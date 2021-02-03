@@ -669,13 +669,11 @@ DO_L2H		= $(ESMF_TEMPLATES)/scripts/do_l2h
 
 # test script variables
 UNIT_TESTS_CONFIG   = $(ESMF_TESTDIR)/unit_tests.config
-MAPL_TESTS_CONFIG   = $(ESMF_TESTDIR)/mapl_tests.config
 SYS_TESTS_CONFIG    = $(ESMF_TESTDIR)/sys_tests.config
 EXAMPLES_CONFIG     = $(ESMF_EXDIR)/examples.config
 TEST_HARNESS_LIST   = $(ESMF_TESTDIR)/test_harness.list
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_COMM)
-DO_MT_RESULTS       = $(ESMF_TESTSCRIPTS)/do_mt_results.pl -h $(ESMF_TESTSCRIPTS) -e $(ESMF_DIR) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_UT_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_UT_BM_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_bm_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_UT_BM_DIR) -f $(ESMF_BENCHMARK_TOLERANCE) -g $(ESMF_BENCHMARK_THRESHOLD_MSEC) -i $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT) -e $(ESMF_COMM)
@@ -823,7 +821,7 @@ ifeq ($(origin ESMF_F90COMPILEPATHS_ENV), environment)
 ESMF_F90COMPILEPATHS = $(ESMF_F90COMPILEPATHS_ENV)
 endif
 ESMF_F90COMPILEPATHS     += $(ESMF_F90IMOD)$(ESMF_F90MODDIR)
-ESMF_F90COMPILEPATHSLOCAL =
+ESMF_F90COMPILEPATHSLOCAL = -I$(ESMF_DIR)/$(LOCDIR)
 ifneq ($(ESMF_SITE),default)
 ESMF_F90COMPILEPATHSLOCAL += -I$(ESMF_SITEDIR)
 endif
@@ -3517,163 +3515,6 @@ check_examples:
 #
 check_examples_ml:
 	@$(DO_EX_ML_RESULTS)
-
-
-#-------------------------------------------------------------------------------
-# Targets for MAPL
-#-------------------------------------------------------------------------------
-
-#
-# install_mapl
-#
-install_mapl:
-	-@echo " "
-	-@echo "Installing MAPL"
-	-@echo " "
-	cd $(ESMF_DIR)/src/addon/MAPL5_1/src ;\
-        $(MAKE) clean
-	cd $(ESMF_DIR)/src/addon/MAPL5_1/src ;\
-        $(MAKE) install
-	-@echo " "
-	-@echo "MAPL installation complete."
-	-@echo " "
-
-#
-# build_mapl_tests
-#
-build_mapl_tests: reqfile_libesmf reqdir_lib chkdir_tests verify_mapl_exhaustive_flag
-	@echo " "
-	@echo "Building MAPL tests"
-	@echo " "
-	cd $(ESMF_DIR)/src/addon/MAPL5_1/tests ;\
-        $(MAKE) clean
-	$(MAKE) config_mapl_tests
-	cd $(ESMF_DIR)/src/addon/MAPL5_1/tests ;\
-	$(MAKE) ACTION=tree_build_unit_tests tree
-	@echo "MAPL tests built successfully."
-	@echo " "
-
-
-#
-# run_mapl_tests
-#
-run_mapl_tests:  reqdir_tests verify_mapl_exhaustive_flag
-	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  echo "Cannot run multiprocessor mapl tests when ESMF_COMM is mpiuni;" ; \
-	  echo "run run_unit_tests_uni instead." ; \
-	  echo "" ; \
-	  $(MAKE) err ; \
-        fi
-	@if [ $(ESMF_DIR) = `pwd` ] ; then \
-          $(MAKE) dust_unit_tests ; \
-        fi
-	@if [ -f $(MAPL_TESTS_CONFIG) ] ; then \
-           $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(MAPL_TESTS_CONFIG) > $(MAPL_TESTS_CONFIG).temp; \
-           $(ESMF_MV) $(MAPL_TESTS_CONFIG).temp $(MAPL_TESTS_CONFIG); \
-        fi
-	cd $(ESMF_DIR)/src/addon/MAPL5_1/tests ;\
-	$(MAKE) ACTION=tree_run_unit_tests tree
-	$(MAKE) check_mapl_tests
-
-
-
-#
-# run_mapl_tests_uni
-#
-run_mapl_tests_uni:  reqdir_tests verify_mapl_exhaustive_flag
-	@if [ $(ESMF_DIR) = `pwd` ] ; then \
-          $(MAKE) dust_unit_tests ; \
-        fi
-	@if [ -f $(MAPL_TESTS_CONFIG) ] ; then \
-           $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(MAPL_TESTS_CONFIG) > $(MAPL_TESTS_CONFIG).temp; \
-           $(ESMF_MV) $(MAPL_TESTS_CONFIG).temp $(MAPL_TESTS_CONFIG); \
-        fi
-	cd $(ESMF_DIR)/src/addon/MAPL5_1/tests ;\
-	$(MAKE) ACTION=tree_run_unit_tests_uni tree
-	$(MAKE) check_mapl_tests
-
-tree_run_unit_tests_uni: $(TESTS_RUN_UNI)
-
-
-
-#
-# config_mapl_tests
-#
-config_mapl_tests:
-	@echo "# This file used by test scripts, please do not delete." > $(MAPL_TESTS_CONFIG)
-ifeq ($(ESMF_TESTEXHAUSTIVE),ON)
-ifeq ($(MULTI),)
-	@echo "Last built Exhaustive ;  Last run Noprocessor" >> $(MAPL_TESTS_CONFIG)
-else
-	@echo "Last built Exhaustive ;  Last run" $(MULTI) >> $(MAPL_TESTS_CONFIG)
-endif
-else
-ifeq ($(MULTI),)
-	@echo "Last built Non-exhaustive ;  Last run Noprocessor" >> $(MAPL_TESTS_CONFIG)
-else
-	@echo "Last built Non-exhaustive ;  Last run" $(MULTI) >> $(MAPL_TESTS_CONFIG)
-endif
-endif
-
-
-#
-# verify_mapl_exhausive_flag
-#
-verify_mapl_exhaustive_flag:
-ifeq ($(ESMF_TESTEXHAUSTIVE),ON)
-	@$(MAKE) MAPL_TEST_STRING="Exhaustive" mapl_exhaustive_flag_check
-else
-	@$(MAKE) MAPL_TEST_STRING="Non-exhaustive" mapl_exhaustive_flag_check
-endif
-
-#
-# mapl_exhaustive_flag_check
-#
-mapl_exhaustive_flag_check:
-	@if [ -s $(MAPL_TESTS_CONFIG) -a \
-             `$(ESMF_SED) -ne '/$(MAPL_TEST_STRING)/p' $(MAPL_TESTS_CONFIG) | $(ESMF_WC) -l` -ne 1 ] ; then \
-          echo "The ESMF_TESTEXHAUSTIVE environment variable is a compile-time control for" ;\
-          echo "whether a basic set or an exhaustive set of tests are built." ;\
-          echo "" ;\
-          echo "The current setting of ESMF_TESTEXHAUSTIVE is \"$(ESMF_TESTEXHAUSTIVE)\", which" ;\
-          echo "is not the same as when the mapl tests were last built." ;\
-          echo "(This is based on the contents of the file:" ;\
-          echo "$(MAPL_TESTS_CONFIG) ";\
-          echo "which contains: `$(ESMF_SED) -e '1d' $(MAPL_TESTS_CONFIG)` )." ;\
-          echo "" ;\
-          echo "To rebuild and run the mapl tests with the current ESMF_TESTEXHAUSTIVE value, run:" ;\
-          echo "   $(MAKE) clean_unit_tests unit_tests"  ;\
-          echo "or change ESMF_TESTEXHAUSTIVE to ON or OFF to match the build-time value." ;\
-          echo "" ;\
-          $(MAKE) err ;\
-        fi
-
-#
-# call clean only if flags do not match
-# clean_if_mapl_exhaustive_flag_mismatch
-#
-
-clean_if_mapl_exhaustive_flag_mismatch:
-ifeq ($(ESMF_TESTEXHAUSTIVE),ON)
-	@$(MAKE) MAPL_TEST_STRING="Exhaustive" mapl_exhaustive_flag_clobber
-else
-	@$(MAKE) MAPL_TEST_STRING="Non-exhaustive" mapl_exhaustive_flag_clobber
-endif
-
-#
-# mapl_exhaustive_flag_clobber
-#
-mapl_exhaustive_flag_clobber:
-	@if [ -s $(MAPL_TESTS_CONFIG) -a \
-             `$(ESMF_SED) -ne '/$(MAPL_TEST_STRING)/p' $(MAPL_TESTS_CONFIG) | $(ESMF_WC) -l` -ne 1 ] ; then \
-          $(MAKE) clean_unit_tests ;\
-        fi
-
-#
-# check_mapl_tests
-#
-check_mapl_tests:
-	@$(DO_MT_RESULTS)
 
 #-------------------------------------------------------------------------------
 # Targets for checking the builds

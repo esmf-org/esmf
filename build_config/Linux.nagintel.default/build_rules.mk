@@ -94,7 +94,8 @@ endif
 # Print compiler version string
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v -c
+ESMF_CXXMAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_CXXCOMPILER} -V)
 
 ############################################################
 # Special debug flags
@@ -108,9 +109,10 @@ ESMF_CXXOPTFLAG_G       += -traceback
 ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
 
 ############################################################
-# nag currently does not support OpenMP
+# Currently NAG does not support the Fortran2018 assumed type feature
 #
-ESMF_OPENMP := OFF
+ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
 
 ############################################################
 # Some ESMF tests fail for NAG with -O -> turn optimization off by default
@@ -135,6 +137,19 @@ ESMF_F90COMPILEOPTS += -thread_safe
 ESMF_F90LINKOPTS    += -thread_safe
 ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_CXXLINKOPTS    += -pthread
+endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -openmp
+ESMF_OPENMP_F90LINKOPTS    += -openmp
+ifeq ($(shell [ $(ESMF_CXXMAJORVERSION) -ge 16 ] && echo true), true)
+ESMF_OPENMP_CXXCOMPILEOPTS += -qopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -qopenmp
+else
+ESMF_OPENMP_CXXCOMPILEOPTS += -openmp
+ESMF_OPENMP_CXXLINKOPTS    += -openmp
 endif
 
 ############################################################

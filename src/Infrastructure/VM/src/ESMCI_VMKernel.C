@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1717,6 +1717,16 @@ void *VMK::startup(class VMKPlan *vmp,
           MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0, 
             MPI_INFO_NULL, &new_mpi_c_ssi);
           sarg[0].mpi_c_ssi = new_mpi_c_ssi;
+#ifdef VM_SSISHMLOG_on
+          {
+            std::stringstream msg;
+            int sz;
+            MPI_Comm_size(sarg[0].mpi_c_ssi, &sz);
+            msg << "VMK::startup()#" << __LINE__
+              << " created mpi_c_ssi of size=" << sz;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          }
+#endif
 #endif
         }else{
           // I am not the first under this lpid and must receive 
@@ -1727,6 +1737,17 @@ void *VMK::startup(class VMKPlan *vmp,
           sarg[0].mpi_c_freeflag = 0; // not responsible to free the communicat.
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
           recv(&new_mpi_c_ssi, sizeof(MPI_Comm), foundfirstpet);
+#ifdef VM_SSISHMLOG_on
+          {
+            std::stringstream msg;
+            int sz;
+            MPI_Comm_size(new_mpi_c_ssi, &sz);
+            msg << "VMK::startup()#" << __LINE__
+              << " received mpi_c_ssi of size=" << sz
+              << " from PET: " << foundfirstpet;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          }
+#endif
 #endif
         }
       }else if (mypet == foundfirstpet){
@@ -1737,6 +1758,17 @@ void *VMK::startup(class VMKPlan *vmp,
         send(&new_mpi_c, sizeof(MPI_Comm), i);
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
         send(&new_mpi_c_ssi, sizeof(MPI_Comm), i);
+#ifdef VM_SSISHMLOG_on
+        {
+          std::stringstream msg;
+          int sz;
+          MPI_Comm_size(new_mpi_c_ssi, &sz);
+          msg << "VMK::startup()#" << __LINE__
+            << " sent mpi_c_ssi of size=" << sz
+            << " to PET: " << i;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
 #endif
       }
     }
@@ -1936,6 +1968,17 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[i].mpi_c = new_mpi_c;
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
     sarg[i].mpi_c_ssi = new_mpi_c_ssi;
+#ifdef VM_SSISHMLOG_on
+    {
+      std::stringstream msg;
+      int sz;
+      MPI_Comm_size(sarg[i].mpi_c_ssi, &sz);
+      msg << "VMK::startup()#" << __LINE__
+        << " copied mpi_c_ssi of size=" << sz
+        << " into sarg[" << i << "]";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
 #endif
     sarg[i].pth_mutex2 = new_pth_mutex2;
     sarg[i].pth_mutex = new_pth_mutex;
@@ -2151,10 +2194,31 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
 #endif
   }
   // now free up the MPI communicators that were associated with the VMK
-  if (sarg[0].mpi_c_freeflag && (sarg[0].mpi_c != MPI_COMM_NULL)){
-    MPI_Comm_free(&(sarg[0].mpi_c));
+  if (sarg[0].mpi_c_freeflag){
+    if (sarg[0].mpi_c != MPI_COMM_NULL){
+      MPI_Comm_free(&(sarg[0].mpi_c));
+    }
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
-    MPI_Comm_free(&(sarg[0].mpi_c_ssi));
+    if (sarg[0].mpi_c_ssi != MPI_COMM_NULL){
+#ifdef VM_SSISHMLOG_on
+      {
+        std::stringstream msg;
+        if (sarg[0].mpi_c_ssi != MPI_COMM_NULL){
+          int sz;
+          MPI_Comm_size(sarg[0].mpi_c_ssi, &sz);
+          msg << "VMK::shutdown()#" << __LINE__
+            << " about to call MPI_Comm_free() on mpi_c_ssi of size=" << sz;
+        }else{
+          msg << "VMK::shutdown()#" << __LINE__
+            << " about to call MPI_Comm_free() on mpi_c_ssi == MPI_COMM_NULL";
+          
+        }
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+      MPI_Barrier(sarg[0].mpi_c_ssi);
+#endif
+      MPI_Comm_free(&(sarg[0].mpi_c_ssi));
+    }
 #endif
   }
   // done holding info in SpawnArg array -> delete now

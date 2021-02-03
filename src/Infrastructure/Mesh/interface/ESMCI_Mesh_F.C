@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -67,8 +67,19 @@ extern "C" void FTN_X(c_esmc_meshsetmoab)(int *_moabOn, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshsetmoab()"
 
-    if (*_moabOn==1) Moab_on=true;
-    else Moab_on=false;
+  if (*_moabOn==1) Moab_on=true;
+  else Moab_on=false;
+  
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+// This method turns on MOAB
+extern "C" void FTN_X(c_esmc_meshgetmoab)(int *_moabOn, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetmoab()"
+
+  *_moabOn=0;
+  if (Moab_on) *_moabOn=1; 
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }

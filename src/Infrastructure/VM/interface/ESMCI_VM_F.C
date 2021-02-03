@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1931,7 +1931,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     try{
       std::string prefixStr(prefix, prefix_l);
-      ESMCI::VM::logGarbageInfo(prefixStr, *logMsgFlag);
+      ESMCI::VM::logGarbageInfo(prefixStr, false, *logMsgFlag);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -341,6 +341,20 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -406,6 +420,20 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -500,6 +528,20 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -596,6 +638,20 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1680,6 +1736,20 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1993,6 +2063,20 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2256,6 +2340,20 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2667,6 +2765,20 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2989,6 +3101,20 @@ module NUOPC_Driver
       return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,10)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,3)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3516,7 +3642,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)    :: iString, jString
     logical                   :: existflag
     logical                   :: areServicesSet
-    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: name, compName
     integer                   :: verbosity, profiling
     type(ESMF_GridComp), pointer  :: compList(:)
     type(ESMF_CplComp), pointer   :: connectorList(:)
@@ -3531,6 +3657,20 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,11)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,6)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3548,14 +3688,14 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
     ! query Component for the internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-      
+
     ! Finalize: connectorComps
     do i=0, is%wrap%modelCount
       write (iString, *) i
@@ -3567,6 +3707,18 @@ module NUOPC_Driver
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
         if (areServicesSet) then
+          if (btest(verbosity,13)) then
+            call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            call ESMF_LogWrite("Calling Finalize phase 1 for connectorComp: "// &
+              trim(compName), ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
           call ESMF_CplCompFinalize(is%wrap%connectorComp(i,j), &
             importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
             clock=internalClock, phase=1, userRc=urc, rc=rc)
@@ -3588,12 +3740,23 @@ module NUOPC_Driver
     ! Finalize: modelComps
     do i=1, is%wrap%modelCount
       write (iString, *) i
-        areServicesSet = &
-          NUOPC_CompAreServicesSet(is%wrap%modelComp(i), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
+      areServicesSet = &
+        NUOPC_CompAreServicesSet(is%wrap%modelComp(i), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
       if (areServicesSet) then
+        if (btest(verbosity,13)) then
+          call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call ESMF_LogWrite("Calling Finalize phase 1 for modelComp: "// &
+            trim(compName), ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
         call ESMF_GridCompFinalize(is%wrap%modelComp(i), &
           importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
           clock=internalClock, phase=1, userRc=urc, rc=rc)
@@ -3608,7 +3771,7 @@ module NUOPC_Driver
           return  ! bail out
       endif
     enddo
-    
+
     ! SPECIALIZE by calling into optional attached method
     if (btest(profiling,7)) then
       call ESMF_TraceRegionEnter("label_Finalize")
@@ -3628,14 +3791,34 @@ module NUOPC_Driver
     ! destroy components in the compList and their import and export States,
     ! and also petLists that were set by the user (and ownership transferred)
     nullify(compList)
-    call NUOPC_DriverGetComp(driver, compList, rc=rc)    
+    call NUOPC_DriverGetComp(driver, compList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     do i=1, size(compList)
+      if (btest(verbosity,13).or.btest(verbosity,14)) then
+        call ESMF_GridCompGet(compList(i), name=compName, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+      if (btest(verbosity,13)) then
+        call ESMF_LogWrite("Delete modelComp: "//trim(compName), &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       call ESMF_GridCompDestroy(compList(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+      if (btest(verbosity,14)) then
+        call ESMF_LogWrite("Delete Import-/Export State for modelComp: "// &
+          trim(compName), ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       call ESMF_StateDestroy(is%wrap%modelIS(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -3662,6 +3845,17 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     do i=1, size(connectorList)
+      if (btest(verbosity,13)) then
+        call ESMF_CplCompGet(connectorList(i), name=compName, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        call ESMF_LogWrite("Delete connectorComp: "//trim(compName), &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       call ESMF_CplCompDestroy(connectorList(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -3769,7 +3963,7 @@ module NUOPC_Driver
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-      
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3819,6 +4013,20 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,11)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,6)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5139,7 +5347,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! component that was added under {\tt compLabel}.
 !
 ! If provided, the {\tt petList} argument will be associated with the petList
-! that was used to create the referenced component.
+! that was used to create the referenced component. This pointer must not be
+! deallocated by the user!
 !
 ! By default an error is returned if no component is associated with the 
 ! specified {\tt compLabel}. This error can be suppressed by setting
@@ -5244,7 +5453,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! component that was added under {\tt compLabel}.
 !
 ! If provided, the {\tt petList} argument will be associated with the petList
-! that was used to create the referenced component.
+! that was used to create the referenced component. This pointer must not be
+! deallocated by the user!
 !
 ! By default an error is returned if no component is associated with the 
 ! specified {\tt compLabel}. This error can be suppressed by setting
@@ -5322,8 +5532,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Get all the GridComp (i.e. Model, Mediator, or Driver) child components from a
 ! Driver. The incoming {\tt compList} and {\tt petLists} arguments must be 
-! unassociated. On return it becomes the responsibility of the caller to 
-! deallocate the associated {\tt compList} and {\tt petLists} arguments
+! unassociated. This means that the user code must explicitly call
+! {\tt nullify()} or use the {\tt => null()} syntax on the variables passed in
+! as the actual arguments. On return it becomes the responsibility of the caller
+! to deallocate any associated {\tt compList} and {\tt petLists} arguments.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -5414,8 +5626,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Get all the CplComp (i.e. Connector) child components from a
 ! Driver. The incoming {\tt compList} and {\tt petLists} arguments must be 
-! unassociated. On return it becomes the responsibility of the caller to 
-! deallocate the associated {\tt compList} and {\tt petLists} arguments
+! unassociated. This means that the user code must explicitly call
+! {\tt nullify()} or use the {\tt => null()} syntax on the variables passed in
+! as the actual arguments. On return it becomes the responsibility of the caller
+! to deallocate any associated {\tt compList} and {\tt petLists} arguments.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -6406,6 +6620,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6501,6 +6729,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6655,6 +6897,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -7001,6 +7257,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -7470,6 +7740,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -7609,6 +7893,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

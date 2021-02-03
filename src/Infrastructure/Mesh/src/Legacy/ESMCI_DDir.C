@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -248,7 +248,7 @@ void DDir<HASH>::RemoteGID(UInt ngid, const UInt gid[], UInt orig_proc[], UInt l
   for (UInt r = 0; r < req_size; r++) {
     dentry &req = requests[r];
     typename std::vector<dentry>::iterator ei = std::lower_bound(my_managed.begin(), my_managed.end(), req, dentry_less<HASH>());
-    if (ei == my_managed.end()) Throw() << "P:" << rank << " could not service request for gid=" << req.gid;
+    if (ei == my_managed.end()) Throw() << "processor=" << rank << " could not find gid=" << req.gid<<" even though it's the processor that should contain it. It's likely that that gid isn't in the directory.";
     dentry &ser = *ei;
     if (req.gid != ser.gid) Throw() << "P:" << rank << " could not service request, gids not equal:"
                      << req.gid << ", " << ser.gid << std::endl;
