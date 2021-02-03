@@ -6136,15 +6136,52 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Init localrc
     localrc = ESMF_SUCCESS
 
-   ! Translate to integer
-   intMoabOn=0
-   if (moabOn) then
+    ! Translate to integer
+    intMoabOn=0
+    if (moabOn) then
       intMoabOn=1
-   endif
+    endif
 
     call c_esmc_meshsetMOAB(intMoabOn, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! add log messages about MOAB
+    if (moabOn) then
+      call ESMF_LogWrite ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!!        MOAB turned ON             !!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!! Meshes now created using MOAB     !!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_LogWrite ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!!        MOAB turned OFF            !!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!! Meshes now created using native   !!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
 
     if (present(rc)) rc = ESMF_SUCCESS
 
