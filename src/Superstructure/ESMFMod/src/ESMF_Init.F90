@@ -611,6 +611,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          return
       endif
 
+#if defined (ESMF_MOAB)
+      build_detail = 'enabled'
+#else
+      build_detail = 'disabled'
+#endif
+      call ESMF_LogWrite(&
+           "ESMF_MOAB                   : " // build_detail,  &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
+
+#if defined (ESMF_LAPACK)
+      build_detail = 'enabled'
+#else
+      build_detail = 'disabled'
+#endif
+      call ESMF_LogWrite(&
+           "ESMF_LAPACK                 : " // build_detail,  &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
+
 #if defined (ESMF_NETCDF)
       build_detail = 'enabled'
 #else
@@ -657,19 +683,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
       call ESMF_LogWrite(&
            "ESMF_YAMLCPP                : " // build_detail,  &
-           ESMF_LOGMSG_INFO, rc=localrc)
-      if (localrc /= ESMF_SUCCESS) then
-         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
-         return
-      endif
-
-#if defined (ESMF_MOAB)
-      build_detail = 'enabled'
-#else
-      build_detail = 'disabled'
-#endif
-      call ESMF_LogWrite(&
-           "ESMF_MOAB                   : " // build_detail,  &
            ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
