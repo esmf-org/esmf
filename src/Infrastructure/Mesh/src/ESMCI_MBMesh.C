@@ -1054,7 +1054,6 @@ void MBMesh::set_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask
   }
 }
 
-
 void MBMesh::set_node_mask(EntityHandle eh, int mask) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::set_node_mask()"
@@ -1070,6 +1069,43 @@ void MBMesh::set_node_mask(EntityHandle eh, int mask) {
   merr=mesh->tag_set_data(node_mask_tag, &eh, 1, &mask);
   ESMC_CHECK_MOAB_THROW(merr);
 }
+
+void MBMesh::set_node_mask(Range nodes, int *masks) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::set_node_mask()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, complain
+  if (!has_node_mask) Throw() << "node mask not present in mesh.";
+
+  // Set data in MOAB
+  merr=mesh->tag_set_data(node_mask_tag, nodes, masks);
+  ESMC_CHECK_MOAB_THROW(merr);
+
+}
+
+void MBMesh::set_node_mask(std::vector<EntityHandle> const &nodes, int *masks) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::set_node_mask()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no masking, complain
+  if (!has_node_mask) Throw() << "node mask not present in mesh.";
+
+  // Set data in MOAB
+  if (nodes.size() > 0) {
+    merr=mesh->tag_set_data(node_mask_tag, &nodes[0], nodes.size(), masks);
+    ESMC_CHECK_MOAB_THROW(merr);
+  }
+}
+
+
 
 
 int MBMesh::get_node_mask(EntityHandle node) {

@@ -535,84 +535,119 @@ int MBMesh_num_nodes_to_esmf_etype(int pdim, int num_corner_nodes) {
 }
 
 
-// triangulate > 4 sided
-// sdim = spatial dim
-// num_p = number of points in poly
-// p     = poly coords size=num_p*sdim
-// oeid  = id of original element for debug output
-// td    = temporary buffer size=num_p*sdim
-// ti    = temporary integer buffer size = num_p
-// tri_ind = output array  size = 3*(nump-2)
-// tri_area = area of each sub-triangle is of whole poly size=(num_p-2)
-static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
-                              double *td, int *ti, int *tri_ind,
-                              double *tri_area) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "triangulate_warea()"
 
-  int localrc;
-
-  // Call into triagulation routines
-  int ret;
-  if (sdim==2) {
-    ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
-                                      ti, tri_ind);
-  } else if (sdim==3) {
-    ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td,
-                                       ti, tri_ind);
-  } else {
-    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                                  " - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3",
-                                      ESMC_CONTEXT, &localrc)) throw localrc;
-  }
-
-  // Check return code
-  if (ret != ESMCI_TP_SUCCESS) {
-    if (ret == ESMCI_TP_DEGENERATE_POLY) {
-      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-           " - can't triangulate a polygon with less than 3 sides",
-                                        ESMC_CONTEXT, &localrc)) throw localrc;
-    } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-      char msg[1024];
-      sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid);
-      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
-                                      ESMC_CONTEXT, &localrc)) throw localrc;
-    } else {
-      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                        " - unknown error in triangulation", ESMC_CONTEXT, &localrc)) throw localrc;
-    }
-  }
+// This method takes a set of info and adds the contained nodes to the mbmp mesh in a group
+// (Adding in groups seems to be more efficient in MOAB)
+void MBMesh_add_nodes_in_a_group(MBMesh *mbmp,   // Mesh to add elems to
+                                 int num_nodes, // the number of new nodes to add
+                                 int *node_ids,   // id for each new node
+                                 double *node_coords, // node original coords
+                                 int *node_orig_pos, // orig pos of each new node (if NULL just order starting from 0)
+                                 int *node_owners, // owner for each new node
+                                 int *node_mask_vals, // optional elem mask value (if NULL ignored)
+                                 int *node_masks // optional elem mask (if NULL ignored)
+                                 ) {
 
 
-  // Calculate triangule areas
-  int ti_pos=0;
-  for (int i=0; i<num_p-2; i++) {
-    // Copy triangle coordinates into td
-    int td_pos=0;
-    for (int j=0; j<3; j++) {
-      double *pnt=p+sdim*tri_ind[ti_pos+j];
-      for (int k=0; k<sdim; k++) {
-        td[td_pos]=pnt[k];
-        td_pos++;
-      }
+    // Create a new set of nodes with basic info
+    Range added_nodes;
+    mbmp->add_nodes(num_nodes,     
+                    node_coords,
+                    node_ids,          
+                    node_orig_pos,
+                    node_owners,
+                    added_nodes); 
+    
+    // If present set node mask values
+    if (node_mask_vals != NULL) {
+      mbmp->set_node_mask_val(added_nodes, node_mask_vals);
     }
 
-    // compute area of triangle
-    double area;
-    if (sdim == 2) {
-      area = area_of_flat_2D_polygon(3, td);
-    } else if (sdim == 3) {
-      area = great_circle_area(3, td);
-    } // Other sdim caught above
-
-    // Save areas to use for computing fractions
-    tri_area[i]=area;
-
-    // Advance to next triangle
-    ti_pos +=3;
-  }
+    // If present set node mask
+    if (node_masks != NULL) {
+      mbmp->set_node_mask(added_nodes, node_masks);
+    }
 }
 
+
+// Wrapper for the above function that takes vectors instead of arrays
+void MBMesh_add_nodes_in_a_group(MBMesh *mbmp,   // Mesh to add elems to
+                                 std::vector<int> &node_ids,   // id for each new node
+                                 std::vector<double> &node_coords, // node original coords
+                                 std::vector<int> &node_orig_pos, // orig pos of each new node (if NULL just order starting from 0)
+                                 std::vector<int> &node_owners, // owner for each new node
+                                 std::vector<int> &node_mask_vals, // optional elem mask value (if NULL ignored)
+                                 std::vector<int> &node_masks // optional elem mask (if NULL ignored)
+                                 ) {
+
+
+  // Number of nodes to create
+  int num_nodes=node_ids.size();
+  
+  // Get pointer to node_ids data
+  int *node_ids_ptr=node_ids.data();
+
+  // Get pointer to node_coords data
+  if (node_coords.size() != num_nodes*mbmp->orig_sdim) {
+    Throw() << " node_coords must have the size of node_ids * the user facing (orig.) spatial dim";
+  }
+  double *node_coords_ptr=node_coords.data();
+
+  // Get pointer to node orig pos data
+  // (If it's not there, then make it NULL, otherwise make sure the size
+  //  is correct)
+  int *node_orig_pos_ptr; 
+  if (node_orig_pos.empty()) {
+    node_orig_pos_ptr=NULL;
+  } else {  
+    if (node_orig_pos.size() != num_nodes) {
+      Throw() << " node_orig_pos must have same size as node_ids";
+    }
+    node_orig_pos_ptr=node_orig_pos.data();
+  }
+
+  // Get pointer to node owners data
+  if (node_owners.size() != num_nodes) {
+    Throw() << " node_owners must have the same size as nodes_ids";
+  }
+  int *node_owners_ptr=node_owners.data();
+
+  // Get pointer to node_mask_vals data
+  // (If it's not there, then make it NULL, otherwise make sure the size
+  //  is correct)
+  int *node_mask_vals_ptr; 
+  if (node_mask_vals.empty()) {
+    node_mask_vals_ptr=NULL;
+  } else {  
+    if (node_mask_vals.size() != num_nodes) {
+      Throw() << " node_mask_vals must have same size as node_ids";
+    }
+    node_mask_vals_ptr=node_mask_vals.data();
+  }
+
+  // Get pointer to node_masks data
+  // (If it's not there, then make it NULL, otherwise make sure the size
+  //  is correct)
+  int *node_masks_ptr; 
+  if (node_masks.empty()) {
+    node_masks_ptr=NULL;
+  } else {  
+    if (node_masks.size() != num_nodes) {
+      Throw() << " node_masks must have same size as node_ids";
+    }
+    node_masks_ptr=node_masks.data();
+  }
+
+  // Call into pointer version
+  MBMesh_add_nodes_in_a_group(mbmp,
+                              num_nodes,
+                              node_ids_ptr, 
+                              node_coords_ptr,
+                              node_orig_pos_ptr,
+                              node_owners_ptr,
+                              node_mask_vals_ptr,
+                              node_masks_ptr);
+}
 
 // This routine takes in a some  element creation information, and sees if any elements need to be split
 void MBMesh_detect_split_elems(
@@ -698,6 +733,84 @@ void MBMesh_detect_split_elems(
     }
   }
   CATCH_MBMESH_RETHROW
+}
+
+// triangulate > 4 sided
+// sdim = spatial dim
+// num_p = number of points in poly
+// p     = poly coords size=num_p*sdim
+// oeid  = id of original element for debug output
+// td    = temporary buffer size=num_p*sdim
+// ti    = temporary integer buffer size = num_p
+// tri_ind = output array  size = 3*(nump-2)
+// tri_area = area of each sub-triangle is of whole poly size=(num_p-2)
+static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
+                              double *td, int *ti, int *tri_ind,
+                              double *tri_area) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "triangulate_warea()"
+
+  int localrc;
+
+  // Call into triagulation routines
+  int ret;
+  if (sdim==2) {
+    ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
+                                      ti, tri_ind);
+  } else if (sdim==3) {
+    ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td,
+                                       ti, tri_ind);
+  } else {
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                  " - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+
+  // Check return code
+  if (ret != ESMCI_TP_SUCCESS) {
+    if (ret == ESMCI_TP_DEGENERATE_POLY) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+           " - can't triangulate a polygon with less than 3 sides",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;
+    } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+      char msg[1024];
+      sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid);
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+    } else {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                        " - unknown error in triangulation", ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+  }
+
+
+  // Calculate triangule areas
+  int ti_pos=0;
+  for (int i=0; i<num_p-2; i++) {
+    // Copy triangle coordinates into td
+    int td_pos=0;
+    for (int j=0; j<3; j++) {
+      double *pnt=p+sdim*tri_ind[ti_pos+j];
+      for (int k=0; k<sdim; k++) {
+        td[td_pos]=pnt[k];
+        td_pos++;
+      }
+    }
+
+    // compute area of triangle
+    double area;
+    if (sdim == 2) {
+      area = area_of_flat_2D_polygon(3, td);
+    } else if (sdim == 3) {
+      area = great_circle_area(3, td);
+    } // Other sdim caught above
+
+    // Save areas to use for computing fractions
+    tri_area[i]=area;
+
+    // Advance to next triangle
+    ti_pos +=3;
+  }
 }
 
 
@@ -1699,6 +1812,7 @@ void MBMesh_add_elems_in_groups_by_type(MBMesh *mbmp,
                                      elem_conns_ptr);
 
 }
+
 
 
 

@@ -67,6 +67,31 @@ int MBMesh_num_nodes_to_esmf_etype(int pdim, int num_corner_nodes);
 //Get the entity type from parametric dimension and ESMF etype
 EntityType MBMesh_get_entity_type(int pdim, int etype);
 
+
+// Add nodes in a group
+void MBMesh_add_nodes_in_a_group(MBMesh *mbmp,   // Mesh to add elems to
+                                 int num_nodes, // the number of new nodes to add
+                                 int *node_ids,   // id for each new node
+                                 double *node_coords, // node original coords
+                                 int *node_orig_pos, // orig pos of each new node (if NULL just order starting from 0)
+                                 int *node_owners, // owner for each new node
+                                 int *node_mask_vals, // optional elem mask value (if NULL ignored)
+                                 int *node_masks // optional elem mask (if NULL ignored)
+                                 );
+
+
+
+// Vector based wrapper for the above
+void MBMesh_add_nodes_in_a_group(MBMesh *mbmp,   // Mesh to add elems to
+                                 std::vector<int> &node_ids,   // id for each new node
+                                 std::vector<double> &node_coords, // node original coords
+                                 std::vector<int> &node_orig_pos, // orig pos of each new node (if NULL just order starting from 0)
+                                 std::vector<int> &node_owners, // owner for each new node
+                                 std::vector<int> &node_mask_vals, // optional elem mask value (if NULL ignored)
+                                 std::vector<int> &node_masks // optional elem mask (if NULL ignored)
+                                 );
+
+
 // This routine takes in a some  element creation information, and sees if any elements need to be split
 void MBMesh_detect_split_elems(
                                // In
@@ -143,6 +168,9 @@ void MBMesh_add_elems_in_groups_by_type(MBMesh *mbmp,
                                         std::vector<double> &elem_coords,
                                         std::vector<int> &elem_conns
                                         );
+
+
+
 
 
 #endif // ESMF_MOAB

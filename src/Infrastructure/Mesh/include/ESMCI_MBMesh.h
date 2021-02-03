@@ -243,11 +243,18 @@ namespace ESMCI {
     // Get node mask value for one entity
     int get_node_mask_val(EntityHandle node);
 
+    // Set node mask
+    void set_node_mask(EntityHandle eh, int mask_val);
+
+    // Set node mask
+    void set_node_mask(Range nodes, int *masks);
+
+    // Set node mask
+    void set_node_mask(std::vector<EntityHandle> const &nodes, int *masks);
+
     // Get node mask for one entity
     int get_node_mask(EntityHandle node);
 
-    // Set node mask
-    void set_node_mask(EntityHandle eh, int mask_val);
 
     // Set node coords
     void set_node_coords(EntityHandle eh, double *orig_coords);
