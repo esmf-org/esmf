@@ -512,10 +512,7 @@ int MBMesh_ElemType2NumNodes(int pdim, int etype) {
     if (etype==10) return 4;
     else if (etype==12) return 8;
     else {
-       int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-       " for a mesh with parametric dimension 3 element types must be either tetrahedrons or hexahedrons",
-                                        ESMC_CONTEXT, &localrc)) throw localrc;
+      Throw () << " unrecognized ESMF element type: "<<etype;
      }
    }
 }
@@ -526,19 +523,13 @@ int MBMesh_num_nodes_to_esmf_etype(int pdim, int num_corner_nodes) {
     if (num_corner_nodes==3) return 3;
     else if (num_corner_nodes==4) return 4;
     else {
-       int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-       " for a mesh with parametric dimension 2 element types must be either triangles or quadrilaterals",
-                                        ESMC_CONTEXT, &localrc)) throw localrc;
-     }
+      Throw() << " unsupported number of corner nodes for 2D elements: "<<num_corner_nodes; 
+    }
   } else if (pdim==3) {
-    if (num_corner_nodes==10) return 4;
-    else if (num_corner_nodes==12) return 8;
+    if (num_corner_nodes==4) return 10;
+    else if (num_corner_nodes==8) return 12;
     else {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                       " for a mesh with parametric dimension 3 element types must be either tetrahedrons or hexahedrons",
-                                       ESMC_CONTEXT, &localrc)) throw localrc;
+      Throw() << " unsupported number of corner nodes for 3D elements: "<<num_corner_nodes; 
     }
   }
 }

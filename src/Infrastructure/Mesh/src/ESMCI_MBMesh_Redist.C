@@ -386,9 +386,15 @@ void create_mbmesh_redist_elem_move_nodes(MBMesh *src_mesh,
     ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts communication")
     // Communicate verts
     comm.communicate();
-    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts communication")
+    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts communication");
 
-      ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts create verts");
+    // Vectors to hold node information as it's being unpacked
+    std::vector<int> node_ids;
+    std::vector<double> node_coords;
+    std::vector<int> node_mask_vals;
+    std::vector<int> node_masks;
+
+    ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts create verts");
     // Go through received buffers and create verts
     // Block so set goes away when done
     {
@@ -415,6 +421,8 @@ void create_mbmesh_redist_elem_move_nodes(MBMesh *src_mesh,
           std::set<int>::const_iterator nngi =  new_node_gids.find(gid);
           if (nngi == new_node_gids.end()) {
 
+/* XMRKX */
+
             // Unpack node
             EntityHandle new_vert;
             unpack_vert_comm(out_mesh, buff, &new_vert);
@@ -433,6 +441,35 @@ void create_mbmesh_redist_elem_move_nodes(MBMesh *src_mesh,
       }
 
     }
+
+#if 0
+    // Create nodes all at once
+    Range added_nodes;
+    out_mesh->add_nodes(num_nodes,     
+                        nodeCoord,
+                        nodeId,          
+                        NULL,  // Just use orig_pos starting from 0      
+                        nodeOwner,
+                        added_nodes); 
+    
+
+    // Done creating nodes, so finalize
+    mbmp->finalize_nodes();
+
+    //// Setup and fill other node fields ////
+
+    // Setup node mask information
+    if (present(nodeMaskII)) { // if masks exist
+      
+      // Turn on node masks
+      mbmp->setup_node_mask();
+      
+      // Set values in node mask value
+      mbmp->set_node_mask_val(added_nodes, nodeMaskII->array);
+    }
+#endif
+
+
     ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts create verts");
       
 
@@ -454,7 +491,6 @@ void create_mbmesh_redist_elem_move_nodes(MBMesh *src_mesh,
   CATCH_MBMESH_RETHROW
 }
 
-/* XMRKX */
 // Redist elems to new mesh
 void create_mbmesh_redist_elem_move_elems(MBMesh *src_mesh, 
                                             std::vector<EH_Comm_Pair> *elem_to_proc_list, 
@@ -1224,26 +1260,16 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
     }
 
     // Pack elem coord data
+    // (Only pack orig. version of coords, because the others will be generated from those.) 
     if (src_mesh->has_elem_coords) {
-      // Only pack orig version of coords, because the other will
-      // be generated from that
-      if (src_mesh->has_elem_orig_coords) {
-        double eoc[3];
-        src_mesh->get_elem_orig_coords(elem, eoc);
-        
-        for (int i=0; i<src_mesh->orig_sdim; ++i) {
-          *((double *)(buff+off))=eoc[i];
-          off +=sizeof(double);
-        }
-
-      } else {          
-        double ec[3];
-        src_mesh->get_elem_cart_coords(elem, ec);
-        
-        for (int i=0; i<src_mesh->sdim; ++i) {
-          *((double *)(buff+off))=ec[i];
-          off +=sizeof(double);
-        }
+      // Get orig. coords
+      double eoc[3];
+      src_mesh->get_elem_orig_coords(elem, eoc);
+      
+      // Pack
+      for (int i=0; i<src_mesh->orig_sdim; ++i) {
+        *((double *)(buff+off))=eoc[i];
+        off +=sizeof(double);
       }
     }
 
@@ -1364,30 +1390,17 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,int> &node_gid_
     }
 
     // Elem cart coords
+    // (Only orig. version of coords were packed, because the others will be generated from those.)
     if (out_mesh->has_elem_coords) {
-      // Only orig version of coords was packed, because the other will
-      // be generated from that
-      if (out_mesh->has_elem_orig_coords) {
-        for (int i=0; i<out_mesh->orig_sdim; ++i) {
-          // Unpack coord
-          double crd=*((double *)(buff+off));
-          off +=sizeof(double);
-          
-          // Add to elem coords list
-          elem_coords.push_back(crd);
-        }
-      } else {
-        for (int i=0; i<out_mesh->sdim; ++i) {
-          // Unpack coord
-          double crd=*((double *)(buff+off));
-          off +=sizeof(double);
 
-          // Add to elem coords list
-          elem_coords.push_back(crd);
-        }
+      // Unpack coord and add to list
+      for (int i=0; i<out_mesh->orig_sdim; ++i) {
+        double crd=*((double *)(buff+off));
+        off +=sizeof(double);
+ 
+        elem_coords.push_back(crd);
       }
     }
-
 
     // Elem mask
     if (out_mesh->has_elem_mask) {
