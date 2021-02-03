@@ -55,14 +55,14 @@ namespace ESMCI {
   void create_mbmesh_copy_metadata(MBMesh *src_mesh, 
                                  MBMesh **_out_mesh);
 
-  void create_mbmesh_redist_elem_move_verts(MBMesh *src_mesh, 
+  void create_mbmesh_redist_elem_move_nodes(MBMesh *src_mesh, 
                                             std::vector<EH_Comm_Pair> *elem_to_proc_list, 
-                                            std::map<int,EntityHandle> *out_gid_to_eh, 
+                                            std::map<int,int> &node_gid_to_pos, 
                                             MBMesh *out_mesh);
 
-  void create_mbmesh_redist_elem_move_elems(MBMesh *src_mesh, 
+  void create_mbmesh_redist_elem_move_elems(MBMesh *src_mesh,
                                             std::vector<EH_Comm_Pair> *elem_to_proc_list, 
-                                            std::map<int,EntityHandle> *out_gid_to_vert, 
+                                            std::map<int,int> &node_gid_to_pos, 
                                             MBMesh *out_mesh);
   void create_pointlist_redist_move_points(PointList *src_pl,
                                           std::vector<PL_Comm_Pair> *point_to_proc_list,
@@ -76,8 +76,10 @@ int calc_size_elem_comm(MBMesh *src_mesh, EntityHandle eh);
 void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff);
 int calc_size_from_buff_elem_comm(MBMesh *out_mesh, char *buff);
 void unpack_gid_elem_comm(MBMesh *out_mesh, char *buff, int *_gid);
-static EntityType _get_entity_type(int pdim, int num_verts);
-void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *out_gid_to_vert, EntityHandle *_new_elem);
+void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,int> &node_gid_to_pos, 
+                      std::vector<int> &elem_ids, std::vector<int> &elem_types, std::vector<int> &elem_conns,
+                      std::vector<int> &elem_mask_vals, std::vector<int> &elem_masks, std::vector<double> &elem_areas, std::vector<double> &elem_coords);
+
 
 // resetting owners after a redist
 void mbmesh_set_elem_owners(MBMesh *mesh, DDir<> edir);
@@ -85,7 +87,7 @@ void mbmesh_set_elem_owners_wo_list(MBMesh *mesh);
 void mbmesh_set_node_owners(MBMesh *mesh, DDir<> ndir);
 void mbmesh_set_node_owners_wo_list(MBMesh *mesh);
 
-// resetting owners after a redist
+// resetting orig_pos after a redist
 void mbmesh_set_elem_orig_pos(MBMesh *mesh, int num_elem_gids, int *elem_gids);
 void mbmesh_set_elem_orig_pos_wo_list(MBMesh *mesh);
 void mbmesh_set_node_orig_pos(MBMesh *output_mesh, int num_node_gids, int *node_gids);
@@ -162,15 +164,15 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
     MBMesh *out_mesh;
     create_mbmesh_copy_metadata(src_mesh, &out_mesh);
 
-    // Redist verts to new mesh
-    std::map<int,EntityHandle> out_gid_to_vert;
+    // Redist nodes to new mesh
+    std::map<int,int> node_gid_to_pos; 
     ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts")
-    create_mbmesh_redist_elem_move_verts(src_mesh, elem_to_proc_list, &out_gid_to_vert, out_mesh);
+    create_mbmesh_redist_elem_move_nodes(src_mesh, elem_to_proc_list, node_gid_to_pos, out_mesh);
     ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts")
 
     // Redist elems to new mesh
     ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems")
-    create_mbmesh_redist_elem_move_elems(src_mesh, elem_to_proc_list, &out_gid_to_vert, out_mesh);
+    create_mbmesh_redist_elem_move_elems(src_mesh, elem_to_proc_list, node_gid_to_pos, out_mesh);
     ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems")
 
     // Output new mesh
@@ -247,12 +249,12 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 // Redist verts to new mesh
 //  - Loop figuring out which verts go to where, use set to unique to each proc, pack and send
 //  - on other side unpack and create map of gid to vert, use this when unpacking and creating elems
-void create_mbmesh_redist_elem_move_verts(MBMesh *src_mesh, 
+void create_mbmesh_redist_elem_move_nodes(MBMesh *src_mesh, 
                                             std::vector<EH_Comm_Pair> *elem_to_proc_list, 
-                                            std::map<int,EntityHandle> *out_gid_to_vert, 
+                                            std::map<int,int> &node_gid_to_pos, 
                                             MBMesh *out_mesh) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "create_mbmesh_redist_elem_move_verts()"
+#define ESMC_METHOD "create_mbmesh_redist_elem_move_nodes()"
   try {
     int localrc, merr;
 
@@ -386,43 +388,77 @@ void create_mbmesh_redist_elem_move_verts(MBMesh *src_mesh,
     comm.communicate();
     ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts communication")
 
-    ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts create verts")
-     // Go through received buffers and create verts
-    for (std::vector<UInt>::const_iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
-      UInt proc = *p;
-      SparseMsg::buffer *b = comm.getRecvBuffer(proc);
+      ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts create verts");
+    // Go through received buffers and create verts
+    // Block so set goes away when done
+    {
+      // Track new nodes so we don't create more than one with same gid
+      std::set<int> new_node_gids;  
 
-      while (!b->empty()) {
-        char buff[MAX_VERT_COMM_SIZE];
+      // Go through received buffers and unpack new node info
+      int pos=0;
+      for (std::vector<UInt>::const_iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
+        UInt proc = *p;
+        SparseMsg::buffer *b = comm.getRecvBuffer(proc);
+        
+        while (!b->empty()) {
+          char buff[MAX_VERT_COMM_SIZE];
+          
+          // Get one verts info out of buffer
+          b->pop((UChar *)buff, (UInt)size_per_vert);
+          
+          // Unpack gid
+          int gid;
+          unpack_gid_vert_comm(out_mesh, buff, &gid);
+          
+          // Check to see if the node already exists, if not then unpack and add
+          std::set<int>::const_iterator nngi =  new_node_gids.find(gid);
+          if (nngi == new_node_gids.end()) {
 
-        // Get one verts info out of buffer
-        b->pop((UChar *)buff, (UInt)size_per_vert);
+            // Unpack node
+            EntityHandle new_vert;
+            unpack_vert_comm(out_mesh, buff, &new_vert);
+            
+            // Set orig_pos
+            int merr=out_mesh->mesh->tag_set_data(out_mesh->orig_pos_tag, &new_vert, 1, &pos);
+            ESMC_CHECK_MOAB_THROW(merr);
+            
+            // next pos
+            pos++;
 
-        // Unpack gid
-        int gid;
-        unpack_gid_vert_comm(out_mesh, buff, &gid);
-
-        // Check to see if the vert already exists, if not then unpack and add
-        std::map<int,EntityHandle>::const_iterator ogehi =  out_gid_to_vert->find(gid);
-        if (ogehi == out_gid_to_vert->end()) {
-          // Unpack vert
-          EntityHandle new_vert;
-          unpack_vert_comm(out_mesh, buff, &new_vert);
-
-          // Add to map
-          (*out_gid_to_vert)[gid]=new_vert;          
+            // Add to set
+            new_node_gids.insert(gid);          
+          }
         }
       }
+
     }
-    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts create verts")
+    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts create verts");
+      
+
+    // Get map of node  gids to pos in array
+    // (block so orig_nodes vector goes away)
+    { 
+      // Get sorted list of orig_nodes
+      std::vector<EntityHandle> orig_nodes;
+      out_mesh->get_sorted_orig_nodes(orig_nodes);
+
+      // Loop through list mapping gid to pos in list
+      for (auto i=0; i<orig_nodes.size(); i++) {
+        int gid=out_mesh->get_gid(orig_nodes[i]);
+        node_gid_to_pos[gid]=i;
+      }
+    }
+
   }
   CATCH_MBMESH_RETHROW
 }
 
+/* XMRKX */
 // Redist elems to new mesh
 void create_mbmesh_redist_elem_move_elems(MBMesh *src_mesh, 
                                             std::vector<EH_Comm_Pair> *elem_to_proc_list, 
-                                            std::map<int,EntityHandle> *out_gid_to_vert, 
+                                            std::map<int,int> &node_gid_to_pos, 
                                             MBMesh *out_mesh) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "create_mbmesh_redist_elem_move_elems()"
@@ -494,7 +530,7 @@ void create_mbmesh_redist_elem_move_elems(MBMesh *src_mesh,
 
     // Set patterns and sizes
     comm.setPattern(num_nonempty, nonempty_pets);
-     comm.setSizes(nonempty_sizes);
+    comm.setSizes(nonempty_sizes);
 
     // Deallocate arrays for communication pattern
     if (num_nonempty > 0) {
@@ -531,40 +567,77 @@ void create_mbmesh_redist_elem_move_elems(MBMesh *src_mesh,
     ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems communication")
 
     ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems create elems")
-    // Track new elems, so we don't create copies
-    std::map<int,EntityHandle> out_gid_to_elem; 
 
+    // Vectors in which to store element creation info
+    std::vector<int> elem_ids;
+    std::vector<int> elem_types;
+    std::vector<int> elem_orig_pos;
+    std::vector<int> elem_masks;
+    std::vector<int> elem_mask_vals;
+    std::vector<double> elem_areas;
+    std::vector<double> elem_coords;
+    std::vector<int> elem_conns;
 
-    // Go through received buffers and create verts
-    for (std::vector<UInt>::const_iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
-      UInt proc = *p;
-      SparseMsg::buffer *b = comm.getRecvBuffer(proc);
-
-      while (!b->empty()) {
-        char buff[MAX_ELEM_COMM_SIZE];
- 
-        // Look at buffer to figure out what size we need to pop
-        int elem_size=calc_size_from_buff_elem_comm(out_mesh, (char *)(b->get_current()));
-
-        // Get one elem's info out of buffer
-        b->pop((UChar *)buff, (UInt)elem_size);
-
-        // Unpack gid
-        int gid;
-        unpack_gid_elem_comm(out_mesh, buff, &gid);
-
-        // Check to see if the elem already exists, if not then unpack and add
-        std::map<int,EntityHandle>::const_iterator ogtei =  out_gid_to_elem.find(gid);
-        if (ogtei == out_gid_to_elem.end()) {
-          // Unpack elem
-          EntityHandle new_elem;
-          unpack_elem_comm(out_mesh, buff, out_gid_to_vert, &new_elem);
-
-          // Add to map
-          out_gid_to_elem[gid]=new_elem;          
+    // Go through received buffers and create elems
+    // Block so new_elems_gids set goes away when done
+    {
+      // Track new elems so we don't create more than one with same gid
+      std::set<int> new_elem_gids; 
+      
+      // Go through received buffers and unpack new elem info
+      for (std::vector<UInt>::const_iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
+        UInt proc = *p;
+        SparseMsg::buffer *b = comm.getRecvBuffer(proc);
+        
+        while (!b->empty()) {
+          char buff[MAX_ELEM_COMM_SIZE];
+          
+          // Look at buffer to figure out what size we need to pop
+          int elem_size=calc_size_from_buff_elem_comm(out_mesh, (char *)(b->get_current()));
+          
+          // Get one elem's info out of buffer
+          b->pop((UChar *)buff, (UInt)elem_size);
+          
+          // Unpack gid
+          int gid;
+          unpack_gid_elem_comm(out_mesh, buff, &gid);
+          
+          // Check to see if the elem already exists, if not then unpack and add
+          std::set<int>::const_iterator negi =  new_elem_gids.find(gid);
+          if (negi == new_elem_gids.end()) {
+            
+            // Unpack elem info
+            unpack_elem_comm(out_mesh, buff, node_gid_to_pos, 
+                             elem_ids, elem_types, elem_conns, 
+                             elem_mask_vals, elem_masks, 
+                             elem_areas, elem_coords);
+            
+            // Add to set
+            new_elem_gids.insert(gid);          
+          }
         }
       }
+
     }
+
+    // Fill elem_orig_pos with default value
+    // TODO: change the MBMesh_add_elems_.. call to allow orig_pos to be optional
+    for (auto i=0; i<elem_ids.size(); i++) {
+      elem_orig_pos.push_back(-3);
+    }
+
+    // Create new elems from info in lists
+    MBMesh_add_elems_in_groups_by_type(out_mesh,
+                                       -1, // Set owner to default, 
+                                       elem_ids,
+                                       elem_types,
+                                       elem_orig_pos,
+                                       elem_mask_vals,
+                                       elem_masks,
+                                       elem_areas,
+                                       elem_coords,
+                                       elem_conns);
+
     ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems create elems")
   }
   CATCH_MBMESH_RETHROW
@@ -1150,24 +1223,27 @@ void pack_elem_comm(MBMesh *src_mesh, EntityHandle elem, char *buff) {
       off +=sizeof(int);
     }
 
-    // Pack elem data
+    // Pack elem coord data
     if (src_mesh->has_elem_coords) {
-      double ec[3];
-      src_mesh->get_elem_cart_coords(elem, ec);
-      
-      for (int i=0; i<src_mesh->sdim; ++i) {
-        *((double *)(buff+off))=ec[i];
-        off +=sizeof(double);
-      }
-    }
+      // Only pack orig version of coords, because the other will
+      // be generated from that
+      if (src_mesh->has_elem_orig_coords) {
+        double eoc[3];
+        src_mesh->get_elem_orig_coords(elem, eoc);
+        
+        for (int i=0; i<src_mesh->orig_sdim; ++i) {
+          *((double *)(buff+off))=eoc[i];
+          off +=sizeof(double);
+        }
 
-    if (src_mesh->has_elem_orig_coords) {
-      double eoc[3];
-      src_mesh->get_elem_orig_coords(elem, eoc);
-      
-      for (int i=0; i<src_mesh->orig_sdim; ++i) {
-        *((double *)(buff+off))=eoc[i];
-        off +=sizeof(double);
+      } else {          
+        double ec[3];
+        src_mesh->get_elem_cart_coords(elem, ec);
+        
+        for (int i=0; i<src_mesh->sdim; ++i) {
+          *((double *)(buff+off))=ec[i];
+          off +=sizeof(double);
+        }
       }
     }
 
@@ -1244,29 +1320,109 @@ void unpack_gid_elem_comm(MBMesh *out_mesh, char *buff, int *_gid) {
   *_gid=*((int *)(buff));
 }
 
-  
-// Get the entity type from parametric dimension and number of corners
-static EntityType _get_entity_type(int pdim, int num_verts) {
+void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,int> &node_gid_to_pos, 
+                      std::vector<int> &elem_ids, std::vector<int> &elem_types, std::vector<int> &elem_conns,
+                      std::vector<int> &elem_mask_vals, std::vector<int> &elem_masks, std::vector<double> &elem_areas, std::vector<double> &elem_coords) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "_get_entity_type()"
+#define ESMC_METHOD "unpack_elem_comm()"
+
   try {
-    if (pdim==2) {
-      if (num_verts==3) return MBTRI;
-      else if (num_verts==4) return MBQUAD;
-      else {
-        Throw () << "- unrecognized ESMF element type";
+    int localrc, merr;
+
+    // Offset
+    int off=0;
+
+    // Unpack gid
+    int gid;
+    gid=*((int *)(buff+off));
+    off +=sizeof(int);
+    elem_ids.push_back(gid);
+
+    ///// Don't send orig_pos and owner, since they will make no sense on
+    ///// a new processor
+
+    // Unpack num_nodes
+    int num_nodes;
+    num_nodes=*((int *)(buff+off));
+    off +=sizeof(int);
+    int esmf_etype=MBMesh_num_nodes_to_esmf_etype(out_mesh->pdim, num_nodes);
+    elem_types.push_back(esmf_etype);
+
+    // Loop unpacking each node gid and converting to pos
+    for(int n=0; n<num_nodes; n++) {
+      int node_gid=*((int *)(buff+off));
+      off +=sizeof(int);
+
+      // Get pos from gid
+      std::map<int,int>::const_iterator ngtpi =  node_gid_to_pos.find(node_gid);
+      if (ngtpi == node_gid_to_pos.end()) {
+        Throw() << "node gid not found in map!";
+       }
+
+      // Add to connection list (make 1-based)
+      elem_conns.push_back(ngtpi->second+1);
+    }
+
+    // Elem cart coords
+    if (out_mesh->has_elem_coords) {
+      // Only orig version of coords was packed, because the other will
+      // be generated from that
+      if (out_mesh->has_elem_orig_coords) {
+        for (int i=0; i<out_mesh->orig_sdim; ++i) {
+          // Unpack coord
+          double crd=*((double *)(buff+off));
+          off +=sizeof(double);
+          
+          // Add to elem coords list
+          elem_coords.push_back(crd);
+        }
+      } else {
+        for (int i=0; i<out_mesh->sdim; ++i) {
+          // Unpack coord
+          double crd=*((double *)(buff+off));
+          off +=sizeof(double);
+
+          // Add to elem coords list
+          elem_coords.push_back(crd);
+        }
       }
-    } else if (pdim==3) {
-      if (num_verts==4) return MBTET;
-      else if (num_verts==8) return MBHEX;
-      else {
-        Throw () << "- unrecognized ESMF element type";
-      }
+    }
+
+
+    // Elem mask
+    if (out_mesh->has_elem_mask) {
+      // Unpack/set elem mask
+      int masked=*((int *)(buff+off));
+      off +=sizeof(int);
+
+      // Add to elem mask list
+      elem_masks.push_back(masked);
+
+      // Unpack/set elem mask val
+      int mask_val=*((int *)(buff+off));
+      off +=sizeof(int);
+
+      // Add to elem mask val. list
+      elem_mask_vals.push_back(mask_val);
+    }
+
+    // Elem area
+    if (out_mesh->has_elem_area) {
+      // Unpack/set elem area
+      double area=*((double *)(buff+off));
+      off +=sizeof(double);
+
+      // Add to elem mask val. list
+      elem_areas.push_back(area);
     }
   }
   CATCH_MBMESH_RETHROW
 }
 
+
+#if 0 
+
+  // OLD VERSION OF ABOVE
 void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *out_gid_to_vert, EntityHandle *_new_elem) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "unpack_elem_comm()"
@@ -1316,7 +1472,7 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *
     }
 
     // Get entity type of element
-    EntityType etype=_get_entity_type(out_mesh->pdim, num_verts);
+    EntityType etype=MBMesh_get_entity_type(out_mesh->pdim, num_verts);
 
     // Create new element
     // NEED TO SWITDH THESE TO USE ACCESSOR METHODS EVENTUALLY, BUT 
@@ -1352,7 +1508,6 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *
       ESMC_CHECK_MOAB_THROW(merr);
     }
 
-
     if (out_mesh->has_elem_mask) {
       // Unpack/set elem mask
       int masked=*((int *)(buff+off));
@@ -1377,6 +1532,7 @@ void unpack_elem_comm(MBMesh *out_mesh, char *buff, std::map<int,EntityHandle> *
   }
   CATCH_MBMESH_RETHROW
 }
+#endif
 
 void mbmesh_invert_split_to_orig_id_map(MBMesh *mesh, 
   std::multimap<int, EntityHandle> &orig_id_to_split_elem) {

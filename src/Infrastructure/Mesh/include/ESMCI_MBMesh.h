@@ -30,6 +30,11 @@ using namespace moab;
 
 namespace ESMCI {
 
+// Specified in the input connection list information for an element. 
+// When specified, indicates that the element should be divided at that point into 
+// another polygon
+#define MBMESH_POLYBREAK_IND -7
+
 // use when no pointer *rc is expected to return
 #define ESMC_CHECK_MOAB_THROW(merr) \
   if (merr != MB_SUCCESS) {\
@@ -405,6 +410,9 @@ namespace ESMCI {
 
     //// Vector based accesors for elem info ////
 
+    // Set elem mask for a vector of entities (e.g. using orig_elems)
+    void set_elem_mask(std::vector<EntityHandle> const &elems, int *masks);
+
     // Set elem mask values for a vector of entities (e.g. using orig_elems)
     void set_elem_mask_val(std::vector<EntityHandle> const &elems, int *mask_val);
 
@@ -436,6 +444,7 @@ namespace ESMCI {
 
     // Set elem mask (not mask val) 
     void set_elem_mask(EntityHandle eh, int mask);
+    void set_elem_mask(Range elems, int *masks);
 
     // Set an element mask value 
     void set_elem_mask_val(EntityHandle eh, int mask_val);
