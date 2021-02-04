@@ -5,8 +5,8 @@ DOC_ARTIFACTS="/tmp/artifacts/log"
 
 cd 
 
-git config --global user.email "himanshupillai@gmail.com"
-git config --global user.name "him-28"
+git config --global user.email "himanshu@ucar.edu"
+git config --global user.name "esmf-orgbot"
 
 
 # Clone the docs repository
@@ -18,7 +18,7 @@ cd esmf-test-artifacts
 mkdir test_coverage
 
 cd ${DOC_ARTIFACTS}
-cp -rf ${DOC_ARTIFACTS}/* ~/esmf-test-artifacts/test_coverage/
+cp -rf ${DOC_ARTIFACTS}/store/* ~/esmf-test-artifacts/test_coverage/
 
 
 cd ~/esmf-test-artifacts/
