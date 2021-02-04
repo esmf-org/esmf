@@ -597,27 +597,8 @@ void MBMesh_regrid_create(MBMesh **meshsrcpp, ESMCI::Array **arraysrcpp,
     }
 
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                                  "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  } catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
   }
+  CATCH_MBMESH_RETURN(rc)
 
 #ifdef PROGRESSLOG_on
   ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_INFO);
@@ -1178,46 +1159,50 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
 #define ESMC_METHOD "calc_regrid_wgts()"
   Trace __trace("calc_regrid_wgts()");
 
-  int localrc;
+  try {
+    int localrc;
 
-  // Branch to different subroutines based on method
-  if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
-    calc_cnsrv_regrid_wgts(srcmbmp, dstmbmp, wts);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
-    calc_bilinear_regrid_wgts(srcmbmp, dstpl, wts, map_type,
-                              set_dst_status, dst_status);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) {
-    calc_nearest_regrid_wgts(srcpl, dstpl, wts,
-                             set_dst_status, dst_status, 
-                             regridMethod, extrapNumSrcPnts,
-                             extrapDistExponent);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_IDAVG) {
-    calc_nearest_regrid_wgts(srcpl, dstpl, wts, 
-                             set_dst_status, dst_status, 
-                             regridMethod, extrapNumSrcPnts, 
-                             extrapDistExponent);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
-    calc_nearest_regrid_wgts(dstpl, srcpl, wts,
-                             set_dst_status, dst_status,
-                             regridMethod, extrapNumSrcPnts,
-                             extrapDistExponent);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_PATCH) {
-    calc_patch_regrid_wgts(srcmbmp, dstpl, wts, map_type,
-                              set_dst_status, dst_status);
-  } else {
-    Throw() << "This regrid method is not currently supported.";
-  }
+    // Branch to different subroutines based on method
+    if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
+      calc_cnsrv_regrid_wgts(srcmbmp, dstmbmp, wts);
+    } else if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
+      calc_bilinear_regrid_wgts(srcmbmp, dstpl, wts, map_type,
+                                set_dst_status, dst_status);
+    } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) {
+      calc_nearest_regrid_wgts(srcpl, dstpl, wts,
+                               set_dst_status, dst_status, 
+                               regridMethod, extrapNumSrcPnts,
+                               extrapDistExponent);
+    } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_IDAVG) {
+      calc_nearest_regrid_wgts(srcpl, dstpl, wts, 
+                               set_dst_status, dst_status, 
+                               regridMethod, extrapNumSrcPnts, 
+                               extrapDistExponent);
+    } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
+      calc_nearest_regrid_wgts(dstpl, srcpl, wts,
+                               set_dst_status, dst_status,
+                               regridMethod, extrapNumSrcPnts,
+                               extrapDistExponent);
+    } else if (*regridMethod == ESMC_REGRID_METHOD_PATCH) {
+      calc_patch_regrid_wgts(srcmbmp, dstpl, wts, map_type,
+                                set_dst_status, dst_status);
+    } else {
+      Throw() << "This regrid method is not currently supported.";
+    }
 
-  // Do extrapolation if the user has requested it
-  if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
-    MBMesh_Extrapolate(srcmbmp, srcpl, dstmbmp, dstpl,
-                       wts, 
-                       // map_type, // RLO: not sure if this is needed
-                       NULL, // pole_constraint_id only used with src_mesh
-                       extrapMethod, extrapNumSrcPnts, extrapDistExponent,
-                       extrapNumLevels, extrapNumInputLevels,
-                       set_dst_status, dst_status, &localrc);
+    // Do extrapolation if the user has requested it
+    if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+      MBMesh_Extrapolate(srcmbmp, srcpl, dstmbmp, dstpl,
+                         wts, 
+                         // map_type, // RLO: not sure if this is needed
+                         NULL, // pole_constraint_id only used with src_mesh
+                         extrapMethod, extrapNumSrcPnts, extrapDistExponent,
+                         extrapNumLevels, extrapNumInputLevels,
+                         set_dst_status, dst_status, &localrc);
+    }
+
   }
+  CATCH_MBMESH_RETHROW
 
   return 1;
 

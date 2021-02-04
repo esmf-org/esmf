@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -Eeuxo pipefail
 
-git config --global user.email "himanshupillai@gmail.com"
-git config --global user.name "him-28"
+DOC_ARTIFACTS="/tmp/artifacts/log"
+
+cd 
+
+git config --global user.email "himanshu@ucar.edu"
+git config --global user.name "esmf-orgbot"
 
 
 # Clone the docs repository
@@ -12,14 +16,14 @@ git clone --depth 1 git@github.com:esmf-org/esmf-test-artifacts.git
 
 cd esmf-test-artifacts
 mkdir test_coverage
-cd test_coverage
-cp $LOGDIR/ESMF_*  .
-cp $LOGDIR/ESMC_*  .
-cp $LOGDIR/Methods_Tests  .
-cd ..
 
+cd ${DOC_ARTIFACTS}
+cp -rf ${DOC_ARTIFACTS}/store/* ~/esmf-test-artifacts/test_coverage/
+
+
+cd ~/esmf-test-artifacts/
 git add .
-git commit -a -m " Test Coverage pushed in the artifacts `date` "
+git commit -a -m " Test Coverage pushed in the artifacts `date` [ci skip] "
 
 # Push the changes ------------------------------------------------------------
 

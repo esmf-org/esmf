@@ -161,9 +161,13 @@ static void populate_box_elems(OTree *box,
     if (Mixed_BBoxIntersect(bounding_box, meshBBBox, btol)) {
 
       // Create Search result
+      // NOTE: this memory is leaked because OTree/ONode is not set up to delete it..
       MBMesh_Search_EToP_Result *sr=new MBMesh_Search_EToP_Result();
       sr->src_elem=elem;
       sr->dst_nodes.clear();
+
+       // Add it to results list to keep track of it
+       result.push_back(sr);
 
       // Add it to tree
       double min[3], max[3];
@@ -565,6 +569,9 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
 
   // TODO: NEED TO MAKE BOUNDING BOX ONLY DEPEND ON NON-MASKED ELEMENTS
   
+  // use this to keep track of search results and delete them later
+  std::vector<MBMesh_Search_EToP_Result*> box_obj;
+
   // Get global bounding box of pointlist
   double cmin[sdim], cmax[sdim];
   build_pl_bbox(cmin, cmax, mbmBp);
@@ -579,11 +586,11 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
     box=new OTree(num_box);
     
     // Construct search result list
-    result.reserve(num_box);
+    box_obj.reserve(num_box);
     
     // Fill tree with search result structs to fill
     // with intersecting elements
-    populate_box_elems(box, result, mbmAp, MeshBBBox, meshBint, normexp, is_sph);
+    populate_box_elems(box, box_obj, mbmAp, MeshBBBox, meshBint, normexp, is_sph);
     box->commit();
   } else box = box_in;
 
@@ -803,8 +810,12 @@ printf("%d# dst_id %d status %d\n", Par::Rank(), dst_id, ESMC_REGRID_STATUS_OUTS
   }
 
    // Get rid of box tree
-  // if (box != NULL) delete box;
+  if (!box_in)
+    if (box != NULL) delete box;
 
+    for (auto entry : box_obj)
+      delete entry;
+    box_obj.clear();
 }
 
 #endif // ESMF_MOAB
