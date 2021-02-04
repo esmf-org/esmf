@@ -18,13 +18,12 @@ cd esmf-test-artifacts
 mkdir test_coverage
 
 cd ${DOC_ARTIFACTS}
-cp -rf ESMF_* ~/esmf-test-artifacts/test_coverage/
-cp -rf ESMC_* ~/esmf-test-artifacts/test_coverage/
-cp -rf Methods_Tests ~/esmf-test-artifacts/test_coverage/ 
+cp -rf ${DOC_ARTIFACTS}/log/store/* ~/esmf-test-artifacts/test_coverage/
+
 
 cd ~/esmf-test-artifacts/
 git add .
-git commit -a -m " Test Coverage pushed in the artifacts `date` "
+git commit -a -m " Test Coverage pushed in the artifacts `date` [ci skip] "
 
 # Push the changes ------------------------------------------------------------
 
