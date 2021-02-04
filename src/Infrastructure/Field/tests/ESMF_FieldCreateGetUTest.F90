@@ -2346,7 +2346,9 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
         field = ESMF_FieldEmptyCreate(rc=localrc) 
-        if(localrc /= ESMF_SUCCESS) rc = ESMF_FAILURE
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
             dimCount=dimCount, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
@@ -2596,7 +2598,9 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
-        if(localrc /= ESMF_SUCCESS) rc = ESMF_FAILURE
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test2b
 
     subroutine test2c(rc)
