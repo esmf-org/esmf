@@ -209,7 +209,7 @@ jobs:
           name: Prep Test Coverage
           command: cd /tmp/artifacts && unzip test_coverage-artifacts.zip
       - run:
-          name: Push to github.io
+          name: Push to esmf-test-artifacts
           command: bash esmf/.circleci/sh/test_coverage-push.sh
 
   esmpy-test:
