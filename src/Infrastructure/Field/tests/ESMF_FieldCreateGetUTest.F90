@@ -53,9 +53,8 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
-#ifdef ESMF_TESTEXHAUSTIVE
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create an empty field
         call test1(rc)
         write(failMsg, *) ""
@@ -63,7 +62,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Get info associated with the empty field
         call test2(rc)
         write(failMsg, *) ""
@@ -71,7 +70,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test_localglobalbounds(rc)
         write(failMsg, *) ""
@@ -79,7 +78,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test_localglobalboundsmesh(rc)
         write(failMsg, *) ""
@@ -87,7 +86,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test_meshindex(rc)
         write(failMsg, *) ""
@@ -95,7 +94,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2a(rc)
         write(failMsg, *) ""
@@ -103,7 +102,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a 2D field with global indices
         call test_globalindex(rc)
         write(failMsg, *) "Test unsuccessful"
@@ -111,7 +110,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2a_get(rc)
         write(failMsg, *) ""
@@ -120,7 +119,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2a_bigarray(rc)
         write(failMsg, *) ""
@@ -129,7 +128,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2a_fail(rc)
         write(failMsg, *) ""
@@ -138,7 +137,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2b(rc)
         write(failMsg, *) ""
@@ -147,7 +146,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2c(rc)
         write(failMsg, *) ""
@@ -155,7 +154,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d(rc)
         write(failMsg, *) ""
@@ -164,7 +163,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_fail(rc)
         write(failMsg, *) ""
@@ -173,7 +172,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -186,7 +185,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -200,7 +199,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
@@ -213,7 +212,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -227,7 +226,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -242,7 +241,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
@@ -256,7 +255,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
@@ -270,7 +269,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -283,7 +282,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -297,7 +296,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
@@ -309,7 +308,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
@@ -321,7 +320,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
@@ -334,7 +333,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/2,2/), &
@@ -347,7 +346,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -361,7 +360,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
@@ -373,7 +372,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/2,2/), &
@@ -385,7 +384,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
             regDecomp=(/2,2/), &
@@ -398,7 +397,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
             regDecomp=(/2,2/), &
@@ -411,7 +410,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2e(rc)
         write(failMsg, *) ""
@@ -420,7 +419,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2e_ugb(rc)
         write(failMsg, *) ""
@@ -429,7 +428,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2e_ugb_bigarray(rc)
         write(failMsg, *) ""
@@ -438,7 +437,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2e_ugb_fail(rc)
         write(failMsg, *) ""
@@ -447,7 +446,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2e_fail(rc)
         write(failMsg, *) ""
@@ -456,7 +455,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2e_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -467,7 +466,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2f_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -478,7 +477,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2e_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
@@ -490,7 +489,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2f_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
@@ -502,7 +501,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2e_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -513,7 +512,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2f_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -524,7 +523,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2e_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
@@ -536,7 +535,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2f_generic(rc, minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
@@ -548,7 +547,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2e_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -563,7 +562,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2f_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -578,7 +577,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 2d 1st dimension distributed
         call test2e_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -593,7 +592,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 2d 1st dimension distributed
         call test2f_generic(rc, minindex=(/1,1/), maxindex=(/10,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -608,7 +607,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 2d both dimensions distributed
         call test3a(rc)
         write(failMsg, *) ""
@@ -616,7 +615,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array pointer 2d both dimensions distributed
         call test3a_fptr(rc)
         write(failMsg, *) ""
@@ -624,7 +623,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array pointer 2d one dimension distributed
         call test3a2_fptr(rc)
         write(failMsg, *) ""
@@ -632,7 +631,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 2d both dimensions distributed
         call test3b(rc)
         write(failMsg, *) ""
@@ -641,7 +640,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 2d both dimensions distributed
         ! Need to add test in case where grid and array have same size dimensions distributed
         call test3b_fail(rc)
@@ -651,7 +650,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 2d both dimensions distributed
         call test3c(rc)
         write(failMsg, *) ""
@@ -660,7 +659,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 3d
         call test3d(rc)
         write(failMsg, *) ""
@@ -669,7 +668,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 3d
         call test3e(rc)
         write(failMsg, *) ""
@@ -678,7 +677,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 3d
         call test3f(rc)
         write(failMsg, *) ""
@@ -687,7 +686,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran array 3d
         call test3g(rc)
         write(failMsg, *) ""
@@ -696,7 +695,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
@@ -709,7 +708,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
@@ -723,7 +722,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -736,7 +735,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
@@ -750,7 +749,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             regDecomp=(/4,1,1/), &
@@ -762,7 +761,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             regDecomp=(/4,1,1/), &
@@ -774,7 +773,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             regDecomp=(/4,1,1/), &
@@ -787,7 +786,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !        !------------------------------------------------------------------------
-!        !E-X_UTest_Multi_Proc_Only
+!        !NE-X_UTest_Multi_Proc_Only
 !        ! Create a field from an fortran 3d array
 !        call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
 !            regDecomp=(/4,1,1/), &
@@ -800,7 +799,7 @@
 !        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             regDecomp=(/2,2,1/), &
@@ -813,7 +812,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
@@ -827,7 +826,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
@@ -839,7 +838,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/2,2/), &
@@ -851,7 +850,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
             regDecomp=(/2,2/), &
@@ -864,7 +863,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
@@ -879,7 +878,7 @@
         call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/17,20,33/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
@@ -894,7 +893,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/17,20,33/), &
             regDecomp=(/2,1,2/), &
@@ -908,7 +907,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/4,5,6/), maxindex=(/17,20,33/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
@@ -924,7 +923,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 3d array
         call test3d_generic(rc, minindex=(/3,3,5/), maxindex=(/17,20,33/), &
             regDecomp=(/2,1,2/), &
@@ -937,6 +936,8 @@
             "neither dimension divisible, " // &
             "with extra padding, halo, and data copy"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_TESTEXHAUSTIVE
 
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
