@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuxo pipefail
 
-DOC_ARTIFACTS="/tmp/artifacts/artifacts"
+DOC_ARTIFACTS="/tmp/artifacts/log"
 
 cd 
 
@@ -17,7 +17,7 @@ git clone --depth 1 git@github.com:esmf-org/esmf-test-artifacts.git
 cd esmf-test-artifacts
 mkdir test_coverage
 
-cd ${DOC_ARTIFACTS}/log
+cd ${DOC_ARTIFACTS}
 cp -rf ESMF_* ~/esmf-test-artifacts/test_coverage/
 cp -rf ESMC_* ~/esmf-test-artifacts/test_coverage/
 cp -rf Methods_Tests ~/esmf-test-artifacts/test_coverage/ 
