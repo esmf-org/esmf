@@ -204,7 +204,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - esmf-test-coverage-{{ .Revision }}
+            - test-coverage-{{ .Revision }}
       - run:
           name: Prep Test Coverage
           command: cd /tmp/artifacts && unzip test_coverage-artifacts.zip
