@@ -18,7 +18,7 @@ cd esmf-test-artifacts
 mkdir test_coverage
 
 cd ${DOC_ARTIFACTS}
-cp -rf ${DOC_ARTIFACTS}/log/store/* ~/esmf-test-artifacts/test_coverage/
+cp -rf ${DOC_ARTIFACTS}/* ~/esmf-test-artifacts/test_coverage/
 
 
 cd ~/esmf-test-artifacts/
