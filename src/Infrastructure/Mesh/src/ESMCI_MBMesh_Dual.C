@@ -27,6 +27,7 @@ using namespace moab;
 #include <Mesh/include/ESMCI_MBMesh_Dual.h>
 #include <Mesh/include/ESMCI_MBMesh_Glue.h>
 #include <Mesh/include/ESMCI_MBMesh_Types.h>
+#include <Mesh/include/ESMCI_MBMesh_Util.h>
 
 #include <Mesh/include/ESMCI_MathUtil.h>
 #endif
@@ -944,7 +945,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     for (int e = 0; e < num_elems; ++e) {
 
       // Get number of nodes in element
-      int num_elem_verts=ElemType2NumNodes(dual_mesh->pdim, elemType[e]);
+      int num_elem_verts=MBMesh_ElemType2NumNodes(dual_mesh->pdim, elemType[e]);
 
       // Define the maximum number of verts
 #define MAX_ELEM_VERTS 20
@@ -969,7 +970,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       }
 
       // Get number of nodes in element
-      EntityType etype=get_entity_type(dual_mesh->pdim, elemType[e]);
+      EntityType etype=MBMesh_get_entity_type(dual_mesh->pdim, elemType[e]);
 
       EntityHandle new_elem;
       merr=dual_mesh->mesh->create_element(etype,elem_verts,num_elem_verts,new_elem);

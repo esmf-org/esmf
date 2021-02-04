@@ -161,10 +161,6 @@ void MBMesh_turnoffelemmask(MBMesh **mbmpp, int *rc);
 void MBMesh_turnonnodemask(MBMesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
 void MBMesh_turnoffnodemask(MBMesh **meshpp, int *rc);
 
-EntityType get_entity_type(int pdim, int etype);
-
-int ElemType2NumNodes(int pdim, int etype);
-
 #endif // ESMF_MOAB
 
 #endif // ESMCI_Mesh_Glue_h

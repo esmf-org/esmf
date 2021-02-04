@@ -1183,11 +1183,12 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
                                set_dst_status, dst_status,
                                regridMethod, extrapNumSrcPnts,
                                extrapDistExponent);
-    } else if (*regridMethod == ESMC_REGRID_METHOD_PATCH) {
-      calc_patch_regrid_wgts(srcmbmp, dstpl, wts, map_type,
-                                set_dst_status, dst_status);
+      // PATCH NOT WORKING YET
+      //    } else if (*regridMethod == ESMC_REGRID_METHOD_PATCH) {
+      //calc_patch_regrid_wgts(srcmbmp, dstpl, wts, map_type,
+      //                           set_dst_status, dst_status);
     } else {
-      Throw() << "This regrid method is not currently supported.";
+      Throw() << "This regrid method is not currently supported when using MOAB for internal mesh representation.";
     }
 
     // Do extrapolation if the user has requested it
