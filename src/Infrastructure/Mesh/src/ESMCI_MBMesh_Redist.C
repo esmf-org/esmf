@@ -388,12 +388,45 @@ void create_mbmesh_redist_elem_move_nodes(MBMesh *src_mesh,
     comm.communicate();
     ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move verts communication");
 
+    // Count max number of nodes for use in reserving space in vectors
+    int max_num_nodes = 0;
+    for (std::vector<UInt>::const_iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
+      UInt proc = *p;
+      SparseMsg::buffer *b = comm.getRecvBuffer(proc);
+      
+      while (!b->empty()) {
+        char buff[MAX_VERT_COMM_SIZE];
+        
+        // Get one verts info out of buffer
+        b->pop((UChar *)buff, (UInt)size_per_vert);
+        
+        // Count node  
+        max_num_nodes++;
+      }
+    }
+
+    // Reset buffers to allow them to be used again below
+    // for the actual unpacking
+    comm.resetBuffers();
+
+
     // Vectors to hold node information as it's being unpacked
     std::vector<int> node_ids;
     std::vector<double> node_coords;
     std::vector<int> node_orig_pos;
     std::vector<int> node_mask_vals;
     std::vector<int> node_masks;
+
+    // Reserve space in vectors to reduce reallocs
+    node_ids.reserve(max_num_nodes);
+    node_coords.reserve(out_mesh->orig_sdim*max_num_nodes);
+    node_orig_pos.reserve(max_num_nodes);
+    
+    if (out_mesh->has_node_mask) {
+      node_mask_vals.reserve(max_num_nodes);
+      node_masks.reserve(max_num_nodes);
+    }
+
 
     ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move verts create verts");
     // Go through received buffers and create verts
@@ -422,8 +455,6 @@ void create_mbmesh_redist_elem_move_nodes(MBMesh *src_mesh,
           std::set<int>::const_iterator nngi =  new_node_gids.find(gid);
           if (nngi == new_node_gids.end()) {
 
-/* XMRKX */
-
             // Unpack node
             unpack_node_comm(out_mesh, buff, 
                              node_ids, 
@@ -447,11 +478,10 @@ void create_mbmesh_redist_elem_move_nodes(MBMesh *src_mesh,
 
     } // Block so set new_node_gids goes away when done
 
-    // Set default for node_owners
-    std::vector<int> node_owners;
-    for (auto i=0; i<node_ids.size(); i++) {
-      node_owners.push_back(-1);
-    }
+
+    // Create node_owners and set default (-1)
+    std::vector<int> node_owners(node_ids.size(),-1);
+
 
     // Create nodes all at once
     MBMesh_add_nodes_in_a_group(out_mesh, 
@@ -578,9 +608,68 @@ void create_mbmesh_redist_elem_move_elems(MBMesh *src_mesh,
     ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems communication")
     // Communicate elems
     comm.communicate();
-    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems communication")
+    ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements move elems communication");
 
-      ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems create elems");
+    ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements move elems create elems");
+
+    // Count max number of elems for use in reserving space in vectors
+    int max_num_elems=0;
+    for (std::vector<UInt>::const_iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
+      UInt proc = *p;
+      SparseMsg::buffer *b = comm.getRecvBuffer(proc);
+        
+      while (!b->empty()) {
+        char buff[MAX_ELEM_COMM_SIZE];
+        
+        // Look at buffer to figure out what size we need to pop
+        int elem_size=calc_size_from_buff_elem_comm(out_mesh, (char *)(b->get_current()));
+        
+        // Get one elem's info out of buffer
+        b->pop((UChar *)buff, (UInt)elem_size);
+          
+        // Count elems
+        max_num_elems++;
+      }
+    }
+
+    // Reset buffers to allow them to be used again below
+    // for the actual unpacking
+    comm.resetBuffers();
+
+
+    // Vectors in which to store element creation info
+    std::vector<int> elem_ids;
+    std::vector<int> elem_types;
+    std::vector<int> elem_orig_pos;
+    std::vector<int> elem_masks;
+    std::vector<int> elem_mask_vals;
+    std::vector<double> elem_areas;
+    std::vector<double> elem_coords;
+    std::vector<int> elem_conns;
+
+    // Reserve space in vectors to reduce reallocs
+    elem_ids.reserve(max_num_elems);
+    elem_types.reserve(max_num_elems);
+    elem_orig_pos.reserve(max_num_elems);
+
+    if (out_mesh->has_elem_mask) {
+      elem_masks.reserve(max_num_elems);
+      elem_mask_vals.reserve(max_num_elems);
+    }
+
+    if (out_mesh->has_elem_area) {
+      elem_areas.reserve(max_num_elems);
+    } 
+
+    if (out_mesh->has_elem_coords) {
+      elem_coords.reserve(out_mesh->orig_sdim*max_num_elems);
+    }
+
+    if (out_mesh->pdim == 2) {
+      elem_conns.reserve(4*max_num_elems); // Quad max for 2D
+    } else {
+      elem_conns.reserve(8*max_num_elems); // Hex max for 3D 
+    }
 
     // Get map of node gids to pos in array to use in elem connection generation
     // (block so orig_nodes vector goes away)
@@ -596,16 +685,6 @@ void create_mbmesh_redist_elem_move_elems(MBMesh *src_mesh,
         node_gid_to_pos[gid]=i;
       }
     }
-
-    // Vectors in which to store element creation info
-    std::vector<int> elem_ids;
-    std::vector<int> elem_types;
-    std::vector<int> elem_orig_pos;
-    std::vector<int> elem_masks;
-    std::vector<int> elem_mask_vals;
-    std::vector<double> elem_areas;
-    std::vector<double> elem_coords;
-    std::vector<int> elem_conns;
 
     // Go through received buffers and create elems
     // Block so new_elems_gids set goes away when done

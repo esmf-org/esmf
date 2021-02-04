@@ -544,6 +544,7 @@ void MBMesh_add_nodes_in_a_group(MBMesh *mbmp,   // Mesh to add elems to
                                  double *node_coords, // node original coords
                                  int *node_orig_pos, // orig pos of each new node (if NULL just order starting from 0)
                                  int *node_owners, // owner for each new node
+                                                   // TODO: allow NULL for above
                                  int *node_mask_vals, // optional elem mask value (if NULL ignored)
                                  int *node_masks // optional elem mask (if NULL ignored)
                                  ) {
@@ -1559,6 +1560,7 @@ void MBMesh_add_elems_in_groups_by_type(MBMesh *mbmp,   // Mesh to add elems to
                                         int *elemType, // The ESMF elemType (i.e. the same as num corners for 2D)
                                                        // TODO: change elemType to be num_corner_nodes ???
                                         int *orig_pos, // orig pos of new elems in input list
+                                                       // TODO: allow NULL for above
                                         int *elemMaskVal, // optional elem mask value (if NULL ignored)
                                         int *elemMask, // optional elem mask (if NULL ignored)
                                         int areaPresent, double *elemArea,
