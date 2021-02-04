@@ -104,9 +104,34 @@
         !------------------------------------------------------------------------
         !NEX_UTest_Multi_Proc_Only
         ! Create a 2D field with global indices
-        call test_globalindex(rc)
+        call test_globalindex(rc=rc)
         write(failMsg, *) "Test unsuccessful"
-        write(name, *) "Creating a 2D Field with a global index"
+        write(name, *) "Creating a 2D Field with global indices"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Create a 2D field with global indices and shared DEs across SSI
+        call test_globalindex(pinflag=ESMF_PIN_DE_TO_SSI, rc=rc)
+        write(failMsg, *) "Test unsuccessful"
+        write(name, *) "Creating a 2D Field with global indices and shared DEs across SSI"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Create a 2D field with global indices EmptyCreate/Set/Complete
+        call test_globalindex(testEmptyComplete=.true., rc=rc)
+        write(failMsg, *) "Test unsuccessful"
+        write(name, *) "Creating a 2D Field with global indices - testing EmptyCreate/Set/Complete"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Create a 2D field with global indices and shared DEs across SSI
+        ! EmptyCreate/Set/Complete
+        call test_globalindex(pinflag=ESMF_PIN_DE_TO_SSI, testEmptyComplete=.true., rc=rc)
+        write(failMsg, *) "Test unsuccessful"
+        write(name, *) "Creating a 2D Field with global indices and shared DEs across SSI - testing EmptyCreate/Set/Complete"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
@@ -2407,9 +2432,8 @@ contains
 
         allocate(farray(ec(1), ec(2)))
 
-        field = ESMF_FieldCreate(grid, farray, indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, &
-            staggerloc=sloc, &
-            rc=localrc)
+        field = ESMF_FieldCreate(grid, farray, indexflag=ESMF_INDEX_DELOCAL, &
+          datacopyflag=ESMF_DATACOPY_VALUE, staggerloc=sloc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7774,17 +7798,21 @@ contains
     end subroutine test_uninit_array
 
 
-    subroutine test_globalindex(rc)
-        integer, intent(out)  :: rc
+    subroutine test_globalindex(pinflag, testEmptyComplete, rc)
+        type(ESMF_Pin_Flag), optional :: pinflag
+        logical,             optional :: testEmptyComplete
+        integer, intent(out)          :: rc
         integer                 :: localrc
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
-        real (ESMF_KIND_R8), pointer   :: farray(:,:)
-        type(ESMF_VM)                               :: vm
-        integer                                     :: localPet, petCount
-        integer                                     :: compLBnd(2), compUBnd(2)
-        type(ESMF_ArraySpec)                        :: arrayspec
-        logical                   :: correct
+        real (ESMF_KIND_R8), pointer:: farray(:,:)
+        type(ESMF_VM)           :: vm
+        integer                 :: localPet, petCount
+        integer                 :: localDeCount, ssiLocalDeCount
+        integer                 :: compLBnd(2), compUBnd(2)
+        type(ESMF_ArraySpec)    :: arrayspec
+        logical                 :: correct
+        logical                 :: ssiSharedMemoryEnabled, testEC
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -7795,7 +7823,8 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+        call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, &
+          ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7809,18 +7838,44 @@ contains
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
-            ! set arrayspec
-            call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+           ! set arrayspec
+           call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
-            ! create field on grid
-            field = ESMF_FieldCreate(grid, arrayspec, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
+            if (present(pinflag).and.(.not.ssiSharedMemoryEnabled)) then
+              ! force DE-TO-PET pinning
+              pinflag = ESMF_PIN_DE_TO_PET
+            endif
+
+            testEC = .false.
+            if (present(testEmptyComplete)) testEC = testEmptyComplete
+
+            if (testEC) then
+              ! create field on grid via EmptyCreate() and EmptyComplete()
+              field = ESMF_FieldEmptyCreate(rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-       
+              call ESMF_FieldEmptySet(field, grid, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              call ESMF_FieldEmptyComplete(field, arrayspec, pinflag=pinflag, &
+                rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else
+              ! create field on grid via FieldCreate()
+              field = ESMF_FieldCreate(grid, arrayspec, pinflag=pinflag, &
+                rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+
             ! Get field bounds
             call ESMF_FieldGet(field, localde=0, farrayPtr=farray, &
                 computationalLBound=compLBnd, computationalUBound=compUBnd, &
@@ -7850,7 +7905,20 @@ contains
                if (compLBnd(2) .ne. 11) correct=.false.
                if (compUBnd(1) .ne. 16) correct=.false.
                if (compUBnd(2) .ne. 20) correct=.false.
-            endif   
+            endif
+
+            if (present(pinflag)) then
+              if (pinflag == ESMF_PIN_DE_TO_SSI) then
+                ! check that each PET sees all 4 DEs across the SSI
+                call ESMF_FieldGet(field, localDeCount=localDeCount, &
+                  ssiLocalDeCount=ssiLocalDeCount, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+                if (localDeCount /= 1) correct=.false.
+                if (ssiLocalDeCount /= 4) correct=.false.
+              endif
+            endif
 
             call ESMF_FieldDestroy(field, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -7863,7 +7931,6 @@ contains
                 ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
-
        ! return rc based on correct
        if (correct) then
          rc=ESMF_SUCCESS
@@ -7871,8 +7938,8 @@ contains
          rc=ESMF_FAILURE
        endif
 
-
     end subroutine test_globalindex
+
 
     subroutine test_localglobalbounds(rc)
         integer, intent(out)  :: rc
