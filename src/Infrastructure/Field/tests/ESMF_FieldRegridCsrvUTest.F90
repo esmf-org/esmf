@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -54,48 +54,113 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 #ifdef ESMF_TESTEXHAUSTIVE
-       ! initialize 
-      rc=ESMF_SUCCESS
-
 ! This #if surrounds all the tests to enable turning on just one test
 #if 1
-      ! do test
-      call test_csrvregrid(itrp, csrv, rc)
 
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test conservative regridding interpolation
-      write(failMsg, *) "Returned an error"
-      write(name, *) "Conservative regridding on a sphere"
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! Test conservative regridding between 2 spherical grids
+    
+    ! initialize 
+    rc=ESMF_SUCCESS
+    
+    ! do test
+    call test_csrvregrid(itrp, csrv, rc)
+    
+    !------------------------------------------------------------------------
+    ! Check return code
+    !EX_UTest
 
-      ! return result
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
-                      failMsg, result, ESMF_SRCLINE)
+    write(failMsg, *) "Returned an error"
+    write(name, *) "Conservative regridding on a sphere"
+    
+    ! return result
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
+         failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    ! Check interp error
+    !EX_UTest
+    
+    write(failMsg, *) "Interpolation maximum error is greater than 10^-2"
+    write(name, *) "Conservative regridding on a sphere interpolation error"
+    
+    ! return result
+    call ESMF_Test((itrp.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
+         failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    ! Check conserve error
+    !EX_UTest
+    ! Test conservative regridding conservation
+    write(failMsg, *) "Conservation relative error is greater than 10^-12"
+    write(name, *) "Conservative regridding on a sphere conservation error"
+    
+    ! return result
+    call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
+         failMsg, result, ESMF_SRCLINE)
+    
 
-      !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! Test MOAB conservative regridding between 2 spherical grids
+    
+    ! initialize 
+    rc=ESMF_SUCCESS
+    itrp = .true.
+    csrv = .true.
 
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test conservative regridding interpolation
-      write(failMsg, *) "Interpolation maximum error is greater than 10^-2"
-      write(name, *) "Conservative regridding on a sphere interpolation error"
+#if defined ESMF_MOAB    
+    ! Turn on MOAB 
+    call ESMF_MeshSetMOAB(.true.)
 
-      ! return result
-      call ESMF_Test((itrp.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
-                      failMsg, result, ESMF_SRCLINE)
+    ! do test
+    call test_csrvregrid(itrp, csrv, rc)
 
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test conservative regridding conservation
-      write(failMsg, *) "Conservation relative error is greater than 10^-12"
-      write(name, *) "Conservative regridding on a sphere conservation error"
+    ! Turn off MOAB
+    call ESMF_MeshSetMOAB(.false.)
+#endif
+    
+    !------------------------------------------------------------------------
+    ! Check return code
+    !EX_UTest
 
-      
-      ! return result
-        call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
-                      failMsg, result, ESMF_SRCLINE)
+    write(failMsg, *) "Returned an error"
+    write(name, *) "MOAB Conservative regridding between spherical Grids"
+    
+    ! return result
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
+         failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    ! Check interp error
+    !EX_UTest
+    
+    write(failMsg, *) "Interpolation maximum error is greater than 10^-2"
+    write(name, *) "MOAB Conservative regridding on a sphere interpolation error"
+    
+    ! return result
+    call ESMF_Test((itrp.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
+         failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    ! Check conserve error
+    !EX_UTest
+    ! Test conservative regridding conservation
+    write(failMsg, *) "Conservation relative error is greater than 10^-12"
+    write(name, *) "MOAB Conservative regridding on a sphere conservation error"
+    
+    ! return result
+    call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
+         failMsg, result, ESMF_SRCLINE)
 
-      ! initialize 
+
+
+    !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
+    ! Test conservative regridding between 2 spherical grids with masks
+
+    ! initialize 
       rc=ESMF_SUCCESS
 
       ! do test

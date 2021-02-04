@@ -1,6 +1,0 @@
-#!/bin/csh -f
-if ( $#argv < 2 ) exit 1
-set default = `echo [Ff][Dd][Pp].[Mm][Oo][Dd]`
-echo $0": installing $1 as $2 (module is $default)"
-sed "/^ *default:/s/fdp.mod/$default/" < $1 > $2
-chmod +x $2

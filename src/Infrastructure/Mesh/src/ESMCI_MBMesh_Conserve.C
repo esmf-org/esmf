@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1480,6 +1480,17 @@ void calc_cnsrv_regrid_wgts(MBMesh *srcmesh, MBMesh *dstmesh, IWeights &wts) {
       if (srcmesh_rend != NULL) delete srcmesh_rend;
       if (dstmesh_rend != NULL) delete dstmesh_rend;
     }
+    
+    // memory associated with results cannot be released by virtue of a
+    //   std::unique_ptr used to define MBMesh_Search_EToP_Result_List because
+    //   a std::set is used to form the temporary elements from which the 
+    //   std::unique_ptr(s) would need to be std::move(ed), and this is not 
+    //   available until c++17
+    // so we will delete these results the (new) old fashioned way (C++11)
+    for (auto entry : result)
+      delete entry;
+    result.clear();
+    
   }
   CATCH_MBMESH_RETHROW
 }

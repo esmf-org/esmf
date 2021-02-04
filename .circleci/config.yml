@@ -164,6 +164,49 @@ jobs:
       - run:
           name: Push to github.io
           command: bash esmf/.circleci/sh/doc-push.sh
+          
+  build-test-coverage:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git src
+      - run:
+          name: Docker Build esmf-doc-base
+          command: docker build -t "esmf/esmf-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmf-doc-base/Dockerfile" .
+      - run:
+          name: Make log directory
+          command: mkdir log 
+      - run:
+          name: Set and echo env variable
+          command: |
+            homedir=`pwd`
+            echo "export homedir=$homedir" >> $BASH_ENV
+            ESMF_DIR=$homedir/src
+            echo "export ESMF_DIR=$ESMF_DIR" >> $BASH_ENV
+            LOGDIR=$homedir/log
+            echo "export LOGDIR=$LOGDIR" >> $BASH_ENV
+      - run:
+          name: Run Test Coverage
+          command: |
+            cd src
+            bash .circleci/sh/test_coverage.sh
+
+  publish-test-coverage:
+    machine: true
+    resource_class: small
+    steps:
+      - run:
+          name: Push to esmf-test-artifacts 
+          command: |
+            cd ..
+            bash src/.circleci/sh/test_coverage-push.sh
 
   esmpy-test:
     parameters:
@@ -387,6 +430,16 @@ workflows:
             branches:
               only:
                 - develop
+  test-coverage:
+    jobs:
+      - should-build-docs:
+         type: approval
+      - build-test-coverage:
+          requires:
+            - should-build-docs
+      - publish-test-coverage:
+          requires:
+            - build-test-coverage
 
 #  osx-commit:
 #    jobs:
