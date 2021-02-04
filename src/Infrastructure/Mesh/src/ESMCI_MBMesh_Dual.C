@@ -577,45 +577,17 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       //  might also mean it was a split elem, that's not the original elem)
       if (nodes_used[pos]) {
 
-        // get coords of this element to put onto the new node
-        double c[3];
-        // merr = src_mesh->mesh->get_coords(elem, 1, c);
-        merr=src_mesh->mesh->tag_get_data(src_mesh->elem_coords_tag, elem, 1, c);
-        ESMC_CHECK_MOAB_THROW(merr);
+        // Get orig coords of this element to put into the new node
+        double orig_coords[3];
+        src_mesh->get_elem_orig_coords(*elem,orig_coords);
 
-        // Add vertex
-        EntityHandle new_node = 0;
-        merr=dual_mesh->mesh->create_vertex(c,new_node);
-        ESMC_CHECK_MOAB_THROW(merr);
+        // Create new node corresponding to elem in src_mesh
+        EntityHandle new_node=dual_mesh->add_node(orig_coords, elem_id, data_index, owner);
+
+        // Add new node to list
         nodes[pos] = new_node;
 
-#ifdef DEBUG_CONNECTIVITY
-        printf("PET %d add vertex %d [%d] at [%f,%f,%f], owner %d\n", localPet, elem_id, pos, c[0], c[1], c[2], owner);
-#endif
-        // Set Ids
-        merr=dual_mesh->mesh->tag_set_data(dual_mesh->gid_tag, &new_node, 
-          1, &elem_id);
-        ESMC_CHECK_MOAB_THROW(merr);
-
-        // Set Owners
-        merr=dual_mesh->mesh->tag_set_data(dual_mesh->owner_tag, 
-          &new_node, 1, &owner);
-        ESMC_CHECK_MOAB_THROW(merr);
-
-        // Set orig_pos
-        merr=dual_mesh->mesh->tag_set_data(dual_mesh->orig_pos_tag, 
-          &new_node, 1, &data_index);
-        ESMC_CHECK_MOAB_THROW(merr);
-
-        // Set original coords
-        if (dual_mesh->has_node_orig_coords) {
-          // Set original coords
-          merr=dual_mesh->mesh->tag_set_data(dual_mesh->node_orig_coords_tag, 
-            &new_node, 1, c);
-          ESMC_CHECK_MOAB_THROW(merr);
-        }
-        
-        // masking
+        // If elem  masking
         if (src_mesh->has_elem_mask) {
           // if the dual_mesh node mask is not yet set up, intialize to unmasked
           if (dual_mesh->has_node_mask == false) {
@@ -651,6 +623,11 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
             &new_node, 1, &elem_mask_val);
           ESMC_CHECK_MOAB_THROW(merr);
         }
+
+#ifdef DEBUG_CONNECTIVITY
+        printf("PET %d add vertex %d [%d] at [%f,%f,%f], owner %d\n", localPet, elem_id, pos, orig_coords[0], orig_coords[1], orig_coords[2], owner);
+#endif
+
         
         data_index++;
       }
