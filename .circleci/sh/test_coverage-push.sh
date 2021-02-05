@@ -14,11 +14,11 @@ git clone --depth 1 git@github.com:esmf-org/esmf-test-artifacts.git
 
 # Test coverage -------------------------------------------------------------------
 
-cd esmf-test-artifacts
-mkdir test_coverage
+cd esmf-test-artifacts/develop/
+mkdir -p test_coverage
 
 cd ${DOC_ARTIFACTS}
-cp -rf ${DOC_ARTIFACTS}/store/* ~/esmf-test-artifacts/test_coverage/
+cp -rf ${DOC_ARTIFACTS}/store/* ~/esmf-test-artifacts/develop/test_coverage/
 
 
 cd ~/esmf-test-artifacts/
