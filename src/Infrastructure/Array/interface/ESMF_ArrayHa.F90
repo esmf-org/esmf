@@ -2170,12 +2170,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
 
-#define PROGRESSLOG_on
-
-#ifdef PROGRESSLOG_on
-  call ESMF_LogWrite("ESMF_ArrayRedistStoreNF(): Just entered routine.", ESMF_LOGMSG_INFO)
-#endif
-
     ! Deal with (optional) array arguments
     srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
@@ -2201,10 +2195,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-#ifdef PROGRESSLOG_on
-  call ESMF_LogWrite("ESMF_ArrayRedistStoreNF(): Leaving routine.", ESMF_LOGMSG_INFO)
-#endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
