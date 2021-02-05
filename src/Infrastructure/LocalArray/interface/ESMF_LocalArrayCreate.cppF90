@@ -77,10 +77,10 @@ module ESMF_LocalArrayCreateMod
   end type
 
   type(ESMF_DataCopy_Flag), parameter :: &
-    ESMF_DATACOPY_VALUE  = ESMF_DataCopy_Flag(1), &
+    ESMF_DATACOPY_NONE        = ESMF_DataCopy_Flag(0), &
+    ESMF_DATACOPY_VALUE       = ESMF_DataCopy_Flag(1), &
     ESMF_DATACOPY_REFERENCE   = ESMF_DataCopy_Flag(2), &
-    ESMF_DATA_DEFER = ESMF_DataCopy_Flag(3), &
-    ESMF_DATA_SPACE = ESMF_DataCopy_Flag(4)
+    ESMF_DATACOPY_ALLOC       = ESMF_DataCopy_Flag(3)
 
 !------------------------------------------------------------------------------
   ! ESMF_LocalArrayOrigin
@@ -118,7 +118,7 @@ module ESMF_LocalArrayCreateMod
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-  public ESMF_DataCopy_Flag, ESMF_DATACOPY_VALUE, ESMF_DATACOPY_REFERENCE, ESMF_DATA_SPACE
+  public ESMF_DataCopy_Flag, ESMF_DATACOPY_VALUE, ESMF_DATACOPY_REFERENCE, ESMF_DATACOPY_ALLOC
   public ESMF_LocalArray
 !------------------------------------------------------------------------------
 
@@ -960,7 +960,7 @@ end function
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-      copy = ESMF_DATA_SPACE @\
+      copy = ESMF_DATACOPY_ALLOC @\
     endif @\
  @\
     ! Check that enough info from totalCount, totalLBound and totalUBound is present @\
@@ -1679,7 +1679,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
        do_dealloc = ESMF_TRUE @\
     else @\
       if (present(datacopyflag)) then @\
-       if (datacopyflag .eq. ESMF_DATA_SPACE) then @\
+       if (datacopyflag .eq. ESMF_DATACOPY_ALLOC) then @\
            newp => farrayPtr    ! ptr alias, important this be =>  @\
            lb(1:size(totalCount)) = lbound(farrayPtr) @\
            ub(1:size(totalCount)) = ubound(farrayPtr) @\

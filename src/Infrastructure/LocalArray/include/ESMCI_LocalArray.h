@@ -68,12 +68,11 @@ namespace ESMCI {
 
   // this must stay in sync with the Fortran counter-part
   typedef enum{ 
-    DATA_COPY = 1, 
-    DATA_REF,
-    DATA_DEFER,
-    DATA_SPACE,
-    DATA_NONE
-  }CopyFlag;
+    DATACOPY_NONE = 0,
+    DATACOPY_VALUE,
+    DATACOPY_REFERENCE,
+    DATACOPY_ALLOC
+  }DataCopyFlag;
 
 
   // class definition
@@ -101,7 +100,7 @@ namespace ESMCI {
   public:    
    private:
     // construct() and destruct()
-    int construct(bool aflag, CopyFlag docopy,
+    int construct(bool aflag, DataCopyFlag docopy,
       ESMC_TypeKind_Flag tk, int irank, LocalArrayOrigin oflag, bool dflag,
       const int *offsets, const int *lbounds, const int *ubounds,
       const int *icounts, void *ibase_addr, struct c_F90ptr *f90ptr);
@@ -112,13 +111,14 @@ namespace ESMCI {
     static LocalArray *create(ESMC_TypeKind_Flag tk, int rank,
       LocalArrayOrigin oflag, int *rc = NULL);
     static LocalArray *create(ESMC_TypeKind_Flag tk, int rank, const int *counts,
-      void *base_addr = NULL, CopyFlag docopy = DATA_REF, int *rc = NULL);
+      void *base_addr = NULL, DataCopyFlag docopy = DATACOPY_REFERENCE,
+      int *rc = NULL);
     static LocalArray *create(ESMC_TypeKind_Flag dk, int rank, const int *counts,
       const int *lbounds, const int *ubounds, void *base_addr = NULL, 
-      CopyFlag docopy = DATA_REF, int *rc = NULL);
+      DataCopyFlag docopy = DATACOPY_REFERENCE, int *rc = NULL);
     static LocalArray *create(const LocalArray *larrayIn,
       const int *lbounds = NULL, const int *ubounds = NULL, int *rc = NULL);
-    static LocalArray *create(const LocalArray *larrayIn, CopyFlag copyflag,
+    static LocalArray *create(const LocalArray *larrayIn, DataCopyFlag copyflag,
       const int *lbounds, const int *ubounds, int *rc);
     static int destroy(LocalArray *array);
 

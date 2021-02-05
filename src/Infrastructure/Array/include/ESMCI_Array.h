@@ -336,7 +336,7 @@ namespace ESMCI {
     int constructContiguousFlag(int redDimCount);
     // create() and destroy()
     static Array *create(LocalArray **larrayList, int larrayCount,
-      DistGrid *distgrid, CopyFlag copyflag,
+      DistGrid *distgrid, DataCopyFlag copyflag,
       InterArray<int> *distgridToArrayMap,
       InterArray<int> *computationalEdgeLWidthArg,
       InterArray<int> *computationalEdgeUWidthArg,

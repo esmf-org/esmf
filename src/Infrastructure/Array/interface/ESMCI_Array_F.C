@@ -52,7 +52,7 @@ extern "C" {
   void FTN_X(c_esmc_arraycreatelocalarray)(ESMCI::Array **ptr, 
     ESMCI::LocalArray **larrayList, int *larrayCount,
     ESMCI::DistGrid **distgrid,
-    ESMCI::CopyFlag *copyflag,
+    ESMCI::DataCopyFlag *copyflag,
     ESMCI::InterArray<int> *distgridToArrayMap,
     ESMCI::InterArray<int> *computationalEdgeLWidthArg,
     ESMCI::InterArray<int> *computationalEdgeUWidthArg,
