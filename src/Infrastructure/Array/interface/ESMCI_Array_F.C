@@ -158,14 +158,14 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_arraycreatecopy)(ESMCI::Array **ptr, 
-    ESMCI::Array **arrayOut, int *rc){
+    ESMCI::Array **arrayOut, ESMCI::DataCopyFlag *copyflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatecopy()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
-    *arrayOut = ESMCI::Array::create(*ptr, 0, &localrc);
+    *arrayOut = ESMCI::Array::create(*ptr, *copyflag, 0, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }

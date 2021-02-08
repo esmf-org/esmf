@@ -60,7 +60,7 @@ extern "C" {
     ESMC_TypeKind_Flag*, const int *, const int *, const int *, int *);
 
   void FTN_X(f_esmf_localarraycopyf90ptr)(const ESMCI::LocalArray** laIn, 
-    ESMCI::LocalArray** laOut, int *rc);
+    ESMCI::LocalArray** laOut, ESMCI::DataCopyFlag *copyflag, int *rc);
   
   void FTN_X(f_esmf_localarrayctof90)(ESMCI::LocalArray**, void *, int *, 
     ESMC_TypeKind_Flag*, int *, int *, int *, int *);
@@ -485,67 +485,6 @@ LocalArray *LocalArray::create(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::LocalArray::create()"
 //BOPI
-// !IROUTINE:  ESMCI::LocalArray::create - create ESMCI::LocalArray from copy
-//
-// !INTERFACE:
-LocalArray *LocalArray::create(
-//
-// !RETURN VALUE:
-//    pointer to newly allocated ESMCI::LocalArray object
-//
-// !ARGUMENTS:
-  const LocalArray *larrayIn, // object to copy from
-  const int *lbounds,         // lower index number per dim
-  const int *ubounds,         // upper index number per dim
-  int *rc){                   // return code
-//
-// !DESCRIPTION:
-//  Deep copy from {\tt larrayIn} with the option to adjust lbounds and ubounds.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-  int localrc = ESMC_RC_NOT_IMPL;
-
-  LocalArray *larrayOut;
-  try{
-    larrayOut = new LocalArray;
-  }catch(...){
-    // allocation error
-    ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);  
-    return ESMC_NULL_POINTER;
-  }
-
-  *larrayOut = *larrayIn; // copy larrayIn content into larrayOut
-  
-  // if lbounds and ubounds arguments were specified set them in larrayOut
-  if (lbounds)
-    for (int i=0; i<larrayOut->rank; i++)
-      larrayOut->lbound[i] = lbounds[i];
-  if (ubounds)
-    for (int i=0; i<larrayOut->rank; i++)
-      larrayOut->ubound[i] = ubounds[i];
-  
-  // mark LocalArray responsible for deallocation of its data area allocation
-  larrayOut->dealloc = true;
-
-  // call into Fortran copy method, which will use larrayOut's lbound and ubound
-  FTN_X(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    rc)) return ESMC_NULL_POINTER;
-  
-  // return successfully 
-  if (rc != NULL) *rc = ESMF_SUCCESS;
-  return larrayOut;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::LocalArray::create()"
-//BOPI
 // !IROUTINE:  ESMCI::LocalArray::create - create ESMCI::LocalArray from existing object, adjusting bounds in Fortran dope vector
 //
 // !INTERFACE:
@@ -583,38 +522,56 @@ LocalArray *LocalArray::create(
   int totalcount = 1;
   for (int i=0; i<rank; i++){
     totalcount *= counts[i];
-    if (counts[i] != ubounds[i] - lbounds[i] + 1){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- Mismatch of lbounds, ubounds and counts", ESMC_CONTEXT, rc);
-      return NULL;
+    if (ubounds && lbounds){
+      if (counts[i] != ubounds[i] - lbounds[i] + 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- Mismatch of lbounds, ubounds and counts", ESMC_CONTEXT, rc);
+        return NULL;
+      }
     }
   }
-
-  LocalArray *larrayOut;
   
-  if (copyflag == DATACOPY_VALUE){
-    // make a copy of the LocalArray object including the data allocation
-    larrayOut = LocalArray::create(larrayIn, lbounds, ubounds, &localrc);
+  // allocate memory for new LocalArray object
+  LocalArray *larrayOut;
+  try{
+    larrayOut = new LocalArray;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);  
+    return ESMC_NULL_POINTER;
+  }
+  // copy the LocalArray members, including the _reference_ to its data alloc.
+  *larrayOut = *larrayIn;
+
+  if ((copyflag==DATACOPY_VALUE)||(copyflag==DATACOPY_ALLOC)){
+    // make a copy of the LocalArray object, create new data allocation
+
+    // if lbounds and ubounds arguments were specified set them in larrayOut
+    if (lbounds)
+      for (int i=0; i<larrayOut->rank; i++)
+        larrayOut->lbound[i] = lbounds[i];
+    if (ubounds)
+      for (int i=0; i<larrayOut->rank; i++)
+        larrayOut->ubound[i] = ubounds[i];
+  
+    // mark LocalArray responsible for deallocation of its data area allocation
+    larrayOut->dealloc = true;
+
+    // call into Fortran copy method, which will use larrayOut's lbound and ubound
+    FTN_X(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &copyflag,
+      &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) return NULL;
+      rc)) return ESMC_NULL_POINTER;
   }else{
-    // allocate memory for new LocalArray object
-    try{
-      larrayOut = new LocalArray;
-    }catch(...){
-      // allocation error
-      ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);  
-      return ESMC_NULL_POINTER;
-    }
-    // copy the LocalArray members, including the _reference_ to its data alloc.
-    *larrayOut = *larrayIn;
     // mark this copy not to be responsible for deallocation
     larrayOut->dealloc = false;
     // adjust the lbound and ubound members in larray copy
-    for (int i=0; i<rank; i++){
-      larrayOut->lbound[i] = lbounds[i];
-      larrayOut->ubound[i] = ubounds[i];
-    }
+    if (lbounds)
+      for (int i=0; i<rank; i++)
+        larrayOut->lbound[i] = lbounds[i];
+    if (ubounds)
+      for (int i=0; i<rank; i++)
+        larrayOut->ubound[i] = ubounds[i];
     if (totalcount > 0){
       // adjust the Fortran dope vector to reflect the new bounds
       FTN_X(f_esmf_localarrayadjust)(&larrayOut, &rank, &typekind, counts,

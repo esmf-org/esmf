@@ -65,7 +65,7 @@ program ESMF_ArrayCreateGetUTest
   real(ESMF_KIND_R4)      :: farray3D(10,10,10)
   integer(ESMF_KIND_I4)   :: farray4D(10,10,10,10)
   real(ESMF_KIND_R8), pointer     :: farrayPtr1D(:)
-  real(ESMF_KIND_R8), pointer     :: farrayPtr2D(:,:)
+  real(ESMF_KIND_R8), pointer     :: farrayPtr2D(:,:), farrayPtr2DCpy(:,:)
   real(ESMF_KIND_R4), pointer     :: farrayPtr3D(:,:,:)
   real(ESMF_KIND_R4), pointer     :: farrayPtr3Dx(:,:,:)
   integer(ESMF_KIND_I4), pointer  :: farrayPtr4D(:,:,:,:)
@@ -292,11 +292,23 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayGet name, 2D ESMF_TYPEKIND_R8 Test"
+  write(name, *) "ArrayGet arrayspec and name, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, arrayspec=arrayspec2, name=arrayName, rc=rc)
   print *, "Array name: ", arrayname
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify ArraySpec returned from Array"
+  write(failMsg, *) "Incorrect ArraySpec"
+  call ESMF_Test((arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify name returned from Array"
+  write(failMsg, *) "Incorrect name"
+  call ESMF_Test((trim(arrayName)=="MyArray with ArraySpec"), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -327,11 +339,67 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayCreate from Copy, 2D ESMF_TYPEKIND_R8 Test"
+  write(name, *) "ArrayCreate from Copy (ALLOC), 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  arrayCpy = ESMF_ArrayCreate(array, rc=rc)
+  farrayPtr2D     = real(localPet+10, ESMF_KIND_R8)  ! fill with data to check
+  arrayCpy = ESMF_ArrayCreate(array, datacopyflag=ESMF_DATACOPY_ALLOC, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet arrayspec from Array Copy (ALLOC) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayCpy, arrayspec=arrayspec2, name=arrayName, rc=rc)
+  print *, "Array name: ", arrayname
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify ArraySpec returned from Array (ALLOC) Copy"
+  write(failMsg, *) "Incorrect ArraySpec"
+  call ESMF_Test((arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet Fortran array pointer, from Array Copy (ALLOC) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayCpy, farrayPtr=farrayPtr2DCpy, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array vs Array Copy (ALLOC) no data copy"
+  write(failMsg, *) "Unexpected data copy"
+  dataCorrect = .true.
+  do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+  do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+    write (msg,*) "farrayPtr2D(",i,",",j,")=", farrayPtr2D(i,j), &
+      "  farrayPtr2DCpy(",i,",",j,")=", farrayPtr2DCpy(i,j)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (abs(farrayPtr2D(i,j)-farrayPtr2DCpy(i,j)) < 1.d-10) dataCorrect=.false.
+  enddo
+  enddo
+  call ESMF_Test((dataCorrect), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array vs Array Copy (ALLOC) separate memory allocation"
+  write(failMsg, *) "Unexpected reference sharing"
+  farrayPtr2D     = real(localPet+10, ESMF_KIND_R8)
+  farrayPtr2DCpy  = real(localPet+100, ESMF_KIND_R8)
+  dataCorrect = .true.
+  do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+  do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+    write (msg,*) "farrayPtr2D(",i,",",j,")=", farrayPtr2D(i,j), &
+      "  farrayPtr2DCpy(",i,",",j,")=", farrayPtr2DCpy(i,j)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (abs(farrayPtr2D(i,j)-farrayPtr2DCpy(i,j)) < 1.d-10) dataCorrect=.false.
+  enddo
+  enddo
+  call ESMF_Test((dataCorrect), name, failMsg, result, ESMF_SRCLINE)
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
@@ -341,18 +409,202 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayPrint from Copy after original destroy, 2D ESMF_TYPEKIND_R8 Test"
+  write(name, *) "ArrayPrint from Copy (ALLOC) after original destroy, 2D ESMF_TYPEKIND_R8 Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayPrint(arrayCpy, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy of Copy (ALLOC) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(arrayCpy, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 Test with ArraySpec"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, name="MyArray with ArraySpec", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet Fortran array pointer, 2D ESMF_TYPEKIND_R8 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate from Copy (VALUE), 2D ESMF_TYPEKIND_R8 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  farrayPtr2D     = real(localPet+20, ESMF_KIND_R8)  ! fill with data to check
+  arrayCpy = ESMF_ArrayCreate(array, datacopyflag=ESMF_DATACOPY_VALUE, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet arrayspec from Array Copy (VALUE) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayCpy, arrayspec=arrayspec2, name=arrayName, rc=rc)
+  print *, "Array name: ", arrayname
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify ArraySpec returned from Array (VALUE) Copy"
+  write(failMsg, *) "Incorrect ArraySpec"
+  call ESMF_Test((arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet Fortran array pointer, from Array Copy (VALUE) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayCpy, farrayPtr=farrayPtr2DCpy, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array vs Array Copy (VALUE) data copy"
+  write(failMsg, *) "Unexpected data copy"
+  dataCorrect = .true.
+  do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+  do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+    write (msg,*) "farrayPtr2D(",i,",",j,")=", farrayPtr2D(i,j), &
+      "  farrayPtr2DCpy(",i,",",j,")=", farrayPtr2DCpy(i,j)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (abs(farrayPtr2D(i,j)-farrayPtr2DCpy(i,j)) > 1.d-10) dataCorrect=.false.
+  enddo
+  enddo
+  call ESMF_Test((dataCorrect), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array vs Array Copy (VALUE) separate memory allocation"
+  write(failMsg, *) "Unexpected reference sharing"
+  farrayPtr2D     = real(localPet+20, ESMF_KIND_R8)
+  farrayPtr2DCpy  = real(localPet+200, ESMF_KIND_R8)
+  dataCorrect = .true.
+  do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+  do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+    write (msg,*) "farrayPtr2D(",i,",",j,")=", farrayPtr2D(i,j), &
+      "  farrayPtr2DCpy(",i,",",j,")=", farrayPtr2DCpy(i,j)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (abs(farrayPtr2D(i,j)-farrayPtr2DCpy(i,j)) < 1.d-10) dataCorrect=.false.
+  enddo
+  enddo
+  call ESMF_Test((dataCorrect), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy of Copy (VALUE) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(arrayCpy, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate Allocate 2D ESMF_TYPEKIND_R8 Test with ArraySpec"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    indexflag=ESMF_INDEX_GLOBAL, name="MyArray with ArraySpec", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet Fortran array pointer, 2D ESMF_TYPEKIND_R8 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate from Copy (REF), 2D ESMF_TYPEKIND_R8 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  farrayPtr2D     = real(localPet+30, ESMF_KIND_R8)  ! fill with data to check
+  arrayCpy = ESMF_ArrayCreate(array, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet arrayspec from Array Copy (REF) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayCpy, arrayspec=arrayspec2, name=arrayName, rc=rc)
+  print *, "Array name: ", arrayname
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify ArraySpec returned from Array Copy (REF)"
+  write(failMsg, *) "Incorrect ArraySpec"
+  call ESMF_Test((arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet Fortran array pointer, from Array Copy (REF) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayCpy, farrayPtr=farrayPtr2DCpy, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array vs Array Copy (REF) shared allocation Test1"
+  write(failMsg, *) "Unexpected separate allocations"
+  dataCorrect = .true.
+  do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+  do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+    write (msg,*) "farrayPtr2D(",i,",",j,")=", farrayPtr2D(i,j), &
+      "  farrayPtr2DCpy(",i,",",j,")=", farrayPtr2DCpy(i,j)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (abs(farrayPtr2D(i,j)-farrayPtr2DCpy(i,j)) > 1.d-10) dataCorrect=.false.
+  enddo
+  enddo
+  call ESMF_Test((dataCorrect), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array vs Array Copy (REF) shared allocation Test2"
+  write(failMsg, *) "Unexpected separate allocations"
+  farrayPtr2D     = real(localPet+30, ESMF_KIND_R8)
+  farrayPtr2DCpy  = real(localPet+300, ESMF_KIND_R8)
+  dataCorrect = .true.
+  do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+  do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+    write (msg,*) "farrayPtr2D(",i,",",j,")=", farrayPtr2D(i,j), &
+      "  farrayPtr2DCpy(",i,",",j,")=", farrayPtr2DCpy(i,j)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (abs(farrayPtr2D(i,j)-farrayPtr2DCpy(i,j)) > 1.d-10) dataCorrect=.false.
+  enddo
+  enddo
+  call ESMF_Test((dataCorrect), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy of Copy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(arrayCpy, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayCreate from Ptr with 3D farray on 2D DistGrid Test as Ptr"

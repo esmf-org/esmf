@@ -116,8 +116,6 @@ namespace ESMCI {
     static LocalArray *create(ESMC_TypeKind_Flag dk, int rank, const int *counts,
       const int *lbounds, const int *ubounds, void *base_addr = NULL, 
       DataCopyFlag docopy = DATACOPY_REFERENCE, int *rc = NULL);
-    static LocalArray *create(const LocalArray *larrayIn,
-      const int *lbounds = NULL, const int *ubounds = NULL, int *rc = NULL);
     static LocalArray *create(const LocalArray *larrayIn, DataCopyFlag copyflag,
       const int *lbounds, const int *ubounds, int *rc);
     static int destroy(LocalArray *array);

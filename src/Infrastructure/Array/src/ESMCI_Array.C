@@ -2087,9 +2087,10 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  Array *arrayIn,                             // (in) Array to copy
-  int rmLeadingTensors,                       // (in) leading tensors to remove
-  int *rc                                     // (out) return code
+  Array         *arrayIn,                     // (in) Array to copy
+  DataCopyFlag  copyflag,                     // (in)
+  int           rmLeadingTensors,             // (in) leading tensors to remove
+  int           *rc                           // (out) return code
   ){
 //
 // !DESCRIPTION:
@@ -2145,10 +2146,11 @@ Array *Array::create(
     // copy the PET-local LocalArray pointers
     arrayOut->larrayList = new LocalArray*[ssiLocalDeCount];
     if (rmLeadingTensors==0){
-      // use the src larrayList as a template for the new allocation
+      // use the src larrayList as a template for the new larrayList
       for (int i=0; i<ssiLocalDeCount; i++){
         arrayOut->larrayList[i] =
-          LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
+          LocalArray::create(arrayIn->larrayList[i], copyflag, NULL, NULL,
+            &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -2156,7 +2158,14 @@ Array *Array::create(
         }
       }
     }else{
-      // remove the leading tensor dimensions from the allocation
+      // create new LocalArray allocation with leading tensor dims removed
+      if (copyflag != DATACOPY_ALLOC){
+        // inconsistentcy detected
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "Only the DATACOPY_ALLOC option supported when removing "
+          "leading tensor dims.", ESMC_CONTEXT, rc);
+        return ESMC_NULL_POINTER;
+      }
       for (int i=0; i<ssiLocalDeCount; i++){
         const int *temp_counts = arrayIn->larrayList[i]->getCounts();
         arrayOut->larrayList[i] =
@@ -2389,7 +2398,8 @@ Array *Array::create(
       // use the src larrayList as a template for the new allocation
       for (int i=0; i<ssiLocalDeCount; i++){
         arrayOut->larrayList[i] =
-          LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
+          LocalArray::create(arrayIn->larrayList[i], DATACOPY_ALLOC, NULL, NULL,
+            &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
