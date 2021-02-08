@@ -1009,12 +1009,149 @@ program ESMF_ArrayCreateGetUTest
 
   deallocate(localDeToDeMap)
   deallocate(localArrayList)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate from Copy (REF), ESMF_PIN_DE_TO_SSI Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arrayCpy = ESMF_ArrayCreate(array, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
+  if (ssiSharedMemoryEnabled) then
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  else
+    write(failMsg, *) "Did not return the correct RC"
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet Fortran array pointer for ESMF_PIN_DE_TO_SSI arrayCpy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayCpy, farrayPtr=farrayPtr2D, rc=rc)
+  if (ssiSharedMemoryEnabled) then
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write (msg,*) "Local Array lbounds=", lbound(farrayPtr2D)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    write (msg,*) "Local Array ubounds=", ubound(farrayPtr2D)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  else
+    write(failMsg, *) "Did not return the correct RC"
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet ssiLocalDeCount ESMF_PIN_DE_TO_SSI arrayCpy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayCpy, ssiLocalDeCount=ssiLocalDeCount, rc=rc)
+  if (ssiSharedMemoryEnabled) then
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write (msg,*) "ssiLocalDeCount=", ssiLocalDeCount
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  else
+    ssiLocalDeCount=1
+    write(failMsg, *) "Did not return the correct RC"
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+  endif
+  allocate(localDeToDeMap(ssiLocalDeCount))
+  allocate(localArrayList(ssiLocalDeCount))
   
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet localDeToDeMap ESMF_PIN_DE_TO_SSI arrayCpy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayCpy, localDeToDeMap=localDeToDeMap, &
+    localarrayList=localArrayList, rc=rc)
+  if (ssiSharedMemoryEnabled) then
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write (msg,*) "localDeToDeMap=", localDeToDeMap
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  else
+    write(failMsg, *) "Did not return the correct RC"
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+  !------------------------------------------------------------------------
+  ! initialize the data on this PETs first localDE
+  if (ssiSharedMemoryEnabled) then
+    farrayPtr2D(:,:) = localDeToDeMap(1) * 10
+  endif
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySync() for ESMF_PIN_DE_TO_SSI arrayCpy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArraySync(arrayCpy, rc=rc)
+  if (ssiSharedMemoryEnabled) then
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  else
+    write(failMsg, *) "Did not return the correct RC"
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "LocalArrayGet Fortran array pointer for last ssiLocalDe for ESMF_PIN_DE_TO_SSI arrayCpy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LocalArrayGet(localArrayList(ssiLocalDeCount), &
+    farrayPtr=farrayPtr2D, rc=rc)
+  if (ssiSharedMemoryEnabled) then
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write (msg,*) "Local Array lbounds=", lbound(farrayPtr2D)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    write (msg,*) "Local Array ubounds=", ubound(farrayPtr2D)
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  else
+    write(failMsg, *) "Did not return the correct RC"
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test data in LocalArray for last ssiLocalDe for ESMF_PIN_DE_TO_SSI arrayCpy Test"
+  write(failMsg, *) "Data not correct"
+  dataCorrect = .true.  ! initialize
+  if (ssiSharedMemoryEnabled) then
+    do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+    do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+      write (msg,*) "data(",i,",",j,")=", farrayPtr2D(i,j)
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      if (abs(farrayPtr2D(i,j)-real(10*localDeToDeMap(ssiLocalDeCount),ESMF_KIND_R8))&
+        > 1.d-10) dataCorrect=.false.
+    enddo
+    enddo
+  else
+    ! dummy test
+  endif
+  call ESMF_Test((dataCorrect), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(localDeToDeMap)
+  deallocate(localArrayList)
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test for array with ESMF_PIN_DE_TO_SSI"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
+  if (ssiSharedMemoryEnabled) then
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  else
+    write(failMsg, *) "Did not return the correct RC"
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayDestroy Test for arrayCpy with ESMF_PIN_DE_TO_SSI"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(arrayCpy, rc=rc)
   if (ssiSharedMemoryEnabled) then
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   else

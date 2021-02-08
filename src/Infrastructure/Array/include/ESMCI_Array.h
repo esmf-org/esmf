@@ -179,6 +179,7 @@ namespace ESMCI {
     LocalArray **larrayList;          // [ssiLocalDeCount] localDeCount first
     void **larrayBaseAddrList;        // [ssiLocalDeCount] localDeCount first
     VM::memhandle *mh;                // in case memory sharing between PETs
+    bool mhCreator;                   // responsible to delete mh resource
     int vasLocalDeCount;              // number of DEs that are in the same VAS
     int ssiLocalDeCount;              // number of DEs that are on the same SSI
     int *localDeToDeMap;              // [ssiLocalDeCount] mapping to DE

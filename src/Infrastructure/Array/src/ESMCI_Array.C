@@ -185,6 +185,8 @@ Array::Array(
   typekind = typekindArg;
   rank = rankArg;
   mh = mhArg;
+  mhCreator = false; //default
+  if (mh) mhCreator = true;
   distgrid = distgridArg;
   distgridCreator = distgridCreatorArg;
   delayout = distgrid->getDELayout();
@@ -379,8 +381,8 @@ void Array::destruct(bool followCreator, bool noGarbage){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
-    // free shared memory handle if it is present
-    if (mh != NULL){
+    // free shared memory handle if it is present and Array responsible for it
+    if ((mh != NULL) && mhCreator){
       int localrc;
       VM *vm = delayout->getVM();      
       localrc = vm->ssishmFree(mh);
@@ -2142,6 +2144,11 @@ Array *Array::create(
     arrayOut->distgrid = arrayIn->distgrid; // copy reference
     arrayOut->distgridCreator = false;      // not a locally created object
     arrayOut->delayout = arrayIn->delayout; // copy reference
+    if (copyflag == DATACOPY_REFERENCE){
+      // sharing reference means also sharing memhandle
+      arrayOut->mh = arrayIn->mh;
+      arrayOut->mhCreator = false;  // do not transfer ownership
+    }
     // deep copy of members with allocations
     // copy the PET-local LocalArray pointers
     arrayOut->larrayList = new LocalArray*[ssiLocalDeCount];
