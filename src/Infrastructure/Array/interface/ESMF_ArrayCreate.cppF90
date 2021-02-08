@@ -3870,16 +3870,17 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateCopy(array, keywordEnforcer, datacopyflag, rc)
+  function ESMF_ArrayCreateCopy(array, keywordEnforcer, datacopyflag, delayout, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateCopy
 !
 ! !ARGUMENTS:
-       type(ESMF_Array),           intent(in)             :: array
+       type(ESMF_Array),           intent(in)            :: array
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_DataCopy_Flag),   intent(in),   optional :: datacopyflag
-       integer,                    intent(out),  optional :: rc
+       type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag
+       type(ESMF_DELayout),        intent(in),  optional :: delayout
+       integer,                    intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -3887,7 +3888,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[8.1.0] Added argument {\tt datacopyflag} to select between different
-!   copy options.
+!   copy options.\newline
+!   Added argument {\tt delayout} to create Array with different localDe -> DE
+!   mapping. This is identical to a change in DE -> PET mapping.
 ! \end{description}
 ! \end{itemize}
 !
@@ -3905,6 +3908,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      allocation provided by {\tt array} directly or copies the data from
 !      {\tt array} into a new memory allocation. For valid values see
 !      \ref{const:datacopyflag}. The default is {\tt ESMF\_DATACOPY\_VALUE}.
+! \item[{[delayout]}]
+!      If present, override the DELayout of the incoming {\tt distgrid}.
+!      By default use the DELayout defined in {\tt distgrid}.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3930,7 +3936,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     if (present(datacopyflag)) datacopyflag_opt = datacopyflag
 
     ! Call into the C++ interface
-    call c_ESMC_ArrayCreateCopy(array, arrayOut, datacopyflag_opt, localrc)
+    call c_ESMC_ArrayCreateCopy(array, arrayOut, datacopyflag_opt, delayout, &
+      localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

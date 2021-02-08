@@ -2091,6 +2091,7 @@ Array *Array::create(
 //
   Array         *arrayIn,                     // (in) Array to copy
   DataCopyFlag  copyflag,                     // (in)
+  DELayout      *delayout,                    // (in)
   int           rmLeadingTensors,             // (in) leading tensors to remove
   int           *rc                           // (out) return code
   ){
