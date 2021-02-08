@@ -201,7 +201,7 @@ Array::Array(
   }
   if (ssiLocalDeCount < vasLocalDeCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "ssiLocalDeCount must not be less than ssiLocalDeCount", ESMC_CONTEXT, 
+      "ssiLocalDeCount must not be less than vasLocalDeCount", ESMC_CONTEXT, 
       rc);
     return;
   }
@@ -2129,7 +2129,17 @@ Array *Array::create(
     int tensorCount =
       arrayOut->tensorCount = arrayIn->tensorCount - rmLeadingTensors;
     arrayOut->vasLocalDeCount = arrayIn->vasLocalDeCount;
-    int ssiLocalDeCount = arrayOut->ssiLocalDeCount = arrayIn->ssiLocalDeCount;
+    if (copyflag == DATACOPY_REFERENCE){
+      // sharing reference means also sharing memhandle
+      arrayOut->mh = arrayIn->mh;
+      arrayOut->mhCreator = false;  // do not transfer ownership
+      // shared DEs are supported
+      arrayOut->ssiLocalDeCount = arrayIn->ssiLocalDeCount;
+    }else{
+      // shared DEs are not supported, only copy local DEs
+      arrayOut->ssiLocalDeCount = arrayIn->localDeCountAux;
+    }
+    int ssiLocalDeCount = arrayOut->ssiLocalDeCount;
     // determine leading tensor elements
     int leadingTensorElementCount = 0;
     if (rmLeadingTensors){
@@ -2144,11 +2154,6 @@ Array *Array::create(
     arrayOut->distgrid = arrayIn->distgrid; // copy reference
     arrayOut->distgridCreator = false;      // not a locally created object
     arrayOut->delayout = arrayIn->delayout; // copy reference
-    if (copyflag == DATACOPY_REFERENCE){
-      // sharing reference means also sharing memhandle
-      arrayOut->mh = arrayIn->mh;
-      arrayOut->mhCreator = false;  // do not transfer ownership
-    }
     // deep copy of members with allocations
     // copy the PET-local LocalArray pointers
     arrayOut->larrayList = new LocalArray*[ssiLocalDeCount];
@@ -2349,7 +2354,8 @@ Array *Array::create(
     arrayOut->distgridCreator = false;      // not a locally created object
     arrayOut->delayout = arrayIn->delayout; // copy reference
     arrayOut->vasLocalDeCount = arrayIn->vasLocalDeCount;
-    int ssiLocalDeCount = arrayOut->ssiLocalDeCount = arrayIn->ssiLocalDeCount;
+    // shared DEs are not supported under copy behavior, only copy local DEs
+    int ssiLocalDeCount = arrayOut->ssiLocalDeCount = arrayIn->localDeCountAux;
     // deep copy of members with allocations
     // copy the PET-local bound arrays
     int redDimCount = rank - tensorCount;
