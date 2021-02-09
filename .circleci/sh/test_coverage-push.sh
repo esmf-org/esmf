@@ -18,7 +18,7 @@ cd esmf-test-artifacts/develop/platform_independent/
 mkdir -p test_coverage
 
 cd ${DOC_ARTIFACTS}
-cp -rf ${DOC_ARTIFACTS}/store/* ~/esmf-test-artifacts/develop/platform_independent/test_coverage/
+cp -rf ${DOC_ARTIFACTS}/* ~/esmf-test-artifacts/develop/platform_independent/test_coverage/
 
 
 cd ~/esmf-test-artifacts/
