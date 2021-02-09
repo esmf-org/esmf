@@ -386,7 +386,7 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
 #if defined ESMF_MOAB
     ESMC_LogDefault.Write("GridToMeshCell:creating with MOAB", ESMC_LOGMSG_DEBUG);
 
-    MBMesh_GridToMeshCell(grid,
+    MBMesh_GridToMeshCell(grid_,
                           &mbmesh, 
                           &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
