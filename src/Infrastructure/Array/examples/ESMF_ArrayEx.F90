@@ -76,7 +76,9 @@ program ESMF_ArrayEx
     finalrc = ESMF_FAILURE
     goto 10
   endif
-  
+
+!===============================================================================
+
 !BOE
 ! \subsubsection{Create Array with automatic memory allocation}
 !
@@ -176,8 +178,11 @@ program ESMF_ArrayEx
 ! object. As such it must follow the ESMF convention that requires that 
 ! the call to {\tt ESMF\_ArrayCreate()} must be issued in unison by all 
 ! PETs of the current context.
-!
+!EOE
 
+!===============================================================================
+
+!BOE
 ! \subsubsection{Native language memory access}
 ! \label{Array_native_language_localde}
 !
@@ -257,8 +262,11 @@ program ESMF_ArrayEx
 ! In most cases memory access through a LocalArray list is less convenient than
 ! the direct {\tt farrayPtr} method because it adds an extra object level 
 ! between the ESMF Array and the native language array. 
-!
-!
+!EOE
+
+!===============================================================================
+
+!BOE
 ! \subsubsection{Regions and default bounds}
 ! \label{Array_regions_and_default_bounds}
 !
@@ -418,8 +426,10 @@ program ESMF_ArrayEx
     enddo
   enddo
 !EOC
-!BOE
 
+!===============================================================================
+
+!BOE
 ! \subsubsection{Array bounds}
 !
 ! The loop over Array elements at the end of the last section only works
@@ -495,8 +505,11 @@ program ESMF_ArrayEx
 ! {\tt ESMF\_INDEX\_DELOCAL} option is used the correspondence between local
 ! and global index space must be made by querying the associated DistGrid for
 ! the DE-local {\tt indexList} arguments.
+!EOE
 
+!===============================================================================
 
+!BOE
 ! \subsubsection{Computational region and extra elements for halo or padding}
 ! \label{Array:padding}
 !
@@ -684,8 +697,11 @@ program ESMF_ArrayEx
 ! defined in the corresponding DistGrid object.
 ! %Please see section 
 ! %\ref{ArrayEx_interiorRegion} for details.
-!
-!
+!EOEI
+
+!===============================================================================
+
+!BOEI
 ! \subsubsection{Interior region and Array's total element mask}
 ! \label{ArrayEx_interiorRegion}
 !
@@ -1023,8 +1039,10 @@ program ESMF_ArrayEx
     maxIndex=(/16,16,16/), regDecomp=(/1,4,4/), rc=rc)
   array3D = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid3D, rc=rc)
 !EOC
-!BOE
 
+!===============================================================================
+
+!BOE
 ! \subsubsection{Working with Arrays of different rank}
 ! Assume a computational kernel that involves the {\tt array3D} object as it was
 ! created at the end of the previous section. Assume further that the kernel 
@@ -1081,8 +1099,9 @@ program ESMF_ArrayEx
   call ESMF_DistGridDestroy(distgrid3D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!===============================================================================
+
 !BOE
-!
 ! \subsubsection{Array and DistGrid rank -- 2D+1 Arrays}
 !
 ! Except for the special Array create interface that implements a copy from
@@ -1281,8 +1300,9 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
+!===============================================================================
+
 !BOE
-!
 ! \subsubsection{Arrays with replicated dimensions}
 !
 ! Thus far most examples demonstrated cases where the DistGrid {\tt dimCount}
