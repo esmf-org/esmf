@@ -13,7 +13,7 @@
 #include "ESMCI_VMKernel.h"
 #include "ESMCI_VM.h"
 
-#define VM_PETMANAGEMENTLOG_on
+#define VM_PETMANAGEMENTLOG_off
 #define VM_MEMLOG_off
 #define VM_COMMQUEUELOG_off
 #define VM_EPOCHLOG_off
