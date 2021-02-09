@@ -402,7 +402,7 @@ namespace ESMCI {
     // Error check
     if (num_creep_levels < 0) Throw() << "Number of creep levels must be positive.";
     if (num_donor_levels < 0) Throw() << "Number of donor levels must be positive.";
-
+    if (mesh.parametric_dim() != 2) Throw() << "Creep fill extrapolation currenly only supported for 2D Grids or Meshes.";
 
     // Leave if nothing to be done
     if (num_creep_levels == 0) return;

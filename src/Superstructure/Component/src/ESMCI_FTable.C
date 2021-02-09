@@ -678,6 +678,15 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
   // ESMCI::VMK class object. The second argument is also of type (void *)
   // and points to a cargotype structure.
 
+#if 0
+  {
+    std::stringstream msg;
+    msg << "ESMCI_FTableCallEntryPointVMHop()#" << __LINE__
+      << " entering.";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
+
   // pull out info from cargo
   ESMCI::cargotype *cargo = (ESMCI::cargotype *)cargoCast;
   char *name = cargo->name;               // name of callback
@@ -702,6 +711,15 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
     }
   }
   ((ESMCI::VM*)vm)->threadbarrier();  // synchronize all threads in local group
+
+#if 0
+  {
+    std::stringstream msg;
+    msg << "ESMCI_FTableCallEntryPointVMHop()#" << __LINE__
+      << " after threadbarrier().";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
 
   // get a pointer to the CompTunnel object
   ESMCI::Comp *f90comp = cargo->f90comp;
@@ -893,15 +911,24 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
 #if 0
-std::cout << ">>> calling into vm_parent->enter() with parentVMflag:" 
-  <<  vmplan->parentVMflag <<"\n";
+  {
+    std::stringstream msg;
+    msg << "FTN_X(c_esmc_ftablecallentrypointvm)#" << __LINE__
+      << " calling into into vm_parent->enter() with parentVMflag:" 
+      <<  vmplan->parentVMflag;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
 #endif
   localrc = vm_parent->enter(vmplan, *vm_info, *vm_cargo);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return; // bail out
-
 #if 0
-std::cout << "<<< parent thread returned from vm_parent->enter()" << "\n";
+  {
+    std::stringstream msg;
+    msg << "FTN_X(c_esmc_ftablecallentrypointvm)#" << __LINE__
+      << " parent thread returned from vm_parent->enter()";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
 #endif
 
   // ... if the child VM uses threads (multi-threading or single-threading)
