@@ -100,8 +100,6 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
      // local error code
  int localrc;
 
-    ESMC_LogDefault.Write("ESMCI_GridToMesh:creating with NATIVE", ESMC_LOGMSG_DEBUG);
-
   // Initialize the parallel environment for mesh (if not already done)
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
@@ -2045,8 +2043,6 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "GridToMeshCell()"
   Trace __trace("GridToMeshCell(const Grid &grid_, ESMCI::Mesh &mesh)");
-
-    ESMC_LogDefault.Write("ESMCI_GridToMeshCell:creating with NATIVE", ESMC_LOGMSG_DEBUG);
 
   try {
   // local error code
