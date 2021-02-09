@@ -13,6 +13,7 @@
 #include "ESMCI_VMKernel.h"
 #include "ESMCI_VM.h"
 
+#define VM_PETMANAGEMENTLOG_on
 #define VM_MEMLOG_off
 #define VM_COMMQUEUELOG_off
 #define VM_EPOCHLOG_off
@@ -678,8 +679,8 @@ struct SpawnArg{
   VMK *myvm;                  // pointer to vm instance on heap
   esmf_pthread_t pthid;       // pthread id of the spawned thread
   int mypet;                  // new mypet 
-  int *ncontributors;         // number of pets that contributed cores 
-  contrib_id **contributors;  // array of contributors
+  int ncontributors;          // number of pets that contribute cores to mypet
+  contrib_id *contributors;   // info about the contributors to mypet
   vmkt_t vmkt;                // this pet's vmkt
   vmkt_t vmkt_extra;          // extra vmkt for this pet (sigcatcher)
   // members which are identical for all new pets
@@ -1086,17 +1087,28 @@ static void *vmk_spawn(void *arg){
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
     // will be pending on a per thread basis...
-#if (VERBOSITY > 5)
-    fprintf(stderr,"thread %d: %d going to wait for release, pid: %d\n",
-      vmkt->tid, pthread_self(), getpid());
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_spawn()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " going to wait for release, pid=" << getpid();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
 #ifndef ESMF_NO_PTHREADS
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
 #endif
-#if (VERBOSITY > 1)
-    fprintf(stderr,"thread %d: %d was released, pid: %d, vm: %p\n", 
-      vmkt->tid, pthread_self(), getpid(), vm);
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_spawn()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " was released, pid=" << getpid();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
+
     if (*f==1) break; // check whether this was a wrap up call
 
     //vm.barrier();
@@ -1109,26 +1121,56 @@ static void *vmk_spawn(void *arg){
       sarg->fctp((void *)vm, vmkt->arg);
     //vmkt->routine(vmkt->arg);
     
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_spawn()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " has returned from user code callback.";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
     // before pet terminates it must send a signal indicating that core is free
-    for (int i=0; i<sarg->ncontributors[sarg->mypet]; i++){
+    for (int i=0; i<sarg->ncontributors; i++){
 #if (VERBOSITY > 5)
       fprintf(stderr, " send wake-up signal to : %d %d\n",
-        sarg->contributors[sarg->mypet][i].pid, 
-        sarg->contributors[sarg->mypet][i].blocker_tid);
+        sarg->contributors[i].pid, 
+        sarg->contributors[i].blocker_tid);
 #endif
       // send signal to the _other_ process
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::vmk_spawn()#" << __LINE__
+          << " thread " << vmkt->tid << ": " << pthread_self()
+          << " sending kill(VM_SIG1) to PID="
+          << sarg->contributors[i].pid;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
 #if !defined (ESMF_OS_MinGW)
-      kill(sarg->contributors[sarg->mypet][i].pid, VM_SIG1);
+      kill(sarg->contributors[i].pid, VM_SIG1);
 #else
 // TODO: Windows equivalent, perhaps using TerminateProcess
+#endif
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::vmk_spawn()#" << __LINE__
+          << " thread " << vmkt->tid << ": " << pthread_self()
+          << " done sending kill(VM_SIG1) to PID="
+          << sarg->contributors[i].pid;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
 #endif
       // which ever thread of the other process woke up will try to receive tid
 #ifndef ESMF_NO_PTHREADS
       if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
         pthread_mutex_lock(&(vmkt->mut0));
 #endif
-      MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_vmkt),
-        sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[sarg->mypet][i].mpi_pid,
+      MPI_Send(&(sarg->contributors[i].blocker_vmkt),
+        sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[i].mpi_pid,
         VM_TID_MPI_TAG, vm->default_mpi_c);
 #ifndef ESMF_NO_PTHREADS
       if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
@@ -1214,16 +1256,26 @@ static void *vmk_sigcatcher(void *arg){
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
     // will be pending on a per thread basis...
-#if (VERBOSITY > 5)
-    fprintf(stderr,"vmk_sigcatcher: thread %d: %d going to wait for release, pid: %d\n",
-      vmkt->tid, pthread_self(), getpid());
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_sigcatcher()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " going to wait for release, pid=" << getpid();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
 #ifndef ESMF_NO_PTHREADS
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
 #endif
-#if (VERBOSITY > 5)
-    fprintf(stderr,"vmk_sigcatcher: thread %d: %d was released, pid:%d\n", vmkt->tid,
-      pthread_self(), getpid());
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_sigcatcher()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " was released, pid=" << getpid();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
 
   if (*f==1) break; // check whether this was a wrap up call
@@ -1235,19 +1287,31 @@ static void *vmk_sigcatcher(void *arg){
   // process, which is actually a blocker thread which then will wrap up and 
   // by that indicate that the resource has been made available again.
   // suspend thread until a signal arrives
-#if (VERBOSITY > 5)
-  fprintf(stderr,"I am a sigcatcher for pid %d and am going to sleep...\n",
-    getpid());
+
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_sigcatcher()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " going to sleep in sigwait(), pid=" << getpid();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
 
 #ifndef ESMF_NO_SIGNALS
   sigwait(&sigs_to_catch, &caught);
 #endif
   
-#if (VERBOSITY > 5)
-  fprintf(stderr, "I am a sigcatcher for pid %d and signal: %d woke me up...\n",
-    getpid(), caught);
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::vmk_sigcatcher()#" << __LINE__
+        << " thread " << vmkt->tid << ": " << pthread_self()
+        << " pid=" << getpid() << " was woken up by signal: " << caught;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
 #endif
+
   // this signal was received from a thread running under another process
   // receive the thread id of the blocker thread that needs to be woken up
   MPI_Recv(&blocker_vmkt, sizeof(vmkt_t *), MPI_BYTE, MPI_ANY_SOURCE, 
@@ -1498,7 +1562,7 @@ void *VMK::startup(class VMKPlan *vmp,
         new contrib_id[new_ncontributors[new_petid]];
       int ncpet_counter=0;      // reset core counter
       int ncontrib_counter=0;   // reset contributor counter
-      // loop over all current pets and see how they contribute tho this pet
+      // loop over all current pets and see how they contribute to this pet
       for (int kk=0; kk<npets; kk++){
         int k = vmp->petlist[kk];  // indirection to preserve petlist order
         if (vmp->contribute[k]==i && vmp->cspawnid[k]==j){
@@ -1949,8 +2013,10 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[i].ncpet = new int[new_npets];
     sarg[i].nadevs = new int[new_npets];
     sarg[i].cid = new int*[new_npets];
-    sarg[i].ncontributors = new int[new_npets];
-    sarg[i].contributors = new contrib_id*[new_npets];
+    sarg[i].ncontributors = new_ncontributors[sarg[i].mypet];
+    sarg[i].contributors = new contrib_id[sarg[i].ncontributors];
+    for (int k=0; k<sarg[i].ncontributors; k++)
+      sarg[i].contributors[k] = new_contributors[sarg[i].mypet][k];
     for (int j=0; j<new_npets; j++){
       sarg[i].lpid[j] = new_lpid[j];
       sarg[i].pid[j] = new_pid[j];
@@ -1960,10 +2026,6 @@ void *VMK::startup(class VMKPlan *vmp,
       sarg[i].cid[j] = new int[new_ncpet[j]];
       for (int k=0; k<new_ncpet[j]; k++)
         sarg[i].cid[j][k] = new_cid[j][k];
-      sarg[i].ncontributors[j]=new_ncontributors[j];
-      sarg[i].contributors[j] = new contrib_id[new_ncontributors[j]];
-      for (int k=0; k<new_ncontributors[j]; k++)
-        sarg[i].contributors[j][k] = new_contributors[j][k];
     }
     sarg[i].mpi_c = new_mpi_c;
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
@@ -2078,10 +2140,26 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
   simpleBlockingCallback |= (vmp->nothreadflag && vmp->spawnflag[mypet]==1);
   // finally execute the simple blocking callback
   if (simpleBlockingCallback){
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::enter()#" << __LINE__
+          << " simpleBlockingCallback to user code ...";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
     if (argvmkt==NULL)
       sarg[0].fctp((void *)sarg[0].myvm, sarg[0].cargo);
     else
       sarg[0].fctp((void *)sarg[0].myvm, argvmkt);
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::enter()#" << __LINE__
+          << " simpleBlockingCallback to user code returned.";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
     return;
   }
   // continue with the more complicated case, where threads must be released...
@@ -2090,23 +2168,86 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
   // (this is so that no signals get missed!)
   if (vmp->spawnflag[mypet]==0){
     if (vmp->contribute[mypet]>-1){
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::enter()#" << __LINE__
+          << " call vmkt_release on blocker thread for contributing PET.";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
       vmkt_release(&(sarg[0].vmkt), NULL);          // release blocker
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::enter()#" << __LINE__
+          << " call vmkt_release on sigcatcher thread for contributing PET.";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
       vmkt_release(&(sarg[0].vmkt_extra), NULL);    // release sigcatcher
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::enter()#" << __LINE__
+          << " sending handshake to spawning PET: "
+          << vmp->contribute[mypet];
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
       send(NULL, 0, vmp->contribute[mypet]);     // tell spawner about me
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::enter()#" << __LINE__
+          << " done sending handshake to spawning PET: "
+          << vmp->contribute[mypet];
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
     }
   }else{
     // wait on all the contributors to this spawner
     for (int i=0; i<npets; i++)
-      if (vmp->contribute[i]==mypet && i!=mypet)
+      if (vmp->contribute[i]==mypet && i!=mypet){
+#ifdef VM_PETMANAGEMENTLOG_on
+        {
+          std::stringstream msg;
+          msg << "VMK::enter()#" << __LINE__
+            << " receiving handshake from contributing PET: " << i;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
         recv(NULL, 0, i); // listen if contributor has released its threads
+#ifdef VM_PETMANAGEMENTLOG_on
+        {
+          std::stringstream msg;
+          msg << "VMK::enter()#" << __LINE__
+            << " done receiving handshake from contributing PET: " << i;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
+      }
     // now all contributors are in, pets that spawn need to release their vmkts
     for (int i=0; i<vmp->spawnflag[mypet]; i++){
-#if (VERBOSITY > 9)
-      fprintf(stderr, "gjt in VMK::enter(): release &(sarg[%d].vmkt)=%d\n", i,
-        &(sarg[i].vmkt));
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::enter()#" << __LINE__
+          << " call vmkt_release on spawned thread: " << i;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
 #endif
       vmkt_release(&(sarg[i].vmkt), argvmkt);
     }
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::enter()#" << __LINE__
+        << " done calling vmkt_release for all spawned threads";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
   }
 }
 
@@ -2120,15 +2261,56 @@ void VMK::exit(class VMKPlan *vmp, void *arg){
   if (vmp->parentVMflag) return;
   // check if this is a thread-based VM
   if (!vmp->nothreadflag){
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::exit()#" << __LINE__
+        << " for a threaded component.";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
     // pets that spawn in a thread-based VM need to catch their vmkts
-    for (int i=0; i<vmp->spawnflag[mypet]; i++)
+    for (int i=0; i<vmp->spawnflag[mypet]; i++){
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::exit()#" << __LINE__
+          << " call vmkt_catch on spawned thread: " << i;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
       vmkt_catch(&(sarg[i].vmkt));
+    }
     // pets that did not spawn but contributed need to catch their blocker and
     // sigcatcher
     if (vmp->spawnflag[mypet]==0 && vmp->contribute[mypet]>-1){
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::exit()#" << __LINE__
+          << " call vmkt_catch on blocker thread for contributor PET.";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
       vmkt_catch(&(sarg[0].vmkt));
+#ifdef VM_PETMANAGEMENTLOG_on
+      {
+        std::stringstream msg;
+        msg << "VMK::exit()#" << __LINE__
+          << " call vmkt_catch on sigcatcher thread for contributor PET.";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
       vmkt_catch(&(sarg[0].vmkt_extra));
     }
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::exit()#" << __LINE__
+        << " done calling vmkt_catch for any threads";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
   }
   // The following threadbarrier ensures that each parent PET blocks until 
   // all threads that work in the PET-local VAS have completed.
@@ -2169,13 +2351,11 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
     delete [] sarg[i].tid;
     delete [] sarg[i].ncpet;
     delete [] sarg[i].nadevs;
-    delete [] sarg[i].ncontributors;
+    delete [] sarg[i].contributors;
     for (int j=0; j<sarg[i].npets; j++){
       delete [] sarg[i].cid[j];
-      delete [] sarg[i].contributors[j];
     }
     delete [] sarg[i].cid;
-    delete [] sarg[i].contributors;
     delete [] sarg[i].sendChannel;
     delete [] sarg[i].recvChannel;
   }
