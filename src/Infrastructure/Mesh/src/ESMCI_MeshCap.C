@@ -52,9 +52,6 @@
 
  using namespace ESMCI;
 
-
-
-
 // Private constructor
  MeshCap::MeshCap() : is_esmf_mesh(false), mesh(NULL), mbmesh(NULL) {
 #undef ESMC_METHOD
@@ -357,6 +354,10 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
    return mc;
 }
 
+// Global in ESMCI_Mesh_F.C
+// (This is kind of ugly, and the variable should probably moved to this file
+//  after the release, but I don't want to make big changes this close.)
+extern bool Moab_on;
 MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
                              const std::vector<ESMCI::Array*> &arrays,
                              int *rc) {
@@ -364,8 +365,9 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
 #define ESMC_METHOD "MeshCap::GridToMeshCell()"
 
 
-  // Eventually should be argument
+  // Set from global var. set in ESMCI_Mesh_F.C
   bool _is_esmf_mesh=true;
+  if (Moab_on) _is_esmf_mesh=false;
 
   // Local error code
   int localrc;
@@ -381,11 +383,18 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
   } else {
+#if defined ESMF_MOAB
     ESMC_LogDefault.Write("GridToMeshCell:creating with MOAB", ESMC_LOGMSG_DEBUG);
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-            "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return NULL;
+
+    MBMesh_GridToMeshCell(grid,
+                          &mbmesh, 
+                          &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return NULL;
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return NULL;
+#endif
   }
 
   // Create MeshCap
