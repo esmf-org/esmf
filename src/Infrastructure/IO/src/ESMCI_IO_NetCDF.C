@@ -771,7 +771,7 @@ void IO_NetCDF::destruct(void) {
                                    &minIndices_int.front(),
                                    &maxIndices_int.front(),
                                    &values.front(),
-                                   DATA_COPY,
+                                   DATACOPY_VALUE,
                                    &localrc);
     //printf("*** LocalArray RC: %d\n", localrc);
     //locArray->print("full");
@@ -814,7 +814,7 @@ void IO_NetCDF::destruct(void) {
     if (trace)
       std::cerr << ESMC_METHOD << ": creating thisArray" << std::endl;
     thisArray = Array::create(&locArray, 1,
-                              distGrid, DATA_COPY,
+                              distGrid, DATACOPY_VALUE,
                               (InterArray<int>*)NULL, (InterArray<int>*)NULL,
                               (InterArray<int>*)NULL, (InterArray<int>*)NULL,
                               (InterArray<int>*)NULL, (InterArray<int>*)NULL,
