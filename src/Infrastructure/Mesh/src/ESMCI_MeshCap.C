@@ -500,6 +500,7 @@ void MeshCap::regrid_create(
     int *nentries, ESMCI::TempWeights **tweights,
     int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
     int *has_statusArray, ESMCI::Array **statusArray,
+    int *checkFlag, 
     int*rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::regrid_create()"
@@ -591,6 +592,7 @@ void MeshCap::regrid_create(
                         nentries, tweights,
                         has_udl, _num_udl, _tudl,
                         has_statusArray, statusArray,
+                        checkFlag, 
                         &localrc);
     ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid");
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,

@@ -107,6 +107,7 @@ void ESMCI_regrid_create(
                      int *nentries, ESMCI::TempWeights **tweights,
                      int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                      int *_has_statusArray, ESMCI::Array **_statusArray,
+                     int *_checkFlag, 
                      int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()"
@@ -142,6 +143,11 @@ void ESMCI_regrid_create(
     bool ignoreDegenerate=false;
     if (*_ignoreDegenerate == 1) ignoreDegenerate=true;
 
+    // transalate checkFlag to C++ bool
+    bool checkFlag=false;
+    if (*_checkFlag == 1) checkFlag=true;
+
+    
      //// Precheck Meshes for errors
     bool degenerate=false;
 
@@ -218,7 +224,8 @@ void ESMCI_regrid_create(
                  extrapNumLevels,
                  extrapNumInputLevels, 
                  &temp_unmappedaction,
-                 set_dst_status, dst_status)) {
+                 set_dst_status, dst_status,
+                 checkFlag)) {
         Throw() << "Online regridding error" << std::endl;
       }
     } else {
@@ -235,7 +242,8 @@ void ESMCI_regrid_create(
                  extrapNumLevels,
                  extrapNumInputLevels, 
                  &temp_unmappedaction,
-                 set_dst_status, dst_status)) {
+                 set_dst_status, dst_status,
+                 checkFlag)) {
         Throw() << "Online regridding error" << std::endl;
       }
     }

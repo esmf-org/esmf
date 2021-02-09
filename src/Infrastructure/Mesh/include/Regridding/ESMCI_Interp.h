@@ -152,7 +152,9 @@ public:
   Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *destplist, Mesh *midmesh, bool freeze_dst_, int imethod,
          bool set_dst_status, WMat &dst_status,
          MAP_TYPE mtype=MAP_TYPE_CART_APPROX, 
-         int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR, int num_src_pnts=1, 
+         int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR, 
+         bool checkFlag=false, 
+         int num_src_pnts=1, 
          ESMC_R8 dist_exponent=2.0);
 
   ~Interp();

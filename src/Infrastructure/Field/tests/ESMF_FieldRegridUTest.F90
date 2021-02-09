@@ -1771,6 +1771,7 @@ contains
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           srcTermProcessing=srcTermProcessing, &
           pipeLineDepth=pipeLineDepth, &
+          checkFlag=.true., & ! Just add this to make sure it doesn't cause problems, even when no error
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
