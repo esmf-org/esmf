@@ -1456,6 +1456,13 @@ void calc_cnsrv_regrid_wgts(MBMesh *srcmesh, MBMesh *dstmesh, IWeights &wts) {
     ESMCI_REGRID_TRACE_EXIT("MBMesh regrid csrv calculate weights");
 
 
+    // If parallel then get rid of rendezvous meshes, now
+    // that we're done with them.
+    if (petCount > 1) {
+      if (srcmesh_rend != NULL) delete srcmesh_rend;
+      if (dstmesh_rend != NULL) delete dstmesh_rend;
+    }
+
     // If parallel then migrate weights and fracs
     // back to decompostion of original destination mesh
     ESMCI_REGRID_TRACE_ENTER("MBMesh regrid csrv migrate weights");
@@ -1475,11 +1482,6 @@ void calc_cnsrv_regrid_wgts(MBMesh *srcmesh, MBMesh *dstmesh, IWeights &wts) {
     // Copy src fractions to mesh
     set_frac_in_mesh(srcmesh, src_frac);
 
-    // If parallel then get rid of rendezvous meshes.
-    if (petCount > 1) {
-      if (srcmesh_rend != NULL) delete srcmesh_rend;
-      if (dstmesh_rend != NULL) delete dstmesh_rend;
-    }
     
     // memory associated with results cannot be released by virtue of a
     //   std::unique_ptr used to define MBMesh_Search_EToP_Result_List because

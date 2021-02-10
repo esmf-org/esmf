@@ -658,7 +658,8 @@ consequences (e.g. they won't be in the resulting regridding matrix, and won't b
 of the regridding weights).
 
 Because it depends on the connections in the destination grid, creep fill extrapolation is not supported when the 
-destination Field is built on a Location Stream (ESMF\_LocStream). 
+destination Field is built on a Location Stream (ESMF\_LocStream). Also, creep fill is currently only supported for 
+2D Grids or Meshes.
 
 \subsubsection{Unmapped destination points}
  If a destination point can't be mapped to a location in the source grid by the combination of regrid method and 

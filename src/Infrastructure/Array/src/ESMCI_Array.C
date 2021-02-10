@@ -6027,6 +6027,7 @@ template<typename SIT, typename DIT>
     typekindFactor = ESMF_NOKIND;
   }
 
+
   // communicate typekindFactor across all Pets
   ESMC_TypeKind_Flag *typekindList = new ESMC_TypeKind_Flag[petCount];
   vm->allgather(&typekindFactor, typekindList, sizeof(ESMC_TypeKind_Flag));
@@ -6429,6 +6430,7 @@ for (int i=0; i<factorListCount; i++)
   sparseMatrix.push_back(SparseMatrix<SIT,DIT> (typekindFactor, factorList,
     factorListCount, srcN, dstN, factorIndexList));
 
+
   // precompute sparse matrix multiplication
   int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
   localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix,
@@ -6466,6 +6468,7 @@ for (int i=0; i<factorListCount; i++)
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
+
 
   // return successfully
   rc = ESMF_SUCCESS;

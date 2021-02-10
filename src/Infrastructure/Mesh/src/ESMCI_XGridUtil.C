@@ -2029,7 +2029,7 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
               &tmpExtrapNumLevels,
               &tmpExtrapNumInputLevels,
               unmappedaction, 
-              tmp_set_dst_status, tmp_dst_status))
+              tmp_set_dst_status, tmp_dst_status, false))
     Throw() << "Regridding error" << std::endl;
 
   return 1;
