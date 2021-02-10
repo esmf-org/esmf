@@ -741,10 +741,8 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    // helper variable
-    int localDeCount = (*ptr)->getDELayout()->getLocalDeCount();
     // check localDe
-    if ((*localDe < 0) || (*localDe >= localDeCount)){
+    if ((*localDe < 0) || (*localDe >= (*ptr)->getSsiLocalDeCount())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "localDe is out of range.", ESMC_CONTEXT, rc);
       return;
