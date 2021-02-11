@@ -718,12 +718,16 @@
 ! for the local DEs, the Field object returns the list of DEs that are owned by
 ! the local PET making the query.
 !
-! By default DEs are {\em pinned} to the PETs on which they were created. The
-! memory allocation associated with a specific DE can only be accessed from the
-! PET to which the DE is pinned. However, on shared memory systems, ESMF allows
-! DEs to be pinned to SSIs instead. In this case the PET under which a DE was
-! created is still consider the owner, but now all PETs under the same SSI
-! have access to the DE as well.
+! By default DEs are {\em pinned} to the PETs under which they were created.
+! The memory allocation associated with a specific DE is only defined in the
+! VAS of the PET to which the DE is pinned. As a consequence, only the PET
+! owning a DE has access to its memory allocation.
+!
+! On shared memory systems, however, ESMF allows DEs to be pinned to SSIs
+! instead of PETs. In this case the PET under which a DE was created is still
+! consider the owner, but now {\em all} PETs under the same SSI have access to
+! the DE. For this the memory allocation associated with the DE is mapped into
+! the VAS of all the PETs under the SSI.
 !
 ! To create an Field with each DE pinned to SSI instead of PET, first query the
 ! VM for the available level of support.
@@ -742,7 +746,7 @@
 !EOC  
 !BOE
 ! Knowing that the SSI shared memory feature is available, it is now possible
-! to create an Field object, pinning the DEs to SSI.
+! to create an Field object with DE to SSI pinning.
 !EOE
 
 !BOC
@@ -773,6 +777,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
+! \begin{sloppypar}
 ! Assuming execution on 4 PETs, all located on the same SSI, the values of the
 ! returned variable are {\tt localDeCount==1} and {\tt ssiLocalDeCount==4} on 
 ! all of the PETs. The mapping between each PET's local DE, and the global DE
@@ -783,6 +788,7 @@
 ! in. However for {\tt size(localDeToDeMap)==ssiLocalDeCount}, mapping
 ! information for all locally {\em accessible} DEs is returned, including
 ! those owned by other PETs on the same SSI.
+! \end{sloppypar}
 !EOE
 !BOC
     allocate(localDeToDeMap(0:ssiLocalDeCount-1))
