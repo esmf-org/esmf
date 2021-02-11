@@ -1615,18 +1615,20 @@ program ESMF_ArrayEx
 ! \label{Array_shared_memory_features}
 !
 ! Practically all modern computer systems utilize multi-core processors,
-! supporting the execution of multiple concurrent hardware threads. Further
-! a number of these multi-core processors are commonly packaged into
-! the same compute node, accessing the same physical memory. Under ESMF each
+! supporting the execution of multiple concurrent hardware threads.
+! A number of these multi-core processors are commonly packaged into the same
+! compute node, having access to the same physical memory. Under ESMF each
 ! hardware thread (or core) is identified as a unique Processing Element (PE).
-! The unit of PEs that share the same physical memory (i.e. compute node) is
-! called a Single System Image (SSI).
+! The collection of PEs that share the same physical memory (i.e. compute node)
+! is referred to as a Single System Image (SSI). The ESMF Array class implements
+! features that allow the user to leverage the shared memory within each SSI to
+! efficiently exchange data without copies or explicit communication calls.
 !
 ! The software threads executing an ESMF application on the hardware, and that
 ! ESMF is aware of, are referred to as Persistent Execution Threads (PETs). In
-! practice a PET can often be thought of as an MPI rank, i.e. an OS process. The
-! ESMF Virtual Machine (VM) class keeps track of the mapping of PETs to PEs
-! and their location on the available SSIs.
+! practice a PET can typically be thought of as an MPI rank, i.e. an OS process.
+! The ESMF Virtual Machine (VM) class keeps track of the mapping between PETs
+! and PEs, and their location on the available SSIs.
 !
 ! When an ESMF Array object is created, the specified DistGrid indicates how
 ! many Decomposition Elements (DEs) are created. Each DE has its own memory
@@ -1635,11 +1637,10 @@ program ESMF_ArrayEx
 ! for the local DEs, the Array object returns the list of DEs that are owned by
 ! the local PET making the query.
 !
-! By default DEs are said to be {\em pinned} to the PETs on which they were
-! created. This means that the memory allocation in an Array associated with
-! a specific DE can only be accessed from the same PET - the one the
-! DE is pinned to. However, on shared memory systems with sufficient support,
-! DEs can be pinned to SSI instead. In this case the PET under which a DE was
+! By default DEs are {\em pinned} to the PETs on which they were created. The
+! memory allocation associated with a specific DE can only be accessed from the
+! PET to which the DE is pinned. However, on shared memory systems, ESMF allows
+! DEs to be pinned to SSIs instead. In this case the PET under which a DE was
 ! created is still consider the owner, but now all PETs under the same SSI
 ! have access to the DE as well.
 !
@@ -1672,7 +1673,7 @@ program ESMF_ArrayEx
 !BOE
 ! Just as in the cases discussed before, where the same DistGrid was used, a
 ! default DELayout with as many DEs as PETs in the VM is constructed. Setting
-! the {\tt pinflag} to {\tt ESMF\_PIN\_DE\_TO\_SSI} also does not change the
+! the {\tt pinflag} to {\tt ESMF\_PIN\_DE\_TO\_SSI} does not change the
 ! fact that each PET owns exactly one of the DEs. However, assuming that this
 ! code is run on a set of PETs that are all located under the same SSI, every
 ! PET now has {\em access} to all of the DEs. The situation can be observed by
@@ -1691,10 +1692,10 @@ program ESMF_ArrayEx
 ! index is provided through the {\tt localDeToDeMap} array argument. The amount
 ! of mapping information returned is dependent on how large {\tt localDeToDeMap}
 ! has been sized by the user. For {\tt size(localDeToDeMap)==localDeCount},
-! only mapping information for those DEs owned by the local PET is filled in.
-! However for {\tt size(localDeToDeMap)==ssiLocalDeCount}, mapping information
-! for {\em all} the locally accessible DEs is returned, including those owned
-! by other PETs on the same SSI.
+! only mapping information for those DEs {\em owned} by the local PET is filled
+! in. However for {\tt size(localDeToDeMap)==ssiLocalDeCount}, mapping
+! information for all locally {\em accessible} DEs is returned, including
+! those owned by other PETs on the same SSI.
 !EOE
 !BOC
     allocate(localDeToDeMap(0:ssiLocalDeCount-1))
@@ -1729,15 +1730,18 @@ program ESMF_ArrayEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! Now {\tt myFarray} on PETs 0 and 1 both point to the {\em same} memory
-! allocation for global DE index 2. Both PETs have access to the same piece of
-! shared memory! The same is true for PETs 2 and 3, pointing to the shared memory
-! allocation of global DE index 1. All of the typical considerations surrounding
-! shared memory usage apply! In particular proper synchronization between PETs
-! accessing shared DEs is needed to avoid {\em race conditions}. Performance
-! issues like {\em false sharing} also needs to be considered for optimal use.
+! Now variable {\tt myFarray} on PETs 0 and 1 both point to the {\em same}
+! memory allocation for global DE 2. Both PETs have access to the same
+! piece of shared memory! The same is true for PETs 2 and 3, pointing to the
+! shared memory allocation of global DE 1.
+
+! It is important to note that all of the typical considerations surrounding
+! shared memory programming apply when accessing shared DEs! Proper
+! synchronization between PETs accessing shared DEs is critical to avoid
+! {\em race conditions}. Also performance issues like {\em false sharing}
+! need to be considered for optimal use.
 !
-! For a simple demonstration PETs 0 and 2 fill the entire memory allocation of
+! For a simple demonstration, PETs 0 and 2 fill the entire memory allocation of
 ! DE 2 and 1, respectively, to a unique value.
 !EOE
 !BOC
@@ -1750,7 +1754,7 @@ program ESMF_ArrayEx
 !BOE
 ! Here synchronization is needed before any PETs that share access to the same
 ! DEs can safely access the data without race condition. The Array class provides
-! a synchronization method.
+! a simple synchronization method that can be used.
 !EOE
 !BOC
     call ESMF_ArraySync(array, rc=rc) ! prevent race condition
@@ -1772,21 +1776,21 @@ program ESMF_ArrayEx
 !BOE
 ! Working with shared DEs requires additional bookkeeping on the user code
 ! level. In some situations, however, DE sharing is simply used as a mechanism
-! to move DEs between PETs without requiring data copies. One practical
+! to {\em move} DEs between PETs without requiring data copies. One practical
 ! application of this case is the transfer of an Array between two components,
 ! both of which use the same PEs, but run with different number of PETs.
 ! These would typically be sequential components that use OpenMP on the user
 ! level with varying threading levels.
 !
-! DEs that are pinned to SSI can be {\em migrated} to any PET within the SSI.
-! This is accomplished by creating a new Array object from an existing Array
-! that was created with {\tt pinflag=ESMF\_PIN\_DE\_TO\_SSI}.
+! DEs that are pinned to SSI can be moved or {\em migrated} to any PET within
+! the SSI. This is accomplished by creating a new Array object from an
+! existing Array that was created with {\tt pinflag=ESMF\_PIN\_DE\_TO\_SSI}.
 ! The information of how the DEs are to migrate between the old and the new
 ! Array is provided through a DELayout object. This object must have the
-! same number of DEs and describe how they map to the PET on the current VM.
+! same number of DEs and describes how they map to the PETs on the current VM.
 ! If this is in the context of a different component, the number of PETs might
-! differ from the original VM under which the existing Array was created. Still
-! the number of DEs must match.
+! differ from the original VM under which the existing Array was created. This
+! situation is explicitly supported, still the number of DEs must match.
 !
 ! Here a simple DELayout is created on the same 4 PETs, but with rotated
 ! DE ownerships:
@@ -1803,9 +1807,9 @@ program ESMF_ArrayEx
 
 !BOE
 ! The creation of the new Array is done by reference, i.e. 
-! {\tt datacopyflag=ESMF\_DATACOPY\_REFERENCE}. The created Array does not have
-! its own memory allocations, but instead references the shared memory
-! resources held by the incoming Array object.
+! {\tt datacopyflag=ESMF\_DATACOPY\_REFERENCE}, since the new Array does
+! not create its own memory allocations. Instead the new Array references the
+! shared memory resources held by the incoming Array object.
 !EOE
 !BOC
     arrayMigrated = ESMF_ArrayCreate(array, delayout=delayout, &
@@ -1841,12 +1845,13 @@ program ESMF_ArrayEx
 
 !BOE
 ! The same situation could have been achieved with the original {\tt array}.
-! However, it would have required first finding the correct local DE index
+! However, it would have required first finding the correct local DE
 ! for the target global DE on each PET, and then querying {\tt array}
 ! accordingly. If needed more repeatedly, this bookkeeping would need to be
 ! kept in a user code data structure. The DE migration feature on the other
 ! hand provides a formal way to create a standard ESMF Array object that can be
-! used directly in any Array level method as usual.
+! used directly in any Array level method as usual, letting ESMF handle the
+! extra bookkeeping needed.
 !EOE
 
 !BOC
@@ -1854,7 +1859,7 @@ program ESMF_ArrayEx
 !EOC
   deallocate(localDeToDeMap)
 !BOE
-! Before destroying an Array whose DEs are shared between PETs it is
+! Before destroying an Array whose DEs are shared between PETs, it is
 ! advisable to issue one more synchronization. This prevents cases where a
 ! PET still might be accessing a shared DE, while the owner PET is already
 ! destroying the Array, therefore deallocating the shared memory resource.
