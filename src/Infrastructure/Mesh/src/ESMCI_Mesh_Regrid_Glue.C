@@ -110,7 +110,7 @@ void ESMCI_regrid_create(
                      int *_checkFlag, 
                      int*rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_regrid_create()"
+#define ESMC_METHOD "ESMCI_regrid_create()"
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
 
@@ -146,6 +146,22 @@ void ESMCI_regrid_create(
     // transalate checkFlag to C++ bool
     bool checkFlag=false;
     if (*_checkFlag == 1) checkFlag=true;
+
+    // Output Warning message about checkFlag
+    if (checkFlag){
+      ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! Calling regrid weight generation                  !!!", 
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! (e.g. ESMF_FieldRegridStore()) with checkFlag on. !!!", 
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! Extra checking comes at the cost of performance.  !!!",
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! Only use for debugging, NOT for production!       !!!",
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+                            ESMC_LOGMSG_WARN);
+    }
 
     
      //// Precheck Meshes for errors
