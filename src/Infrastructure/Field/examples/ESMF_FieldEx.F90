@@ -866,124 +866,130 @@
     endif
 !EOC
 
-!BOE
-! Working with shared DEs requires additional bookkeeping on the user code
-! level. In some situations, however, DE sharing is simply used as a mechanism
-! to {\em move} DEs between PETs without requiring data copies. One practical
-! application of this case is the transfer of an Field between two components,
-! both of which use the same PEs, but run with different number of PETs.
-! These would typically be sequential components that use OpenMP on the user
-! level with varying threading levels.
-!
-! DEs that are pinned to SSI can be moved or {\em migrated} to any PET within
-! the SSI. This is accomplished by creating a new Field object from an
-! existing Field that was created with {\tt pinflag=ESMF\_PIN\_DE\_TO\_SSI}.
-! The information of how the DEs are to migrate between the old and the new
-! Field is provided through a DELayout object. This object must have the
-! same number of DEs and describes how they map to the PETs on the current VM.
-! If this is in the context of a different component, the number of PETs might
-! differ from the original VM under which the existing Field was created. This
-! situation is explicitly supported, still the number of DEs must match.
-!
-! Here a simple DELayout is created on the same 4 PETs, but with rotated
-! DE ownerships:
-!
-! DE 0 -> PET 1 (old PET 0)\newline
-! DE 1 -> PET 2 (old PET 1)\newline
-! DE 2 -> PET 3 (old PET 2)\newline
-! DE 3 -> PET 0 (old PET 3)\newline
-!EOE
-!BOC
-    delayout = ESMF_DELayoutCreate(petMap=(/1,2,3,0/), rc=rc) ! DE->PET mapping
-!EOC  
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_GridDestroy(grid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_FieldDestroy(field, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  deallocate(localDeToDeMap)
 
-!BOE
-! The creation of the new Field is done by reference, i.e. 
-! {\tt datacopyflag=ESMF\_DATACOPY\_REFERENCE}, since the new Field does
-! not create its own memory allocations. Instead the new Field references the
-! shared memory resources held by the incoming Field object.
-!EOE
-!BOC
-    call ESMF_FieldGet(field, array=array, rc=rc)
-!EOC
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-    arrayMigrated = ESMF_ArrayCreate(array, delayout=delayout, &
-      datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
-!EOC  
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-    fieldMigrated = ESMF_FieldCreate(array=arrayMigrated, grid=grid, rc=rc)
-!EOC
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-!BOE
-! Querying {\tt fieldMigrated} for the number of local DEs will return 1 on
-! each PET. Sizing the {\tt localDeToDeMap} accordingly and querying for it.
-!EOE
-!BOC
-    deallocate(localDeToDeMap) ! free previous allocation
-    allocate(localDeToDeMap(0:1))
-    call ESMF_FieldGet(fieldMigrated, localDeToDeMap=localDeToDeMap, rc=rc)
-!EOC  
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-!BOE
-! This yields the following expected outcome:
+!!B-OE
+!! Working with shared DEs requires additional bookkeeping on the user code
+!! level. In some situations, however, DE sharing is simply used as a mechanism
+!! to {\em move} DEs between PETs without requiring data copies. One practical
+!! application of this case is the transfer of an Field between two components,
+!! both of which use the same PEs, but run with different number of PETs.
+!! These would typically be sequential components that use OpenMP on the user
+!! level with varying threading levels.
+!!
+!! DEs that are pinned to SSI can be moved or {\em migrated} to any PET within
+!! the SSI. This is accomplished by creating a new Field object from an
+!! existing Field that was created with {\tt pinflag=ESMF\_PIN\_DE\_TO\_SSI}.
+!! The information of how the DEs are to migrate between the old and the new
+!! Field is provided through a DELayout object. This object must have the
+!! same number of DEs and describes how they map to the PETs on the current VM.
+!! If this is in the context of a different component, the number of PETs might
+!! differ from the original VM under which the existing Field was created. This
+!! situation is explicitly supported, still the number of DEs must match.
+!!
+!! Here a simple DELayout is created on the same 4 PETs, but with rotated
+!! DE ownerships:
+!!
+!! DE 0 -> PET 1 (old PET 0)\newline
+!! DE 1 -> PET 2 (old PET 1)\newline
+!! DE 2 -> PET 3 (old PET 2)\newline
+!! DE 3 -> PET 0 (old PET 3)\newline
+!!E-OE
+!!B-OC
+!    delayout = ESMF_DELayoutCreate(petMap=(/1,2,3,0/), rc=rc) ! DE->PET mapping
+!!E-OC  
+!    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !
-! PET 0: {\tt localDeToDeMap}=={\tt(/1/)}\newline
-! PET 1: {\tt localDeToDeMap}=={\tt(/2/)}\newline
-! PET 2: {\tt localDeToDeMap}=={\tt(/3/)}\newline
-! PET 3: {\tt localDeToDeMap}=={\tt(/0/)}\newline
+!!B-OE
+!! The creation of the new Field is done by reference, i.e. 
+!! {\tt datacopyflag=ESMF\_DATACOPY\_REFERENCE}, since the new Field does
+!! not create its own memory allocations. Instead the new Field references the
+!! shared memory resources held by the incoming Field object.
+!!E-OE
+!!B-OC
+!    call ESMF_FieldGet(field, array=array, rc=rc)
+!!E-OC
+!    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!!B-OC
+!    arrayMigrated = ESMF_ArrayCreate(array, delayout=delayout, &
+!      datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
+!!E-OC  
+!    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!!B-OC
+!    fieldMigrated = ESMF_FieldCreate(array=arrayMigrated, grid=grid, rc=rc)
+!!E-OC
+!    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !
-! On each PET the respective Fortran array pointer is returned by the Farray.
-!EOE
-!BOC
-    call ESMF_FieldGet(FieldMigrated, farrayPtr=myFarray, rc=rc)
-!EOC  
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-!BOE
-! The same situation could have been achieved with the original {\tt field}.
-! However, it would have required first finding the correct local DE
-! for the target global DE on each PET, and then querying {\tt field}
-! accordingly. If needed more repeatedly, this bookkeeping would need to be
-! kept in a user code data structure. The DE migration feature on the other
-! hand provides a formal way to create a standard ESMF Field object that can be
-! used directly in any Field level method as usual, letting ESMF handle the
-! extra bookkeeping needed.
-!EOE
-
+!!B-OE
+!! Querying {\tt fieldMigrated} for the number of local DEs will return 1 on
+!! each PET. Sizing the {\tt localDeToDeMap} accordingly and querying for it.
+!!E-OE
+!!B-OC
+!    deallocate(localDeToDeMap) ! free previous allocation
+!    allocate(localDeToDeMap(0:1))
+!    call ESMF_FieldGet(fieldMigrated, localDeToDeMap=localDeToDeMap, rc=rc)
+!!E-OC  
+!    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!
+!!B-OE
+!! This yields the following expected outcome:
+!!
+!! PET 0: {\tt localDeToDeMap}=={\tt(/1/)}\newline
+!! PET 1: {\tt localDeToDeMap}=={\tt(/2/)}\newline
+!! PET 2: {\tt localDeToDeMap}=={\tt(/3/)}\newline
+!! PET 3: {\tt localDeToDeMap}=={\tt(/0/)}\newline
+!!
+!! On each PET the respective Fortran array pointer is returned by the Farray.
+!!E-OE
+!!B-OC
+!    call ESMF_FieldGet(FieldMigrated, farrayPtr=myFarray, rc=rc)
+!!E-OC  
+!    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!
+!!B-OE
+!! The same situation could have been achieved with the original {\tt field}.
+!! However, it would have required first finding the correct local DE
+!! for the target global DE on each PET, and then querying {\tt field}
+!! accordingly. If needed more repeatedly, this bookkeeping would need to be
+!! kept in a user code data structure. The DE migration feature on the other
+!! hand provides a formal way to create a standard ESMF Field object that can be
+!! used directly in any Field level method as usual, letting ESMF handle the
+!! extra bookkeeping needed.
+!!E-OE
+!
 !BOC
   endif ! ending the ssiSharedMemoryEnabled conditional
 !EOC
-  deallocate(localDeToDeMap)
-!BOE
-! Before destroying an Field whose DEs are shared between PETs, it is
-! advisable to issue one more synchronization. This prevents cases where a
-! PET still might be accessing a shared DE, while the owner PET is already
-! destroying the Field, therefore deallocating the shared memory resource.
-!EOE
-!BOC
-  call ESMF_FieldSync(field, rc=rc) ! prevent race condition
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-  call ESMF_FieldDestroy(field, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
-! Remember that {\tt fieldMigrated} shares the same memory allocations that were
-! held by {\tt field}. Field {\tt fieldMigrated} must therefore not be used
-! beyond the life time of {\tt field}. Best to destroy it now.
-!EOE
-!BOC
-  call ESMF_FieldDestroy(fieldMigrated, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_GridDestroy(grid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!  deallocate(localDeToDeMap)
+!!B-OE
+!! Before destroying an Field whose DEs are shared between PETs, it is
+!! advisable to issue one more synchronization. This prevents cases where a
+!! PET still might be accessing a shared DE, while the owner PET is already
+!! destroying the Field, therefore deallocating the shared memory resource.
+!!E-OE
+!!B-OC
+!  call ESMF_FieldSync(field, rc=rc) ! prevent race condition
+!!E-OC
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!!B-OC
+!  call ESMF_FieldDestroy(field, rc=rc)
+!!E-OC
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!!B-OE
+!! Remember that {\tt fieldMigrated} shares the same memory allocations that were
+!! held by {\tt field}. Field {\tt fieldMigrated} must therefore not be used
+!! beyond the life time of {\tt field}. Best to destroy it now.
+!!E-OE
+!!B-OC
+!  call ESMF_FieldDestroy(fieldMigrated, rc=rc)
+!!E-OC
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!  call ESMF_GridDestroy(grid, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
