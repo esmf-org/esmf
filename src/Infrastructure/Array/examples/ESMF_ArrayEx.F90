@@ -1614,8 +1614,8 @@ program ESMF_ArrayEx
 ! \subsubsection{Shared memory features: DE pinning, sharing, and migration}
 ! \label{Array_shared_memory_features}
 !
-! Practically all modern computer systems utilize multi-core processors,
-! supporting the execution of multiple concurrent hardware threads.
+! Practically all modern computer systems today utilize multi-core processors,
+! supporting the concurrent execution of multiple hardware threads.
 ! A number of these multi-core processors are commonly packaged into the same
 ! compute node, having access to the same physical memory. Under ESMF each
 ! hardware thread (or core) is identified as a unique Processing Element (PE).
@@ -1626,7 +1626,8 @@ program ESMF_ArrayEx
 !
 ! The software threads executing an ESMF application on the hardware, and that
 ! ESMF is aware of, are referred to as Persistent Execution Threads (PETs). In
-! practice a PET can typically be thought of as an MPI rank, i.e. an OS process.
+! practice a PET can typically be thought of as an MPI rank, i.e. an OS process,
+! defining its own private virtual address space (VAS). 
 ! The ESMF Virtual Machine (VM) class keeps track of the mapping between PETs
 ! and PEs, and their location on the available SSIs.
 !
@@ -1637,12 +1638,16 @@ program ESMF_ArrayEx
 ! for the local DEs, the Array object returns the list of DEs that are owned by
 ! the local PET making the query.
 !
-! By default DEs are {\em pinned} to the PETs on which they were created. The
-! memory allocation associated with a specific DE can only be accessed from the
-! PET to which the DE is pinned. However, on shared memory systems, ESMF allows
-! DEs to be pinned to SSIs instead. In this case the PET under which a DE was
-! created is still consider the owner, but now all PETs under the same SSI
-! have access to the DE as well.
+! By default DEs are {\em pinned} to the PETs under which they were created.
+! The memory allocation associated with a specific DE is only defined in the
+! VAS of the PET to which the DE is pinned. As a consequence, only the PET
+! owning a DE has access to its memory allocation.
+!
+! On shared memory systems, however, ESMF allows DEs to be pinned to SSIs
+! instead of PETs. In this case the PET under which a DE was created is still
+! consider the owner, but now {\em all} PETs under the same SSI have access to
+! the DE. For this the memory allocation associated with the DE is mapped into
+! the VAS of all the PETs under the SSI.
 !
 ! To create an Array with each DE pinned to SSI instead of PET, first query the
 ! VM for the available level of support.
@@ -1657,7 +1662,7 @@ program ESMF_ArrayEx
 !EOC  
 !BOE
 ! Knowing that the SSI shared memory feature is available, it is now possible
-! to create an Array object, pinning the DEs to SSI.
+! to create an Array object with DE to SSI pinning.
 !EOE
 
 !BOC
@@ -1686,6 +1691,7 @@ program ESMF_ArrayEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
+! \begin{sloppypar}
 ! Assuming execution on 4 PETs, all located on the same SSI, the values of the
 ! returned variable are {\tt localDeCount==1} and {\tt ssiLocalDeCount==4} on 
 ! all of the PETs. The mapping between each PET's local DE, and the global DE
@@ -1696,6 +1702,7 @@ program ESMF_ArrayEx
 ! in. However for {\tt size(localDeToDeMap)==ssiLocalDeCount}, mapping
 ! information for all locally {\em accessible} DEs is returned, including
 ! those owned by other PETs on the same SSI.
+! \end{sloppypar}
 !EOE
 !BOC
     allocate(localDeToDeMap(0:ssiLocalDeCount-1))
