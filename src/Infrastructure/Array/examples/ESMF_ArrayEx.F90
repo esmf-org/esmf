@@ -1860,11 +1860,8 @@ program ESMF_ArrayEx
 ! used directly in any Array level method as usual, letting ESMF handle the
 ! extra bookkeeping needed.
 !EOE
-  deallocate(localDeToDeMap)
+    deallocate(localDeToDeMap)
 
-!BOC
-  endif ! ending the ssiSharedMemoryEnabled conditional
-!EOC
 !BOE
 ! Before destroying an Array whose DEs are shared between PETs, it is
 ! advisable to issue one more synchronization. This prevents cases where a
@@ -1872,24 +1869,27 @@ program ESMF_ArrayEx
 ! destroying the Array, therefore deallocating the shared memory resource.
 !EOE
 !BOC
-  call ESMF_ArraySync(array, rc=rc) ! prevent race condition
+    call ESMF_ArraySync(array, rc=rc) ! prevent race condition
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  call ESMF_ArrayDestroy(array, rc=rc)
+    call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Remember that {\tt arrayMigrated} shares the same memory allocations that were
 ! held by {\tt array}. Array {\tt arrayMigrated} must therefore not be used
 ! beyond the life time of {\tt array}. Best to destroy it now.
 !EOE
 !BOC
-  call ESMF_ArrayDestroy(arrayMigrated, rc=rc)
+    call ESMF_ArrayDestroy(arrayMigrated, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_DistGridDestroy(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_DistGridDestroy(distgrid, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  endif ! ending the ssiSharedMemoryEnabled conditional
+!EOC
 
 !===============================================================================
 
