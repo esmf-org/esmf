@@ -1860,11 +1860,11 @@ program ESMF_ArrayEx
 ! used directly in any Array level method as usual, letting ESMF handle the
 ! extra bookkeeping needed.
 !EOE
+  deallocate(localDeToDeMap)
 
 !BOC
   endif ! ending the ssiSharedMemoryEnabled conditional
 !EOC
-  deallocate(localDeToDeMap)
 !BOE
 ! Before destroying an Array whose DEs are shared between PETs, it is
 ! advisable to issue one more synchronization. This prevents cases where a
