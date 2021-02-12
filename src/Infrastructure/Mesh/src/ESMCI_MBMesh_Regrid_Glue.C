@@ -478,8 +478,8 @@ void MBMesh_regrid_create(MBMesh **meshsrcpp, ESMCI::Array **arraysrcpp,
 #else
     ///// Split translation not implemented yet
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
-      if (mbmsrcp.is_split) Throw() << "Cells with >4 sides currently not supported with conservative regridding with MOAB internal mesh representation." 
-      if (mbmdstp.is_split) Throw() << "Cells with >4 sides currently not supported with conservative regridding with MOAB internal mesh representation." 
+      if (mbmsrcp->is_split) Throw() << "Cells with >4 sides currently not supported with conservative regridding using MOAB internal mesh representation.";
+      if (mbmdstp->is_split) Throw() << "Cells with >4 sides currently not supported with conservative regridding using MOAB internal mesh representation.";
     }
 #endif
 
