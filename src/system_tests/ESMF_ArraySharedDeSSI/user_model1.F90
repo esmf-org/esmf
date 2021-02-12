@@ -110,7 +110,7 @@ module user_model1
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_VMLog(vm, prefix="model1: ", logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+    call ESMF_VMLog(vm, prefix="model1: ", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_VMGet(vm, ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, &

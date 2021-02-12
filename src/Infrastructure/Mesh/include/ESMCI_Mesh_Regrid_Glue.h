@@ -66,6 +66,7 @@ void ESMCI_regrid_create(Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Poi
                          int *nentries, ESMCI::TempWeights **tweights,
                          int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                          int *has_statusArray, ESMCI::Array **statusArray,
+                         int *checkFlag,
                          int*rc);
 
 void ESMCI_regrid_getiwts(Grid **gridpp,

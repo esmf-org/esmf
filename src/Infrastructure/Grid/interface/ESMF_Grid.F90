@@ -5239,9 +5239,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          return
       endif
 
-      ! We can't find an alignment for this case, because it won't fit in one row
+      ! We can't find an alignment for this case, because it won't fit in the corner data
       ! Report that without an error, so another can be tried.
-      if (startCell+1 > dim1) then
+      if (startCell+1 > dim1*dim2) then
          foundAlign=.false.
          rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
          return
@@ -5348,7 +5348,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             exit
          endif
       enddo
-      
+
       ! Make sure we found a corner
       if (TopRightCorner == -1) then
          foundAlign=.false.

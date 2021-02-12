@@ -1,6 +1,6 @@
 import os
 
-DATA_URL_ROOT = 'http://www.earthsystemmodeling.org/download/data'
+DATA_URL_ROOT = 'http://data.earthsystemmodeling.org/download/data/'
 
 # If fname doesn't exist, retrieve it from the remote server via http.
 def cache_data_file(fname, DATA_URL_ROOT=DATA_URL_ROOT):

@@ -379,6 +379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     srcFracField, dstFracField, &
                     dstStatusField, &
                     unmappedDstList, &
+                    checkFlag, &
                     rc)
 !      
 ! !ARGUMENTS:
@@ -409,6 +410,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Field),               intent(inout), optional :: dstFracField
       type(ESMF_Field),               intent(inout), optional :: dstStatusField
       integer(ESMF_KIND_I4),          pointer,       optional :: unmappedDstList(:)
+      logical,                        intent(in),    optional :: checkFlag
       integer,                        intent(out),   optional :: rc 
 !
 ! !STATUS:
@@ -450,6 +452,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[8.0.0] Added argument {\tt extrapNumLevels}. For level based extrapolation methods
 !              (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}) this argument allows the user to
 !              set how many levels to extrapolate. 
+!
+! \item[8.1.0] Added argument {\tt checkFlag} to enable the user to turn on more
+!              expensive error checking during regrid weight calculation. 
 !              
 ! \end{description}
 ! \end{itemize}
@@ -659,6 +664,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The list on each PET only contains the unmapped locations for the piece of the {\tt dstField} on that PET. 
 !           If a destination point is masked, it won't be put in this list. This option currently doesn't work with 
 !           the {\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS} regrid method.
+!      \item [{[checkFlag]}]
+!       If set to {\tt .FALSE.} {\em (default)} only quick error checking
+!       will be performed. If set to {\tt .TRUE.} more expensive error checking
+!       will be performed, possibly catching more errors. Set
+!       {\tt checkFlag} to {\tt .FALSE.} to achieve highest performance.
+!       The checkFlag currently only turns on checking for conservative regrid methods 
+!       (e.g. {\tt ESMF\_REGRIDMETHOD\_CONSERVE}). 
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -702,6 +714,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8) :: localExtrapDistExponent
         integer :: localExtrapNumLevels
         integer :: localExtrapNumInputLevels        
+        logical :: localCheckFlag
 
 !        real(ESMF_KIND_R8) :: beg_time, end_time
 !        call ESMF_VMWtime(beg_time)
@@ -727,6 +740,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+
+        ! Default check flag
+        localCheckFlag=.false.
+        if (present(checkFlag)) then
+           localCheckFlag=checkFlag
         endif
 
         ! process status field argument
@@ -1282,6 +1302,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   routehandle, &
                                   tmp_indices, tmp_weights, &
                                   unmappedDstList, &
+                                  localCheckFlag, &
                                   localrc)
 
            if (ESMF_LogFoundError(localrc, &
@@ -1318,6 +1339,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   pipeLineDepth, &
                                   routehandle, &
                                   unmappedDstList=unmappedDstList, &
+                                  checkFlag=localCheckFlag, &
                                   rc=localrc)
 
            if (ESMF_LogFoundError(localrc, &

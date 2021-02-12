@@ -38,7 +38,7 @@ namespace ESMCI {
             int *extrapNumLevels,
             int *extrapNumInputLevels, 
             int *unmappedaction,
-            bool set_dst_status, WMat &dst_status);
+            bool set_dst_status, WMat &dst_status, bool checkFlag);
 
  int get_iwts(Mesh &mesh, MEField<> *iwts, int *regridScheme);
 
