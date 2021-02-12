@@ -347,7 +347,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   \label{api:DynamicMaskSetR8R8R8}
+!   \label{api:DynamicMaskSetR4R8R4}
 !   Set an {\tt ESMF\_DynamicMask} object suitable for 
 !   destination element typekind {\tt ESMF\_TYPEKIND\_R4},
 !   factor typekind {\tt ESMF\_TYPEKIND\_R8}, and
@@ -545,7 +545,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   \label{api:DynamicMaskSetR8R8R8}
+!   \label{api:DynamicMaskSetR4R4R4}
 !   Set an {\tt ESMF\_DynamicMask} object suitable for 
 !   destination element typekind {\tt ESMF\_TYPEKIND\_R4},
 !   factor typekind {\tt ESMF\_TYPEKIND\_R4}, and

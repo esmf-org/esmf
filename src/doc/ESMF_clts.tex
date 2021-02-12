@@ -1,38 +1,38 @@
 % $Id$
 
-ESMF comes with a set of bundled applications in the form of standard command 
-line tools. These applications include convenient access to general information 
+ESMF comes with a set of bundled command line tools (CLT).
+These applications include convenient access to general information 
 about an ESMF installation, and regrid weight file generation (sometimes
 referred to as "offline" regridding). This section provides assistance with
-respect to building and running the bundled applications. If you are using a
+respect to building and running the bundled CLTs. If you are using a
 pre-installed ESMF on your system, follow the local instructions provided by
-the installer or system admin of how to access and run the ESMF applications.
+the installer or system admin of how to access and run the ESMF CLTs.
 Often access is as simple as loading a configuration module to have the
-correct path to the ESMF application binaries added to your {\tt PATH}
+correct path to the ESMF CLT binaries added to your {\tt PATH}
 environment variable.
 
 There are two ways a user may choose to build and access the bundled ESMF 
-applications. Users that prefer not to go through the full ESMF installation 
-process have the option to build the bundled applications inside of the ESMF 
+CLTs. Users that prefer not to go through the full ESMF installation 
+process have the option to build the bundled CLTs inside of the ESMF 
 source tree, very similar to how the unit tests, system tests and examples are 
 built. This option is outlined in section \ref{quickapps} and should only be 
-considered by users that want quick access to the applications and are not 
+considered by users that want quick access to the CLTs and are not 
 interested in a sharable installation or the development of portable scripts and 
-makefiles that use the applications. Users interested in the latter should 
+makefiles that use the CLTs. Users interested in the latter should 
 consider the more standard second option outlined below.
 
-The bundled ESMF applications are built automatically in the process of 
+The bundled ESMF CLTs are built automatically in the process of 
 installing ESMF following the instructions given in section \ref{InstallESMF}. 
 On systems that offer system-wide ESMF installations (e.g. via modules or 
 similar mechanisms) the user need not worry about the build and installation 
-details. Once installed, the applications are accessible through their precise 
+details. Once installed, the CLTs are accessible through their precise 
 location on the system. For this purpose every ESMF installation provides a file 
 named {\tt esmf.mk} that contains the variable {\tt ESMF\_APPSDIR} which 
-specifies the precise application path.
+specifies the precise CLT path.
 
-The {\tt esmf.mk} mechanism used for application access is the same as the one 
+The {\tt esmf.mk} mechanism used for CLT access is the same as the one 
 described in section \ref{sec:Use} for writing robust and portable user 
-makefiles for building and linking user applications against an ESMF 
+makefiles for building and linking user CLTs against an ESMF 
 installation. One feature of the {\tt esmf.mk} mechanism is that only one single 
 piece of information must be known about an ESMF installation to use it, and 
 that is the location of file {\tt esmf.mk} itself. The location of this file 
@@ -42,30 +42,30 @@ provided by the system that points to the {\tt esmf.mk} file. See section
 \ref{InstallESMF} for the related discussion aimed at the person that installs 
 ESMF on a system.
 
-Once the exact location of the bundled ESMF application files has been 
+Once the exact location of the bundled ESMF CLT files has been 
 determined, either by inspecting the associated {\tt esmf.mk} file, or by using 
 the {\tt ESMF\_APPSDIR} makefile variable directly in the user script or 
-makefile, the applications can be executed following the system specific rules 
+makefile, the CLTs can be executed following the system specific rules 
 for execution. The details will depend on whether ESMF was built with or without 
 MPI dependency. In the latter case the system specific rules for launching 
-parallel applications must be followed. System specific execution details on 
+parallel CLTs must be followed. System specific execution details on 
 this level are outside of ESMF's scope. However, ESMF does offer specific 
-application use examples as part of the {\it external\_demos} module described 
+CLT use examples as part of the {\it external\_demos} module described 
 online at the 
 \htmladdnormallink{External Demos webpage}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml}. 
-For most systems, the MPI version of the ESMF bundled applications can be 
+For most systems, the MPI version of the ESMF bundled CLTs can be 
 executed by a command equivalent to:
 
 \begin{verbatim}
 
-mpirun -np X $(ESMF_APPSDIR)/application
+mpirun -np X $(ESMF_APPSDIR)/<clt-name>
 
 \end{verbatim}
  
-where {\tt X} specifies the total number of PETs and {\tt application} is the 
-name of the specific ESMF application to be executed.
+where {\tt X} specifies the total number of PETs and {\tt clt-name} is the 
+name of the specific ESMF command line tool to be executed.
  
-All bundled ESMF applications support the standard \verb+ '--help'+ command line 
+All bundled ESMF CLTs support the standard \verb+ '--help'+ command line 
 option that prints out information on its proper use.  More detailed 
-instructions of the individual applications are available in the "Applications" 
+instructions of the individual CLTs are available in the "Command Line Tools" 
 section of the {\it ESMF Reference Manual}.

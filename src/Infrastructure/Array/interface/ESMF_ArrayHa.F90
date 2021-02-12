@@ -1463,20 +1463,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-! \label{ArrayRedistStoreTK}
+! \label{ArrayRedistStoreTKTP}
 ! {\tt ESMF\_ArrayRedistStore()} is a collective method across all PETs of the
 ! current Component. The interface of the method is overloaded, allowing 
 ! -- in principle -- each PET to call into {\tt ESMF\_ArrayRedistStore()}
 ! through a different entry point. Restrictions apply as to which combinations
 ! are sensible. All other combinations result in ESMF run time errors. The
 ! complete semantics of the {\tt ESMF\_ArrayRedistStore()} method, as provided
-! through the separate entry points shown in \ref{ArrayRedistStoreTK} and
-! \ref{ArrayRedistStoreNF}, is described in the following paragraphs as a whole.
+! through the separate entry points shown in \ref{ArrayRedistStoreTKTP} and
+! \ref{ArrayRedistStoreNFTP}, is described in the following paragraphs as a whole.
 !
 ! Store an Array redistribution operation from {\tt srcArray} to {\tt dstArray}.
-! Interface \ref{ArrayRedistStoreTK} allows PETs to specify a {\tt factor}
+! Interface \ref{ArrayRedistStoreTKTP} allows PETs to specify a {\tt factor}
 ! argument. PETs not specifying a {\tt factor} argument call into interface
-! \ref{ArrayRedistStoreNF}. If multiple PETs specify the {\tt factor} argument,
+! \ref{ArrayRedistStoreNFTP}. If multiple PETs specify the {\tt factor} argument,
 ! its type and kind, as well as its value must match across all PETs. If none
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
@@ -2227,20 +2227,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-! \label{ArrayRedistStoreNF}
+! \label{ArrayRedistStoreNFTP}
 ! {\tt ESMF\_ArrayRedistStore()} is a collective method across all PETs of the
 ! current Component. The interface of the method is overloaded, allowing 
 ! -- in principle -- each PET to call into {\tt ESMF\_ArrayRedistStore()}
 ! through a different entry point. Restrictions apply as to which combinations
 ! are sensible. All other combinations result in ESMF run time errors. The
 ! complete semantics of the {\tt ESMF\_ArrayRedistStore()} method, as provided
-! through the separate entry points shown in \ref{ArrayRedistStoreTK} and
-! \ref{ArrayRedistStoreNF}, is described in the following paragraphs as a whole.
+! through the separate entry points shown in \ref{ArrayRedistStoreTKTP} and
+! \ref{ArrayRedistStoreNFTP}, is described in the following paragraphs as a whole.
 !
 ! Store an Array redistribution operation from {\tt srcArray} to {\tt dstArray}.
-! Interface \ref{ArrayRedistStoreTK} allows PETs to specify a {\tt factor}
+! Interface \ref{ArrayRedistStoreTKTP} allows PETs to specify a {\tt factor}
 ! argument. PETs not specifying a {\tt factor} argument call into interface
-! \ref{ArrayRedistStoreNF}. If multiple PETs specify the {\tt factor} argument,
+! \ref{ArrayRedistStoreNFTP}. If multiple PETs specify the {\tt factor} argument,
 ! its type and kind, as well as its value must match across all PETs. If none
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during

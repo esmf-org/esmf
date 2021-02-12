@@ -2,12 +2,12 @@
 
 ALL: tree_build_apps
 
-LOCDIR	  = src/apps/ESMF_Info
+LOCDIR	  = src/apps/ESMF_PrintInfo
 
 
-APPS_BUILD    = $(ESMF_APPSDIR)/ESMF_Info
+APPS_BUILD    = $(ESMF_APPSDIR)/ESMF_PrintInfo
 
-APPS_OBJ      = ESMF_Info.o
+APPS_OBJ      = ESMF_PrintInfo.o
 
 include $(ESMF_DIR)/makefile
 

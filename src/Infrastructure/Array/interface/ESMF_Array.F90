@@ -1862,15 +1862,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                   intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-! \label{ArraySMMStoreTK}
+! \label{ArraySMMStoreTKTP}
 ! {\tt ESMF\_ArraySMMStore()} is a collective method across all PETs of the
 ! current Component. The interface of the method is overloaded, allowing 
 ! -- in principle -- each PET to call into {\tt ESMF\_ArraySMMStore()}
 ! through a different entry point. Restrictions apply as to which combinations
 ! are sensible. All other combinations result in ESMF run time errors. The
 ! complete semantics of the {\tt ESMF\_ArraySMMStore()} method, as provided
-! through the separate entry points shown in \ref{ArraySMMStoreTK} and
-! \ref{ArraySMMStoreNF}, is described in the following paragraphs as a whole.
+! through the separate entry points shown in \ref{ArraySMMStoreTKTP} and
+! \ref{ArraySMMStoreNFTP}, is described in the following paragraphs as a whole.
 !
 !   \begin{sloppypar}
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
@@ -3197,15 +3197,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-! \label{ArraySMMStoreNF}
+! \label{ArraySMMStoreNFTP}
 ! {\tt ESMF\_ArraySMMStore()} is a collective method across all PETs of the
 ! current Component. The interface of the method is overloaded, allowing 
 ! -- in principle -- each PET to call into {\tt ESMF\_ArraySMMStore()}
 ! through a different entry point. Restrictions apply as to which combinations
 ! are sensible. All other combinations result in ESMF run time errors. The
 ! complete semantics of the {\tt ESMF\_ArraySMMStore()} method, as provided
-! through the separate entry points shown in \ref{ArraySMMStoreTK} and
-! \ref{ArraySMMStoreNF}, is described in the following paragraphs as a whole.
+! through the separate entry points shown in \ref{ArraySMMStoreTKTP} and
+! \ref{ArraySMMStoreNFTP}, is described in the following paragraphs as a whole.
 !
 !   \begin{sloppypar}
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
