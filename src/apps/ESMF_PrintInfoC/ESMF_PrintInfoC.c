@@ -21,7 +21,8 @@ int main(int argc, char *argv[]){
   int argFlag;
   ESMC_VM vm;
 
-  ESMC_Initialize(NULL, ESMC_InitArgLogKindFlag(ESMC_LOGKIND_NONE), ESMC_ArgLast);
+  ESMC_Initialize(NULL, ESMC_InitArgLogKindFlag(ESMC_LOGKIND_NONE),
+    ESMC_ArgLast);
   
   vm = ESMC_VMGetGlobal(&rc);
   
@@ -37,7 +38,8 @@ int main(int argc, char *argv[]){
     if (argIndex >= 0){
       argFlag=1;
       /* standard --help argument was specified */
-      printf("ESMF_InfoC: Print information about the ESMF installation.\n");
+      printf("ESMF_PrintInfoC: Print information about the ESMF"
+        " installation.\n");
       printf("Options:\n");
       printf("  --help        Display this information and exit.\n");
       printf("  --version     Display ESMF version and license information "
@@ -61,7 +63,7 @@ int main(int argc, char *argv[]){
       ESMC_UtilVersionPrint (vFlag, versionFlag, &rc);
     } else {
       /* regular execution */
-      printf("ESMF_InfoC\n");
+      printf("ESMF_PrintInfoC\n");
       printf("\n");
       printf("  ESMF_VERSION_STRING:       %s\n", ESMF_VERSION_STRING);
       printf("\n");
