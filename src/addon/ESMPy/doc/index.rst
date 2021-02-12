@@ -18,8 +18,6 @@ Welcome to ESMPy - The ESMF Python Interface!
     api
     appendix
     
-    BasicRegridding
-
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
