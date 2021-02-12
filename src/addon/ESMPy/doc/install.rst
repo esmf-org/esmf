@@ -8,7 +8,7 @@ Requirements
 
 The following packages are *required* to work with ESMPy:
 
-* `ESMF installation <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/ESMF_usrdoc/node9.html>`_
+* `ESMF installation <http://earthsystemmodeling.org/docs/release/ESMF_8_0_1/ESMF_usrdoc/node9.html>`_
 * `python <http://python.org/>`_
 * `numpy <http://www.numpy.org/>`_
 
@@ -23,14 +23,15 @@ The following packages are *optional*:
 Getting the code
 ----------------
 
-The `ESMF User's Guide <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/ESMF_usrdoc/>`_
+The ESMPy source code can be downloaded from the 
+`ESMF git repository <https://github.com/esmf-org/esmf>`_.
+
+The `ESMF User's Guide <http://earthsystemmodeling.org/docs/release/ESMF_8_0_1/ESMF_usrdoc/>`_
 contains information on building and installing ESMF.
-The `ESMF Reference Manual <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_8_0_1/ESMF_refdoc/>`_
+
+The `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/ESMF_8_0_1/ESMF_refdoc/>`_
 contains information on the architecture of ESMF, example code, and details of the API (Application Programming
 Interface).
-
-Instructions on how to download the ESMPy code can be found at the `ESMPy Download page
-<http://www.earthsystemcog.org/projects/esmpy/releases>`_.
 
 ~~~~~~~~~~~~~~~~~
 Anaconda Packages
@@ -46,7 +47,7 @@ Specific versions of the conda package can be installed like this:
 
 .. code::
 
-    conda create -n esmpy -c conda-forge esmpy=8.0.1
+    conda create -n esmpy -c conda-forge esmpy=8.1.0
 
 Development versions can be found in the ``esmpy_dev`` channel:
 
