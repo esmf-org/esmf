@@ -97,8 +97,8 @@ module user_model2
     type(ESMF_VM)         :: vm
     logical               :: ssiSharedMemoryEnabled
     type(ESMF_Field)      :: field
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j, k, tid, currentSsiPe
+    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)   ! matching F90 array pointer
+    integer               :: i, j, k, loop, tid, currentSsiPe
     integer               :: localDeCount, lde, deCount
     integer, allocatable  :: localDeToDeMap(:)
     type(ESMF_LocalArray), allocatable :: localArrayList(:)
@@ -130,6 +130,9 @@ module user_model2
     call ESMF_FieldGet(field, ssiLocalDeCount=localDeCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
+    write(msg,*) "user2_run: ssiLocalDeCount=", localDeCount
+    call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+
     ! Allocate map and list variables
     allocate(localDeToDeMap(0:localDeCount-1))
     allocate(localArrayList(0:localDeCount-1))
@@ -142,7 +145,7 @@ module user_model2
     ! Test sharing for correctness
     dataOkay = .true.
 
-do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
+do loop=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
 
 !$omp parallel do reduction (.and.:dataOkay) &
 !$omp& default (none)  &
@@ -174,14 +177,16 @@ do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
 !$omp end critical
 
       ! Test Field data against exact solution
+      do k = lbound(farrayPtr, 3), ubound(farrayPtr, 3)
       do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-        do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-          if (abs(farrayPtr(i,j) - (10.0d0 &
+      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+          if (abs(farrayPtr(i,j,k) - (10.0d0 &
             + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
             + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi))) > 1.d-8) then
             dataOkay = dataOkay .and. .false.
           endif
-        enddo
+      enddo
+      enddo
       enddo
 
     enddo

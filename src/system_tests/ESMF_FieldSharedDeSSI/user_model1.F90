@@ -111,6 +111,7 @@ module user_model1
     call ESMF_VMGet(vm, ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+
     if (ssiSharedMemoryEnabled) then
       ! requires support for SSI shared memory
 #if 0
@@ -123,15 +124,18 @@ module user_model1
     endif
 
     ! Create Grid and Field that support sharing of DEs across the same SSI
-    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10000,12000/),&
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10000,1200/),&
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     field = ESMF_FieldCreate(typekind=ESMF_TYPEKIND_R8, grid=grid, &
-      indexflag=ESMF_INDEX_GLOBAL, name="MyField", pinflag=pinflag, rc=rc)
+      indexflag=ESMF_INDEX_GLOBAL, name="MyField", pinflag=pinflag, &
+!      gridToFieldMap=(/2,3/), &  ! enable to test this option
+      ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-  
-    ! Add the Field to the State
+
+     ! Add the Field to the State
     call ESMF_StateAdd(exportState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -151,8 +155,8 @@ module user_model1
     real(ESMF_KIND_R8)    :: pi
     type(ESMF_VM)         :: vm
     type(ESMF_Field)      :: field
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j, k, currentSsiPe
+    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)   ! matching F90 array pointer
+    integer               :: i, j, k, loop, currentSsiPe
     character(len=320)    :: msg
     
     ! Initialize return code
@@ -175,7 +179,7 @@ module user_model1
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
+do loop=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
 
     call ESMF_VMGet(vm, currentSsiPe=currentSsiPe, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -186,16 +190,18 @@ do k=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Field with data
+    do k = lbound(farrayPtr, 3), ubound(farrayPtr, 3)
     do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-        farrayPtr(i,j) = 10.0d0 &
-          + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
-          + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi)
-      enddo
+    do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+      farrayPtr(i,j,k) = 10.0d0 &
+        + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
+        + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi)
     enddo
-    
+    enddo
+    enddo
+
 enddo
- 
+
     call ESMF_LogWrite("Exiting 'user1_run'", ESMF_LOGMSG_INFO, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

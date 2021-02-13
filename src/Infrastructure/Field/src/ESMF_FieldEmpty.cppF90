@@ -1129,7 +1129,7 @@ end subroutine ESMF_FieldEmptyCompTK
       ! are the dimension of the array,
       distgridDimCount_norep = arrayRank - ungriddedDimCount
       array=ESMF_ArrayCreate(distgrid=distgrid, arrayspec=arrayspec, &
-                distgridToArrayMap=distgridToArrayMap, &
+                pinflag=pinflag, distgridToArrayMap=distgridToArrayMap, &
                 totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
                 indexflag=indexflag, &
                 undistLBound=arrayLBound, undistUBound=arrayUBound, &
