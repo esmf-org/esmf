@@ -166,10 +166,12 @@ namespace ESMCI {
     bool has_elem_area;
     Tag  elem_area_tag;
 
-    bool has_elem_frac; // TODO: Get rid of this
+    bool has_elem_frac; // TODO: Get rid of this if it's always there???
+                        //       or make it so that elem fracs can be added later.
     Tag  elem_frac_tag;
 
     // Split stuff
+    // TODO: rethink this to make it more efficient
     bool is_split;
     int max_non_split_id;
     std::map<int,int> split_to_orig_id;
@@ -360,7 +362,7 @@ namespace ESMCI {
     void get_owned_nodes(std::vector<EntityHandle> &owned_nodes);
     void get_owned_elems(std::vector<EntityHandle> &owned_elems);
 
-    // Return a a vector of EntityHandles for the original nodes used for creation
+    // Return a a vector of EntityHandles for the original entities used for creation
     // on this processor sorted in the order they were used for creation
     void get_sorted_orig_nodes(std::vector<EntityHandle> &owned_nodes);
     void get_sorted_orig_elems(std::vector<EntityHandle> &owned_elems);
@@ -432,6 +434,9 @@ namespace ESMCI {
     // Get elem area values for a vector of entities (e.g. using orig_elems)
     void get_elem_area(std::vector<EntityHandle> const &elems, double *areas);
 
+    // Get elem frac values for a vector of entities (e.g. using orig_elems)
+    void get_elem_frac(bool merge_split, std::vector<EntityHandle> const &elems, double *fracs);
+
     // Get elem coords for a vector of entities (e.g. using orig_elems)
     void get_elem_orig_coords(std::vector<EntityHandle> const &elems, double *orig_coords);
 
@@ -439,9 +444,12 @@ namespace ESMCI {
     void get_elem_types(std::vector<EntityHandle> const &elems, int *elem_conn);
 
 
+
+
     // Accessors for values from a single EntityHandle (avoid if possible, slow)
     int get_elem_mask_val(EntityHandle eh);
     double get_elem_area(EntityHandle eh);
+    double get_elem_frac(EntityHandle eh);
 
     // Turn on elem masking
     void setup_elem_mask();

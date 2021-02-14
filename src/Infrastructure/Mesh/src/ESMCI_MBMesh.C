@@ -1748,7 +1748,7 @@ void MBMesh::set_elem_area(std::vector<EntityHandle> const &elems, double *areas
 }
 
 
-
+// Add merge_split flag
 void MBMesh::get_elem_area(std::vector<EntityHandle> const &elems, double *areas) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_elem_area()"
@@ -1767,7 +1767,7 @@ void MBMesh::get_elem_area(std::vector<EntityHandle> const &elems, double *areas
   }
 }
 
-
+// Add merge_split flag??
 double MBMesh::get_elem_area(EntityHandle eh) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_elem_area()"
@@ -1788,6 +1788,123 @@ double MBMesh::get_elem_area(EntityHandle eh) {
   // Output area
   return area;
 }
+
+// Get element fraction
+// NOTE: This method does not merge split elems, it just gets the data out of MOAB
+// TODO: Add merge_split flag??
+double MBMesh::get_elem_frac(EntityHandle eh) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_frac()"
+  
+  // If no frac, then error
+  if (!has_elem_frac) Throw() << "element frac not present in mesh.";
+
+  // Get data from MOAB
+  double frac;
+  int merr=mesh->tag_get_data(elem_frac_tag, &eh, 1, &frac);
+  ESMC_CHECK_MOAB_THROW(merr);
+
+  // Output data
+  return frac;
+}
+
+
+// Get elem fractions. 
+// merge_split - if true merge together values for split elems, otherwise just copy out data.
+// elems - vector of elems for which to get fraction data
+// fracs - place to put fraction data. Needs to be at least of size = sizeof(double)*elems.size()
+// WARNING: if merging, this won't handle repeated elements in the elems list
+void MBMesh::get_elem_frac(bool merge_split, std::vector<EntityHandle> const &elems, double *fracs) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh::get_elem_frac()"
+
+  // Error return codes
+  int localrc;
+  int merr;
+  
+  // If no fracs, complain
+  if (!has_elem_frac) Throw() << "element fracs not present in mesh.";
+
+
+  // If requested and if they exist, merge split elems 
+  if (merge_split && is_split) {
+
+      // Make map of elem ids to index
+      std::map<int,int> id_to_index;
+      for (auto i=0; i<elems.size(); i++) {
+        // Get elem gid
+        int elem_gid=get_gid(elems[i]);
+
+        // Insert into map
+        std::pair<std::map<int,int>::iterator,bool> ret;
+        ret=id_to_index.insert(std::pair<int,int>(elem_gid,i));
+
+        // Complain if it's already there
+        if (!ret.second) {
+          Throw() <<"multiple entries with the same global id in the input list currently not supported when merging fractions.";
+        } 
+      }
+
+      // Zero out array
+      for (auto i=0; i<elems.size(); i++) {
+        fracs[i]=0.0;
+      }
+
+
+      // Iterate through split elements adding in frac
+      Range all_elems;
+      get_all_elems(all_elems);
+      for(Range::const_iterator it=all_elems.begin(); it !=all_elems.end(); it++) {
+        EntityHandle elem=*it;
+
+        // Get the element id
+        int elem_gid=get_gid(elem);
+
+        // Translate id if necessary
+        int orig_gid;
+        std::map<int,int>::iterator soi =  split_to_orig_id.find(elem_gid);
+        if (soi == split_to_orig_id.end()) {
+          orig_gid=elem_gid;
+        } else {
+          orig_gid=soi->second;
+        }
+
+        // Get index in input array
+        int index;
+        std::map<int,int>::iterator itoi=id_to_index.find(orig_gid);
+        if (itoi == id_to_index.end()) { 
+          continue; // Not in input array, so skip
+        } else {
+          index=itoi->second; // In input, so get index
+        }
+
+        // Get frac data in elem
+        double frac=get_elem_frac(elem);
+
+        // Get fraction of larger polygon
+        std::map<int,double>::iterator mi=split_id_to_frac.find(elem_gid);
+
+        // Not part of something larger, so just stick in array
+        if (mi == split_id_to_frac.end()) {
+          fracs[index] = frac;
+          continue;
+        }
+
+        // It is part of larger original poly, so modify by fraction
+        frac *= mi->second;
+
+        // Add modified frac to what's already in array
+        fracs[index] += frac;
+      }
+
+  } else { // Otherwise just get data from MOAB.
+    if (elems.size() > 0) {
+      merr=mesh->tag_get_data(elem_frac_tag, &elems[0], elems.size(), fracs);
+      ESMC_CHECK_MOAB_THROW(merr);
+    }
+  }
+}
+
 
 
 void MBMesh::setup_elem_coords() {

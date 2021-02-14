@@ -118,6 +118,15 @@ void MBMesh_Extrapolate(MBMesh *srcmesh, PointList *srcpointlist,
 
   int localrc;
 
+  // Error out for extrap methods not handled right now
+  if (*extrapMethod == ESMC_EXTRAPMETHOD_CREEP) {
+    Throw() << "Creep fill extrapolation is currently not available when using MOAB internal mesh representation.";
+  } else if (*extrapMethod == ESMC_EXTRAPMETHOD_CREEP_NRST_D) {
+    Throw() << "Creep fill nearest destination extrapolation is currently not available when using MOAB internal mesh representation.";
+  } else if (*extrapMethod == ESMC_EXTRAPMETHOD_NEAREST_D) {
+    Throw() << "Nearest mapped destination extrapolation is currently not available when using MOAB internal mesh representation.";
+  }
+
   // printf("MBMesh_Extrapolate: extrapMethod=%d\n", *extrapMethod);
 
   // if (extrapMethod == ESMC_EXTRAPMETHOD_CREEP) {

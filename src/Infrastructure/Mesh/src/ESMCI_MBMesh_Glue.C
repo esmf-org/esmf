@@ -147,7 +147,7 @@ void MBMesh_addnodes(MBMesh **mbmpp, int *_num_nodes, int *nodeId,
     for (int n = 0; n < num_nodes; ++n) {
       if ((nodeOwner[n]<0) || (nodeOwner[n]>petCount-1)) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                                         "- Bad nodeOwner value ", ESMC_CONTEXT,&localrc)) throw localrc;
+                                         " bad nodeOwner value ", ESMC_CONTEXT,&localrc)) throw localrc;
       }
     }
 
@@ -157,13 +157,13 @@ void MBMesh_addnodes(MBMesh **mbmpp, int *_num_nodes, int *nodeId,
       if ((nodeMaskII)->dimCount !=1) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-                                         "- nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+                                         " nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
       }
       
       if ((nodeMaskII)->extent[0] != num_nodes) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-                                         "- nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
+                                         " nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
 
@@ -2649,6 +2649,133 @@ void MBMesh_GetNodeCreateInfo(MBMesh *meshp,
 
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
+
+void MBMesh_getelemfrac(MBMesh *mbmesh, int *_num_elem, double *elem_fracs, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_getelemfrac()"
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+        throw localrc;  // bail out with exception
+    }
+
+    // Dereference number of elements
+    int num_elem=*_num_elem;
+
+    // Get elems in creation order
+    std::vector<EntityHandle> orig_elems;    
+    mbmesh->get_sorted_orig_elems(orig_elems);
+
+    // Check size
+    if (num_elem != orig_elems.size()) {
+      Throw() << "Number of elements in Mesh doesn't match size of input array for element fractions.";
+    }
+
+    // Get fracs (merging split elems if necessary)
+    mbmesh->get_elem_frac(true,orig_elems,elem_fracs);
+
+  }
+  CATCH_MBMESH_RETURN(rc);
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+
+#if 0
+// Create a list of elems in the same order as gids/seqInd in Array
+void MBMesh_create_list_of_elems_in_Array(ESMCI::Array *array, 
+                                          std::map<int,EntityHandle> &gid_to_elem_map,
+                                          std::vector<EntityHandle> &elems_in_Array) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_create_list_of_elems_in_Array()"
+
+  try {
+
+    // Get rank of Array
+    int rank=
+
+    // Get Distgrid
+    ESMCI::DistGrid *distGrid=array->getDistGrid();
+
+    // Get localDECount
+    int localDECount=distgrid->getDELayout()->getLocalDeCount();
+
+    // Loop over DEs
+    for (auto lDE=0; lDE < localDECount, lDE++) {
+
+        // Get localDE lower bound
+        int lbound=(elem_area_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)
+
+
+
+    }
+
+  }
+  CATCH_MBMESH_RETHROW;
+}
+
+
+void MBMesh_get_elem_frac_into_Array(MBMesh *mbmesh, ESMCI::Array *array, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_get_elem_frac_into_Array()"
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+        throw localrc;  // bail out with exception
+    }
+
+    // Error Checks
+    ThrowAssert(array != NULL);
+
+    // Get all elems
+    // TODO: make this an MBMesh method
+    Range elems;
+    mbmp->get_all_elems(elems);
+
+    // Loop and set up gid_to_elem_map
+    std::map<int,EntityHandle> gid_to_elem_map;
+    for (Range::iterator it=elems.begin(); it !=elems.end(); it++) {
+      EntityHandle elem=*it;
+      
+      // Get node global id
+      int gid=mbmp->get_gid(elem);
+      
+      // Add to map
+      gid_to_elem_map[gid]=elem;
+    }
+
+
+    // Get elems
+    std::vector<EntityHandle> elems_in_Array;    
+
+    // Use gid_to_elem map to make ordered vector of elems in Array
+    MBMesh_create_list_of_elems_in_Array(array, gid_to_elem_map, elems_in_Array);
+
+
+
+
+    // Get fracs (merging split elems if necessary)
+    mbmesh->get_elem_frac(true,owned_elems,elem_fracs);
+
+  }
+  CATCH_MBMESH_RETURN(rc);
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+#endif
+
 
 
 #endif // ESMF_MOAB

@@ -1461,9 +1461,12 @@ void MeshCap::meshgetfrac(int *_num_elem, double *elem_fracs, int *rc) {
   if (is_esmf_mesh) {
     ESMCI_meshgetfrac(&mesh, _num_elem, elem_fracs, rc);
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
+#if defined ESMF_MOAB
+    MBMesh_getelemfrac(mbmesh, _num_elem, elem_fracs, rc);
+#else
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
     return;
   }
 }
