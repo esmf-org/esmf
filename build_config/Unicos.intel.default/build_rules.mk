@@ -64,24 +64,15 @@ ESMF_F90COMPILEOPTS += -assume realloc_lhs
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
-# Disable "gethostid()" support on Cray XC
+# Conditionally add pthread compiler and linker flags
 #
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
-# Disable signals support on Cray XC
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
-
-############################################################
-# Disable system call support on Cray XC
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
-
-############################################################
-# Disable Pthreads support on Cray XC
-#
-ESMF_PTHREADS := OFF
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_F90COMPILEOPTS += -pthread -threads
+ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_F90LINKOPTS    += -pthread -threads
+ESMF_CXXLINKOPTS    += -pthread
+ESMF_SL_LIBOPTS     += -pthread
+endif
 
 ############################################################
 # OpenMP compiler and linker flags
