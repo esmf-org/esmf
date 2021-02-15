@@ -820,7 +820,6 @@ void VMK::construct(void *ssarg){
         CPU_ZERO(&cpuset);
         int cIndex = omp_get_thread_num()%ncpet[mypet];
         CPU_SET(ssipe[cid[mypet][cIndex]], &cpuset);
-//        if (sarg->openmphandling>2 && (omp_get_thread_num()!=0)){
         if (sarg->openmphandling>2){
           // set affinity on all OpenMP threads
           pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
@@ -1117,14 +1116,6 @@ static void *vmk_spawn(void *arg){
 
     //vm.barrier();
 
-#if 0
-  cpu_set_t cpuset, cpuset_old;
-  pthread_getaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset_old);
-  CPU_ZERO(&cpuset);
-  CPU_SET(vm->getSsipe()[vm->getCid()[vm->getMypet()][0]], &cpuset);
-  pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
-#endif
-
     // call the function pointer with the new VMK as its argument
     // this is where we finally enter the user code again...
     if (vmkt->arg==NULL)
@@ -1132,11 +1123,7 @@ static void *vmk_spawn(void *arg){
     else
       sarg->fctp((void *)vm, vmkt->arg);
     //vmkt->routine(vmkt->arg);
-    
-#if 0
-  pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset_old);
-#endif
-    
+
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
@@ -1303,9 +1290,6 @@ static void *vmk_sigcatcher(void *arg){
   // process, which is actually a blocker thread which then will wrap up and 
   // by that indicate that the resource has been made available again.
   // suspend thread until a signal arrives
-
-//  VMK::wtimedelay(0.005);
-
 
 #ifdef VM_PETMANAGEMENTLOG_on
     {
