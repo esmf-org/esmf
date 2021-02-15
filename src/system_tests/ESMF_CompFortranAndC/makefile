@@ -6,7 +6,7 @@ ALL: tree_build_system_tests
 run: tree_run_system_tests
 run_uni: tree_run_system_tests_uni
 
-LOCDIR	  = src/system_tests/ESMF_CompInFortranAndC
+LOCDIR	  = src/system_tests/ESMF_CompFortranAndC
 
 
 SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_CompFortranAndCSTest

@@ -94,8 +94,8 @@ module user_model1
 
     ! Local variables
     type(ESMF_VM)       :: vm
-    type(ESMF_DistGrid) :: distgrid
-    type(ESMF_Array)    :: array
+    type(ESMF_Grid)     :: grid
+    type(ESMF_Field)    :: field
     logical             :: ssiSharedMemoryEnabled
     type(ESMF_Pin_Flag) :: pinflag
   
@@ -123,20 +123,20 @@ module user_model1
       pinflag=ESMF_PIN_DE_TO_PET
     endif
 
-    ! Create DistGrid and Array that support sharing of DEs across the same SSI
-    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10000,1200/), &
+    ! Create Grid and Field that support sharing of DEs across the same SSI
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10000,1200/),&
+      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    field = ESMF_FieldCreate(typekind=ESMF_TYPEKIND_R8, grid=grid, &
+      indexflag=ESMF_INDEX_GLOBAL, name="MyField", pinflag=pinflag, &
+!      gridToFieldMap=(/2,3/), &  ! enable to test this option
+      ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, name="MyArray", pinflag=pinflag, &
-!      distgridToArrayMap=(/2,3/), &  ! enable to test this option
-      undistLBound=(/1/), undistUBound=(/10/), &
-      rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    ! Add the Array to the State
-    call ESMF_StateAdd(exportState, (/array/), rc=rc)
+     ! Add the Field to the State
+    call ESMF_StateAdd(exportState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine user1_init
@@ -154,7 +154,7 @@ module user_model1
     ! Local variables
     real(ESMF_KIND_R8)    :: pi
     type(ESMF_VM)         :: vm
-    type(ESMF_Array)      :: array
+    type(ESMF_Field)      :: field
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)   ! matching F90 array pointer
     integer               :: i, j, k, loop, currentSsiPe
     character(len=320)    :: msg
@@ -167,12 +167,12 @@ module user_model1
 
     pi = 3.14159d0
 
-    ! Get the source Array from the export State
-    call ESMF_StateGet(exportState, "MyArray", array, rc=rc)
+    ! Get the source Field from the export State
+    call ESMF_StateGet(exportState, "MyField", field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get VM
@@ -189,7 +189,7 @@ do loop=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
     call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Fill source Array with data
+    ! Fill source Field with data
     do k = lbound(farrayPtr, 3), ubound(farrayPtr, 3)
     do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
     do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)

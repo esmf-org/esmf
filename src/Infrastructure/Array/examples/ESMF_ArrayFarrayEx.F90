@@ -27,8 +27,9 @@
 !EOE
 !BOC
 program ESMF_ArrayFarrayEx
+!EOC
 #include "ESMF.h"
-
+!BOC
   use ESMF
   use ESMF_TestMod
   

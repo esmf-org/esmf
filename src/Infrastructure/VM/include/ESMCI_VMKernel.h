@@ -375,6 +375,9 @@ class VMK{
     int getDefaultTag(int src, int dst);   // return default tag
     int getMaxTag();               // return maximum value of tag
     
+    const int *getSsipe() const {return ssipe;}
+    int **getCid() const {return cid;}
+        
     // get() calls
     int getLocalPet() const {return mypet;}
     int getCurrentSsiPe() const;
