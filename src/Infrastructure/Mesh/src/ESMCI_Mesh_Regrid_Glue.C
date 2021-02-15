@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -107,9 +107,10 @@ void ESMCI_regrid_create(
                      int *nentries, ESMCI::TempWeights **tweights,
                      int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                      int *_has_statusArray, ESMCI::Array **_statusArray,
+                     int *_checkFlag, 
                      int*rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_regrid_create()"
+#define ESMC_METHOD "ESMCI_regrid_create()"
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
 
@@ -142,6 +143,27 @@ void ESMCI_regrid_create(
     bool ignoreDegenerate=false;
     if (*_ignoreDegenerate == 1) ignoreDegenerate=true;
 
+    // transalate checkFlag to C++ bool
+    bool checkFlag=false;
+    if (*_checkFlag == 1) checkFlag=true;
+
+    // Output Warning message about checkFlag
+    if (checkFlag){
+      ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! Calling regrid weight generation                  !!!", 
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! (e.g. ESMF_FieldRegridStore()) with checkFlag on. !!!", 
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! Extra checking comes at the cost of performance.  !!!",
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! Only use for debugging, NOT for production!       !!!",
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+                            ESMC_LOGMSG_WARN);
+    }
+
+    
      //// Precheck Meshes for errors
     bool degenerate=false;
 
@@ -218,7 +240,8 @@ void ESMCI_regrid_create(
                  extrapNumLevels,
                  extrapNumInputLevels, 
                  &temp_unmappedaction,
-                 set_dst_status, dst_status)) {
+                 set_dst_status, dst_status,
+                 checkFlag)) {
         Throw() << "Online regridding error" << std::endl;
       }
     } else {
@@ -235,7 +258,8 @@ void ESMCI_regrid_create(
                  extrapNumLevels,
                  extrapNumInputLevels, 
                  &temp_unmappedaction,
-                 set_dst_status, dst_status)) {
+                 set_dst_status, dst_status,
+                 checkFlag)) {
         Throw() << "Online regridding error" << std::endl;
       }
     }

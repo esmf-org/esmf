@@ -3,9 +3,9 @@
 
 This section gives a brief description of how to get the ESMF software, build 
 it, and run the self-tests to verify the installation was successful. There is 
-also a short guide for using the bundled ESMF applications. More detailed 
+also a short guide for using the bundled ESMF command line tools. More detailed 
 information on each of these steps is provided in sections \ref{sec:TechOver},
- \ref{sec:TechOver2} and \ref{sec:Apps}, respectively.
+ \ref{sec:TechOver2} and \ref{sec:CLTs}, respectively.
 
 With a growing user community requiring access to ESMF, central computing 
 resources (such as ORNL for the {\it Jaguar} and {\it Kraken} supercomputers) 
@@ -15,8 +15,8 @@ ESMF. Practically it means that if you are working on a system (such as
 {\it Jaguar}) that offers a standard ESMF installation, you do not have to 
 download, build and validate your own ESMF installation from source! Instead you 
 can proceed directly to using ESMF as a programming library or through access to 
-the bundled applications as described in sections \ref{sec:Use} and 
-\ref{sec:Apps}, respectively.
+the bundled command line tools as described in sections \ref{sec:Use} and 
+\ref{sec:CLTs}, respectively.
 
 \subsection{Downloading ESMF}
 \subsubsection{From the ESMF web site}
@@ -450,47 +450,47 @@ compile-time and not run-time option.
 \end{description}
 
 
-\subsubsection{Building and using bundled ESMF applications}
+\subsubsection{Building and using bundled ESMF Command Line Tools}
 \label{quickapps}
 
-This section describes how the bundled ESMF applications can be built and used 
-from inside the ESMF source tree. Notice that this is sort of a quick and dirty 
-way of accessing the ESMF applications. It is supported as convenience to those 
-users interested in quickly gaining access to the bundled ESMF applications, and 
-do not mind the shortcomings of this approach. Users interested in maximum 
-portability should instead follow the instructions provided in section 
-\ref{sec:Apps}.
+This section describes how the bundled ESMF command line tools can be built
+and used from inside the ESMF source tree. Notice that this is sort of a quick
+and dirty way of accessing the ESMF applications. It is supported as
+convenience to those users interested in quickly gaining access to the bundled
+ESMF command line tools, and do not mind the shortcomings of this approach.
+Users interested in maximum portability should instead follow the instructions
+provided in section \ref{sec:CLTs}.
 
-To build the bundled ESMF applications type:
+To build the bundled ESMF command line tools, type:
 \begin{verbatim}
 gmake build_apps
 \end{verbatim}
-This will build the applications and place the executables under the 
+This will build the command line tools and place the executables under the 
 {\tt \$ESMF\_DIR/apps} directory inside the ESMF source tree. The 
-applications can be directly executed from within the {\tt \$ESMF\_DIR/apps} 
-directory following the system specific rules for execution. The details will 
-depend on whether ESMF was built with or without MPI dependency. In the latter 
-case the system specific rules for launching parallel applications must be 
-followed. System specific execution details on this level are outside of ESMF's 
-scope.
+command line tools can be directly executed from within the
+{\tt \$ESMF\_DIR/apps} directory following the system specific rules for
+execution. The details will depend on whether ESMF was built with or without
+MPI dependency. In the latter case the system specific rules for launching
+parallel applications must be followed. System specific execution details on
+this level are outside of ESMF's scope.
 
-For most systems, the MPI version of the ESMF bundled applications can be 
+For most systems, the MPI version of the ESMF bundled command line tools can be 
 executed by a command equivalent to:
 
 \begin{verbatim}
 
-mpirun -np X $(ESMF_DIR)/apps/..../application
+mpirun -np X $(ESMF_DIR)/apps/..../<cli-name>
 
 \end{verbatim}
  
-where {\tt X} specifies the total number of PETs and {\tt application} is the 
-name of the specific ESMF application to be executed. The {\tt ....} in the path 
-indicates the precise subdirectory structure under {\tt ./apps} which follows 
-the standard ESMF pattern also used for the {\tt ./tests} and {\tt ./examples} 
-subdirectories.
+where {\tt X} specifies the total number of PETs and {\tt cli-name} is the 
+name of the specific ESMF command line tool to be executed. The {\tt ....} in
+the path indicates the precise subdirectory structure under {\tt ./apps} which
+follows the standard ESMF pattern also used for the {\tt ./tests} and
+{\tt ./examples} subdirectories.
 
-All bundled ESMF applications support the standard \verb+ '--help'+ command line 
-option that prints out information on its proper use. More detailed instructions 
-of the individual applications are available in the "Applications" section of 
-the {\it ESMF Reference Manual}.
+All bundled ESMF command line tool support the standard \verb+ '--help'+ command
+line option that prints out information on its proper use. More detailed
+instructions of the individual tools are available in the "Command Line Tools"
+section of the {\it ESMF Reference Manual}.
 

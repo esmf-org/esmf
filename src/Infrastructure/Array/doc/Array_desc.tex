@@ -1,33 +1,38 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2020, University Corporation for Atmospheric Research, 
-% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-% Laboratory, University of Michigan, National Centers for Environmental 
-% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% Copyright 2002-2021, University Corporation for Atmospheric Research,
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+% Laboratory, University of Michigan, National Centers for Environmental
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-The Array class is an alternative to the Field class for representing 
-distributed, structured data.  Unlike Fields, which are built to carry 
-grid coordinate information, Arrays can only carry information about the 
-{\it indices} associated with grid cells.  Since they do not have coordinate 
-information, Arrays cannot be used to calculate interpolation weights.  
-However, if the user can supply interpolation weights, the Array sparse 
-matrix multiply operation can be used to apply the weights and transfer 
-data to the new grid.  Arrays can also perform redistribution, scatter, 
-and gather communication operations.
+The Array class is an alternative to the Field class for representing
+distributed, structured data.  Unlike Fields, which are built to carry
+grid coordinate information, Arrays only carry information about the
+{\it indices} associated with grid cells.  Since they do not have coordinate
+information, Arrays cannot be used to calculate interpolation weights.
+However, if the user supplies interpolation weights, the Array sparse
+matrix multiply (SMM) operation can be used to apply the weights and transfer
+data to the new grid.  Arrays carry enough information to perform
+redistribution, scatter, and gather communication operations.
 
-Like Fields, Arrays can be added to a State and used in inter-Component 
-data communications.  Arrays can also be grouped together into ArrayBundles 
-so that collective operations can be performed on the whole group.  One 
-motivation for this is convenience; another is the ability to schedule 
-optimized, collective data transfers.   
+Like Fields, Arrays can be added to a State and used in inter-Component
+data communications.  Arrays can also be grouped together into ArrayBundles,
+allowing operations to be performed collectively on the whole group.  One
+motivation for this is convenience; another is the ability to schedule
+optimized, collective data transfers.
 
-From a technical standpoint, the ESMF Array class is an index space 
-based, distributed data storage class. It provides DE-local memory allocations 
-within DE-centric index regions and defines the relationship to the index 
-space described by the ESMF DistGrid. The Array class offers common 
-communication patterns within the index space formalism. As part of the ESMF 
-index space layer, Array has close relationship to the DistGrid and DELayout 
-classes.
+From a technical standpoint, the ESMF Array class is an index space based,
+distributed data storage class. Its purpose is to hold distributed user data.
+Each decompositon element (DE) is associated with its own memory allocation. The
+index space relationship between DEs is described by the ESMF DistGrid class.
+DEs, and their associated memory allocation, are pinned either to a specific
+perisistent execution thread (PET), virtual address space (VAS), or a single
+system image (SSI). This aspect is managed by the ESMF DELayout class. Pinning
+to PET is the most common mode and is the default.
+
+The Array class offers common communication patterns within the index space
+formalism. All RouteHandle based communication methods of the Field,
+FieldBundle, and ArrayBundle layers are implemented via the Array SMM operation.

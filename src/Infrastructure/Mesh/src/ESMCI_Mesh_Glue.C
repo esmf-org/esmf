@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2123,7 +2123,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     // If elemCoords array exists, error check
     if (present(elemCoords)) {
 
-      // Mask sure element mask is present
+      // Mask sure element coords area present
       MEField<> *elem_coords=mesh->GetField("elem_coordinates");
       if (!elem_coords) {
         int localrc;
@@ -2274,9 +2274,9 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If it was passed in, fill elemCoords array
     if (present(elemCoords)) {
-
+/* XMRKX */
       // Get pointer to mesh elem coords data
-      MEField<> *elem_coords=mesh->GetField("orig_elem_coordinates");
+      MEField<> *elem_coords=mesh->GetField("elem_orig_coordinates");
       if (!elem_coords) {
         elem_coords=mesh->GetField("elem_coordinates");
       }

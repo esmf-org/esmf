@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -3100,7 +3100,7 @@ call ESMF_TraceRegionExit("call first level NUOPC_GetStateMemberListsIntrnl", rc
 !     \end{itemize}
 !   \item[{[dataFillScheme]}]
 !     Realized fields will be filled according to the selected fill
-!     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
+!     scheme. See {\tt ESMF\_FieldFill()} for fill schemes. Default is to leave
 !     the data in realized fields uninitialized.
 !   \item[{[field]}]
 !     Returns the completed field that was realized by this method. This option
@@ -3402,7 +3402,7 @@ call ESMF_TraceRegionExit("call first level NUOPC_GetStateMemberListsIntrnl", rc
 !     \end{itemize}
 !   \item[{[dataFillScheme]}]
 !     Realized fields will be filled according to the selected fill
-!     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
+!     scheme. See {\tt ESMF\_FieldFill()} for fill schemes. Default is to leave
 !     the data in realized fields uninitialized.
 !   \item[{[field]}]
 !     Returns the completed field that was realized by this method. This option
@@ -3602,7 +3602,7 @@ call ESMF_TraceRegionExit("call first level NUOPC_GetStateMemberListsIntrnl", rc
 !     \end{itemize}
 !   \item[{[dataFillScheme]}]
 !     Realized fields will be filled according to the selected fill
-!     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
+!     scheme. See {\tt ESMF\_FieldFill()} for fill schemes. Default is to leave
 !     the data in realized fields uninitialized.
 !   \item[{[field]}]
 !     Returns the completed field that was realized by this method. This option

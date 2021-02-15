@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -29,6 +29,11 @@ using namespace moab;
 #include <vector>
 
 namespace ESMCI {
+
+// Specified in the input connection list information for an element. 
+// When specified, indicates that the element should be divided at that point into 
+// another polygon
+#define MBMESH_POLYBREAK_IND -7
 
 // use when no pointer *rc is expected to return
 #define ESMC_CHECK_MOAB_THROW(merr) \
@@ -161,10 +166,12 @@ namespace ESMCI {
     bool has_elem_area;
     Tag  elem_area_tag;
 
-    bool has_elem_frac; // TODO: Get rid of this
+    bool has_elem_frac; // TODO: Get rid of this if it's always there???
+                        //       or make it so that elem fracs can be added later.
     Tag  elem_frac_tag;
 
     // Split stuff
+    // TODO: rethink this to make it more efficient
     bool is_split;
     int max_non_split_id;
     std::map<int,int> split_to_orig_id;
@@ -238,11 +245,18 @@ namespace ESMCI {
     // Get node mask value for one entity
     int get_node_mask_val(EntityHandle node);
 
+    // Set node mask
+    void set_node_mask(EntityHandle eh, int mask_val);
+
+    // Set node mask
+    void set_node_mask(Range nodes, int *masks);
+
+    // Set node mask
+    void set_node_mask(std::vector<EntityHandle> const &nodes, int *masks);
+
     // Get node mask for one entity
     int get_node_mask(EntityHandle node);
 
-    // Set node mask
-    void set_node_mask(EntityHandle eh, int mask_val);
 
     // Set node coords
     void set_node_coords(EntityHandle eh, double *orig_coords);
@@ -348,7 +362,7 @@ namespace ESMCI {
     void get_owned_nodes(std::vector<EntityHandle> &owned_nodes);
     void get_owned_elems(std::vector<EntityHandle> &owned_elems);
 
-    // Return a a vector of EntityHandles for the original nodes used for creation
+    // Return a a vector of EntityHandles for the original entities used for creation
     // on this processor sorted in the order they were used for creation
     void get_sorted_orig_nodes(std::vector<EntityHandle> &owned_nodes);
     void get_sorted_orig_elems(std::vector<EntityHandle> &owned_elems);
@@ -405,6 +419,9 @@ namespace ESMCI {
 
     //// Vector based accesors for elem info ////
 
+    // Set elem mask for a vector of entities (e.g. using orig_elems)
+    void set_elem_mask(std::vector<EntityHandle> const &elems, int *masks);
+
     // Set elem mask values for a vector of entities (e.g. using orig_elems)
     void set_elem_mask_val(std::vector<EntityHandle> const &elems, int *mask_val);
 
@@ -417,6 +434,9 @@ namespace ESMCI {
     // Get elem area values for a vector of entities (e.g. using orig_elems)
     void get_elem_area(std::vector<EntityHandle> const &elems, double *areas);
 
+    // Get elem frac values for a vector of entities (e.g. using orig_elems)
+    void get_elem_frac(bool merge_split, std::vector<EntityHandle> const &elems, double *fracs);
+
     // Get elem coords for a vector of entities (e.g. using orig_elems)
     void get_elem_orig_coords(std::vector<EntityHandle> const &elems, double *orig_coords);
 
@@ -424,9 +444,12 @@ namespace ESMCI {
     void get_elem_types(std::vector<EntityHandle> const &elems, int *elem_conn);
 
 
+
+
     // Accessors for values from a single EntityHandle (avoid if possible, slow)
     int get_elem_mask_val(EntityHandle eh);
     double get_elem_area(EntityHandle eh);
+    double get_elem_frac(EntityHandle eh);
 
     // Turn on elem masking
     void setup_elem_mask();
@@ -436,6 +459,7 @@ namespace ESMCI {
 
     // Set elem mask (not mask val) 
     void set_elem_mask(EntityHandle eh, int mask);
+    void set_elem_mask(Range elems, int *masks);
 
     // Set an element mask value 
     void set_elem_mask_val(EntityHandle eh, int mask_val);

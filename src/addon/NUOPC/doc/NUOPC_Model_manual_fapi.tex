@@ -112,7 +112,7 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
   \begin{itemize}
   \item Realize connected import and export fields that have their TransferActionGeomObject attribute set to ``provide'', i.e., that will provide their own geometric object (i.e., Grid, Mesh, or LocStream). ``provide'' is the default value of TransferActionGeomObject. Realize means an ESMF\_Field object is created on a geometric object and memory for the field is allocated or referenced.
 
-The {\tt NUOPC\_Realize} methods (\ref{NUOPC_RealizeComplete}, \ref{NUOPC_RealizeField}) are used to realize fields. Only previously advertised fields can be realized and the field's name is used to search the state for the previously advertised field.
+The {\tt NUOPC\_Realize} methods (\ref{NUOPC_RealizeCompleteG}, \ref{NUOPC_RealizeCompleteLS}, \ref{NUOPC_RealizeCompleteM}, \ref{NUOPC_RealizeField}, \ref{NUOPC_RealizeTransfer}) are used to realize fields. Only previously advertised fields can be realized and the field's name is used to search the state for the previously advertised field.
 
 *Note: This phase is not required if all fields are {\em accepting} a geometric object.
   \end{itemize}
@@ -126,7 +126,7 @@ This phase is useful when accepting a Grid from another component, but when the 
   \begin{itemize}
   \item Realize connected import and export fields that have their TransferActionGeomObject attribute set to ``accept'', i.e., that will accept a geometric object from a connected field in another component.  If the generic {\tt NUOPC\_Connector} is used, at this point the full geometric object has already been set in the field and only a call to {\tt ESMF\_FieldEmptyComplete} is required to allocate memory for the field.
 
-The {\tt NUOPC\_Realize} methods (\ref{NUOPC_RealizeComplete}, \ref{NUOPC_RealizeField}) are used to realize fields. Only previously advertised fields can be realized and the field's name is used to search the state for the previously advertised field.
+The {\tt NUOPC\_Realize} methods (\ref{NUOPC_RealizeCompleteG}, \ref{NUOPC_RealizeCompleteLS}, \ref{NUOPC_RealizeCompleteM}, \ref{NUOPC_RealizeField}, \ref{NUOPC_RealizeTransfer}) are used to realize fields. Only previously advertised fields can be realized and the field's name is used to search the state for the previously advertised field.
 
   *Note: This phase is not required if all fields are {\em providing} a geometric object.
   \end{itemize}

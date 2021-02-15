@@ -136,7 +136,8 @@ The valid values are:
 \subsection{ESMF\_DATACOPY}
 \label{const:datacopyflag}
 {\sf DESCRIPTION:\\}
-Indicates whether to reference a data item or make a copy of it.
+Indicates how data references, copies, and memory allocations to hold data are
+handled.
 
 The type of this flag is:
 
@@ -144,10 +145,13 @@ The type of this flag is:
 
 The valid values are:
 \begin{description}
-\item [ESMF\_DATACOPY\_VALUE]
-      Copy the data item to another buffer.
+\item [ESMF\_DATACOPY\_ALLOC]
+      Create a new allocation that is sufficient in size to hold the data.
+      However, no data is copied and the allocation is returned uninitialized.
 \item [ESMF\_DATACOPY\_REFERENCE]
-      Reference the data item.
+      Reference the data within the existing allocation.
+\item [ESMF\_DATACOPY\_VALUE]
+      Copy the data to another allocation. If needed create the new allocation.
 \end{description}
 
 \subsection{ESMF\_DECOMP}

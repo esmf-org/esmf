@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -2029,7 +2029,7 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
               &tmpExtrapNumLevels,
               &tmpExtrapNumInputLevels,
               unmappedaction, 
-              tmp_set_dst_status, tmp_dst_status))
+              tmp_set_dst_status, tmp_dst_status, false))
     Throw() << "Regridding error" << std::endl;
 
   return 1;

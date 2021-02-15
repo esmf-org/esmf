@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -38,7 +38,8 @@ namespace ESMCI {
             int *extrapNumLevels,
             int *extrapNumInputLevels, 
             int *unmappedaction,
-            bool set_dst_status, WMat &dst_status) {
+            bool set_dst_status, WMat &dst_status,
+            bool checkFlag) {
 
 
    // See if it could have a pole
@@ -193,7 +194,7 @@ namespace ESMCI {
       Interp interp(srcmesh, srcpointlist, tmp_dstmesh, dstpointlist,
                     midmesh, false, *regridMethod,
                     set_dst_status, dst_status,
-                    mtype, *unmappedaction);
+                    mtype, *unmappedaction, checkFlag);
       ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid interp 1");
 
 

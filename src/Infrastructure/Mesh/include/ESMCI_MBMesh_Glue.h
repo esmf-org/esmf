@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -161,9 +161,7 @@ void MBMesh_turnoffelemmask(MBMesh **mbmpp, int *rc);
 void MBMesh_turnonnodemask(MBMesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
 void MBMesh_turnoffnodemask(MBMesh **meshpp, int *rc);
 
-EntityType get_entity_type(int pdim, int etype);
-
-int ElemType2NumNodes(int pdim, int etype);
+void MBMesh_getelemfrac(MBMesh *mbmesh, int *_num_elem, double *elem_fracs, int *rc);
 
 #endif // ESMF_MOAB
 

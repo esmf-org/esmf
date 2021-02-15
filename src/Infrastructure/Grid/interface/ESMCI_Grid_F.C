@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -859,7 +859,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
                                          int *staggerloc,
                                          int *coord,
                                          ESMCI::Array **array,
-                                         ESMCI::CopyFlag *docopy,
+                                         ESMCI::DataCopyFlag *docopy,
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -881,7 +881,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
                                          int *staggerloc,
                                          int *item,
                                          ESMCI::Array **array,
-                                         ESMCI::CopyFlag *docopy,
+                                         ESMCI::DataCopyFlag *docopy,
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -995,7 +995,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
                                          int *staggerloc,
                                          int *arrayCount,
                                          ESMCI::Array **arrayList,
-                                         ESMCI::CopyFlag *docopy,
+                                         ESMCI::DataCopyFlag *docopy,
                                          ESMCI::InterArray<int> *staggerEdgeLWidthArg,
                                          ESMCI::InterArray<int> *staggerEdgeUWidthArg,
                                          ESMCI::InterArray<int> *staggerAlignArg,
@@ -1075,7 +1075,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
                                          int *staggerloc,
                                          int *coord,
                                          ESMCI::Array **array,
-                                         ESMCI::CopyFlag *docopy,
+                                         ESMCI::DataCopyFlag *docopy,
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -1170,7 +1170,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
                                         int *staggerloc,
                                         int *item,
                                         ESMCI::Array **array,
-                                        ESMCI::CopyFlag *docopy,
+                                        ESMCI::DataCopyFlag *docopy,
                                         int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -1223,7 +1223,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
     int gridExLBnd[ESMF_MAXDIM];
     int gridExUBnd[ESMF_MAXDIM];
     int userIndexOffset[ESMF_MAXDIM];
-    ESMCI::CopyFlag docopy;
+    ESMCI::DataCopyFlag docopy;
     ESMC_GridDecompType decompType;
 
     // Get Grid pointer
@@ -1317,7 +1317,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
    array = ESMC_NULL_POINTER;
    if (!grid->isEmptyCoordArray(staggerloc, coord)) {
      // Get Array
-     docopy=ESMCI::DATA_REF;
+     docopy=ESMCI::DATACOPY_REFERENCE;
      array=grid->getCoordArray(&staggerloc, coord+1, &docopy, &localrc);
      if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
               ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc))) return;
@@ -1729,7 +1729,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
     int gridExLBnd[ESMF_MAXDIM];
     int gridExUBnd[ESMF_MAXDIM];
     int userIndexOffset[ESMF_MAXDIM];
-    ESMCI::CopyFlag docopy;
+    ESMCI::DataCopyFlag docopy;
     ESMC_GridDecompType decompType;
 
     // Get Grid pointer
@@ -1817,7 +1817,7 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
    array = ESMC_NULL_POINTER;
    if (grid->hasItemStaggerLoc(staggerloc, item)) {
      // Get Array
-     docopy=ESMCI::DATA_REF;
+     docopy=ESMCI::DATACOPY_REFERENCE;
      array=grid->getItemArray(&staggerloc, &item, &docopy, &localrc);
      if(ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
               ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc))) return;

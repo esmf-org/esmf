@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -166,6 +166,7 @@ end function my_xor
                  routehandle, &
                  indices, weights, &
                  unmappedDstList, &
+                 checkFlag, &
                  rc)
 !
 ! !ARGUMENTS:
@@ -198,6 +199,7 @@ end function my_xor
       integer(ESMF_KIND_I4),       pointer, optional   :: unmappedDstList(:)
       logical                     :: hasStatusArray
       type(ESMF_Array)            :: statusArray
+      logical :: checkFlag
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -248,7 +250,7 @@ end function my_xor
        integer :: localIgnoreDegenerate
        integer :: src_pl_used_int, dst_pl_used_int
        integer ::  has_statusArrayInt
-
+       integer :: checkFlagInt
 
 
        ! Logic to determine if valid optional args are passed.  
@@ -339,6 +341,9 @@ end function my_xor
           has_statusArrayInt=1
        endif
 
+       ! Covert checkFlag to int
+       checkFlagInt=0
+       if (checkFlag) checkFlagInt=1
 
         ! Call through to the C++ object that does the work
         call c_ESMC_regrid_create(srcMesh%this, srcArray, srcPointList, src_pl_used_int, &
@@ -360,6 +365,7 @@ end function my_xor
                    nentries, tweights, &
                    has_udl, num_udl, tudl, &
                    has_statusArrayInt, statusArray, &
+                   checkFlagInt, &
                    localrc)
 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

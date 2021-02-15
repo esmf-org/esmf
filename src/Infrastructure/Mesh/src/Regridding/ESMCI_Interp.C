@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -252,9 +252,11 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
 
 }
 
-#ifdef REGRID_DEBUG_OVERLAP
-  // This assumes that mesh is a rendezvous mesh or is serial
-  void calc_max_overlap(Mesh &mesh, double &max_overlap, int &max_overlap_src_id, int &max_overlap_dst_id) {
+
+// This assumes that mesh is a rendezvous mesh or is serial
+// max_local_overlap_area returns the local  maximum overlap area which will be -1 if no overlap was detected
+// max_local_overlap_id1 and max_local_overlap_id2 give the element ids of the local max overlap
+void calc_max_overlap(Mesh &mesh, double &max_local_overlap_area, int &max_local_overlap_id1, int &max_local_overlap_id2) {
   Trace __trace("calc_max_overlap(Mesh &mesh, double &max_overlap, int &max_overlap_id)");
 
   // Calc search results
@@ -311,12 +313,9 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
   std::vector<sintd_cell *> tmp_cells;  
 
   // Init variables
-  int loc_max_sid=-1;
-  int loc_max_did=-1;
-  double loc_max_overlap=0.0; 
-  double loc_tot_overlap_area=0.0;
-
-  int num_big_overlap=0;
+  int loc_max_id1=-1;
+  int loc_max_id2=-1;
+  double loc_max_overlap_area=-1.0; 
 
   // Loop through search results
   for (sb = sres.begin(); sb != se; sb++) {
@@ -409,21 +408,14 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
 	// Skip if src area is 0.0 
 	if (src_elem_area == 0.0) continue;
 
-	// Compute overlap fraction
-	// double overlap= areas[i]/src_elem_area;
-	double overlap= areas[i];
-
-	loc_tot_overlap_area += areas[i];
-
-	if (overlap > 1.0E-6) {
-	 num_big_overlap++;
-	}
+	// Get overlap area
+	double overlap_area= areas[i];
 
 	// Update max
-	if (overlap > loc_max_overlap) {
-	  loc_max_sid=sr.elem->get_id();
-	  loc_max_did=sr.elems[i]->get_id();
-	  loc_max_overlap=overlap;
+	if (overlap_area > loc_max_overlap_area) {
+	  loc_max_id1=sr.elem->get_id();
+	  loc_max_id2=sr.elems[i]->get_id();
+	  loc_max_overlap_area=overlap_area;
 	}
       }
     }
@@ -444,15 +436,11 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
   }
 #endif
 
-  // TODO: Eventually get the max over all processors
-
   // Output local max for now
-  max_overlap=loc_max_overlap;
-  max_overlap_src_id=loc_max_sid;
-  max_overlap_dst_id=loc_max_did;
+  max_local_overlap_area=loc_max_overlap_area;
+  max_local_overlap_id1=loc_max_id1;
+  max_local_overlap_id2=loc_max_id2;
 }
-
-#endif
 
 /*----------------------------------------------------------------*/
 // Interp:
@@ -2834,10 +2822,60 @@ static void _fill_pl_with_outside_status(PointList &pl, WMat &status) {
     }
 }
 
+// Check a Mesh for some more expensive error conditions
+// If one is detected, then fail with an error message
+static void _check_mesh(Mesh &mesh, const char *name) {
+#define OVERLAP_TOL 1.0E-15
+
+  // Do overlap detection
+  double max_local_overlap_area;
+  int max_local_overlap_id1, max_local_overlap_id2;
+  calc_max_overlap(mesh, max_local_overlap_area, max_local_overlap_id1, max_local_overlap_id2);
+
+  // Reduce to get the max overlap and proc it's located on
+  // Struct to use for MPI_MAXLOC
+  struct {
+    double area;
+    int rank;
+  } local_max, global_max;
+  local_max.area=max_local_overlap_area;
+  local_max.rank=Par::Rank();
+  MPI_Allreduce(&local_max,&global_max,1,MPI_DOUBLE_INT,MPI_MAXLOC,Par::Comm());
+
+  // If the global_max overlap is bigger than tol, then report an error
+  if (global_max.area > OVERLAP_TOL) {
+
+    // Broadcast ids from max proc, so everyone has them
+    int global_max_ids[2];
+    global_max_ids[0]=max_local_overlap_id1;
+    global_max_ids[1]=max_local_overlap_id2;
+    MPI_Bcast(global_max_ids,2,MPI_INT,global_max.rank,Par::Comm());
+
+    // Output error info on processor 0
+      ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Self Overlapping Grid or Mesh Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+      ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+      char msg[1024];
+      sprintf(msg,"  Significant self overlap (overlap area > %g) detected in %s Mesh or Grid.",OVERLAP_TOL,name);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+      sprintf(msg,"  Maximum overlap area=%g occurs between elem id=%d and elem id=%d",global_max.area, global_max_ids[0], global_max_ids[1]);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+      ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+      ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+      Throw() << " Self overlapping Grid or Mesh detected.";
+  }
+#undef OVERLAP_TOL
+
+  // TODO: add more checks
+
+
+
+}
+
 Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh,
                bool freeze_src_, int imethod,
                bool set_dst_status, WMat &dst_status,
-               MAP_TYPE mtype, int unmappedaction, int _num_src_pnts, ESMC_R8 _dist_exponent):
+               MAP_TYPE mtype, int unmappedaction, bool checkFlag, 
+               int _num_src_pnts, ESMC_R8 _dist_exponent):
 
 sres(),
 grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE)),
@@ -2932,6 +2970,8 @@ interp_method(imethod)
       }
     } else {
       if (search_obj_type == MeshObj::NODE) {
+
+        // Search
         OctSearch(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type,
                   unmappedaction, sres, set_dst_status, dst_status, 1e-8);
         // Redistribute regrid status
@@ -2939,6 +2979,14 @@ interp_method(imethod)
           dst_status.Migrate(*dstplist);
         }
       } else if (search_obj_type == MeshObj::ELEMENT) {
+
+        // Check meshes
+        if (checkFlag) {
+          _check_mesh(grend.GetSrcRend(), "source");
+          _check_mesh(grend.GetDstRend(), "destination");
+        }
+
+        // Search
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
         if(freeze_src_) {
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
@@ -2972,6 +3020,12 @@ interp_method(imethod)
                   unmappedaction, sres, set_dst_status, dst_status, 1e-8);
         //OctSearch(src, dest, mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
+        // Check grids
+        if (checkFlag) {
+          _check_mesh(*src, "source");
+          _check_mesh(*dest, "destination");
+        }
+
         OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
       }
     }

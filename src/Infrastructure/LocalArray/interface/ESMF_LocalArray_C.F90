@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -110,7 +110,7 @@ end subroutine f_esmf_localarrayadjust
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_localarraycopyf90ptr"
-subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, rc)
+subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, datacopyflag, rc)
   use ESMF_UtilTypesMod     ! ESMF base class
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error logging
@@ -118,9 +118,10 @@ subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, rc)
   
   implicit none
 
-  type(ESMF_LocalArray) :: arrayInArg
-  type(ESMF_LocalArray) :: arrayOutArg
-  integer :: rc
+  type(ESMF_LocalArray)     :: arrayInArg
+  type(ESMF_LocalArray)     :: arrayOutArg
+  type(ESMF_DataCopy_Flag)  :: datacopyflag
+  integer                   :: rc
   
   type(ESMF_LocalArray) :: arrayIn
   type(ESMF_LocalArray) :: arrayOut
@@ -140,7 +141,8 @@ subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, rc)
   arrayOut%this = arrayOutArg%this  ! only access "this" member
 
   ! do the actual copy, allocating the required memory
-  call ESMF_LocalArrayCopyF90Ptr(arrayIn, arrayOut, rc=rc)
+  call ESMF_LocalArrayCopyF90Ptr(arrayIn, arrayOut, datacopyflag=datacopyflag, &
+    rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT)) return

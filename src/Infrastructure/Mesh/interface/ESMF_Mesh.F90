@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -218,6 +218,7 @@ module ESMF_MeshMod
   public ESMF_MeshCreateDual  ! not a public interface for now
   public ESMF_MeshSet
   public ESMF_MeshSetMOAB
+  public ESMF_MeshGetMOAB
   public ESMF_MeshSetIsCMeshFreed
   public ESMF_MeshGetIntPtr
   public ESMF_MeshCreateFromIntPtr
@@ -6135,19 +6136,112 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Init localrc
     localrc = ESMF_SUCCESS
 
-   ! Translate to integer
-   intMoabOn=0
-   if (moabOn) then
+    ! Translate to integer
+    intMoabOn=0
+    if (moabOn) then
       intMoabOn=1
-   endif
+    endif
 
     call c_esmc_meshsetMOAB(intMoabOn, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! add log messages about MOAB
+    if (moabOn) then
+      call ESMF_LogWrite ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!!        MOAB turned ON             !!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!! Meshes now created using MOAB     !!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_LogWrite ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!!        MOAB turned OFF            !!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!! Meshes now created using native   !!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogWrite ('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',  &
+        ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
 
     if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_MeshSetMOAB
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetMOAB()"
+!BOP
+! !IROUTINE: ESMF_MeshGetMOAB -- Check on status of using MOAB library internally.
+!
+! !INTERFACE:
+   subroutine ESMF_MeshGetMOAB(moabOn, rc)
+!
+! !ARGUMENTS:
+    logical, intent(out)                      :: moabOn
+    integer, intent(out), optional            :: rc
+!
+! !DESCRIPTION:
+!   This method is only temporary. It was created to enable testing during the stage in ESMF development while
+!   we have two internal mesh implementations. At some point it will be removed.
+!
+!   This method can be used to check whether the MOAB library is being used
+!   to hold the internal structure of the Mesh. When set to .true. the following
+!   Mesh create calls create a Mesh using MOAB internally. When set to .false. the following
+!   Mesh create calls use the ESMF native internal mesh respresentation. Note that ESMF Meshes
+!   created on MOAB are only supported in a limited set of operations and should be used
+!   with caution as they haven't yet been tested as thoroughly as the native version.
+!   Also, operations that use a pair of Meshes (e.g. regrid weight generation) are only supported between
+!   meshes of the same type (e.g. you can regrid between two MOAB meshes, but not between a MOAB and
+!   a native mesh).
+!
+!   \begin{description}
+!   \item [moabOn]
+!         Output variable which indicates current state of MOAB.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc
+    integer :: intMoabOn
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+
+    ! Get status from C
+    call c_esmc_meshgetMOAB(intMoabOn, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Translate to logical
+    moabOn=.false.
+    if (intMoabOn .eq. 1) moabOn=.true.
+    
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshGetMOAB
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -68,6 +68,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(MeshCap **meshsrcpp,
                                             int *nentries, ESMCI::TempWeights **tweights,
                                             int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                                             int *has_statusArray, ESMCI::Array **statusArray,
+                                            int *checkFlag, 
                                             int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()"
@@ -106,6 +107,7 @@ MeshCap::regrid_create(meshsrcpp, arraysrcpp, plsrcpp,
                        nentries, tweights,
                        has_udl, _num_udl, _tudl,
                        has_statusArray, statusArray,
+                       checkFlag, 
                        rc);
 }
 

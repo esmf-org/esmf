@@ -2,7 +2,7 @@
 
 # Earth System Modeling Framework (ESMF)  
 
->Copyright (c) 2002-2020 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
+>Copyright (c) 2002-2021 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
 
 Hello and welcome to ESMF.
 
@@ -33,7 +33,6 @@ conda create -c conda-forge -n <env> esmf esmpy
 
 Several add-on packages are included with ESMF under [`./src/addon`](https://github.com/esmf-org/esmf/tree/master/src/addon):  
  * [ESMPy](src/addon/ESMPy/README.md) - Python interface to ESMF.
- * [MAPL](src/addon/MAPL/README) - Usability layer developed under the NASA Modeling Analysis and Prediction (MAP) program.
  * [NUOPC](src/addon/NUOPC/README) - Interoperability layer developed under the National Unified Operational Prediction Capability (NUOPC) program.
 
 See each addon package for a specific README file.

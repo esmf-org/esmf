@@ -83,6 +83,20 @@ jobs:
     resource_class: small
     steps:
       - run: exit 0
+      
+  should-run-test-coverage:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
+  
+  should-run-api-change:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
 
   should-run-osx:
     docker:
@@ -153,7 +167,7 @@ jobs:
 
   publish-esmf-docs:
     machine: true
-    resource_class: small
+    resource_class: medium
     steps:
       - restore_cache:
           keys:
@@ -164,6 +178,86 @@ jobs:
       - run:
           name: Push to github.io
           command: bash esmf/.circleci/sh/doc-push.sh
+          
+  run-test-coverage:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+      - run:
+          name: Docker Run Test Coverage
+          command: docker build -t "esmf/test-coverage:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/test_coverage/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
+      - run:
+          name: Extract Test Coverage
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/log/test_coverage-artifacts.zip" "esmf/test-coverage:${CIRCLE_BRANCH}"
+      - save_cache:
+          key: test-coverage-{{ .Revision }}
+          paths:
+            - /tmp/artifacts
+            - esmf
+      - store_artifacts:
+          path: /tmp/artifacts/test_coverage-artifacts.zip
+          destination: test_coverage-artifacts.zip
+
+  publish-test-coverage:
+    machine: true
+    resource_class: medium
+    steps:
+      - restore_cache:
+          keys:
+            - test-coverage-{{ .Revision }}
+      - run:
+          name: Prep Test Coverage
+          command: cd /tmp/artifacts && unzip test_coverage-artifacts.zip
+      - run:
+          name: Push to esmf-test-artifacts
+          command: bash esmf/.circleci/sh/test_coverage-push.sh
+
+  run-api-change:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+      - run:
+          name: Docker Run API Changes
+          command: docker build -t "esmf/api-change:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/API_changes/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --build-arg TAG2="ESMF_8_0_1" --no-cache .
+      - run:
+          name: Extract API Changes
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/api/api_change-artifacts.zip" "esmf/api-change:${CIRCLE_BRANCH}"
+      - save_cache:
+          key: api-change-{{ .Revision }}
+          paths:
+            - /tmp/artifacts
+            - esmf
+      - store_artifacts:
+          path: /tmp/artifacts/api_change-artifacts.zip
+          destination: api_change-artifacts.zip
+
+  publish-api-change:
+    machine: true
+    resource_class: medium
+    steps:
+      - restore_cache:
+          keys:
+            - api-change-{{ .Revision }}
+      - run:
+          name: Prep API Changes
+          command: cd /tmp/artifacts && unzip api_change-artifacts.zip
+      - run:
+          name: Push to esmf-test-artifacts
+          command: bash esmf/.circleci/sh/api_changes-push.sh
 
   esmpy-test:
     parameters:
@@ -211,7 +305,7 @@ jobs:
 
   publish-esmpy-docs:
     machine: true
-    resource_class: small
+    resource_class: medium
     steps:
       - restore_cache:
           keys:
@@ -383,6 +477,35 @@ workflows:
       - publish-esmpy-docs:
           requires:
             - build-esmpy-docs
+          filters:
+            branches:
+              only:
+                - develop
+  test-coverage-commit:
+    jobs:
+      - should-run-test-coverage:
+         type: approval
+      - run-test-coverage:
+          requires:
+            - should-run-test-coverage
+      - publish-test-coverage:
+          requires:
+            - run-test-coverage
+          filters:
+            branches:
+              only:
+                - develop  
+
+  api-change-commit:
+    jobs:
+      - should-run-api-change:
+         type: approval
+      - run-api-change:
+          requires:
+            - should-run-api-change
+      - publish-api-change:
+          requires:
+            - run-api-change
           filters:
             branches:
               only:

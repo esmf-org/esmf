@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -755,6 +755,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
   ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
 
+#define PROGRESSLOG_on
+
+#ifdef PROGRESSLOG_on
+  call ESMF_LogWrite("ESMF_FieldRedistStoreNF(): Just entered routine.", ESMF_LOGMSG_INFO)
+#endif
+
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
@@ -774,6 +780,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
+
+#ifdef PROGRESSLOG_on
+  call ESMF_LogWrite("ESMF_FieldRedistStoreNF(): Leaving routine.", ESMF_LOGMSG_INFO)
+#endif
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldRedistStoreNF

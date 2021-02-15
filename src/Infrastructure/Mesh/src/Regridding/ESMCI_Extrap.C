@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -699,7 +699,7 @@ template void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dt
    Interp interp((Mesh *)NULL, srcpointlist_extrap,(Mesh *)NULL, missing_points,
                  (Mesh *)NULL, false, ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST,
                  set_dst_status, extrap_dst_status,
-                 mtype, ESMCI_UNMAPPEDACTION_IGNORE, 
+                 mtype, ESMCI_UNMAPPEDACTION_IGNORE, false,
                  0, 0.0);
 
    // Create the weight matrix
@@ -768,7 +768,7 @@ template void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dt
    Interp interp((Mesh *)NULL, srcpointlist_extrap,(Mesh *)NULL, missing_points,
                  (Mesh *)NULL, false, ESMC_REGRID_METHOD_NEAREST_IDAVG,
                  set_dst_status, extrap_dst_status,
-                 mtype, ESMCI_UNMAPPEDACTION_IGNORE, 
+                 mtype, ESMCI_UNMAPPEDACTION_IGNORE, false, 
                  extrapNumSrcPnts, extrapDistExponent);
 
    // Create the weight matrix
@@ -830,7 +830,7 @@ template void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dt
                   (Mesh *)NULL, dst_missing_points,
                   (Mesh *)NULL, false, regridMethod,
                   set_dst_status, nrst_extrap_dst_status,
-                  mtype, ESMCI_UNMAPPEDACTION_IGNORE, 
+                  mtype, ESMCI_UNMAPPEDACTION_IGNORE, false, 
                   0, 0.0);
     
     // Create the weight matrix
@@ -960,7 +960,7 @@ template void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dt
                      (Mesh *)NULL, dst_missing_points,
                      (Mesh *)NULL, false, regridMethod,
                      set_dst_status, nrst_extrap_dst_status,
-                     mtype, ESMCI_UNMAPPEDACTION_IGNORE, 
+                     mtype, ESMCI_UNMAPPEDACTION_IGNORE, false, 
                      0, 0.0);
        
        // Create the weight matrix

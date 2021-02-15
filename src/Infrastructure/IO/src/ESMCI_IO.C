@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1392,7 +1392,7 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
 
   // finally, create the fixed up Array using pointer to original data.
   // Assuming only 1 DE/PET since redist step would have been performed previously.
-  CopyFlag copyflag = DATA_REF;
+  DataCopyFlag copyflag = DATACOPY_REFERENCE;
   *dest_array_p = Array::create (src_array_p->getLocalarrayList(), 1,
       dg_temp, copyflag,
       NULL, NULL, NULL, NULL, NULL,

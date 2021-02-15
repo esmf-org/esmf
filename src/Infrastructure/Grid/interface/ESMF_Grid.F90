@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -5198,8 +5198,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Find out how the corners around the centers in a SCRIP grid 
     ! align with each other
-    subroutine find_corner_align(dim1,dim2,cornerX2D,cornerY2D, &
+    subroutine find_corner_align(startCell,dim1,dim2,cornerX2D,cornerY2D, &
          foundAlign, topCorner,topRightCorner,btmRightCorner,btmCorner,rc)
+      integer :: startCell
       integer :: dim1,dim2
       real(ESMF_KIND_R8) :: cornerX2D(:,:),cornerY2D(:,:)
       logical :: foundAlign
@@ -5237,7 +5238,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)
          return
       endif
-      
+
+      ! We can't find an alignment for this case, because it won't fit in the corner data
+      ! Report that without an error, so another can be tried.
+      if (startCell+1 > dim1*dim2) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+
+      ! We can't find an alignment for this case, because it won't fit in corner data.
+      ! Report that without an error, so another can be tried.
+      if (startCell+dim1 > dim1*dim2) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+
+      ! We can't find an alignment for this case, because it won't fit in corner data.
+      ! Report that without an error, so another can be tried.
+      if (startCell+dim1+1 > dim1*dim2) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+
+
       ! Figure out which corner indice is the top row of corners
       ! It won't match any of the neighbors corners
       TopCorner=-1
@@ -5246,8 +5272,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ! See if it matches nbr to the right
          matches=.false.
          do j=1,4
-            if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-                 (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+1))<tol)) then
                matches=.true.
                exit
             endif
@@ -5257,8 +5283,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ! See if it matches nbr to the below
          matches=.false.
          do j=1,4
-            if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
-                 (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+dim1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+dim1))<tol)) then
                matches=.true.
                exit
             endif
@@ -5268,8 +5294,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ! See if it matches nbr to the below and to the right
          matches=.false.
          do j=1,4
-            if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
-                 (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+dim1+1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+dim1+1))<tol)) then
                matches=.true.
                exit
             endif
@@ -5298,8 +5324,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ! See if it matches nbr to the right
          matches=.false.
          do j=1,4
-            if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-                 (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+1))<tol)) then
                matches=.true.
                exit
             endif
@@ -5309,8 +5335,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ! See if it matches nbr to the below right
          matches=.false.
          do j=1,4
-            if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
-                 (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+dim1+1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+dim1+1))<tol)) then
                matches=.true.
                exit
             endif
@@ -5322,7 +5348,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             exit
          endif
       enddo
-      
+
       ! Make sure we found a corner
       if (TopRightCorner == -1) then
          foundAlign=.false.
@@ -5338,8 +5364,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ! See if it matches nbr to the right
          matches=.false.
          do j=1,4
-            if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-                 (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+1))<tol)) then
                matches=.true.
                exit
             endif
@@ -5349,8 +5375,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ! See if it matches nbr to the below
          matches=.false.
          do j=1,4
-            if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
-                 (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+dim1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+dim1))<tol)) then
                matches=.true.
                exit
             endif
@@ -5451,18 +5477,36 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  endif
 
  ! Find the alignment of the corners
- call find_corner_align(dim1,dim2,cornerX2D,cornerY2D, &
+ call find_corner_align(1,dim1,dim2,cornerX2D,cornerY2D, &
       foundAlign,topCorner,topRightCorner,btmRightCorner,btmCorner,rc=localrc)
  if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
- ! IF we couldn't find an align then just default
+ ! Try second row
  if (.not. foundAlign) then
-    topCorner=1
-    topRightCorner=2
-    btmRightCorner=3
-    btmCorner=4
+    call find_corner_align(1+dim1,dim1,dim2,cornerX2D,cornerY2D, &
+         foundAlign,topCorner,topRightCorner,btmRightCorner,btmCorner,rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+ endif
+
+#if 0
+ ! Debug output
+ write(*,*) "topCorner=",topCorner
+ write(*,*) "topRightCorner=",topRightCorner
+ write(*,*) "btmRightCorner=",btmRightCorner
+ write(*,*) "btmCorner=",btmCorner
+#endif
+
+ ! If we couldn't find an align then return error
+ if (.not. foundAlign) then
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+         msg=" Couldn't find a consistent ordering of corners around each cell in file"// & 
+             " to be able to arrange them into a logically rectangular Grid.", &
+         ESMF_CONTEXT, rcToReturn=rc)
+    return
  endif
 
 #if 0

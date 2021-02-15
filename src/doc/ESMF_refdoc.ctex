@@ -113,17 +113,17 @@
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Applications}
+\addcontentsline{toc}{part}{Command Line Tools}
 \end{htmlonly}
-\part{Applications}
+\part{Command Line Tools}
 
-\label{part:Applications}
+\label{part:CLTs}
 
-\input{Applications}
+\input{CLTs}
 
-%\input{ESMF_InfoC}
+%\input{ESMF_PrintInfoC}
 
-\input{ESMF_Info}
+\input{ESMF_PrintInfo}
 
 \input{ESMF_RegridWeightGen}
 

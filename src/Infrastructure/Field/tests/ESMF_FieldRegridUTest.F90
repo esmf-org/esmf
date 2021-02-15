@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -349,6 +349,32 @@
       ! do test
       call test_regridCnr(rc)
 
+       ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid with masks
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "MOAB bilinear regrid on Grid corner stagger"
+
+      ! initialize
+      rc=ESMF_SUCCESS
+
+      ! do test
+#if defined ESMF_MOAB    
+
+      ! Turn on MOAB 
+      call ESMF_MeshSetMOAB(.true.)
+
+      ! Do test
+      call test_regridCnr(rc)
+
+      ! Turn off MOAB
+      call ESMF_MeshSetMOAB(.false.)
+#endif
        ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1158,6 +1184,34 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
        !------------------------------------------------------------------------
 
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid with masks
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "MOAB bilinear regrid on Grid center stagger"
+
+      ! initialize
+      rc=ESMF_SUCCESS
+
+      ! do test
+#if defined ESMF_MOAB    
+      ! Turn on MOAB 
+      call ESMF_MeshSetMOAB(.true.)
+
+      ! do test
+      call test_regrid_gridufrm(rc)
+
+
+      ! Turn off MOAB
+      call ESMF_MeshSetMOAB(.false.)
+#endif
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+       !------------------------------------------------------------------------
+
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
@@ -1717,6 +1771,7 @@ contains
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           srcTermProcessing=srcTermProcessing, &
           pipeLineDepth=pipeLineDepth, &
+          checkFlag=.true., & ! Just add this to make sure it doesn't cause problems, even when no error
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -34612,7 +34667,7 @@ write(*,*) "LOCALRC=",localrc
   srcGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/src_nx,src_ny/), &
        minCornerCoord=(/0.0_ESMF_KIND_R8,-80.0_ESMF_KIND_R8/), &
        maxCornerCoord=(/360.0_ESMF_KIND_R8,80.0_ESMF_KIND_R8/), &
-       staggerLocList=(/ESMF_STAGGERLOC_CENTER/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -34624,7 +34679,7 @@ write(*,*) "LOCALRC=",localrc
   dstGrid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/dst_nx,dst_ny/), &
        minCornerCoord=(/-50.0_ESMF_KIND_R8,-50.0_ESMF_KIND_R8/), &
        maxCornerCoord=(/50.0_ESMF_KIND_R8,50.0_ESMF_KIND_R8/), &
-       staggerLocList=(/ESMF_STAGGERLOC_CENTER/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
