@@ -82,36 +82,6 @@ endif
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
-# XT compute nodes do not have support for POSIX dynamic linking
-#
-#ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
-
-############################################################
-# XT compute nodes do not have support for "gethostid()"
-#
-#ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
-# XT compute nodes do not have support for signals
-#
-#ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
-
-############################################################
-# XT compute nodes do not have support for system call
-#
-#ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
-
-############################################################
-# XT compute nodes do not have support for Pthreads
-#
-#ESMF_PTHREADS := OFF
-
-############################################################
-# XT compute nodes do not have support for OpenMP
-#
-#ESMF_OPENMP := OFF
-
-############################################################
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
