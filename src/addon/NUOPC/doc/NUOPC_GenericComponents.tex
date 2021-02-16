@@ -47,7 +47,7 @@ After the call to {\tt NUOPC\_CompDerive()} in a component's {\tt SetServices()}
 
 The {\tt NUOPC\_CompSpecialize()} method is used to link specific user provided routines to pre-defined NUOPC specialization points. The labels of the pre-defined specialization points are use associated named constants made available by the respective generic component module. The naming of all pre-defined specialization labels starts with the {\tt label\_} prefix, and is followed by a short intent of the specialization. E.g. {\tt label\_Advertise} refers to the specialization point responsible for advertising Fields in the import- and exportStates of the component.
 
-Lists of all the pre-defined specialization labels for each of the generic NUOPC component kinds are provided at the beginning of the respective API sections.
+There are pre-defined specialization labels for Initialize, Run, and Finalize phases. Section \ref{PhaseMaps} discusses the semantic labeling of Initialize phases in greater detail. Lists of {\em all} pre-defined specialization labels (Initialize, Run, and Finalize) for each of the generic NUOPC component kinds are provided at the beginning of the respective API sections. (Driver: \ref{NUOPC_Driver}, Model: \ref{NUOPC_Model}, Mediator: \ref{NUOPC_Mediator}, Connector: \ref{NUOPC_Connector})
 
 The following code snippet shows a full specialization of {\tt NUOPC\_Model}, using three specialization labels:
 
