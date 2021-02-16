@@ -492,10 +492,16 @@ void MeshCap::regrid_getfrac(Grid **gridpp,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    int localrc;
+    MBMesh_get_elem_frac_into_Array((*meshpp)->mbmesh, *arraypp, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+#else
+
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 

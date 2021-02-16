@@ -2687,8 +2687,10 @@ void MBMesh_getelemfrac(MBMesh *mbmesh, int *_num_elem, double *elem_fracs, int 
 }
 
 
-#if 0
+
 // Create a list of elems in the same order as gids/seqInd in Array
+// TODO: Change to not be elem specific (i.e. change names to be entity or some such)
+// TODO: Come up with a way to handle undistributed dims
 void MBMesh_create_list_of_elems_in_Array(ESMCI::Array *array, 
                                           std::map<int,EntityHandle> &gid_to_elem_map,
                                           std::vector<EntityHandle> &elems_in_Array) {
@@ -2697,30 +2699,111 @@ void MBMesh_create_list_of_elems_in_Array(ESMCI::Array *array,
 
   try {
 
-    // Get rank of Array
-    int rank=
-
     // Get Distgrid
     ESMCI::DistGrid *distGrid=array->getDistGrid();
 
     // Get localDECount
-    int localDECount=distgrid->getDELayout()->getLocalDeCount();
+    int localDECount=distGrid->getDELayout()->getLocalDeCount();
 
     // Loop over DEs
-    for (auto lDE=0; lDE < localDECount, lDE++) {
+    for (auto lDE=0; lDE < localDECount; lDE++) {
 
-        // Get localDE lower bound
-        int lbound=(elem_area_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)
+      // iterator through Array Elements
+      ArrayElement arrayElement(array, lDE, true, false, false);
+      while(arrayElement.isWithin()){
+        SeqIndex<ESMC_I4> seqIndex;  // invalidated by default constructor
+        if (arrayElement.hasValidSeqIndex()){
+          // seqIndex is well defined for this arrayElement
+          seqIndex = arrayElement.getSequenceIndex<ESMC_I4>();
 
+          // Get seqIndex/Mesh global id
+          int gid=seqIndex.decompSeqIndex;;
 
+          // Add associated EntityHandle to output
+          std::map<int,EntityHandle>::iterator gtei = gid_to_elem_map.find(gid);
 
-    }
+          // Complain if gid not found
+          if (gtei == gid_to_elem_map.end()) {
+            Throw() << "Global id in Array unexpectedly not found in Mesh.";
+          } 
+
+          // Add entity to output vector
+          elems_in_Array.push_back(gtei->second);
+        }
+
+        // next element
+        arrayElement.next();  
+      } // multi dim index loop
+
+    } // Loop over local DEs
 
   }
   CATCH_MBMESH_RETHROW;
 }
 
 
+
+// Copy data into memory in Array
+// NEEDS TO GO THROUGH ARRAY IN SAME ORDER AS ABOVE METHOD!!!!!!!!!!!!
+
+// TODO: Come up with a way to handle undistributed dims or at least complain about them.
+// TODO: eventually template this so that it'll support other types
+void MBMesh_put_data_into_Array(ESMCI::Array *array, ESMC_R8 *data) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_put_data_into_Array()"
+
+  try {
+
+    // Get Distgrid
+    ESMCI::DistGrid *distGrid=array->getDistGrid();
+
+    // Get typekind of Array
+    ESMC_TypeKind_Flag typekind=array->getTypekind();
+
+    //  Only support ESMC_R8 right now
+    if (typekind != ESMC_TYPEKIND_R8) {
+      Throw() <<"Only fraction Fields of typekind=ESMF_TYPEKIND_R8 are supported right now.";
+    }
+
+    // Get localDECount
+    int localDECount=distGrid->getDELayout()->getLocalDeCount();
+
+    // Loop over DEs
+    int data_pos=0;
+    for (auto lDE=0; lDE < localDECount; lDE++) {
+
+      // Get base address for local DE memory
+      ESMC_R8 *lDEBaseAddr = (ESMC_R8 *)(array->getLarrayBaseAddrList())[lDE];
+
+      // iterator through Array Elements
+      ArrayElement arrayElement(array, lDE, true, false, false);
+      while(arrayElement.isWithin()){
+        if (arrayElement.hasValidSeqIndex()){
+
+          // Get linear index of this element
+          long unsigned int linearIndex = arrayElement.getLinearIndex();
+
+          // Get pointer to data
+          ESMC_R8 *arrayData=lDEBaseAddr+linearIndex;
+
+          // Copy Data
+          *arrayData=data[data_pos];
+
+          // Advance to next data  pos
+          data_pos++;
+        }
+
+        // next element
+        arrayElement.next();  
+      } // multi dim index loop
+
+    } // Loop over local DEs
+
+  }
+  CATCH_MBMESH_RETHROW;
+}
+
+// Copy element fractions from an MBMesh (mbmesh) into an Array (array)
 void MBMesh_get_elem_frac_into_Array(MBMesh *mbmesh, ESMCI::Array *array, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_get_elem_frac_into_Array()"
@@ -2735,12 +2818,12 @@ void MBMesh_get_elem_frac_into_Array(MBMesh *mbmesh, ESMCI::Array *array, int *r
     }
 
     // Error Checks
-    ThrowAssert(array != NULL);
+    ThrowRequire(mbmesh != NULL);
+    ThrowRequire(array != NULL);
 
     // Get all elems
-    // TODO: make this an MBMesh method
     Range elems;
-    mbmp->get_all_elems(elems);
+    mbmesh->get_all_elems(elems);
 
     // Loop and set up gid_to_elem_map
     std::map<int,EntityHandle> gid_to_elem_map;
@@ -2748,24 +2831,28 @@ void MBMesh_get_elem_frac_into_Array(MBMesh *mbmesh, ESMCI::Array *array, int *r
       EntityHandle elem=*it;
       
       // Get node global id
-      int gid=mbmp->get_gid(elem);
+      int gid=mbmesh->get_gid(elem);
       
       // Add to map
       gid_to_elem_map[gid]=elem;
     }
 
 
-    // Get elems
-    std::vector<EntityHandle> elems_in_Array;    
-
     // Use gid_to_elem map to make ordered vector of elems in Array
+    std::vector<EntityHandle> elems_in_Array;    
     MBMesh_create_list_of_elems_in_Array(array, gid_to_elem_map, elems_in_Array);
 
-
-
+    // Allocate elem fractions array
+    double *elem_fracs=new double[elems_in_Array.size()];
 
     // Get fracs (merging split elems if necessary)
-    mbmesh->get_elem_frac(true,owned_elems,elem_fracs);
+    mbmesh->get_elem_frac(true,elems_in_Array,elem_fracs);
+
+    // Copy into Array memory
+    MBMesh_put_data_into_Array(array, elem_fracs);    
+
+    // Get rid of elem_fracs
+    delete [] elem_fracs;
 
   }
   CATCH_MBMESH_RETURN(rc);
@@ -2774,8 +2861,5 @@ void MBMesh_get_elem_frac_into_Array(MBMesh *mbmesh, ESMCI::Array *array, int *r
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
-#endif
-
-
 
 #endif // ESMF_MOAB
