@@ -198,17 +198,77 @@
       call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
 
-      ! initialize 
-      rc=ESMF_SUCCESS
 
-      ! do test
-      call test_cartcsrvregridWMasks(itrp, csrv, rc)
+    !------------------------------------------------------------------------      
+
+    !------------------------------------------------------------------------
+    ! Test conservative regridding between 2 Cart. Grids with masks
+    
+    ! initialize 
+    rc=ESMF_SUCCESS
+    itrp = .true.
+    csrv = .true.
+
+    ! do test
+    call test_cartcsrvregridWMasks(itrp, csrv, rc)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Test conservative regridding interpolation
+    write(failMsg, *) "Returned an error"
+    write(name, *) "Conservative regridding on a Cartesian Grid with masks"
+      
+    ! return result
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
+         failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Test conservative regridding interpolation
+    write(failMsg, *) "Interpolation maximum error is greater than 10^-2"
+    write(name, *) "Conservative regridding on a Cartesian Grid with masks interpolation error"
+    
+    
+    ! return result
+    call ESMF_Test((itrp.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
+         failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Test conservative regridding conservation
+    write(failMsg, *) "Conservation relative error is greater than 10^-12"
+    write(name, *) "Conservative regridding on a Cartesian Grid with Masks conservation error"
+    
+    
+    ! return result
+    call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
+         failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+    
+    !------------------------------------------------------------------------
+    ! Test MOAB conservative regridding between 2 Cart. Grids with masks
+    
+    ! initialize 
+    rc=ESMF_SUCCESS
+    itrp = .true.
+    csrv = .true.
+
+#if defined ESMF_MOAB    
+    ! Turn on MOAB 
+    call ESMF_MeshSetMOAB(.true.)
+
+    ! do test
+    call test_cartcsrvregridWMasks(itrp, csrv, rc)
+
+    ! Turn off MOAB
+    call ESMF_MeshSetMOAB(.false.)
+#endif
 
        !------------------------------------------------------------------------
       !EX_UTest
       ! Test conservative regridding interpolation
       write(failMsg, *) "Returned an error"
-      write(name, *) "Conservative regridding on a cartesian grid with masks"
+      write(name, *) "MOAB Conservative regridding on a Cartesian Grid with masks"
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
@@ -218,7 +278,7 @@
       !EX_UTest
       ! Test conservative regridding interpolation
       write(failMsg, *) "Interpolation maximum error is greater than 10^-2"
-      write(name, *) "Conservative regridding on a cartesian grid with masks interpolation error"
+      write(name, *) "MOAB Conservative regridding on a Cartesian Grid with masks interpolation error"
 
       
       ! return result
@@ -229,14 +289,16 @@
       !EX_UTest
       ! Test conservative regridding conservation
       write(failMsg, *) "Conservation relative error is greater than 10^-12"
-      write(name, *) "Conservative regridding on a cartesian grid with Masks conservation error"
+      write(name, *) "MOAB Conservative regridding on a Cartesian Grid with Masks conservation error"
 
       
       ! return result
       call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
 
       ! do test
       rc=ESMF_SUCCESS
