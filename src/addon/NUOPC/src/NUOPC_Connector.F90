@@ -12,7 +12,7 @@
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Connector.F90"
 !==============================================================================
 
-#define DEBUGLOG_on
+#define DEBUGLOG_off
 
 module NUOPC_Connector
 

@@ -1183,9 +1183,11 @@ int RouteHandle::optimize(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   try{
-    
+
+#if 0
     ESMC_LogDefault.Write("Entering RouteHandle::optimize()", ESMC_LOGMSG_DEBUG,
       ESMC_CONTEXT);
+#endif
 
     // get the communication matrix from routehandle
     std::vector<int> *commMatrixDstPet       =(std::vector<int> *)getStorage(1);
@@ -1263,10 +1265,12 @@ bool RouteHandle::isCompatible(
   bool srcMatch = Array::matchBool(srcArrayArg, srcArray, &localrc);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
 
+#if 0
   std::stringstream debugmsg;
   debugmsg << "RouteHandle::isCompatible(), srcMatch=" << srcMatch;
   ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
-  
+#endif
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return srcMatch;
