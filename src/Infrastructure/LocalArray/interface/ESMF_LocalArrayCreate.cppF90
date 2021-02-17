@@ -1680,9 +1680,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     else @\
       if (present(datacopyflag)) then @\
        if (datacopyflag .eq. ESMF_DATACOPY_ALLOC) then @\
-           newp => farrayPtr    ! ptr alias, important this be =>  @\
-           lb(1:size(totalCount)) = lbound(farrayPtr) @\
-           ub(1:size(totalCount)) = ubound(farrayPtr) @\
+           nullify(newp) @\
            willalloc = .true. @\
            willcopy = .false. @\
            do_dealloc = ESMF_TRUE @\

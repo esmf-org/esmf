@@ -17,7 +17,7 @@ Welcome to ESMPy - The ESMF Python Interface!
     examples
     api
     appendix
-
+    
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`

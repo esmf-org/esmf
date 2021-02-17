@@ -715,6 +715,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer :: localExtrapNumLevels
         integer :: localExtrapNumInputLevels        
         logical :: localCheckFlag
+        logical :: moabOn
 
 !        real(ESMF_KIND_R8) :: beg_time, end_time
 !        call ESMF_VMWtime(beg_time)
@@ -748,6 +749,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(checkFlag)) then
            localCheckFlag=checkFlag
         endif
+
+
 
         ! process status field argument
         hasStatusArray=.false.
@@ -809,6 +812,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         else     
            lregridmethod=ESMF_REGRIDMETHOD_BILINEAR
         endif
+
 
         ! Make sure that patch isn't being used without LAPACK
 #ifndef ESMF_LAPACK
@@ -917,6 +921,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               localpolemethod=ESMF_POLEMETHOD_ALLAVG
            endif
         endif
+
+
+        ! Error about polemethod if MOAB is being used
+
+        ! Check if Moab is on
+        call ESMF_MeshGetMOAB(moabOn, rc=localrc) 
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ! If MOAB is on Warn about polemethods
+        if (moabOn) then
+           ! Polemethod is only used with Bilinear or Patch (and Patch not available yet with MOAB)
+           if (lregridmethod .eq. ESMF_REGRIDMETHOD_BILINEAR) then
+              ! If polemethod isn't NONE, then issue warning
+              if (localpolemethod .ne. ESMF_POLEMETHOD_NONE) then
+                 call ESMF_LogWrite("A polemethod is being used (perhaps by default) " // &
+                      "in ESMF_FieldRegridStore() when MOAB internal Mesh represenation is on. " // &
+                      "Polemethods aren't currently implemented in MOAB, so this could lead to " // &
+                      "unexpected unmapped points.",  &
+                      ESMF_LOGMSG_WARNING, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return                 
+              endif
+           endif
+        endif
+
 
         ! Handle default for extrapNumSrcPnts
         if (present(extrapNumSrcPnts)) then

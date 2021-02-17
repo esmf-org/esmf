@@ -109,11 +109,11 @@
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Applications}
+\addcontentsline{toc}{part}{Command Line Tools}
 \end{htmlonly}
-\part{Applications}
-\label{part:CApplications}
-\input{CApplications}
+\part{Command Line Tools}
+\label{part:CCLTs}
+\input{CCLTs}
 
 \newpage
 \begin{htmlonly}

@@ -5,13 +5,13 @@
 
 \subsection{Description}
 
-This section describes the file-based regridding application provided by ESMF (for a description of ESMF regridding in general see Section~\ref{sec:regrid}). Regridding, also called remapping or interpolation, is the process of changing the grid that underlies data values while preserving qualities of the original data. Different kinds of transformations are appropriate for different problems. Regridding may be needed when communicating data between Earth system model components such as land and atmosphere, or between different data sets to support operations such as visualization. 
+This section describes the file-based regridding command line tool provided by ESMF (for a description of ESMF regridding in general see Section~\ref{sec:regrid}). Regridding, also called remapping or interpolation, is the process of changing the grid that underlies data values while preserving qualities of the original data. Different kinds of transformations are appropriate for different problems. Regridding may be needed when communicating data between Earth system model components such as land and atmosphere, or between different data sets to support operations such as visualization. 
 
 Regridding can be broken into two stages. The first stage is generation of an interpolation weight matrix that describes how points in
 the source grid contribute to points in the destination grid. The second stage is the multiplication of values on the source grid by the
 interpolation weight matrix to produce values on the destination grid. This is implemented as a parallel sparse matrix multiplication.
 
-The {\tt ESMF\_RegridWeightGen} application described in Section~\ref{sec:ESMF_RegridWeightGen} 
+The {\tt ESMF\_RegridWeightGen} command line tool described in Section~\ref{sec:ESMF_RegridWeightGen} 
 performs the first stage of the regridding process - generate the interpolation weight matrix. 
 This tool not only calculates the interpolation weights, it also applies the
 weights to a list of variables 
@@ -218,7 +218,7 @@ object from the file.  The coordinates at the center and the corner stagger in
 the tile files will be stored in the grid.  The data has to be located at the
 center stagger of the grid.
  
-Similar to {\tt ESMF\_RegridWeightGen} application (Section~\ref{sec:ESMF_RegridWeightGen}), this application supports
+Similar to the {\tt ESMF\_RegridWeightGen} command line tool (Section~\ref{sec:ESMF_RegridWeightGen}), this application supports
 bilinear, patch, nearest neighbor, first-order and second-order conservative interpolation. The descriptions of different 
 interpolation methods can be found at Section~\ref{sec:regrid} and Section~\ref{sec:ESMF_RegridWeightGen}. 
 It also supports different pole methods for non-conservative interpolation and allows user to choose to 
@@ -234,8 +234,7 @@ be checked agaist a synthetic field defined as follows:
 \subsection{Usage}\label{sec:fileregridusage}
 
 The command line arguments are all keyword based.  Both the long keyword prefixed with \verb+ '--' + or the
-one character short keyword prefixed with {\tt '-'} are supported.  The format to run the application is
-as follows:
+one character short keyword prefixed with {\tt '-'} are supported.  The format to run the command line tool is as follows:
 
 \begin{verbatim}
 ESMF_Regrid  

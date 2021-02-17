@@ -10,7 +10,7 @@
 !
 !==============================================================================
 
-program ESMF_InfoF
+program ESMF_PrintInfoF
 
   ! modules
   use ESMF
@@ -41,7 +41,7 @@ program ESMF_InfoF
 
       select case (argname)
       case ('--help')
-        print *, "ESMF_Info: Print information about the ESMF installation."
+        print *, "ESMF_PrintInfo: Print information about the ESMF installation."
         print *, "Options:"
         print *, "  --help        Display this information and exit."
         print *, "  --version     Display ESMF version and license information and exit."
@@ -66,7 +66,7 @@ program ESMF_InfoF
 
     if (nargs == 0) then
       ! regular execution
-      print *, "ESMF_Info"
+      print *, "ESMF_PrintInfo"
       print *
       print *, "  ESMF_VERSION_STRING:       ", ESMF_VERSION_STRING
       print *

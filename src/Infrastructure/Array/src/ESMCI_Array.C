@@ -11918,6 +11918,20 @@ int Array::sparseMatMul(
 
   // conditionally perform full input checks
   if (checkflag){
+    // Warning banner
+    ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      ESMC_LOGMSG_WARN);
+    ESMC_LogDefault.Write("!!! Calling " ESMC_METHOD " with CHECKFLAG!",
+      ESMC_LOGMSG_WARN);
+    ESMC_LogDefault.Write("!!! Extra checking comes at the cost  !!!",
+      ESMC_LOGMSG_WARN);
+    ESMC_LogDefault.Write("!!! of performance. Only use for      !!!",
+      ESMC_LOGMSG_WARN);
+    ESMC_LogDefault.Write("!!! debugging, NOT for production!    !!!",
+      ESMC_LOGMSG_WARN);
+    ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+      ESMC_LOGMSG_WARN);
+    
     // check that srcArray's typekind matches
     if (srcArrayFlag && (xxe->typekind[1] != srcArray->getTypekind())){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
