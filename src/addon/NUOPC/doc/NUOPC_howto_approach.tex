@@ -80,10 +80,10 @@ in the NUOPC cap to your model's data structures.  The NUOPC Field
 Dictionary uses the \htmladdnormallink{Climate and Forecast conventions}{http://cfconventions.org/}
 for defining field standard names, but can support field name aliases.
 
-Finally, the model should not use the global MPI\_WORLD\_COMM communicator
+Finally, the model should not use the global MPI\_COMM\_WORLD communicator
 explicitly, but should accept a communicator at some point during
 startup.  A global search and replace can be used to replace
-all uses of MPI\_WORLD\_COMM with a different communicator defined
+all uses of MPI\_COMM\_WORLD with a different communicator defined
 as a global variable in your model.
 
 
@@ -262,11 +262,14 @@ initialization subroutine(s).
 
 NUOPC defines a precise initialization sequence--i.e., a series of
 steps that all NUOPC components are expected to take when starting
-up.  Some of the steps are optional and some are required.
-This initialization sequence is encoded in the \emph{Initialize Phase
-Definition} (IPD), which includes several different versions in
-order to allow for extension of the initialization sequence for
-future releases of NUOPC and to support backward compatibility.
+up.  A user component cap interacts with the NUOPC initialization
+sequence through specific specialization points. Specifically this means
+using the {\tt NUOPC\_CompSpecialize()} method during the component's
+SetServices method for each of the required specializations, and providing the
+necessary implementation. The {\tt NUOPC\_CompSpecialize()} method takes a
+{\tt specLabel} argument to indicate the targeted specialization. All available
+specialization labels for model components are listed in the NUOPC
+reference manual under the NUOPC\_Model API section.
 
 Instead of tackling the full NUOPC initialization sequence at this point in
 developing your cap, we recommend that you start by adding calls in your cap's

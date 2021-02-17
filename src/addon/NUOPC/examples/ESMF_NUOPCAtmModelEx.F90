@@ -55,8 +55,7 @@ module ATM
   use ESMF
   use NUOPC
   use NUOPC_Model, &
-    model_routine_SS    => SetServices, &
-    model_label_Advance => label_Advance
+    modelSS    => SetServices
   
   implicit none
   
@@ -77,42 +76,28 @@ module ATM
 ! and should do several things:
 ! \begin{itemize}
 ! \item indicate the generic component being specialized,
-! \item register entry points for execution phases, and
 ! \item register any specialization points.
 ! \end{itemize}
 !
-! In the example code, the call to {\tt NUOPC\_CompDerive} indicates that
+! In the example code, the call to {\tt NUOPC\_CompDerive()} indicates that
 ! this component derives from (and specializes) the generic {\tt NUOPC\_Model}
 ! component.  In other words, this is a {\tt NUOPC\_Model} component customized
 ! for a specific model.
 !
-! The calls to {\tt NUOPC\_CompSetEntryPoint} register
-! subroutines that are implemented in the cap.  These are initialization phases
-! that are not provided by the generic NUOPC Model.
-! The {\tt phaseLabelList} parameter lists a NUOPC-defined label from the \emph{Initialize Phase
-! Definition}.  NUOPC defines explicitly what happens in each phase of model
-! initialization and these labels uniquely define each phase.  For example, 
-! {\tt "IPDv03p1"} stands for ``Initialize Phase Definition version 03 phase 1''. The
-! value for the parameter {\tt userRoutine} is the name of the subroutine that should
-! be executed for the phase (e.g., {\tt InitializeP1}).   This subroutine
-! appears later on in the cap and the name of the registered subroutine is entirely
-! up to you.
-
-! At this point, don't worry too much about what happens during each phase, just
-! know that some phases are not provided by NUOPC and so must be written
-! by you.  In the example code:
-! \begin{itemize}
-! \item phase IPDv03p1 maps to subroutine {\tt InitializeP1}, and
-! \item phase IPDv03p3 maps to subroutine {\tt InitializeP2}.
-! \end{itemize}
+! The calls to {\tt NUOPC\_CompSpecialize()} register
+! subroutines that are implemented in the cap.
+! The {\tt specLabel} argument specifies NUOPC-defined specialization labels.
+! NUOPC defines explicitly what happens during each phase of the
+! initialization and these labels uniquely define any specialization that might
+! be supplied by the user.  For example, 
+! {\tt label\_Advertise} is responsible for advertising field in the import- and
+! exportState of the component. The  {\tt NUOPC\_CompSpecialize()} also takes
+! the {\tt specRoutine} argument to indicate what routine provides the actual
+! specialization. This subroutine appears later on in the cap and the name of
+! the registered subroutine is entirely up to you.
 !
-! In addition to providing subroutines for entire phases, sometimes \emph{part} of
-! a phase can be specialized.  The call to {\tt NUOPC\_CompSpecialize} shows how
-! to register a subroutine for a particular ``specialization point.'' In this
-! case the name of the specialization point is held in the variable
-! {\tt model\_label\_Advance} and the subroutine providing the implementation is
-! {\tt ModelAdvance}.
-!
+! The same specialization approach is used to specialize the generic Run method.
+! Here {\tt label\_Advance} is specialized by subroutine {\tt Advance}.
 ! The Advance specialization point is called by NUOPC whenever it needs
 ! your model to take a single timestep forward.  Basically, this means
 ! you'll need to add a call inside the specialization subroutine to your
@@ -127,29 +112,27 @@ module ATM
     rc = ESMF_SUCCESS
     
     ! the NUOPC model component will register the generic methods
-    call NUOPC_CompDerive(model, model_routine_SS, rc=rc)
+    call NUOPC_CompDerive(model, modelSS, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
     
-    ! set entry point for methods that require specific implementation
-    call NUOPC_CompSetEntryPoint(model, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv03p1"/), userRoutine=InitializeP1, rc=rc)
+    ! specialize model
+    call NUOPC_CompSpecialize(model, specLabel=label_Advertise, &
+      specRoutine=Advertise, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    call NUOPC_CompSetEntryPoint(model, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv03p3"/), userRoutine=InitializeP2, rc=rc)
+    call NUOPC_CompSpecialize(model, specLabel=label_RealizeProvided, &
+      specRoutine=Realize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    
-    ! attach specializing method(s)
-    call NUOPC_CompSpecialize(model, specLabel=model_label_Advance, &
-      specRoutine=ModelAdvance, rc=rc)
+    call NUOPC_CompSpecialize(model, specLabel=label_Advance, &
+      specRoutine=Advance, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -171,20 +154,17 @@ module ATM
 !
 !\subsection{Initialize Phase - Advertise Fields}
 !\label{sec:atmexample_advertisefields}
-! In this section we see the implementation of the {\tt InitializeP1} subroutine, which
-! is registered for the initialize phase with label IPDv03p1.
-! The full list of initialization phases,
-! how they are ordered, and what happens during each phase is described in the
-! \htmladdnormallink{NUOPC Reference Manual}{http://www.earthsystemmodeling.org/esmf\_releases/non_public/ESMF\_7\_0\_0/NUOPC\_refdoc/node3.html\#IPD}.
+! In this section we see the implementation of the {\tt Advertise} subroutine,
+! which is registered for the {\tt label\_Advertise} specialization.
+! The full list of specialization labels is described in the NUOPC Reference
+! Manual.
 !
 ! For now you should notice a few things:
 ! \begin{itemize}
-! \item All phase subroutines are standard ESMF methods with the same parameter list:
+! \item All specialization subroutines are standard ESMF attachable methods
+! with the same parameter list:
 !   \begin{itemize}
 !   \item {\tt model} - a reference to the component itself ({\tt ESMF\_GridComp})
-!   \item {\tt importState} - a container ({\tt ESMF\_State}) for input fields
-!   \item {\tt exportState} - a container ({\tt ESMF\_State}) for output fields
-!   \item {\tt clock} - keeps track of model time ({\tt ESMF\_Clock})
 !   \item {\tt rc} - an {\tt integer} return code
 !   \end{itemize}
 ! \item If the subroutine succeeds, it should return {\tt ESMF\_SUCCESS} in
@@ -236,13 +216,22 @@ module ATM
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP1(model, importState, exportState, clock, rc)
+  subroutine Advertise(model, rc)
     type(ESMF_GridComp)  :: model
-    type(ESMF_State)     :: importState, exportState
-    type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
-    
+
+    ! local variables
+    type(ESMF_State)        :: importState, exportState
+
     rc = ESMF_SUCCESS
+
+    ! query for importState and exportState
+    call NUOPC_ModelGet(model, importState=importState, &
+      exportState=exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
     
     ! importable field: sea_surface_temperature
     call NUOPC_Advertise(importState, &
@@ -280,8 +269,8 @@ module ATM
 !\label{sec:atmexample_realizefields}
 !
 !
-! The following code fragment shows the {\tt InitializeP2} subroutine, which
-! was registered for phase IPDv03p3.   During this phase, fields that
+! The following code fragment shows the {\tt Realize} subroutine, which
+! specializes {\tt label\_RealizeProvided}.   During this phase, fields that
 ! were previously advertised should now be \textbf{realized}.  Realizing a field
 ! means that an {\tt ESMF\_Field} object is created and it is added to the appropriate
 ! {\tt ESMF\_State}, either import or export.
@@ -318,19 +307,26 @@ module ATM
 
   !-----------------------------------------------------------------------------
 !BOC
-  subroutine InitializeP2(model, importState, exportState, clock, rc)
+  subroutine Realize(model, rc)
     type(ESMF_GridComp)  :: model
-    type(ESMF_State)     :: importState, exportState
-    type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
-    
-    ! local variables    
+
+    ! local variables
+    type(ESMF_State)        :: importState, exportState
     type(ESMF_Field)        :: field
     type(ESMF_Grid)         :: gridIn
     type(ESMF_Grid)         :: gridOut
     
     rc = ESMF_SUCCESS
     
+    ! query for importState and exportState
+    call NUOPC_ModelGet(model, importState=importState, &
+      exportState=exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     ! create a Grid object for Fields
     gridIn = ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/10, 100/), &
       minCornerCoord=(/10._ESMF_KIND_R8, 20._ESMF_KIND_R8/), &
@@ -390,7 +386,7 @@ module ATM
 ! \label{sec:atmexample_advancespec}
 !
 ! As described in the section \ref{sec:atmexample_setservices},
-! the subroutine {\tt ModelAdvance} (shown below) has been
+! the subroutine {\tt Advance} (shown below) has been
 ! registered to the \emph{specialization point} with the label
 ! {\tt model\_label\_Advance} in the {\tt SetServices} subroutine. This
 ! specialization point subroutine is called within the generic {\tt NUOPC\_Model}
@@ -426,7 +422,7 @@ module ATM
   !-----------------------------------------------------------------------------
 
 !BOC
-  subroutine ModelAdvance(model, rc)
+  subroutine Advance(model, rc)
     type(ESMF_GridComp)  :: model
     integer, intent(out) :: rc
     
@@ -449,7 +445,7 @@ module ATM
     ! Because of the way that the internal Clock was set by default,
     ! its timeStep is equal to the parent timeStep. As a consequence the
     ! currTime + timeStep is equal to the stopTime of the internal Clock
-    ! for this call of the ModelAdvance() routine.
+    ! for this call of the Advance() routine.
     
     call ESMF_ClockPrint(clock, options="currTime", &
       preString="------>Advancing ATM from: ", rc=rc)
@@ -726,6 +722,8 @@ contains
     logical                :: isPresent
     type(ESMF_AttPack)     :: attpack
     integer, pointer       :: ungriddedLBound(:), ungriddedUBound(:)
+    type(ESMF_StateIntent_Flag)             :: stateIntent
+    character(len=80)                       :: transferActionAttr
 
     rc = ESMF_SUCCESS
 
@@ -751,6 +749,25 @@ contains
          file=__FILE__)) &
          return  ! bail out
 
+    call ESMF_StateGet(state, stateIntent=stateIntent, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    if (stateIntent==ESMF_STATEINTENT_EXPORT) then
+      transferActionAttr="ProducerTransferAction"
+    elseif (stateIntent==ESMF_STATEINTENT_IMPORT) then
+      transferActionAttr="ConsumerTransferAction"
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The stateIntent must either be IMPORT or EXPORT here.", &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+
     ! WARNING: does not currently deal with nested states or field bundles
     do i=lbound(itemNameList,1), ubound(itemNameList,1)
        if (itemTypeList(i)==ESMF_STATEITEM_FIELD) then
@@ -765,7 +782,7 @@ contains
                file=__FILE__)) &
                return  ! bail out
 
-          call NUOPC_GetAttribute(field, name="TransferActionGeomObject", &
+          call NUOPC_GetAttribute(field, name=transferActionAttr, &
                value=transferGeom, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                line=__LINE__, &
@@ -975,11 +992,11 @@ end module
     print *, "NUOPC DRIVER + ATM Model example run"
 
     importState = ESMF_StateCreate(name="Driver Import State", &
-       stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
+       stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
     exportState = ESMF_StateCreate(name="Driver Export State", &
-       stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
+       stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     drvr = ESMF_GridCompCreate(name="Driver", rc=rc)

@@ -137,7 +137,7 @@
 
 \subsection{Initialization}
 
-\subsubsection{Semantic Initialize Phase Labels, Phase Maps, and Component Labels}
+\subsubsection{Phase Maps, Semantic Specialization Labels, and Component Labels}
 #ifdef STANDALONE
 \input{NUOPC_PhaseMaps}
 #elif defined(CONSTITUENT)
