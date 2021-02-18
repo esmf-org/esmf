@@ -111,12 +111,6 @@ ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 ESMF_F90COMPILEOPTS += -ffree-line-length-none
 
 ############################################################
-# Blank out variables to prevent rpath encoding
-#
-#ESMF_F90LINKRPATHS      =
-#ESMF_CXXLINKRPATHS      =
-
-############################################################
 # Set rpath syntax
 #
 ESMF_F90RPATHPREFIX         = -Wl,-rpath,
