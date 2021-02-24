@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuxo pipefail
 
-DOC_ARTIFACTS="/tmp/artifacts/log"
+DOC_ARTIFACTS="/tmp/artifacts/artifacts"
 
 cd 
 
@@ -13,12 +13,14 @@ git config --global user.name "esmf-orgbot"
 git clone --depth 1 git@github.com:esmf-org/esmf-test-artifacts.git
 
 # Test coverage -------------------------------------------------------------------
+echo "ESMF_BRANCH=${CIRCLE_BRANCH}"
 
-cd esmf-test-artifacts/develop/platform_independent/
-mkdir -p test_coverage
+cd esmf-test-artifacts/
+
+mkdir -p ${CIRCLE_BRANCH}/platform_independent/test_coverage
 
 cd ${DOC_ARTIFACTS}
-cp -rf ${DOC_ARTIFACTS}/* ~/esmf-test-artifacts/develop/platform_independent/test_coverage/
+cp -rf ${DOC_ARTIFACTS}/* ~/esmf-test-artifacts/${CIRCLE_BRANCH}/platform_independent/test_coverage/
 
 
 cd ~/esmf-test-artifacts/
