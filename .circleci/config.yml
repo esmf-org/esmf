@@ -195,7 +195,7 @@ jobs:
           command: docker build -t "esmf/test-coverage" --file "ESCOMP-Containers/ESMF/test_coverage/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
       - run:
           name: Extract Test Coverage
-          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/test_coverage-artifacts.zip" "esmf/test-coverage:${CIRCLE_BRANCH}"
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/test_coverage-artifacts.zip" "esmf/test-coverage"
       - save_cache:
           key: test-coverage-{{ .Revision }}
           paths:
