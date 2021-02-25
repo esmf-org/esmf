@@ -25,7 +25,7 @@ cp -rf ${DOC_ARTIFACTS}/* ~/esmf-test-artifacts/${CIRCLE_BRANCH}/platform_indepe
 
 cd ~/esmf-test-artifacts/
 git add .
-git commit -a -m " Release 8.1.0 Test Coverage pushed in the artifacts `date` [ci skip] "
+git commit -a -m " `echo ${CIRCLE_BRANCH}` Test Coverage pushed in the artifacts `date` [ci skip] "
 
 # Push the changes ------------------------------------------------------------
 
