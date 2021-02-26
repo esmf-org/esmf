@@ -147,9 +147,9 @@ jobs:
       - run:
          name: "Removing slash from branch name "
          command: |
-         echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
-         echo $CIRCLE_BRANCH_NEW
-         source $BASH_ENV
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo $CIRCLE_BRANCH_NEW
+                  source $BASH_ENV
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
@@ -193,9 +193,9 @@ jobs:
       - run:
          name: "Removing slash from branch name "
          command: |
-         echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
-         echo $CIRCLE_BRANCH_NEW
-         source $BASH_ENV
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo $CIRCLE_BRANCH_NEW
+                  source $BASH_ENV
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
@@ -239,9 +239,9 @@ jobs:
       - run:
          name: "Removing slash from branch name "
          command: |
-         echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
-         echo $CIRCLE_BRANCH_NEW
-         source $BASH_ENV
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo $CIRCLE_BRANCH_NEW
+                  source $BASH_ENV
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
