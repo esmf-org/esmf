@@ -776,20 +776,20 @@ The type of this flag is:
 
 The valid values for all regrid methods are:
 \begin{description}
-\item [ESMF\_REGRIDSTATUS\_DSTMASKED] The destination location is masked, so no regridding has been peformed on it. 
-\item [ESMF\_REGRIDSTATUS\_SRCMASKED] The destination location is within a masked part of the source grid, so no regridding has been performed on it. 
-\item [ESMF\_REGRIDSTATUS\_OUTSIDE] The destination location is outside the source grid, so no regridding has been performed on it. 
-\item [ESMF\_REGRIDSTATUS\_MAPPED] The destination location is within the unmasked source grid, and so has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
-\item [ESMF\_REGRIDSTATUS\_EXMAPPED] The destination location was not within the unmasked source grid, and so typically it wouldn't be regridded. However, extrapolation was used, and so it has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
+\item [ESMF\_REGRIDSTATUS\_DSTMASKED] The destination location is masked, so no regridding has been peformed on it. This status has a numeric value of 0.
+\item [ESMF\_REGRIDSTATUS\_SRCMASKED] The destination location is within a masked part of the source grid, so no regridding has been performed on it. This status has a numeric value of 1.
+\item [ESMF\_REGRIDSTATUS\_OUTSIDE] The destination location is outside the source grid, so no regridding has been performed on it. This status has a numeric value of 2.
+\item [ESMF\_REGRIDSTATUS\_MAPPED] The destination location is within the unmasked source grid, and so has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). This status has a numeric value of 4. 
+\item [ESMF\_REGRIDSTATUS\_EXMAPPED] The destination location was not within the unmasked source grid, and so typically it wouldn't be regridded. However, extrapolation was used, and so it has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). This status has a numeric value of 8.
 \end{description}
 
 In addition to the above, regridding using the conservative method can result in other values. The reason for this is that in that method one destination cell can overlap multiple source cells, so a single destination can have a combination of values.  
 The following are the additional values that apply to the conservative method:
 \begin{description}
-\item [ESMF\_REGRIDSTATUS\_SMSK\_OUT] The destination cell overlaps a masked source cell, and extends outside the source grid. 
-\item [ESMF\_REGRIDSTATUS\_SMSK\_MP] The destination cell overlaps a masked source cell, and an unmasked source cell. (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle).  
-\item [ESMF\_REGRIDSTATUS\_OUT\_MP] The destination cell overlaps an unmasked source cell, and extends outside the source grid.  (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle). 
-\item [ESMF\_REGRIDSTATUS\_SMSK\_OUT\_MP] The destination cell overlaps a masked source cell, an unmasked source cell, and extends outside the source grid. (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle).  
+\item [ESMF\_REGRIDSTATUS\_SMSK\_OUT] The destination cell overlaps a masked source cell, and extends outside the source grid. This status has a numeric value of 3.
+\item [ESMF\_REGRIDSTATUS\_SMSK\_MP] The destination cell overlaps a masked source cell, and an unmasked source cell. (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle). This status has a numeric value of 5.  
+\item [ESMF\_REGRIDSTATUS\_OUT\_MP] The destination cell overlaps an unmasked source cell, and extends outside the source grid.  (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle). This status has a numeric value of 6.
+\item [ESMF\_REGRIDSTATUS\_SMSK\_OUT\_MP] The destination cell overlaps a masked source cell, an unmasked source cell, and extends outside the source grid. (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle).  This status has a numeric value of 7.
 \end{description}
 
 
