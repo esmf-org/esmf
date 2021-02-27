@@ -11,7 +11,7 @@ cd
 # Clone the docs repository
 git clone --depth 1 git@github.com:esmf-org/esmf-org.github.io.git
 cd esmf-org.github.io/
-mkdir -p docs/nightly/${CIRCLE_BRANCH}
+mkdir -p docs/nightly/${CIRCLE_BRANCH}/dev_guide
 
 # ESMF Docs -------------------------------------------------------------------
 
