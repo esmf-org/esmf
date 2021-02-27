@@ -483,7 +483,7 @@ workflows:
     jobs:
       - should-build-docs:
           type: approval
-      - build-esmf-docs
+      - build-esmf-docs:
           requires:
             - should-build-docs
       - publish-esmf-docs:
@@ -493,7 +493,7 @@ workflows:
 #            branches:
 #              only:
 #                - develop
-      - build-esmpy-docs
+      - build-esmpy-docs:
           requires:
             - should-build-docs
       - publish-esmpy-docs:
