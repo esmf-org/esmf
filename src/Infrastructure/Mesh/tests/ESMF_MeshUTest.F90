@@ -101,7 +101,6 @@ program ESMF_MeshUTest
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
-  call ESMF_MeshSetMOAB(.false.)
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -113,6 +112,10 @@ program ESMF_MeshUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Make sure MOAB is off
+  call ESMF_MeshSetMOAB(.false.)
+
 
  ! This surrounds all the tests to make turning off everything but one test easier
 #if 1
