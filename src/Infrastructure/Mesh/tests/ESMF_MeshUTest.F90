@@ -91,6 +91,7 @@ program ESMF_MeshUTest
   logical :: nodalIsPresent, elementIsPresent
   type(ESMF_MESHSTATUS_FLAG) :: status
   character(len=80)      :: meshName, meshNameOut
+  logical :: isMOABOn
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -2814,6 +2815,46 @@ endif
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
  ! end of if defined MOAB
+#endif
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Mesh Set/Get MOAB"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Don't test if MOAB isn't available
+#if defined ESMF_MOAB
+
+  ! Turn on MOAB mesh creation
+  call ESMF_MeshSetMOAB(.true., rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get MOAB status
+  call ESMF_MeshGetMOAB(isMOABOn, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check Status
+  if (.not. isMOABOn) correct=.false.
+
+
+  ! Finish with MOAB off
+  call ESMF_MeshSetMOAB(.false., rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get MOAB status
+  call ESMF_MeshGetMOAB(isMOABOn, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check Status
+  if (isMOABOn) correct=.false.
+
 #endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
