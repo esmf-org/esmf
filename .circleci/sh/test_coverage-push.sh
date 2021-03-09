@@ -30,4 +30,4 @@ git commit -a -m " Test Coverage pushed in the artifacts `date` [ci skip] "
 # Push the changes ------------------------------------------------------------
 
 git remote prune origin
-git push origin master
+git push origin main
