@@ -281,18 +281,6 @@ program ESMF_AttributeSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  ! Write the Attribute info in tab-delimited and .xml format for both Components
-  ! The XML format will also send the output to an .xml in this directory
-  conv = 'ESMF'
-  purp = 'General'
-  ! AttributeUpdate is not called so we are only printing from PET0 for now
-!    call ESMF_AttributeWrite(comp1,conv,purp,rc=rc)
-!    call ESMF_AttributeWrite(comp2,conv,purp,rc=rc)
-!    call ESMF_AttributeWrite(comp1,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
-!    call ESMF_AttributeWrite(comp2,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) &
-      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Finalize section
