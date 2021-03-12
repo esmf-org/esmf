@@ -88,6 +88,7 @@ module NUOPC
   public NUOPC_ChopString                 ! method, internal use only
   public NUOPC_GetAttribute               ! method
   public NUOPC_GetStateMemberLists        ! method
+  public NUOPC_GetStateMemberCount        ! method
   public NUOPC_GetTimestamp               ! method
   public NUOPC_InitAttributes             ! method, internal use only
   public NUOPC_IsAtTime                   ! method
