@@ -290,10 +290,10 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - run:
           name: Docker Build esmpy-doc
-          command: docker build -t "esmf/esmpy-doc" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
+          command: docker build -t "esmf/esmpy-doc:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
       - run:
           name: Extract Doc Artifacts
-          command: bash esmf/.circleci/sh/extract-artifacts.sh /tmp/artifacts /artifacts/doc-esmpy.zip esmf/esmpy-doc
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-esmpy.zip" "esmf/esmpy-doc:${CIRCLE_BRANCH}"
       - save_cache:
           key: esmpy-docs-{{ .Revision }}
           paths:
