@@ -300,6 +300,11 @@ jobs:
     steps:
       - setup_remote_docker
       - run:
+          name: "Removing slash from branch name "
+          command: |
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo $CIRCLE_BRANCH_NEW
+                  source $BASH_ENV
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
 #          command: git clone --depth 1 --branch esmpy-doc-base-to-ubuntu https://github.com/esmf-org/ESCOMP-Containers.git
@@ -308,10 +313,10 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - run:
           name: Docker Build esmpy-doc
-          command: docker build -t "esmf/esmpy-doc" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
+          command: docker build -t "esmf/esmpy-doc:${CIRCLE_BRANCH_NEW}" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
       - run:
           name: Extract Doc Artifacts
-          command: bash esmf/.circleci/sh/extract-artifacts.sh /tmp/artifacts /artifacts/doc-esmpy.zip esmf/esmpy-doc
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-esmpy.zip" "esmf/esmpy-doc:${CIRCLE_BRANCH_NEW}"
       - save_cache:
           key: esmpy-docs-{{ .Revision }}
           paths:
