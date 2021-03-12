@@ -103,7 +103,9 @@ int main(int argc, char *argv[]) {
     {"redist_node", "tri_2d_sph"},
   };
 
+#if defined ESMF_MOAB
   MBTGen *generate = new MBTGen();
+#endif
 
   for (const auto api: test_apis) {
     for (const auto mesh: test_meshes) {    
@@ -143,8 +145,10 @@ int main(int argc, char *argv[]) {
                 &result, __FILE__, __LINE__, 0);
     }
   }
-  
+
+#if defined ESMF_MOAB
   delete generate;
+#endif
 
   //NEX_UTest
   //NEX_UTest
