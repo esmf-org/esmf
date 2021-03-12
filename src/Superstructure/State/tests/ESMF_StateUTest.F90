@@ -143,14 +143,20 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-      !NEX_UTest      
-      ! Test Creation of an empty import State 
-      statename = "Atmosphere In"
-      state1 = ESMF_StateCreate(name=statename, stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating an empty import State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+  !NEX_UTest
+  ! Test Creation of an empty import State 
+  statename = "Atmosphere In"
+  state1 = ESMF_StateCreate(name=statename, stateIntent=ESMF_STATEINTENT_IMPORT, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Creating an empty import State Test"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !NEX_UTest
+  ! Test Set
+  call ESMF_StateSet(state1, stateIntent=ESMF_STATEINTENT_EXPORT, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Setting stateIntent on State Test"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
