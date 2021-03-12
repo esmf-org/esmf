@@ -300,11 +300,12 @@ jobs:
     steps:
       - setup_remote_docker
       - run:
-          name: "Removing slash from branch name "
-          command: |
+         name: "Removing slash from branch name "
+         command: |
                   echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
                   echo $CIRCLE_BRANCH_NEW
                   source $BASH_ENV
+      - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
 #          command: git clone --depth 1 --branch esmpy-doc-base-to-ubuntu https://github.com/esmf-org/ESCOMP-Containers.git
