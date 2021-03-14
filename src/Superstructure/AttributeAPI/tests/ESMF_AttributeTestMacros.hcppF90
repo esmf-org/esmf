@@ -1740,11 +1740,6 @@
       write(name, *) "Getting an logical list Attribute from mobj Test with long valueList" @\
       call ESMF_Test(rc==ESMF_RC_ATTR_ITEMSOFF, name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
- @\
-      !---------------------------------------------------------------------- @\
-      !  Attribute Info @\
-      !---------------------------------------------------------------------- @\
- @\
       attrname="Character_name" @\
       attrvalue="stuff" @\
       ! Set a Character Attribute on a mobj to test the get info calls @\
@@ -1844,6 +1839,7 @@
       !---------------------------------------------------------------------- @\
  @\
 ^endif @\
+ @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------
 
@@ -1952,6 +1948,320 @@
       call mobj##Destroy(mname##Alias, rc=rc) @\
       call mobj##Destroy(mname##Hybrid, rc=rc) @\
       call mobj##Destroy(mname##Value, rc=rc) @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------
+
+! main test body
+#define AttributeReadWriteTestMacro(mname, mname2, mobj, mtag_ex, mtag_nex) \
+!---------------------------------------------------------------------------- @\
+! <This section created by macro - do not edit directly> @\
+ @\
+      !---------------------------------------------------------------------- @\
+      !  ESMF_I4 @\
+      !---------------------------------------------------------------------- @\
+      inI4 = 4 @\
+      !mtag_nex @\
+      ! Add an ESMF_I4 Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrI4", value=inI4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_I4 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+^ifdef ESMF_TESTEXHAUSTIVE @\
+ @\
+      inI4l = (/1,2,3/) @\
+      !mtag_ex @\
+      ! Add an ESMF_I4 list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrI4l", & @\
+        valueList=inI4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_I4l Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      inI8 = 4 @\
+      !mtag_ex @\
+      ! Add an ESMF_I8 Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrI8", value=inI8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_I8 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      inI8l = (/1,2,3/) @\
+      !mtag_ex @\
+      ! Add an ESMF_I8 list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrI8l", & @\
+        valueList=inI8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_I8l Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      inR4 = 4 @\
+      !mtag_ex @\
+      ! Add an ESMF_R4 Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrR4", value=inR4, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_R4 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      inR4l = (/1,2,3/) @\
+      !mtag_ex @\
+      ! Add an ESMF_R4 list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrR4l", & @\
+        valueList=inR4l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_R4l Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      inR8 = 4 @\
+      !mtag_ex @\
+      ! Add an ESMF_R8 Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrR8", value=inR8, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_R8 Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      inR8l = (/1,2,3/) @\
+      !mtag_ex @\
+      ! Add an ESMF_R8 list Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name="AttrR8l", & @\
+        valueList=inR8l, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding an ESMF_R8l Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      inChar = "charAttribute" @\
+      attrName = "char_" @\
+      !mtag_ex @\
+      ! Add a char Attribute to mobj Test @\
+      call ESMF_AttributeSet(mname, name=attrname, value=inChar, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Adding a char Attribute to mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      InCharl(1) = "Character String 1" @\
+      InCharl(2) = "Character String 2" @\
+      InCharl(3) = "Character String 3" @\
+ @\
+      !mtag_ex @\
+      ! Set a char list Attribute on mobj Test @\
+      call ESMF_AttributeSet(mname, name="Charl", & @\
+        valueList=InCharl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an Attribute char list on mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      attrname = "flag" @\
+      inLog = .true. @\
+ @\
+      !mtag_ex @\
+      ! Set a logical attribute - scalar version @\
+      call ESMF_AttributeSet(mname, name=attrname, value=inLog, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCESS" @\
+      write(name, *) "Setting Grid Attribute (type Fortran logical scalar)" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      attrname = "flag grid" @\
+      inLogl = (/ .true., .false., .true. /) @\
+ @\
+      !mtag_ex @\
+      ! Set a logical attribute - grid version @\
+      call ESMF_AttributeSet(mname, name=attrname, & @\
+        valueList=inLogl, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCESS" @\
+      write(name, *) "Setting Grid Attribute (type Fortran logical grid)" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+^endif @\
+ @\
+      !---------------------------------------------------------------------- @\
+      !  Attribute Read/Write @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !mtag_nex @\
+      ! Write Attribute info to JSON from mobj Test @\
+      call ESMF_AttributeWrite(mname, filename="Attribute.json", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Writing Attribute info to JSON from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      call ESMF_InfoGetFromHost(mname2, info, rc=rc) @\
+      call ESMF_InfoDestroy(info, rc=rc) @\
+ @\
+      !mtag_nex @\
+      ! Read Attribute info from JSON on mobj Test @\
+      call ESMF_AttributeRead(mname2, filename="Attribute.json", rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Reading Attribute info from JSON on mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !---------------------------------------------------------------------- @\
+      !  Get Attributes Read from JSON to validate against those already set @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !mtag_nex @\
+      ! Get an ESMF_I4 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname2, name="AttrI4", value=outI4, & @\
+        isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I4 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                     .and.(inI4==outI4) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+^ifdef ESMF_TESTEXHAUSTIVE @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_I4 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname2, name="AttrI4l", & @\
+        valueList=outI4l, isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I4l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                     .and. all (inI4l==outI4l) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_I8 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname2, name="AttrI8", value=outI8, & @\
+        isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I8 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                     .and.(inI8==outI8) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_I8 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname2, name="AttrI8l", & @\
+        valueList=outI8l, isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_I8l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                     .and. all (inI8l==outI8l) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_R4 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname2, name="AttrR4", value=outR4, & @\
+        isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R4 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                     .and.(inR4==outR4) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_R4 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname2, name="AttrR4l", & @\
+        valueList=outR4l, isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R4l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                     .and. all (inR4l==outR4l) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_R8 Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname2, name="AttrR8", value=outR8, & @\
+        isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R8 Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                     .and.(inR8==outR8) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !mtag_ex @\
+      ! Get an ESMF_R8 list Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname2, name="AttrR8l", & @\
+        valueList=outR8l, isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting an ESMF_R8l Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                     .and. all (inR8l==outR8l) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !mtag_ex @\
+      ! Get a char Attribute from mobj Test @\
+      call ESMF_AttributeGet(mname2, name=attrname, value=outChar, & @\
+        isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
+      write(name, *) "Getting a char Attribute from mobj Test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                     .and. (inChar==outChar) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      !mtag_ex @\
+      ! Get a char list Attribute on mobj Test @\
+      call ESMF_AttributeGet(mname2, name="Charl", & @\
+        valueList=OutCharl, isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting an Attribute char list from mobj test" @\
+      call ESMF_Test((rc==ESMF_SUCCESS) & @\
+                     .and. all (InCharl==OutCharl) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      outLog = .false. @\
+      !mtag_ex @\
+      ! Get a logical attribute - scalar version @\
+      call ESMF_AttributeGet(mname2, name=attrname, value=outLog, & @\
+        isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting an Attribute Fortran logical from mobj test" @\
+      call ESMF_Test((rc == ESMF_SUCCESS) & @\
+                     .and.(inLog .eqv. outLog) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+      outLogl = .false. @\
+      !mtag_ex @\
+      ! Get a logical attribute - grid version @\
+      call ESMF_AttributeGet(mname2, name=attrname,  & @\
+        valueList=outLogl, isPresent=isPresent, rc=rc) @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting an Attribute Fortran logical list from mobj test" @\
+      call ESMF_Test((rc == ESMF_SUCCESS) & @\
+                     .and. all (inLogl .eqv. outLogl) & @\
+                     .and.(isPresent.eqv..true.), & @\
+                     name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+ @\
+^endif @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------
