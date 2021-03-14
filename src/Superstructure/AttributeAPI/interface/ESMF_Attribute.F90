@@ -1832,7 +1832,7 @@ contains  !====================================================================
 !
 !EOP
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeRead  - Read Attributes from a JSON file
 ! \label{api:AttributeRead}
 !
@@ -1879,7 +1879,7 @@ contains  !====================================================================
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package using an ESMF_AttPack
@@ -2326,7 +2326,7 @@ contains  !====================================================================
 !
 !EOP
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
 ! \label{api:AttributeWrite}
 !
@@ -2377,7 +2377,7 @@ contains  !====================================================================
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
 !==============================================================================
