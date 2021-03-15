@@ -469,13 +469,13 @@ program ESMF_InfoUTest
 
   ! Testing ESMF_InfoOperator(/=)()
   info = info9
-  failed = (info9 /= info)
+  if (info9 /= info) failed = .true.
 
   info = ESMF_InfoCreate(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Testing ESMF_InfoOperator(==)()
-  failed = (info9 == info)
+  if (info9 == info) failed = .true.
 
   do i=1, 3
     if (arr_i4(i) /= arr_i4_get(i)) then
