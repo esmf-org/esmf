@@ -9247,8 +9247,7 @@ template<typename SIT, typename DIT>
   if (srcTensorLength>1) undistributedElementsPresent = true;
   if (dstTensorLength>1) undistributedElementsPresent = true;
 
-#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifndef MUST_NOTUSE_MALLOC_TRIM
+#ifdef USE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
 #ifdef MALLOC_TRIM_REPORT_on
@@ -9257,7 +9256,6 @@ template<typename SIT, typename DIT>
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
-#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9326,8 +9324,7 @@ template<typename SIT, typename DIT>
   vector<vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > >().swap(srcLinSeqVect);
   vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >().swap(dstLinSeqVect);
 
-#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifndef MUST_NOTUSE_MALLOC_TRIM
+#ifdef USE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
 #ifdef MALLOC_TRIM_REPORT_on
@@ -9336,7 +9333,6 @@ template<typename SIT, typename DIT>
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
-#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9874,8 +9870,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     VM::logMemInfo(std::string("ASMMStoreNbVectors4.0"));
 #endif
     
-#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifndef MUST_NOTUSE_MALLOC_TRIM
+#ifdef USE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
 #ifdef MALLOC_TRIM_REPORT_on
@@ -9884,7 +9879,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
-#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -10115,8 +10109,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   VMK::wtime(t9);   //gjt - profile
 #endif
 
-#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifndef MUST_NOTUSE_MALLOC_TRIM
+#ifdef USE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
 #ifdef MALLOC_TRIM_REPORT_on
@@ -10125,7 +10118,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
-#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -10303,8 +10295,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     VM::logMemInfo(std::string("ASMMStoreNbVectors8.0"));
 #endif
     
-#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifndef MUST_NOTUSE_MALLOC_TRIM
+#ifdef USE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
 #ifdef MALLOC_TRIM_REPORT_on
@@ -10313,7 +10304,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
-#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -10931,8 +10921,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
-#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifndef MUST_NOTUSE_MALLOC_TRIM
+
+#ifdef USE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
 #ifdef MALLOC_TRIM_REPORT_on
@@ -10941,7 +10931,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
-#endif
 #endif
   
 #if 0
@@ -11109,8 +11098,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
-#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifndef MUST_NOTUSE_MALLOC_TRIM
+
+#ifdef USE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
 #ifdef MALLOC_TRIM_REPORT_on
@@ -11119,7 +11108,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
-#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -11264,8 +11252,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
-#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifndef MUST_NOTUSE_MALLOC_TRIM
+#ifdef USE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
 #ifdef MALLOC_TRIM_REPORT_on
@@ -11274,7 +11261,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
-#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
