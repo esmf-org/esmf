@@ -461,19 +461,21 @@ program ESMF_InfoUTest
   i = 3
   call ESMF_InfoGetArrayMeta(info9, "the-key", isArray, i, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  failed = .not. isArray
 
-  call ESMF_InfoGetAlloc(info9, "the-key", arr_i4_get, itemcount=arr_i4_get_count, rc=rc)
+  call ESMF_InfoGetAlloc(info9, "the-key", arr_i4_get, &
+    itemcount=arr_i4_get_count, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! Testing ESMF_InfoOperator(/=)()
   info = info9
-  if(info9 /= info) failed = .true.
+  failed = (info9 /= info)
 
   info = ESMF_InfoCreate(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  if(info9 == info) failed = .true.
-
-  failed = .not. isArray
+  ! Testing ESMF_InfoOperator(==)()
+  failed = (info9 == info)
 
   do i=1, 3
     if (arr_i4(i) /= arr_i4_get(i)) then
