@@ -467,8 +467,10 @@ program ESMF_InfoUTest
     itemcount=arr_i4_get_count, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  ! Testing ESMF_InfoOperator(/=)()
+  ! Testing ESMF_InfoAssignment(=)()
   info = info9
+
+  ! Testing ESMF_InfoOperator(/=)()
   if (info9 /= info) failed = .true.
 
   info = ESMF_InfoCreate(rc=rc)
