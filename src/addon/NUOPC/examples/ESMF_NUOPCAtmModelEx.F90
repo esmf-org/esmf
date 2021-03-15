@@ -472,9 +472,7 @@ module DRIVER
 
   use ESMF
   use NUOPC
-  use NUOPC_Driver, &
-       driver_routine_SS             => SetServices, &
-       driver_label_SetModelServices => label_SetModelServices
+  use NUOPC_Driver, driverSS         => SetServices
 
   use NUOPC_Connector, only: cplSS => SetServices
 
@@ -501,36 +499,43 @@ contains
     rc = ESMF_SUCCESS
 
     ! NUOPC_Driver registers the generic methods
-    call NUOPC_CompDerive(drvr, driver_routine_SS, rc=rc)
+    call NUOPC_CompDerive(drvr, driverSS, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
          return  ! bail out
 
     call NUOPC_CompSetInternalEntryPoint(drvr, ESMF_METHOD_INITIALIZE, &
-         phaseLabelList=(/"IPDv05p1"/), userRoutine=InitializeP1, rc=rc)
+         phaseLabelList=(/"IPDv05p8"/), userRoutine=TimestampImportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         return  ! bail out
+    call NUOPC_CompSetInternalEntryPoint(drvr, ESMF_METHOD_RUN, &
+      phaseLabelList=(/"InternalRun"/), userRoutine=RunTimestampImportState, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
          return  ! bail out
 
-    call NUOPC_CompSetInternalEntryPoint(drvr, ESMF_METHOD_INITIALIZE, &
-         phaseLabelList=(/"IPDv05p6"/), userRoutine=RealizeMirroredFields, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return  ! bail out
-
-    call NUOPC_CompSetInternalEntryPoint(drvr, ESMF_METHOD_INITIALIZE, &
-         phaseLabelList=(/"IPDv05p8"/), userRoutine=TimestampMirroredFields, rc=rc)
+    ! set HierarchyProtocol on the driver
+    call NUOPC_CompAttributeSet(drvr, name="HierarchyProtocol", &
+      value="Explorer", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
          return  ! bail out
 
     ! attach specializing method(s)
-    call NUOPC_CompSpecialize(drvr, specLabel=driver_label_SetModelServices, &
+    call NUOPC_CompSpecialize(drvr, specLabel=label_SetModelServices, &
          specRoutine=SetModelServices, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         return  ! bail out
+    call NUOPC_CompSpecialize(drvr, specLabel=label_SetRunSequence, &
+      specRoutine=SetRunSequence, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
@@ -561,31 +566,7 @@ contains
          file=__FILE__)) &
          return  ! bail out
 
-    call NUOPC_CompAttributeSet(drvr, name="CompLabel", &
-         value="Driver", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
     call NUOPC_DriverAddComp(drvr, "ATM", atmSS, comp=child, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return  ! bail out
-
-    ! Add connectors for field mirroring
-    call NUOPC_DriverAddComp(drvr, srcCompLabel="Driver", &
-         dstCompLabel="ATM", compSetServicesRoutine=cplSS, &
-         rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return  ! bail out
-
-    call NUOPC_DriverAddComp(drvr, srcCompLabel="ATM", &
-         dstCompLabel="Driver", compSetServicesRoutine=cplSS, &
-         rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
          line=__LINE__, &
          file=__FILE__)) &
@@ -625,325 +606,118 @@ contains
 
   end subroutine SetModelServices
 
-  subroutine InitializeP1(drvr, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: drvr
+  !-----------------------------------------------------------------------------
+
+  subroutine SetRunSequence(driver, rc)
+    type(ESMF_GridComp)  :: driver
+    integer, intent(out) :: rc
+
+    ! local variables
+    character(ESMF_MAXSTR)              :: name
+    type(NUOPC_FreeFormat)              :: runSeqFF
+
+    rc = ESMF_SUCCESS
+
+    ! query the driver for its name
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         return  ! bail out
+
+    ! set up free format run sequence
+    runSeqFF = NUOPC_FreeFormatCreate(stringList=(/ &
+      " @*                          ",    &
+      "   Driver                    ",    &
+      "   Driver -> ATM             ",    &
+      "   ATM                       ",    &
+      " @                           " /), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         return  ! bail out
+
+    ! ingest FreeFormat run sequence
+    call NUOPC_DriverIngestRunSequence(driver, runSeqFF, autoAddConnectors=.true., rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         return  ! bail out
+
+    ! clean-up
+    call NUOPC_FreeFormatDestroy(runSeqFF, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+         line=__LINE__, &
+         file=__FILE__)) &
+         return  ! bail out
+
+  end subroutine SetRunSequence
+
+  !-----------------------------------------------------------------------------
+
+  subroutine TimestampImportState(driver, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_GridComp) :: comp
-    type(ESMF_State)   :: compImport, compExport
+    type(ESMF_Clock)              :: internalClock
 
     rc = ESMF_SUCCESS
 
-    call NUOPC_DriverGetComp(drvr, compLabel="ATM", &
-         comp=comp, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return  ! bail out
+    ! timestamp the fields in the importState
 
-    call ESMF_GridCompGet(comp, importState=compImport, &
-         exportState=compExport, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return  ! bail out
-
-    call NUOPC_SetAttribute(compImport, "FieldTransferPolicy", &
-         "transferAll", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return  ! bail out
-    call NUOPC_SetAttribute(compExport, "FieldTransferPolicy", &
-         "transferAll", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return  ! bail out
-
-    ! set driver's own import/export to accept field transfers
-    call NUOPC_SetAttribute(importState, "FieldTransferPolicy", &
-         "transferAll", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return  ! bail out
-    call NUOPC_SetAttribute(exportState, "FieldTransferPolicy", &
-         "transferAll", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return  ! bail out
-
-  end subroutine InitializeP1
-
-  subroutine RealizeMirroredFields(drvr, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: drvr
-    type(ESMF_State)     :: importState, exportState
-    type(ESMF_Clock)     :: clock
-    integer, intent(out) :: rc
-
-    rc = ESMF_SUCCESS
-
-    !print *, "Inside RealizeMirroredFields"
-
-    ! realize mirrored fields that have accepted grid from other comp
-    call MirrorFieldsInState(importState, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return ! bail out
-
-    call MirrorFieldsInState(exportState, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return ! bail out
-
-  end subroutine RealizeMirroredFields
-
-  subroutine MirrorFieldsInState(state, rc)
-    type(ESMF_State), intent(in) :: state
-    integer, intent(out) :: rc
-
-    integer                :: i, itemCount, stat
-    character(ESMF_MAXSTR) :: transferGeom
-    character(ESMF_MAXSTR), allocatable :: itemNameList(:)
-    type(ESMF_StateItem_Flag), allocatable :: itemTypeList(:)
-    type(ESMF_Field)       :: field
-
-    type(ESMF_Grid)        :: grid
-    type(ESMF_DistGrid)    :: distgrid
-    integer, allocatable   :: minIndexPTile(:,:), maxIndexPTile(:,:)
-    integer                :: dimCount
-    character(len=80)      :: valueString, attrString
-    logical                :: isPresent
-    type(ESMF_AttPack)     :: attpack
-    integer, pointer       :: ungriddedLBound(:), ungriddedUBound(:)
-    type(ESMF_StateIntent_Flag)             :: stateIntent
-    character(len=80)                       :: transferActionAttr
-
-    rc = ESMF_SUCCESS
-
-    call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, file=__FILE__)) return  ! bail out
-
-    allocate(itemNameList(itemCount),stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-         msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, file=__FILE__, rcToReturn=rc)) &
-         return  ! bail out
-
-    allocate(itemTypeList(itemCount),stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, file=__FILE__, rcToReturn=rc)) &
-         return  ! bail out
-
-    call ESMF_StateGet(state, itemNameList=itemNameList, &
-         itemTypeList=itemTypeList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         return  ! bail out
-
-    call ESMF_StateGet(state, stateIntent=stateIntent, rc=rc)
+    call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
-    if (stateIntent==ESMF_STATEINTENT_EXPORT) then
-      transferActionAttr="ProducerTransferAction"
-    elseif (stateIntent==ESMF_STATEINTENT_IMPORT) then
-      transferActionAttr="ConsumerTransferAction"
-    else
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="The stateIntent must either be IMPORT or EXPORT here.", &
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)
+    call NUOPC_SetTimestamp(importState, internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
       return  ! bail out
-    endif
 
-    ! WARNING: does not currently deal with nested states or field bundles
-    do i=lbound(itemNameList,1), ubound(itemNameList,1)
-       if (itemTypeList(i)==ESMF_STATEITEM_FIELD) then
+    call ESMF_AttributeSet(driver, name="InitializeDataComplete", &
+      value="true", convention="NUOPC",  purpose="Instance", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
 
-          ! TODO: condition on NUOPC_IsConnected first
-          ! NUOPC_IsConnected(state, fieldName=fieldNameList(i))
+  end subroutine
 
-          call ESMF_StateGet(state, &
-               itemNameList(i), field, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-               line=__LINE__, &
-               file=__FILE__)) &
-               return  ! bail out
+  !-----------------------------------------------------------------------------
 
-          call NUOPC_GetAttribute(field, name=transferActionAttr, &
-               value=transferGeom, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-               line=__LINE__, &
-               file=__FILE__)) &
-               return  ! bail out
-
-          if (trim(transferGeom)=="accept") then
-
-             call ESMF_LogWrite("Completing mirrored field: "//itemNameList(i), &
-                  ESMF_LOGMSG_INFO, rc=rc)
-             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=__FILE__)) &
-                  return  ! bail out
-
-             nullify(ungriddedLBound)
-             nullify(ungriddedUBound)
-
-             call ESMF_AttributeGetAttPack(field, attpack=attpack, &
-                  convention="NUOPC", purpose="Instance", isPresent=isPresent, rc=rc)
-             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=__FILE__)) &
-                  return  ! bail out
-             if (.not. isPresent) then
-                ! attpack not present
-                call ESMF_LogWrite("Field level attpack NOT present!", &
-                     ESMF_LOGMSG_WARNING, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                     line=__LINE__, file=__FILE__)) &
-                     return  ! bail out
-             else
-                ! retrieve ungridded dimension bounds and mirror
-                ! match those as well
-                call ESMF_AttributeGet(field, name="UngriddedLBound", &
-                     attpack=attpack, itemCount=itemCount, isPresent=isPresent, &
-                     attnestflag=ESMF_ATTNEST_ON, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                     line=__LINE__, file=__FILE__)) &
-                     return  ! bail out
-
-                if (isPresent .and. itemCount > 0) then
-                   allocate(ungriddedLBound(itemCount),stat=stat)
-                   if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-                        msg="Allocation of internal ungriddedLBound failed.", &
-                        line=__LINE__, file=__FILE__, rcToReturn=rc)) &
-                        return  ! bail out
-
-                   call ESMF_AttributeGet(field, &
-                        name="UngriddedLBound", valueList=ungriddedLBound, &
-                        convention="NUOPC", purpose="Instance", &
-                        attnestflag=ESMF_ATTNEST_ON, rc=rc)
-                   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                        line=__LINE__, &
-                        file=__FILE__)) &
-                        return  ! bail out
-
-                   !print *, "UNGRIDDED LBOUND = ", ungriddedLBound
-                endif
-
-                call ESMF_AttributeGet(field, name="UngriddedUBound", &
-                     attpack=attpack, itemCount=itemCount, isPresent=isPresent, &
-                     attnestflag=ESMF_ATTNEST_ON, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                     line=__LINE__, file=__FILE__)) &
-                     return  ! bail out
-
-                if (isPresent .and. itemCount > 0) then
-                   allocate(ungriddedUBound(itemCount),stat=stat)
-                   if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-                        msg="Allocation of internal ungriddedUBound failed.", &
-                        line=__LINE__, file=__FILE__, rcToReturn=rc)) &
-                        return  ! bail out
-
-                   call ESMF_AttributeGet(field, &
-                        name="UngriddedUBound", valueList=ungriddedUBound, &
-                        convention="NUOPC", purpose="Instance", &
-                        attnestflag=ESMF_ATTNEST_ON, rc=rc)
-                   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                        line=__LINE__, &
-                        file=__FILE__)) &
-                        return  ! bail out
-
-                   !print *, "UNGRIDDED UBOUND = ", ungriddedUBound
-                endif
-             endif
-
-             if (associated(ungriddedLBound) .and. &
-                  associated(ungriddedUBound)) then
-                call ESMF_FieldEmptyComplete(field, typekind=ESMF_TYPEKIND_R8, &
-                     ungriddedLBound=ungriddedLBound, &
-                     ungriddedUBound=ungriddedUBound, &
-                     rc=rc)
-                deallocate(ungriddedLBound)
-                deallocate(ungriddedUBound)
-             else
-                call ESMF_FieldEmptyComplete(field, typekind=ESMF_TYPEKIND_R8, rc=rc)
-             endif
-
-             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, &
-                  file=__FILE__)) &
-                  return  ! bail out
-          else
-             !print *, "NOT COMPLETING FIELD: ", itemNameList(i), trim(transferGeom)
-             call ESMF_LogWrite("CANNOT complete mirrored field: "//itemNameList(i), &
-                  ESMF_LOGMSG_INFO, rc=rc)
-             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, &
-                  file=__FILE__)) &
-                  return  ! bail out
-          end if
-
-       end if
-    end do
-
-    deallocate(itemNameList)
-    deallocate(itemTypeList)
-
-  end subroutine MirrorFieldsInState
-
-
-  subroutine TimestampMirroredFields(drvr, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: drvr
+  subroutine RunTimestampImportState(driver, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
-    integer, intent(out) :: rc
+    integer, intent(out)    :: rc
+
+    type(ESMF_Clock)        :: internalClock
+    type(ESMF_Time)         :: time
+    type(ESMF_TimeInterval) :: timeStep
+
+    character(ESMF_MAXSTR)          :: msgString, timeString
 
     rc = ESMF_SUCCESS
 
-    !print *, "Inside TimestampMirroredFields"
+    ! timestamp the fields in the importState
 
-    ! timestamp mirrored fields
-
-    ! no Clock is passed into the driver from the application level
-    ! -> query the driver for its internal clock
-    call ESMF_GridCompGet(drvr, clock=clock, rc=rc)
+    call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      line=__LINE__, file=__FILE__)) &
+      return  ! bail out
 
-    call NUOPC_SetTimestamp(importState, clock, rc=rc)
+    call NUOPC_SetTimestamp(importState, internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      line=__LINE__, file=__FILE__)) &
+      return  ! bail out
 
-    call NUOPC_SetTimestamp(exportState, clock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-    call ESMF_AttributeSet(drvr, name="InitializeDataComplete", &
-         value="true", convention="NUOPC",  purpose="Instance", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-         line=__LINE__, &
-         file=__FILE__)) &
-         call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  end subroutine TimestampMirroredFields
-
+  end subroutine
 
 
 end module
