@@ -1,0 +1,157 @@
+% $Id$
+
+Debugging failing applications is often a challenging task. Massive
+parallelism, issues with compute node access, and large data volumes (just to
+name a few typical HPC aspects) add to the difficulties. For coupled
+applications, built from many individual components and libraries, additional
+complexity is introduced by the many layers of software.
+
+For applications utilizing ESMF, the ESMF library is one of those software
+layers. Due to the "framework" nature of ESMF, the situation can be
+more subtle than for "simple" libraries. This is because ESMF code
+is called from user code (as for "simple" libraries), as well as calling
+back into registered user code (the "framework" aspect of ESMF). The
+consequences of this fact relating to debugging of applications are discussed
+in this section.
+
+One consequence of the "framework" nature is that ESMF code is executing between
+major portions of user code. For instance, when one ESMF component calls into
+another ESMF component, the control flow goes through the ESMF software layer.
+This provides ESMF with a chance to write messages into an application wide
+log file. In particular, for user code that has implemented standard return
+code handling, ESMF can log an error trace in the event of detecting an
+error condition. The ESMF Reference Manual discusses standard "Return Code
+Handling" under a section of the same name.
+
+By default, the application wide ESMF log output is written to files that are
+named {\tt PET<nnn>.ESMF\_LogFile}, where {\tt <nnn>} is the number of the
+persistent execution thread (PET) that is writing. Several characteristics of
+the default log can be changed during the call to {\tt ESMF\_Initialize()}. In
+order to take advantage of the ESMF log output, it is important
+to ensure that the {\tt logkindflag} is set to {\tt ESMF\_LOGKIND\_MULTI}, which
+is the default, or {\tt ESMF\_LOGKIND\_MULTI\_ON\_ERROR}. The latter is
+recommended for production runs where extra log output is minimized, and the ESMF
+log is only activated when an error is encountered.
+
+Assuming that the ESMF log is active for a failing application, and the user
+code follows the documented return code handling, the ESMF log files are among
+the first files that should be inspected. The log files are written into the
+working directory that was active during the application execution. Assuming
+default log file naming, we recommend the following grep command to scan for
+errors.
+
+\begin{verbatim}
+grep ERROR PET*.ESMF_LogFile
+\end{verbatim}
+
+A typical error trace looks similar to the following output. Here for an
+application using the NUOPC layer.
+
+\begin{verbatim}
+20210317 150338.047 ERROR PET0 atm.F90:113       Invalid argument  - \
+                                          Passing error in return code
+20210317 150338.047 ERROR PET0 ATM:src/addon/NUOPC/src/NUOPC_ModelBase.F90:865
+20210317 150338.047 ERROR PET0 esm:src/addon/NUOPC/src/NUOPC_Driver.F90:2570
+20210317 150338.047 ERROR PET0 esm:src/addon/NUOPC/src/NUOPC_Driver.F90:1287
+20210317 150338.047 ERROR PET0 esm:src/addon/NUOPC/src/NUOPC_Driver.F90:466
+20210317 150338.047 ERROR PET0 esmApp.F90:64       Invalid argument  - \
+                                           Passing error in return code
+\end{verbatim}
+
+The first two columns contain the wall clock information of when each individual
+log message was written. The third and forth column indicate the type of the log
+message, here {\tt ERROR}, and the PET number, respectively, The sixth column
+contains information about the source file and line number. Finally the seventh
+column and beyond contain information about the error.
+
+Notice that error traces are logged in backward order. The first {\tt ERROR}
+entry corresponds to the lowest level, where the error condition was first
+detected. Here the error was first detected in file {\tt atm.F90}, at line 113.
+The error is then propagated back up to the highest application level,
+here ending up in file {\tt esmApp.F90}, line 64. Due to the framework nature
+of ESMF discussed earlier, it is very common to see several layers of ESMF
+library code in an error trace, as is the case in this example. Notice however,
+that the error was first caught in "user code" {\tt atm.F90}.
+
+Even if the lowest level indicated (i.e. the start of an error trace) is inside
+the ESMF library, it does not immediately indicate an issue with ESMF code. In
+such cases it is good to follow the error trace to the first user code entry,
+and investigate what ESMF call is made just before that location.
+Then consider looking at the specific information passed into the ESMF method
+and ensure correctness.
+
+There are situations where an application experiences a hard crash, either
+triggered by the runtime library, or the operating system itself. In these cases
+the ESMF log files are typically not as helpful, and might even be missing. A
+hard crash that produces a code dump, a backtrace to stderr, or is caught under
+a debugger, can still be a good source of information to track down the 
+problematic issue.
+
+An example backtrace for a hard crash is shown below.
+
+\begin{verbatim}
+Program received signal SIGFPE: Floating-point exception - erroneous arithmetic operation.
+
+Backtrace for this error:
+#0  0x7f9e45bed49f in ???
+#1  0x40430e in realize
+        at /tmp/AtmOcnProto/ocn.F90:149
+#2  0x7f9e49568f8b in _ZNK5ESMCI13MethodElement7executeEPvPi
+        at /tmp/esmf/src/Superstructure/Component/src/ESMCI_MethodTable.C:333
+#3  0x7f9e49569e74 in _ZN5ESMCI11MethodTable7executeENSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPvPiPb
+        at /tmp/esmf/src/Superstructure/Component/src/ESMCI_MethodTable.C:519
+#4  0x7f9e49568dea in c_esmc_methodtableexecuteef_
+        at /tmp/esmf/src/Superstructure/Component/src/ESMCI_MethodTable.C:303
+#5  0x7f9e4982d8da in __esmf_attachmethodsmod_MOD_esmf_methodgridcompexecute
+        at /tmp/esmf/src/Superstructure/AttachMethods/src/ESMF_AttachMethods.F90:1278
+#6  0x7f9e4a69fcd0 in initializeipdvxp04
+        at /tmp/esmf/src/addon/NUOPC/src/NUOPC_ModelBase.F90:1263
+#7  0x7f9e492b8d1a in _ZN5ESMCI6FTable12callVFuncPtrEPKcPNS_2VMEPi
+        at /tmp/esmf/src/Superstructure/Component/src/ESMCI_FTable.C:2036
+#8  0x7f9e492b605a in ESMCI_FTableCallEntryPointVMHop
+        at /tmp/esmf/src/Superstructure/Component/src/ESMCI_FTable.C:765
+#9  0x7f9e49654bc3 in _ZN5ESMCI3VMK5enterEPNS_7VMKPlanEPvS3_
+        at /tmp/esmf/src/Infrastructure/VM/src/ESMCI_VMKernel.C:2195
+#10  0x7f9e49668136 in _ZN5ESMCI2VM5enterEPNS_6VMPlanEPvS3_
+        at /tmp/esmf/src/Infrastructure/VM/src/ESMCI_VM.C:1211
+#11  0x7f9e492b64f0 in c_esmc_ftablecallentrypointvm_
+        at /tmp/esmf/src/Superstructure/Component/src/ESMCI_FTable.C:922
+#12  0x7f9e499f8678 in __esmf_compmod_MOD_esmf_compexecute
+        at /tmp/esmf/src/Superstructure/Component/src/ESMF_Comp.F90:1216
+#13  0x7f9e49e5e19b in __esmf_gridcompmod_MOD_esmf_gridcompinitialize
+        at /tmp/esmf/src/Superstructure/Component/src/ESMF_GridComp.F90:1408
+#14  0x7f9e4a63740e in loopmodelcompss
+        at /tmp/esmf/src/addon/NUOPC/src/NUOPC_Driver.F90:2534
+#15  0x7f9e4a641e92 in initializeipdv02p3
+        at /tmp/esmf/src/addon/NUOPC/src/NUOPC_Driver.F90:1833
+#16  0x7f9e4a6650c9 in initializep1
+        at /tmp/esmf/src/addon/NUOPC/src/NUOPC_Driver.F90:467
+#17  0x7f9e492b8d1a in _ZN5ESMCI6FTable12callVFuncPtrEPKcPNS_2VMEPi
+        at /tmp/esmf/src/Superstructure/Component/src/ESMCI_FTable.C:2036
+#18  0x7f9e492b605a in ESMCI_FTableCallEntryPointVMHop
+        at /tmp/esmf/src/Superstructure/Component/src/ESMCI_FTable.C:765
+#19  0x7f9e49654bc3 in _ZN5ESMCI3VMK5enterEPNS_7VMKPlanEPvS3_
+        at /tmp/esmf/src/Infrastructure/VM/src/ESMCI_VMKernel.C:2195
+#20  0x7f9e49668136 in _ZN5ESMCI2VM5enterEPNS_6VMPlanEPvS3_
+        at /tmp/esmf/src/Infrastructure/VM/src/ESMCI_VM.C:1211
+#21  0x7f9e492b64f0 in c_esmc_ftablecallentrypointvm_
+        at /tmp/esmf/src/Superstructure/Component/src/ESMCI_FTable.C:922
+#22  0x7f9e499f8678 in __esmf_compmod_MOD_esmf_compexecute
+        at /tmp/esmf/src/Superstructure/Component/src/ESMF_Comp.F90:1216
+#23  0x7f9e49e5e19b in __esmf_gridcompmod_MOD_esmf_gridcompinitialize
+        at /tmp/esmf/src/Superstructure/Component/src/ESMF_GridComp.F90:1408
+#24  0x401aaf in esmapp
+        at /tmp/AtmOcnProto/esmApp.F90:58
+#25  0x401ee4 in main
+        at /tmp/AtmOcnProto/esmApp.F90:17
+Floating exception (core dumped)
+\end{verbatim}
+
+Just as for the ESMF log, the backtrace is produced in reverse order, starting
+at the lowest level where the problem was encountered, tracing all the way up
+the call stack to {\tt main}. As expected, the backtrace contains many
+layers of ESMF library code. Again this does not immediately indicate that there
+is a problem in the library code. In this example user code is visible at the
+very top of the stack {\tt esmApp.F90}, and at the very bottom {\tt ocn.F90}.
+In fact the location of the division by zero is correctly identified by the
+runtime library at line 149 in file {\tt ocn.F90}.
