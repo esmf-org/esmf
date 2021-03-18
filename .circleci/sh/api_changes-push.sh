@@ -27,4 +27,4 @@ git commit -a -m " `echo ${CIRCLE_BRANCH}` API changes pushed in the artifacts `
 # Push the changes ------------------------------------------------------------
 
 git remote prune origin
-git push origin master
+git push origin main
