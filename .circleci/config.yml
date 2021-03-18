@@ -494,9 +494,9 @@ workflows:
             branches:
               only:
                 - develop
-      - build-esmpy-docs:
-          requires:
-            - should-build-docs
+      - build-esmpy-docs
+#          requires:
+#            - should-build-docs
       - publish-esmpy-docs:
           requires:
             - build-esmpy-docs
