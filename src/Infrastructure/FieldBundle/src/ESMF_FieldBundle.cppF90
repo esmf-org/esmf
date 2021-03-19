@@ -7223,8 +7223,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       character(len=len(str)+len(delim)+len(append)) :: concatName
 
       concatName(:len(str)) = str
-      concatName(len(str)+1:len(str)+1+len(delim)) = delim
-      concatName(len(str)+1+len(delim):) = append
-		end function
+      concatName(len(str)+1:len(str)+len(delim)) = delim
+      concatName(len(str)+len(delim)+1:) = append
+    end function
 
 end module ESMF_FieldBundleMod
