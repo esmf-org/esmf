@@ -67,9 +67,6 @@
 !     type(ESMF_AttPack),  intent(out),   optional :: attpack
 !     integer,             intent(inout), optional :: rc
 !
-{% set removed_parameters = ["nestAttPackInstanceCountList", "nestAttPackInstanceNameList", "nestCount", "nestAttPackInstanceNameCount"] %}
-{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
-!
 ! !DESCRIPTION:
 !     Add an ESMF Attribute package containing a nested Attribute package.
 !
@@ -573,7 +570,7 @@
 !
 !EOP
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number from an ESMF_AttPack
 !
 ! !INTERFACE:
@@ -626,7 +623,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number

@@ -911,15 +911,6 @@ contains  !====================================================================
 !     type(ESMF_AttPack),  intent(out),   optional :: attpack
 !     integer,             intent(inout), optional :: rc
 !
-! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
-!     \begin{itemize}
-!     \item \texttt{ nestAttPackInstanceCountList }
-!     \item \texttt{ nestAttPackInstanceNameList }
-!     \item \texttt{ nestCount }
-!     \item \texttt{ nestAttPackInstanceNameCount }
-!     \end{itemize}
-!
 ! !DESCRIPTION:
 !     Add an ESMF Attribute package containing a nested Attribute package.
 !
@@ -1187,7 +1178,7 @@ contains  !====================================================================
 !     integer,                intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1272,7 +1263,7 @@ contains  !====================================================================
 !     integer,                intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1416,7 +1407,7 @@ contains  !====================================================================
 !     integer,                    intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1553,7 +1544,7 @@ contains  !====================================================================
 !     integer,                  intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1607,7 +1598,7 @@ contains  !====================================================================
 !
 !EOP
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number from an ESMF_AttPack
 !
 ! !INTERFACE:
@@ -1674,7 +1665,7 @@ contains  !====================================================================
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number
@@ -1698,7 +1689,7 @@ contains  !====================================================================
 !     integer,                  intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1774,7 +1765,7 @@ contains  !====================================================================
 !     integer,                 intent(out),    optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1835,7 +1826,7 @@ contains  !====================================================================
 !     integer,             intent(out), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ schemaFileName }
 !     \end{itemize}
@@ -1948,7 +1939,7 @@ contains  !====================================================================
 !     integer,                 intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -2164,7 +2155,7 @@ contains  !====================================================================
 !     integer,                 intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -2243,7 +2234,7 @@ contains  !====================================================================
 !     integer,                 intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -2318,7 +2309,7 @@ contains  !====================================================================
 !     integer,       intent(out), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ reconcile }
 !     \end{itemize}
