@@ -1397,7 +1397,7 @@ module ESMF_AttachMethodsMod
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Remove attached method.
+! Access information about attached method.
 !
 ! The arguments are:
 ! \begin{description}
@@ -1460,7 +1460,7 @@ module ESMF_AttachMethodsMod
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Remove attached method.
+! Access information about attached method.
 !
 ! The arguments are:
 ! \begin{description}
@@ -1523,7 +1523,7 @@ module ESMF_AttachMethodsMod
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Remove attached method.
+! Access information about attached method.
 !
 ! The arguments are:
 ! \begin{description}
