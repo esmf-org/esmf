@@ -52,6 +52,7 @@ module ESMF_StateInternalsMod
       use ESMF_StateTypesMod
       use ESMF_StateContainerMod
       use ESMF_StateVaMod
+      use ESMF_AbstractStateItemMod
 
       implicit none
 
@@ -102,6 +103,7 @@ module ESMF_StateInternalsMod
     module procedure ESMF_StateClsAddFieldList
     module procedure ESMF_StateClsAddFieldBundleList
     module procedure ESMF_StateClsAddStateList
+    module procedure ESMF_StateClsAddAbstractStateItemList
 
   end interface
 !------------------------------------------------------------------------------
@@ -126,6 +128,7 @@ contains
                          arrays, arraybundles, &
                          fields, fieldbundles, &
                          routehandles, states, &
+			 abstractitems, &
                          itemCount, vm, rc)
 !
 ! !ARGUMENTS:
@@ -138,6 +141,7 @@ contains
       type(ESMF_FieldBundle), intent(in),  optional :: fieldbundles(:)
       type(ESMF_RouteHandle), intent(in),  optional :: routehandles(:)
       type(ESMF_State),       intent(in),  optional :: states(:)
+      type(ESMF_AbstractStateItem),       intent(in),  optional :: abstractitems(:)
       integer,                intent(in),  optional :: itemCount
       type(ESMF_VM),          intent(in),  optional :: vm
       integer,                intent(out), optional :: rc
@@ -166,6 +170,8 @@ contains
 !    An array of {\tt ESMF\_FieldBundle}s.
 !   \item[{[states]}]
 !    An array of nested {\tt ESMF\_State}s.
+!   \item[{[abstractitems]}]
+!    An array of nested {\tt ESMF\_AbstractStateItem}s.
 !   \item[{[routehandles]}]
 !    An array of {\tt ESMF\_RouteHandle}s.
 !   \item[{[itemCount]}]
@@ -224,6 +230,13 @@ ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundles(i),rc)
 ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,states(i),rc)
            enddo
            localitemcount = localitemcount + size (states)
+        endif
+        if (present(abstractitems)) then
+           do i=1,size(abstractitems)
+! TLC I do not nkow what this macro does so commenting it out for now
+!ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,states(i),rc)
+           enddo
+           localitemcount = localitemcount + size (abstractitems)
         endif
         if (present(routehandles)) then
            do i=1,size(routehandles)
@@ -306,6 +319,16 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
           if (size (states) > 0) then
             call ESMF_StateClsAddStateList(stypep,  &
               states, addflag=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        endif
+
+        if (present(abstractitems)) then
+          if (size (abstractitems) > 0) then
+            call ESMF_StateClsAddAbstractStateItemList(stypep,  &
+              abstractitems, addflag=.true., rc=localrc)
             if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -729,6 +752,7 @@ StateClsAddListMacro(ESMF_FieldBundle, FieldBundle, fieldbundles, fbp, FIELDBUND
 ^define stateversion
 StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
 ^undef  stateversion
+StateClsAddListMacro(ESMF_AbstractStateItem, AbstractStateItem, abstractitems, asip, ABSTRACTITEM)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
