@@ -1,11 +1,13 @@
 module ESMF_AbstractStateItemMod
    use ESMF_UtilTypesMod
+   use ESMF_LogErrMod
    implicit none
    private
 
    public :: ESMF_AbstractItem
 
    public :: ESMF_AbstractStateItem
+   public :: AbstractItemWrapper
    public :: ESMF_AbstractItemWrapper
 
    public :: ESMF_AbstractStateItemGetInit
@@ -14,10 +16,15 @@ module ESMF_AbstractStateItemMod
    type, abstract :: ESMF_AbstractItem
    end type ESMF_AbstractItem
 
+   type :: AbstractItemWrapper
+      class(ESMF_AbstractItem), pointer :: item
+   end type AbstractItemWrapper
+
+   
 
    type :: FakeAbstractItem
       sequence
-      integer :: placeholder(2)
+      integer :: placeholder
    end type FakeAbstractItem
    ! This wrapper is intended to just to be the the same size as user
    ! wrappers containing their own pointers to objects of types that
@@ -32,6 +39,14 @@ module ESMF_AbstractStateItemMod
       character(ESMF_MAXSTR) :: name
       type(ESMF_AbstractItemWrapper) :: wrapper
    end type ESMF_AbstractStateItem
+
+!!$   interface ESMF_StateAdd
+!!$      module procedure ESMF_StateAddAbstractItem_
+!!$   end interface ESMF_StateAdd
+!!$
+!!$   interface ESMF_StateGet
+!!$      module procedure ESMF_StateGetAbstractItem_
+!!$   end interface ESMF_StateGet
 
 
 
@@ -88,4 +103,7 @@ contains
    end function ESMF_AbstractStateItemGetInit
 !------------------------------------------------------------------------------
 
+
+
 end module ESMF_AbstractStateItemMod
+

@@ -4,7 +4,7 @@
 ! just happens to accept this interface despite most arguments not
 ! being C interoperable.
 #define ESMF_METHOD "ESMF_StateAddAbstractItem"
-subroutine ESMF_StateAddAbstractItem(state, itemname, item, keywordEnforcer, &
+subroutine ESMF_StateAddAbstractItem(state, itemname, item, &
      proxyflag, addflag, replaceflag, relaxedflag, rc) bind(c, name="ESMF_StateAddAbstractItem")
    use ESMF_UtilTypesMod
    use ESMF_StateTypesMod
@@ -18,7 +18,6 @@ subroutine ESMF_StateAddAbstractItem(state, itemname, item, keywordEnforcer, &
    type(ESMF_State),  intent(inout) :: state
    character(*), intent(in) :: itemname
    type(ESMF_AbstractItemWrapper), intent(in) :: item
-   type(ESMF_KeywordEnforcer), optional :: keywordEnforcer
    logical, optional, intent(in) :: proxyflag
    logical, optional, intent(in) :: addflag
    logical, optional, intent(in) :: replaceflag
@@ -63,7 +62,7 @@ end subroutine ESMF_StateAddAbstractItem
 #undef ESMF_METHOD
 
 #define ESMF_METHOD "ESMF_StateGetAbstractItem"
-subroutine ESMF_StateGetAbstractItem(state, itemname, item, keywordEnforcer, rc) bind(c, name="ESMF_StateGetAbstractItem")
+subroutine ESMF_StateGetAbstractItem(state, itemname, item, rc) bind(c, name="ESMF_StateGetAbstractItem")
    use ESMF_UtilTypesMod
    use ESMF_StateTypesMod
    use ESMF_AbstractStateItemMod
@@ -76,7 +75,6 @@ subroutine ESMF_StateGetAbstractItem(state, itemname, item, keywordEnforcer, rc)
    type(ESMF_State),  intent(inout) :: state
    character(len=*), intent(in) :: itemname
    type(ESMF_AbstractItemWrapper), intent(out) :: item
-   type(ESMF_KeywordEnforcer), optional :: keywordEnforcer
    type(integer), intent(out), optional :: rc
 
    type(ESMF_StateItem), pointer :: dataitem

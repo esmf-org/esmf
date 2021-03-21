@@ -58,7 +58,7 @@ module ESMF_StateAPIMod
       use ESMF_IOUtilMod
       use ESMF_UtilMod
       use ESMF_UtilStringMod
-
+      use ESMF_AbstractStateItemMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -142,6 +142,8 @@ module ESMF_StateAPIMod
     module procedure ESMF_StateAddOneStateX
     module procedure ESMF_StateAddStateList
 
+    module procedure ESMF_StateAddAbstractItemList
+
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -166,7 +168,6 @@ module ESMF_StateAPIMod
     module procedure ESMF_StateAddRpRoutehandleList
     module procedure ESMF_StateAddRpStateList
 
-
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
 ! types of {\tt ESMF\_StateAdd} functions.
@@ -189,6 +190,7 @@ module ESMF_StateAPIMod
       module procedure ESMF_StateGetFieldBundle
       module procedure ESMF_StateGetRouteHandle
       module procedure ESMF_StateGetState
+      module procedure ESMF_StateGetAbstractItem_
       module procedure ESMF_StateGetInfo
       module procedure ESMF_StateGetItemInfo
 
@@ -2158,5 +2160,96 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         end function ESMF_StateReadRestart
+
+
+   subroutine ESMF_StateAddAbstractItemList(state, itemname, item, keywordEnforcer, &
+        proxyflag, addflag, replaceflag, relaxedflag, rc)
+      type(ESMF_State),  intent(inout) :: state
+      character(*), intent(in) :: itemname
+      class(ESMF_AbstractItem), target, intent(in) :: item
+      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer
+      logical, optional, intent(in) :: proxyflag
+      logical, optional, intent(in) :: addflag
+      logical, optional, intent(in) :: replaceflag
+      logical, optional, intent(in) :: relaxedflag
+      type(integer), intent(out), optional :: rc
+
+      integer :: localrc
+      type (AbstractItemWrapper) :: wrapper
+
+      interface
+         subroutine ESMF_StateAddAbstractItem(state, itemname, item, &
+              proxyflag, addflag, replaceflag, relaxedflag, rc) bind(c, name="ESMF_StateAddAbstractItem")
+            use ESMF_UtilTypesMod
+            use ESMF_StateTypesMod
+            use ESMF_AbstractStateItemMod
+            use ESMF_StateItemMod
+            use ESMF_StateInternalsMod
+            use ESMF_InitMacrosMod
+            use ESMF_StateVaMod
+            use ESMF_LogErrMod
+            implicit none
+            type(ESMF_State),  intent(inout) :: state
+            character(*), intent(in) :: itemname
+            type(AbstractItemWrapper), intent(in) :: item
+            logical, optional, intent(in) :: proxyflag
+            logical, optional, intent(in) :: addflag
+            logical, optional, intent(in) :: replaceflag
+            logical, optional, intent(in) :: relaxedflag
+            integer, intent(out), optional :: rc
+         end subroutine ESMF_StateAddAbstractItem
+      end interface
+      
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! Trick compiler to use implicit interface
+      wrapper%item => item
+      call ESMF_StateAddAbstractItem(state, itemname, wrapper, &
+           proxyflag=proxyflag, addflag=addflag, replaceflag=replaceflag, relaxedflag=relaxedflag, &
+           rc=localrc)
+
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+   end subroutine ESMF_StateAddAbstractItemList
+
+
+   subroutine ESMF_StateGetAbstractItem_(state, itemname, item, keywordEnforcer, rc)
+      type(ESMF_State),  intent(inout) :: state
+      character(*), intent(in) :: itemname
+      class(ESMF_AbstractItem), target, intent(out) :: item
+      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer
+      integer, intent(out), optional :: rc
+
+      integer :: localrc
+      type (AbstractItemWrapper) :: wrapper
+
+      interface
+         subroutine ESMF_StateGetAbstractItem(state, itemname, item, rc) bind(c, name="ESMF_StateGetAbstractItem")
+            use ESMF_UtilTypesMod
+            use ESMF_StateTypesMod
+            use ESMF_AbstractStateItemMod
+            use ESMF_StateItemMod
+            use ESMF_StateInternalsMod
+            use ESMF_InitMacrosMod
+            use ESMF_StateVaMod
+            use ESMF_LogErrMod
+            implicit none
+            type(ESMF_State),  intent(inout) :: state
+            character(len=*), intent(in) :: itemname
+            type(AbstractItemWrapper), intent(out) :: item
+            type(integer), intent(out), optional :: rc
+         end subroutine ESMF_StateGetAbstractItem
+      end interface
+
+      ! Trick compiler to use implicit interface
+      wrapper%item => item
+      call ESMF_StateGetAbstractItem(state, itemname, wrapper, localrc)
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+   end subroutine ESMF_StateGetAbstractItem_
+
 
 end module ESMF_StateAPIMod

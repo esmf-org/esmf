@@ -182,7 +182,7 @@
 #endif
 #endif
       !private
-        type(ESMF_DataHolder) :: datap
+      type(ESMF_DataHolder) :: datap
         type(ESMF_StateItem_Flag) :: otype
 #if 0
         type(ESMF_NeededFlag) :: needed 
