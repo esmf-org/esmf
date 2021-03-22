@@ -617,7 +617,6 @@ then for each of the fields we will make different run time modifications:
 
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
-    character(ESMF_MAXSTR)      :: convESMF,purpGen
 
     rc = ESMF_SUCCESS
 
@@ -625,18 +624,6 @@ then for each of the fields we will make different run time modifications:
     if (status .ne. ESMF_SUCCESS) return
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) return
-
-    convESMF = 'ESMF'
-    purpGen = 'General'
-
-#if 0
-    if (myPet .eq. 2) then
-      call ESMF_AttributeWrite(importState,convESMF,purpGen, &
-        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      call ESMF_AttributeWrite(importState,convESMF,purpGen,rc=rc)
-      if (rc .ne. ESMF_SUCCESS) return
-    endif
-#endif
 
   end subroutine userm2_run
 

@@ -458,8 +458,26 @@ program ESMF_InfoUTest
   call ESMF_InfoSet(info9, "the-key", arr_i4, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_InfoGetAlloc(info9, "the-key", arr_i4_get, itemcount=arr_i4_get_count, rc=rc)
+  i = 3
+  call ESMF_InfoGetArrayMeta(info9, "the-key", isArray, i, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  failed = .not. isArray
+
+  call ESMF_InfoGetAlloc(info9, "the-key", arr_i4_get, &
+    itemcount=arr_i4_get_count, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Testing ESMF_InfoAssignment(=)()
+  info = info9
+
+  ! Testing ESMF_InfoOperator(/=)()
+  if (info9 /= info) failed = .true.
+
+  info = ESMF_InfoCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Testing ESMF_InfoOperator(==)()
+  if (info9 == info) failed = .true.
 
   do i=1, 3
     if (arr_i4(i) /= arr_i4_get(i)) then
@@ -468,6 +486,12 @@ program ESMF_InfoUTest
   end do
 
   deallocate(arr_i4_get)
+
+  call ESMF_InfoDestroy(info, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_InfoDestroy(info9, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_Test((.not. failed), name, failMsg, result, ESMF_SRCLINE)
   !----------------------------------------------------------------------------

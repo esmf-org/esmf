@@ -468,6 +468,56 @@ typical case where {\tt ESMF\_YAMLCPP} is set to {\tt "standard"},
 \end{description}
 
 
+\subsubsection{MOAB}
+\label{sec:MOAB}
+
+The Mesh Oriented datABase
+(\htmladdnormallink{MOAB}{https://sigma.mcs.anl.gov/moab-library/})
+can be used to build an ESMF unstructured Mesh as an alternative to the 
+"native" ESMF Mesh implementation. The decision to use either MOAB or the 
+native ESMF Mesh implementation is made at run time. This aspect is described 
+in the Reference Manual, section {\tt ESMF\_MeshSetMOAB()} .The default is to use 
+the native ESMF Mesh. ESMF will build an internal version of MOAB by default, 
+but an external MOAB installation can be used if desired. The build parameters 
+covered in this section are used to determine which version of MOAB is 
+available to ESMF. 
+
+\begin{description}
+
+\item[ESMF\_MOAB] Possible values: {\tt "internal"} (default), {\tt "OFF"},
+{\tt "external"}.
+
+\begin{description}
+\item[{\tt "internal"} (default)] The MOAB dependent code inside of ESMF will
+be enabled.
+The MOAB sources included with ESMF will be used to provide MOAB support.
+The {\tt ESMF\_MOAB\_INCLUDE}, {\tt ESMF\_MOAB\_LIBPATH}, and
+{\tt ESMF\_MOAB\_LIBS} environment variables will be ignored.
+
+\item[{\tt "OFF"}] Disables MOAB dependent code.
+
+\item[{\tt "external"}] The MOAB dependent code inside of ESMF will
+be enabled.
+The {\tt ESMF\_MOAB\_INCLUDE}, {\tt ESMF\_MOAB\_LIBPATH} and 
+{\tt ESMF\_MOAB\_LIBS} environment variables must also be specified.
+\end{description}
+
+\item[ESMF\_MOAB\_INCLUDE] Typical value: {\tt /usr/local/include}
+(no default).
+
+Specifies the path where the MOAB C++ header files are located.
+
+\item[ESMF\_MOAB\_LIBPATH] Typical value: {\tt /usr/local/lib} (no default).
+
+Specifies the path where the MOAB C++ library file is located.
+
+\item[ESMF\_MOAB\_LIBS] Typical value: {\tt "-lMOAB"} (no default).
+
+Specifies the linker directives needed to link the MOAB C++ library to
+the application.
+
+\end{description}
+
 \subsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
 

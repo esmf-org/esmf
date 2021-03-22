@@ -10,15 +10,17 @@ cd
 
 # Clone the docs repository
 git clone --depth 1 git@github.com:esmf-org/esmf-org.github.io.git
+cd esmf-org.github.io/
+mkdir -p docs/nightly/${CIRCLE_BRANCH}/dev_guide
 
 # ESMF Docs -------------------------------------------------------------------
 
 cd ${DOC_ARTIFACTS}/doc-esmf
-cp -rf ./* ~/esmf-org.github.io/docs/nightly/develop/
+cp -rf ./* ~/esmf-org.github.io/docs/nightly/${CIRCLE_BRANCH}/
 
 cd ~/esmf-org.github.io/
 git add .
-git commit -m "ESMF doc build by CircleCI"
+git commit -m " `echo ${CIRCLE_BRANCH}` ESMF doc build by CircleCI"
 
 # NUOPC Docs ------------------------------------------------------------------
 
@@ -26,26 +28,26 @@ cd ${DOC_ARTIFACTS}/doc-nuopc
 
 for i in  NUOPC_refdoc NUOPC_howtodoc
     do
-        cp -rf $i ~/esmf-org.github.io/docs/nightly/develop/
+        cp -rf $i ~/esmf-org.github.io/docs/nightly/${CIRCLE_BRANCH}/
 
     done
 
 for i in  NUOPC_refdoc.pdf NUOPC_howtodoc.pdf
     do
-        cp -rf $i ~/esmf-org.github.io/docs/nightly/develop/
+        cp -rf $i ~/esmf-org.github.io/docs/nightly/${CIRCLE_BRANCH}/
     done
 
-cd ~/esmf-org.github.io/docs/nightly/develop
+cd ~/esmf-org.github.io/docs/nightly/${CIRCLE_BRANCH}
 git add .
-git commit -m "NUOPC doc build by CircleCI"
+git commit -m "`echo ${CIRCLE_BRANCH}` NUOPC doc build by CircleCI"
 
 # Developer's Guide -----------------------------------------------------------
 
 cd ${DOC_ARTIFACTS}/doc-dev_guide
-cp -rf ./dev_guide/dev_guide/* ~/esmf-org.github.io/docs/nightly/develop/dev_guide/
+cp -rf ./dev_guide/dev_guide/* ~/esmf-org.github.io/docs/nightly/${CIRCLE_BRANCH}/dev_guide/
 cd ~/esmf-org.github.io/
 git add .
-git commit -m " ESMF dev_guide build by CircleCI"
+git commit -m " `echo ${CIRCLE_BRANCH}` ESMF dev_guide build by CircleCI"
 
 # Push the changes ------------------------------------------------------------
 

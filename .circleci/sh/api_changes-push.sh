@@ -3,7 +3,7 @@ set -Eeuxo pipefail
 
 DOC_ARTIFACTS="/tmp/artifacts/artifacts"
 
-git config --global user.email "himanshu@ucar.edu"
+git config --global user.email "dunlap@ucar.edu"
 git config --global user.name "esmf-orgbot"
 
 cd
@@ -12,6 +12,7 @@ cd
 git clone --depth 1 git@github.com:esmf-org/esmf-test-artifacts.git
 
 # API changes -------------------------------------------------------------------
+echo "ESMF_BRANCH=${CIRCLE_BRANCH}"
 
 cd esmf-test-artifacts/
 mkdir -p ${CIRCLE_BRANCH}/platform_independent/api_change

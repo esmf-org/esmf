@@ -852,46 +852,38 @@ contains  !====================================================================
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
-!     subroutine ESMF_AttAddPackStd(target, convention, purpose, attrList, attpack, &
-!       rc)
+!     subroutine ESMF_AttAddPackInfo(info, convention, purpose, attrList, &
+!       nestConvention, nestPurpose, attpack, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),      intent(in)              :: target
+!     type(<ESMF_Info>),   intent(inout)           :: info
 !     character (len = *), intent(in)              :: convention
 !     character (len = *), intent(in)              :: purpose
 !     character (len = *), intent(in),    optional :: attrList(:)
-!     type(ESMF_AttPack),  intent(inout), optional :: attpack
-!     integer,             intent(out),   optional :: rc
+!     character (len = *), intent(in)     optional :: nestConvention
+!     character (len = *), intent(in)     optional :: nestPurpose
+!     type(ESMF_AttPack),  intent(out),   optional :: attpack
+!     integer,             intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
 !     Add an ESMF Attribute package.
 !
-!     Supported values for <object> are:
-!     \begin{description}
-!     \item \texttt{ESMF\_Array}
-!     \item \texttt{ESMF\_ArrayBundle}
-!     \item \texttt{ESMF\_CplComp}
-!     \item \texttt{ESMF\_GridComp}
-!     \item \texttt{ESMF\_SciComp}
-!     \item \texttt{ESMF\_DistGrid}
-!     \item \texttt{ESMF\_Field}
-!     \item \texttt{ESMF\_FieldBundle}
-!     \item \texttt{ESMF\_Grid}
-!     \item \texttt{ESMF\_State}
-!     \item \texttt{ESMF\_LocStream}
-!     \item \texttt{ESMF\_Mesh}
-!     \end{description}
-!
 !     The arguments are:
 !     \begin{description}
-!     \item [target]
-!           An {\tt ESMF} object.
+!     \item [info]
+!           An {\tt ESMF\_Info} object.
 !     \item [convention]
 !           The convention of the new Attribute package.
 !     \item [purpose]
 !           The purpose of the new Attribute package.
 !     \item [{[attrList]}]
 !           The list of Attribute names to add to the Attribute package.
+!     \item [{[nestConvention]}]
+!           The convention(s) of the standard Attribute package(s) around
+!           which to nest the new Attribute package.
+!     \item [{[nestPurpose]}]
+!           The purpose(s) of the standard Attribute package(s) around
+!           which to nest the new Attribute package.
 !     \item [{[attpack]}]
 !           An optional handle to the Attribute package that is to be created.
 !     \item [{[rc]}]
@@ -906,28 +898,18 @@ contains  !====================================================================
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
-!     subroutine ESMF_AttAddPackStdN(target, convention, purpose, nestConvention, &
-!       nestPurpose, attrList, attpack, rc)
+!     subroutine ESMF_AttAddPackStd(target, convention, purpose, attrList, &
+!       nestConvention, nestPurpose, attpack, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),      intent(in)              :: target
+!     type(<object>),      intent(inout)           :: target
 !     character (len = *), intent(in)              :: convention
 !     character (len = *), intent(in)              :: purpose
-!     character (len = *), intent(in)              :: nestConvention
-!     character (len = *), intent(in)              :: nestPurpose
 !     character (len = *), intent(in),    optional :: attrList(:)
-!     type(ESMF_AttPack),  intent(inout), optional :: attpack
-!     integer,             intent(out),   optional :: rc
-!
-! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
-!     \begin{itemize}
-!     \item \texttt{ nestPurpose }
-!     \item \texttt{ nestAttPackInstanceCountList }
-!     \item \texttt{ nestAttPackInstanceNameList }
-!     \item \texttt{ nestCount }
-!     \item \texttt{ nestAttPackInstanceNameCount }
-!     \end{itemize}
+!     character (len = *), intent(in)     optional :: nestConvention
+!     character (len = *), intent(in)     optional :: nestPurpose
+!     type(ESMF_AttPack),  intent(out),   optional :: attpack
+!     integer,             intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
 !     Add an ESMF Attribute package containing a nested Attribute package.
@@ -956,14 +938,14 @@ contains  !====================================================================
 !           The convention of the new Attribute package.
 !     \item [purpose]
 !           The purpose of the new Attribute package.
-!     \item [nestConvention]
-!           The convention(s) of the standard Attribute package(s) around
-!           which to nest the new Attribute package.
-!     \item [nestPurpose]
-!           The purpose(s) of the standard Attribute package(s) around
-!           which to nest the new Attribute package.
 !     \item [{[attrList]}]
 !           The list of Attribute names to add to the Attribute package.
+!     \item [{[nestConvention]}]
+!           The convention(s) of the standard Attribute package(s) around
+!           which to nest the new Attribute package.
+!     \item [{[nestPurpose]}]
+!           The purpose(s) of the standard Attribute package(s) around
+!           which to nest the new Attribute package.
 !     \item [{[attpack]}]
 !           An optional handle to the Attribute package that is to be created.
 !     \item [{[rc]}]
@@ -978,17 +960,17 @@ contains  !====================================================================
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy()
-!     subroutine ESMF_AttributeCopy(target1, target2, attcopy, rc)
+!     subroutine ESMF_AttributeCopy(src, dst, attcopy, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),          intent(in)            :: target1
-!     type(<object>),          intent(in)            :: target2
+!     type(<object>),          intent(in)            :: src
+!     type(<object>),          intent(inout)         :: dst
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     type(ESMF_AttCopy_Flag), intent(in),  optional :: attcopy
 !     integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Copy an Attribute hierarchy from \texttt{target1} to \texttt{target2}.
+!     Copy an Attribute hierarchy from \texttt{src} to \texttt{dst}.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1010,9 +992,9 @@ contains  !====================================================================
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [target1]
+!     \item [src]
 !           An {\tt Attribute}-bearing ESMF object.
-!     \item [target2]
+!     \item [dst]
 !           An {\tt Attribute}-bearing ESMF object.
 !     \item [{[attcopy]}]
 !           A flag to determine if the copy is by value (the default) or reference.
@@ -1031,15 +1013,15 @@ contains  !====================================================================
 !       keywordEnforcer, <defaultvalue>, attnestflag, isPresent, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),         intent(in)            :: target
-!     character (len = *),    intent(in)            :: name
-!     type(ESMF_AttPack),     intent(inout)         :: attpack
+!     type(<object>),         intent(in)              :: target
+!     character (len = *),    intent(in)              :: name
+!     type(ESMF_AttPack),     intent(inout)           :: attpack
 !     <value>, see below for supported values
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     <defaultvalue>, see below for supported values
-!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
-!     logical,                intent(out), optional :: isPresent
-!     integer,                intent(out), optional :: rc
+!     type(ESMF_AttNest_Flag),intent(in),  optional   :: attnestflag
+!     logical,                intent(out), optional   :: isPresent
+!     integer,                intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the \texttt{target}, or from an Attribute
@@ -1107,16 +1089,16 @@ contains  !====================================================================
 !       isPresent, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),         intent(in)            :: target
-!     character (len = *),    intent(in)            :: name
-!     type(ESMF_AttPack),     intent(inout)         :: attpack
+!     type(<object>),         intent(in)              :: target
+!     character (len = *),    intent(in)              :: name
+!     type(ESMF_AttPack),     intent(inout)           :: attpack
 !     <valueList>, see below for supported values
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     <defaultvalueList>, see below for supported values
-!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
-!     integer,                intent(out), optional :: itemCount
-!     logical,                intent(out), optional :: isPresent
-!     integer,                intent(out), optional :: rc
+!     type(ESMF_AttNest_Flag),intent(in),  optional   :: attnestflag
+!     integer,                intent(out), optional   :: itemCount
+!     logical,                intent(out), optional   :: isPresent
+!     integer,                intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the \texttt{target}, or from an
@@ -1185,18 +1167,18 @@ contains  !====================================================================
 !       convention, purpose, attnestflag, isPresent, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),         intent(in)            :: target
-!     character (len = *),    intent(in)            :: name
+!     type(<object>),         intent(in)              :: target
+!     character (len = *),    intent(in)              :: name
 !     <value>, see below for supported values
 !     <defaultvalue>, see below for supported values
-!     character (len = *),    intent(in),  optional :: convention
-!     character (len = *),    intent(in),  optional :: purpose
-!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
-!     logical,                intent(out), optional :: isPresent
-!     integer,                intent(out), optional :: rc
+!     character (len = *),    intent(in),    optional :: convention
+!     character (len = *),    intent(in),    optional :: purpose
+!     type(ESMF_AttNest_Flag),intent(in),    optional :: attnestflag
+!     logical,                intent(out),   optional :: isPresent
+!     integer,                intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1269,19 +1251,19 @@ contains  !====================================================================
 !       convention, purpose, attnestflag, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),         intent(in)            :: target
-!     character (len = *),    intent(in)            :: name
+!     type(<object>),         intent(in)              :: target
+!     character (len = *),    intent(in)              :: name
 !     <valueList>, see below for supported values
 !     <defaultvalueList>, see below for supported values
-!     character (len = *),    intent(in),  optional :: convention
-!     character (len = *),    intent(in),  optional :: purpose
-!     type(ESMF_AttNest_Flag),intent(in),  optional :: attnestflag
-!     integer,                intent(out), optional :: itemCount
-!     logical,                intent(out), optional :: isPresent
-!     integer,                intent(out), optional :: rc
+!     character (len = *),    intent(in),    optional :: convention
+!     character (len = *),    intent(in),    optional :: purpose
+!     type(ESMF_AttNest_Flag),intent(in),    optional :: attnestflag
+!     integer,                intent(out),   optional :: itemCount
+!     logical,                intent(out),   optional :: isPresent
+!     integer,                intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1357,12 +1339,12 @@ contains  !====================================================================
 !                                       attcountflag, attnestflag, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),             intent(in)            :: target
-!     type(ESMF_AttPack),         intent(inout)         :: attpack
-!     integer,                    intent(out)           :: count
-!     type(ESMF_AttGetCountFlag), intent(in),  optional :: attcountflag
-!     type(ESMF_AttNest_Flag),    intent(in),  optional :: attnestflag
-!     integer,                    intent(out), optional :: rc
+!     type(<object>),             intent(in)              :: target
+!     type(ESMF_AttPack),         intent(inout)           :: attpack
+!     integer,                    intent(inout)           :: count
+!     type(ESMF_AttGetCountFlag), intent(in),    optional :: attcountflag
+!     type(ESMF_AttNest_Flag),    intent(in),    optional :: attnestflag
+!     integer,                    intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
 !     Return the Attribute count for \texttt{target}.
@@ -1416,17 +1398,16 @@ contains  !====================================================================
 !       attcountflag, attnestflag, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),             intent(in)            :: target
-!     integer,                    intent(out)           :: count
-!     character (len=*),          intent(in),  optional :: convention
-!     character (len=*),          intent(in),  optional :: purpose
-!     character (len=*),          intent(in),  optional :: attPackInstanceName
-!     type(ESMF_AttGetCountFlag), intent(in),  optional :: attcountflag
-!     type(ESMF_AttNest_Flag),    intent(in),  optional :: attnestflag
-!     integer,                    intent(out), optional :: rc
+!     type(<object>),             intent(in)              :: target
+!     integer,                    intent(inout)           :: count
+!     character (len=*),          intent(in),    optional :: convention
+!     character (len=*),          intent(in),    optional :: purpose
+!     type(ESMF_AttGetCountFlag), intent(in),    optional :: attcountflag
+!     type(ESMF_AttNest_Flag),    intent(in),    optional :: attnestflag
+!     integer,                    intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1485,15 +1466,15 @@ contains  !====================================================================
 !       keywordEnforcer, attnestflag, typekind, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),           intent(in)            :: target
-!     character (len = *),      intent(in)            :: name
-!     type(ESMF_AttPack),       intent(inout)         :: attpack
+!     type(<object>),           intent(in)              :: target
+!     character (len = *),      intent(in)              :: name
+!     type(ESMF_AttPack),       intent(inout)           :: attpack
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type(ESMF_AttNest_Flag),  intent(in),  optional :: attnestflag
-!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
-!     integer,                  intent(out), optional :: itemCount
-!     logical,                  intent(out), optional :: isPresent
-!     integer,                  intent(out), optional :: rc
+!     type(ESMF_AttNest_Flag),  intent(in),    optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out),   optional :: typekind
+!     integer,                  intent(out),   optional :: itemCount
+!     logical,                  intent(out),   optional :: isPresent
+!     integer,                  intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
 !     Return information associated with an Attribute in an Attribute package,
@@ -1551,19 +1532,19 @@ contains  !====================================================================
 !       convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),           intent(in)            :: target
-!     character (len = *),      intent(in)            :: name
+!     type(<object>),           intent(in)              :: target
+!     character (len = *),      intent(in)              :: name
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     character (len=*),        intent(in),  optional :: convention
-!     character (len=*),        intent(in),  optional :: purpose
-!     type(ESMF_AttNest_Flag),  intent(in),  optional :: attnestflag
-!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
-!     integer,                  intent(out), optional :: itemCount
-!     logical,                  intent(out), optional :: isPresent
-!     integer,                  intent(out), optional :: rc
+!     character (len=*),        intent(in),    optional :: convention
+!     character (len=*),        intent(in),    optional :: purpose
+!     type(ESMF_AttNest_Flag),  intent(in),    optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out),   optional :: typekind
+!     integer,                  intent(out),   optional :: itemCount
+!     logical,                  intent(out),   optional :: isPresent
+!     integer,                  intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1617,7 +1598,7 @@ contains  !====================================================================
 !
 !EOP
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number from an ESMF_AttPack
 !
 ! !INTERFACE:
@@ -1684,7 +1665,7 @@ contains  !====================================================================
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number
@@ -1696,19 +1677,19 @@ contains  !====================================================================
 !       rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),           intent(in)            :: target
-!     integer,                  intent(in)            :: attributeIndex
-!     character (len = *),      intent(out)           :: name
-!     character (len = *),      intent(in),  optional :: convention
-!     character (len = *),      intent(in),  optional :: purpose
-!     type(ESMF_AttNest_Flag),  intent(in),  optional :: attnestflag
-!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
-!     integer,                  intent(out), optional :: itemCount
-!     logical,                  intent(out), optional :: isPresent
-!     integer,                  intent(out), optional :: rc
+!     type(<object>),           intent(in)              :: target
+!     integer,                  intent(in)              :: attributeIndex
+!     character (len = *),      intent(out)             :: name
+!     character (len = *),      intent(in),    optional :: convention
+!     character (len = *),      intent(in),    optional :: purpose
+!     type(ESMF_AttNest_Flag),  intent(in),    optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out),   optional :: typekind
+!     integer,                  intent(out),   optional :: itemCount
+!     logical,                  intent(out),   optional :: isPresent
+!     integer,                  intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1784,7 +1765,7 @@ contains  !====================================================================
 !     integer,                 intent(out),    optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1832,7 +1813,7 @@ contains  !====================================================================
 !
 !EOP
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeRead  - Read Attributes from a JSON file
 ! \label{api:AttributeRead}
 !
@@ -1840,12 +1821,12 @@ contains  !====================================================================
 !     subroutine ESMF_AttributeRead(target, fileName, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),      intent(in)            :: target
-!     character (len = *), intent(in),  optional :: fileName
+!     type(<object>),      intent(inout)         :: target
+!     character (len = *), intent(in)            :: fileName
 !     integer,             intent(out), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ schemaFileName }
 !     \end{itemize}
@@ -1873,27 +1854,28 @@ contains  !====================================================================
 !     \begin{description}
 !     \item [<object>]
 !           The {\tt ESMF} object onto which the read Attributes will be placed.
-!     \item [{[fileName]}]
-!           The name of the XML file to read.
+!     \item [fileName]
+!           The name of the JSON file to read.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package using an ESMF_AttPack
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeRemove(target, keywordEnforcer, name, &
-!       attpack, rc)
+!       attpack, attnestflag, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),       intent(in)            :: target
+!     type(<object>),          intent(inout)           :: target
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     character (len = *),  intent(in),  optional :: name
-!     type(ESMF_AttPack),   intent(inout)         :: attpack
-!     integer,              intent(out), optional :: rc
+!     character (len = *),     intent(in),    optional :: name
+!     type(ESMF_AttPack),      intent(inout), optional :: attpack
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
 !     Remove an Attribute, or Attribute package on \texttt{target}.
@@ -1922,6 +1904,11 @@ contains  !====================================================================
 !           The name of the Attribute to remove.
 !     \item [attpack]
 !           A handle to the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package, the
+!           default is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in
+!           section \ref{const:attnest}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1941,17 +1928,18 @@ contains  !====================================================================
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeRemove(target, name, convention, purpose, &
-!       attPackInstanceName, rc)
+!       attnestflag, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),       intent(in)            :: target
-!     character (len = *),  intent(in),  optional :: name
-!     character (len = *),  intent(in),  optional :: convention
-!     character (len = *),  intent(in),  optional :: purpose
-!     integer,              intent(out), optional :: rc
+!     type(<object>),          intent(inout)           :: target
+!     character (len = *),     intent(in),    optional :: name
+!     character (len = *),     intent(in),    optional :: convention
+!     character (len = *),     intent(in),    optional :: purpose
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -1985,6 +1973,11 @@ contains  !====================================================================
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package, the
+!           default is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in
+!           section \ref{const:attnest}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2004,20 +1997,25 @@ contains  !====================================================================
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(target, name, <value>, attpack, &
-!       keywordEnforcer, rc)
+!       keywordEnforcer, itemcount, attnestflag, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),       intent(in)            :: target
-!     character (len = *),  intent(in)            :: name
+!     type(<object>),          intent(in)              :: target
+!     character (len = *),     intent(in)              :: name
 !     <value>, see below for supported values
-!     type(ESMF_AttPack),   intent(inout)         :: attpack
+!     type(ESMF_AttPack),      intent(inout)           :: attpack
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     integer,              intent(out), optional :: rc
+!     integer,                 intent(in),    optional :: itemcount
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
 !     and, if in an Attribute package, a {\tt attpack}.
+!
+!     The \texttt{itemcount} and \texttt{attnestflag} are NOOP. The 
+!     \texttt{target} is a NOOP if the \texttt{attpack} is used.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -2055,6 +2053,10 @@ contains  !====================================================================
 !           The value of the Attribute to set.
 !     \item [attpack]
 !           A handle to the Attribute package.
+!     \item [{[itemcount]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[attnestflag]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2067,22 +2069,26 @@ contains  !====================================================================
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(target, name, <valueList>, attpack, &
-!       keywordEnforcer, itemCount, rc)
+!       keywordEnforcer, itemCount,  attnestflag, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),       intent(in)            :: target
-!     character (len = *),  intent(in)            :: name
+!     type(<object>),          intent(in)              :: target
+!     character (len = *),     intent(in)              :: name
 !     <valueList>, see below for supported values
-!     type(ESMF_AttPack),   intent(in)            :: attpack
+!     type(ESMF_AttPack),      intent(inout)           :: attpack
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     integer,              intent(in),  optional :: itemCount
-!     integer,              intent(out), optional :: rc
+!     integer,                 intent(in),    optional :: itemcount
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and a
 !     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute
 !     package, a {\tt attpack}.
+!
+!     The \texttt{itemcount} and \texttt{attnestflag} are NOOP. The 
+!     \texttt{target} is a NOOP if the \texttt{attpack} is used.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -2120,8 +2126,10 @@ contains  !====================================================================
 !           The valueList of the Attribute to set.
 !     \item [attpack]
 !           A handle to the Attribute package.
-!     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute.
+!     \item [{[itemcount]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[attnestflag]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2134,18 +2142,20 @@ contains  !====================================================================
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(target, name, <value>, &
-!       convention, purpose, attPackInstanceName, rc)
+!       convention, purpose, itemcount, attnestflag, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),       intent(in)            :: target
-!     character (len = *),  intent(in)            :: name
+!     type(<object>),          intent(inout)           :: target
+!     character (len = *),     intent(in)              :: name
 !     <value>, see below for supported values
-!     character (len = *),  intent(in),  optional :: convention
-!     character (len = *),  intent(in),  optional :: purpose
-!     integer,              intent(out), optional :: rc
+!     character (len = *),     intent(in),    optional :: convention
+!     character (len = *),     intent(in),    optional :: purpose
+!     integer,                 intent(in),    optional :: itemcount
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -2154,6 +2164,8 @@ contains  !====================================================================
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
 !     and, if in an Attribute package, {\tt convention} and {\tt purpose}.
+!
+!     The \texttt{itemcount} and \texttt{attnestflag} are NOOP.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -2193,6 +2205,10 @@ contains  !====================================================================
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package.
+!     \item [{[itemcount]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[attnestflag]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2205,19 +2221,20 @@ contains  !====================================================================
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(target, name, <valueList>, &
-!       convention, purpose, itemCount, rc)
+!       convention, purpose, itemCount, attnestflag, rc)
 !
 ! !ARGUMENTS:
-!     type(<object>),       intent(in)            :: target
-!     character (len = *),  intent(in)            :: name
+!     type(<object>),          intent(inout)           :: target
+!     character (len = *),     intent(in)              :: name
 !     <valueList>, see below for supported values
-!     character (len = *),  intent(in),  optional :: convention
-!     character (len = *),  intent(in),  optional :: purpose
-!     integer,              intent(in),  optional :: itemCount
-!     integer,              intent(out), optional :: rc
+!     character (len = *),     intent(in),    optional :: convention
+!     character (len = *),     intent(in),    optional :: purpose
+!     integer,                 intent(in),    optional :: itemcount
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
@@ -2227,6 +2244,8 @@ contains  !====================================================================
 !     Attribute package.  The Attribute has a {\tt name} and a
 !     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute
 !     package, {\tt convention} and {\tt purpose}.
+!
+!     The \texttt{itemcount} and \texttt{attnestflag} are NOOP.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -2266,8 +2285,10 @@ contains  !====================================================================
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package.
-!     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute.
+!     \item [{[itemcount]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[attnestflag]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2279,16 +2300,16 @@ contains  !====================================================================
 ! !IROUTINE: ESMF_AttributeUpdate  - Update an Attribute hierarchy
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeUpdate(target, vm, rootList, reconcile, rc)
+!     subroutine ESMF_AttributeUpdate(target, vm, rootList, rc)
 !
 ! !ARGUMENTS:
-!     <object>, see below for supported values
+!     <target>, see below for supported values
 !     type(ESMF_VM), intent(in)            :: vm
 !     integer,       intent(in)            :: rootList(:)
 !     integer,       intent(out), optional :: rc
 !
 ! !STATUS:
-!     The following parameters were removed in ESMF version 8.1:
+!     The following parameters were removed in ESMF version 8.1.0:
 !     \begin{itemize}
 !     \item \texttt{ reconcile }
 !     \end{itemize}
@@ -2326,16 +2347,17 @@ contains  !====================================================================
 !
 !EOP
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
 ! \label{api:AttributeWrite}
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeWrite(target, convention, purpose, &
+!     subroutine ESMF_AttributeWrite(target, fileName, convention, purpose, &
 !       attwriteflag, rc)
 !
 ! !ARGUMENTS:
 !     type(<object>),          intent(in)            :: target
+!     character (len = *),     intent(in)            :: fileName
 !     character (len = *),     intent(in),  optional :: convention
 !     character (len = *),     intent(in),  optional :: purpose
 !     type(ESMF_AttWriteFlag), intent(in),  optional :: attwriteflag
@@ -2365,6 +2387,8 @@ contains  !====================================================================
 !     \begin{description}
 !     \item [target]
 !           An {\tt ESMF} object.
+!     \item [fileName]
+!           The name of the JSON file to write.
 !     \item [{[convention]}]
 !           The convention of the Attribute package.
 !     \item [{[purpose]}]
@@ -2377,7 +2401,7 @@ contains  !====================================================================
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
 !==============================================================================
