@@ -37,17 +37,9 @@ module ESMF_AbstractStateItemMod
    type :: ESMF_AbstractStateItem
       sequence
       character(ESMF_MAXSTR) :: name
-      type(ESMF_AbstractItemWrapper) :: wrapper
+      logical :: isInit = .false.
+      type(ESMF_AbstractItemWrapper), pointer :: wrapper
    end type ESMF_AbstractStateItem
-
-!!$   interface ESMF_StateAdd
-!!$      module procedure ESMF_StateAddAbstractItem_
-!!$   end interface ESMF_StateAdd
-!!$
-!!$   interface ESMF_StateGet
-!!$      module procedure ESMF_StateGetAbstractItem_
-!!$   end interface ESMF_StateGet
-
 
 
 #include "ESMF.h"
@@ -93,12 +85,11 @@ contains
 !
 !EOPI
 
-!!$    if (present(si)) then
-!!$      ESMF_AbstractStateItemGetInit = ESMF_INIT_GET(si)
-!!$    else
-!!$      ESMF_AbstractStateItemGetInit = ESMF_INIT_DEFINED
-!!$    endif
+    if (present(si)) then
+      ESMF_AbstractStateItemGetInit = ESMF_INIT_CREATED ! ESMF_INIT_GET(si)
+    else
       ESMF_AbstractStateItemGetInit = ESMF_INIT_DEFINED
+    endif
 
    end function ESMF_AbstractStateItemGetInit
 !------------------------------------------------------------------------------

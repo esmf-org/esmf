@@ -38,7 +38,7 @@
       use ESMF_InitMacrosMod
       use ESMF_IOUtilMod
       use ESMF_ContainerMod
-      use ESMF_AbstractStateItemMod, only: ESMF_AbstractStateItem
+      use ESMF_AbstractStateItemMod, only: ESMF_AbstractStateItem, ESMF_AbstractStateItemGet
       implicit none
 
 !------------------------------------------------------------------------------
@@ -443,6 +443,12 @@ contains
         return
     case (ESMF_STATEITEM_ROUTEHANDLE%ot)
       call ESMF_RouteHandleGet(stateItem%datap%rp, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        return
+    case (ESMF_STATEITEM_ABSTRACTITEM%ot)
+      call ESMF_AbstractStateItemGet(stateItem%datap%asip, name=name, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &

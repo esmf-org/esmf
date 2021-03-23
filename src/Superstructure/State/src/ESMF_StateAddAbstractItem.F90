@@ -5,7 +5,7 @@
 ! being C interoperable.
 #define ESMF_METHOD "ESMF_StateAddAbstractItem"
 subroutine ESMF_StateAddAbstractItem(state, itemname, item, &
-     proxyflag, addflag, replaceflag, relaxedflag, rc) bind(c, name="ESMF_StateAddAbstractItem")
+     relaxedflag, rc) bind(c, name="ESMF_StateAddAbstractItem")
    use ESMF_UtilTypesMod
    use ESMF_StateTypesMod
    use ESMF_AbstractStateItemMod
@@ -17,10 +17,7 @@ subroutine ESMF_StateAddAbstractItem(state, itemname, item, &
    implicit none
    type(ESMF_State),  intent(inout) :: state
    character(*), intent(in) :: itemname
-   type(ESMF_AbstractItemWrapper), intent(in) :: item
-   logical, optional, intent(in) :: proxyflag
-   logical, optional, intent(in) :: addflag
-   logical, optional, intent(in) :: replaceflag
+   type(ESMF_AbstractItemWrapper), target, intent(in) :: item
    logical, optional, intent(in) :: relaxedflag
    type(integer), intent(out), optional :: rc
 
@@ -48,11 +45,9 @@ subroutine ESMF_StateAddAbstractItem(state, itemname, item, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       temp_list(1)%name = itemname
-      temp_list(1)%wrapper = item
-
+      temp_list(1)%wrapper => item
       call ESMF_StateClsAdd (state%statep, temp_list, &
-        addflag=addflag, replaceflag=replaceflag, relaxedflag=relaxedflag,  &
-        proxyflag=proxyflag, rc=localrc)
+        addflag=.true., relaxedflag=relaxedflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -74,7 +69,7 @@ subroutine ESMF_StateGetAbstractItem(state, itemname, item, rc) bind(c, name="ES
    implicit none
    type(ESMF_State),  intent(inout) :: state
    character(len=*), intent(in) :: itemname
-   type(ESMF_AbstractItemWrapper), intent(out) :: item
+   type(ESMF_AbstractItemWrapper), pointer, intent(out) :: item
    type(integer), intent(out), optional :: rc
 
    type(ESMF_StateItem), pointer :: dataitem

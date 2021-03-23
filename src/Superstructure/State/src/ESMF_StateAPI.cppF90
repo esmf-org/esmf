@@ -2175,11 +2175,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(integer), intent(out), optional :: rc
 
       integer :: localrc
-      type (AbstractItemWrapper) :: wrapper
+      type (AbstractItemWrapper), pointer :: wrapper
 
       interface
          subroutine ESMF_StateAddAbstractItem(state, itemname, item, &
-              proxyflag, addflag, replaceflag, relaxedflag, rc) bind(c, name="ESMF_StateAddAbstractItem")
+              relaxedflag, rc) bind(c, name="ESMF_StateAddAbstractItem")
             use ESMF_UtilTypesMod
             use ESMF_StateTypesMod
             use ESMF_AbstractStateItemMod
@@ -2191,10 +2191,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             implicit none
             type(ESMF_State),  intent(inout) :: state
             character(*), intent(in) :: itemname
-            type(AbstractItemWrapper), intent(in) :: item
-            logical, optional, intent(in) :: proxyflag
-            logical, optional, intent(in) :: addflag
-            logical, optional, intent(in) :: replaceflag
+            type(AbstractItemWrapper), target, intent(in):: item
             logical, optional, intent(in) :: relaxedflag
             integer, intent(out), optional :: rc
          end subroutine ESMF_StateAddAbstractItem
@@ -2202,10 +2199,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      ! Trick compiler to use implicit interface
+      ! memory leak
+      allocate(wrapper)
       wrapper%item => item
+
+      ! Trick compiler to use implicit interface
       call ESMF_StateAddAbstractItem(state, itemname, wrapper, &
-           proxyflag=proxyflag, addflag=addflag, replaceflag=replaceflag, relaxedflag=relaxedflag, &
+           relaxedflag=relaxedflag, &
            rc=localrc)
 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2218,12 +2218,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    subroutine ESMF_StateGetAbstractItem_(state, itemname, item, keywordEnforcer, rc)
       type(ESMF_State),  intent(inout) :: state
       character(*), intent(in) :: itemname
-      class(ESMF_AbstractItem), target, intent(out) :: item
+      class(ESMF_AbstractItem), pointer, intent(out) :: item
       type(ESMF_KeywordEnforcer), optional :: keywordEnforcer
       integer, intent(out), optional :: rc
 
       integer :: localrc
-      type (AbstractItemWrapper) :: wrapper
+      type (AbstractItemWrapper), pointer :: wrapper
 
       interface
          subroutine ESMF_StateGetAbstractItem(state, itemname, item, rc) bind(c, name="ESMF_StateGetAbstractItem")
@@ -2238,14 +2238,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             implicit none
             type(ESMF_State),  intent(inout) :: state
             character(len=*), intent(in) :: itemname
-            type(AbstractItemWrapper), intent(out) :: item
+            type(AbstractItemWrapper), pointer, intent(out) :: item
             type(integer), intent(out), optional :: rc
          end subroutine ESMF_StateGetAbstractItem
       end interface
 
       ! Trick compiler to use implicit interface
-      wrapper%item => item
       call ESMF_StateGetAbstractItem(state, itemname, wrapper, localrc)
+      item => wrapper%item
 
       if (present(rc)) rc = ESMF_SUCCESS
 

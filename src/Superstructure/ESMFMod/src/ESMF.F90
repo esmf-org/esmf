@@ -92,6 +92,7 @@ module ESMF
     use ESMF_MeshMod
 
     use ESMF_StateTypesMod
+    use ESMF_AbstractStateItemMod
     use ESMF_StateVaMod
     use ESMF_StateMod
     use ESMF_StateReconcileMod
