@@ -136,7 +136,8 @@ The valid values are:
 \subsection{ESMF\_DATACOPY}
 \label{const:datacopyflag}
 {\sf DESCRIPTION:\\}
-Indicates whether to reference a data item or make a copy of it.
+Indicates how data references, copies, and memory allocations to hold data are
+handled.
 
 The type of this flag is:
 
@@ -144,10 +145,13 @@ The type of this flag is:
 
 The valid values are:
 \begin{description}
-\item [ESMF\_DATACOPY\_VALUE]
-      Copy the data item to another buffer.
+\item [ESMF\_DATACOPY\_ALLOC]
+      Create a new allocation that is sufficient in size to hold the data.
+      However, no data is copied and the allocation is returned uninitialized.
 \item [ESMF\_DATACOPY\_REFERENCE]
-      Reference the data item.
+      Reference the data within the existing allocation.
+\item [ESMF\_DATACOPY\_VALUE]
+      Copy the data to another allocation. If needed create the new allocation.
 \end{description}
 
 \subsection{ESMF\_DECOMP}
@@ -205,7 +209,7 @@ The valid values are:
      Indicates that no extrapolation should be done. 
 \item [ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG]
       Inverse distance weighted average. 
-      Here the value of a destination point is the weighted average
+      Here the value of an unmapped destination point is the weighted average
       of the closest N source points. The weight is 
       the reciprocal of the distance of the source point from the destination point raised to a power P.
       All the weights contributing to one destination point are normalized so that they sum to 1.0. 
@@ -214,17 +218,30 @@ The valid values are:
       (e.g. {\tt ESMF\_REGRIDMETHOD\_CONSERVE}).
 \item [ESMF\_EXTRAPMETHOD\_NEAREST\_STOD]
       Nearest source to destination. 
-      Here each destination point is mapped to the closest source point. A given source point may go 
-      to multiple destination points, but no destination point will receive input from more than
-      one source point. This extrapolation method is not supported with conservative regrid methods
+      Here the value of each unmapped destination point is set to the value of the closest source point. 
+       This extrapolation method is not supported with conservative regrid methods
+      (e.g. {\tt ESMF\_REGRIDMETHOD\_CONSERVE}).
+\item [ESMF\_EXTRAPMETHOD\_NEAREST\_D]
+      Nearest mapped destination to unmapped destination. 
+      Here the value of each unmapped destination point is set to the value of the closest mapped (i.e. regridded) destination point. 
+      This extrapolation method is not supported with conservative regrid methods
       (e.g. {\tt ESMF\_REGRIDMETHOD\_CONSERVE}).
 \item [ESMF\_EXTRAPMETHOD\_CREEP]
       Creep fill.
-      Here unmapped destination points are filled by moving data from mapped locations to neighboring unmapped locations. The data filled into a new location is the average of its already filled neighbors' values. 
+      Here unmapped destination points are filled by moving data from mapped locations to neighboring unmapped locations. 
+      The data filled into a new location is the average of its already filled neighbors' values. 
       This process is repeated for a user specified number of levels (e.g. in ESMF\_FieldRegridStore() this is specified via the {\tt extrapNumLevels} argument).
       This extrapolation method is not supported with conservative regrid methods 
       (e.g. {\tt ESMF\_REGRIDMETHOD\_CONSERVE}).
-
+\item [ESMF\_EXTRAPMETHOD\_CREEP\_NRST\_D]
+      Creep fill with nearest destination.
+      Here unmapped destination points are filled using creep fill as described under that entry (see ESMF\_EXTRAPMETHOD\_CREEP above), any points not filled
+      by creep fill are then set to the closest filled or mapped destination point as if the nearest destination method (see ESMF\_EXTRAPMETHOD\_NEAREST\_D above) 
+      were run after the initial regridding followed by creep fill. 
+      Like creep fill, this method is repeated for a user specified number of levels 
+      (e.g. in ESMF\_FieldRegridStore() this is specified via the {\tt extrapNumLevels} argument).
+      This extrapolation method is not supported with conservative regrid methods 
+      (e.g. {\tt ESMF\_REGRIDMETHOD\_CONSERVE}).
 \end{description}
 
 \subsection{ESMF\_FIELDSTATUS}
@@ -259,6 +276,24 @@ tiles. See section~\ref{sec:fileformat:mosaic} for more detailed description.
 
 \item [ESMF\_FILEFORMAT\_UGRID] CF-convention unstructured grid file format. This format is a proposed extension to the 
 CF-conventions for unstructured grid data model. See section~\ref{sec:fileformat:ugrid} for more detailed description.
+
+\end{description}
+
+\subsection{ESMF\_FILEMODE}
+\label{const:filemodeflag}
+{\sf DESCRIPTION:\\}
+This flag is used to indicate which mode to use when writing a weight file.
+
+The type of this flag is:
+
+{\tt type(ESMF\_FileMode\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_FILEMODE\_BASIC]
+      Indicates that only the factorList and factorIndexList should be written.
+\item [ESMF\_FILEMODE\_WITHAUX]
+      Indicates that grid center coordinates should also be written.
 
 \end{description}
 
@@ -1070,6 +1105,9 @@ The following named constants define the precise version of ESMF in use.
       Constant of type {\tt character} holding the exact release version string
       (e.g. "5.2.0r").
 \end{description}
+
+\subsection{ESMF\_VMEPOCH}
+This flag is documented in section \ref{const:vmepoch_flag}.
 
 \subsection{ESMF\_XGRIDSIDE}
 This flag is documented in section \ref{const:xgridside}.

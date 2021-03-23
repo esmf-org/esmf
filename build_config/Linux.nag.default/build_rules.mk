@@ -111,9 +111,10 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
 
 ############################################################
-# nag currently does not support OpenMP
+# Currently NAG does not support the Fortran2018 assumed type feature
 #
-ESMF_OPENMP := OFF
+ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
 
 ############################################################
 # Some ESMF tests fail for NAG with -O -> turn optimization off by default
@@ -139,6 +140,14 @@ ESMF_F90LINKOPTS    += -thread_safe
 ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_CXXLINKOPTS    += -pthread
 endif
+
+############################################################
+# OpenMP compiler and linker flags
+#
+ESMF_OPENMP_F90COMPILEOPTS += -openmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -openmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)

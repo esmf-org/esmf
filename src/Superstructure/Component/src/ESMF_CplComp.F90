@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2643,7 +2643,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, keywordEnforcer, &
-    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
+    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
+    minStackSize, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
@@ -2652,6 +2653,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
+    integer,             intent(in),  optional :: minStackSize
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2685,6 +2687,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
+! \item[{[minStackSize]}]
+!   Minimum stack size in byte of any Pthread that is created in the VM with the
+!   intention of executing user code as a PET. For cases where OpenMP threads
+!   are used by the user code, each thread allocates its own private stack. For
+!   all threads {\em other} than the master, the stack size is set via the 
+!   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
+!   however, becomes the {\em master} of the OpenMP thread team, and is not
+!   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
+!   sized via the {\tt minStackSize} argument, and a large enough size is often
+!   critical.
+!
+!   When {\tt minStackSize} is absent, the default is to use the system default
+!   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
+!   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
+!   {\em unlimited}, or any setting below the ESMF implemented minimum,
+!   will result in setting the stack size to 20MiB (the ESMF minimum).
+!   Depending on how much private data is used by the user code under
+!   the master thread, the default might be too small, and {\tt minStackSize}
+!   must be used to allocate sufficient stack space.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2701,7 +2722,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMaxPEs(cplcomp%compp, maxPeCountPerPet, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2720,7 +2741,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, keywordEnforcer, &
-    maxPetCountPerVas, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
+    maxPetCountPerVas, prefIntraProcess, prefIntraSsi, prefInterSsi, &
+    minStackSize, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
@@ -2729,6 +2751,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
+    integer,             intent(in),  optional :: minStackSize
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2764,6 +2787,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
+! \item[{[minStackSize]}]
+!   Minimum stack size in byte of any Pthread that is created in the VM with the
+!   intention of executing user code as a PET. For cases where OpenMP threads
+!   are used by the user code, each thread allocates its own private stack. For
+!   all threads {\em other} than the master, the stack size is set via the 
+!   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
+!   however, becomes the {\em master} of the OpenMP thread team, and is not
+!   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
+!   sized via the {\tt minStackSize} argument, and a large enough size is often
+!   critical.
+!
+!   When {\tt minStackSize} is absent, the default is to use the system default
+!   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
+!   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
+!   {\em unlimited}, or any setting below the ESMF implemented minimum,
+!   will result in setting the stack size to 20MiB (the ESMF minimum).
+!   Depending on how much private data is used by the user code under
+!   the master thread, the default might be too small, and {\tt minStackSize}
+!   must be used to allocate sufficient stack space.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2780,7 +2822,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMaxThreads(cplcomp%compp, maxPetCountPerVas, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2799,7 +2841,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMinThreads(cplcomp, keywordEnforcer, &
-    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
+    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
+    minStackSize, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
@@ -2808,6 +2851,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
+    integer,             intent(in),  optional :: minStackSize
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2840,6 +2884,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
+! \item[{[minStackSize]}]
+!   Minimum stack size in byte of any Pthread that is created in the VM with the
+!   intention of executing user code as a PET. For cases where OpenMP threads
+!   are used by the user code, each thread allocates its own private stack. For
+!   all threads {\em other} than the master, the stack size is set via the 
+!   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
+!   however, becomes the {\em master} of the OpenMP thread team, and is not
+!   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
+!   sized via the {\tt minStackSize} argument, and a large enough size is often
+!   critical.
+!
+!   When {\tt minStackSize} is absent, the default is to use the system default
+!   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
+!   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
+!   {\em unlimited}, or any setting below the ESMF implemented minimum,
+!   will result in setting the stack size to 20MiB (the ESMF minimum).
+!   Depending on how much private data is used by the user code under
+!   the master thread, the default might be too small, and {\tt minStackSize}
+!   must be used to allocate sufficient stack space.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2856,7 +2919,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMinThreads(cplcomp%compp, maxPeCountPerPet, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

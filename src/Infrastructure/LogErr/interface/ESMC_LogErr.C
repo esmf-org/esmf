@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -69,7 +69,7 @@ int ESMC_LogWrite(const char msg[], int msgtype){
   int localrc = ESMC_RC_NOT_IMPL;
 
   // Call into ESMCI method
-  localrc = ESMC_LogDefault.Write(msg, msgtype, ESMC_CONTEXT);
+  localrc = ESMC_LogDefault.Write(msg, msgtype);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                     ESMC_CONTEXT, &rc))
     return rc;  // bail out

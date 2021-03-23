@@ -24,13 +24,16 @@ Named Constants
 .. toctree::
 
     CoordSys
+    ExtrapMethod
     FileFormat
+    FileMode
     GridItem
     LineType
     LogKind
     MeshElemType
     MeshLoc
     NormType
+    PoleKind
     PoleMethod
     Region
     RegridMethod

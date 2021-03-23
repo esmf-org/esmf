@@ -2,7 +2,7 @@
 $Id$
 
 Earth System Modeling Framework
-Copyright 2002-2019, University Corporation for Atmospheric Research,
+Copyright 2002-2021, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -46,11 +46,6 @@ These are typically when testing for errors.
 
 Eventually these macros can be rewritten or replaced using the F2008
 block/end block statements.
-#endif
-
-#if defined (_FROM_FORTRAN)
-#define ESMF_BLOCK(ESMF_BLOCK_LABEL) ESMF_BLOCK_LABEL: do
-#define ESMF_ENDBLOCK(ESMF_BLOCK_LABEL) if (.true.) exit ESMF_BLOCK_LABEL; end do ESMF_BLOCK_LABEL
 #endif
 
 #ifdef OMPI_MAJOR_VERSION

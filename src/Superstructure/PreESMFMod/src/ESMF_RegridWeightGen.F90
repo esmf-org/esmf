@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -94,8 +94,8 @@ contains
 ! \label{api:esmf_regridweightgenfile}
 ! !INTERFACE:
   ! Private name; call using ESMF_RegridWeightGen()
-  subroutine ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, keywordEnforcer, &
-    regridmethod, polemethod, regridPoleNPnts, lineType, normType, &
+  subroutine ESMF_RegridWeightGenFile(srcFile, dstFile, keywordEnforcer, &
+    weightFile, rhFile, regridmethod, polemethod, regridPoleNPnts, lineType, normType, &
     extrapMethod, extrapNumSrcPnts, extrapDistExponent, extrapNumLevels, &
     unmappedaction, ignoreDegenerate, srcFileType, dstFileType, &
     srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
@@ -113,8 +113,9 @@ contains
 
   character(len=*),             intent(in)            :: srcFile
   character(len=*),             intent(in)            :: dstFile
-  character(len=*),             intent(in)            :: weightFile
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  character(len=*),             intent(in),  optional :: weightFile
+  character(len=*),             intent(in),  optional :: rhFile
   type(ESMF_RegridMethod_Flag), intent(in),  optional :: regridmethod
   type(ESMF_PoleMethod_Flag),   intent(in),  optional :: polemethod
   integer,                      intent(in),  optional :: regridPoleNPnts
@@ -182,6 +183,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The destination grid file name.
 !   \item [weightFile]
 !     The interpolation weight file name.
+!   \item [{[rhFile]}]
+!     The RouteHandle file name.
 !   \item [{[regridmethod]}]
 !     The type of interpolation. Please see Section~\ref{opt:regridmethod}
 !     for a list of valid options. If not specified, defaults to
@@ -367,10 +370,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical            :: useSrcMask, useDstMask
     logical            :: useSrcCorner, useDstCorner
     integer            :: commandbuf(6)
+    type(ESMF_RouteHandle) :: rhandle
 #ifdef DOBENCHMARK
     real(ESMF_KIND_R8) :: starttime, endtime, totaltime
     real(ESMF_KIND_R8), pointer :: sendbuf(:), recvbuf(:)
-    type(ESMF_RouteHandle) :: rhandle
     real(ESMF_KIND_R8), pointer :: fptr1D(:), fptr2D(:,:)
 #endif
     type(ESMF_LineType_Flag) :: localLineType
@@ -422,6 +425,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dstIsMosaic = .false.
     srcIsReg = .false.
     dstIsReg = .false.
+
+    if (.not. present(weightFile) .and. .not. present(rhFile)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+        msg ="either a weightFile or a rhFile must be specified", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
 
     if (present(regridMethod)) then
       localRegridMethod = regridMethod
@@ -731,6 +741,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     usingCreepExtrap=.false.
     if (present(extrapMethod)) then
        if (extrapMethod == ESMF_EXTRAPMETHOD_CREEP) usingCreepExtrap=.true.
+       if (extrapMethod == ESMF_EXTRAPMETHOD_CREEP_NRST_D) usingCreepExtrap=.true.
     endif
 
     ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
@@ -882,7 +893,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       print *, "Starting weight generation with these inputs: "
       print *, "  Source File: ", trim(srcfile)
       print *, "  Destination File: ", trim(dstfile)
-      print *, "  Weight File: ", trim(weightFile)
+      if (present(weightFile)) then
+        print *, "  Weight File: ", trim(weightFile)
+      endif
+      if (present(rhfile)) then
+        print *, "  RouteHandle File: ", trim(rhfile)
+      endif
       if (localWeightOnlyFlag) then
           print *, "    only output weights in the weight file"
       endif
@@ -1034,8 +1050,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                print *, "  Extrap. Dist. Exponent: ",2.0
             endif
          else if (extrapMethod%extrapmethod .eq. &
+              ESMF_EXTRAPMETHOD_NEAREST_D%extrapmethod) then
+            print *, "  Extrap. Method: nearestd"
+         else if (extrapMethod%extrapmethod .eq. &
               ESMF_EXTRAPMETHOD_CREEP%extrapmethod) then
             print *, "  Extrap. Method: creep"
+            if (present(extrapNumLevels)) then
+               print '(a,i0)', "   Extrap. Number of Levels: ",extrapNumLevels
+            else
+               print *,"   Extrap. Number of Levels: NOT PRESENT?"
+            endif
+         else if (extrapMethod%extrapmethod .eq. &
+           ESMF_EXTRAPMETHOD_CREEP_NRST_D%extrapmethod) then
+            print *, "  Extrap. Method: creepnrstd"
             if (present(extrapNumLevels)) then
                print '(a,i0)', "   Extrap. Number of Levels: ",extrapNumLevels
             else
@@ -1456,81 +1483,164 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)
     endif
 
-    if (useSrcMask .and. useDstMask) then
-      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-              srcMaskValues = maskvals, dstMaskValues = maskvals, &
-              unmappedaction=localUnmappedaction, &
-              ignoreDegenerate=localIgnoreDegenerate, &
-              factorIndexList=factorIndexList, factorList=factorList, &
-              srcFracField=srcFracField, dstFracField=dstFracField, &
-              regridmethod = localRegridMethod, &
-              polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-              lineType=localLineType, &
-              normType=localNormType, &
-              extrapMethod=extrapMethod, &
-              extrapNumSrcPnts=extrapNumSrcPnts, &
-              extrapDistExponent=extrapDistExponent, &
-              extrapNumLevels=extrapNumLevels, &
-              rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    else if (useSrcMask) then
-      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-              srcMaskValues = maskvals, &
-              unmappedaction=localUnmappedaction, &
-              ignoreDegenerate=localIgnoreDegenerate, &
-              factorIndexList=factorIndexList, factorList=factorList, &
-              srcFracField=srcFracField, dstFracField=dstFracField, &
-              regridmethod = localRegridMethod, &
-              polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-              lineType=localLineType, &
-              normType=localNormType, &
-              extrapMethod=extrapMethod, &
-              extrapNumSrcPnts=extrapNumSrcPnts, &
-              extrapDistExponent=extrapDistExponent, &
-              extrapNumLevels=extrapNumLevels, &
-              rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    else if (useDstMask) then
-      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-              dstMaskValues = maskvals, &
-              unmappedaction=localUnmappedaction, &
-              ignoreDegenerate=localIgnoreDegenerate, &
-              factorIndexList=factorIndexList, factorList=factorList, &
-              srcFracField=srcFracField, dstFracField=dstFracField, &
-              regridmethod = localRegridMethod, &
-              polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-              lineType=locallineType, &
-              normType=localNormType, &
-              extrapMethod=extrapMethod, &
-              extrapNumSrcPnts=extrapNumSrcPnts, &
-              extrapDistExponent=extrapDistExponent, &
-              extrapNumLevels=extrapNumLevels, &
-              rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    else        
-      call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-              unmappedaction=localUnmappedaction, &
-              ignoreDegenerate=localIgnoreDegenerate, &
-              factorIndexList=factorIndexList, factorList=factorList, &
-              srcFracField=srcFracField, dstFracField=dstFracField, &
-              regridmethod = localRegridMethod, &
-              polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
-              lineType=locallineType, &
-              normType=localNormType, &
-              extrapMethod=extrapMethod, &
-              extrapNumSrcPnts=extrapNumSrcPnts, &
-              extrapDistExponent=extrapDistExponent, &
-              extrapNumLevels=extrapNumLevels, &
-              rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present (rhFile)) then
+      if (useSrcMask .and. useDstMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                srcMaskValues = maskvals, dstMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                routehandle=rhandle, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=localLineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (useSrcMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                srcMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                routehandle=rhandle, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=localLineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (useDstMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                dstMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                routehandle=rhandle, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=locallineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else        
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                routehandle=rhandle, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=locallineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    else
+      if (useSrcMask .and. useDstMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                srcMaskValues = maskvals, dstMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=localLineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (useSrcMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                srcMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=localLineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (useDstMask) then
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                dstMaskValues = maskvals, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=locallineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      else        
+        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                unmappedaction=localUnmappedaction, &
+                ignoreDegenerate=localIgnoreDegenerate, &
+                factorIndexList=factorIndexList, factorList=factorList, &
+                srcFracField=srcFracField, dstFracField=dstFracField, &
+                regridmethod = localRegridMethod, &
+                polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
+                lineType=locallineType, &
+                normType=localNormType, &
+                extrapMethod=extrapMethod, &
+                extrapNumSrcPnts=extrapNumSrcPnts, &
+                extrapDistExponent=extrapDistExponent, &
+                extrapNumLevels=extrapNumLevels, &
+                rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 #ifdef DOBENCHMARK
     call ESMF_VMBarrier(vm)
@@ -1664,153 +1774,162 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     !! Write the weight table into a SCRIP format NetCDF file
-    if (PetNo == 0 .and. .not. localWeightOnlyFlag) then
-      if (isConserve) then
-          if (useSrcCoordVar .and. useDstCoordVar) then
-            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-                  srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-                  dstFileType=localDstFileType, method = localRegridMethod, &
-                  normType=localNormType, &
-                  srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-                  dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-                  netcdf4FileFlag = localNetcdf4FileFlag, &
-                  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-                  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-                  srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-                  tileFilePath = tileFilePath, &
-                  srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-          else if (useSrcCoordVar) then         
-            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-                  srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-                  dstFileType=localDstFileType, method = localRegridMethod, &
-                  normType=localNormType, &
-                  srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-                  dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-                  netcdf4FileFlag = localNetcdf4FileFlag, &
-                  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-                  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-                  srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-                  tileFilePath = tileFilePath, &
-                  srccoordnames = srcCoordinateVars, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-          elseif (useDstCoordVar) then
-            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-                  srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-                  dstFileType=localDstFileType, method = localRegridMethod, &
-                  normType=localNormType, &
-                  srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-                  dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-                  netcdf4FileFlag = localNetcdf4FileFlag, &
-                  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-                  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-                  srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-                  tileFilePath = tileFilePath, &
-                  dstcoordnames = dstCoordinateVars, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-          else
-            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-                  srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-                  dstFileType=localDstFileType, method = localRegridMethod, &
-                  normType=localNormType, &
-                  srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-                  dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
-                  netcdf4FileFlag = localNetcdf4FileFlag, &
-                  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-                  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-                  tileFilePath = tileFilePath, &
-                  srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
+    if (present (weightFile)) then
+      if (PetNo == 0 .and. .not. localWeightOnlyFlag) then
+        if (isConserve) then
+            if (useSrcCoordVar .and. useDstCoordVar) then
+              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+                    srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+                    dstFileType=localDstFileType, method = localRegridMethod, &
+                    normType=localNormType, &
+                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+                    dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+                    netcdf4FileFlag = localNetcdf4FileFlag, &
+                    srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+                    srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                    srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+                    tileFilePath = tileFilePath, &
+                    srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (useSrcCoordVar) then         
+              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+                    srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+                    dstFileType=localDstFileType, method = localRegridMethod, &
+                    normType=localNormType, &
+                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+                    dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+                    netcdf4FileFlag = localNetcdf4FileFlag, &
+                    srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+                    srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                    srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+                    tileFilePath = tileFilePath, &
+                    srccoordnames = srcCoordinateVars, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            elseif (useDstCoordVar) then
+              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+                    srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+                    dstFileType=localDstFileType, method = localRegridMethod, &
+                    normType=localNormType, &
+                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+                    dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+                    netcdf4FileFlag = localNetcdf4FileFlag, &
+                    srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+                    srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                    srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+                    tileFilePath = tileFilePath, &
+                    dstcoordnames = dstCoordinateVars, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            else
+              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+                    srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+                    dstFileType=localDstFileType, method = localRegridMethod, &
+                    normType=localNormType, &
+                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+                    dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+                    netcdf4FileFlag = localNetcdf4FileFlag, &
+                    srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+                    srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                    tileFilePath = tileFilePath, &
+                    srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+        else
+            if (useSrcCoordVar .and. useDstCoordVar) then
+              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+                    srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+                    dstFileType=localDstFileType, method = localRegridMethod, &
+                    normType=localNormType, dstFrac=dstFrac, &
+                    largeFileFlag=localLargeFileFlag, &
+                    netcdf4FileFlag = localNetcdf4FileFlag, &
+                    srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+                    srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                    srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+                    useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
+                    tileFilePath = tileFilePath, &
+                    srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            elseif (useSrcCoordVar) then
+              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+                    srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+                    dstFileType=localDstFileType, method = localRegridMethod, &
+                    normType=localNormType, dstFrac=dstFrac, &
+                    largeFileFlag=localLargeFileFlag, &
+                    netcdf4FileFlag = localNetcdf4FileFlag, &
+                    srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+                    srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                    srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+                    useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
+                    tileFilePath = tileFilePath, &
+                    srccoordnames = srcCoordinateVars, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            elseif (useDstCoordVar) then
+              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+                    srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+                    dstFileType=localDstFileType, method = localRegridMethod, &
+                    normType=localNormType, dstFrac=dstFrac, &
+                    largeFileFlag=localLargeFileFlag, &
+                    netcdf4FileFlag = localNetcdf4FileFlag, &
+                    srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+                    srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                    srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+                    useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
+                    tileFilePath = tileFilePath, &
+                    dstcoordnames = dstCoordinateVars, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            else
+              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+                    srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
+                    dstFileType=localDstFileType, method = localRegridMethod, &
+                    normType=localNormType, dstFrac=dstFrac, &
+                    largeFileFlag=localLargeFileFlag, &
+                    netcdf4FileFlag = localNetcdf4FileFlag, &
+                    srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+                    srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+                    useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
+                    tileFilePath = tileFilePath, &
+                    srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                  ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+        endif
+      elseif (.not. localWeightOnlyFlag) then
+        ! Not root PET
+        call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
       else
-          if (useSrcCoordVar .and. useDstCoordVar) then
-            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-                  srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-                  dstFileType=localDstFileType, method = localRegridMethod, &
-                  normType=localNormType, dstFrac=dstFrac, &
-                  largeFileFlag=localLargeFileFlag, &
-                  netcdf4FileFlag = localNetcdf4FileFlag, &
-                  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-                  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-                  srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-                  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
-                  tileFilePath = tileFilePath, &
-                  srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-          elseif (useSrcCoordVar) then
-            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-                  srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-                  dstFileType=localDstFileType, method = localRegridMethod, &
-                  normType=localNormType, dstFrac=dstFrac, &
-                  largeFileFlag=localLargeFileFlag, &
-                  netcdf4FileFlag = localNetcdf4FileFlag, &
-                  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-                  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-                  srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-                  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
-                  tileFilePath = tileFilePath, &
-                  srccoordnames = srcCoordinateVars, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-          elseif (useDstCoordVar) then
-            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-                  srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-                  dstFileType=localDstFileType, method = localRegridMethod, &
-                  normType=localNormType, dstFrac=dstFrac, &
-                  largeFileFlag=localLargeFileFlag, &
-                  netcdf4FileFlag = localNetcdf4FileFlag, &
-                  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-                  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-                  srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
-                  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
-                  tileFilePath = tileFilePath, &
-                  dstcoordnames = dstCoordinateVars, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-          else
-            call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
-                  srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-                  dstFileType=localDstFileType, method = localRegridMethod, &
-                  normType=localNormType, dstFrac=dstFrac, &
-                  largeFileFlag=localLargeFileFlag, &
-                  netcdf4FileFlag = localNetcdf4FileFlag, &
-                  srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
-                  srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-                  useSrcCorner=useSrcCorner, useDstCorner=useDstCorner, &
-                  tileFilePath = tileFilePath, &
-                  srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
+        ! localWeightOnlyFlag == .TRUE. for all PETs
+        ! write simple weight file
+        call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, &
+                    title = "ESMF Regrid Weight Generator", &
+                    method = localRegridMethod, &
+                    largeFileFlag=localLargeFileFlag, &
+                    netcdf4FileFlag = localNetcdf4FileFlag, &
+                    rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-    elseif (.not. localWeightOnlyFlag) then
-      ! Not root PET
-      call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! localWeightOnlyFlag == .TRUE. for all PETs
-      ! write simple weight file
-      call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, &
-                  title = "ESMF Regrid Weight Generator", &
-                  method = localRegridMethod, &
-                  largeFileFlag=localLargeFileFlag, &
-                  netcdf4FileFlag = localNetcdf4FileFlag, &
-                  rc=localrc)
+    endif
+
+    if (present(rhFile)) then
+      call ESMF_RouteHandleWrite(rhandle, rhFile, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

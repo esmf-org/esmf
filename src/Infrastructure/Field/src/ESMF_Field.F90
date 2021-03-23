@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -58,6 +58,9 @@ module ESMF_FieldMod
   use ESMF_TimeMod
   use ESMF_InitMacrosMod
 
+  use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoGet, &
+                           ESMF_InfoIsPresent
+
   implicit none
 
 !------------------------------------------------------------------------------
@@ -105,6 +108,7 @@ module ESMF_FieldMod
     integer                       :: ungriddedUBound(ESMF_MAXDIM)
     integer                       :: totalLWidth(ESMF_MAXDIM)
     integer                       :: totalUWidth(ESMF_MAXDIM)
+    integer                       :: timestamp(10)
     ESMF_INIT_DECLARE
   end type
 
@@ -172,6 +176,53 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+! -------------------------- ESMF-private method ------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetSerializeFlag"
+!BOPI
+! !IROUTINE: ESMF_FieldGetSerializeFlag - Get logical flag from attributes determining serialization action
+!
+! !INTERFACE:
+subroutine ESMF_FieldGetSerializeFlag(ftypep, theFlag, rc)
+! !ARGUMENTS:
+  type(ESMF_FieldType), intent(in) :: ftypep
+  logical, intent(out) :: theFlag
+  integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     Get the logical flag in the object's attributes indicating if the object
+!     should be serialized.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [ftypep]
+!       Type holding the attribute handle.
+!     \item [theFlag]
+!       Output logical flag.
+!     \item [rc]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
+  type(ESMF_Info) :: infoh
+  logical :: isPresent
+
+  call ESMF_InfoGetFromBase(ftypep%base, infoh, rc=rc)
+  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  isPresent = ESMF_InfoIsPresent(infoh, "_esmf_state_reconcile", rc=rc)
+  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (isPresent) then
+    call ESMF_InfoGet(infoh, "_esmf_state_reconcile/should_serialize_geom", &
+      theFlag, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    theFlag = .true.
+  end if
+
+end subroutine
 
 ! -------------------------- ESMF-public method -------------------------------
 
@@ -442,6 +493,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_InquireFlag) :: linquireflag
 
+      type(ESMF_Info) :: infoh
+      logical :: should_serialize_geom, skipGeomObj
+
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -481,14 +535,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-
       if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
           fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
+
+        call ESMF_FieldGetSerializeFlag(fp, should_serialize_geom, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (should_serialize_geom) then
+          skipGeomObj = .false.
+        else
+          skipGeomObj = .true.
+        end if
+
         call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
-                                    lattreconflag, linquireflag, localrc)
+                                    lattreconflag, linquireflag, skipGeomObj, &
+                                    localrc)
         if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+                               ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
@@ -550,7 +614,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_FieldType), pointer :: fp    ! field type
       integer staggerloc
       type(ESMF_AttReconcileFlag) :: lattreconflag
-      type(ESMF_Logical) :: linkChange
+
+      type(ESMF_Info) :: infoh
+      logical :: should_serialize_geom, skipGeomObj
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -597,23 +663,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
           fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
-          fp%geombase=ESMF_GeomBaseDeserialize(buffer, offset, &
-                                              lattreconflag, localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-          
-          !  here we relink the Field Attribute hierarchy to the Attribute
-          !  hierarchy of the object in the GeomBase, Grid for now
-          if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value .and. & 
-              fp%geombase%gbcp%type%type == ESMF_GEOMTYPE_GRID%type) then
-            linkChange = ESMF_TRUE
-            call c_ESMC_AttributeLink(fp%base, fp%geombase%gbcp%grid, linkChange, localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
 
+        call ESMF_FieldGetSerializeFlag(fp, should_serialize_geom, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (should_serialize_geom) then
+          skipGeomObj = .false.
+        else
+          skipGeomObj = .true.
+        end if
+
+        fp%geombase=ESMF_GeomBaseDeserialize(buffer, offset, &
+                                            lattreconflag, skipGeomObj, &
+                                            localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then

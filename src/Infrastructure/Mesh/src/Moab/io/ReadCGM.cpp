@@ -684,7 +684,7 @@ ErrorCode ReadCGM::create_surface_facets(std::map<RefEntity*, EntityHandle>& sur
   ErrorCode rval;
   std::map<RefEntity*, EntityHandle>::iterator ci;
   CubitStatus s;
-#if  ( (CGM_MAJOR_VERSION == 14 && CGM_MINOR_VERSION > 2) || CGM_MAJOR_VERSION == 15 )
+#if  ( (CGM_MAJOR_VERSION == 14 && CGM_MINOR_VERSION > 2) || CGM_MAJOR_VERSION >= 15 )
   DLIList<TopologyEntity*> me_list;
 #else
   DLIList<ModelEntity*> me_list;

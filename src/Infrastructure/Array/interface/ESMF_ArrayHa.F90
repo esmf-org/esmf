@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -34,6 +34,8 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -110,7 +112,34 @@ module ESMF_ArrayHaMod
 
   end interface
 
-      
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
+      srcToDstTransposeMap, typekind, factor, ignoreUnmatched, pipelineDepth, &
+      rc)
+      import                :: ESMF_Array, ESMF_RouteHandle
+      import                :: ESMF_InterArray, ESMF_TypeKind_Flag, ESMF_Logical
+      type(ESMF_Array)      :: srcArray, dstArray
+      type(ESMF_RouteHandle):: routehandle
+      type(ESMF_InterArray) :: srcToDstTransposeMap
+      type(ESMF_TypeKind_Flag):: typekind
+      type(*)               :: factor
+      type(ESMF_Logical)    :: ignoreUnmatched
+      integer               :: pipelineDepth
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+#endif
+
+!------------------------------------------------------------------------------
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -1434,20 +1463,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-! \label{ArrayRedistStoreTK}
+! \label{ArrayRedistStoreTKTP}
 ! {\tt ESMF\_ArrayRedistStore()} is a collective method across all PETs of the
 ! current Component. The interface of the method is overloaded, allowing 
 ! -- in principle -- each PET to call into {\tt ESMF\_ArrayRedistStore()}
 ! through a different entry point. Restrictions apply as to which combinations
 ! are sensible. All other combinations result in ESMF run time errors. The
 ! complete semantics of the {\tt ESMF\_ArrayRedistStore()} method, as provided
-! through the separate entry points shown in \ref{ArrayRedistStoreTK} and
-! \ref{ArrayRedistStoreNF}, is described in the following paragraphs as a whole.
+! through the separate entry points shown in \ref{ArrayRedistStoreTKTP} and
+! \ref{ArrayRedistStoreNFTP}, is described in the following paragraphs as a whole.
 !
 ! Store an Array redistribution operation from {\tt srcArray} to {\tt dstArray}.
-! Interface \ref{ArrayRedistStoreTK} allows PETs to specify a {\tt factor}
+! Interface \ref{ArrayRedistStoreTKTP} allows PETs to specify a {\tt factor}
 ! argument. PETs not specifying a {\tt factor} argument call into interface
-! \ref{ArrayRedistStoreNF}. If multiple PETs specify the {\tt factor} argument,
+! \ref{ArrayRedistStoreNFTP}. If multiple PETs specify the {\tt factor} argument,
 ! its type and kind, as well as its value must match across all PETs. If none
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
@@ -2140,7 +2169,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
-    
+
     ! Deal with (optional) array arguments
     srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
@@ -2198,20 +2227,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-! \label{ArrayRedistStoreNF}
+! \label{ArrayRedistStoreNFTP}
 ! {\tt ESMF\_ArrayRedistStore()} is a collective method across all PETs of the
 ! current Component. The interface of the method is overloaded, allowing 
 ! -- in principle -- each PET to call into {\tt ESMF\_ArrayRedistStore()}
 ! through a different entry point. Restrictions apply as to which combinations
 ! are sensible. All other combinations result in ESMF run time errors. The
 ! complete semantics of the {\tt ESMF\_ArrayRedistStore()} method, as provided
-! through the separate entry points shown in \ref{ArrayRedistStoreTK} and
-! \ref{ArrayRedistStoreNF}, is described in the following paragraphs as a whole.
+! through the separate entry points shown in \ref{ArrayRedistStoreTKTP} and
+! \ref{ArrayRedistStoreNFTP}, is described in the following paragraphs as a whole.
 !
 ! Store an Array redistribution operation from {\tt srcArray} to {\tt dstArray}.
-! Interface \ref{ArrayRedistStoreTK} allows PETs to specify a {\tt factor}
+! Interface \ref{ArrayRedistStoreTKTP} allows PETs to specify a {\tt factor}
 ! argument. PETs not specifying a {\tt factor} argument call into interface
-! \ref{ArrayRedistStoreNF}. If multiple PETs specify the {\tt factor} argument,
+! \ref{ArrayRedistStoreNFTP}. If multiple PETs specify the {\tt factor} argument,
 ! its type and kind, as well as its value must match across all PETs. If none
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -753,6 +753,7 @@ int ESMC_FieldRegridStore(
     enum ESMC_ExtrapMethod_Flag *extrapMethod,     // in
     int *extrapNumSrcPnts,                         // in
     float *extrapDistExponent,                     // in
+    int *extrapNumLevels,                          // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
     double **factorList,                           // inout
@@ -821,6 +822,10 @@ int ESMC_FieldRegridStore(
 //    The exponent to raise the distance to when calculating weights for 
 //    the {\tt ESMC\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
 //    of more distant points. If not specified, defaults to 2.0.
+//  \item [{[extrapNumLevels]}] 
+//    The number of levels to output for the extrapolation methods that fill levels 
+//    (e.g. ESMC\_EXTRAPMETHOD\_CREEP). When a method is used that requires this, then 
+//    an error will be returned if it is not specified.
 //  \item[unmappedaction]
 //    Specifies what should happen if there are destination points that can't 
 //    be mapped to a source cell. Options are {\tt ESMF\_UNMAPPEDACTION\_ERROR} or
@@ -868,8 +873,8 @@ int ESMC_FieldRegridStoreFile(
     ESMC_Field srcField,                           // in
     ESMC_Field dstField,                           // in
     const char *filename,                          // in
-    ESMC_InterArrayInt *srcMaskValues,              // in
-    ESMC_InterArrayInt *dstMaskValues,              // in
+    ESMC_InterArrayInt *srcMaskValues,             // in
+    ESMC_InterArrayInt *dstMaskValues,             // in
     ESMC_RouteHandle *routehandle,                 // inout
     enum ESMC_RegridMethod_Flag *regridmethod,     // in
     enum ESMC_PoleMethod_Flag *polemethod,         // in
@@ -879,8 +884,15 @@ int ESMC_FieldRegridStoreFile(
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
     enum ESMC_Logical *create_rh,                  // in
+    ESMC_FileMode_Flag *filemode,                  // in
+    const char *srcFile,                           // in
+    const char *dstFile,                           // in
+    enum ESMC_FileFormat_Flag *srcFileType,        // in
+    enum ESMC_FileFormat_Flag *dstFileType,        // in
+    enum ESMC_Logical *largeFileFlag,              // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
+    
 
 // !RETURN VALUE:
 //   Return code; equals ESMF_SUCCESS if there are no errors.
@@ -941,6 +953,21 @@ int ESMC_FieldRegridStoreFile(
 //  \item[{create\_rh}]
 //    Specifies whether or not to create a routehandle, or just write weights to file.
 //    If not specified, defaults to {\tt ESMF\_TRUE}.
+//  \item[{filemode}]
+//    Specifies the mode to use when creating the weight file. Options are
+//    {\tt ESMC\_FILEMODE\_BASIC} and {\tt ESMC\_FILEMODE\_WITHAUX}, which will
+//    write a file that includes center coordinates of the grids. The default 
+//    value is {\tt ESMC\_FILEMODE\_BASIC}.
+//  \item[{srcFile}]
+//    The name of the source file used to create the {\tt ESMC\_Grid} used
+//    in this regridding operation.
+//  \item[{dstFile}]
+//    The name of the destination file used to create the {\tt ESMC\_Grid} used
+//    in this regridding operation.
+//  \item[{srcFileType}]
+//    The type of the file used to represent the source grid.
+//  \item[{dstFileType}]
+//    The type of the file used to represent the destination grid.
 //  \item [{[srcFracField]}]
 //    The fraction of each source cell participating in the regridding. Only
 //    valid when regridmethod is {\tt ESMC\_REGRIDMETHOD\_CONSERVE}.

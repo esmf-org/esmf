@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -348,6 +348,9 @@ double great_circle_area(int n, double *pnts) {
     // compute angle for pnt1
     sum += tri_area(pnt0, pnt1, pnt2);
   }
+
+  // BOB DEBUG
+  // if (sum < 1.0E-16) sum=0.0;
 
   // return area
   return sum;
@@ -938,6 +941,85 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
 
 }
 
+
+  // TODO: merge this with other version of rot_2D_3D_sph() after release
+void xgrid_rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
+
+  // Define Cross product                                                                                                                   
+#define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
+#define DOT_PRODUCT3D(a,b) a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+#define TOL 1.0E-17
+
+  // init flags                                                            
+  *left_turn=false;
+  *right_turn=false;
+
+  // Loop through polygon                    
+  for (int i=0; i<num_p; i++) {
+    double *pntip0=p+3*i;
+    double *pntip1=p+3*((i+1)%num_p);
+    double *pntip2=p+3*((i+2)%num_p);
+
+    // vector from pntip1 to pnti0         
+    double v10[3];
+    v10[0]=pntip0[0]-pntip1[0];
+    v10[1]=pntip0[1]-pntip1[1];
+    v10[2]=pntip0[2]-pntip1[2];
+
+    // Make unit vector
+    // TODO: need to also do this to rot_2D_2D
+    double u_v10[3];
+    double v10_len=MU_LEN_VEC3D(v10);
+    if (v10_len > 0.0) {
+      double div_len=1.0/v10_len;
+      MU_MULT_BY_SCALAR_VEC3D(u_v10,v10,div_len);
+    } else {
+      continue; // Can't determine direction
+    }
+
+    // vector from pntip1 to pnti2               
+    double v12[3];
+    v12[0]=pntip2[0]-pntip1[0];
+    v12[1]=pntip2[1]-pntip1[1];
+    v12[2]=pntip2[2]-pntip1[2];
+
+    // Make unit vector
+    // TODO: need to also do this to rot_2D_2D
+    double u_v12[3];
+    double v12_len=MU_LEN_VEC3D(v12);
+    if (v12_len > 0.0) {
+      double div_len=1.0/v12_len;
+      MU_MULT_BY_SCALAR_VEC3D(u_v12,v12,div_len);
+    } else {
+      continue; // Can't determine direction
+    }   
+
+    // Calc cross product   
+    double cross[3];
+    CROSS_PRODUCT3D(cross,u_v12,u_v10);
+
+    // dot cross product with vector from center of sphere
+    // to middle point (pntip1)
+    double dir=DOT_PRODUCT3D(cross,pntip1);
+
+    // Interpret direction
+    if (dir > TOL) {
+      *left_turn=true;
+    } else if (dir < -TOL) {
+      *right_turn=true;
+    }
+  }
+
+  // If no turns default to left
+  if (!(*right_turn) && !(*left_turn)) *left_turn=true;
+
+#undef CROSS_PRODUCT3D
+#undef TOL
+
+}
+
+
+
   // Detect if a point (pnt) is in a polygon (p)
   // ONLY WORKS FOR CONVEX POLYGONS
   // here the points are 2D and the polygon is counter-clockwise
@@ -1130,6 +1212,155 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
 template int triangulate_poly<GEOM_CART2D>(int num_p, double *p, double *td, int *ti, int *tri_ind);
 template int triangulate_poly<GEOM_SPH2D3D>(int num_p, double *p, double *td, int *ti, int *tri_ind);
 
+
+// Triangulate a 2D polygon using the ear clip method.
+// This method works on both concave and convex polygons.
+// As usual in ESMF Mesh this assumes the polygon is counter-clockwise.
+// Output is in tri_ind, which are the 0-based indices of the triangles 
+// making up the triangulization. tri_ind should be of size 3*(num_p-2)
+// td should be the same size as p, ti should be of size num_p.
+template <class GEOM>
+int xgrid_triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
+
+  // Error check
+  if (num_p < 3) {
+    return ESMCI_TP_DEGENERATE_POLY;
+  }
+
+  // Handle degenerate case
+  if (num_p == 3) {
+    tri_ind[0]=0;
+    tri_ind[1]=1;
+    tri_ind[2]=2;
+    return ESMCI_TP_SUCCESS;
+  }
+
+  // Copy polygon to temporary array
+  memcpy((double *)td, (double *)p, GEOM::pnt_size*num_p*sizeof(double));
+  int num_t=num_p;
+  
+  // Fill index array
+  for(int i=0; i<num_p; i++) {
+    ti[i]=i;
+  }
+
+
+  // Loop until we've broken everything up
+  int pos_tri_ind=0;
+  while (true) {
+
+    // Handle triangle case
+    if (num_t == 3) {
+      tri_ind[pos_tri_ind]=ti[0];
+      tri_ind[pos_tri_ind+1]=ti[1];
+      tri_ind[pos_tri_ind+2]=ti[2];
+      return ESMCI_TP_SUCCESS;
+    }
+
+    // Loop through polygon                    
+    int max_clip_ind[3];
+    double max_clip_dot=-std::numeric_limits<double>::max();
+    bool found_clip=false;
+    for (int i=0; i<num_t; i++) {
+      // indices which make up triangle to potentially clip
+      int clip_ind[3];
+      clip_ind[0]=i;
+      clip_ind[1]=(i+1)%num_t;
+      clip_ind[2]=(i+2)%num_t;
+
+      // Points which make up triangle
+      double *pntip0=GEOM::getPntAt(td,clip_ind[0]);
+      double *pntip1=GEOM::getPntAt(td,clip_ind[1]);
+      double *pntip2=GEOM::getPntAt(td,clip_ind[2]);
+
+      // vector from pntip1 to pnti0                 
+      double v10[GEOM::pnt_size];
+      GEOM::sub(v10,pntip0,pntip1);
+
+      // vector from pntip1 to pnti2
+      double v12[GEOM::pnt_size];
+      GEOM::sub(v12,pntip2,pntip1);
+
+      // Calc cross product                                                             
+      double cross;
+      cross=GEOM::turn(v12,v10,pntip1);
+
+      //      if (mathutil_debug) printf("%d %d %d cross=%30.27E \n",ti[clip_ind[0]],ti[clip_ind[1]],ti[clip_ind[2]],cross);
+
+      // See if other way of doing cross is more accurate
+      // if (mathutil_debug) {
+      // double new_cross;
+      /// new_cross=GEOM::turn(pntip0,pntip1,pntip2);
+      /// printf("%d %d %d new_cross=%30.27E \n",ti[clip_ind[0]],ti[clip_ind[1]],ti[clip_ind[2]],new_cross);
+      // }
+
+      // Find the maximum left turn to clip
+      // to give good triangles
+      // BOB: Make this slightly less than 0.0 to take care of very long thin triangles where the calc of the cross
+      //      might not be accurate due to numerical issue. These will then have a high dot and should be clipped out fairly quickly. 
+      if (cross > -1.0E-15) {
+        double dot;
+        dot=GEOM::dot(v12,v10); 
+
+        // len
+        double l_v12=sqrt(GEOM::dot(v12,v12)); 
+        double l_v10=sqrt(GEOM::dot(v10,v10)); 
+
+        // divide by len
+	if (l_v12*l_v10 != 0.0) {
+	  dot=dot/(l_v12*l_v10);
+	}
+
+	//        if (mathutil_debug) printf("%d %d %d dot=%f max=%f \n",ti[clip_ind[0]],ti[clip_ind[1]],ti[clip_ind[2]],dot,max_clip_dot);
+        if (dot > max_clip_dot) {
+          bool is_ear_b=is_ear<GEOM>(num_t, td, clip_ind);
+	  //	  if (mathutil_debug) printf("%d %d %d is_ear=%d \n",ti[clip_ind[0]],ti[clip_ind[1]],ti[clip_ind[2]],is_ear_b);
+          if (is_ear_b) {
+            max_clip_dot=dot;
+            max_clip_ind[0]=clip_ind[0];
+            max_clip_ind[1]=clip_ind[1];
+            max_clip_ind[2]=clip_ind[2];
+            found_clip=true;
+          }
+        }
+      }
+    }
+    
+    // Clip
+    if (found_clip) {
+      // Add clipped triangle to list
+      tri_ind[pos_tri_ind]=ti[max_clip_ind[0]];
+      tri_ind[pos_tri_ind+1]=ti[max_clip_ind[1]];
+      tri_ind[pos_tri_ind+2]=ti[max_clip_ind[2]];
+      
+      //      if (mathutil_debug) {
+      //	printf("tri=%d :: %d %d %d \n",pos_tri_ind/3,tri_ind[pos_tri_ind],tri_ind[pos_tri_ind+1],tri_ind[pos_tri_ind+2]);
+      //}
+      
+      pos_tri_ind +=3;
+
+      // remove triangle from polygon and collapse arrays
+      for (int j=max_clip_ind[1]+1; j<num_t; j++) {
+        GEOM::copy(GEOM::getPntAt(td,j-1),GEOM::getPntAt(td,j));
+        ti[j-1]=ti[j];
+      }
+
+      // shrink size by 1
+      num_t--;
+
+      // Loop back to beginning
+      continue;
+    } else {
+      return ESMCI_TP_CLOCKWISE_POLY;
+    }        
+  } // Loop back to top before triangle detection
+
+}
+
+// Create instances for supported geometries, otherwise would have to put template
+// in include file
+template int xgrid_triangulate_poly<GEOM_CART2D>(int num_p, double *p, double *td, int *ti, int *tri_ind);
+template int xgrid_triangulate_poly<GEOM_SPH2D3D>(int num_p, double *p, double *td, int *ti, int *tri_ind);
 
 // calculates spherical coords in radians
 // lon -> (-pi to +pi)

@@ -11,10 +11,9 @@ unstructured meshes and sets of unconnected points; regional or global grids;
 information from NetCDF files in a variety of formats, including the
 `Climate and Forecast (CF) V1.6 (a.k.a GridSpec) <http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html>`_,
 `UGRID <https://github.com/ugrid-conventions/ugrid-conventions>`_,
-`ESMF Unstructured <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03028200000000000000>`_
-and
-`SCRIP <http://www.earthsystemmodeling.org/esmf_releases/non_public/ESMF_8_0_0/ESMF_refdoc/node3.html#SECTION03028100000000000000>`_
-conventions.
+ESMF Unstructured and SCRIP conventions. Information on these last two conventions
+can be found in the
+`ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_.
 
 ESMPy provides a :class:`~ESMF.api.grid.Grid` to represent single-tile logically
 rectangular coordinate data, a :class:`~ESMF.api.mesh.Mesh` for unstructured 

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -33,7 +33,7 @@ module ESMF_TraceAPIMod
   use ESMF_CplCompMod
   use ESMF_BaseMod
   use ESMF_VMMod
-  use ESMF_AttributeMod
+!  use ESMF_AttributeMod
   use ESMF_TimeMod
   use ESMF_ClockMod
   use ESMF_TraceMod

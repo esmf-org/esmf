@@ -15,7 +15,7 @@
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
 \newcommand{\mytitle}{\longname \docmttype ~~}
-\newcommand{\myversion}{Version 8.0.0}
+\newcommand{\myversion}{Version 8.1.0}
 
 \input{common_commands}
 
@@ -113,17 +113,17 @@
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Applications}
+\addcontentsline{toc}{part}{Command Line Tools}
 \end{htmlonly}
-\part{Applications}
+\part{Command Line Tools}
 
-\label{part:Applications}
+\label{part:CLTs}
 
-\input{Applications}
+\input{CLTs}
 
-%\input{ESMF_InfoC}
+%\input{ESMF_PrintInfoC}
 
-\input{ESMF_Info}
+\input{ESMF_PrintInfo}
 
 \input{ESMF_RegridWeightGen}
 
@@ -217,7 +217,7 @@
 
 \newpage
 
-#include "../Infrastructure/Attribute/doc/Attribute_refdoc.ctex"
+#include "../Infrastructure/Base/doc/Info_refdoc.ctex"
 
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
@@ -249,6 +249,7 @@
 \input{ESMF_options}
 \input{ESMF_appuml}
 \input{ESMF_apperr}
+\input{ESMF_appattr}
 
 \end{document}
 

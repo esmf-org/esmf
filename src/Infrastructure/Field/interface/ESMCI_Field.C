@@ -1,7 +1,7 @@
 //$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -146,6 +146,7 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   ESMC_ExtrapMethod_Flag *extrapMethod,
   int *extrapNumSrcPnts,
   float *extrapDistExponent,
+  int *extrapNumLevels,
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
   double **factorList,
@@ -168,10 +169,18 @@ void FTN_X(f_esmf_regridstorefile)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldp
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
   ESMC_Logical *create_rh,
+  ESMC_FileMode_Flag *filemode,
+  const char *srcFile,
+  const char *dstFile,
+  ESMC_FileFormat_Flag *srcFileType,
+  ESMC_FileFormat_Flag *dstFileType,
+  ESMC_Logical *largeFileFlag,
   ESMCI::Field *srcfracfieldp,
   ESMCI::Field *dstfracfieldp,
   int *rc,
-  ESMCI_FortranStrLenArg flen
+  ESMCI_FortranStrLenArg flen,
+  ESMCI_FortranStrLenArg sflen,
+  ESMCI_FortranStrLenArg dflen
 );
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
@@ -1373,6 +1382,7 @@ namespace ESMCI {
     ESMC_ExtrapMethod_Flag *extrapMethod,
     int *extrapNumSrcPnts,
     float *extrapDistExponent,
+    int *extrapNumLevels,
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
     double **factorList,
@@ -1447,6 +1457,7 @@ namespace ESMCI {
                               lineType,
                               normType,
                               extrapMethod, extrapNumSrcPnts, extrapDistExponent,
+                              extrapNumLevels,
                               unmappedAction,
                               ignoreDegenerate,
                               factorList, factorIndexList,
@@ -1496,6 +1507,12 @@ namespace ESMCI {
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
     ESMC_Logical *create_rh,
+    ESMC_FileMode_Flag *filemode,
+    const char *srcFile,
+    const char *dstFile,
+    ESMC_FileFormat_Flag *srcFileType,
+    ESMC_FileFormat_Flag *dstFileType,
+    ESMC_Logical *largeFileFlag,
     Field *srcFracField,
     Field *dstFracField) {
 //
@@ -1555,6 +1572,8 @@ namespace ESMCI {
     }
 
     std::string filename_local = filename;
+    std::string srcFilename = ""; if (srcFile) srcFilename = srcFile;
+    std::string dstFilename = ""; if (dstFile) dstFilename = dstFile;
     FTN_X(f_esmf_regridstorefile)(fieldpsrc, fieldpdst, filename,
                               srcMaskArray, &srcMaskLen,
                               dstMaskArray, &dstMaskLen,
@@ -1567,10 +1586,18 @@ namespace ESMCI {
                               unmappedAction,
                               ignoreDegenerate,
                               create_rh,
+                              filemode,
+                              srcFile,
+                              dstFile,
+                              srcFileType,
+                              dstFileType,
+                              largeFileFlag,
                               srcFracField,
                               dstFracField,
                               &localrc,
-                              filename_local.size());
+                              filename_local.size(),
+                              srcFilename.size(),
+                              dstFilename.size());
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
       if (sff_created) delete sff;

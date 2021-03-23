@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -426,22 +426,22 @@ int main(void){
   ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
 #ifdef gridmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle,
-                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,
                              NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
 #ifdef meshmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, &i_maskValues, &routehandle,
-                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,
                              NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
 #ifdef bothmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, &routehandle,
-                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,
                              NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
 #ifdef nomasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle,
-                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,
                              NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);

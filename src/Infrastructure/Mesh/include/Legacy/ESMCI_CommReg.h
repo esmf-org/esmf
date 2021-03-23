@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -73,6 +73,8 @@ bool VerifySymComm();
 void CommPrint(std::ostream &);
 
 void clear();
+
+void map_proc_numbers(int num_procs, int *proc_map);
 
 private:
 CommRel node_rel;

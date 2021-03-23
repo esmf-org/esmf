@@ -1,27 +1,21 @@
 #ifndef SMOOTH_FACE_EVAL_HPP
 #define SMOOTH_FACE_EVAL_HPP
 
-// do we really need iMesh here; maybe go directly to MOAB
-//#include "iMesh.h"
 #include "moab/Interface.hpp"
 #include "moab/Range.hpp"
 #include "moab/CartVect.hpp"
 #include "MBTagConventions.hpp"
 #include "moab/Types.hpp"
 
-#define determ3(p1,q1,p2,q2,p3,q3) ((q3)*((p2)-(p1)) + (q2)*((p1)-(p3)) + (q1)*((p3)-(p2)))
-#define sqr(a) ((a)*(a))
-#define cube(a) (sqr(a) * (a))
-#define quart(a) (sqr(a) * sqr(a))
-#define blend(x) (-2.0*(x)*(x)*(x) + 3.0*(x)*(x))
-
+#include <cmath>
 #include <vector>
 #include <map>
-//#include "MBEntityHandle.hpp"
+
+#define determ3(p1,q1,p2,q2,p3,q3) ((q3)*((p2)-(p1)) + (q2)*((p1)-(p3)) + (q1)*((p3)-(p2)))
+#define blend(x) (-2.0*(x)*(x)*(x) + 3.0*(x)*(x))
 
 // work only with CAMAL > = 500
 // #if CAMAL_VERSION < 500
-
 // #else
 
 #include "moab/GeomTopoTool.hpp"

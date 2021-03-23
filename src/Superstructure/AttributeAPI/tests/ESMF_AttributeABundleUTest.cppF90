@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -87,54 +87,6 @@ program ESMF_AttributeArrayBundleUTest
 !-------------------------------------------------------------------------
 
 AttributeTestMacro(arraybundle, an ArrayBundle, EX_UTest, NEX_UTest)
-
-    !-------------------------------------------------------------------------
-    !  Attribute hierarchy linking
-    !-------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Link an ArrayBundle Attribute hierarchy to a Array Attribute hierarchy ArrayBundle Test
-      call ESMF_AttributeLink(arraybundle, afb, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking an ArrayBundle hierarchy to a Array hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^ifdef ESMF_TESTEXHAUSTIVE
-
-      !EX_UTest
-      ! Link an ArrayBundle Attribute hierarchy to a Array Attribute hierarchy ArrayBundle Test, again
-      call ESMF_AttributeLink(arraybundle, afb, rc=rc)
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking an ArrayBundle hierarchy to a Array hierarchy Test, again"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test
-      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test 2
-      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test 2"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test 3
-      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test 3"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^endif
 
       !------------------------------------------------------------------------
       ! clean up

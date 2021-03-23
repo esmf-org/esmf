@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -184,6 +184,8 @@ void  FTN_X(esmf_ctof90string)(const char *src, char *dst, int *rc,
                              /* hidden */ ESMCI_FortranStrLenArg slen, ESMCI_FortranStrLenArg dlen);
 }
 
+// return the objectName given the objectId
+const char *ESMC_ObjectID_Name(int objectId);
 // return byte counts for TypeKinds
 int ESMC_TypeKind_FlagSize(ESMC_TypeKind_Flag dk);
 // return a static string name for various enums
@@ -193,7 +195,7 @@ const char *ESMC_LogicalString(ESMC_Logical tf);
 
 extern "C" {
 void FTN_X(esmf_pointertoint)(int *n, short *s, ESMC_POINTER *len);
-void FTN_X(esmf_pointerdifference)(int *n, short *s1, short *s2, int *len);
+void FTN_X(esmf_pointerdifference)(long *n, short *s1, short *s2, int *len);
 void FTN_X(c_esmc_getcwd)(char *pathname, int *rc, ESMCI_FortranStrLenArg pathname_l);
 void FTN_X(c_esmc_makedirectory)(const char *pathname, int *mode, ESMC_Logical *relaxedFlag,
       int *rc, ESMCI_FortranStrLenArg pathname_l);

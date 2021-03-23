@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -70,11 +70,12 @@ void FTN_X(f_esmf_gridcreatenoperidim)(ESMCI::Grid **grid,
     ESMC_IndexFlag *indexflag, int *rc);
 
 void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
-    int *maxIndex, int *len1, int *periodicDim, int *pd_present,
-    int *poleDim, int *pld_present,
-    ESMC_CoordSys_Flag *coordSys, int *cs_present,
-    ESMC_TypeKind_Flag *coordTypeKind, int *ctk_present,
-    ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
+    int *maxIndex, int *len1, 
+    int *poleKind, int *len2,
+    int *periodicDim,
+    int *poleDim,
+    ESMC_CoordSys_Flag *coordSys,
+    ESMC_TypeKind_Flag *coordTypeKind,
     ESMC_IndexFlag *indexflag, int *rc);
 
 void FTN_X(f_esmf_gridcreatecubedsphere)(ESMCI::Grid **grid,
@@ -90,15 +91,16 @@ void FTN_X(f_esmf_gridcreatecubedsphere)(ESMCI::Grid **grid,
 
 void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid,
     const char *filename, int *fileTypeFlag,
-    int *regDecomp, int *rdpresent,
-    int *decompflag, int *dfpresent,
-    int *isSphere, int *ispresent,
-    int *addCornerStagger, int *acspresent,
-    int *addUserArea, int *auapresent,
+    int *regDecomp,
+    int *decompflag,
+    int *isSphere, 
+    int *polekind, int *len1,
+    int *addCornerStagger,
+    int *addUserArea,
     ESMC_IndexFlag *indexflag,
-    int *addMask, int *ampresent,
-    const char *varname, int *vnpresent,
-    const char *coordNames, int *cnpresent, int *rc,
+    int *addMask,
+    const char *varname,
+    const char *coordNames, int *rc,
     ESMCI_FortranStrLenArg len_filename,
     ESMCI_FortranStrLenArg len_varname,
     ESMCI_FortranStrLenArg len_coordNames);
@@ -277,11 +279,11 @@ int setDefaultsLUA(int dimCount,
 //
 // !ARGUMENTS:
     ESMC_InterArrayInt *maxIndex, 
+    ESMC_InterArrayInt *polekindflag,
     int *periodicDim,
     int *poleDim,
     ESMC_CoordSys_Flag *coordSys,
     ESMC_TypeKind_Flag *coordTypeKind,
-    ESMC_PoleKind_Flag *poleKind,
     ESMC_IndexFlag *indexflag,
     int *rc) {           // out - return code
 //
@@ -296,14 +298,8 @@ int setDefaultsLUA(int dimCount,
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
-    int cs_present, ctk_present, pk_present, pd_present, pld_present;
-    cs_present = 0;
-    ctk_present = 0;
-    pk_present = 0;
-    pd_present = 0;
-    pld_present = 0;
-
-    int pksize = 2;
+    int *pkfArray;
+    int pkfLen;
 
     ESMCI::InterArray<int> *mi = (ESMCI::InterArray<int> *)maxIndex;
   
@@ -313,33 +309,46 @@ int setDefaultsLUA(int dimCount,
        return ESMC_NULL_POINTER;
     }
 
+    ESMCI::InterArray<int> *pkf = (ESMCI::InterArray<int> *)polekindflag;
+    if (pkf != NULL) {
+      if(pkf->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- polekindflag array must be of rank 1", ESMC_CONTEXT, rc);
+          return ESMC_NULL_POINTER;
+      }
+
+      if(pkf->extent[0] != 2){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- polekindflag array must hold 2 values", ESMC_CONTEXT, rc);
+          return ESMC_NULL_POINTER;
+      }
+      pkfArray = pkf->array;
+      pkfLen = pkf->extent[0];
+    } else {
+      pkfArray = NULL;
+      pkfLen = 0;
+    }
+
+
     // handle the optional arguments
-    if (coordSys != NULL)
-      cs_present = 1;
-    if (coordTypeKind != NULL)
-      ctk_present = 1; 
-    if (poleKind != NULL)
-      pk_present = 1; 
     int periodicDimLoc = 1;
     if (periodicDim != NULL) {
-      pd_present = 1;
       periodicDimLoc = *periodicDim;
     }
     int poleDimLoc = 2;
     if (poleDim != NULL) {
-      pld_present = 1;
       poleDimLoc = *poleDim;
     }
     // allocate the grid object
     Grid *grid;
   
     FTN_X(f_esmf_gridcreate1peridim)(&grid,
-                                     mi->array, &mi->extent[0], 
-                                     &periodicDimLoc, &pd_present,
-                                     &poleDimLoc, &pld_present,
-                                     coordSys, &cs_present,
-                                     coordTypeKind, &ctk_present,
-                                     poleKind, &pk_present, &pksize,
+                                     mi->array, &mi->extent[0],
+                                     pkfArray, &pkfLen, 
+                                     &periodicDimLoc, 
+                                     &poleDimLoc, 
+                                     coordSys, 
+                                     coordTypeKind, 
                                      indexflag, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return grid;
@@ -530,6 +539,7 @@ int setDefaultsLUA(int dimCount,
     int *regDecomp,
     int *decompflag,
     int *isSphere,
+    ESMC_InterArrayInt *polekindflag,
     int *addCornerStagger,
     int *addUserArea,
     ESMC_IndexFlag *indexflag,
@@ -554,9 +564,6 @@ int setDefaultsLUA(int dimCount,
 
 
     // handle the optional arguments
-    int ispresent=0, acspresent=0, auapresent=0;
-    int ampresent=0, vnpresent=0, cnpresent=0;
-    int dfpresent=0, rdpresent=0;
     int *df_loc = NULL;
     int *rd_loc = NULL;
     char *vn_loc = (char *)"";
@@ -564,40 +571,57 @@ int setDefaultsLUA(int dimCount,
 
     if (regDecomp != NULL) {
       rd_loc = regDecomp;
-      rdpresent = 1;
     }
     if (decompflag != NULL) {
       df_loc = decompflag;
-      dfpresent = 1;
     }
     int is_loc = 1;
     if (isSphere != NULL) {
       is_loc = *isSphere;
-      ispresent = 1;
     }
     int acs_loc = 0;
     if (addCornerStagger != NULL) {
       acs_loc = *addCornerStagger;
-      acspresent = 1;
     }
     int aua_loc = 0;
     if (addUserArea != NULL) {
       aua_loc = *addUserArea;
-      auapresent = 1;
     }
     int am_loc = 0;
     if (addMask != NULL) {
       am_loc = *addMask;
-      ampresent = 1;
     }
     if (varname != NULL) {
       vn_len = strlen(varname);
-      vnpresent = vn_len > 0;
-      if (vnpresent) {
+      if (vn_len > 0) {
         vn_loc = (char *)malloc(vn_len);
         strncpy(vn_loc, varname, vn_len);
       }
     }
+
+    int *pkfArray;
+    int pkfLen;
+    
+    ESMCI::InterArray<int> *pkf = (ESMCI::InterArray<int> *)polekindflag;
+    if (pkf != NULL) {
+      if(pkf->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "- polekindflag array must be of rank 1", ESMC_CONTEXT, rc);
+          return ESMC_NULL_POINTER;
+      }
+
+      if(pkf->extent[0] != 2){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- polekindflag array must hold 2 values", ESMC_CONTEXT, rc);
+          return ESMC_NULL_POINTER;
+      }
+      pkfArray = pkf->array;
+      pkfLen = pkf->extent[0];
+    } else {
+      pkfArray = NULL;
+      pkfLen = 0;
+    }
+
 
     // Create Fortran-style buffer to pass coordNames to Fortran if coordNames are present.
     int cn_len = 0;
@@ -612,7 +636,6 @@ int setDefaultsLUA(int dimCount,
       }
       cn_len = (cn_len0 >= cn_len1) ? cn_len0 : cn_len1;
       int fortran_buf_size = 2 * cn_len;
-      cnpresent = 1;
       cn_buf = (char *)malloc(fortran_buf_size);
       memset(cn_buf, ' ', fortran_buf_size);
       strncpy(&cn_buf[0], coordNames[0], cn_len);
@@ -622,11 +645,9 @@ int setDefaultsLUA(int dimCount,
     // allocate the grid object
     Grid *grid;
     FTN_X(f_esmf_gridcreatefromfile)(&grid, filename, &fileTypeFlag,
-                     rd_loc, &rdpresent, df_loc, &dfpresent,
-                     &is_loc, &ispresent, 
-                     &acs_loc, &acspresent, &aua_loc, &auapresent,
-                     indexflag, &am_loc, &ampresent, vn_loc, &vnpresent,
-                     cn_buf, &cnpresent, &localrc,
+                     rd_loc, df_loc, &is_loc, pkfArray, &pkfLen, 
+                     &acs_loc, &aua_loc, 
+                     indexflag, &am_loc, vn_loc, cn_buf, &localrc,
                      strlen(filename), vn_len, cn_len);
     if (vn_loc && (vn_len > 0)) {
       free(vn_loc);
@@ -694,8 +715,9 @@ int setDefaultsLUA(int dimCount,
   meshp->meshwrite(non_const_fname, &localrc, nlen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 
-  // Get rid of Mesh  
-  delete meshp;
+  // Get rid of Mesh, also considering garbage collection
+  localrc = MeshCap::destroy(&meshp, true);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 
   // return success
   return ESMF_SUCCESS;
@@ -734,7 +756,7 @@ int Grid::addCoordArray(
   int rc, localrc;
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap;
   Array *array;
   DistGrid *staggerDistgrid;
@@ -1055,7 +1077,7 @@ int Grid::addCoordFromArrayList(
                         int *staggerlocArg,        // (in) optional
                         int arrayCount,             // (in) 
                         Array **arrayList,           // (in)
-                        CopyFlag *docopyArg,   // (in) optional
+                        DataCopyFlag *docopyArg,   // (in) optional
                         InterArray<int> *staggerEdgeLWidthArg, // (in) optional
                         InterArray<int> *staggerEdgeUWidthArg, // (in) optional
                         InterArray<int> *staggerAlignArg   // (in) optional 
@@ -1080,7 +1102,7 @@ int Grid::addCoordFromArrayList(
   int rc;
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   int *staggerAlign;
   int *staggerEdgeLWidth;
   int *staggerEdgeUWidth;
@@ -1355,7 +1377,7 @@ int Grid::addItemArrayArb(
   // local vars
   int rc, localrc;
   int staggerloc,item;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap;
   Array *array;
   int extent[1];
@@ -1818,7 +1840,14 @@ int Grid::destroy(
     return rc;
   }
 
+  // check if this Grid object has the persist flag set
+  if ((*gridArg)->ESMC_BaseGetPersist())
+    return ESMF_SUCCESS;  // nothing to be done here, return successfully
+
   try{
+    // check if this Grid object still has a valid entry in the garbage collection
+    if (!VM::validObject(*gridArg))
+      return ESMF_SUCCESS;  // nothing to be done here, return successfully
     // destruct Grid object
     (*gridArg)->destruct(true, noGarbage);
     // mark as invalid object
@@ -1840,7 +1869,7 @@ int Grid::destroy(
     delete (*gridArg);      // completely delete the object, free heap
   }
 
-    // return successfully
+  // return successfully
   return ESMF_SUCCESS;
 }
 
@@ -1862,7 +1891,7 @@ Array *Grid::getCoordArray(
 //
                         int *staggerlocArg,        // (in) optional
                         int coordArg,              // (in) base-1
-                        CopyFlag *docopyArg,  // (in) optional
+                        DataCopyFlag *docopyArg,  // (in) optional
                         int *rcArg                 // (out) optional return code 
   ) {
 //
@@ -1875,7 +1904,7 @@ Array *Grid::getCoordArray(
   int localrc;                 // local error status
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   int dimCount;
   Array *array;
 
@@ -1906,13 +1935,13 @@ Array *Grid::getCoordArray(
 
   // If docopyArg wasn't passed in, use default, else copy the value
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Copy option isn't working for now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, rcArg);
       return ESMC_NULL_POINTER;
@@ -1949,7 +1978,7 @@ Array *Grid::getItemArray(
 //
                         int *staggerlocArg,        // (in) optional
                         int *itemArg,              // (in) required
-                        CopyFlag *docopyArg,  // (in) optional
+                        DataCopyFlag *docopyArg,  // (in) optional
                         int *rcArg                 // (out) optional return code 
   ) {
 //
@@ -1961,7 +1990,7 @@ Array *Grid::getItemArray(
   // local vars
   int localrc;                 // local error status
   int staggerloc, item;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   int dimCount;
   Array *array;
 
@@ -2003,13 +2032,13 @@ Array *Grid::getItemArray(
 
   // If docopyArg wasn't passed in, use default, else copy the value
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Copy option isn't working for now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, rcArg);
       return ESMC_NULL_POINTER;
@@ -3534,7 +3563,7 @@ int Grid::setCoordArray(
                         int *staggerlocArg,        // (in) optional
                         int *coordArg,             // (in) 
                         Array *arrayArg,           // (in)
-                        CopyFlag *docopyArg   // (in) optional
+                        DataCopyFlag *docopyArg   // (in) optional
   ) {
 //
 // !DESCRIPTION:
@@ -3548,7 +3577,7 @@ int Grid::setCoordArray(
   int rc;
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap, *arrayUndistLBound, *arrayUndistUBound;
   const int *gridUndistLBound, *gridUndistUBound;
   bool ok;  
@@ -3610,13 +3639,13 @@ int Grid::setCoordArray(
 
   // If docopyArg hasn't been passed in use a default otherwise, copy it. 
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Don't support copy right now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, &rc);
       return rc;
@@ -3725,7 +3754,7 @@ int Grid::setItemArray(
                         int *staggerlocArg,        // (in) optional
                         int *itemArg,              // (in)
                         Array *arrayArg,           // (in)
-                        CopyFlag *docopyArg   // (in) optional
+                        DataCopyFlag *docopyArg   // (in) optional
   ) {
 //
 // !DESCRIPTION:
@@ -3738,7 +3767,7 @@ int Grid::setItemArray(
   int localrc;
   int rc;
   int staggerloc, item;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap;
   bool ok;  
   DistGrid *staggerDistgrid;
@@ -3787,13 +3816,13 @@ int Grid::setItemArray(
 
   // If docopyArg hasn't been passed in use a default otherwise, copy it. 
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Don't support copy right now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, &rc);
       return rc;
@@ -5875,9 +5904,8 @@ int Grid::deserialize(
     DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
     
     // Don't deserialize, but set 
-    destroyDistgrid=false; // proxy distgrid (like all proxies) do not belong to any 
-                           // other object -> garbage collection will take care of them.
-    destroyDELayout=false; // delayot belongs to DistGrid
+    destroyDistgrid=true;   // proxy DistGrid belongs to this proxy Grid object
+    destroyDELayout=false;  // DELayout belongs to DistGrid
     
     DESERIALIZE_VAR( buffer,loffset,distDimCount,int);    
     
@@ -8672,19 +8700,25 @@ void GridCellIter::getDEBnds(
   grid->getDistExclusiveUBound(staggerDistgrid, localDE, uBnd);  
   grid->getDistExclusiveLBound(staggerDistgrid, localDE, lBnd);  
 
-  // if cell iterator then expand bounds
-  // If center stagger, expand if not bipole
-    if (staggerloc==0) {
+  // Adjust to be cell bounds
+  if (staggerloc==0) {
+
       for (int i=0; i<rank; i++) {
         bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
         bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
         
-        if (align[i] <0) {
-          if (isUBnd && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
+        // Adjust based on alignment
+        if (align[i] < 0) {
+          if (isUBnd) uBnd[i]--;
         } else {
-          if (isLBnd && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
+          if (isLBnd) lBnd[i]++;
         }    
+
+        // Reexpand for bipole
+        if (isLBnd && (connL[i]==ESMC_GRIDCONN_BIPOLE)) lBnd[i]--;
+        if (isUBnd && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
       }
+
     } else {
       // Calculations are different for single and multi-tile cases
       if (tileCount <= 1) {
@@ -8732,9 +8766,6 @@ void GridCellIter::getDEBnds(
       }
     }
 }
-
-//-----------------------------------------------------------------------------
-
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

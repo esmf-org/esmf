@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -63,6 +63,10 @@ module ESMF_F90InterfaceMod
     integer(ESMF_KIND_I8), pointer :: farray1DI8(:)       ! Fortran reference
     integer(ESMF_KIND_I8), pointer :: farray2DI8(:,:)     ! Fortran reference
     integer(ESMF_KIND_I8), pointer :: farray3DI8(:,:,:)   ! Fortran reference
+    real(ESMF_KIND_R8), pointer :: farray1DR8(:)       ! Fortran reference
+    real(ESMF_KIND_R8), pointer :: farray2DR8(:,:)     ! Fortran reference
+    real(ESMF_KIND_R8), pointer :: farray3DR8(:,:,:)   ! Fortran reference
+
   end type
 
 
@@ -107,7 +111,8 @@ contains
 
 ! !INTERFACE:
   recursive function ESMF_InterArrayCreateTrg(farray1D, farray2D, farray3D, &
-    farray1DI8, farray2DI8, farray3DI8, rc) result (InterArrayCreateTrg)
+    farray1DI8, farray2DI8, farray3DI8, farray1DR8, farray2DR8, farray3DR8, &
+    rc) result (InterArrayCreateTrg)
 !
 ! !ARGUMENTS:
     integer, target,               intent(in),  optional :: farray1D(:)
@@ -116,6 +121,9 @@ contains
     integer(ESMF_KIND_I8), target, intent(in),  optional :: farray1DI8(:)
     integer(ESMF_KIND_I8), target, intent(in),  optional :: farray2DI8(:,:)
     integer(ESMF_KIND_I8), target, intent(in),  optional :: farray3DI8(:,:,:)
+    real(ESMF_KIND_R8), target,    intent(in),  optional :: farray1DR8(:)
+    real(ESMF_KIND_R8), target,    intent(in),  optional :: farray2DR8(:,:)
+    real(ESMF_KIND_R8), target,    intent(in),  optional :: farray3DR8(:,:,:)
     integer,                       intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
@@ -138,6 +146,12 @@ contains
 !     2D Fortran array of ESMF_TYPEKIND_I8.
 !   \item[{[farray3DI8]}]
 !     3D Fortran array of ESMF_TYPEKIND_I8.
+!   \item[{[farray1DR8]}]
+!     1D Fortran array of ESMF_TYPEKIND_R8.
+!   \item[{[farray2DR8]}]
+!     2D Fortran array of ESMF_TYPEKIND_R8.
+!   \item[{[farray3DR8]}]
+!     3D Fortran array of ESMF_TYPEKIND_R8.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -152,6 +166,10 @@ contains
     integer(ESMF_KIND_I8), pointer        :: farray1DI8Ptr(:)
     integer(ESMF_KIND_I8), pointer        :: farray2DI8Ptr(:,:)
     integer(ESMF_KIND_I8), pointer        :: farray3DI8Ptr(:,:,:)
+    real(ESMF_KIND_R8), pointer           :: farray1DR8Ptr(:)
+    real(ESMF_KIND_R8), pointer           :: farray2DR8Ptr(:,:)
+    real(ESMF_KIND_R8), pointer           :: farray3DR8Ptr(:,:,:)
+
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -170,6 +188,10 @@ contains
     nullify(farray1DI8Ptr)
     nullify(farray2DI8Ptr)
     nullify(farray3DI8Ptr)
+    nullify(farray1DR8Ptr)
+    nullify(farray2DR8Ptr)
+    nullify(farray3DR8Ptr)
+
     
     ! set references
     if (present(farray1D)) farray1DPtr => farray1D
@@ -178,11 +200,15 @@ contains
     if (present(farray1DI8)) farray1DI8Ptr => farray1DI8
     if (present(farray2DI8)) farray2DI8Ptr => farray2DI8
     if (present(farray3DI8)) farray3DI8Ptr => farray3DI8
+    if (present(farray1DR8)) farray1DR8Ptr => farray1DR8
+    if (present(farray2DR8)) farray2DR8Ptr => farray2DR8
+    if (present(farray3DR8)) farray3DR8Ptr => farray3DR8
     
     ! create InterArray object
     array = ESMF_InterArrayCreate(farray1DPtr, farray2DPtr, farray3DPtr, &
-      farray1DI8Ptr, farray2DI8Ptr, farray3DI8Ptr, transferOwnership=.false., &
-      rc=localrc)
+      farray1DI8Ptr, farray2DI8Ptr, farray3DI8Ptr,  &
+      farray1DR8Ptr, farray2DR8Ptr, farray3DR8Ptr,  &
+      transferOwnership=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -204,8 +230,10 @@ contains
 
 ! !INTERFACE:
   recursive function ESMF_InterArrayCreatePtr(farray1D, farray2D, farray3D, &
-    farray1DI8, farray2DI8, farray3DI8, transferOwnership, rc) &
-    result (InterArrayCreatePtr)
+       farray1DI8, farray2DI8, farray3DI8, &
+       farray1DR8, farray2DR8, farray3DR8, &
+       transferOwnership, rc) &
+       result (InterArrayCreatePtr)
 !
 ! !ARGUMENTS:
     integer, pointer,                   optional :: farray1D(:)
@@ -214,6 +242,9 @@ contains
     integer(ESMF_KIND_I8), pointer,     optional :: farray1DI8(:)
     integer(ESMF_KIND_I8), pointer,     optional :: farray2DI8(:,:)
     integer(ESMF_KIND_I8), pointer,     optional :: farray3DI8(:,:,:)
+    real(ESMF_KIND_R8), pointer,        optional :: farray1DR8(:)
+    real(ESMF_KIND_R8), pointer,        optional :: farray2DR8(:,:)
+    real(ESMF_KIND_R8), pointer,        optional :: farray3DR8(:,:,:)
     logical,               intent(in)            :: transferOwnership
     integer,               intent(out), optional :: rc
 !         
@@ -240,6 +271,12 @@ contains
 !     2D Fortran array of ESMF_TYPEKIND_I8.
 !   \item[{[farray3DI8]}]
 !     3D Fortran array of ESMF_TYPEKIND_I8.
+!   \item[{[farray1DR8]}]
+!     1D Fortran array of ESMF_TYPEKIND_R8.
+!   \item[{[farray2DR8]}]
+!     2D Fortran array of ESMF_TYPEKIND_R8.
+!   \item[{[farray3DR8]}]
+!     3D Fortran array of ESMF_TYPEKIND_R8.
 !   \item[transferOwnership]
 !     For a value of {\tt .true.} transfers ownership of Fortran array to the
 !     newly created InterArray object.
@@ -253,6 +290,8 @@ contains
     type(ESMF_InterArray)   :: array        ! opaque pointer to new C++ object
     integer, allocatable    :: len(:)
     integer                 :: checkCount
+    integer(ESMF_KIND_I8)   :: dummyI8
+    real(ESMF_KIND_R8)      :: dummyR8
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -271,6 +310,9 @@ contains
     nullify(array%farray1DI8)
     nullify(array%farray2DI8)
     nullify(array%farray3DI8)
+    nullify(array%farray1DR8)
+    nullify(array%farray2DR8)
+    nullify(array%farray3DR8)
     
     ! check that only one of the array arguments is present
     checkCount = 0  ! reset
@@ -291,6 +333,15 @@ contains
     endif
     if (present(farray3DI8)) then
       if (associated(farray3DI8)) checkCount = checkCount + 1
+    endif
+    if (present(farray1DR8)) then
+      if (associated(farray1DR8)) checkCount = checkCount + 1
+    endif
+    if (present(farray2DR8)) then
+      if (associated(farray2DR8)) checkCount = checkCount + 1
+    endif
+    if (present(farray3DR8)) then
+      if (associated(farray3DR8)) checkCount = checkCount + 1
     endif
     if (checkCount>1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
@@ -365,7 +416,7 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call c_ESMC_InterArrayCreate1DI8(array, 0, len, localrc)
+          call c_ESMC_InterArrayCreate1DI8(array, dummyI8, len, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -384,7 +435,7 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call c_ESMC_InterArrayCreate2DI8(array, 0, len, localrc)
+          call c_ESMC_InterArrayCreate2DI8(array, dummyI8, len, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -403,7 +454,64 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call c_ESMC_InterArrayCreate3DI8(array, 0, len, localrc)
+          call c_ESMC_InterArrayCreate3DI8(array, dummyI8, len, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        deallocate(len)
+      endif
+    endif
+
+    if (present(farray1DR8)) then
+      if (associated(farray1DR8)) then
+        if (transferOwnership) &
+          array%farray1DR8 => farray1DR8
+        allocate(len(1))
+        len = shape(farray1DR8)
+        if (all(len .ne. 0)) then
+          call c_ESMC_InterArrayCreate1DR8(array, farray1DR8(1), len, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          call c_ESMC_InterArrayCreate1DR8(array, dummyR8, len, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        deallocate(len)
+      endif
+    endif
+    if (present(farray2DR8)) then
+      if (associated(farray2DR8)) then
+        if (transferOwnership) &
+          array%farray2DR8 => farray2DR8
+        allocate(len(2))
+        len = shape(farray2DR8)
+        if (all(len .ne. 0)) then
+          call c_ESMC_InterArrayCreate2DR8(array, farray2DR8(1,1), len, &
+            localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          call c_ESMC_InterArrayCreate2DR8(array, dummyR8, len, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        deallocate(len)
+      endif
+    endif
+    if (present(farray3DR8)) then
+      if (associated(farray3DR8)) then
+        if (transferOwnership) &
+          array%farray3DR8 => farray3DR8
+        allocate(len(3))
+        len = shape(farray3DR8)
+        if (all(len .ne. 0)) then
+          call c_ESMC_InterArrayCreate3DR8(array, farray3DR8(1,1,1), len, &
+            localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          call c_ESMC_InterArrayCreate3DR8(array, dummyR8, len, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -429,7 +537,7 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_InterArrayGet(array, farray1D, farray2D, farray3D, &
-    farray1DI8, farray2DI8, farray3DI8, rc)
+    farray1DI8, farray2DI8, farray3DI8, farray1DR8, farray2DR8, farray3DR8, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InterArray), intent(inout)           :: array
@@ -439,6 +547,9 @@ contains
     integer(ESMF_KIND_I8),   pointer,     optional :: farray1DI8(:)
     integer(ESMF_KIND_I8),   pointer,     optional :: farray2DI8(:,:)
     integer(ESMF_KIND_I8),   pointer,     optional :: farray3DI8(:,:,:)
+    real(ESMF_KIND_R8),      pointer,     optional :: farray1DR8(:)
+    real(ESMF_KIND_R8),      pointer,     optional :: farray2DR8(:,:)
+    real(ESMF_KIND_R8),      pointer,     optional :: farray3DR8(:,:,:)
     integer,                 intent(out), optional :: rc
 !         
 !
@@ -461,6 +572,12 @@ contains
 !     2D Fortran array of ESMF_TYPEKIND_I8.
 !   \item[{[farray3DI8]}]
 !     3D Fortran array of ESMF_TYPEKIND_I8.
+!   \item[{[farray1DR8]}]
+!     1D Fortran array of ESMF_TYPEKIND_R8.
+!   \item[{[farray2DR8]}]
+!     2D Fortran array of ESMF_TYPEKIND_R8.
+!   \item[{[farray3DR8]}]
+!     3D Fortran array of ESMF_TYPEKIND_R8.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -480,6 +597,9 @@ contains
     if (present(farray1DI8)) farray1DI8 => array%farray1DI8
     if (present(farray2DI8)) farray2DI8 => array%farray2DI8
     if (present(farray3DI8)) farray3DI8 => array%farray3DI8
+    if (present(farray1DR8)) farray1DR8 => array%farray1DR8
+    if (present(farray2DR8)) farray2DR8 => array%farray2DR8
+    if (present(farray3DR8)) farray3DR8 => array%farray3DR8
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -557,6 +677,25 @@ contains
     if (associated(array%farray3DI8)) then
       deallocate(array%farray3DI8, stat=stat)
       if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray3DI8", &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+    endif
+
+    if (associated(array%farray1DR8)) then
+      deallocate(array%farray1DR8, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray1DR8", &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+    endif
+    if (associated(array%farray2DR8)) then
+      deallocate(array%farray2DR8, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray2DR8", &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+    endif
+    if (associated(array%farray3DR8)) then
+      deallocate(array%farray3DR8, stat=stat)
+      if (ESMF_LogFoundDeallocError(stat, msg="deallocating array%farray3DR8", &
         ESMF_CONTEXT)) &
         return  ! bail out
     endif

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -49,7 +49,7 @@
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
- 
+
     ! individual test result code
     integer :: rc = 1
 
@@ -61,7 +61,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 #ifdef ESMF_TESTEXHAUSTIVE
- 
+
 ! This #if surrounds all the tests to enable turning on just one test
 #if 1
       !------------------------------------------------------------------------
@@ -70,9 +70,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Bilinear regrid a cubed sphere Grid with regular decomposition"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_bilinear_regrid_csgrid(.true.,rc)
 
@@ -86,23 +86,23 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Bilinear regrid a cubed sphere Grid with irregular decomposition"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_bilinear_regrid_csgrid(.false.,rc)
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Bilinear regrid a cubed sphere Grid with ESMF_COORDSYS_SPH_RAD"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
 
       ! do test
@@ -118,14 +118,19 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Patch regrid a cubed sphere Grid"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_patch_regrid_csgrid(rc)
 
       ! return result
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#ifdef ESMF_LAPACK
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+      write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+      call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
@@ -133,9 +138,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Nearest neighbor regrid a cubed sphere Grid"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_nearest_regrid_csgrid(rc)
 
@@ -149,9 +154,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Conservative regrid a cubed sphere Grid with regular decomposition"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_conserve_regrid_csgrid(.true., rc)
 
@@ -165,9 +170,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Conservative regrid a cubed sphere Grid with irregular decomposition"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_conserve_regrid_csgrid(.false.,rc)
 
@@ -181,9 +186,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Bilinear regrid a cubed sphere Mesh"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_bilinear_regrid_csmesh(rc)
 
@@ -196,14 +201,19 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Patch regrid a cubed sphere Mesh"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_patch_regrid_csmesh(rc)
 
       ! return result
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#ifdef ESMF_LAPACK
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+      write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+      call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest
@@ -211,9 +221,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Nearest neighbor regrid a cubed sphere Mesh"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_nearest_regrid_csmesh(rc)
 
@@ -226,9 +236,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Conservative regrid a cubed sphere Mesh"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_conserve_regrid_csmesh(rc)
 
@@ -241,9 +251,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Bilinear regrid a regularly decomposed cubed sphere Grid defined in GRIDSPEC Mosaic file"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_bilinear_regrid_csmosaic(.true.,rc)
 
@@ -261,9 +271,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Bilinear regrid an irregularly decomposed cubed sphere Grid defined in GRIDSPEC Mosaic file"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_bilinear_regrid_csmosaic(.false.,rc)
 
@@ -281,9 +291,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Conservative regrid a regularly decomposed cubed sphere Grid defined in a GRIDSPEC Mosaic file"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_conserve_regrid_csmosaic(.true., rc)
 
@@ -302,9 +312,9 @@
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Conservative regrid a irregularly decomposed cubed sphere Grid defined in a GRIDSPEC Mosaic file"
 
-      ! initialize 
+      ! initialize
       rc=ESMF_SUCCESS
-       
+
       ! do test
       call test_conserve_regrid_csmosaic(.false., rc)
 
@@ -321,7 +331,7 @@
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
 
-contains 
+contains
 
  subroutine test_bilinear_regrid_csgrid(isregular, rc)
 #undef ESMF_METHOD
@@ -357,11 +367,11 @@ contains
   real(ESMF_KIND_R8) :: coords(2), maxRelErr
   integer :: localPet, petCount
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
   integer :: decomptile(2,6)
   integer :: countsPerDEDim1(3,6), countsPerDEDim2(2,6)
   integer :: i
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -401,7 +411,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  else 
+  else
     do i=1,3
        CountsPerDeDim1(:,i)=(/10,5,5/)
        CountsPerDeDim1(:,i+3)=(/10,10,0/)
@@ -410,7 +420,7 @@ contains
     enddo
     ! Create Src Grid
     srcGrid=ESMF_GridCreateCubedSphere(src_tile_size, &
-       CountsPerDeDim1, CountsPerDeDim2, &	
+       CountsPerDeDim1, CountsPerDeDim2, &
        staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        indexflag = ESMF_INDEX_GLOBAL, &
        rc=localrc)
@@ -418,7 +428,7 @@ contains
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
    endif
-  
+
   ! Create Dst Grid
   dstGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/dst_nx,dst_ny/), &
        minCornerCoord=(/0.0_ESMF_KIND_R8,-90.0_ESMF_KIND_R8/), &
@@ -494,7 +504,7 @@ contains
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -517,7 +527,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -543,7 +553,7 @@ contains
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -571,7 +581,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -599,7 +609,7 @@ contains
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
 #endif
 
   !!! Regrid forward from the A grid to the B grid
@@ -628,9 +638,9 @@ contains
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -667,7 +677,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -740,7 +750,7 @@ contains
   endif
 
  end subroutine test_bilinear_regrid_csgrid
- 
+
  subroutine test_bilinear_regrid_csgrid_sph_rad(rc)
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_bilinear_regrid_csgrid_sph_rad"
@@ -775,9 +785,9 @@ contains
   real(ESMF_KIND_R4) :: coordsR4(2)
   integer :: localPet, petCount
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
   integer :: decomptile(2,6)
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -896,7 +906,7 @@ contains
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -919,7 +929,7 @@ contains
         ! init exact answer
         theta = coordsR4(1)
         phi = 90.0_ESMF_KIND_R4*ESMF_COORDSYS_DEG2RAD-coordsR4(2)
-     
+
         x = cos(theta)*sin(phi)
         y = sin(theta)*sin(phi)
         z = cos(phi)
@@ -941,7 +951,7 @@ contains
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -969,7 +979,7 @@ contains
         ! init exact answer
         theta = coords(1)
         phi = 90.0_ESMF_KIND_R8*ESMF_COORDSYS_DEG2RAD-coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         x = cos(theta)*sin(phi)
         y = sin(theta)*sin(phi)
@@ -995,7 +1005,7 @@ contains
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
 #endif
 
   !!! Regrid forward from the A grid to the B grid
@@ -1024,9 +1034,9 @@ contains
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -1063,7 +1073,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -1170,9 +1180,9 @@ contains
   real(ESMF_KIND_R8) :: coords(2), maxRelErr
   integer :: localPet, petCount
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
   integer :: decomptile(2,6)
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -1288,7 +1298,7 @@ contains
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -1311,7 +1321,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -1337,7 +1347,7 @@ contains
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -1365,7 +1375,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -1393,7 +1403,7 @@ contains
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
 #endif
 
   !!! Regrid forward from the A grid to the B grid
@@ -1422,9 +1432,9 @@ contains
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -1461,7 +1471,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -1568,9 +1578,9 @@ contains
   real(ESMF_KIND_R8) :: coords(2), maxRelErr
   integer :: localPet, petCount
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
   integer :: decomptile(2,6)
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -1611,7 +1621,7 @@ contains
 
 
   ! Create Dst Grid
-  ! (create an identical grid to the source grid in terms of coordinates 
+  ! (create an identical grid to the source grid in terms of coordinates
   !  but with a different distribution to make checking
   !  the accuracty of the nearest neighbor easy)
   dstGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
@@ -1686,7 +1696,7 @@ contains
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -1709,7 +1719,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -1735,7 +1745,7 @@ contains
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -1763,7 +1773,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -1791,7 +1801,7 @@ contains
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
 #endif
 
   !!! Regrid forward from the A grid to the B grid
@@ -1820,9 +1830,9 @@ contains
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -1859,7 +1869,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -1977,12 +1987,12 @@ contains
   real(ESMF_KIND_R8) :: localDstIntegral(1), globalDstIntegral(1)
   real(ESMF_KIND_R8) :: localMaxRelErr(1), globalMaxRelErr(1)
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
   integer :: decomptile(2,6)
   integer :: countsPerDEDim1(3,6), countsPerDEDim2(2,6)
   integer :: i
 
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -2021,7 +2031,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  else 
+  else
     do i=1,3
        CountsPerDeDim1(:,i)=(/10,5,5/)
        CountsPerDeDim1(:,i+3)=(/10,10,0/)
@@ -2030,7 +2040,7 @@ contains
     enddo
     ! Create Src Grid
     srcGrid=ESMF_GridCreateCubedSphere(src_tile_size, &
-       CountsPerDeDim1, CountsPerDeDim2, &	
+       CountsPerDeDim1, CountsPerDeDim2, &
        staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        indexflag = ESMF_INDEX_GLOBAL, &
        rc=localrc)
@@ -2075,7 +2085,7 @@ contains
 
   ! Get memory and set fields for src
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -2098,7 +2108,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -2187,7 +2197,7 @@ contains
 
   ! Get memory and set fields for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -2215,7 +2225,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -2243,7 +2253,7 @@ contains
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
 #endif
 
   !!! Regrid forward from the A grid to the B grid
@@ -2291,10 +2301,10 @@ contains
  ! XMRKX
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   dstIntegral=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -2330,7 +2340,7 @@ contains
      do i2=clbnd(2),cubnd(2)
 
         ! Compute total integral
-        ! NOTE: DO need to include dstFrac here, because the frac has been included in the weights 
+        ! NOTE: DO need to include dstFrac here, because the frac has been included in the weights
         dstIntegral = dstIntegral + dstFracptr(i1,i2)*dstAreaptr(i1,i2)*farrayPtr(i1,i2)
        ! dstIntegral = dstIntegral + dstAreaptr(i1,i2)
 
@@ -2350,7 +2360,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -2411,7 +2421,7 @@ contains
   ! Get info across PETs
   globalSrcIntegral(1) = 0.0
   globalDstIntegral(1) = 0.0
-  
+
   localSrcIntegral(1)=srcIntegral
   call ESMF_VMAllReduce(vm, localSrcIntegral, globalSrcIntegral, 1, &
        ESMF_REDUCE_SUM, rc=localrc)
@@ -2525,11 +2535,11 @@ contains
   integer :: numOwnedElems
   integer :: localPet, petCount
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -2566,7 +2576,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-  
+
   ! srcArray
   call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
@@ -2606,7 +2616,7 @@ contains
       ! Get coords
      lon=ownedElemCoords(2*i1-1)
      lat=ownedElemCoords(2*i1)
-     
+
      ! Set the source to be a function of the x,y,z coordinate
      theta = DEG2RAD*(lon)
      phi = DEG2RAD*(90.-lat)
@@ -2614,7 +2624,7 @@ contains
      x = cos(theta)*sin(phi)
      y = sin(theta)*sin(phi)
      z = cos(phi)
-     
+
      ! set src data
      farrayPtr1D(i1) = x+y+z+15.0
   enddo
@@ -2678,7 +2688,7 @@ contains
 
   ! Get memory and set fields for dest
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -2706,7 +2716,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -2754,9 +2764,9 @@ contains
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -2793,7 +2803,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -2891,11 +2901,11 @@ contains
   integer :: numOwnedElems
   integer :: localPet, petCount
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -2972,7 +2982,7 @@ contains
       ! Get coords
      lon=ownedElemCoords(2*i1-1)
      lat=ownedElemCoords(2*i1)
-     
+
      ! Set the source to be a function of the x,y,z coordinate
      theta = DEG2RAD*(lon)
      phi = DEG2RAD*(90.-lat)
@@ -2980,7 +2990,7 @@ contains
      x = cos(theta)*sin(phi)
      y = sin(theta)*sin(phi)
      z = cos(phi)
-     
+
      ! set src data
      farrayPtr1D(i1) = x+y+z+15.0
   enddo
@@ -3044,7 +3054,7 @@ contains
 
   ! Get memory and set fields for dest
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -3072,7 +3082,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -3120,9 +3130,9 @@ contains
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -3159,7 +3169,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -3257,11 +3267,11 @@ contains
   integer :: numOwnedElems
   integer :: localPet, petCount
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
 
   ! result code
   integer :: finalrc
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -3338,7 +3348,7 @@ contains
       ! Get coords
      lon=ownedElemCoords(2*i1-1)
      lat=ownedElemCoords(2*i1)
-     
+
      ! Set the source to be a function of the x,y,z coordinate
      theta = DEG2RAD*(lon)
      phi = DEG2RAD*(90.-lat)
@@ -3346,7 +3356,7 @@ contains
      x = cos(theta)*sin(phi)
      y = sin(theta)*sin(phi)
      z = cos(phi)
-     
+
      ! set src data
      farrayPtr1D(i1) = x+y+z+15.0
   enddo
@@ -3360,7 +3370,7 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Create Dst Grid
-  ! (create an identical csgrid in terms of coordinates to make checking 
+  ! (create an identical csgrid in terms of coordinates to make checking
   !  nearest neighbor easier)
   dstGrid=ESMF_GridCreateCubedSphere(tileSize=src_tile_size, &
        staggerLocList = (/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
@@ -3410,7 +3420,7 @@ contains
 
   ! Get memory and set fields for dest
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -3438,7 +3448,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -3486,9 +3496,9 @@ contains
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -3525,7 +3535,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -3634,8 +3644,8 @@ contains
   real(ESMF_KIND_R8),pointer :: ownedElemCoords(:)
   integer :: numOwnedElems
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
-  
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -3729,7 +3739,7 @@ contains
       ! Get coords
      lon=ownedElemCoords(2*i1-1)
      lat=ownedElemCoords(2*i1)
-     
+
      ! Set the source to be a function of the x,y,z coordinate
      theta = DEG2RAD*(lon)
      phi = DEG2RAD*(90.-lat)
@@ -3737,7 +3747,7 @@ contains
      x = cos(theta)*sin(phi)
      y = sin(theta)*sin(phi)
      z = cos(phi)
-     
+
      ! set src data
      srcFarrayPtr(i1) = x+y+z+15.0
   enddo
@@ -3816,7 +3826,7 @@ contains
 
   ! Get memory and set fields for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -3844,7 +3854,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -3911,10 +3921,10 @@ contains
  ! XMRKX
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   dstIntegral=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -3951,7 +3961,7 @@ contains
      do i2=clbnd(2),cubnd(2)
 
         ! Compute total integral
-        ! NOTE: DO need to include dstFrac here, because the frac has been included in the weights 
+        ! NOTE: DO need to include dstFrac here, because the frac has been included in the weights
         dstIntegral = dstIntegral + dstFracptr(i1,i2)*dstAreaptr(i1,i2)*farrayPtr(i1,i2)
 
         ! Compute relative error
@@ -3970,7 +3980,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -3990,19 +4000,19 @@ contains
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
-  
+
   ! get src Field
   call ESMF_FieldGet(srcArea, 0, srcAreaptr,  rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
   ! get frac Field
   call ESMF_FieldGet(srcFracField, 0, srcFracptr,  rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
   do i1=clbnd1D(1),cubnd1D(1)
      srcIntegral = srcIntegral + srcFracptr(i1)*srcAreaptr(i1)*srcFarrayPtr(i1)
   enddo
@@ -4027,7 +4037,7 @@ contains
   ! Get info across PETs
   globalSrcIntegral(1) = 0.0
   globalDstIntegral(1) = 0.0
-  
+
   localSrcIntegral(1)=srcIntegral
   call ESMF_VMAllReduce(vm, localSrcIntegral, globalSrcIntegral, 1, &
        ESMF_REDUCE_SUM, rc=localrc)
@@ -4140,11 +4150,11 @@ contains
   real(ESMF_KIND_R8) :: coords(2), maxRelErr
   integer :: localPet, petCount, i
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
   integer :: decomptile(2,6)
   integer :: countsPerDEDim1(3,6), countsPerDEDim2(2,6)
   character(len=ESMF_MAXPATHLEN) :: filename
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -4183,7 +4193,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  else 
+  else
     ! Setup irregular decomposition
     do i=1,3
       CountsPerDeDim1(:,i)=(/24,12,12/)
@@ -4192,7 +4202,7 @@ contains
       CountsPerDeDim2(:,i+3)=(/48,0/)
     enddo
     srcGrid=ESMF_GridCreateMosaic(trim(filename), &
-       CountsPerDeDim1, CountsPerDeDim2, &	
+       CountsPerDeDim1, CountsPerDeDim2, &
        tileFilePath="./data/",           &
        staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        indexflag = ESMF_INDEX_GLOBAL, &
@@ -4201,7 +4211,7 @@ contains
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
   endif
-      
+
   ! Create Dst Grid
   dstGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/dst_nx,dst_ny/), &
        minCornerCoord=(/0.0_ESMF_KIND_R8,-90.0_ESMF_KIND_R8/), &
@@ -4276,7 +4286,7 @@ contains
   ! Construct Src Grid
   ! (Get memory and set coords for src)
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -4298,7 +4308,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -4324,7 +4334,7 @@ contains
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -4352,7 +4362,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -4380,7 +4390,7 @@ contains
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
 #endif
 
   !!! Regrid forward from the A grid to the B grid
@@ -4409,9 +4419,9 @@ contains
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -4448,7 +4458,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -4566,12 +4576,12 @@ contains
   real(ESMF_KIND_R8) :: localDstIntegral(1), globalDstIntegral(1)
   real(ESMF_KIND_R8) :: localMaxRelErr(1), globalMaxRelErr(1)
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
-                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
+                3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8
   integer :: decomptile(2,6)
   integer :: countsPerDEDim1(3,6), countsPerDEDim2(2,6)
   integer :: i
   character(len=ESMF_MAXPATHLEN) :: filename
-  
+
   ! init success flag
   correct=.true.
   rc=ESMF_SUCCESS
@@ -4611,7 +4621,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  else 
+  else
     ! Setup irregular decomposition
     do i=1,3
       CountsPerDeDim1(:,i)=(/24,12,12/)
@@ -4620,7 +4630,7 @@ contains
       CountsPerDeDim2(:,i+3)=(/48,0/)
     enddo
     srcGrid=ESMF_GridCreateMosaic(trim(filename), &
-       CountsPerDeDim1, CountsPerDeDim2, &	
+       CountsPerDeDim1, CountsPerDeDim2, &
        tileFilePath="./data/",           &
        staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
        indexflag = ESMF_INDEX_GLOBAL, &
@@ -4666,7 +4676,7 @@ contains
 
   ! Get memory and set fields for src
   do lDE=0,srclocalDECount-1
- 
+
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -4689,7 +4699,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -4778,7 +4788,7 @@ contains
 
   ! Get memory and set fields for dst
   do lDE=0,dstlocalDECount-1
- 
+
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, &
           computationalLBound=clbnd, computationalUBound=cubnd, rc=localrc)
@@ -4806,7 +4816,7 @@ contains
         ! init exact answer
         lon = coords(1)
         lat = coords(2)
-     
+
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
@@ -4834,7 +4844,7 @@ contains
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
 #endif
 
   !!! Regrid forward from the A grid to the B grid
@@ -4882,10 +4892,10 @@ contains
  ! XMRKX
 
   ! Check results
-  maxRelErr=0.0  
+  maxRelErr=0.0
   dstIntegral=0.0
   do lDE=0,dstlocalDECount-1
-     
+
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
           computationalUBound=cubnd,  rc=localrc)
      if (ESMF_LogFoundError(localrc, &
@@ -4921,7 +4931,7 @@ contains
      do i2=clbnd(2),cubnd(2)
 
         ! Compute total integral
-        ! NOTE: DO need to include dstFrac here, because the frac has been included in the weights 
+        ! NOTE: DO need to include dstFrac here, because the frac has been included in the weights
         dstIntegral = dstIntegral + dstFracptr(i1,i2)*dstAreaptr(i1,i2)*farrayPtr(i1,i2)
 
         ! Compute relative error
@@ -4940,7 +4950,7 @@ contains
         ! Calc max
         if (relErr > maxRelErr) then
            maxRelErr=relErr
-        endif      
+        endif
 
         ! put in error field
         errfarrayPtr(i1,i2)=relErr
@@ -5000,7 +5010,7 @@ contains
   ! Get info across PETs
   globalSrcIntegral(1) = 0.0
   globalDstIntegral(1) = 0.0
-  
+
   localSrcIntegral(1)=srcIntegral
   call ESMF_VMAllReduce(vm, localSrcIntegral, globalSrcIntegral, 1, &
        ESMF_REDUCE_SUM, rc=localrc)
@@ -5080,5 +5090,3 @@ contains
 
 
 end program ESMF_FieldRegridUTest
-
-

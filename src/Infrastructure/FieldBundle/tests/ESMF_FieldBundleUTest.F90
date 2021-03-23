@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2303,7 +2303,9 @@
       !------------------------------------------------------------------------
       !EX_UTest
       Call ESMF_FieldDestroy(ft, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       Call ESMF_FieldDestroy(fp, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_FieldBundleDestroy(bundle5, rc=rc)
       write(failMsg, *) "Destroy FieldBundle"
       write(name, *) "Destroy FieldBundle"
@@ -2327,10 +2329,11 @@
       fieldIdx = 1
       packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldIdx, &
         gridToFieldMap=(/3,4/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
-      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Create 2nd packed FieldBundle"
       write(name, *) "Create 2nd packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -2339,10 +2342,11 @@
       fieldIdx = 2
       packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldIdx, &
         gridToFieldMap=(/4,3/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
-      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Create 3rd packed FieldBundle"
       write(name, *) "Create 3rd packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -2366,30 +2370,53 @@
       !EX_UTest_Multi_Proc_Only
       allocate(fieldNameListAlloc(fieldcount))
       call ESMF_FieldBundleGet(packedFB, fieldNameList=fieldNameListAlloc, rc=rc)
-      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Get fieldNameList from packed FieldBundle"
       write(name, *) "Get fieldNameList from packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       deallocate(fieldNameListAlloc)
+      deallocate(packedPtr)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      deallocate(packedPtr)
       allocate(packedPtr3D(10, 1, 3)) ! fieldIdx, meshdata, timeslice
       fieldIdx = 1
       packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr3D, meshTst1, fieldIdx, &
         gridToFieldMap=(/2/), meshloc=ESMF_MESHLOC_ELEMENT, rc=rc)
-      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Create packed FieldBundle on Mesh"
       write(name, *) "Create packed FieldBundle on Mesh"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      deallocate(packedPtr3D)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      fieldcount = 5
+      allocate(fieldNameListAlloc(fieldcount))
+      do i = 1, fieldcount
+        fieldNameListAlloc(i) = 'ThisReallyIsASuperLongFieldNameThatYouCanUseInESMF'
+      enddo
+      allocate(packedPtr3D(fieldcount, 1, 3)) ! fieldIdx, meshdata, timeslice
+      fieldIdx = 1
+      packedFB = ESMF_FieldBundleCreate(fieldNameListAlloc, packedPtr3D, meshTst1, fieldIdx, &
+        gridToFieldMap=(/2/), meshloc=ESMF_MESHLOC_ELEMENT, rc=rc)
+      write(failMsg, *) "Create packed FieldBundle with variable many long Field names"
+      write(name, *) "Create packed FieldBundle with variable many long Field names"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       deallocate(packedPtr3D)
+      deallocate(fieldNameListAlloc)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
      
       endif ! Petcount = 4
+
+      ! Destroy MeshTst1
       if ((petCount .eq. 1) .or. (petCount .eq. 4)) then
         call ESMF_MeshDestroy(meshTst1, rc=rc)
-        if (rc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
 #endif
 

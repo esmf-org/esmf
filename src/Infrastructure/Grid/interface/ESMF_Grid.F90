@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -53,6 +53,7 @@
       use ESMF_IOUtilMod
       use ESMF_UtilCubedSphereMod
       use ESMF_IOFileTypeCheckMod
+      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromPointer, ESMF_InfoUpdate
 
 #ifdef ESMF_NETCDF
       use netcdf
@@ -136,7 +137,7 @@
 
   type(ESMF_GridConn_Flag), parameter :: &
     ESMF_GRIDCONN_NONE = ESMF_GridConn_Flag(0), &
-     ESMF_GRIDCONN_PERIODIC = ESMF_GridConn_Flag(1), &
+    ESMF_GRIDCONN_PERIODIC = ESMF_GridConn_Flag(1), &
     ESMF_GRIDCONN_POLE = ESMF_GridConn_Flag(2), &
     ESMF_GRIDCONN_BIPOLE = ESMF_GridConn_Flag(3)
 
@@ -2824,6 +2825,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer, allocatable     :: minIndex(:), maxIndex(:), indexArray(:,:)
        character(len=160)       :: msgString
        type(ESMF_DistGridMatch_Flag) :: dgMatch
+       type(ESMF_Info) :: lhs, rhs
 
 
        ! Initialize return code; assume failure until success is certain
@@ -3161,7 +3163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             zeroregion=ESMF_REGION_TOTAL, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-         call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=localrc)
+         call ESMF_ArrayRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
@@ -3223,7 +3225,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
        ! Destroy ArrayBundles and release Routehandle
-!       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, rc=localrc)
+!       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
 !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !            ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ArrayBundleDestroy(srcAB, rc=localrc)
@@ -3308,7 +3310,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                zeroregion=ESMF_REGION_TOTAL, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-             call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=localrc)
+             call ESMF_ArrayRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
@@ -3323,7 +3325,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
        ! Destroy ArrayBundles and release Routehandle
-          !       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, rc=localrc)
+          !       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
           !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           !            ESMF_CONTEXT, rcToReturn=rc)) return
           !call ESMF_ArrayBundleDestroy(srcAB, rc=localrc)
@@ -3339,7 +3341,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! Copy Attributes
        if (present(copyAttributes)) then
          if (copyAttributes) then
-             call c_esmc_attributecopy(grid, newGrid, ESMF_ATTCOPY_VALUE, localrc)
+             call ESMF_InfoGetFromPointer(newGrid%this, lhs, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_InfoGetFromPointer(grid%this, rhs, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_InfoUpdate(lhs, rhs, recursive=.true., rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
          endif
@@ -5188,6 +5196,236 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end function ESMF_GridCreateFrmDistGridArb
 
+    ! Find out how the corners around the centers in a SCRIP grid 
+    ! align with each other
+    subroutine find_corner_align(startCell,dim1,dim2,cornerX2D,cornerY2D, &
+         foundAlign, topCorner,topRightCorner,btmRightCorner,btmCorner,rc)
+      integer :: startCell
+      integer :: dim1,dim2
+      real(ESMF_KIND_R8) :: cornerX2D(:,:),cornerY2D(:,:)
+      logical :: foundAlign
+      integer :: topCorner
+      integer :: topRightCorner
+      integer :: BtmRightCorner
+      integer :: btmCorner
+      integer :: rc
+      
+      integer :: i,j
+      real(ESMF_KIND_R8) :: tol=0.0000000001
+      logical :: matches
+      integer :: count,inPos,outPos
+      integer :: ip1,im1
+      
+      ! Init Output
+      foundAlign=.false.
+      topCorner=-1
+      topRightCorner=-1
+      BtmRightCorner=-1
+      btmCorner=-1
+      rc=ESMF_SUCCESS
+      
+      ! Error check inputs
+      if (dim1 == 1) then
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+              msg="- Currently can't handle a grid thats width 1 in only 1st dim", &
+              ESMF_CONTEXT, rcToReturn=rc)
+         return
+      endif
+      
+      if (dim2 == 1) then
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+              msg="- Currently can't handle a grid thats width 1 in only 2nd dim", &
+              ESMF_CONTEXT, rcToReturn=rc)
+         return
+      endif
+
+      ! We can't find an alignment for this case, because it won't fit in the corner data
+      ! Report that without an error, so another can be tried.
+      if (startCell+1 > dim1*dim2) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+
+      ! We can't find an alignment for this case, because it won't fit in corner data.
+      ! Report that without an error, so another can be tried.
+      if (startCell+dim1 > dim1*dim2) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+
+      ! We can't find an alignment for this case, because it won't fit in corner data.
+      ! Report that without an error, so another can be tried.
+      if (startCell+dim1+1 > dim1*dim2) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+
+
+      ! Figure out which corner indice is the top row of corners
+      ! It won't match any of the neighbors corners
+      TopCorner=-1
+      do i=1,4
+         
+         ! See if it matches nbr to the right
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+1))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         if (matches) cycle
+         
+         ! See if it matches nbr to the below
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+dim1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+dim1))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         if (matches) cycle
+         
+         ! See if it matches nbr to the below and to the right
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+dim1+1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+dim1+1))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         if (matches) cycle
+         
+         ! Doesn't match anyone
+         TopCorner=i
+         
+         ! Exit the loop
+         exit
+      enddo
+      
+      ! Make sure we found a corner
+      if (TopCorner == -1) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+
+      ! Figure out which corner indice is the top right row of corners
+      ! It will match the top right, but not the bottom right
+      TopRightCorner=-1
+      do i=1,4
+         
+         ! See if it matches nbr to the right
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+1))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         if (.not. matches) cycle
+         
+         ! See if it matches nbr to the below right
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+dim1+1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+dim1+1))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         
+         ! correct matching so should be BtmCorner
+         if (.not. matches) then
+            TopRightCorner=i
+            exit
+         endif
+      enddo
+
+      ! Make sure we found a corner
+      if (TopRightCorner == -1) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+      
+      ! Figure out which corner indice is the bottom row of corners
+      ! It will match the one below , but not the one to the right
+      BtmCorner=-1
+      do i=1,4
+         
+         ! See if it matches nbr to the right
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+1))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         if (matches) cycle
+         
+         ! See if it matches nbr to the below
+         matches=.false.
+         do j=1,4
+            if ((abs(cornerX2D(i,startCell)-cornerX2D(j,startCell+dim1))<tol) .and. &
+                 (abs(cornerY2D(i,startCell)-cornerY2D(j,startCell+dim1))<tol)) then
+               matches=.true.
+               exit
+            endif
+         enddo
+         
+         ! correct matching so should be BtmCorner
+         if (matches) then
+            BtmCorner=i
+            exit
+         endif         
+      enddo
+      
+      ! Make sure we found a corner
+      if (BtmCorner == -1) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+      
+      
+      ! Figure out which corner indice is the bottom right row of corners
+      ! It will match the bottom right, but not the top right
+      BtmRightCorner=-1
+      do i=1,4
+         
+         ! eliminate all other possibilities
+         if (i == TopCorner) cycle
+         if (i == TopRightCorner) cycle
+         if (i == BtmCorner) cycle
+         
+         BtmRightCorner=i
+      enddo
+      
+      ! Make sure we found a corner
+      if (BtmRightCorner == -1) then
+         foundAlign=.false.
+         rc=ESMF_SUCCESS ! Successfully found that we couldn't find alignment, not an error in this case
+         return
+      endif
+      
+      ! Made it all the way through, so found align
+      foundAlign=.true.
+      
+      ! return success
+      rc=ESMF_SUCCESS
+      
+    end subroutine find_corner_align
+
+
 !-------------------------------------------------------------------------------------------
 ! Internal subroutine to convert the 2D corner coordinate arrays which contain all the corners
 ! surrounding each center point into a 1D Array without repeats.
@@ -5199,8 +5437,10 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  real(ESMF_KIND_R8) :: cornerX(:),cornerY(:)
  integer :: rc
 
+ integer :: localrc
  integer :: i,j
  real(ESMF_KIND_R8) :: tol=0.0000000001
+ logical :: foundAlign
  integer :: topCorner
  integer :: topRightCorner
  integer :: BtmRightCorner
@@ -5236,177 +5476,38 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
     return
  endif
 
- if (dim1 == 1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
- msg="- Currently can't handle a grid thats width 1 in only 1st dim", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
+ ! Find the alignment of the corners
+ call find_corner_align(1,dim1,dim2,cornerX2D,cornerY2D, &
+      foundAlign,topCorner,topRightCorner,btmRightCorner,btmCorner,rc=localrc)
+ if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+ ! Try second row
+ if (.not. foundAlign) then
+    call find_corner_align(1+dim1,dim1,dim2,cornerX2D,cornerY2D, &
+         foundAlign,topCorner,topRightCorner,btmRightCorner,btmCorner,rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
  endif
 
- if (dim2 == 1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
- msg="- Currently can't handle a grid thats width 1 in only 2nd dim", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
+#if 0
+ ! Debug output
+ write(*,*) "topCorner=",topCorner
+ write(*,*) "topRightCorner=",topRightCorner
+ write(*,*) "btmRightCorner=",btmRightCorner
+ write(*,*) "btmCorner=",btmCorner
+#endif
+
+ ! If we couldn't find an align then return error
+ if (.not. foundAlign) then
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+         msg=" Couldn't find a consistent ordering of corners around each cell in file"// & 
+             " to be able to arrange them into a logically rectangular Grid.", &
+         ESMF_CONTEXT, rcToReturn=rc)
+    return
  endif
-
-
- ! Figure out which corner indice is the top row of corners
- ! It won't match any of the neighbors corners
- TopCorner=-1
- do i=1,4
-
-    ! See if it matches nbr to the right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (matches) cycle
-
-    ! See if it matches nbr to the below
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (matches) cycle
-
-   ! See if it matches nbr to the below and to the right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (matches) cycle
-
-    ! Doesn't match anyone
-    TopCorner=i
-
-    ! Exit the loop
-    exit
- enddo
-
-  ! Make sure we found a corner
-  if (TopCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-          msg="- Bad corner array in SCRIP file", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
-  endif
-
-
- ! Figure out which corner indice is the top right row of corners
- ! It will match the top right, but not the bottom right
- TopRightCorner=-1
- do i=1,4
-
-    ! See if it matches nbr to the right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (.not. matches) cycle
-
-    ! See if it matches nbr to the below right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-
-    ! correct matching so should be BtmCorner
-    if (.not. matches) then
-       TopRightCorner=i
-       exit
-    endif
- enddo
-
-  ! Make sure we found a corner
-  if (TopRightCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Bad corner array in SCRIP file", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
-  endif
-
- ! Figure out which corner indice is the bottom row of corners
- ! It will match the one below , but not the one to the right
- BtmCorner=-1
- do i=1,4
-
-    ! See if it matches nbr to the right
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-    if (matches) cycle
-
-    ! See if it matches nbr to the below
-    matches=.false.
-    do j=1,4
-       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
-           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
-          matches=.true.
-          exit
-       endif
-    enddo
-
-    ! correct matching so should be BtmCorner
-    if (matches) then
-       BtmCorner=i
-       exit
-    endif
-
- enddo
-
-  ! Make sure we found a corner
-  if (BtmCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, msg="- Bad corner array in SCRIP file", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
-  endif
-
-
- ! Figure out which corner indice is the bottom right row of corners
- ! It will match the bottom right, but not the top right
- BtmRightCorner=-1
- do i=1,4
-
-    ! eliminate all other possibilities
-    if (i == TopCorner) cycle
-    if (i == TopRightCorner) cycle
-    if (i == BtmCorner) cycle
-
-    BtmRightCorner=i
- enddo
-
-  ! Make sure we found a corner
-  if (BtmRightCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Bad corner array in SCRIP file", &
-          ESMF_CONTEXT, rcToReturn=rc)
-     return
-  endif
-
 
 #if 0
 ! Error check corner info from file to make sure corners are consistent throughout file
@@ -5927,7 +6028,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the grid file to add the Corner stagger to
 !      the Grid. The coordinates for the corner stagger is required for conservative
@@ -6245,7 +6346,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the grid file to add the Corner stagger to
 !      the Grid. The coordinates for the corner stagger is required for conservative
@@ -6520,7 +6621,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the SCRIP file to add the Corner stagger to
 !      the Grid. If not specified, defaults to false.
@@ -6652,6 +6753,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
     endif
 
+#if DEBUG_POLEKIND
+    if(present(polekindflag)) then
+      print *, "ESMF_GridCreateFrmScrip", polekindflag(1), polekindflag(2), localIsSphere
+    endif
+#endif    
     ! Create Grid based on the input distgrid
     if (localIsSphere) then
        grid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=dims, &
@@ -7048,7 +7154,7 @@ end function ESMF_GridCreateFrmScrip
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the GridSpec file to add the Corner stagger to
 !      the Grid. If not specified, defaults to true (since GridSpec defaults to
@@ -8805,7 +8911,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[periodicDim]}]
 !      The periodic dimension. If not specified, defaults to 1.
 ! \item[{[poleDim]}]
@@ -9086,7 +9192,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[periodicDim]}]
 !      The periodic dimension. If not specified, defaults to 1.
 ! \item[{[poleDim]}]
@@ -9182,6 +9288,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+#if DEBUG_POLEKIND
+    if(present(polekindflag)) then
+      print *, "GridCreate1PeriDim", polekindflag(1), polekindflag(2)
+    endif
+#endif
+    
     ! Get IndexSpace
     call GetIndexSpaceReg(minIndex, maxIndex, &
           dimCount, minIndexLocal, maxIndexLocal,  rc=localrc)
@@ -9356,7 +9468,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[periodicDim]}]
 !      The periodic dimension. If not specified, defaults to 1.
 ! \item[{[poleDim]}]
@@ -11231,7 +11343,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[coordSys]}]
 !     The coordinate system of the grid coordinate data.
 !     For a full list of options, please see Section~\ref{const:coordsys}.
@@ -11487,7 +11599,7 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
 !      specifies the connection that occurs at the minimum end of the pole dimension. The value in polekindflag(2)
 !      specifies the connection that occurs at the maximum end of the pole dimension. Please see
 !      Section~\ref{const:polekind} for a full list of options. If not specified,
-!      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.
+!      the default is {\tt ESMF\_POLEKIND\_MONOPOLE} for both.
 ! \item[{[coordSys]}]
 !     The coordinate system of the grid coordinate data.
 !     For a full list of options, please see Section~\ref{const:coordsys}.
@@ -15532,6 +15644,7 @@ end subroutine CalculateConnection
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateMosaicReg()"
 !BOP
+!\label{API:GridCreateMosaicReg}
 ! !IROUTINE: ESMF_GridCreateMosaic - Create a multi-tile Grid object with regular decomposition using the grid definition from a GRIDSPEC Mosaic file.
 
 ! !INTERFACE:
@@ -24355,7 +24468,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! return successfully
     if (matchResult == 1) then
        ESMF_GridMatch = ESMF_GRIDMATCH_EXACT
     else
@@ -24387,6 +24499,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_GridMatch
@@ -30033,7 +30146,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer :: widthIndex(ESMF_MAXDIM)
        integer :: localrc
 
-
+#if DEBUG_POLEKIND
+    if(present(polekindflag)) then
+      print *, "Setup1PeriodicConn", polekindflag(1), polekindflag(2)
+    endif
+#endif
+    
        ! Error check input
        if (present(periodicDim)) then
           if (periodicDim .gt. dimCount) then
@@ -30142,7 +30260,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Lower end
       if (polekindflaglocal(1) .eq. ESMF_POLEKIND_MONOPOLE) then
-         ! do pole connection
+
+         ! setup monopole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)/2
          posVec(poleDimLocal)=1
@@ -30154,7 +30273,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Advance postion in list
+         connListPos=connListPos+1
+
       else if (polekindflaglocal(1) .eq. ESMF_POLEKIND_BIPOLE) then
+
+         ! setup bipole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)+1
          posVec(poleDimLocal)=1
@@ -30167,8 +30292,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Advance postion in list
+         connListPos=connListPos+1
       endif
-      connListPos=connListPos+1
+
 
      ! Reinit orient vec
      do i=1,ESMF_MAXDIM
@@ -30177,6 +30305,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Upper end
       if (polekindflaglocal(2) .eq. ESMF_POLEKIND_MONOPOLE) then
+
+         ! setup monopole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)/2
          posVec(poleDimLocal)=2*widthIndex(poleDimLocal)+1
@@ -30189,6 +30319,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       else if (polekindflaglocal(2) .eq. ESMF_POLEKIND_BIPOLE) then
+
+         ! setup bipole connection
          posVec=0
          posVec(periodicDimLocal)=widthIndex(periodicDimLocal)+1
          posVec(poleDimLocal)=2*widthIndex(poleDimLocal)+1
@@ -30871,7 +31003,7 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
     integer :: varsize
     integer :: ndims, dims(ESMF_MAXDIM)
     integer :: PetNo, PetCnt
-    integer, pointer :: Staggers(:)
+    type(ESMF_STAGGERLOC), allocatable :: Staggers(:)
     integer :: staggercnt, decount, xdim, ydim
     integer :: londim, londim1, latdim, latdim1, gridid
     integer :: rankid, fourid, varid1, varid2, varid3, varid4
@@ -30884,8 +31016,6 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_Array) :: array
     type(ESMF_Array) :: lonarray, latarray
-    type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_RouteHandle) :: routehandle
     type(ESMF_CoordSys_Flag) :: coordsys
     real(ESMF_KIND_R8), pointer::lonArray1d(:), latArray1d(:)
     real(ESMF_KIND_R8), pointer::lonArray2d(:,:), latArray2d(:,:)

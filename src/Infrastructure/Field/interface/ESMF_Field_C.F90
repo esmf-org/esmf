@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -740,15 +740,14 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     rc = ESMF_RC_NOT_IMPL
   
     !print *, "collecting Field garbage"
-    
-    ! destruct internal data allocations
-    call ESMF_FieldDestruct(field%ftypep, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! deallocate actual FieldType allocation      
     if (associated(field%ftypep)) then
+      ! destruct internal data allocations
+      call ESMF_FieldDestruct(field%ftypep, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! deallocate actual FieldType allocation      
       !print *, "deallocate(field%ftypep)"
       deallocate(field%ftypep, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Deallocating Field", &
@@ -1004,6 +1003,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapMethod, &
                                 extrapNumSrcPnts, &
                                 extrapDistExponent, &
+                                extrapNumLevels, &
                                 unmappedaction, &
                                 ignoreDegenerate, &
                                 factorList, &
@@ -1027,7 +1027,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_Field)                        :: dstField
     integer                                 :: len1, len2
     integer,optional                        :: srcMaskValues(len1), &
-                                                 dstMaskValues(len2)
+                                               dstMaskValues(len2)
     type(ESMF_RouteHandle),optional         :: routehandle
     type(ESMF_RegridMethod_Flag),optional   :: regridmethod
     type(ESMF_PoleMethod_Flag),optional     :: polemethod
@@ -1038,6 +1038,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_ExtrapMethod_Flag), optional  :: extrapMethod
     integer, optional                       :: extrapNumSrcPnts
     real(ESMF_KIND_R4), optional            :: extrapDistExponent
+    integer, optional                       :: extrapNumLevels
     type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
     logical,optional                        :: ignoreDegenerate
 
@@ -1083,6 +1084,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapMethod=extrapMethod, &
                                 extrapNumSrcPnts=extrapNumSrcPnts, &
                                 extrapDistExponent=extrapDistExponent, &
+                                extrapNumLevels=extrapNumLevels, &
                                 unmappedaction=unmappedaction, &
                                 ignoreDegenerate=ignoreDegenerate, &
                                 factorList=factorListFPtr, &
@@ -1114,6 +1116,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapMethod=extrapMethod, &
                                 extrapNumSrcPnts=extrapNumSrcPnts, &
                                 extrapDistExponent=extrapDistExponent, &
+                                extrapNumLevels=extrapNumLevels, &
                                 unmappedaction=unmappedaction, &
                                 ignoreDegenerate=ignoreDegenerate, &
                                 srcFracField=srcFracField, &
@@ -1157,6 +1160,12 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                     unmappedaction, &
                                     ignoreDegenerate, &
                                     createRoutehandle, &
+                                    filemode, &
+                                    srcFile, &
+                                    dstFile, &
+                                    srcFileType, &
+                                    dstFileType, &
+                                    largeFileFlag, &
                                     srcFracField, &
                                     dstFracField, &
                                     rc)
@@ -1187,8 +1196,18 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     type(ESMF_UnmappedAction_Flag)          :: unmappedaction
     logical                                 :: ignoreDegenerate
     logical, optional                       :: createRoutehandle
+
+    type(ESMF_FileMode_Flag),   optional    :: filemode
+    character(len=*),           optional    :: srcFile
+    character(len=*),           optional    :: dstFile
+    type(ESMF_FileFormat_Flag), optional    :: srcFileType
+    type(ESMF_FileFormat_Flag), optional    :: dstFileType
+
+    logical, optional                       :: largeFileFlag
+
     type(ESMF_Field)                        :: srcFracField
     type(ESMF_Field)                        :: dstFracField
+
     integer                                 :: rc
 
     integer :: localrc
@@ -1196,6 +1215,8 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     real(ESMF_KIND_R8), pointer :: localFactorList(:)
     integer(ESMF_KIND_I4), pointer :: localFactorIndexList(:,:)
+    
+    type(ESMF_FileMode_Flag) :: filemode_local
     
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
@@ -1262,8 +1283,27 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     endif
 
     ! write the weights to file
-    call ESMF_SparseMatrixWrite(localFactorList, localFactorIndexList, &
-                                fileName, rc=localrc)
+    filemode_local = ESMF_FILEMODE_BASIC
+    if (present(filemode)) then
+      filemode_local = filemode
+    endif
+    
+    if (filemode_local == ESMF_FILEMODE_BASIC) then
+      call ESMF_SparseMatrixWrite(localFactorList, localFactorIndexList, &
+                                  fileName, rc=localrc)
+    elseif (filemode_local == ESMF_FILEMODE_WITHAUX) then
+      call ESMF_OutputScripWeightFile(fileName, &
+                                      localFactorList, localFactorIndexList, &
+                                      srcFile=srcFile, dstFile=dstFile, &
+                                      srcFileType=srcFileType, &
+                                      dstFileType=dstFileType, &
+                                      largeFileFlag=largeFileFlag, &
+                                      rc=localrc)
+    else
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_OUTOFRANGE, &
+                            msg="- filemode not recognized", &
+                            ESMF_CONTEXT, rcToReturn=rc)
+    endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

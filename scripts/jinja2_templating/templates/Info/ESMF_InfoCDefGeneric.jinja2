@@ -1,0 +1,61 @@
+{#Data type iteration target#}
+{% set ts = meta['THETYPES'].values() %}
+{#Interfaces overloaded for for scalar and arrays (lists)#}
+{% set is_scalar_opts = [True, False] %}
+{{ meta['ESMF_FILEHEADER'] }}
+
+{{ meta['F_JINJADISCLAIMER'] }}
+
+interface
+
+!===============================================================================
+! c_info_get ===================================================================
+!===============================================================================
+
+{% for is_scalar in is_scalar_opts %}{% for t in ts %}{% if t.ctype != "std::string" %}
+  subroutine c_info_get_{% if not is_scalar %}array_{% endif %}{{ t.esmf_suffix }}(info, key, value, {% if not is_scalar %}itemcount, {% endif %}rc{% if is_scalar %}, default, idx{% endif %}, recursive{% if not is_scalar %}, local_scalarToArray_forC, expected_size{% endif %}) bind(C, name="ESMC_InfoGet{% if not is_scalar %}Array{% endif %}{{ t.esmf_suffix }}")
+    use iso_c_binding
+    implicit none
+    type(C_PTR), value :: info
+    character(C_CHAR), intent(in) :: key(*)
+    {{ t.ftype }}({{ t.iso_ctype }}), {% if not is_scalar %}dimension(*), {% endif %}intent(out) :: value
+{% if not is_scalar %}
+    integer(C_INT), intent(out) :: itemcount
+{% endif  %}
+    integer(C_INT), intent(inout) :: rc
+{% if is_scalar %}
+    type(C_PTR), value :: default, idx
+{% endif  %}
+    integer(C_INT), intent(in) :: recursive
+{% if not is_scalar %}
+    integer(C_INT), intent(in) :: local_scalarToArray_forC
+    integer(C_INT), intent(in) :: expected_size
+{% endif %}
+  end subroutine c_info_get_{% if not is_scalar %}array_{% endif %}{{ t.esmf_suffix }}
+
+{% endif %}{% endfor %}{% endfor %}
+!===============================================================================
+! c_info_set ===================================================================
+!===============================================================================
+
+{% for is_scalar in is_scalar_opts %}{% for t in ts %}
+{% if is_scalar or (t.ctype != "std::string" and not is_scalar) %}
+  subroutine c_info_set_{% if not is_scalar %}array_{% endif %}{{ t.esmf_suffix }}(info, key, value, {% if not is_scalar %}itemcount, {% endif %}force, rc, {% if is_scalar %}idx, {% endif %}pkey) bind(C, name="ESMC_InfoSet{% if not is_scalar %}Array{% endif %}{{ t.esmf_suffix }}")
+    use iso_c_binding
+    implicit none
+    type(C_PTR), value :: info
+    character(kind=C_CHAR), intent(in) :: key(*)
+    {{ t.ftype }}({{ t.iso_ctype }}), {% if not is_scalar %}dimension(*), {% endif %}intent(in) :: value
+{% if not is_scalar %}
+    integer(C_INT), intent(in) :: itemcount
+{% endif %}
+    logical(C_BOOL), intent(in) :: force
+    integer(C_INT), intent(inout) :: rc
+{% if is_scalar %}
+    type(C_PTR), value :: idx
+{% endif %}
+    character(kind=C_CHAR), intent(in) :: pkey(*)
+  end subroutine c_info_set_{% if not is_scalar %}array_{% endif %}{{ t.esmf_suffix }}
+
+{% endif %}{% endfor %}{% endfor %}
+end interface

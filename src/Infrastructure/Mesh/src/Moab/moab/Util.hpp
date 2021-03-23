@@ -22,9 +22,7 @@
 
 #include <math.h>
 #if defined MOAB_HAVE_ISFINITE
-// #define moab_isfinite(f) isfinite(f)
-#include <limits>
-#define moab_isfinite(n) ((n) <= std::numeric_limits<double>::max() && (n) >= -std::numeric_limits<double>::max())
+#define moab_isfinite(f) isfinite(f)
 #elif defined MOAB_HAVE_STDISFINITE
 #include <cmath>
 #define moab_isfinite(f) std::isfinite(f)

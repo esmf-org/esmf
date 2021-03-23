@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -63,7 +63,7 @@ module ESMF_InitMod
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_Initialize, ESMF_Finalize
+      public ESMF_Initialize, ESMF_InitializePreMPI, ESMF_Finalize
       public ESMF_IsInitialized, ESMF_IsFinalized
                   
       ! should be private to framework - needed by other modules
@@ -147,9 +147,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \ref{vm_inside_user_mpi}. It is not necessary that all MPI ranks are
 !     handed to ESMF. Section \ref{vm_nesting_esmf} shows how an MPI
 !     communicator can be used to execute ESMF on a subset of MPI ranks.
-!     Finally {\tt ESMF\_Initialize()} supports running multiple concurrent
+!     {\tt ESMF\_Initialize()} supports running multiple concurrent
 !     instances of ESMF under the same user MPI program. This feature is
 !     discussed under \ref{vm_multi_instance_esmf}.
+!
+!     In order to use any of the advanced resource management functions that
+!     ESMF provides via the {\tt ESMF\_*CompSetVM*()} methods, the MPI
+!     environment must be thread-safe. {\tt ESMF\_Initialize()} handles this
+!     automatically if it is in charge of initializing MPI. However, if the
+!     user code initializes MPI before calling into {\tt ESMF\_Initialize()},
+!     it must do so via {\tt MPI\_Init\_thread()}, specifying
+!     {\tt MPI\_THREAD\_SERIALIZED} or above for the required level of thread
+!     support.
+!
+!     In cases where {\tt ESMF\_*CompSetVM*()} methods are used to move
+!     processing elements (PEs), i.e. CPU cores, between persistent execution
+!     threads (PETs), ESMF uses POSIX signals between PETs. In order to do so
+!     safely, the proper signal handlers must be installed before MPI is
+!     initialized. {\tt ESMF\_Initialize()} handles this automatically if it is
+!     in charge of initializing MPI. If, however, MPI is explicitly initialized
+!     by user code, then to ensure correct signal handling it is necessary to
+!     call {\tt ESMF\_InitializePreMPI()} from the user code prior to the MPI
+!     initialization.
 !
 !     By default, {\tt ESMF\_Initialize()} will open multiple error log files,
 !     one per processor.  This is very useful for debugging purpose.  However,
@@ -165,7 +184,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     for more information on how ESMF uses Fortran unit numbers.
 !
 !     Before exiting the application the user must call {\tt ESMF\_Finalize()}
-!     to release resources and clean up ESMF gracefully.
+!     to release resources and clean up ESMF gracefully. See the
+!     {\tt ESMF\_Finalize()} documentation about details relating to the MPI
+!     environment.
 !
 !     The arguments are:
 !     \begin{description}
@@ -254,6 +275,72 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_Initialize
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InitializePreMPI"
+!BOP
+! !IROUTINE:  ESMF_InitializePreMPI - Initialize parts of ESMF that must happen before MPI is initialized
+!
+! !INTERFACE:
+      subroutine ESMF_InitializePreMPI(keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                 intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     This method is {\em only} needed for cases where MPI is initialized
+!     explicitly by user code. In most typical cases {\tt ESMF\_Initialize()}
+!     is called before MPI is initialized, and takes care of all the internal
+!     initialization, including MPI.
+!
+!     There are circumstances where it is necessary or convenient to
+!     initialize MPI before calling into {\tt ESMF\_Initialize()}. This option
+!     is supported by ESMF, and for most cases no special action is required
+!     on the user side. However, for cases where {\tt ESMF\_*CompSetVM*()}
+!     methods are used to move processing elements (PEs), i.e. CPU cores,
+!     between persistent execution threads (PETs), ESMF uses POSIX signals
+!     between PETs. In order to do so safely, the proper signal handlers must
+!     be installed before MPI is initialized. This is accomplished by calling
+!     {\tt ESMF\_InitializePreMPI()} from the user code prior to the MPI
+!     initialization.
+!
+!     Note also that in order to use any of the advanced resource management
+!     functions that ESMF provides via the {\tt ESMF\_*CompSetVM*()} methods,
+!     the MPI environment must be thread-safe. {\tt ESMF\_Initialize()} handles
+!     this automatically if it is in charge of initializing MPI. However, if the
+!     user code initializes MPI before calling into {\tt ESMF\_Initialize()},
+!     it must do so via {\tt MPI\_Init\_thread()}, specifying
+!     {\tt MPI\_THREAD\_SERIALIZED} or above for the required level of thread
+!     support.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!EOP
+      integer       :: localrc                        ! local return code
+
+      ! assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! initialize pre MPI parts of global VM
+      call ESMF_VMInitializePreMPI(rc=localrc)
+                                      
+      ! on failure LogErr is not initialized -> explicit print on error
+      if (localrc .ne. ESMF_SUCCESS) then
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing framework"
+        return 
+      endif 
+      ! on success LogErr is assumed to be functioning
+      
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_InitializePreMPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -374,7 +461,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! be called before any other mechanism calls MPI_Init. This is because 
       ! MPI_Init() on some systems will spawn helper threads which might have 
       ! signal handlers installed incompatible with VMKernel. Calling
-      ! ESMF_VMInitialize() with and un-initialized MPI will install correct 
+      ! ESMF_VMInitialize() with an un-initialized MPI will install correct 
       ! signal handlers _before_ possible helper threads are spawned by 
       ! MPI_Init().
       ! If, however, VMKernel threading is not used it is fine to come in with
@@ -524,6 +611,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          return
       endif
 
+#if defined (ESMF_MOAB)
+      build_detail = 'enabled'
+#else
+      build_detail = 'disabled'
+#endif
+      call ESMF_LogWrite(&
+           "ESMF_MOAB                   : " // build_detail,  &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
+
+#if defined (ESMF_LAPACK)
+      build_detail = 'enabled'
+#else
+      build_detail = 'disabled'
+#endif
+      call ESMF_LogWrite(&
+           "ESMF_LAPACK                 : " // build_detail,  &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
+
 #if defined (ESMF_NETCDF)
       build_detail = 'enabled'
 #else
@@ -570,19 +683,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
       call ESMF_LogWrite(&
            "ESMF_YAMLCPP                : " // build_detail,  &
-           ESMF_LOGMSG_INFO, rc=localrc)
-      if (localrc /= ESMF_SUCCESS) then
-         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
-         return
-      endif
-
-#if defined (ESMF_MOAB)
-      build_detail = 'enabled'
-#else
-      build_detail = 'disabled'
-#endif
-      call ESMF_LogWrite(&
-           "ESMF_MOAB                   : " // build_detail,  &
            ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"

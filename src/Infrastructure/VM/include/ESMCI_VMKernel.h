@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -17,8 +17,16 @@
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 
+#define USE_STRSTREAM
+
 #include <mpi.h>
 #include <vector>
+#include <string>
+#include <sstream>
+#ifdef USE_STRSTREAM
+#include <strstream>
+#endif
+#include <map>
 
 #ifdef VMK_STANDALONE
 #include <pthread.h>
@@ -32,11 +40,19 @@ typedef pthread_t       esmf_pthread_t;
 // define NULL
 #include <cstddef> 
 
+#include "ESMCI_LogErr.h"
+
 // reduction operations
 enum vmOp   { vmSUM=1, vmMIN, vmMAX};
 // typekind indicators
 //   Note: vmL4 indicates Fortran logicals, not c++ bools
 enum vmType { vmBYTE=1, vmI4, vmI8, vmR4, vmR8, vmL4};
+// epochs
+enum vmEpoch  { epochNone=0, epochBuffer};
+
+// Pthread stack sizes
+#define VM_PTHREAD_STACKSIZE_SERVICE  (4194304) //  4MiB for service threads
+#define VM_PTHREAD_STACKSIZE_USER    (20971520) // 20MiB for user threads
 
 // VM_ANY_SOURCE and VM_ANY_TAG
 #define VM_ANY_SRC                    (-2)
@@ -93,6 +109,19 @@ void sync_reset(shmsync *shms);
 
 
 namespace ESMCI {
+
+
+//-----------------------------------------------------------------------------
+// utility function
+template<typename T> void append(std::stringstream &streami, T value){
+  streami.write((char*)&value, sizeof(T));
+}
+#ifdef USE_STRSTREAM
+template<typename T> void append(std::strstream &streami, T value){
+  streami.write((char*)&value, sizeof(T));
+}
+#endif
+//-----------------------------------------------------------------------------
 
 
 class VMK{
@@ -181,6 +210,33 @@ class VMK{
     ipshmAlloc *prev;   // pointer to prev. ipshmAlloc element in list
     ipshmAlloc *next;   // pointer to next ipshmAlloc element in list
   };
+  
+  struct sendBuffer{
+#ifdef USE_STRSTREAM
+    std::strstream stream;
+#else
+    std::stringstream stream;
+    std::string streamBuffer;
+#endif
+    MPI_Request mpireq;
+    bool firstFlag;
+   public:
+    sendBuffer(){  // native constructor
+      mpireq = MPI_REQUEST_NULL;
+      firstFlag = true;
+    }
+    void clear();
+  };
+    
+  struct recvBuffer{
+    std::string streamBuffer;
+    void *buffer;
+    bool firstFlag;
+   public:
+    recvBuffer(){  // native constructor
+      firstFlag = true;
+    }
+  };
 
   // members
   protected:
@@ -227,10 +283,17 @@ class VMK{
     // Communication requests queue
     int nhandles;
     commhandle *firsthandle;
+    // Epoch support
+    vmEpoch epoch;
+    bool pastFirst; // true if the first epoch enabled call has been made
+    std::map<int, sendBuffer> sendMap;
+    std::map<int, recvBuffer> recvMap;
     // static info of physical machine
+    static int nssiid;  // total number of single system image ids
     static int ncores;  // total number of cores in the physical machine
     static int *cpuid;  // cpuid associated with certain core (multi-core cpus)
-    static int *ssiid;    // single system image id to which this core belongs
+    static int *ssiid;  // single system image id to which this core belongs
+    static int *ssipe;  // PE id on the SSI on which this PE resides
     static double wtime0; // the MPI WTime at the very beginning of execution
   public:
     // Declaration of static data members - Definitions are in the header of
@@ -239,6 +302,8 @@ class VMK{
     // and the thread level that the MPI implementation supports.
     static MPI_Comm default_mpi_c;
     static int mpi_thread_level;
+    static int mpi_init_outside_esmf;
+    static int pre_mpi_init;
     // Static data members that hold command line arguments
     // There are two sets of these variables. The first set of variables is
     // used to obtain the command line arguments in the obtain_args() method
@@ -266,6 +331,8 @@ class VMK{
     void commqueueitem_link(commhandle *commh);
     int  commqueueitem_unlink(commhandle *commh);
   public:
+    static void InitPreMPI();
+      // initialization step before MPI is initialized
     void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
       // initialize the physical machine and a default (all MPI) virtual machine
     void finalize(int finalizeMpi=1);
@@ -287,6 +354,10 @@ class VMK{
       // exit a vm derived from current vm according to the VMKPlan
   
     void print() const;
+    void log(std::string prefix,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;
+    static void logSystem(std::string prefix,
+      ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO);
     
     // get() calls    <-- to be replaced by following new inlined section
     int getNpets();                // return npets
@@ -301,10 +372,15 @@ class VMK{
     int getVas(int i);             // return vas for PET
     int getLpid(int i);            // return lpid for PET
     
+    int getDefaultTag(int src, int dst);   // return default tag
     int getMaxTag();               // return maximum value of tag
     
+    const int *getSsipe() const {return ssipe;}
+    int **getCid() const {return cid;}
+        
     // get() calls
     int getLocalPet() const {return mypet;}
+    int getCurrentSsiPe() const;
     int getPetCount() const {return npets;}
     int getSsiCount() const {return ssiCount;}
     int getSsiMinPetCount() const {return ssiMinPetCount;}
@@ -312,7 +388,7 @@ class VMK{
     int getSsiLocalPetCount() const {return ssiLocalPetCount;}
     const int *getSsiLocalPetList() const {return ssiLocalPetList;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
-    bool isPthreadsEnabled() const{
+    static bool isPthreadsEnabled(){
 #ifdef ESMF_NO_PTHREADS
       // did not compile with threads
       return false;
@@ -323,7 +399,7 @@ class VMK{
       return true;
 #endif
     }
-    bool isOpenMPEnabled() const{
+    static bool isOpenMPEnabled(){
 #ifdef ESMF_NO_OPENMP
       return false;
 #else
@@ -334,14 +410,14 @@ class VMK{
 #endif
 #endif
     }
-    bool isOpenACCEnabled() const{
+    static bool isOpenACCEnabled(){
 #ifdef ESMF_NO_OPENACC
       return false;
 #else
       return true;
 #endif
     }
-    bool isSsiSharedMemoryEnabled() const;
+    static bool isSsiSharedMemoryEnabled();
       //TODO: For now had to implement this method in the source file, because
       //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
       //TODO: Move it into the VMKernel header once includes are fixed.
@@ -431,7 +507,15 @@ class VMK{
     // Simple thread-safety lock/unlock using internal pth_mutex
     int lock();
     int unlock();
-    
+
+    // Epoch support
+    void epochSetFirst();
+    void epochInit();
+    void epochFinal();
+    void epochEnter(vmEpoch epoch);
+    void epochExit(bool keepAlloc=true);
+    vmEpoch getEpoch() const {return epoch;}
+        
     // Timer methods
     static void wtime(double *time);
     static void wtimeprec(double *prec);
@@ -452,6 +536,8 @@ class VMKPlan{
     int *spawnflag;   // for each pet: 0-don't spawn, >=1-spawn threads
     int *contribute;  // pet id to which non-spawning pet contributes its cores
     int *cspawnid;    // idication to which one of spawned pets to contribute to
+    // Pthread specifications
+    size_t minStackSize;  // minimum stack size for any user thread created
     // VMK references for this PET (as many entries as this PET spawns)
     int nspawn;       // number of PETs this PET will spwan
     VMK **myvms; // this array holds pointers to heap VMK instances
@@ -465,7 +551,10 @@ class VMKPlan{
     int *lpid_mpi_g_part_map;
     MPI_Comm mpi_c_part;
     int commfreeflag;   // flag to indicate which PETs must free MPIcommunicator
-    
+    // OpenMP handling
+    int openmphandling; // 0-none, 1-setnumthreads, 2-initialize, 3-pinaffinity
+    int openmpnumthreads; // -1 default: local peCount
+
   public:
     VMKPlan();
       // native constructor (sets communication preferences to defaults)

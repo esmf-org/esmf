@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -35,6 +35,8 @@
 #include "MBTagConventions.hpp"
 #include "Mesh/include/Legacy/ESMCI_BBox.h"
 #include "ESMCI_PointList.h"
+
+#include "ESMCI_TraceMacros.h"  // for profiling
 
 // #define ESMF_REGRID_DEBUG_MAP_ELEM1 836800
 // #define ESMF_REGRID_DEBUG_MAP_ELEM2 836801
@@ -175,17 +177,8 @@ static void assign_elems_to_procs(MBMesh *mesh,
   std::vector<EntityHandle>::iterator si = elems->begin(), se = elems->end();
   for (; si != se; ++si) {
     EntityHandle &elem = *si;
-    
-    int id;
-#ifdef ESMF_REGRID_DEBUG_MAP_ANY
-    MBMesh_get_gid(mesh, elem, &id);
-#endif
-#ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
-    MBMesh_get_gid(mesh, elem, &id);
-#endif
-#ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
-    MBMesh_get_gid(mesh, elem, &id);
-#endif
+    int elem_id;
+    MBMesh_get_gid(mesh, elem, &elem_id);
 
     // Get bounding box for elem
     MBMesh_BBox ebox(mesh, elem, geom_tol, is_sph);
@@ -202,20 +195,20 @@ static void assign_elems_to_procs(MBMesh *mesh,
 
 // need to find object id and put into an if statement
 #ifdef ESMF_REGRID_DEBUG_MAP_ANY
-      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+      printf("%d# Elem %d send to procs [", Par::Rank(), elem_id);
 #endif
 #ifdef ESMF_REGRID_DEBUG_MAP_ELEM1
     if (id==ESMF_REGRID_DEBUG_MAP_ELEM1)
-      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+      printf("%d# Elem %d send to procs [", Par::Rank(), elem_id);
 #endif
 #ifdef ESMF_REGRID_DEBUG_MAP_ELEM2
     if (id==ESMF_REGRID_DEBUG_MAP_ELEM2)
-      printf("%d# Elem %d send to procs [", Par::Rank(), id);
+      printf("%d# Elem %d send to procs [", Par::Rank(), elem_id);
 #endif
 
     // Add to pattern
     for (int i = 0; i < numprocs; i++) {
-      EH_Comm_Pair ecp(elem, procs[i]);
+      EH_Comm_Pair ecp(elem, elem_id, procs[i]);
 
       std::vector<EH_Comm_Pair>::iterator lb =
         std::lower_bound(elem_to_proc_list->begin(), elem_to_proc_list->end(), ecp);
@@ -248,80 +241,6 @@ static void assign_elems_to_procs(MBMesh *mesh,
 #endif
   } // for si
 }
-
-// static void assign_points_to_procs_old(PointList *pl,
-//                                    std::vector<point*> *points,
-//                                    double geom_tol, UInt sdim,
-//                                    Zoltan_Struct *zz,
-//                                    std::vector<PL_Comm_Pair> *point_to_proc_list) {
-//   Trace __trace("assign_points_to_procs()");
-// #undef  ESMC_METHOD
-// #define ESMC_METHOD "assign_points_to_procs()"
-// 
-//   // Get number of Pets
-//   int localrc;
-//   int petCount = VM::getCurrent(&localrc)->getPetCount();
-//   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-//     throw localrc;  // bail out with exception
-// 
-//   // Allocate list of procs where each elem should be assigned
-//   int numprocs;
-//   std::vector<int> procs(petCount);
-// 
-//   // Loop through objects assigning them to procs
-//   for (unsigned int i = 0; i < points->size(); ++i) {
-// 
-//     point *p = points->at(i);
-// 
-// #ifdef ESMF_REGRID_DEBUG_MAP_ANY
-//     int id = pl->get_id(i);
-//     printf("%d# Node %d send to procs [", Par::Rank(), id);
-// #endif
-// #ifdef ESMF_REGRID_DEBUG_MAP_NODE
-//     int id = pl->get_id(i);
-// 
-//     if (id==ESMF_REGRID_DEBUG_MAP_NODE)
-//       printf("%d# Node %d send to procs [", Par::Rank(), id);
-// #endif
-// 
-//     // Assign elems to procs using zoltan struct
-//     Zoltan_LB_Box_Assign(zz, p->coords[0]-geom_tol,
-//                          p->coords[1]-geom_tol,
-//                          (sdim > 2 ? p->coords[2] : 0) - geom_tol,
-//                          p->coords[0]+geom_tol,
-//                          p->coords[1]+geom_tol,
-//                          (sdim > 2 ? p->coords[2] : 0) + geom_tol,
-//                          &procs[0],
-//                          &numprocs);
-// 
-//     // Add to pattern
-//     for (int j = 0; j < numprocs; j++) {
-//       PL_Comm_Pair pcp(i, procs[j]);
-// 
-//       std::vector<PL_Comm_Pair>::iterator lb =
-//         std::lower_bound(point_to_proc_list->begin(),
-//                          point_to_proc_list->end(), pcp);
-// 
-//       // Add if not already there
-//       if (lb == point_to_proc_list->end() || *lb != pcp)
-//         point_to_proc_list->insert(lb, pcp);
-// #ifdef ESMF_REGRID_DEBUG_MAP_ANY
-//       printf("%d, ", j);
-// #endif
-// #ifdef ESMF_REGRID_DEBUG_MAP_NODE
-//       if (id==ESMF_REGRID_DEBUG_MAP_NODE)
-//         printf("%d, ", j);
-// #endif
-//     } // for nproc
-// #ifdef ESMF_REGRID_DEBUG_MAP_ANY
-//     printf("]\n");
-// #endif
-// #ifdef ESMF_REGRID_DEBUG_MAP_NODE
-//     if (id==ESMF_REGRID_DEBUG_MAP_NODE)
-//       printf("]\n");
-// #endif
-//   } // for si
-// }
 
 static void assign_points_to_procs(PointList *pl, int numExport, ZOLTAN_ID_PTR exportGids,
                                    ZOLTAN_ID_PTR exportLids,
@@ -518,11 +437,13 @@ void create_rendez_mbmesh_etop(MBMesh *srcmesh, PointList *dstpl,
   bool is_sph = false;
   if (*map_type == MB_MAP_TYPE_GREAT_CIRCLE) is_sph = true;
 
+  ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous comm pattern")
   // Compute communication pattern to build rendezvous meshes
   std::vector<EH_Comm_Pair> src_elem_to_proc_list;
   std::vector<PL_Comm_Pair> dst_point_to_proc_list;
   calc_rendez_comm_pattern(srcmesh, dstpl, 
       &src_elem_to_proc_list, &dst_point_to_proc_list, is_sph);
+  ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous comm pattern")
 
 /*
   // Debug print of src list
@@ -551,10 +472,14 @@ void create_rendez_mbmesh_etop(MBMesh *srcmesh, PointList *dstpl,
 */
 
   // Create src rend mesh
+  ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist elements")
   create_mbmesh_redist_elem(srcmesh, &src_elem_to_proc_list, _srcmesh_rendez);
+  ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist elements")
 
   // Create dst rend mesh
+  ESMCI_RENDEZVOUS_TRACE_ENTER("MBMesh rendezvous redist points")
   create_pointlist_redist_point(dstpl, &dst_point_to_proc_list, _dstpl_rendez);
+  ESMCI_RENDEZVOUS_TRACE_EXIT("MBMesh rendezvous redist points")
 }
 
 #endif // ESMF_MOAB

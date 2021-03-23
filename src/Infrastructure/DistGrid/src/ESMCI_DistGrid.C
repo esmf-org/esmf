@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -60,6 +60,12 @@ namespace ESMCI {
 //
 //-----------------------------------------------------------------------------
 
+template int DistGrid::setArbSeqIndex<ESMC_I4>(vector<ESMC_I4> &arbSeqIndex, 
+  int localDe, int collocation);
+
+template int DistGrid::setArbSeqIndex<ESMC_I8>(vector<ESMC_I8> &arbSeqIndex, 
+  int localDe, int collocation);
+
 template int DistGrid::setArbSeqIndex<ESMC_I4>(InterArray<ESMC_I4> *arbSeqIndex, 
   int localDe, int collocation);
 
@@ -79,6 +85,12 @@ template int DistGrid::getSequenceIndexTileRelative<ESMC_I4>(int tile,
 
 template int DistGrid::getSequenceIndexTileRelative<ESMC_I8>(int tile,
     int const *index, ESMC_I8 *seqIndex)const;
+
+template int DistGrid::fillSeqIndexList<ESMC_I4>(vector<ESMC_I4> &seqIndexList,
+  int localDe, int collocation) const;
+
+template int DistGrid::fillSeqIndexList<ESMC_I8>(vector<ESMC_I8> &seqIndexList,
+  int localDe, int collocation) const;
 
 template int DistGrid::fillSeqIndexList<ESMC_I4>(
     InterArray<ESMC_I4> *seqIndexList, int localDe, int collocation) const;
@@ -157,7 +169,7 @@ DistGrid *DistGrid::create(
     std::stringstream debugmsg;
     debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
       " DELayout " << delayout;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   
@@ -187,7 +199,7 @@ DistGrid *DistGrid::create(
     std::stringstream debugmsg;
     debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
       " 2nd DELayout " << delayout;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -197,7 +209,7 @@ DistGrid *DistGrid::create(
       std::stringstream debugmsg;
       debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
         " inside 'balanceflag' branch.";
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     // for now assume very simple conditions, or else error out
@@ -240,7 +252,7 @@ DistGrid *DistGrid::create(
       std::stringstream debugmsg;
       debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
         " allArbSeqFlag = " << allArbSeqFlag;
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (allArbSeqFlag > 0){
@@ -265,18 +277,18 @@ DistGrid *DistGrid::create(
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
             " keepArbPtr[i] = " << keepArbPtr[i];
-          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
           for (int j=0; j<75; j++){
             debugmsg.str("");  // clear
             debugmsg << "DistGrid::create(fromDG): " << ((int *)keepArbPtr[i])[j];
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
           }
         }
 #endif
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
         larrayList[i] = LocalArray::create(dg->indexTK, 1,
-          &(elementCount[0][i]), keepArbPtr[i], DATA_COPY, &localrc);
+          &(elementCount[0][i]), keepArbPtr[i], DATACOPY_VALUE, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
         // disable arbitrary sequence indices temporarily for canoncial Redist
@@ -287,12 +299,12 @@ DistGrid *DistGrid::create(
       if (dg->delayout->getLocalDeCount() == 0){
         // need to prepare a dummy LocalArray object
         larrayList[0] = LocalArray::create(dg->indexTK, 1,
-          NULL, NULL, DATA_NONE, &localrc);
+          NULL, NULL, DATACOPY_NONE, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
       Array *srcArbSeqArray = Array::create(larrayList,
-        larrayCount, dg, DATA_REF, NULL, NULL, NULL,
+        larrayCount, dg, DATACOPY_REFERENCE, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
@@ -307,12 +319,12 @@ DistGrid *DistGrid::create(
             srcArbSeqArray->getTotalElementCountPLocalDe()[i] <<
             " baseAddrList[i] = " << baseAddrList[i] <<
             " keepArbPtr[i] = " << keepArbPtr[i];
-          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
           for (int j=0; j<srcArbSeqArray->getTotalElementCountPLocalDe()[i]; j++){
             debugmsg.str("");  // clear
             debugmsg << "DistGrid::create(fromDG): " << ((int *)baseAddrList[i])[j]
               << " - " << ((int *)keepArbPtr[i])[j];
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
           }
         }
       }
@@ -351,11 +363,11 @@ DistGrid *DistGrid::create(
             " getTotalElementCountPLocalDe[i] = " << 
             dstArbSeqArray->getTotalElementCountPLocalDe()[i] <<
             " baseAddrList[i] = " << baseAddrList[i];
-          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
           for (int j=0; j<dstArbSeqArray->getTotalElementCountPLocalDe()[i]; j++){
             debugmsg.str("");  // clear
             debugmsg << "DistGrid::create(fromDG): " << ((int *)baseAddrList[i])[j];
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
           }
         }
 #endif
@@ -409,7 +421,7 @@ DistGrid *DistGrid::create(
         << present(lastExtra) << ", " << indexflag  << ", "
         << present(connectionList) << ", " << vm  << ", "
         << !actualFlag;
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
    if (actualFlag){
@@ -659,9 +671,9 @@ DistGrid *DistGrid::create(
       dimInterArray, dimCountInterArray);
     
     // use indexflag inside dg as the default if not supplied by caller
-    ESMC_IndexFlag *indexflagOpt = dg->indexflag; // default
+    ESMC_IndexFlag indexflagOpt = dg->indexflag; // default
     if (indexflag)
-      indexflagOpt = indexflag; // provided by caller
+      indexflagOpt = *indexflag; // provided by caller
     
     //TODO: maybe also need to hold on to delabellist to preserve DE labeling?
     
@@ -673,7 +685,7 @@ DistGrid *DistGrid::create(
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
           " incoming DG identified as regDecomp";
-        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       // prepare regDecomp
@@ -690,7 +702,7 @@ DistGrid *DistGrid::create(
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
             " single-tile regDecomp branch";
-          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         int decompflagCount = 0;  // default
@@ -698,7 +710,7 @@ DistGrid *DistGrid::create(
           decompflagCount = dg->dimCount;
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, delayout, vm, &localrc, dg->indexTK);
+          &indexflagOpt, connectionList, delayout, vm, &localrc, dg->indexTK);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
@@ -708,7 +720,7 @@ DistGrid *DistGrid::create(
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
             " multi-tile regDecomp branch";
-          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         int decompflagCount1 = 0;  // default
@@ -719,7 +731,7 @@ DistGrid *DistGrid::create(
         }
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount1, decompflagCount2, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, delayout, vm, &localrc, dg->indexTK);
+          &indexflagOpt, connectionList, delayout, vm, &localrc, dg->indexTK);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
@@ -728,7 +740,7 @@ DistGrid *DistGrid::create(
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
           " done with DistGrid::create()";
-        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       delete regDecomp;
@@ -739,7 +751,7 @@ DistGrid *DistGrid::create(
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
           " incoming DG identified as deBlock";
-        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       // prepare deBlockList
@@ -793,12 +805,12 @@ DistGrid *DistGrid::create(
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
             " single-tile deBlock branch";
-          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         // create DistGrid
         distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
-          NULL, indexflagOpt, connectionList, delayout, vm, &localrc);
+          NULL, &indexflagOpt, connectionList, delayout, vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
@@ -808,7 +820,7 @@ DistGrid *DistGrid::create(
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
             " multi-tile deBlock branch";
-          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         InterArray<int> *deToTileMap =
@@ -816,7 +828,7 @@ DistGrid *DistGrid::create(
         // create DistGrid
         distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
           deToTileMap,
-          NULL, indexflagOpt, connectionList, delayout, vm, &localrc);
+          NULL, &indexflagOpt, connectionList, delayout, vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
         delete deToTileMap;
@@ -846,16 +858,16 @@ DistGrid *DistGrid::create(
    char msgString[160];
    sprintf(msgString, "DGfromDG: incoming DG localDeCount=%d",
      dg->delayout->getLocalDeCount());
-   ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+   ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_DEBUG);
    if (actualFlag){
      sprintf(msgString, "DGfromDG: new DG localDeCount=%d",
        distgrid->delayout->getLocalDeCount());
-     ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+     ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_DEBUG);
      for (int i=0; i<distgrid->delayout->getLocalDeCount(); i++){
        sprintf(msgString, "DGfromDG: new DG localDe=%d=>%d elementCount=%d",
          i, distgrid->delayout->getLocalDeToDeMap()[i], 
          distgrid->getElementCountPCollPLocalDe()[0][i]);
-       ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+       ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_DEBUG);
      }
    }
    if (!vm)
@@ -864,11 +876,11 @@ DistGrid *DistGrid::create(
    else
      sprintf(msgString, "DGfromDG: vm.petCount=%d, currentVM.petCount=%d",
        vm->getPetCount(), VM::getCurrent()->getPetCount());
-   ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+   ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_DEBUG);
 
    sprintf(msgString, "DGfromDG: incoming DG diffCollocationCount=%d",
      dg->getDiffCollocationCount());
-   ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+   ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_DEBUG);
    
    // should error out if collocationCount is not 1 cannot handle that yet
    
@@ -880,7 +892,7 @@ DistGrid *DistGrid::create(
         sprintf(msgString, "DGfromDG: incoming DG localDe=%d=>%d, elementCount=%d, "
          "arbSeqIndexList=%p", i, dg->delayout->getLocalDeToDeMap()[i],
          dg->getElementCountPCollPLocalDe()[0][i], arbSeq);
-        ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_DEBUG);
       }
    }
 #endif
@@ -894,7 +906,7 @@ DistGrid *DistGrid::create(
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
           " currentVMcollectiveOK = " << currentVMcollectiveOK;
-        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
      }
 #endif
 
@@ -920,7 +932,7 @@ DistGrid *DistGrid::create(
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
           " allArbSeqFlag = " << allArbSeqFlag;
-        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
      }
 #endif
      // now allArbSeqFlag > 0 means that there are provider DistGrid DEs that
@@ -959,7 +971,7 @@ DistGrid *DistGrid::create(
          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
            " DE mapping for acceptor item" << i << " is " <<
             acceptorLocalDeToDeMap[i];
-         ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+         ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
        }
 #endif
        // determine how many local DEs in the provider DistGrid there are
@@ -986,7 +998,7 @@ DistGrid *DistGrid::create(
          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
            " DE mapping for provider item" << i << " is " <<
             providerLocalDeToDeMap[i];
-         ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+         ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
        }
 #endif
        // loop through DEs (same on both provider and acceptor DistGrids), and
@@ -1016,7 +1028,7 @@ DistGrid *DistGrid::create(
            debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
              " DE " << de << " - provider PET=" << providerPet <<
              " localDe=" << providerLDe << " offset=" << providerOffset;
-           ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+           ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
          }
 #endif
          // find this DE amount the localDEs of the acceptor PETs
@@ -1043,7 +1055,7 @@ DistGrid *DistGrid::create(
            debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
              " DE " << de << " - acceptor PET=" << acceptorPet <<
              " localDe=" << acceptorLDe << " offset=" << acceptorOffset;
-           ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+           ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
          }
 #endif
          // finally send the arb sequence indices from provider to acceptor
@@ -1092,10 +1104,10 @@ DistGrid *DistGrid::create(
     char msgString[160];
     sprintf(msgString, "DGfromDG: incoming DG identified for deep copy, "
       "actualFlag=%d", actualFlag);
-    ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_DEBUG);
     sprintf(msgString, "DGfromDG: incoming DG localDeCount=%d",
       dg->delayout->getLocalDeCount());
-    ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_DEBUG);
 #endif
    if (actualFlag){
     // simple deep copy of the incoming DistGrid
@@ -1216,11 +1228,7 @@ DistGrid *DistGrid::create(
         sizeof(Decomp_Flag)*dimCount*tileCount);
     }else
       distgrid->regDecomp = NULL;
-    if (dg->indexflag){
-      distgrid->indexflag = new ESMC_IndexFlag;
-      memcpy(distgrid->indexflag, dg->indexflag, sizeof(ESMC_IndexFlag));
-    }else
-      distgrid->indexflag = NULL;
+    distgrid->indexflag = dg->indexflag;
     distgrid->delayout = dg->delayout;
     distgrid->delayoutCreator = false;
     distgrid->vm = dg->vm;
@@ -3227,10 +3235,9 @@ int DistGrid::construct(
   }else
     decompflag = NULL;
   if (indexflagArg){
-    indexflag = new ESMC_IndexFlag; // must store in local storage
-    *indexflag = *indexflagArg;     // copy the value
+    indexflag = *indexflagArg;     // copy the value
   }else
-    indexflag = NULL;
+    indexflag = ESMC_INDEX_USER;
   
   // fill in the DistGrid object
   indexTK = indexTKArg;
@@ -3324,16 +3331,24 @@ int DistGrid::construct(
     // mark in tileListPDe DEs that have no elements as not being on any tile
     if (elementCountPDe[i]==0) tileListPDe[i]=0;  // tiles are base 1
   }
-  // see if indexTK requires auto selection of typekind
+  // check for correct indexTK selection, conditionally choose automatically
+  ESMC_I8 totalElementCount = 0;  // reset
+  for (int i=0; i<tileCount; i++)
+    totalElementCount += elementCountPTile[i];
   if (indexTK == ESMF_NOKIND){
     // auto selection of the correct typekind
-    indexTK = ESMC_TYPEKIND_I4;  // default to 32-bit (signed i.e. 31-bit)
-    ESMC_I8 totalElementCount = 0;  // reset
-    for (int i=0; i<tileCount; i++)
-      totalElementCount += elementCountPTile[i];
+    indexTK = ESMC_TYPEKIND_I4;  // default to 32-bit (signed i.e. eff. 31-bit)
     if (totalElementCount > 2147483647L){
       // above the I4 limit -> go to I8
       indexTK = ESMC_TYPEKIND_I8;
+    }
+  }else if (indexTK == ESMC_TYPEKIND_I4){
+    if (totalElementCount > 2147483647L){
+      // above the I4 limit -> bail with error condition
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "The total number of elements is above the I4 indexTK limit",
+        ESMC_CONTEXT, &rc);
+      return rc;
     }
   }
   // complete sequence index collocation by default
@@ -3415,8 +3430,6 @@ int DistGrid::destruct(bool followCreator, bool noGarbage){
     
     if (decompflag)
       delete [] decompflag;
-    if (indexflag)
-      delete indexflag;
     
 //    int localDeCount = delayout->getLocalDeCount();
     int localDeCount = localDeCountAux; // TODO: delayout may be gone already!
@@ -3496,16 +3509,82 @@ template<typename T> int DistGrid::fillSeqIndexList(
 //
 // !ARGUMENTS:
 //
+  vector<T> &seqIndexList,      // in
+  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
+  int collocation               // in  -
+  )const{
+//
+// !DESCRIPTION:
+//    Fill the seqIndexList argument. The sequence indices are cast to the
+//    requested type T. There are checks in place to error out in case an
+//    overflow condition is detected during the cast. The most efficient way
+//    to call is with the same typekind (indexTK) of the DistGrid.
+//    
+//    If the size of seqIndexList does not match it will automatically
+//    resized by this method.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  int i;
+  for (i=0; i<diffCollocationCount; i++)
+    if (collocationTable[i]==collocation) break;
+  if (i==diffCollocationCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+      "specified collocation not valid", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  int collIndex = i;
+
+  unsigned int elementCount = elementCountPCollPLocalDe[collIndex][localDe];
+  
+  if (seqIndexList.size() != elementCount)
+    seqIndexList.resize(elementCount);
+  
+  InterArray<T> *seqIndexListAux = new InterArray<T>(seqIndexList);
+  localrc = fillSeqIndexList(seqIndexListAux, localDe, collocation);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  delete seqIndexListAux;
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::fillSeqIndexList()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::fillSeqIndexList
+//
+// !INTERFACE:
+//
+template<typename T> int DistGrid::fillSeqIndexList(
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
   InterArray<T> *seqIndexList,    // in
   int localDe,                    // in  - local DE = {0, ..., localDeCount-1}
   int collocation                 // in  -
   )const{
 //
 // !DESCRIPTION:
-//    Fill the seqIndexList argument. Providing this InterArray based 
-//    method is required for efficient filling of arrays that come through
-//    the Fortran API, without having to do an extra copy. It can also leveraged
-//    by the overloaded vector<int> based interface.
+//    Fill the seqIndexList argument. The sequence indices are cast to the
+//    requested type T. There are checks in place to error out in case an
+//    overflow condition is detected during the cast. The most efficient way
+//    to call is with the same typekind (indexTK) of the DistGrid.
+//    
+//    This InterArray based method is required for efficient filling of arrays
+//    that come through the Fortran API, without having to do an extra copy. 
+//    It is also leveraged by the overloaded vector<T> based interface.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -3558,14 +3637,74 @@ template<typename T> int DistGrid::fillSeqIndexList(
           "Unsupported DistGrid indexTK", ESMC_CONTEXT, &rc);
         return rc;
       }
-      if (sizeof(T) != sizeOfType){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "Type mismatch.",
-          ESMC_CONTEXT, &rc);
-        return rc;
+      // Fill the outgoing array with sequence indices
+      if (sizeof(T) == sizeOfType){
+        // same typekind requested as intenally stored -> memcpy()
+        memcpy((seqIndexList)->array, arbSeqIndexList,
+          sizeOfType * elementCountPCollPLocalDe[collIndex][localDe]);
+      }else if (sizeof(T) > sizeOfType){
+        // casting from smaller to larger type -> don't need overflow check
+        if (indexTK == ESMC_TYPEKIND_I1){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++)
+            seqIndexList->array[j] = (T)((ESMC_I1*)arbSeqIndexList)[j];
+        }else if (indexTK == ESMC_TYPEKIND_I2){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++)
+            seqIndexList->array[j] = (T)((ESMC_I2*)arbSeqIndexList)[j];
+        }else if (indexTK == ESMC_TYPEKIND_I4){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++)
+            seqIndexList->array[j] = (T)((ESMC_I4*)arbSeqIndexList)[j];
+        }else if (indexTK == ESMC_TYPEKIND_I8){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++)
+            seqIndexList->array[j] = (T)((ESMC_I8*)arbSeqIndexList)[j];
+        }
+      }else if (sizeof(T) < sizeOfType){
+        // casting from larger to smaller type -> need overflow check
+        if (indexTK == ESMC_TYPEKIND_I1){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++){
+            seqIndexList->array[j] = (T)((ESMC_I1*)arbSeqIndexList)[j];
+            if ((ESMC_I1)seqIndexList->array[j]
+              != ((ESMC_I1*)arbSeqIndexList)[j]){
+              // error condition
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                "Overflow detected during assignment", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+          }
+        }else if (indexTK == ESMC_TYPEKIND_I2){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++){
+            seqIndexList->array[j] = (T)((ESMC_I2*)arbSeqIndexList)[j];
+            if ((ESMC_I2)seqIndexList->array[j]
+              != ((ESMC_I2*)arbSeqIndexList)[j]){
+              // error condition
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                "Overflow detected during assignment", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+          }
+        }else if (indexTK == ESMC_TYPEKIND_I4){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++){
+            seqIndexList->array[j] = (T)((ESMC_I4*)arbSeqIndexList)[j];
+            if ((ESMC_I4)seqIndexList->array[j]
+              != ((ESMC_I4*)arbSeqIndexList)[j]){
+              // error condition
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                "Overflow detected during assignment", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+          }
+        }else if (indexTK == ESMC_TYPEKIND_I8){
+          for (int j=0; j<elementCountPCollPLocalDe[collIndex][localDe]; j++){
+            seqIndexList->array[j] = (T)((ESMC_I8*)arbSeqIndexList)[j];
+            if ((ESMC_I8)seqIndexList->array[j]
+              != ((ESMC_I8*)arbSeqIndexList)[j]){
+              // error condition
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                "Overflow detected during assignment", ESMC_CONTEXT, &rc);
+              return rc;
+            }
+          }
+        }
       }
-      memcpy((seqIndexList)->array, arbSeqIndexList,
-        sizeOfType * elementCountPCollPLocalDe[collIndex][localDe]);
     }else{
       // default seq indices -> generate on the fly and fill in
       if ((seqIndexList)->extent[0] <
@@ -3575,91 +3714,35 @@ template<typename T> int DistGrid::fillSeqIndexList(
           ESMC_CONTEXT, &rc);
         return rc;
       }
+      int de = delayout->getLocalDeToDeMap()[localDe];
       // TODO: must consider collocation subspace here!!!
-      // TODO: use MultiDimIndexLoop class for the following multi-dim loop
-      int *ii = new int[dimCount];     // index tuple basis 0
-      const int *iiEnd = getIndexCountPDimPDe() + dimCount *
-        delayout->getLocalDeToDeMap()[localDe];
-      // reset counters
+      vector<int> sizes(dimCount);
+      for (int i=0; i<dimCount; i++)
+        sizes[i]=indexCountPDimPDe[de*dimCount+i];
+      MultiDimIndexLoop multiDimIndexLoop(sizes, true, this, localDe);
       int index = 0;
-      for (int j=0; j<dimCount; j++)
-        ii[j] = 0;  // reset
-      // loop over all elements in exclusive region for localDe
-      while(ii[dimCount-1] < iiEnd[dimCount-1]){
-        vector<T> seqIndex;
-        getSequenceIndexLocalDe(localDe, ii, seqIndex);
-        (seqIndexList)->array[index] = seqIndex[0];
-        ++index;
-        // multi-dim index increment
-        ++ii[0];
-        for (int j=0; j<dimCount-1; j++){
-          if (ii[j] == iiEnd[j]){
-            ii[j] = 0;  // reset
-            ++ii[j+1];
-          }
+      while(multiDimIndexLoop.isWithin()){
+        try{
+          seqIndexList->array[index++]= multiDimIndexLoop.getSequenceIndex<T>();
+        }catch(int catchrc){
+          // catch standard ESMF return code
+          ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc);
+          return rc;
+        }catch(exception &x){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          x.what(), ESMC_CONTEXT, &rc);
+          return rc;
+        }catch(...){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "Caught exception", ESMC_CONTEXT, &rc);
+          return rc;
         }
+        multiDimIndexLoop.next();
       }
-      delete [] ii;
     }
   }
   
-  // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::fillSeqIndexList()"
-//BOPI
-// !IROUTINE:  ESMCI::DistGrid::fillSeqIndexList
-//
-// !INTERFACE:
-//
-int DistGrid::fillSeqIndexList(
-// !RETURN VALUE:
-//    int return code
-//
-// !ARGUMENTS:
-//
-  vector<int> &seqIndexList,    // in
-  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
-  int collocation               // in  -
-  )const{
-//
-// !DESCRIPTION:
-//    Fill the seqIndexList argument. If the size of seqIndexList does not
-//    match it will automatically resized by this method.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
-  int i;
-  for (i=0; i<diffCollocationCount; i++)
-    if (collocationTable[i]==collocation) break;
-  if (i==diffCollocationCount){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-      "specified collocation not valid", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-  int collIndex = i;
-
-  unsigned int elementCount = elementCountPCollPLocalDe[collIndex][localDe];
-  
-  if (seqIndexList.size() != elementCount)
-    seqIndexList.resize(elementCount);
-  
-  InterArray<int> *seqIndexListAux = new InterArray<int>(seqIndexList);
-  localrc = fillSeqIndexList(seqIndexListAux, localDe, collocation);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  delete seqIndexListAux;
-    
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -3819,7 +3902,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -3831,7 +3914,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -3847,7 +3930,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3869,7 +3952,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3887,7 +3970,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3900,7 +3983,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3914,7 +3997,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3929,7 +4012,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3944,7 +4027,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3963,7 +4046,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -3979,7 +4062,7 @@ DistGridMatch_Flag DistGrid::match(
         {
           std::stringstream msg;
           msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         return matchResult;
@@ -3998,7 +4081,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4012,7 +4095,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4027,7 +4110,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4042,7 +4125,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4057,7 +4140,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4072,7 +4155,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4087,7 +4170,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4101,7 +4184,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4121,7 +4204,7 @@ DistGridMatch_Flag DistGrid::match(
             std::stringstream msg;
             msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
             msg << " " << i << "," << j << ": " << intP1[i][j] << " " << intP2[i][j];
-            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
           if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4142,7 +4225,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4156,7 +4239,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4171,7 +4254,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4187,7 +4270,7 @@ DistGridMatch_Flag DistGrid::match(
         {
           std::stringstream msg;
           msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4202,7 +4285,7 @@ DistGridMatch_Flag DistGrid::match(
     {
       std::stringstream msg;
       msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4230,7 +4313,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
               if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4246,7 +4329,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
               if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4262,7 +4345,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
               if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4278,7 +4361,7 @@ DistGridMatch_Flag DistGrid::match(
       {
         std::stringstream msg;
         msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
               if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4297,7 +4380,7 @@ DistGridMatch_Flag DistGrid::match(
   {
     std::stringstream msg;
     msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -4512,7 +4595,7 @@ bool DistGrid::isLocalDeOnEdgeL(
   {
     stringstream debugmsg;
     debugmsg << "isLocalDeOnEdgeL: localDe=" << localDe << " dim=" << dim;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -4632,7 +4715,7 @@ bool DistGrid::isLocalDeOnEdgeU(
   {
     stringstream debugmsg;
     debugmsg << "isLocalDeOnEdgeU: localDe=" << localDe << " dim=" << dim;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -5168,7 +5251,7 @@ template<typename T> int DistGrid::getSequenceIndexTile(
       debugmsg << "seqIndex.size()=" << seqIndex.size();
       for (unsigned int i=0; i<seqIndex.size(); i++)
         debugmsg << " ["<<i<<"]=" << seqIndex[i];
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
     
@@ -5231,7 +5314,7 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
       << " tile=" << tile << " hops=" << hops;
     for (int i=0; i<dimCount; i++)
       debugmsg << " index["<<i<<"]=" << index[i];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -5280,7 +5363,7 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
       << " tile=" << tile;
     for (int i=0; i<dimCount; i++)
       debugmsg << " index["<<i<<"]=" << index[i];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
   }
@@ -5294,7 +5377,7 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
     stringstream debugmsg;
     debugmsg << "getSequenceIndexTileRecursive(): connection=" << i
       << " tileA=" << tileA << " tileB=" << tileB;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
         // found connection for this tile -> need to transform index
@@ -5337,7 +5420,7 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
     stringstream debugmsg;
     debugmsg << "getSequenceIndexTileRecursive(): connection=" << i
       << " tileA=" << tileA << " tileB=" << tileB;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
         // found connection for this tile -> need to transform index
@@ -5787,6 +5870,7 @@ int DistGrid::serialize(
   int *ip;
   ESMC_I8 *lp;
   ESMC_TypeKind_Flag *tkp;
+  ESMC_IndexFlag *ifp;
   int r;
 
   // Check if buffer has enough free memory to hold object
@@ -5817,8 +5901,13 @@ int DistGrid::serialize(
     *tkp++ = indexTK;
   else
     tkp += 1;
+  ifp = (ESMC_IndexFlag *)tkp;
+  if (inquireflag != ESMF_INQUIREONLY)
+    *ifp++ = indexflag;
+  else
+    ifp += 1;
   //
-  ip = (int *)tkp;
+  ip = (int *)ifp;
   if (inquireflag != ESMF_INQUIREONLY){
     *ip++ = dimCount;
     *ip++ = tileCount;
@@ -5930,6 +6019,7 @@ DistGrid *DistGrid::deserialize(
   int *ip;
   ESMC_I8 *lp;
   ESMC_TypeKind_Flag *tkp;
+  ESMC_IndexFlag *ifp;
   int r;
   
   // Deserialize the Base class
@@ -5949,7 +6039,9 @@ DistGrid *DistGrid::deserialize(
   if (r!=0) *offset += 8-r;  // alignment
   tkp = (ESMC_TypeKind_Flag *)(buffer + *offset);
   a->indexTK = *tkp++;
-  ip = (int *)tkp;
+  ifp = (ESMC_IndexFlag *)tkp;
+  a->indexflag = *ifp++;
+  ip = (int *)ifp;
   a->dimCount = *ip++;
   a->tileCount = *ip++;
   a->minIndexPDimPTile = new int[a->dimCount*a->tileCount];
@@ -6348,13 +6440,15 @@ template<typename T> int DistGrid::setArbSeqIndex(
 //
 // !ARGUMENTS:
 //
-  InterArray<T> *arbSeqIndex,   // in
+  vector<T> &arbSeqIndex,       // in
   int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
   int collocation               // in
   ){
 //
 // !DESCRIPTION:
-//    Set the array of arbitrary indices
+//    Set the array of arbitrary indices for localDe and collocation. The 
+//    indexTK of the DistGrid object might be changed. It is set to the 
+//    typekind of the incoming type T.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -6367,7 +6461,57 @@ template<typename T> int DistGrid::setArbSeqIndex(
   char msg[160];
   sprintf(msg, "setArbSeqIndex: localDe=%d, collocation=%d", localDe, 
     collocation);
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+#endif
+  
+  InterArray<T> arbSeqIndexInter(arbSeqIndex);
+  localrc = setArbSeqIndex(&arbSeqIndexInter, localDe, 1);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+  
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::setArbSeqIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::setArbSeqIndex
+//
+// !INTERFACE:
+//
+template<typename T> int DistGrid::setArbSeqIndex(
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  InterArray<T> *arbSeqIndex,   // in
+  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
+  int collocation               // in
+  ){
+//
+// !DESCRIPTION:
+//    Set the array of arbitrary indices for localDe and collocation. The 
+//    indexTK of the DistGrid object might be changed. It is set to the 
+//    typekind of the incoming type T.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+#define DEBUGPRINTS____disable
+#ifdef DEBUGPRINTS
+  char msg[160];
+  sprintf(msg, "setArbSeqIndex: localDe=%d, collocation=%d", localDe, 
+    collocation);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
   
   // check input
@@ -6402,7 +6546,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
     "elementCountPCollPLocalDe[collocationIndex][localDe]=%d", 
     arbSeqIndex->extent[0], 
     elementCountPCollPLocalDe[collocationIndex][localDe]);
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
     
   if (arbSeqIndex->extent[0] !=
@@ -6413,7 +6557,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
     return rc;
   }
 
-  // potentially delete previous index list
+  // delete potentially existing previous arbSeqIndexListPCollPLocalDe[][] alloc
   if (arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]){
     if (indexTK == ESMC_TYPEKIND_I1){
       ESMC_I1 *ptr = 
@@ -6439,24 +6583,24 @@ template<typename T> int DistGrid::setArbSeqIndex(
     }
   }
 
-  // set arbSeqIndexListPCollPLocalDe[][]
-  unsigned int sizeOfType;
-  if (indexTK == ESMC_TYPEKIND_I1){
+  // allocate memory for arbSeqIndexListPCollPLocalDe[][] and set indexTK
+  unsigned int sizeOfType = sizeof(T);
+  if (sizeOfType == sizeof(ESMC_I1)){
     arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
       = (void *)(new ESMC_I1[arbSeqIndex->extent[0]]);
-    sizeOfType = sizeof(ESMC_I1);
-  }else if (indexTK == ESMC_TYPEKIND_I2){
+    indexTK = ESMC_TYPEKIND_I1;
+  }else if (sizeOfType == sizeof(ESMC_I2)){
     arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
       = (void *)(new ESMC_I2[arbSeqIndex->extent[0]]);
-    sizeOfType = sizeof(ESMC_I2);
-  }else if (indexTK == ESMC_TYPEKIND_I4){
+    indexTK = ESMC_TYPEKIND_I2;
+  }else if (sizeOfType == sizeof(ESMC_I4)){
     arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
       = (void *)(new ESMC_I4[arbSeqIndex->extent[0]]);
-    sizeOfType = sizeof(ESMC_I4);
-  }else if (indexTK == ESMC_TYPEKIND_I8){
+    indexTK = ESMC_TYPEKIND_I4;
+  }else if (sizeOfType == sizeof(ESMC_I8)){
     arbSeqIndexListPCollPLocalDe[collocationIndex][localDe]
       = (void *)(new ESMC_I8[arbSeqIndex->extent[0]]);
-    sizeOfType = sizeof(ESMC_I8);
+    indexTK = ESMC_TYPEKIND_I8;
   }else{
     // error condition, indexTK not supported
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -6464,15 +6608,6 @@ template<typename T> int DistGrid::setArbSeqIndex(
     return rc;
   }
   
-  // check for type mismatch
-  if (sizeOfType != sizeof(T)){
-    // error condition, indexTK not supported
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Mismatch of DistGrid indexTK and typekind of provided sequence indices",
-      ESMC_CONTEXT, &rc);
-    return rc;
-  }
-
   // copy the provided arbSeqIndex array into the DistGrid
   memcpy(arbSeqIndexListPCollPLocalDe[collocationIndex][localDe],
     arbSeqIndex->array, sizeOfType*arbSeqIndex->extent[0]);
@@ -6488,7 +6623,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::DistGrid::setArbSeqIndex()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::unsetArbSeqIndex
+// !IROUTINE:  ESMCI::DistGrid::setArbSeqIndex
 //
 // !INTERFACE:
 //
@@ -6504,7 +6639,7 @@ int DistGrid::setArbSeqIndex(
   ){
 //
 // !DESCRIPTION:
-//    Unset the array of arbitrary indices
+//    Set the array of arbitrary indices to the incoming pointer.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -6517,7 +6652,7 @@ int DistGrid::setArbSeqIndex(
   char msg[160];
   sprintf(msg, "setArbSeqIndex: localDe=%d, collocation=%d", localDe, 
     collocation);
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
   
   // check input
@@ -6560,8 +6695,13 @@ int DistGrid::setArbSeqIndex(
     indexTupleWatchStart.resize(0);
     indexTupleWatchEnd.resize(0);
     skipBlockedRegionFlag = false; // initialize
+    seqIndex=NULL;
+    distgrid=NULL;
+    localDe=-1;
+    arbSeq=false;
   }
-  MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &sizes){
+  MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &sizes,
+    bool seqIndexEnabled, DistGrid const *distgridArg, int localDeArg){
     indexTupleEnd = sizes;
     // default initialize rest
     int rank = sizes.size();
@@ -6579,7 +6719,58 @@ int DistGrid::setArbSeqIndex(
       indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     }
     skipBlockedRegionFlag = false; // initialize
+    seqIndex=NULL;  // default
+    distgrid=NULL;  // default
+    localDe=-1;     // default
+    arbSeq=false;   // default
     adjust();
+    // deal with seqIndex support
+    if (seqIndexEnabled){
+      int localrc = ESMC_RC_NOT_IMPL;
+      if (distgridArg==NULL){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+          "distgridArg must not be NULL for seqIndexEnabled=.true.",
+          ESMC_CONTEXT, &localrc);
+        throw localrc;  // bail out with exception
+      }
+      distgrid = distgridArg;
+      if (localDeArg<0 || 
+        localDeArg >= distgrid->getDELayout()->getLocalDeCount()){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "A valid localDeArg is needed for seqIndexEnabled=.true.",
+          ESMC_CONTEXT, &localrc);
+        throw localrc;  // bail out with exception
+      }
+      localDe=localDeArg;
+      // check for arbitary sequence indices
+      if (distgrid->getArbSeqIndexList(localDe, 1, &localrc)) arbSeq=true;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      // prepare seqIndex member for iteration
+      if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4){
+        seqIndex = (void *) new ESMC_I4;
+        vector<ESMC_I4> seqIndexList;
+        localrc = distgrid->getSequenceIndexLocalDe(localDe, getIndexTuple(),
+          seqIndexList);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+        if (seqIndexList.size()>0)
+          *(ESMC_I4*)seqIndex = seqIndexList[0];
+        else
+          *(ESMC_I4*)seqIndex = -1;
+      }else if (distgrid->getIndexTK()==ESMC_TYPEKIND_I8){
+        seqIndex = (void *) new ESMC_I8;
+        vector<ESMC_I8> seqIndexList;
+        localrc = distgrid->getSequenceIndexLocalDe(localDe, getIndexTuple(),
+          seqIndexList);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+        if (seqIndexList.size()>0)
+          *(ESMC_I8*)seqIndex = seqIndexList[0];
+        else
+          *(ESMC_I8*)seqIndex = -1;
+      }
+    }
   }
   MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &offsets,
     vector<int> const &sizes){
@@ -6602,6 +6793,10 @@ int DistGrid::setArbSeqIndex(
       indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     }
     skipBlockedRegionFlag = false; // initialize
+    seqIndex=NULL;  // default
+    distgrid=NULL;  // default
+    localDe=-1;     // default
+    arbSeq=false;   // default
     adjust();
   }
   void MultiDimIndexLoop::setSkipDim(int dim){
@@ -6727,10 +6922,45 @@ int DistGrid::setArbSeqIndex(
       msg << "adjust()#" << __LINE__ << "index= ";
       for (unsigned i=0; i<indexTuple.size(); i++)
         msg << indexTuple[i] << ", ";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
-    
+    // update seqIndex if active
+    if (seqIndex){
+      int localrc = ESMC_RC_NOT_IMPL;
+      if (adjusted||arbSeq){
+        // must re-compute seqIndex from index tuple
+        if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4){
+          vector<ESMC_I4> seqIndexList;
+          localrc = distgrid->getSequenceIndexLocalDe(localDe, getIndexTuple(),
+            seqIndexList);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+          if (seqIndexList.size()>0)
+            *(ESMC_I4*)seqIndex = seqIndexList[0];
+          else
+            *(ESMC_I4*)seqIndex = -1;
+        }else if (distgrid->getIndexTK()==ESMC_TYPEKIND_I8){
+          vector<ESMC_I8> seqIndexList;
+          localrc = distgrid->getSequenceIndexLocalDe(localDe, getIndexTuple(),
+            seqIndexList);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+          if (seqIndexList.size()>0)
+            *(ESMC_I8*)seqIndex = seqIndexList[0];
+          else
+            *(ESMC_I8*)seqIndex = -1;
+        }
+      }else{
+        // optimize by simple seqIndex increment
+        if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4){
+          (*(ESMC_I4*)seqIndex)++;
+        }else if (distgrid->getIndexTK()==ESMC_TYPEKIND_I8){
+          (*(ESMC_I8*)seqIndex)++;
+        }
+      }
+    }
+    // return
     return adjusted;
   }
   bool MultiDimIndexLoop::next(){
@@ -6790,26 +7020,26 @@ int DistGrid::setArbSeqIndex(
   int const *MultiDimIndexLoop::getIndexTupleStart()const{
     return &indexTupleStart[0];
   }
-  void MultiDimIndexLoop::log()const{
+  void MultiDimIndexLoop::log(ESMC_LogMsgType_Flag msgType)const{
     unsigned i;
     std::stringstream msg;
     msg << "MultiDimIndexLoop: indexTupleStart = (";
     for (i=0; i<indexTupleStart.size()-1; i++)
       msg << " " << indexTupleStart[i] << ",";
     msg << " " << indexTupleStart[i] << ")";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), msgType);
     msg.str("");  // clear
     msg << "MultiDimIndexLoop: indexTupleEnd = (";
     for (i=0; i<indexTupleEnd.size()-1; i++)
       msg << " " << indexTupleEnd[i] << ",";
     msg << " " << indexTupleEnd[i] << ")";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), msgType);
     msg.str("");  // clear
     msg << "MultiDimIndexLoop: indexTuple = (";
     for (i=0; i<indexTuple.size()-1; i++)
       msg << " " << indexTuple[i] << ",";
     msg << " " << indexTuple[i] << ")";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msg.str(), msgType);
   }
   //============================================================================
 

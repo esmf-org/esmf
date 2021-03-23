@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -12,7 +12,7 @@
 #define ESMF_FILENAME "ESMF_StateSet.F90"
 !
 !     ESMF StateSet module
-      module ESMF_StateSetMod
+module ESMF_StateSetMod
 !
 !==============================================================================
 !
@@ -23,7 +23,6 @@
 !------------------------------------------------------------------------------
 #include "ESMF.h"
 
-#define ESMF_ENABLESTATENEEDED
 !------------------------------------------------------------------------------
 !BOPI
 ! !MODULE: ESMF_StateSetMod - State Set Module
@@ -38,7 +37,6 @@
       use ESMF_LogErrMod
       use ESMF_StateTypesMod
       use ESMF_StateVaMod
-      use ESMF_StateMod
       use ESMF_InitMacrosMod
       
       implicit none
@@ -54,9 +52,7 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-#if defined (ESMF_ENABLESTATENEEDED)
-      public ESMF_StateSetNeeded
-#endif
+      public ESMF_StateSet
 
 !EOPI
 
@@ -79,73 +75,43 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateSetNeeded"
-!BOPI
-! !IROUTINE: ESMF_StateSetNeeded - Set if a data item is needed
+#define ESMF_METHOD "ESMF_StateSet"
+!BOP
+! !IROUTINE: ESMF_StateSet - Set State aspects
 !
 ! !INTERFACE:
-      subroutine ESMF_StateSetNeeded(state, itemName, neededflag, keywordEnforcer, rc)
+  subroutine ESMF_StateSet(state, keywordEnforcer, stateIntent, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),  intent(inout)   :: state
-      character (len=*), intent(in)      :: itemName
-      type(ESMF_NeededFlag), intent(in)  :: neededflag
+    type(ESMF_State),            intent(inout)         :: state
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,    intent(out),  optional :: rc             
+    type(ESMF_StateIntent_Flag), intent(in),  optional :: stateIntent
+    integer,                     intent(out), optional :: rc             
 
 !
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \end{itemize}
-!
 ! !DESCRIPTION:
-!      Sets the status of the {\tt needed} flag for the data item
-!      named by {\tt itemName} in the {\tt ESMF\_State}.
+!      Set the info in the {\tt state} object.
 !
 !     The arguments are:
 !      \begin{description}     
 !      \item[state]
 !        The {\tt ESMF\_State} to set.
-!       \item[itemName]
-!        Name of the data item to set.
-!       \item[neededflag]
-!        Set status of data item to this.  See Section~\ref{opt:neededflag}
-!        for possible values.
-!       \item[{[rc]}]
+!      \item[stateIntent]
+!        Intent, e.g. Import or Export, of this {\tt ESMF\_State}.
+!        Possible values are listed in Section~\ref{const:stateintent}.
+!      \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
+!      \end{description}
 !
-!EOPI
-
-      type(ESMF_StateItem), pointer :: dataitem
-      logical :: exists
-      integer :: localrc
-
-      ! Assume failure until we know we will succeed
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-
-!      exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
-!                                      dataitem=dataitem, rc=localrc)
-!      if (.not. exists) then
-!          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=itemName, &
-!                                      ESMF_CONTEXT, rcToReturn=rc)) return
-!      endif
-!
-!      dataitem%needed = neededflag
-!
-!      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateSetNeeded
+!EOP
 !------------------------------------------------------------------------------
-      end module ESMF_StateSetMod
+    type(ESMF_StateClass), pointer :: stypep
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    stypep => state%statep
+    if (present(stateIntent)) stypep%st = stateintent
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_StateSet
+!------------------------------------------------------------------------------
+
+end module ESMF_StateSetMod

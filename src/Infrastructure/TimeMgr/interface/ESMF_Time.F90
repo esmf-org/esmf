@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -557,6 +557,11 @@
       end interface
 !
 !==============================================================================
+
+  interface ESMF_TimeSet
+    module procedure ESMF_TimeSetDefault
+    module procedure ESMF_TimeSetString
+  end interface
 
       contains
 
@@ -1159,12 +1164,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_TimeSet()"
+#define ESMF_METHOD "ESMF_TimeSetDefault()"
 !BOP
 ! !IROUTINE: ESMF_TimeSet - Initialize or set a Time
 
 ! !INTERFACE:
-      subroutine ESMF_TimeSet(time, keywordEnforcer, &
+  ! Private name; call using ESMF_TimeSet()
+      subroutine ESMF_TimeSetDefault(time, keywordEnforcer, &
         yy, yy_i8, &
         mm, dd, &
         d, d_i8, &
@@ -1373,7 +1379,61 @@
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_TimeSet
+      end subroutine ESMF_TimeSetDefault
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeSetString()"
+!BOP
+! !IROUTINE: ESMF_TimeSet - Initialize or set a Time from ISO format string
+
+! !INTERFACE:
+  ! Private name; call using ESMF_TimeSet()
+      subroutine ESMF_TimeSetString(time, timeString, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Time),         intent(inout)         :: time
+      character(*),            intent(in)            :: timeString
+      integer,                 intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Initializes an {\tt ESMF\_Time} with a set of user-specified string.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time]
+!          The object instance to initialize.
+!     \item[timeString]
+!          ISO format time string. E.g. 2012-10-24T18:00:00.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+      integer :: localrc                        ! local return code
+      integer :: yy, mm, dd, h, m, s
+
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      ! transform from string to integer components
+      read (timeString(1:4), "(I4.4)") yy
+      read (timeString(6:7), "(I2.2)") mm
+      read (timeString(9:10), "(I2.2)") dd
+      read (timeString(12:13), "(I2.2)") h
+      read (timeString(15:16), "(I2.2)") m
+      read (timeString(18:19), "(I2.2)") s
+
+      ! set the time using integer components
+      call ESMF_TimeSet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Return success
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_TimeSetString
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

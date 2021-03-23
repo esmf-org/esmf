@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -166,47 +166,51 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   localDeCount = 1
   rc = ESMF_SUCCESS
-  ESMF_BLOCK(aget_i4)
-    call ESMF_ArrayGet(array_withhalo, localDe=0, farrayPtr=Farray3D_withhalo, rc=rc)
-    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
-        line=__LINE__, file=ESMF_FILENAME)) exit aget_i4
 
-    call ESMF_ArrayGet(array_wouthalo, localDe=0, farrayPtr=Farray3D_wouthalo, rc=rc)
-    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
-        line=__LINE__, file=ESMF_FILENAME)) exit aget_i4
+  call ESMF_ArrayGet(array_withhalo, localDe=0, farrayPtr=Farray3D_withhalo, rc=rc)
+  if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+    line=__LINE__, file=ESMF_FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    localDeCount = 1
-    allocate(exclusiveLBound(3,localDeCount))         ! dimCount=3
-    allocate(exclusiveUBound(3,localDeCount))         ! dimCount=3
+  call ESMF_ArrayGet(array_wouthalo, localDe=0, farrayPtr=Farray3D_wouthalo, rc=rc)
+  if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+    line=__LINE__, file=ESMF_FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_ArrayGet(array_wouthalo, exclusiveLBound=exclusiveLBound, &
-                       exclusiveUBound=exclusiveUBound, rc=rc)
-    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
-        line=__LINE__, file=ESMF_FILENAME)) exit aget_i4
+  localDeCount = 1
+  allocate(exclusiveLBound(3,localDeCount))         ! dimCount=3
+  allocate(exclusiveUBound(3,localDeCount))         ! dimCount=3
 
-    Farray3D_wouthalo = 1
-    do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
-    do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
-    do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
-      Farray3D_wouthalo(i,j,k) = i+j+k  ! init to something i, j, k dependent
-    enddo
-    enddo
-    enddo
+  call ESMF_ArrayGet(array_wouthalo, exclusiveLBound=exclusiveLBound, &
+                     exclusiveUBound=exclusiveUBound, rc=rc)
+  if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+    line=__LINE__, file=ESMF_FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_ArrayGet(array_withhalo, exclusiveLBound=exclusiveLBound, &
-                       exclusiveUBound=exclusiveUBound, rc=rc)
-    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
-        line=__LINE__, file=ESMF_FILENAME)) exit aget_i4
+  Farray3D_wouthalo = 1
+  do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
+  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
+  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
+    Farray3D_wouthalo(i,j,k) = i+j+k  ! init to something i, j, k dependent
+  enddo
+  enddo
+  enddo
 
-    Farray3D_withhalo = 1     ! All entries are 1 including the halos.
-    do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
-    do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
-    do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
-      Farray3D_withhalo(i,j,k) = i+j+k  ! init to something i, j, k dependent
-    enddo
-    enddo
-    enddo
-  ESMF_ENDBLOCK(aget_i4)
+  call ESMF_ArrayGet(array_withhalo, exclusiveLBound=exclusiveLBound, &
+                     exclusiveUBound=exclusiveUBound, rc=rc)
+  if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+    line=__LINE__, file=ESMF_FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  Farray3D_withhalo = 1     ! All entries are 1 including the halos.
+  do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
+  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
+  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
+    Farray3D_withhalo(i,j,k) = i+j+k  ! init to something i, j, k dependent
+  enddo
+  enddo
+  enddo
+
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)  
 
 !------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -335,7 +335,8 @@ int LogErr::Write(
        int msgtype   // Msg Type
       )
 // !DESCRIPTION:
-// Prints log message and returns true if successful.  It takes two arguments -
+// Prints log message and returns ESMF_SUCCESS if successful.  It takes two
+// arguments -
 // msg which is a user message and log type.  This method does not use cpp
 // macros
 //EOP
@@ -345,7 +346,7 @@ int LogErr::Write(
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
-    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return true;
+    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return ESMF_SUCCESS;
     FTN_X(f_esmf_logwrite0)(msg.c_str(), &msgtype, &rc, msg.size());
 
     return rc;
@@ -372,7 +373,8 @@ int LogErr::Write(
     const std::string &method
     )
 // !DESCRIPTION:
-// Prints log message and returns true if successful.  It takes two arguments -
+// Prints log message and returns ESMF_SUCCESS if successful.  It takes two
+// arguments -
 // msg which is a user message and log type.  This method uses cpp macros
 //EOP
 {
@@ -381,7 +383,7 @@ int LogErr::Write(
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
-    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return true;
+    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return ESMF_SUCCESS;
     FTN_X(f_esmf_logwrite1)(msg.c_str(), &msgtype, &LINE, FILE.c_str(), method.c_str(), &rc,
                           msg.length(), FILE.length(), method.length());
 

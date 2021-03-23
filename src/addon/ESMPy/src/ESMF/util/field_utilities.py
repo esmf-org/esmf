@@ -40,7 +40,7 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
     assert field1.data.shape == field2.data.shape, 'compare_fields: Fields must be the same size!'
     
     # deal with default values for fracfield
-    if dstfracfield is None:
+    if isinstance(dstfracfield, type(None)):
         dstfracfield = ma.ones(field1.data.shape)
 
     # compute pointwise error measures
@@ -54,9 +54,9 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
     field2_flat = np.ravel(field2.data)
     dstfracfield_flat = np.ravel(dstfracfield.data)
     # setup mask, no Mask on a Mesh (yet) so need to look at the type first
-    if ((type(field2.grid) is ESMF.Grid) and
-        (field2.grid.mask[field2.staggerloc] is not None)):
-        if (field2.grid.mask[field2.staggerloc] is not None):
+    if (isinstance(field2.grid, ESMF.Grid)) and \
+        (not isinstance(field2.grid.mask[field2.staggerloc], type(None))):
+        if not isinstance(field2.grid.mask[field2.staggerloc], type(None)):
             field2mask_flat = [True if x in mask_values else False for x in field2.grid.mask[field2.staggerloc].flatten().tolist()]
     else:
         field2mask_flat = np.ravel(np.zeros_like(field2.data))
@@ -88,7 +88,7 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
         num_nodes_global = helpers.reduce_val(num_nodes)
         max_error_global = helpers.reduce_val(max_error, op=constants.Reduce.MAX)
         min_error_global = helpers.reduce_val(min_error, op=constants.Reduce.MIN)
-        if (mass1 is not None) and (mass2 is not None):
+        if not isinstance(mass1, type(None)) and not isinstance(mass2, type(None)):
             mass1_global = helpers.reduce_val(mass1)
             mass2_global = helpers.reduce_val(mass2)
 
@@ -97,7 +97,7 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
         num_nodes_global = num_nodes
         max_error_global = max_error
         min_error_global = min_error
-        if (mass1 is not None) and (mass2 is not None):
+        if not isinstance(mass1, type(None)) and not isinstance(mass2, type(None)):
             mass1_global = mass1
             mass2_global = mass2
 

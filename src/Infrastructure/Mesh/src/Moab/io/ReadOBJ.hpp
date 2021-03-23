@@ -148,8 +148,7 @@ private:
 
   GeomTopoTool* myGeomTool;
 
-  Tag geom_tag,id_tag,name_tag,category_tag,faceting_tol_tag, geometry_resabs_tag, obj_name_tag, 
-    sense_tag;
+  Tag geom_tag,id_tag,name_tag,category_tag,faceting_tol_tag, geometry_resabs_tag, obj_name_tag;
 
   /*  The keyword type function matches the first character extracted from each line to a type of line
    */ 

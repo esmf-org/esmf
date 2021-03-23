@@ -11,10 +11,9 @@
 #include "moab/ParallelComm.hpp"
 #endif
 
-bool debug = false;
-
 namespace moab 
 {
+  static bool debug = false;
 
     SpatialLocator::SpatialLocator(Interface *impl, Range &elems, Tree *tree, ElemEvaluator *eval) 
             : mbImpl(impl), myElems(elems), myDim(-1), myTree(tree), elemEval(eval), iCreatedTree(false),

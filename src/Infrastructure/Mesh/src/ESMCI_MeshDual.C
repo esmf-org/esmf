@@ -1,7 +1,8 @@
+
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -83,6 +84,7 @@ namespace ESMCI {
   void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
                                 int *_num_ids, UInt *ids);
 
+  void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm);
 
 
   // Create a dual of the input Mesh 
@@ -650,11 +652,22 @@ namespace ESMCI {
 #endif
 
       // Allocate some temporary variables for splitting
-      double *polyCoords=new double[3*max_num_conn];
-      double *polyDblBuf=new double[3*max_num_conn];
-      int    *polyIntBuf=new int[max_num_conn];
-      int    *triInd=new int[3*(max_num_conn-2)];
-      double *triFrac=new double[max_num_conn-2];
+      double *polyCoords = NULL;
+      double *polyDblBuf = NULL;
+      int    *polyIntBuf = NULL;
+      int    *triInd = NULL;
+      double *triFrac = NULL;
+
+      //There is nothing to do if there are no local elements, 
+      //plus the max_num_conn will be zero in this case
+      //which will try to allocate negative memory below
+      if (num_elems > 0) {
+        polyCoords = new double[3*max_num_conn];
+        polyDblBuf = new double[3*max_num_conn];
+        polyIntBuf = new int[max_num_conn];
+        triInd = new int[3*(max_num_conn-2)];
+        triFrac = new double[max_num_conn-2];
+      }
 
       // new id counter
       int curr_extra_id=beg_extra_ids;
@@ -787,7 +800,6 @@ namespace ESMCI {
       // The object
       UInt eid = elemId[e];
       MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
-      elem->set_owner(elemOwner[e]);
 
       for (int n = 0; n < nnodes; ++n) {
       
@@ -802,7 +814,7 @@ namespace ESMCI {
       }
 
       dual_mesh->add_element(elem, nconnect, topo->number, topo);
-
+      elem->set_owner(elemOwner[e]); // Need to do after add_element(), because for some reason that resets the element owner.
 
     } // for e
 
@@ -825,6 +837,9 @@ namespace ESMCI {
                   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
     }
 
+    // Change owners to be on the current communicator rather than the source mesh's communicator
+    _change_owners_from_src_to_curr_comm(dual_mesh, src_mesh->orig_comm);
+
     // Commit Mesh
     dual_mesh->build_sym_comm_rel(MeshObj::NODE);
     dual_mesh->Commit();
@@ -834,6 +849,41 @@ namespace ESMCI {
     // Output 
     *_dual_mesh=dual_mesh;
 }
+
+
+  void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm) {
+    
+    // If not in src comm, just leave because there is nothing to do
+    if (src_comm == MPI_COMM_NULL) return;
+
+    // Save rank in current comm
+    int curr_rank=Par::Rank();
+
+    // Save current comm
+    MPI_Comm curr_comm=Par::Comm();
+
+    // Switch to src comm
+    ESMCI::Par::Init("MESHLOG", false, src_comm);
+
+    // Get size
+    int src_comm_size=Par::Size();
+
+    // Allocate map
+    int *src_to_curr_map = new int[src_comm_size];
+
+    // Fill map
+    MPI_Allgather(&curr_rank, 1, MPI_INT, src_to_curr_map, 1, MPI_INT, src_comm);
+
+    // Move nodes and elems to new owners
+    dual_mesh->map_obj_owners(src_comm_size, src_to_curr_map);
+
+    // Deallocate map
+    delete [] src_to_curr_map;
+
+
+    // Switch back to current comm
+    ESMCI::Par::Init("MESHLOG", false, curr_comm);
+  }
 
 
 
@@ -1077,8 +1127,13 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
         // If at the center, so would be a zero vector skip...
         if ((tmp_coords[0]==center[0]) &&
             (tmp_coords[1]==center[1]) &&
-            (tmp_coords[2]==center[2])) continue;
-   
+            (tmp_coords[2]==center[2])) {
+
+          // Move to next elem and go back to top...
+          ++el; // Very important otherwise will get stuck in loop
+          continue;
+        }
+
         // Otherwise make this the new point
         max_elem_id=elem_id;
         max_elem_coords[0]=tmp_coords[0];

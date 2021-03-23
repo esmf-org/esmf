@@ -56,118 +56,56 @@ Component that drives and coordinates initialization of its child components: Mo
     integer, intent(out)  :: rc
 \end{verbatim}
 
-\bigskip{\sf INITIALIZE:}
+\bigskip{\sf SEMANTIC SPECIALIZATION LABELS:}
 \begin{itemize}
-\item phase 0: ({\sc Required, NUOPC Provided})
+  \item Initialize:
   \begin{itemize}
-  \item Ensure that the {\tt InitializePhaseMap} and {\tt InternalInitializePhaseMap} attributes are set consistent with the available NUOPC Initialize Phase Definition (IPD) versions (see section \ref{IPD} for a precise definition). The default implementation uses IPDv02 for {\tt InitializePhaseMap}, and sets
+    \item {\bf label\_SetModelServices}
     \begin{itemize}
-    \item IPDv02p1  ({\sc NUOPC Provided})
-    \item IPDv02p3  ({\sc NUOPC Provided})
-    \item IPDv02p5  ({\sc NUOPC Provided}).
-    \end{itemize}  
- The default implementation uses IPDv05 for {\tt InternalInitializePhaseMap}, and sets
+      \item Optional. By default driver has no child components.
+      \item Use {\tt NUOPC\_DriverAddComp()} repeatedly to add child components to the driver.
+      \item Use {\tt NUOPC\_CompAttributeSet()} or {\tt NUOPC\_CompAttributeIngest()} to set attributes on child components.
+      \item Create and set driver clock with startTime, stopTime, and timeStep, if not done by the driver's parent.
+    \end{itemize}
+    \item {\bf label\_SetRunSequence}
     \begin{itemize}
-    \item IPDv05p1  ({\sc NUOPC Provided})
-    \item IPDv05p2  ({\sc NUOPC Provided})
-    \item IPDv05p3  ({\sc NUOPC Provided})
-    \item IPDv05p4  ({\sc NUOPC Provided})
-    \item IPDv05p6  ({\sc NUOPC Provided})
-    \item IPDv05p8  ({\sc NUOPC Provided}).
-    \end{itemize}    
-  \end{itemize}  
-\item phase 1: ({\sc Required, NUOPC Provided})
-  \begin{itemize}
-    \item A default Initialize entry point for the higher level (e.g. application level) to initialize the Driver with a single call.
-    \item Internally calls into the  {\tt InitializePhaseMap}: IPDv02p1, IPDv02p3, IPDv02p5 phases in sequence.
-  \end{itemize}  
-
-\item {\tt InitializePhaseMap}: IPDv02p1 ({\sc NUOPC Provided})
-  \begin{itemize}
-  \item Allocate and initialize internal data structures.
-  \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, but only if the incoming clock is valid.
-  \item {\it Required specialization} to set component services: {\tt label\_SetModelServices}.
-  \begin{itemize}
-    \item Call {\tt NUOPC\_DriverAddComp()} for all Model, Mediator, and Connector components to be added.
-    \item Optionally replace the default clock. 
+      \item Optional. By default drive child components in the sequence they were added.
+      \item Define and set a RunSequence either by calling {\tt NUOPC\_DriverIngestRunSequence()}, or by using the {\tt NUOPC\_DriverNewRunSequence()} and {\tt NUOPC\_DriverAddRunElement()} API.
+    \end{itemize}
+    \item {\bf label\_ModifyInitializePhaseMap}
+    \begin{itemize}
+      \item Optional. By default InitializePhaseMap attributes are not modified.
+      \item Modify the InitializePhaseMap attribute on the child components as desired. This is very rarely needed.
+    \end{itemize}
+    \item {\bf label\_ModifyCplLists}
+    \begin{itemize}
+      \item Optional. By default CplList attributes are  not modified.
+      \item Modify the CplList attribute on the child components as desired. This can be useful to set custom Connection Options for specific Field pairs.
+    \end{itemize}
   \end{itemize}
-  \item Create States for all of the child GridComps.
-  \item Create Connectors to/from Driver component itself.
-  \item Set default run sequence.
-  \item Execute Initialize phase=0 for all Model, Mediator, and Connector components. This is the method where each component is required to initialize its {\tt InitializePhaseMap} Attribute.
-  \item {\it Optional specialization} to analyze and modify the {\tt InitializePhaseMap} Attribute of the child components before the Driver uses it: {\tt label\_ModifyInitializePhaseMap}.
-  \item {\it Optional specialization} to set run sequence: {\tt label\_SetRunSequence}.
-  \item Drive the initialize sequence for the child components, compatible with up to IPDv05, as documented in section \ref{IPD}, through IPDv05p3.
-  \end{itemize}  
-
-\item {\tt InitializePhaseMap}: IPDv02p3 ({\sc NUOPC Provided})
+  \item Run:
   \begin{itemize}
-  \item Continue to drive the initialize sequence for the child components, compatible with up to IPDv05, as documented in section \ref{IPD}, through IPDv05p7.
-  \end{itemize}  
-
-\item {\tt InitializePhaseMap}: IPDv02p5 ({\sc NUOPC Provided})
+    \item {\bf label\_SetRunClock}
+      \begin{itemize}
+        \item Optional. By default driver clock is not modified each time its Run is entered.
+        \item Modify the driver clock before executing RunSequence. This is very rarely needed.
+      \end{itemize}
+    \item {\bf label\_ExecuteRunSequence}
+    \begin{itemize}
+      \item Optional. By default use NUOPC generic RunSequence execution.
+      \item Implement a custom RunSequence execution. This is very rarely needed.
+    \end{itemize}
+  \end{itemize}
+  \item Finalize:
   \begin{itemize}
-  \item Continue to drive the initialize sequence for the child components, compatible with up to IPDv05, as documented in section \ref{IPD}, through IPDv05p8.
-  \end{itemize}  
-
-\item {\tt InternalInitializePhaseMap}: IPDv05p1 ({\sc NUOPC Provided})
-  \begin{itemize}
-  \item Request that fields in export and import State of child components are mirrored onto the driver's own import and export States.
-  \item This includes transferring the associated Grid, Mesh, or LocStream objects.
-  \end{itemize}  
-
-\item {\tt InternalInitializePhaseMap}: IPDv05p2 ({\sc NUOPC Provided})
-  \begin{itemize}
-  \item Reset the request of field mirroring.
-  \end{itemize}  
-
-\item {\tt InternalInitializePhaseMap}: IPDv05p3 ({\sc NUOPC Provided})
-  \begin{itemize}
-  \item Add the {\tt REMAPMETHOD=redist} option to all entries in {\tt CplList} attribute on all Connectors to/from the driver itself.
-  \item {\it Optional specialization} to modify the {\tt CplList} attribute on all of the Connectors: {\tt label\_ModifyCplLists}.
-  \end{itemize}  
-
-\item {\tt InternalInitializePhaseMap}: IPDv05p4 ({\sc NUOPC Provided})
-  \begin{itemize}
-  \item Check that all connected fields in the driver's own import and export State have a producer connection.
-  \end{itemize}  
-
-\item {\tt InternalInitializePhaseMap}: IPDv05p6 ({\sc NUOPC Provided})
-  \begin{itemize}
-  \item Complete the allocation of all the fields in the driver's own import and export State.
-  \end{itemize}  
-
-\item {\tt InternalInitializePhaseMap}: IPDv05p8 ({\sc NUOPC Provided})
-  \begin{itemize}
-  \item Set the {\tt InitializeDataComplete} consistent with the data-dependency protocol.
-  \end{itemize}  
-
+    \item {\bf label\_Finalize}
+    \begin{itemize}
+      \item Optional. By default do nothing.
+      \item Destroy any objects created during Initalize.
+    \end{itemize}
+  \end{itemize}
 \end{itemize}
 
-\bigskip{\sf RUN:}
-\begin{itemize}
-\item phase 1: ({\sc Required, NUOPC Provided})
-  \begin{itemize}
-  \item If the incoming clock is valid, set the internal stop time to one time step interval on the incoming clock.
-  \item Drive the time stepping loop, from current time to stop time, incrementing by time step.
-  \begin{itemize}
-    \item For each time step iteration the Model and Connector components Run() methods are being called according to the run sequence.
-  \end{itemize}  
-  \end{itemize}    
-\end{itemize}
-
-\bigskip{\sf FINALIZE:}
-\begin{itemize}
-\item phase 1: ({\sc Required, NUOPC Provided})
-  \begin{itemize}
-  \item Execute the Finalize() methods of all Connector components in order.
-  \item Execute the Finalize() methods of all Model components in order.
-  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
-  \item Destroy all Model components and their import and export states.
-  \item Destroy all Connector components.
-  \item Internal clean-up.
-  \end{itemize}      
-\end{itemize}
 
 \mbox{}\hrulefill\ 
 

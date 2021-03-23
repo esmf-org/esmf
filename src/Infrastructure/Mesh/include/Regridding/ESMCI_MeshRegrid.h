@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -27,19 +27,6 @@
 
 namespace ESMCI {
 
-#ifdef REGRIDTIMING
-class regridTimer
-{
-public:
-  double start;
-  double gridsInput;
-  double regridComplete;
-  double weightsOutput;
-private:
-} ;
-#endif
-
-// offline
  int regrid(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,
             Mesh *midmesh, IWeights &wts,
             int *regridMethod, int *regridScheme,
@@ -51,34 +38,9 @@ private:
             int *extrapNumLevels,
             int *extrapNumInputLevels, 
             int *unmappedaction,
-            bool set_dst_status, WMat &dst_status);
+            bool set_dst_status, WMat &dst_status, bool checkFlag);
 
-int csrv(Mesh &, Mesh &, IWeights &, MEField<> *, MEField<> *,
-         int *, int *, int *, int *, int *);
-
-// online
-#ifdef REGRIDTIMING
-int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, char *, char *, regridTimer &rT);
-#else
-int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, char *, char *);
-#endif
-  int online_regrid(Mesh *srcmesh, PointList *srcpointlist,
-                    Mesh *dstmesh, PointList *dstpointlist,
-                    IWeights &wts,
-                    int *regridConserve, int *regridMethod,
-                    int *regridPoleType, int *regridPoleNPnts,
-                    int *regridScheme,
-                    int *map_type,
-                    int *extrapMethod,
-                    int *extrapNumSrcPnts,
-                    ESMC_R8 *extrapDistExponent,
-                    int *extrapNumLevels,
-                    int *extrapNumInputLevels, 
-                    int *unmappedaction,
-                    bool set_dst_status, WMat &dst_status);
-
-// get the integration weights for one mesh
-int get_iwts(Mesh &, MEField<> *, int *);
+ int get_iwts(Mesh &mesh, MEField<> *iwts, int *regridScheme);
 
 } // namespace
 

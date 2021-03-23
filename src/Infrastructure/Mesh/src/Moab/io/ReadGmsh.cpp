@@ -1,16 +1,16 @@
 /**
  * MOAB, a Mesh-Oriented datABase, is a software component for creating,
  * storing and accessing finite element mesh data.
- * 
+ *
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
  * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  */
 
 /**
@@ -78,7 +78,7 @@ ErrorCode ReadGmsh::load_file(const char* filename,
   const int* material_set_list = 0;
   int zero = 0;
   if (subset_list) {
-    if (subset_list->tag_list_length > 1 && 
+    if (subset_list->tag_list_length > 1 &&
         !strcmp(subset_list->tag_list[0].tag_name, MATERIAL_SET_TAG_NAME)) {
       MB_SET_ERR(MB_UNSUPPORTED_OPERATION, "GMsh supports subset read only by material ID");
     }
@@ -97,7 +97,7 @@ ErrorCode ReadGmsh::load_file(const char* filename,
   for (const int* mat_set_end = material_set_list + num_material_sets;
        material_set_list != mat_set_end; ++material_set_list)
     blocks.insert(*material_set_list);
-  
+
   // Map of ID->handle for nodes
   std::map<long, EntityHandle> node_id_map;
   int data_size = 8;
@@ -206,7 +206,7 @@ ErrorCode ReadGmsh::load_file(const char* filename,
     return result;
   if (file_id_tag) {
     result = mdbImpl->tag_set_data(*file_id_tag, &handles[0], num_nodes, &ids[0]);
-    if (MB_SUCCESS != result) 
+    if (MB_SUCCESS != result)
       return result;
   }
   ids.clear();
@@ -357,9 +357,16 @@ ErrorCode ReadGmsh::create_elements(const GmshElemType& type,
     return MB_FAILURE;
 
   // Create the element sequence
-  // do not do anything for point type
-  if (type.mb_type==MBVERTEX)
-    return MB_SUCCESS; // do not create anything
+  // for points, simply gather the connectivities and create the materials
+  if (type.mb_type==MBVERTEX) {
+    Range elements;
+    elements.insert< std::vector<EntityHandle> >(connectivity.begin(), connectivity.end());
+    result = create_sets(type.mb_type, elements, matl_ids, 0);
+    if (MB_SUCCESS != result)
+      return result;
+
+    return MB_SUCCESS;
+  }
   EntityHandle handle = 0;
   EntityHandle* conn_array;
   result = readMeshIface->get_element_connect(num_elem, node_per_elem, type.mb_type,
@@ -390,7 +397,7 @@ ErrorCode ReadGmsh::create_elements(const GmshElemType& type,
     return result;
   if (file_id_tag) {
     result = mdbImpl->tag_set_data(*file_id_tag, elements, &elem_ids[0]);
-    if (MB_SUCCESS != result) 
+    if (MB_SUCCESS != result)
       return result;
   }
 
@@ -511,7 +518,7 @@ ErrorCode ReadGmsh::create_sets(EntityType type,
         // Get dimension of set
         int dim2;
         result = mdbImpl->tag_get_data(tag_handles[1], &set, 1, &dim2);
-        if (MB_SUCCESS != result) 
+        if (MB_SUCCESS != result)
           return result;
         // If we're putting geometry of a higher dimension into the
         // set, increase the dimension of the set.

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -49,6 +49,10 @@ namespace ESMCI {
 
  bool debug=false;
 
+#ifdef BOB_XGRID_DEBUG
+  int global_src_id=-1;
+  int global_dst_id=-1;
+#endif
 
   //////////////// BEGIN CALC 2D 2D  WEIGHTS ////////////////
 
@@ -252,10 +256,11 @@ namespace ESMCI {
         }
       }
 
-      if(midmesh || res_map)
+      if(midmesh || res_map) {
         compute_sintd_nodes_cells(sintd_areas[i],
-          num_sintd_nodes, sintd_coords, 2, 2,
-          sintd_nodes, sintd_cells, zz);
+				  num_sintd_nodes, sintd_coords, 2, 2,
+				  sintd_nodes, sintd_cells, zz);
+      }
 
       // append result to a multi-map index-ed by passive mesh element for merging optimization
       if(res_map){
@@ -896,13 +901,14 @@ void norm_poly3D(int num_p, double *p) {
 
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into
   // this call.
-  void calc_1st_order_weights_2D_3D_sph_orig(const MeshObj *src_elem, MEField<> *src_cfield,
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
-                                           double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts,
-                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
-                                           Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes,
-                                           std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
+  void calc_1st_order_weights_2D_3D_sph_orig(const MeshObj *src_elem, MEField<> *src_cfield, 
+					     std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,  
+					     double *src_elem_area,
+					     std::vector<int> *valid, std::vector<double> *wgts, 
+					     std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out, 
+					     Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
+					     std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz, 
+					     MEField<> *src_side_field, MEField<> *dst_side_field) {
 
 
 // Maximum size for a supported polygon
@@ -1092,6 +1098,7 @@ void norm_poly3D(int num_p, double *p) {
       }
 #endif
 
+      // Initialize to valid
       (*valid)[i]=1;
 
       // Invalidate masked destination elements
@@ -1111,10 +1118,68 @@ void norm_poly3D(int num_p, double *p) {
         }
       }
 
-      if(midmesh || res_map)
+      if(midmesh || res_map) {
+
+        //// When we are making an XGrid if clipped piece is very
+        //// small part of original cells then skip. 
+#define XGRID_CLIP_TOL 1.0E-14
+
+      // Calc ratio of intersected part to source area
+      // (src_area == 0.0 is checked above)
+      double src_ratio=sintd_areas[i]/src_area;
+
+      // Calc ratio of intersected part to dst area
+      // (dst_area == 0.0 is checked above)
+      double dst_ratio=sintd_areas[i]/dst_areas[i];
+
+      // if intersected part is only a small piece of the src and dst, then skip
+      // (dst_areas[i] == 0.0 is checked above)
+      if ((src_ratio < XGRID_CLIP_TOL) && (dst_ratio < XGRID_CLIP_TOL)) {
+	(*valid)[i]=0;
+	(*wgts)[i]=0.0;
+        sintd_areas[i]=0.0;
+	continue;
+      }
+
+#undef XGRID_CLIP_TOL
+
+	// Set side information
+	int side1_ind=1; // default to 1
+	if (src_side_field) {
+	  double *side1_dbl=src_side_field->data(*src_elem);
+	  side1_ind=(int)(*side1_dbl+0.5);
+	} 
+	int side2_ind=1; // default to 1
+	if (dst_side_field) {
+	  double *side2_dbl=dst_side_field->data(*dst_elem);
+	  side2_ind=(int)(*side2_dbl+0.5);
+	} 
+        //printf("%d# BOB: END CC\n",Par::Rank());
+	  
         compute_sintd_nodes_cells(sintd_areas[i],
-          num_sintd_nodes, sintd_coords, 2, 3,
-          sintd_nodes, sintd_cells, zz);
+				  num_sintd_nodes, sintd_coords, 2, 3, 
+				  sintd_nodes, sintd_cells, zz,
+#ifdef BOB_XGRID_DEBUG
+                                  src_elem->get_id(),dst_elem->get_id(),
+#endif
+                                  side1_ind, side2_ind);
+
+
+#if 0
+	if ((src_elem->get_id() == 6642) && 
+	    ((dst_elem->get_id() == 38262) || (dst_elem->get_id() == 38263))) {
+	      
+	      printf("%d# BOBXGC %d s_id=%d d_id=%d \n",Par::Rank(),sintd_cells->size(),src_elem->get_id(),dst_elem->get_id());
+	      
+	      write_3D_poly_to_vtk("xgc_sintdelem",dst_elem->get_id(),num_sintd_nodes, sintd_coords);
+	      write_3D_poly_to_vtk("xgc_srcelem",src_elem->get_id(),num_src_nodes, src_coords);
+	      write_3D_poly_to_vtk("xgc_dstelem",dst_elem->get_id(),num_dst_nodes, dst_coords);
+	}
+#endif
+
+
+      }
+
 
       // append result to a multi-map index-ed by passive mesh element for merging optimization
       if(res_map){
@@ -1233,6 +1298,12 @@ void norm_poly3D(int num_p, double *p) {
       *valid=1;
 
 #if 0
+	if (global_src_id==6488) {
+	  printf("BOB: WGT CALC SINTD dst=%d src=%d area=%g\n",global_dst_id,global_src_id,*sintd_area);	
+	  write_3D_poly_to_vtk("sintdelem",global_dst_id,num_sintd_nodes, sintd_coords);
+	}
+#endif
+#if 0
       if(midmesh || res_map)
         compute_sintd_nodes_cells(sintd_areas[i],
           num_sintd_nodes, sintd_coords, 2, 2,
@@ -1314,6 +1385,9 @@ void norm_poly3D(int num_p, double *p) {
 
 
  /* XMRKX */
+#ifdef BOB_XGRID_DEBUG
+    double tot=0.0;
+#endif
 
     // Loop intersecting and computing areas of intersection
     for (int i=0; i<dst_elems.size(); i++) {
@@ -1372,6 +1446,12 @@ void norm_poly3D(int num_p, double *p) {
         if (left_turn && right_turn) is_concave=true;
       }
 
+#ifdef BOB_XGRID_DEBUG
+	// BOB DEBUG
+	global_dst_id=dst_elem->get_id();
+#endif
+
+
       // If not concave, calculate intersection and intersection area for 1
       if (!is_concave) {
         int valid;
@@ -1383,6 +1463,16 @@ void norm_poly3D(int num_p, double *p) {
                                                            midmesh,
                                                            sintd_nodes,
                                                            sintd_cells, res_map, zz);
+
+#ifdef BOB_XGRID_DEBUG
+	if (valid && (global_src_id == 0)) {
+	  tot += sintd_area;
+          printf("BOB: WGT CALC dst=%d src=%d valid=%d darea=%g sintd_area=%g tot=%g t/s=%g\n",global_dst_id,global_src_id,valid,dst_area,sintd_area,tot,tot/src_area);	
+	  write_3D_poly_to_vtk("dstelem",global_dst_id, num_dst_nodes, dst_coords);
+	  write_3D_poly_to_vtk("srcelem",global_src_id, num_src_nodes, src_coords);
+	}
+#endif
+
 
         // Set output based on validity
         if (valid==1) {
@@ -1494,28 +1584,28 @@ void norm_poly3D(int num_p, double *p) {
 
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into
   // this call.
-  void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield,
+  void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
                                            double *src_elem_area,
-                                           std::vector<int> *valid,
-                                           std::vector<double> *wgts,
+                                           std::vector<int> *valid, 
+                                           std::vector<double> *wgts, 
                                            std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
                                            std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
-                                           Mesh * midmesh,
-                                           std::vector<sintd_node *> * sintd_nodes,
-                                         std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
+                                           Mesh * midmesh, 
+                                           std::vector<sintd_node *> * sintd_nodes, 
+					std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz, MEField<> *src_side_field, MEField<> *dst_side_field) {
 
     // Use original version if midmesh exists
     // TODO: Fei fix this
     if(midmesh || res_map) {
-      calc_1st_order_weights_2D_3D_sph_orig(src_elem, src_cfield,
+      calc_1st_order_weights_2D_3D_sph_orig(src_elem, src_cfield, 
                                              dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
                                              src_elem_area,
-                                             valid, wgts,
+                                             valid, wgts, 
                                              sintd_areas_out, dst_areas_out,
-                                             midmesh,
-                                             sintd_nodes,
-                                             sintd_cells, res_map, zz);
+                                             midmesh, 
+                                             sintd_nodes, 
+					    sintd_cells, res_map, zz, src_side_field, dst_side_field);
 
       return;
     }
@@ -1577,6 +1667,10 @@ void norm_poly3D(int num_p, double *p) {
       if (left_turn && right_turn) is_concave=true;
     }
 
+#ifdef BOB_XGRID_DEBUG
+    // BOB DEBUG
+    global_src_id=src_elem->get_id();
+#endif
 
     // If not concave then just call into the lower level
     if (!is_concave) {

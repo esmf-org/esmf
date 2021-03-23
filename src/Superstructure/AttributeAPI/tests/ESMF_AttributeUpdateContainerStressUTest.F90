@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -422,9 +422,9 @@ should include field2, 3, 6, 7, 8, 9.
 
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_StateReconcile(importState, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_StateReconcile(importState, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_StateReconcile(exportState, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_StateReconcile(exportState, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl_init
@@ -617,7 +617,6 @@ then for each of the fields we will make different run time modifications:
 
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
-    character(ESMF_MAXSTR)      :: convESMF,purpGen
 
     rc = ESMF_SUCCESS
 
@@ -625,18 +624,6 @@ then for each of the fields we will make different run time modifications:
     if (status .ne. ESMF_SUCCESS) return
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) return
-
-    convESMF = 'ESMF'
-    purpGen = 'General'
-
-#if 0
-    if (myPet .eq. 2) then
-      call ESMF_AttributeWrite(importState,convESMF,purpGen, &
-        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      call ESMF_AttributeWrite(importState,convESMF,purpGen,rc=rc)
-      if (rc .ne. ESMF_SUCCESS) return
-    endif
-#endif
 
   end subroutine userm2_run
 

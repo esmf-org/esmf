@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -39,6 +39,7 @@ module ESMF_FieldBundleMod
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  use ESMF_UtilStringMod
   use ESMF_ArraySpecMod
   use ESMF_ArrayMod
   use ESMF_ArrayBundleMod
@@ -592,7 +593,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_FieldBundleAddList
 
-    ! Private name; call using ESMF_FieldBundleAdd()   
+    ! Private name; call using ESMF_FieldBundleAdd()
     subroutine ESMF_FieldBundleAddListInternal(fieldbundle, fieldList, &
       multiflag, relaxedflag, rc)
 !
@@ -677,20 +678,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
         enddo
 
-        ! Attribute link
-        linkChange = ESMF_TRUE
-
         if(size(addedList) .ge. 1) then
           call ESMF_FieldBundleSetGeom(fieldbundle, addedList(1), rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                         ESMF_CONTEXT, rcToReturn=rc))  return
         endif
-
-        do i=1, size(addedList)
-          call c_ESMC_AttributeLink(fieldbundle%this%base, addedList(i)%ftypep%base, linkChange, localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                        ESMF_CONTEXT, rcToReturn=rc))  return
-        enddo
         deallocate(addedList)
 
       endif  ! partial add
@@ -717,13 +709,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc))  return
       endif ! non-empty fieldlist
 
-      linkChange = ESMF_TRUE
-      do i=1, size(fieldList)
-        call c_ESMC_AttributeLink(fieldbundle%this%base, fieldList(i)%ftypep%base, linkChange, localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc))  return
-      enddo
-      
     endif ! garbageSize /= 0
 
     ! always deallocate garbageList because it is always associated returning from Container
@@ -842,8 +827,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
-    integer                       :: fieldCount, i, garbageSize
-    type(ESMF_Logical)            :: linkChange
+    integer                       :: fieldCount, i
     type(ESMF_Field), pointer     :: garbageList(:)
 
     ! initialize return code; assume routine not implemented
@@ -860,7 +844,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
-    
+
     ! Determine the number of FieldList elements
     fieldCount = size(fieldList)
     nullify(garbageList)
@@ -894,22 +878,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
     endif ! non-empty fieldlist
-    linkChange = ESMF_TRUE
-    ! Add all fields in fieldList
-    do i = 1, fieldCount
-      call c_ESMC_AttributeLink(fieldbundle%this%base, fieldList(i)%ftypep%base, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
-    
-    ! Remove those that were replaced
-    garbageSize = size(garbageList)
-    do i=1, garbageSize
-      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
-    deallocate(garbageList)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -980,7 +948,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc    ! local return code
     type(ESMF_FieldBundleType), pointer  :: this
     integer                 :: fieldCount, i
-    type(ESMF_Logical)      :: linkChange
     type(ESMF_GeomType_Flag)     :: geomtype
     type(ESMF_Grid)         :: grid
     type(ESMF_XGrid)        :: xgrid
@@ -1187,7 +1154,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                              :: gridDimCount, fieldCount @\
     type(ESMF_Field)                     :: fieldList(1) @\
     integer, allocatable                 :: ig2fmap(:) @\
-    character(ESMF_MAXSTR)               :: encodeName @\
+    character(len=:), allocatable        :: encodeName @\
     integer                              :: i, localrc @\
 @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -1196,6 +1163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Initialize @\
     nullify(this) @\
     nullify(ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind%this) @\
+    allocate(character(1024) :: encodeName) ! Initial allocation @\
 @\
     if (size(fieldNameList) /= size(farrayPtr, fieldDim) ) then @\
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
@@ -1237,9 +1205,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set init code @\
     ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind) @\
 @\
-    encodeName = fieldNameList(1) @\
+    encodeName = trim(fieldNameList(1)) @\
     do i = 2, size(fieldNameList) @\
-      write(encodeName, "(3A)") trim(encodeName), trim(":"), trim(fieldNameList(i)) @\
+      encodeName = concatName(trim(encodeName), ':', trim(fieldNameList(i))) @\
     enddo @\
 @\
     ! Create an internal g2f map @\
@@ -1388,7 +1356,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer          :: gridDimCount, fieldCount @\
     type(ESMF_Field) :: fieldList(1) @\
     integer, allocatable   :: ig2fmap(:) @\
-    character(ESMF_MAXSTR) :: encodeName @\
+    character(len=:), allocatable  :: encodeName @\
     integer          :: i, localrc @\
 @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -1397,6 +1365,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Initialize @\
     nullify(this) @\
     nullify(ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind%this) @\
+    allocate(character(1024) :: encodeName) ! Initial allocation @\
 @\
     if (size(fieldNameList) /= size(farrayPtr, fieldDim) ) then @\
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
@@ -1438,9 +1407,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set init code @\
     ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind) @\
 @\
-    encodeName = fieldNameList(1) @\
+    encodeName = trim(fieldNameList(1)) @\
     do i = 2, size(fieldNameList) @\
-      write(encodeName, "(3A)") trim(encodeName), trim(":"), trim(fieldNameList(i)) @\
+      encodeName = concatName(trim(encodeName), ':', trim(fieldNameList(i))) @\
     enddo @\
 @\
     fieldList(1) = ESMF_FieldCreate(mesh, farrayPtr, meshloc=meshloc, & @\
@@ -1699,6 +1668,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt itemorderflag}.
 !              The new argument gives the user control over the order in which
 !              the items are returned.
+! \item[8.0.0] Added argument {\tt isPacked}.
+!              The new argument allows the user to query if this is a packed FieldBundle.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1735,7 +1706,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         {\tt ESMF\_FieldBundle}. The argument must be allocated to be at least of
 !         size {\tt fieldCount}.
 !   \item [{[isPacked]}]
-!         Upon return holds the information if this FieldBundle is packed. 
+!         Upon return holds the information if this FieldBundle is packed.
 !   \item [{[name]}]
 !         Name of the fieldbundle object.
 !   \item [{[rc]}]
@@ -1744,13 +1715,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                       :: localrc      ! local return code
-    integer                       :: l_fieldCount, i         ! helper variable
-    type(ESMF_Field), pointer     :: l_fieldList(:)
-    type(ESMF_FieldBundleType), pointer     :: this
-    type(ESMF_GeomType_Flag)           :: l_geomtype
-    type(ESMF_ItemOrder_Flag)          :: l_itemorderflag
-    character(len=ESMF_MAXSTR)          :: packedName
+    integer                             :: localrc           ! local return code
+    integer                             :: l_fieldCount, i   ! helper variable
+    type(ESMF_Field), pointer           :: l_fieldList(:)
+    type(ESMF_FieldBundleType), pointer :: this
+    type(ESMF_GeomType_Flag)            :: l_geomtype
+    type(ESMF_ItemOrder_Flag)           :: l_itemorderflag
+    character(len=:), allocatable       :: packedName
     character(len=ESMF_MAXSTR), pointer :: fieldNameListPtr(:)
 
     ! initialize return code; assume routine not implemented
@@ -1764,6 +1735,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     nullify(this)
     nullify(l_fieldList)
+    allocate(character(1024) :: packedName) ! Initial allocation
 
     this => fieldbundle%this
 
@@ -1880,7 +1852,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
     endif
 
-    ! If fieldbundle is not packed, evaluate the results 
+    ! If fieldbundle is not packed, evaluate the results
     if(fieldbundle%this%is_packed) then
       if(l_fieldCount .ne. 1) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
@@ -1912,7 +1884,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       if(associated(fieldNameListPtr)) deallocate(fieldNameListPtr)
     endif
-  
+
     deallocate(l_fieldList)
 
     if (present(isPacked)) then
@@ -1995,7 +1967,7 @@ msg="This call does not work with packed FieldBundle.",&
           ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
-    
+
     if (present(fieldCount)) then
       call ESMF_ContainerGet(fieldbundle%this%container, &
         itemName=trim(fieldName), itemCount=fieldCount, rc=localrc)
@@ -2107,7 +2079,7 @@ msg="This call does not work with packed FieldBundle.",&
           ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
-    
+
     nullify(l_fieldList)
     ! Check size
     call ESMF_ContainerGet(fieldbundle%this%container, trim(fieldName), &
@@ -2910,7 +2882,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         ! Clear the IO object (only need to do this for i > 1)
         if (i .gt. 1) call ESMF_IOClear(io)
         write(cnum,"(i3.3)") i
-        filename_num = trim (fileName) // cnum
+        filename_num = ESMF_StringConcat(trim (fileName) , cnum)
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
         errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
             ESMF_CONTEXT, rcToReturn=rc)
@@ -3182,31 +3154,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleRedistRelease
 
 !---------------------------------------------------------------------------- 
-!BOP 
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution with local factor argument 
-! 
-! !INTERFACE: 
-! ! Private name; call using ESMF_FieldBundleRedistStore() 
+!BOP
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution with local factor argument
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_FieldBundleRedistStore()
 ! subroutine ESMF_FieldBundleRedistStore<type><kind>(srcFieldBundle, &
 !   dstFieldBundle, routehandle, factor, keywordEnforcer, &
-!   srcToDstTransposeMap, rc) 
-! 
-! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(in)             :: srcFieldBundle  
-!   type(ESMF_FieldBundle),   intent(inout)          :: dstFieldBundle  
-!   type(ESMF_RouteHandle),   intent(inout)          :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)             :: factor
+!   ignoreUnmatchedIndicesFlag, srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+!   type(ESMF_FieldBundle),   intent(in)      :: srcFieldBundle
+!   type(ESMF_FieldBundle),   intent(inout)   :: dstFieldBundle
+!   type(ESMF_RouteHandle),   intent(inout)   :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)      :: factor
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(in),   optional :: srcToDstTransposeMap(:)
-!   integer,                  intent(out),  optional :: rc 
+!   logical,          intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+!   integer,          intent(in),    optional :: srcToDstTransposeMap(:)
+!   integer,          intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where source and destination side do not cover the exact same index space.
+! \end{description}
 ! \end{itemize}
 !
-! !DESCRIPTION: 
-! 
+! !DESCRIPTION:
+!
 ! Store a FieldBundle redistribution operation from {\tt srcFieldBundle} to {\tt dstFieldBundle}. 
 ! PETs that
 ! specify a {\tt factor} argument must use the <type><kind> overloaded interface. Other 
@@ -3259,6 +3237,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Handle to the precomputed Route. 
 ! \item [factor]
 !       Factor by which to multiply source data.
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover the identical index space, using precisely matching sequence
+!     indices. If set to {.true.}, mismatching sequence indices between source
+!     and destination side are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fields in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Field pair separately. If only one element is specified, it is
+!     used for {\em all} Field pairs.
 ! \item [{[srcToDstTransposeMap]}] 
 !       List with as many entries as there are dimensions in {\tt srcFieldBundle}. Each 
 ! entry maps the corresponding {\tt srcFieldBundle} dimension 
@@ -3278,18 +3266,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreI4(srcFieldBundle, &
-      dstFieldBundle, routehandle, factor, keywordEnforcer, &
-      srcToDstTransposeMap, rc) 
+    subroutine ESMF_FieldBundleRedistStoreI4(srcFieldBundle, dstFieldBundle, &
+      routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+      srcToDstTransposeMap, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)          :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)       :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)       :: routehandle
-        integer(ESMF_KIND_I4),  intent(in)          :: factor
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        integer(ESMF_KIND_I4),  intent(in)      :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,              intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,              intent(out), optional :: rc 
+        logical,          intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,          intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,          intent(out), optional :: rc 
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -3333,6 +3322,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
@@ -3359,17 +3349,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreI8(srcFieldBundle, dstFieldBundle, & 
-      routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+    subroutine ESMF_FieldBundleRedistStoreI8(srcFieldBundle, dstFieldBundle, &
+      routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+      srcToDstTransposeMap, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)         :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)      :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)      :: routehandle
-        integer(ESMF_KIND_I8),  intent(in)         :: factor
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        integer(ESMF_KIND_I8),  intent(in)      :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,             intent(out), optional :: rc 
+        logical,          intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,          intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,          intent(out), optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -3413,6 +3405,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
@@ -3439,17 +3432,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreR4(srcFieldBundle, dstFieldBundle, & 
-      routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+    subroutine ESMF_FieldBundleRedistStoreR4(srcFieldBundle, dstFieldBundle, &
+      routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+      srcToDstTransposeMap, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)          :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)       :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)       :: routehandle
-        real(ESMF_KIND_R4),   intent(in)            :: factor
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        real(ESMF_KIND_R4),   intent(in)        :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,              intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,              intent(out), optional :: rc 
+        logical,          intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,          intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,          intent(out), optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -3493,6 +3488,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
@@ -3519,17 +3515,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreR8(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
+    subroutine ESMF_FieldBundleRedistStoreR8(srcFieldBundle, dstFieldBundle, &
+      routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+      srcToDstTransposeMap, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        real(ESMF_KIND_R8),     intent(in)            :: factor
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        real(ESMF_KIND_R8),     intent(in)      :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,                intent(out), optional :: rc 
+        logical,          intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,          intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,          intent(out), optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -3573,6 +3571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
@@ -3592,28 +3591,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldBundleRedistStoreR8
 
 !---------------------------------------------------------------------------- 
-!BOP 
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution with local factor argument 
-! 
-! !INTERFACE: 
-! ! Private name; call using ESMF_FieldBundleRedistStore() 
-! subroutine ESMF_FieldBundleRedistStoreNF(srcFieldBundle, dstFieldBundle, & 
-!        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
-! 
-! !ARGUMENTS: 
-!   type(ESMF_FieldBundle), intent(in)             :: srcFieldBundle  
-!   type(ESMF_FieldBundle), intent(inout)          :: dstFieldBundle  
-!   type(ESMF_RouteHandle), intent(inout)          :: routehandle
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                intent(in),   optional :: srcToDstTransposeMap(:)
-!   integer,                intent(out),  optional :: rc 
+^undef  ESMF_METHOD 
+^define ESMF_METHOD "ESMF_FieldBundleRedistStoreNF" 
+!BOP
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution without local factor argument
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_FieldBundleRedistStore()
+  subroutine ESMF_FieldBundleRedistStoreNF(srcFieldBundle, dstFieldBundle, &
+    routehandle, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+    srcToDstTransposeMap, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(in)        :: srcFieldBundle
+    type(ESMF_FieldBundle), intent(inout)     :: dstFieldBundle
+    type(ESMF_RouteHandle), intent(inout)     :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,          intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+    integer,          intent(in),    optional :: srcToDstTransposeMap(:)
+    integer,          intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where source and destination side do not cover the exact same index space.
+! \end{description}
 ! \end{itemize}
 !
-! !DESCRIPTION: 
+! !DESCRIPTION:
 !
 ! \begin{sloppypar}
 ! Store a FieldBundle redistribution operation from {\tt srcFieldBundle}
@@ -3650,11 +3658,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   See section \ref{RH:Reusability} for a more detailed discussion of
 !   RouteHandle reusability.
 !  
-! This method is overloaded for:\newline
-! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
-! {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
-! \newline
-!
 ! This call is collective across the current VM.  
 ! 
 ! For examples and associated documentation regarding this method see Section
@@ -3669,6 +3672,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       FieldBundle may be destroyed by this call. 
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover the identical index space, using precisely matching sequence
+!     indices. If set to {.true.}, mismatching sequence indices between source
+!     and destination side are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fields in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Field pair separately. If only one element is specified, it is
+!     used for {\em all} Field pairs.
 ! \item [{[srcToDstTransposeMap]}] 
 !       List with as many entries as there are dimensions in {\tt srcFieldBundle}. Each 
 ! entry maps the corresponding {\tt srcFieldBundle} dimension 
@@ -3680,26 +3693,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 !EOP 
 !---------------------------------------------------------------------------- 
-
-^undef  ESMF_METHOD 
-^define ESMF_METHOD "ESMF_FieldBundleRedistStoreNF" 
-!BOPI
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreNF(srcFieldBundle, dstFieldBundle, & 
-      routehandle, keywordEnforcer, srcToDstTransposeMap, rc) 
-
-        ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,                intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,                intent(out), optional :: rc 
-
-!EOPI
         ! local variables as temporary input/output arguments 
 
         ! internal local variables 
@@ -3750,6 +3743,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, & 
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
@@ -4043,8 +4037,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              method.
 ! \item[8.0.0] Added argument {\tt extrapNumLevels}. For level based extrapolation methods
 !              (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}) this argument allows the user to
-!              set how many levels to extrapolate. 
-!! 
+!              set how many levels to extrapolate.
+!!
 ! \end{description}
 ! \end{itemize}
 !
@@ -4118,13 +4112,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The exponent to raise the distance to when calculating weights for 
 !           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
 !           of more distant points. If not specified, defaults to 2.0.
-!  \item [{[extrapNumLevels]}] 
+!  \item [{[extrapNumLevels]}]
 !           The number of levels to output for the extrapolation methods that fill levels
-!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). When a method is used that requires this, then an error will be returned, if it 
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). When a method is used that requires this, then an error will be returned, if it
 !           is not specified.
 !  \item [{[unmappedaction]}]
 !    Specifies what should happen if there are destination points that
-!    can not be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
+!    can not be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a
 !           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[ignoreDegenerate]}]
 !           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
@@ -4238,6 +4232,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     type(RHL), pointer              :: rhList, rhListE, rhListG
     logical                         :: rhListMatch
+    type(ESMF_Field), pointer       :: srcFieldsPtr(:), dstFieldsPtr(:)
 
     ! Initialize return code; assume routine not implemented 
     localrc = ESMF_RC_NOT_IMPL 
@@ -4248,12 +4243,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc) 
 
     ! consistency check counts
-    call ESMF_FieldBundleGet(srcFieldBundle, fieldCount=count, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_FieldBundleGet(dstFieldBundle, fieldCount=i, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if(srcFieldBundle%this%is_packed) then
+      count = 1
+    else
+      call ESMF_FieldBundleGet(srcFieldBundle, fieldCount=count, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if(dstFieldBundle%this%is_packed) then
+      i = 1
+    else
+      call ESMF_FieldBundleGet(dstFieldBundle, fieldCount=i, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     if (i /= count) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Number of Fields in srcFieldBundle/dstFieldBundle must match!", &
@@ -4267,12 +4272,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       msg="Allocation of srcFields and dstFields.", &
       ESMF_CONTEXT, rcToReturn=rc)) &
       return  ! bail out
-    call ESMF_FieldBundleGet(srcFieldBundle, fieldList=srcFields, &
-      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+    if(srcFieldBundle%this%is_packed) then
+      allocate(srcFieldsPtr(1))
+      call ESMF_ContainerGet(srcFieldBundle%this%container, &
+        itemList=srcFieldsPtr, itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+      srcFields = srcFieldsPtr
+      deallocate(srcFieldsPtr)
+    else
+      call ESMF_FieldBundleGet(srcFieldBundle, fieldList=srcFields, &
+        itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+    endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_FieldBundleGet(dstFieldBundle, fieldList=dstFields, &
-      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+
+    if(dstFieldBundle%this%is_packed) then
+      allocate(dstFieldsPtr(1))
+      call ESMF_ContainerGet(dstFieldBundle%this%container, &
+        itemList=dstFieldsPtr, itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+      dstFields = dstFieldsPtr
+      deallocate(dstFieldsPtr)
+    else
+      call ESMF_FieldBundleGet(dstFieldBundle, fieldList=dstFields, &
+        itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+    endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4627,7 +4649,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
     integer                       :: fieldCount, i, fcount
-    type(ESMF_Logical)            :: linkChange
     type(ESMF_Field), pointer     :: garbageList(:)
 
     ! initialize return code; assume routine not implemented
@@ -4661,12 +4682,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Remove attribute link for those Fields that were removed
-    do i=1, size(garbageList)
-      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
     deallocate(garbageList)
 
     ! Check if the fieldbundle is empty
@@ -4743,7 +4758,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
     integer                       :: fieldCount, i
-    type(ESMF_Logical)            :: linkChange
     type(ESMF_Field), pointer     :: garbageList(:)
 
     ! initialize return code; assume routine not implemented
@@ -4786,20 +4800,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc))  return
     endif ! non-empty fieldlist
 
-    ! Add all the input Fields in fieldList
-    linkChange = ESMF_TRUE
-    do i = 1, fieldCount
-      call c_ESMC_AttributeLink(fieldbundle%this%base, fieldList(i)%ftypep%base, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
-    
-    ! Remove those that were replaced or not added
-    do i = 1, size(garbageList)
-      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
     deallocate(garbageList)
 
     ! Return successfully
@@ -4847,7 +4847,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       integer :: status                           ! Error status
       type(ESMF_FieldBundleType), pointer :: btype     ! internal data
-      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
@@ -4875,12 +4874,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Set Status to containing a Grid
       btype%status = ESMF_FBSTATUS_GRIDSET
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(btype%base, grid, linkChange, status)
-      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4999,7 +4992,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       integer :: status                           ! Error status
       type(ESMF_FieldBundleType), pointer :: btype     ! internal data
-      type(ESMF_Logical) :: linkChange
 
       ! Initialize return code; assume routine not implemented
       status = ESMF_RC_NOT_IMPL
@@ -5026,12 +5018,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Set Status to containing a Geombase
       btype%status = ESMF_FBSTATUS_GRIDSET
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(btype%base, locstream%lstypep%base, linkChange, status)
-      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5118,17 +5104,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, &
-        routehandle, keywordEnforcer, zeroregion, termorderflag, checkflag, rc)
+    routehandle, keywordEnforcer, &
+    zeroregion, & ! DEPRECATED ARGUMENT
+    zeroregionflag, termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_FieldBundle), intent(in),    optional  :: srcFieldBundle
-        type(ESMF_FieldBundle), intent(inout), optional  :: dstFieldBundle
-        type(ESMF_RouteHandle), intent(inout)            :: routehandle
+    type(ESMF_FieldBundle),    intent(in),         optional :: srcFieldBundle
+    type(ESMF_FieldBundle),    intent(inout),      optional :: dstFieldBundle
+    type(ESMF_RouteHandle),    intent(inout)                :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        type(ESMF_Region_Flag), intent(in),    optional  :: zeroregion
-        type(ESMF_TermOrder_Flag), intent(in), optional  :: termorderflag(:)
-        logical,                intent(in),    optional  :: checkflag
-        integer,                intent(out),   optional  :: rc
+    type(ESMF_Region_Flag),    intent(in), optional  :: zeroregion ! DEPRECATED ARGUMENT
+    type(ESMF_Region_Flag),    intent(in), target, optional :: zeroregionflag(:)
+    type(ESMF_TermOrder_Flag), intent(in),         optional :: termorderflag(:)
+    logical,                   intent(in),         optional :: checkflag
+    integer,                   intent(out),        optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -5138,6 +5127,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[7.0.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
+! \item[8.1.0] Added argument {\tt zeroregionflag}, and deprecated
+!              {\tt zeroregion}. The new argument allows greater flexibility
+!              in setting the zero region for individual FieldBundle members.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5177,18 +5169,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_FieldBundle} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[zeroregion]}]
-!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
-!     all DEs in {\tt dstFieldBundle} will be initialized to zero before updating the 
-!     elements with the results of the sparse matrix multiplication. If set to
-!     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstFieldBundle} will not be
-!     modified prior to the sparse matrix multiplication and results will be
-!     added to the incoming element values. Setting {\tt zeroregion} to 
-!
-!     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
-!     destination FieldBundle that will be updated by the sparse matrix
-!     multiplication. See section \ref{const:region} for a complete list of
-!     valid settings.
+!   \item [{[zeroregion]}] 
+!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of 
+!     all DEs in all Fields in {\tt dstFieldBundle} will be initialized to zero 
+!     before updating the elements with the results of the sparse matrix 
+!     multiplication. If set to {\tt ESMF\_REGION\_EMPTY} the elements in the
+!     Fields in {\tt dstFieldBundle} will not be modified prior to the sparse
+!     matrix multiplication and results will be added to the incoming element
+!     values. Setting {\tt zeroregion} to {\tt ESMF\_REGION\_SELECT} will only
+!     zero out those elements in the destination Fields that will be updated
+!     by the sparse matrix multiplication. See section \ref{const:region}
+!   \item [{[zeroregionflag]}] 
+!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of 
+!     all DEs in the destination Field will be initialized to zero 
+!     before updating the elements with the results of the sparse matrix 
+!     multiplication. If set to {\tt ESMF\_REGION\_EMPTY} the elements in the
+!     destination Field will not be modified prior to the sparse
+!     matrix multiplication and results will be added to the incoming element
+!     values. A setting of {\tt ESMF\_REGION\_SELECT} will only
+!     zero out those elements in the destination Field that will be updated
+!     by the sparse matrix multiplication. See section \ref{const:region}
+!     for a complete list of valid settings.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fields in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the zero region for each Field SMM operation is
+!     indicated separately. If only one zero region element is specified, it is
+!     used for {\em all} Field pairs.
 !   \item [{[termorderflag]}]
 !     Specifies the order of the source side terms in all of the destination
 !     sums. The {\tt termorderflag} only affects the order of terms during 
@@ -5217,10 +5223,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
         integer                 :: localrc      ! local return code
         
-        ! local variables to buffer optional arguments
-        type(ESMF_Region_Flag)   :: l_zeroregion
-        logical                 :: l_checkflag! helper variable
-
         ! local internal variables
         logical                 :: src_bundle
         logical                 :: dst_bundle
@@ -5235,12 +5237,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! Check init status of arguments, deal with optional FieldBundle args
         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
-
-        ! Set default flags
-        l_checkflag = ESMF_FALSE
-        if (present(checkflag)) l_checkflag = checkflag
-        l_zeroregion = ESMF_REGION_TOTAL
-        if (present(zeroregion)) l_zeroregion = zeroregion
 
         src_bundle = .true.
         if (present(srcFieldBundle)) then
@@ -5263,28 +5259,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! perform FieldBundle SMM
         if(src_bundle .and. dst_bundle) then
           call ESMF_ArrayBundleSMM(srcab, dstab, routehandle, &
-            zeroregion=l_zeroregion, termorderflag=termorderflag, &
-            checkflag=l_checkflag, rc=localrc)
+            zeroregion=zeroregion, zeroregionflag=zeroregionflag, &
+            termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else if(src_bundle .and. .not. dst_bundle) then
           call ESMF_ArrayBundleSMM(srcArrayBundle=srcab, &
             routehandle=routehandle, &
-            zeroregion=l_zeroregion, termorderflag=termorderflag, &
-            checkflag=l_checkflag, rc=localrc)
+            zeroregion=zeroregion, zeroregionflag=zeroregionflag, &
+            termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else if(.not. src_bundle .and. dst_bundle) then
           call ESMF_ArrayBundleSMM(dstArrayBundle=dstab, &
             routehandle=routehandle, &
-            zeroregion=l_zeroregion, termorderflag=termorderflag, &
-            checkflag=l_checkflag, rc=localrc)
+            zeroregion=zeroregion, zeroregionflag=zeroregionflag, &
+            termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else if(.not. src_bundle .and. .not. dst_bundle) then
           call ESMF_ArrayBundleSMM(routehandle=routehandle, &
-            zeroregion=l_zeroregion, termorderflag=termorderflag, &
-            checkflag=l_checkflag, rc=localrc)
+            zeroregion=zeroregion, zeroregionflag=zeroregionflag, &
+            termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
@@ -5387,22 +5383,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !---------------------------------------------------------------------------- 
 !BOP 
 ! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication with local factors
-! 
-! !INTERFACE: 
-! ! Private name; call using ESMF_FieldBundleSMMStore() 
+!
+! !INTERFACE:
+! ! Private name; call using ESMF_FieldBundleSMMStore()
 ! subroutine ESMF_FieldBundleSMMStore<type><kind>(srcFieldBundle, &
 !   dstFieldBundle,  routehandle, factorList, factorIndexList, &
-!   keywordEnforcer, srcTermProcessing, rc)
-! 
-! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
-!   type(ESMF_FieldBundle),   intent(inout)         :: dstFieldBundle  
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)            :: factorList(:) 
-!   integer,                  intent(in),           :: factorIndexList(:,:) 
+!   keywordEnforcer, ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
+!
+! !ARGUMENTS:
+!   type(ESMF_FieldBundle),   intent(in)      :: srcFieldBundle
+!   type(ESMF_FieldBundle),   intent(inout)   :: dstFieldBundle
+!   type(ESMF_RouteHandle),   intent(inout)   :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)      :: factorList(:)
+!   integer,                  intent(in),     :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                intent(inout), optional :: srcTermProcessing(:)
-!   integer,                  intent(out), optional :: rc 
+!   logical,          intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+!   integer,          intent(inout), optional :: srcTermProcessing(:)
+!   integer,          intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -5413,6 +5410,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise
 !              reproducibility.
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where the sparse matrix includes terms with source or destination sequence
+!    indices not present in the source or destination field.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5505,6 +5505,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     {\em sequence indices} and {\em tensor sequence indices}.
+!
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover all of the squence indices defined in the sparse matrix. An error
+!     will be returned if a sequence index in the sparse matrix does not match
+!     on either the source or destination side.
+!     If set to {.true.}, mismatching sequence indices are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fieldss in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Field pair separately. If only one element is specified, it is
+!     used for {\em all} Field pairs.
+!
 ! \item [{[srcTermProcessing]}]
 !       Source term summing options for route handle creation. See
 !       {\tt ESMF\_FieldRegridStore} documentation for a full parameter description.
@@ -5529,17 +5542,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreI4(srcFieldBundle, dstFieldBundle, & 
         routehandle, factorList, factorIndexList, keywordEnforcer, &
-        srcTermProcessing, rc)
+        ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        integer(ESMF_KIND_I4),  intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        integer(ESMF_KIND_I4),  intent(in)      :: factorList(:)
+        integer,                intent(in)      :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out),   optional  :: rc
+        logical,        intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,        intent(inout), optional :: srcTermProcessing(:)
+        integer,        intent(out),   optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -5583,7 +5597,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
+            factorIndexList, &
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
+            srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
             
@@ -5610,17 +5626,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreI8(srcFieldBundle, dstFieldBundle, & 
       routehandle, factorList, factorIndexList, keywordEnforcer, &
-      srcTermProcessing, rc)
+      ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        integer(ESMF_KIND_I8),  intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        integer(ESMF_KIND_I8),  intent(in)      :: factorList(:)
+        integer,                intent(in)      :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out),   optional  :: rc
+        logical,        intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,        intent(inout), optional :: srcTermProcessing(:)
+        integer,        intent(out),   optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -5664,7 +5681,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
+            factorIndexList, &
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
+            srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
             
@@ -5691,17 +5710,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreR4(srcFieldBundle, dstFieldBundle, & 
       routehandle, factorList, factorIndexList, keywordEnforcer, &
-      srcTermProcessing, rc)
+      ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        real(ESMF_KIND_R4),     intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        real(ESMF_KIND_R4),     intent(in)      :: factorList(:)
+        integer,                intent(in)      :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out),   optional  :: rc
+        logical,        intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,        intent(inout), optional :: srcTermProcessing(:)
+        integer,        intent(out),   optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -5745,7 +5765,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
+            factorIndexList, &
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
+            srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5772,17 +5794,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreR8(srcFieldBundle, dstFieldBundle, & 
       routehandle, factorList, factorIndexList, keywordEnforcer, &
-      srcTermProcessing, rc)
+      ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        real(ESMF_KIND_R8),     intent(in)            :: factorList(:)
-        integer,                intent(in)            :: factorIndexList(:,:) 
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
+        real(ESMF_KIND_R8),     intent(in)      :: factorList(:)
+        integer,                intent(in)      :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out),   optional  :: rc
+        logical,        intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,        intent(inout), optional :: srcTermProcessing(:)
+        integer,        intent(out),   optional :: rc
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -5826,7 +5849,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, factorList, &
-            factorIndexList, srcTermProcessing=srcTermProcessing, rc=localrc)
+            factorIndexList, &
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
+            srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5853,15 +5878,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreNF(srcFieldBundle, dstFieldBundle, &
-        routehandle, keywordEnforcer, srcTermProcessing, rc)
+        routehandle, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+        srcTermProcessing, rc)
 
 ! !ARGUMENTS:
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
+        type(ESMF_FieldBundle), intent(in)      :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout)   :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)   :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        integer,             intent(inout), optional  :: srcTermProcessing(:)
-        integer,             intent(out), optional    :: rc
+        logical,        intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+        integer,        intent(inout), optional :: srcTermProcessing(:)
+        integer,        intent(out),   optional :: rc
 
 ! !STATUS:
 ! \begin{itemize}
@@ -5872,6 +5899,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise
 !              reproducibility.
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where the sparse matrix includes terms with source or destination sequence
+!    indices not present in the source or destination field.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5932,6 +5962,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       FieldBundle may be destroyed by this call. 
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover all of the squence indices defined in the sparse matrix. An error
+!     will be returned if a sequence index in the sparse matrix does not match
+!     on either the source or destination side.
+!     If set to {.true.}, mismatching sequence indices are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fieldss in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Field pair separately. If only one element is specified, it is
+!     used for {\em all} Field pairs.
 ! \item [{[srcTermProcessing]}]
 !       Source term summing options for route handle creation. See
 !       {\tt ESMF\_FieldRegridStore} documentation for a full parameter description.
@@ -5995,6 +6036,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayBundleSMMStore(srcab, dstab, routehandle, &
+            ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
             srcTermProcessing=srcTermProcessing, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6023,16 +6065,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
 ! ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreFromFile(srcFieldBundle, dstFieldBundle, &
-      filename, routehandle, keywordEnforcer, srcTermProcessing, rc)
+      filename, routehandle, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+      srcTermProcessing, rc)
 
 ! ! ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in)              :: srcFieldBundle
-      type(ESMF_FieldBundle), intent(inout)           :: dstFieldBundle
-      character(len=*),       intent(in)              :: filename
-      type(ESMF_RouteHandle), intent(inout)           :: routehandle
+      type(ESMF_FieldBundle), intent(in)        :: srcFieldBundle
+      type(ESMF_FieldBundle), intent(inout)     :: dstFieldBundle
+      character(len=*),       intent(in)        :: filename
+      type(ESMF_RouteHandle), intent(inout)     :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,             intent(inout), optional    :: srcTermProcessing(:)
-      integer,             intent(out),   optional    :: rc
+      logical,          intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+      integer,          intent(inout), optional :: srcTermProcessing(:)
+      integer,          intent(out),   optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -6058,6 +6102,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! \item [routehandle]
 !       Handle to the {\tt ESMF\_RouteHandle}.
+!
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover all of the squence indices defined in the sparse matrix. An error
+!     will be returned if a sequence index in the sparse matrix does not match
+!     on either the source or destination side.
+!     If set to {.true.}, mismatching sequence indices are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Fieldss in the {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Field pair separately. If only one element is specified, it is
+!     used for {\em all} Field pairs.
 !
 ! \item [{[srcTermProcessing]}]
 !       Source term summing options for route handle creation. See
@@ -6095,8 +6151,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Generate routeHandle from factorList and factorIndexList
       call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, routehandle, &
-        factorList, factorIndexList, srcTermProcessing=srcTermProcessing, &
-        rc=localrc)
+        factorList, factorIndexList, &
+        ignoreUnmatchedIndicesFlag=ignoreUnmatchedIndicesFlag, &
+        srcTermProcessing=srcTermProcessing, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6403,7 +6460,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         ! Clear the IO object (only need to do this for i > 1)
         if (i .gt. 1) call ESMF_IOClear(io)
         write(cnum,"(i3.3)") i
-        filename_num = trim (fileName) // cnum
+        filename_num = ESMF_StringConcat(trim (fileName) , cnum)
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6508,6 +6565,9 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       type(ESMF_InquireFlag) :: linquireflag
       type(ESMF_Field), pointer :: l_fieldList(:)
 
+      logical, parameter :: debug = .false.
+      character(len=ESMF_MAXSTR) :: logmsg
+
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
@@ -6538,13 +6598,40 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
+      if (debug) then
+        call ESMF_LogWrite(&
+          ESMF_StringConcat(ESMF_METHOD , ": Calling ESMF_BaseSerialize"), &
+          ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+        write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": offset (before)= "), offset
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+
       call ESMF_BaseSerialize (bp%base, buffer, offset,  &
           lattreconflag, linquireflag,  &
           rc=localrc)
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (debug) then
+        write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": offset (after)= "), offset
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+         logmsg = ESMF_StringConcat(ESMF_METHOD , ": Exited ESMF_BaseSerialize")
+         call ESMF_LogWrite(logmsg, ESMF_LOGMSG_INFO, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       end if
 
       call c_ESMC_FieldBundleSerialize(bp%status, fieldCount, &
                                  buffer, length, offset, linquireflag, localrc)
@@ -6562,14 +6649,16 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if(bp%status == ESMF_FBSTATUS_GRIDSET) then
+        ! NOTE: A small optimization for StateReconcile is possible by removing
+        !  this extra GeomBase serialization/deserialization. According to Fei,
+        !  this just references the first Field.
         call ESMF_GeomBaseSerialize(bp%geombase, buffer, length, offset, &
-                                 lattreconflag, linquireflag, localrc)
+                                 lattreconflag, linquireflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      ! TODO: decide if these need to be sent before or after
       do i = 1, fieldCount
           call ESMF_FieldSerialize(l_fieldList(i), buffer, length, offset, &
                                   attreconflag=lattreconflag, &
@@ -6636,7 +6725,9 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       type(ESMF_LocStream) :: locstream
       type(ESMF_GeomType_Flag) :: geomtype
       type(ESMF_Field), pointer :: flist(:)
-      type(ESMF_Logical) :: linkChange
+
+      logical, parameter :: debug = .false.
+      character(len=ESMF_MAXSTR) :: logmsg
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -6651,8 +6742,6 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       else
         lattreconflag = ESMF_ATTRECONCILE_OFF
       endif
-      ! linkChange flag true for all but Components
-      linkChange = ESMF_TRUE;
 
       ! in case of error, make sure this is invalid.
       nullify(bp)
@@ -6664,12 +6753,39 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         msg="space for new FieldBundle object", &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+      if (debug) then
+        call ESMF_LogWrite(&
+           ESMF_StringConcat(ESMF_METHOD , ": Calling ESMF_BaseDeserialize"), &
+           ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+        write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": buffer length= "), LEN(buffer)
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+        write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": offset= "), offset
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+
       ! Deserialize Base
       bp%base = ESMF_BaseDeserialize (buffer, offset=offset,  &
           attreconflag=lattreconflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (debug) then
+        logmsg = ESMF_StringConcat(ESMF_METHOD , ": Exited ESMF_BaseDeserialize")
+        call ESMF_LogWrite(logmsg, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
 
       call ESMF_BaseSetInitCreated(bp%base, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -6699,31 +6815,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        !  link the Attribute hierarchies
-        call ESMF_GeomBaseGet(bp%geombase, geomtype=geomtype, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        if (geomtype == ESMF_GEOMTYPE_GRID) then
-           call ESMF_GeomBaseGet(bp%geombase, grid=grid, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-           linkChange = ESMF_TRUE
-           call c_ESMC_AttributeLink(bp%base, grid, linkChange, status)
-           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc))  return
-        else if (geomtype == ESMF_GEOMTYPE_LOCSTREAM) then
-           call ESMF_GeomBaseGet(bp%geombase, locstream=locstream, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-           linkChange = ESMF_TRUE
-           call c_ESMC_AttributeLink(bp%base, locstream%lstypep%base, linkChange, status)
-           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc))  return
-        endif
-     endif
+      endif
 
       ! TODO: decide if these need to be sent before or after
       allocate(flist(fieldCount), stat=localrc)
@@ -6901,7 +6993,6 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     integer                                           :: localrc
     type(ESMF_GeomType_Flag)                               :: geomtype
     type(ESMF_Grid)                                   :: grid
-    type(ESMF_Logical)                                :: linkChange
 
     localrc = ESMF_RC_NOT_IMPL
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -6920,16 +7011,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     call ESMF_GeomBaseGet(fieldbundle%this%geombase, geomtype=geomtype, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc))  return
-    if(geomtype == ESMF_GEOMTYPE_GRID) then
-      call ESMF_GeombaseGet(fieldbundle%this%geombase, grid=grid, rc=localrc)  
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc))  return
 
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, grid, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-    endif
     call ESMF_GeomBaseDestroy(fieldbundle%this%geombase, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc))  return
@@ -6984,7 +7066,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 
     if(.not. fieldbundle%this%is_packed) then
 
-      call ESMF_FieldBundleGet(fieldbundle, fieldCount=fcount, rc=localrc) 
+      call ESMF_FieldBundleGet(fieldbundle, fieldCount=fcount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -7086,47 +7168,63 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
      ESMF_FieldBundleStatusNE = (sf1%status /= sf2%status)
     end function
 
-    subroutine decodeName(string, delimiter, decodeCount, strArray) 
-      ! splitstring splits a string to an array of 
-      ! substrings based on a selected delimiter 
-      ! note any facing space/blank in substrings will be removed 
+    subroutine decodeName(string, delimiter, decodeCount, strArray)
+      ! splitstring splits a string to an array of
+      ! substrings based on a selected delimiter
+      ! note any facing space/blank in substrings will be removed
       ! Credit to Mohammad from comp.lang.fortran with slight modification
 
-      character(len=ESMF_MAXSTR), intent(in) :: string
+      character(len=*), intent(in)           :: string
       character,                  intent(in) :: delimiter
       integer,                    intent(out):: decodeCount
-      character(len=ESMF_MAXSTR), pointer    :: strarray(:) 
+      character(len=ESMF_MAXSTR), pointer    :: strarray(:)
 
       ! Local Variables
-      integer   :: n, m, p 
-      integer   :: i, idx 
-      character(len=ESMF_MAXSTR):: strtmp 
+      integer   :: n, m, p
+      integer   :: i, idx
+      character(len=ESMF_MAXSTR):: strtmp
 
 
-      ! 0. remove initial blanks if any 
-      strtmp=trim (adjustl(string) ) 
+      ! 0. remove initial blanks if any
+      strtmp=trim (adjustl(string) )
 
-      ! 1. count the number substrings separated by delimiter 
+      ! 1. count the number substrings separated by delimiter
       i = 1
-      n = count( [ (strtmp(i:i), i=1, len_trim(strtmp)) ] == delimiter) 
-      ! 4. allocate the output string array 
-      allocate(strarray(n+1)) 
+      n = count( [ (strtmp(i:i), i=1, len_trim(strtmp)) ] == delimiter)
+      ! 4. allocate the output string array
+      allocate(strarray(n+1))
       decodeCount = n+1
 
-      m=1 
-      do i=1, n 
-          idx=index(strtmp(m:),delimiter) 
-          strarray(i) = adjustl( strtmp(m:m+idx-2) ) 
-          m = m + idx 
-      end do 
-      strarray(n+1)=adjustl(strtmp(m:) ) 
+      m=1
+      do i=1, n
+          idx=index(strtmp(m:),delimiter)
+          strarray(i) = adjustl( strtmp(m:m+idx-2) )
+          m = m + idx
+      end do
+      strarray(n+1)=adjustl(strtmp(m:) )
 
-      ! 6. pring the results 
-      !print*, '"'//string//'"' 
-      !print *, 'nvalues=', n+1 
-      !print '(a)', strarray(1:n+1) 
-      !print*,'----------------------' 
+      ! 6. pring the results
+      !print*, '"'//string//'"'
+      !print *, 'nvalues=', n+1
+      !print '(a)', strarray(1:n+1)
+      !print*,'----------------------'
 
-    end subroutine decodeName 
+    end subroutine decodeName
+
+    ! Have to work around macro expansion not allowing //
+    ! We will want to inline this for performance
+    !dir$ attributes forceinline :: frob
+
+    function concatName(str, delim, append)
+      character(len=*), intent(in)             :: str
+      character(len=*), intent(in)             :: delim
+      character(len=*), intent(in)             :: append
+
+      character(len=len(str)+len(delim)+len(append)) :: concatName
+
+      concatName(:len(str)) = str
+      concatName(len(str)+1:len(str)+len(delim)) = delim
+      concatName(len(str)+len(delim)+1:) = append
+    end function
 
 end module ESMF_FieldBundleMod

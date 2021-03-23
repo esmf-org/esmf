@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -25,8 +25,8 @@ program ESMF_TraceUserEx
 ! API calls {\tt ESMF\_TraceRegionEnter} and {\tt ESMF\_TraceRegionExit}
 ! should always appear in pairs, wrapping a particular section
 ! of code. The environment variable {\tt ESMF\_RUNTIME\_TRACE} 
-! or {\tt ESMF\_RUNTIME\_PROFILE} must  
-! be set to {\tt ON} to enable these regions. If at least one is not set, the calls to
+! or {\tt ESMF\_RUNTIME\_PROFILE} must be set to {\tt ON} to enable these
+! regions. If not at least one is set, the calls to
 ! {\tt ESMF\_TraceRegionEnter} and {\tt ESMF\_TraceRegionExit}
 ! will simply return immediately. For this reason, it is safe to
 ! leave this instrumentation in application code, even when not being profiled.  

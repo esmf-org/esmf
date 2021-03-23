@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -90,7 +90,7 @@ program ESMF_LogErrPerfUTest
   !NEX_UTest
   write(name, *) "Threshold check for ESMF_LogFoundError() 1000000x Test"
 #ifdef ESMF_BOPT_g
-  dtTest = 2.d-7  ! 200ns is expected to pass in debug mode
+  dtTest = 7.d-7  ! 700ns is expected to pass in debug mode
 #else
   dtTest = 6.d-8  ! 60ns is expected to pass in optimized mode
 #endif

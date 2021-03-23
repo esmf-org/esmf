@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -12,8 +12,9 @@
 #ifndef ESMCI_MeshCap_h
 #define ESMCI_MeshCap_h
 
-#include "ESMCI_Mesh.h"
+#include "Mesh/include/ESMCI_Mesh.h"
 
+#include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
 
 #include "ESMCI_Macros.h"
@@ -23,65 +24,70 @@
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 
+namespace ESMCI {
 
-
- namespace ESMCI {
-
-  class MeshCap {
+  class MeshCap : public ESMC_Base {
 
     // Eventually merge this with MeshCXX
 
   private:
-    MeshCap();
 
   public:
+    MeshCap();
     bool is_esmf_mesh;
     Mesh *mesh;     // Make 1 void pointer here for both
-    void *mbmesh;
+    MBMesh *mbmesh;
 
     // NOT NEEDED RIGHT NOW
     //    bool is_internal_mesh_esmf() {return is_esmf_mesh;}
+
+    MeshCap(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
+      is_esmf_mesh = false;
+      mesh = NULL;
+      mbmesh = NULL;
+      ESMC_BaseSetName(NULL, "Mesh");
+    }
 
     void *get_internal_mesh_ptr() {
       if (is_esmf_mesh) {
         return (void *)mesh;
       } else {
-        return mbmesh;
+        return static_cast<void*> (mbmesh);
       }
     }
 
     void fit_on_vm(VM **vm, int *rc);
 
     void MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
-                                   ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
-                                   int *rc);
+                              ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
+                              int *rc);
 
     static MeshCap *create_from_ptr(void **_mesh,
-                             bool _is_esmf_mesh, int *rc);
+                                    bool _is_esmf_mesh, int *rc);
 
 
     static MeshCap *meshcreate(int *pdim, int *sdim,
-                                 ESMC_CoordSys_Flag *coordSys,
-                                 bool _is_esmf_mesh, int *rc);
+                               ESMC_CoordSys_Flag *coordSys,
+                               bool _is_esmf_mesh, int *rc);
 
     static MeshCap *meshcreate_easy_elems(int *pdim,
-                                        int *sdim,
-                                        int *num_elems,
-                                        InterArray<int> *elemIdsII,
-                                        int *elemTypes,
-                                        InterArray<int> *elemMaskII,
-                                        int *num_elemCorners,
-                                        double *elemCornerCoords,
-                                        int *has_elemArea,
-                                        double *elemArea,
-                                        int *has_elemCoords,
-                                        double *elemCoords,
-                                        ESMC_CoordSys_Flag *coordSys,
+                                          int *sdim,
+                                          int *num_elems,
+                                          InterArray<int> *elemIdsII,
+                                          int *elemTypes,
+                                          InterArray<int> *elemMaskII,
+                                          int *num_elemCorners,
+                                          double *elemCornerCoords,
+                                          int *has_elemArea,
+                                          double *elemArea,
+                                          int *has_elemCoords,
+                                          double *elemCoords,
+                                          ESMC_CoordSys_Flag *coordSys,
                                           bool _is_esmf_mesh, int *rc);
 
     static MeshCap *meshcreate_from_grid(Grid **gridpp,
-                                                  bool _is_esmf_mesh, 
-                                                  int *rc);
+                                         bool _is_esmf_mesh,
+                                         int *rc);
 
     void meshaddnodes(int *num_nodes, int *nodeId,
                       double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
@@ -92,8 +98,8 @@
                    ESMCI_FortranStrLenArg nlen);
 
     void meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
-                                   int num_nodeArrays, ESMCI::Array **nodeArrays, 
-                                   int num_elemArrays, ESMCI::Array **elemArrays, 
+                                   int num_nodeArrays, ESMCI::Array **nodeArrays,
+                                   int num_elemArrays, ESMCI::Array **elemArrays,
                                    int *rc);
 
     void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
@@ -126,6 +132,7 @@
     static void meshinfoserialize(int *intMeshFreed,
                                   int *spatialDim, int *parametricDim,
                                   int *intIsPresentNDG, int *intIsPresentEDG,
+                                  int *coordSys, 
                                   char *buffer, int *length, int *offset,
                                   ESMC_InquireFlag *inquireflag, int *rc,
                                   ESMCI_FortranStrLenArg buffer_l);
@@ -134,25 +141,29 @@
     static void meshinfodeserialize(int *intMeshFreed,
                                     int *spatialDim, int *parametricDim,
                                     int *intIsPresentNDG, int *intIsPresentEDG,
+                                    int *coordSys, 
                                     char *buffer, int *offset, int *rc,
                                     ESMCI_FortranStrLenArg buffer_l);
 
     void meshserialize(char *buffer, int *length, int *offset,
-                       ESMC_InquireFlag *inquireflag, int *rc,
+                       const ESMC_AttReconcileFlag &attreconflag,
+                       ESMC_InquireFlag *inquireflag, bool baseOnly, int *rc,
                        ESMCI_FortranStrLenArg buffer_l);
 
 
-    static MeshCap *meshdeserialize(char *buffer, int *offset, int *rc,
+    void meshdeserialize(char *buffer, int *offset,
+                         const ESMC_AttReconcileFlag &attreconflag,
+                         bool baseOnly, int *rc,
                          ESMCI_FortranStrLenArg buffer_l);
 
     void meshfindpnt(int *unmappedaction, int *dimPnts, int *numPnts,
                      double *pnts, int *pets, int *rc);
 
-    void geteleminfointoarray(DistGrid *elemDistgrid, 
-                                   int numElemArrays,
-                                   int *infoTypeElemArrays, 
-                                   Array **elemArrays, 
-                                   int *rc);
+    void geteleminfointoarray(DistGrid *elemDistgrid,
+                              int numElemArrays,
+                              int *infoTypeElemArrays,
+                              Array **elemArrays,
+                              int *rc);
 
     void getlocalcoords(double *nodeCoord, int *_orig_sdim, int *rc);
 
@@ -183,33 +194,32 @@
     void meshturnoffnodemask(int *rc);
 
     static void get_polygon_area(int *spatialdim, int *nedges,
-                          double *points, double *area, int *rc);
+                                 double *points, double *area, int *rc);
 
     static MeshCap *meshcreatefrommeshes(MeshCap **meshapp, MeshCap **meshbpp,
-                                         ESMC_MeshOp_Flag * meshop, double * threshold, int *rc);
+                                         ESMC_MeshOp_Flag * meshop, 
+                                         double *threshold, int *rc);
 
 
-    static MeshCap *meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids, int *elem_gids,
-                                          int *rc);
+    static MeshCap *meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids, 
+                                          int *elem_gids, int *rc);
 
 
-    static MeshCap *meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids, int *node_gids,
-                                          int *rc);
+    static MeshCap *meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids, 
+                                          int *node_gids, int *rc);
 
     static MeshCap *meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int *node_gids,
                                      int *num_elem_gids, int *elem_gids, int *rc);
 
-    void meshchecknodelist(int *_num_node_gids, int *node_gids,
-                           int *rc);
+    void meshchecknodelist(int *_num_node_gids, int *node_gids, int *rc);
 
-    void meshcheckelemlist(int *_num_elem_gids, int *elem_gids,
-                           int *rc);
+    void meshcheckelemlist(int *_num_elem_gids, int *elem_gids, int *rc);
 
     static void sphdeg_to_cart(double *lon, double *lat,
                         double *x, double *y, double *z, int *rc);
 
-    void meshsetpoles(int *_pole_obj_type, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
-                           int *rc);
+    void meshsetpoles(int *_pole_obj_type, int *_pole_val, int *_min_pole_gid, 
+                      int *_max_pole_gid, int *rc);
 
     static MeshCap *meshcreatedual(MeshCap **src_meshpp, int *rc);
 
@@ -232,6 +242,7 @@
               int *nentries, ESMCI::TempWeights **tweights,
               int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
               int *has_statusArray, ESMCI::Array **statusArray,
+              int *checkFlag, 
               int*rc);
 
     static void regrid_getiwts(Grid **gridpp,
@@ -264,11 +275,40 @@
                                     int *nentries, ESMCI::TempWeights **tweights,
                                     int*rc);
 
-     static MeshCap *merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp,
-                           int*rc);
+     static MeshCap *merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp, int*rc);
 
-     void meshsetfrac(double * fraction,
-                      int*rc);
+
+     void getNodeCount(int *nodeCount, int *rc);
+     void getElemCount(int *elemCount, int *rc);
+     void getElemConnCount(int *elemConnCount, int *rc);
+
+     void getElemInfoPresence(int *elemMaskIsPresent,
+                              int *elemAreaIsPresent,
+                              int *elemCoordsIsPresent,
+                              int *rc);
+
+     void getElemCreateInfo(ESMCI::InterArray<int> *elemIds,
+                                     ESMCI::InterArray<int> *elemTypes,
+                                     ESMCI::InterArray<int> *elemConn,
+                                     ESMCI::InterArray<int> *elemMask,
+                                     ESMCI::InterArray<ESMC_R8> *elemArea,
+                                     ESMCI::InterArray<ESMC_R8> *elemCoords, int *rc);
+
+
+     void setElemInfo(ESMCI::InterArray<int> *elemMask,
+                      ESMCI::InterArray<ESMC_R8> *elemArea,
+                      int *rc);
+
+     void getNodeInfoPresence(int *nodeMaskIsPresent, int *rc);
+
+     void getNodeCreateInfo(ESMCI::InterArray<int> *nodeIds,
+                            ESMCI::InterArray<ESMC_R8> *nodeCoords,
+                            ESMCI::InterArray<int> *nodeOwners,
+                            ESMCI::InterArray<int> *nodeMask,
+                            int *rc);
+
+
+     void meshsetfrac(double * fraction, int*rc);
 
      void xgrid_getfrac2(Grid **gridpp,
                          ESMCI::Array **arraypp, int *staggerLoc,
@@ -278,7 +318,9 @@
                         ESMCI::Array **arraypp, int *staggerLoc,
                         int *rc);
 
-     static void destroy(MeshCap **mcpp,int *rc);
+     static int destroy(MeshCap **mcpp, bool noGarbage=false);
+
+     void set_xgrid_info(int *side, int *ind, int *rc);
   };
 
 } // namespace

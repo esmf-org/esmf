@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -70,6 +70,8 @@ namespace ESMCI {
   void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn);
 
   void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn);
+
+  void xgrid_rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn);
 
   void convert_cart_to_sph(double x, double y, double z,
                          double *lon, double *lat, double *r);
@@ -273,6 +275,9 @@ struct GEOM_SPH2D3D {
   // based on cross product
   static double turn(double *a, double *b, double *p) {return p[0]*(a[1]*b[2]-a[2]*b[1])+p[1]*(a[2]*b[0]-a[0]*b[2])+p[2]*(a[0]*b[1]-a[1]*b[0]);}
 
+  // Bob 7/24/19: This was used in XGrid debugging work, I don't think that it made much of a difference, but left it here in case we need to switch to it. 
+  //  static double turn(double *a, double *b, double *p) {return (p[0]*a[1]*b[2]+p[1]*a[2]*b[0]+p[2]*a[0]*b[1])-(p[0]*a[2]*b[1]+p[1]*a[0]*b[2]+p[2]*a[1]*b[0]);}
+
   // Used as an approximation of sharpness of angle between two vectors
   static double dot(double *a, double *b) {return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
 
@@ -306,6 +311,10 @@ struct GEOM_SPH2D3D {
 #define ESMCI_TP_CLOCKWISE_POLY 2
 template <class TYPE>
 int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind);
+
+template <class TYPE>
+int xgrid_triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind);
+
 
 template <class TYPE>
   bool is_pnt_in_convex_poly(int num_p, double *p, double *pnt);

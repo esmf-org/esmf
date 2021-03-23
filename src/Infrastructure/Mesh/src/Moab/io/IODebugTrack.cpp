@@ -169,8 +169,8 @@ void IODebugTrack::all_reduce()
               
   std::vector<DRange> send(dataSet.size()), recv(total);
   std::copy( dataSet.begin(), dataSet.end(), send.begin() );
-  MPI_Gatherv( &send[0], 3*send.size(), MPI_UNSIGNED_LONG,
-               &recv[0], &counts[0], &displs[0], MPI_UNSIGNED_LONG,
+  MPI_Gatherv( (void*)&send[0], 3*send.size(), MPI_UNSIGNED_LONG,
+               (void*)&recv[0], &counts[0], &displs[0], MPI_UNSIGNED_LONG,
                0, MPI_COMM_WORLD );
   
   if (0 == mpiRank) {

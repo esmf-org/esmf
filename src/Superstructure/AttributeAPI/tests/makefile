@@ -17,7 +17,6 @@ AUTOGEN = ESMF_AttPackABundleUTest.F90 \
           ESMF_AttPackStateUTest.F90 \
           ESMF_AttributeABundleUTest.F90 \
           ESMF_AttributeArrayUTest.F90 \
-          ESMF_AttributeAutoLinkUTest.F90 \
           ESMF_AttributeCplCompUTest.F90 \
           ESMF_AttributeDistGridUTest.F90 \
           ESMF_AttributeFBundleUTest.F90 \
@@ -33,10 +32,7 @@ AUTOGEN = ESMF_AttPackABundleUTest.F90 \
 LOCDIR = src/Superstructure/AttributeAPI/tests
 
 .NOTPARALLEL:
-
 TESTS_BUILD = \
-          $(ESMF_TESTDIR)/ESMF_AttributeAutoLinkUTest \
-          $(ESMF_TESTDIR)/ESMF_AttInternalGridUTest \
           $(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
           $(ESMF_TESTDIR)/ESMF_AttPackArrayUTest \
           $(ESMF_TESTDIR)/ESMF_AttPackCplCompUTest \
@@ -60,23 +56,14 @@ TESTS_BUILD = \
           $(ESMF_TESTDIR)/ESMF_AttributeSciCompUTest \
           $(ESMF_TESTDIR)/ESMF_AttributeStateUTest \
           $(ESMF_TESTDIR)/ESMF_AttributeUpdateUTest \
-          $(ESMF_TESTDIR)/ESMF_AttributeUpdateCIMRespPartyUTest \
-          $(ESMF_TESTDIR)/ESMF_AttributeUpdateClosedLoopTreesUTest \
           $(ESMF_TESTDIR)/ESMF_AttributeUpdateComponentUTest \
           $(ESMF_TESTDIR)/ESMF_AttributeUpdateContainerStressUTest \
           $(ESMF_TESTDIR)/ESMF_AttributeUpdateMultiReconcileUTest \
           $(ESMF_TESTDIR)/ESMF_AttributeUpdateRemoveOnlyUTest \
           $(ESMF_TESTDIR)/ESMF_AttributeUpdateReconcileUTest \
-          $(ESMF_TESTDIR)/ESMF_AttributeWriteInternalUTest \
-          $(ESMF_TESTDIR)/ESMF_AttributeXMLUTest \
-          $(ESMF_TESTDIR)/ESMF_AttReadCplCompUTest \
-          $(ESMF_TESTDIR)/ESMF_AttReadGridCompUTest \
-          $(ESMF_TESTDIR)/ESMF_AttReadFieldUTest \
-          $(ESMF_TESTDIR)/ESMF_AttributeJSONUTest
+          $(ESMF_TESTDIR)/ESMF_AttributeUtilUTest
 
 TESTS_RUN = \
-          RUN_ESMF_AttributeAutoLinkUTest \
-          RUN_ESMF_AttInternalGridUTest \
           RUN_ESMF_AttPackABundleUTest \
           RUN_ESMF_AttPackArrayUTest \
           RUN_ESMF_AttPackCplCompUTest \
@@ -100,23 +87,14 @@ TESTS_RUN = \
           RUN_ESMF_AttributeSciCompUTest \
           RUN_ESMF_AttributeStateUTest \
           RUN_ESMF_AttributeUpdateUTest \
-          RUN_ESMF_AttributeUpdateCIMRespPartyUTest \
-          RUN_ESMF_AttributeUpdateClosedLoopTreesUTest \
           RUN_ESMF_AttributeUpdateComponentUTest \
           RUN_ESMF_AttributeUpdateContainerStressUTest \
           RUN_ESMF_AttributeUpdateMultiReconcileUTest \
           RUN_ESMF_AttributeUpdateReconcileUTest \
           RUN_ESMF_AttributeUpdateRemoveOnlyUTest \
-          RUN_ESMF_AttributeWriteInternalUTest \
-          RUN_ESMF_AttributeXMLUTest \
-          RUN_ESMF_AttReadCplCompUTest \
-          RUN_ESMF_AttReadGridCompUTest \
-          RUN_ESMF_AttReadFieldUTest \
-          RUN_ESMF_AttributeJSONUTest
+          RUN_ESMF_AttributeUtilUTest
 
 TESTS_RUN_UNI = \
-          RUN_ESMF_AttributeAutoLinkUTestUNI \
-          RUN_ESMF_AttInternalGridUTestUNI \
           RUN_ESMF_AttPackArrayUTestUNI \
           RUN_ESMF_AttPackABundleUTestUNI \
           RUN_ESMF_AttPackCplCompUTestUNI \
@@ -135,18 +113,11 @@ TESTS_RUN_UNI = \
           RUN_ESMF_AttributeFieldUTestUNI \
           RUN_ESMF_AttributeFBundleUTestUNI \
           RUN_ESMF_AttributeGridCompUTestUNI \
-          RUN_ESMF_AttInternalGridUTestUNI \
           RUN_ESMF_AttributeGridUTestUNI \
           RUN_ESMF_AttributeLocStreamUTestUNI \
           RUN_ESMF_AttributeSciCompUTestUNI \
           RUN_ESMF_AttributeStateUTestUNI \
-          RUN_ESMF_AttributeWriteInternalUTestUNI \
-          RUN_ESMF_AttributeXMLUTestUNI \
-          RUN_ESMF_AttReadCplCompUTestUNI \
-          RUN_ESMF_AttReadGridCompUTestUNI \
-          RUN_ESMF_AttReadFieldUTestUNI \
-          RUN_ESMF_AttributeJSONUTestUNI
-
+          RUN_ESMF_AttributeUtilUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -160,15 +131,6 @@ CLOBBERDIRS =
 #
 #  Attribute class
 #
-
-# --- AutoLink
-
-RUN_ESMF_AttributeAutoLinkUTest:
-	$(MAKE) TNAME=AttributeAutoLink NP=4 ftest
-
-RUN_ESMF_AttributeAutoLinkUTestUNI:
-	$(MAKE) TNAME=AttributeAutoLink NP=1 ftest
-
 
 # --- AttPackArray
 
@@ -326,16 +288,6 @@ RUN_ESMF_AttributeCplCompUTest:
 RUN_ESMF_AttributeCplCompUTestUNI:
 	$(MAKE) TNAME=AttributeCplComp NP=1 ftest
 
-RUN_ESMF_AttReadCplCompUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_cplcomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttReadCplComp NP=4 ftest
-
-RUN_ESMF_AttReadCplCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_cplcomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttReadCplComp NP=1 ftest
-
 # --- DistGrid
 
 RUN_ESMF_AttributeDistGridUTest:
@@ -360,16 +312,6 @@ RUN_ESMF_AttributeFieldUTest:
 RUN_ESMF_AttributeFieldUTestUNI:
 	$(MAKE) TNAME=AttributeField NP=1 ftest
 
-RUN_ESMF_AttReadFieldUTest:
-	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttReadField NP=4 ftest
-
-RUN_ESMF_AttReadFieldUTestUNI:
-	cp -f $(ESMF_DIR)/src/Infrastructure/Field/etc/esmf_field.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttReadField NP=1 ftest
-
 # --- GridComp
 
 RUN_ESMF_AttributeGridCompUTest:
@@ -378,23 +320,7 @@ RUN_ESMF_AttributeGridCompUTest:
 RUN_ESMF_AttributeGridCompUTestUNI:
 	$(MAKE) TNAME=AttributeGridComp NP=1 ftest
 
-RUN_ESMF_AttReadGridCompUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttReadGridComp NP=4 ftest
-
-RUN_ESMF_AttReadGridCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttReadGridComp NP=1 ftest
-
 # --- Grid
-
-RUN_ESMF_AttInternalGridUTest:
-	$(MAKE) TNAME=AttInternalGrid NP=4 ftest
-
-RUN_ESMF_AttInternalGridUTestUNI:
-	$(MAKE) TNAME=AttInternalGrid NP=1 ftest
 
 RUN_ESMF_AttributeGridUTest:
 	$(MAKE) TNAME=AttributeGrid NP=4 ftest
@@ -418,16 +344,6 @@ RUN_ESMF_AttributeSciCompUTest:
 RUN_ESMF_AttributeSciCompUTestUNI:
 	$(MAKE) TNAME=AttributeSciComp NP=1 ftest
 
-RUN_ESMF_AttReadSciCompUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_scicomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttReadSciComp NP=4 ftest
-
-RUN_ESMF_AttReadSciCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_scicomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttReadSciComp NP=1 ftest
-
 # --- State
 
 RUN_ESMF_AttributeStateUTest:
@@ -436,24 +352,10 @@ RUN_ESMF_AttributeStateUTest:
 RUN_ESMF_AttributeStateUTestUNI:
 	$(MAKE) TNAME=AttributeState NP=1 ftest
 
-# --- JSON
-
-RUN_ESMF_AttributeJSONUTest:
-	$(MAKE) TNAME=AttributeJSON NP=4 ftest
-
-RUN_ESMF_AttributeJSONUTestUNI:
-	$(MAKE) TNAME=AttributeJSON NP=1 ftest
-
 # --- Update
 
 RUN_ESMF_AttributeUpdateUTest:
 	$(MAKE) TNAME=AttributeUpdate NP=4 ftest
-
-RUN_ESMF_AttributeUpdateCIMRespPartyUTest:
-	$(MAKE) TNAME=AttributeUpdateCIMRespParty NP=6 ftest
-
-RUN_ESMF_AttributeUpdateClosedLoopTreesUTest:
-	$(MAKE) TNAME=AttributeUpdateClosedLoopTrees NP=4 ftest
 
 RUN_ESMF_AttributeUpdateComponentUTest:
 	$(MAKE) TNAME=AttributeUpdateComponent NP=8 ftest
@@ -470,27 +372,18 @@ RUN_ESMF_AttributeUpdateReconcileUTest:
 RUN_ESMF_AttributeUpdateRemoveOnlyUTest:
 	$(MAKE) TNAME=AttributeUpdateRemoveOnly NP=4 ftest
 
-# --- WriteInternal
+# --- Utility Testing
 
-RUN_ESMF_AttributeWriteInternalUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp_cim151grids.xml $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttributeWriteInternal NP=1 ftest
+RUN_ESMF_AttributeUtilUTest:
+	$(MAKE) TNAME=AttributeUtil NP=2 ftest
 
-RUN_ESMF_AttributeWriteInternalUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp_cim151grids.xml $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttributeWriteInternal NP=1 ftest
+RUN_ESMF_AttributeUtilUTestUNI:
+	$(MAKE) TNAME=AttributeUtil NP=1 ftest
 
-# --- XML
+# --- Attribute Profiling
 
-RUN_ESMF_AttributeXMLUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cim.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cim_rp.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cust_rp.xml $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttributeXML NP=4 ftest
+RUN_ESMF_AttributeProfileUTest:
+	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=AttributeProfile NP=4 ftest
 
-RUN_ESMF_AttributeXMLUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cim.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cim_rp.xml $(ESMF_TESTDIR)
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cust_rp.xml $(ESMF_TESTDIR)
-	$(MAKE) TNAME=AttributeXML NP=1 ftest
-
+RUN_ESMF_AttributeProfileUTestUNI:
+	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=AttributeProfile NP=1 ftest

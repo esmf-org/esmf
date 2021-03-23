@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -87,15 +87,14 @@
 
     !print *, "collecting FieldBundle garbage"
   
-    ! destruct internal data allocations
-    call ESMF_FieldBundleDestruct(fb%this, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-
-    ! deallocate actual FieldBundleType allocation      
     if (associated(fb%this)) then
+      ! destruct internal data allocations
+      call ESMF_FieldBundleDestruct(fb%this, localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+      ! deallocate actual FieldBundleType allocation      
       deallocate(fb%this, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Deallocating FieldBundle", &
         ESMF_CONTEXT, &

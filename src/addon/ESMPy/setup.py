@@ -50,8 +50,8 @@ class AbstractESMFNoseCommand(AbstractESMFCommand):
 
     @classmethod
     def nosetests_command(cls):
-        ret = ['nosetests', '-vs']
-        if cls._nose_attrs is not None:
+        ret = ['nosetests', '-vs', '--with-xunit']
+        if not isinstance(cls._nose_attrs, type(None)):
             nose_attrs = cls._nose_base_attrs + cls._nose_attrs
             nose_attrs = ','.join(nose_attrs)
             cmd_nose_attrs = ['-a', nose_attrs]
@@ -65,7 +65,7 @@ class AbstractESMFNoseCommand(AbstractESMFCommand):
             mpirun_prefix = [constants._ESMF_MPIRUN, '-n', str(constants._ESMF_MPIRUN_NP)]
             ret = mpirun_prefix + ret
 
-        if cls._nose_flags is not None:
+        if not isinstance(cls._nose_flags, type(None)):
             ret.append(cls._nose_flags)
         ret.append(cls._default_target)
         return ret
@@ -86,18 +86,18 @@ class BuildCommand(AbstractESMFCommand):
 
     def finalize_options(self):
         self.cwd = os.getcwd()
-        if self.ESMFMKFILE is None:
+        if isinstance(self.ESMFMKFILE, type(None)):
             self.ESMFMKFILE = os.getenv('ESMFMKFILE')
-        if self.build_lib is None:
+        if isinstance(self.build_lib, type(None)):
             self.build_lib = os.path.join(self.build_base, 'lib')
-        if self.plat_name is None:
+        if isinstance(self.plat_name, type(None)):
             self.plat_name = get_platform()
 
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
 
         # Create "esmfmkfile.py" file holding the path to the ESMF "esmf.mk" file
-        if self.ESMFMKFILE is not None:
+        if not isinstance(self.ESMFMKFILE, type(None)):
             f = open(os.path.join('src', 'ESMF', 'interface', 'esmfmkfile.py'), 'w')
             f.write('ESMFMKFILE = "%s"' % self.ESMFMKFILE)
             f.close()
@@ -187,7 +187,7 @@ class TestRegridFromFileCommand(AbstractESMFCommand):
         self._validate_()
         target = os.path.join('src', 'ESMF', 'test', 'regrid_from_file', self._filename)
         cmd = [sys.executable, target]
-        if self._flags is not None:
+        if not isinstance(self._flags, type(None)):
             cmd.append(self._flags)
         subprocess.check_call(cmd)
 
@@ -242,7 +242,7 @@ for dirpath, dirnames, filenames in os.walk(src_path):
 # TODO: build doc command
 # TODO: remove duplicated metadata: here and src/ESMF/__init__.py
 setup(name="ESMPy",
-      version="8.0.0",
+      version="8.1.0",
       description="ESMF Python interface",
       author="University Corporation for Atmospheric Research, \
               Massachusetts Institute of Technology, \
@@ -253,8 +253,8 @@ setup(name="ESMPy",
               Argonne National Laboratory, \
               NASA Goddard Space Flight Center",
       license="University of Illinois-NCSA",
-      author_email="esmf_support@list.woc.noaa.gov",
-      url="http://earthsystemcog.org/projects/esmpy/",
+      author_email="esmf_support@ucar.edu",
+      url="http://earthsystemmodeling.org/esmpy/",
       packages=packages,
       package_dir={'': 'src'},
       cmdclass={'build': BuildCommand,

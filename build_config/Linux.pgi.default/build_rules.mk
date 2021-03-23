@@ -45,10 +45,6 @@ ESMF_F90LINKLIBS       += -lmpi++
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-# Under ticket #3614573 found that MPT has issues. One of the following macros
-# must be set!
-#ESMF_CXXCOMPILEOPTS    += -DMUST_USE_BLOCKING_SEND
-ESMF_CXXCOMPILEOPTS    += -DMUST_NOTUSE_MALLOC_TRIM
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
@@ -173,6 +169,12 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_PGIVERSION_MINOR=$(ESMF_PGIVERSION_MINOR)
 ESMF_PGIVERSION_PATCH = $(shell $(ESMF_DIR)/scripts/version.pgi 3 $(ESMF_F90COMPILER_VERSION))
 ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_PATCH=$(ESMF_PGIVERSION_PATCH)
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_PGIVERSION_PATCH=$(ESMF_PGIVERSION_PATCH)
+
+############################################################
+# Currently PGI does not support the Fortran2018 assumed type feature
+#
+ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
 
 ############################################################
 # Construct the ABISTRING

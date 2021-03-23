@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -217,6 +217,22 @@ void FTN_X(c_esmc_xgridregrid_create)(MeshCap **meshsrcpp, MeshCap **meshdstpp,
                               rc);
 }
 
+void FTN_X(c_esmc_xgridregrid_createp)(MeshCap **meshsrcpp, MeshCap **meshdstpp,
+                   MeshCap **mesh,
+                   int *compute_midmesh,
+                   int *regridMethod, 
+                    int *unmappedaction,
+                   int *nentries, ESMCI::TempWeights **tweights,
+                   int*rc) {
+  FTN_X(c_esmc_xgridregrid_create)(meshsrcpp, meshdstpp,
+                   mesh,
+                   compute_midmesh,
+                   regridMethod, 
+                   unmappedaction,
+                   nentries, tweights,
+                   rc);
+}
+
 void FTN_X(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, double *w) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "c_esmc_copy_tempweights_xgrid()"
@@ -284,5 +300,15 @@ extern "C" void FTN_X(c_esmc_xgrid_getfrac2)(Grid **gridpp,
                             arraypp, staggerLoc,
                             rc);
 }
+
+
+// mesh set tmp xgrid info
+  void FTN_X(c_esmc_meshsetxgridinfo)(MeshCap **meshpp, int *side, int *ind, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetxgridinfo()" 
+
+    (*meshpp)->set_xgrid_info(side,ind,rc);
+}
+
 
 } // end extern "C"

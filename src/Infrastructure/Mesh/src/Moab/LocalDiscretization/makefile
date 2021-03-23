@@ -6,9 +6,9 @@ ALL: build_here
 ESMF_CXXCOMPILECPPFLAGS += -DIS_BUILDING_MB -DHAVE_VSNPRINTF -DLINUX -DUSE_MPI
 
 SOURCEC = ElemEvaluator.cpp LinearHex.cpp LinearQuad.cpp \
-  LinearTet.cpp LinearTri.cpp QuadraticHex.cpp
-
-#  SpectralHex.cpp SpectralQuad.cpp
+  LinearTet.cpp LinearTri.cpp QuadraticHex.cpp 
+	
+	# SpectralHex.cpp SpectralQuad.cpp
 
 SOURCEF =
 

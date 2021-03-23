@@ -146,8 +146,7 @@ module user_model1
     real(ESMF_KIND_R8)    :: pi
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    type(ESMF_VM)         :: vm
-    integer               :: i, j, tid, localPet, peCount
+    integer               :: i, j, tid
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -164,17 +163,6 @@ module user_model1
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    ! Query the VM of the Component for the number of PEs this PET has access to
-    ! -> Set the number of OpenMP threads accordingly
-    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, pet=localPet, peCount=peCount, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-!$  call omp_set_num_threads(peCount)
-
     ! Fill source Array with data
     tid = 0
 !$omp parallel do  &

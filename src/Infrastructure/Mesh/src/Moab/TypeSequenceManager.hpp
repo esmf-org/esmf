@@ -15,13 +15,13 @@ class Error;
  *
  * EntitySequenceManager is a composition of instances of TypeSequenceManager,
  * one instance for each EntityType.  The TypeSequenceManager provides
- * organization, owership, and querying of EntitySequences for a specific
+ * organization, ownership, and querying of EntitySequences for a specific
  * EntityType.
  */
 class TypeSequenceManager
 {
 public:
-  /**\brief Comparision function used in std::set
+  /**\brief Comparison function used in std::set
    *
    * Define less-than comparison for EntitySequence pointers as a comparison
    * of the entity handles in the pointed-to EntitySequences.
@@ -54,7 +54,7 @@ public:
   typedef set_type::iterator iterator;
   /**\brief Iterator for set_type */
   typedef set_type::const_iterator const_iterator;
-  /**\brief Type of container for organizing SequenceData instaces */
+  /**\brief Type of container for organizing SequenceData instances */
   typedef std::set<SequenceData*,SequenceCompare<SequenceData> > data_set_type;
   /**\brief iterator type for data_set_type */
   typedef data_set_type::iterator data_iterator;
@@ -111,7 +111,7 @@ public:
    *
    * Give up ownership of specified EntitySequence, and remove it
    * from all internal data structures.  Passes back bool flag to
-   * notify caller that ownership of the correspoding SequenceData
+   * notify caller that ownership of the corresponding SequenceData
    * is also relinquished because the specified EntitySequence is
    * the last one referencing it.  
    */
@@ -280,7 +280,7 @@ public:
      * and can be allocated with the passed value of values_per_ent.
      * For example, the handle may not be allocated, but it may
      * fall within an existing SequenceData.  In that case, it
-     * must be possible to store the speciified values_per_ent
+     * must be possible to store the specified values_per_ent
      * in the existing SequenceData.
      *
      * There are four possible return 'states' from this function:

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -36,6 +36,7 @@ module ESMF_StateRemRepMod
 ! !USES:
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
+      use ESMF_BaseMod
       use ESMF_ContainerMod
       use ESMF_UtilStringMod
       use ESMF_UtilTypesMod
@@ -325,42 +326,6 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! Handle the attribute heirarchy
-      linkChange = ESMF_TRUE
-      select case (dataitem%otype%ot)
-      case (ESMF_STATEITEM_FIELD%ot)
-        call c_ESMC_AttributeLinkRemove(localstatep%base, &
-            dataitem%datap%fp%ftypep%base, linkChange, localrc)
-
-      case (ESMF_STATEITEM_FIELDBUNDLE%ot)
-        call c_ESMC_AttributeLinkRemove(localstatep%base, &
-            dataitem%datap%fbp%this%base, linkChange, localrc)
-
-      case (ESMF_STATEITEM_ARRAY%ot)
-        call c_ESMC_AttributeLinkRemove(localstatep%base, &
-            dataitem%datap%ap, linkChange, localrc)
-
-      case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
-        call c_ESMC_AttributeLinkRemove(localstatep%base, &
-            dataitem%datap%abp, linkChange, localrc)
-
-      case (ESMF_STATEITEM_ROUTEHANDLE%ot)
-        localrc = ESMF_SUCCESS
-
-      case (ESMF_STATEITEM_STATE%ot)
-        call c_ESMC_AttributeLinkRemove(localstatep%base, &
-            dataitem%datap%spp%base, linkChange, localrc)
-
-      end select
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      deallocate (dataitem, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
     end do
 
     if (present(rc)) rc = localrc
@@ -575,38 +540,6 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\
-^if !defined (noattributesversion) @\
-      ! link the Attribute hierarchies @\
-      linkChange = ESMF_TRUE @\
-      do i=1, localcount @\
-         call c_ESMC_AttributeLink(state%statep%base, & @\
-            mnameattbase, linkChange, localrc) @\
-         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-                    ESMF_CONTEXT, rcToReturn=rc))  return @\
-      enddo @\
- @\
-      ! set the import and export Attributes on any item connected to this State @\
-      lobject = #mnameatt @\
-      lvalue1 = 'Import'  @\
-      lvalue2 = 'Export' @\
-      lname  = 'VariableIntent' @\
-      if (state%statep%st == ESMF_STATEINTENT_IMPORT) then @\
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
-          trim (lobject), trim (lname), trim (lvalue1), localrc) @\
-        if (ESMF_LogFoundError(localrc, & @\
-          ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, & @\
-          rcToReturn=rc)) return @\
-      else if (state%statep%st == ESMF_STATEINTENT_EXPORT) then @\
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
-          trim (lobject), trim (lname), trim (lvalue2), localrc) @\
-        if (ESMF_LogFoundError(localrc, & @\
-          ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, & @\
-          rcToReturn=rc)) return @\
-      endif @\
-^endif @\
-       @\
       if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_StateRep##mentryname##List
 

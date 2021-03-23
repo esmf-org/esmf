@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -41,6 +41,8 @@ module ESMF_ArrayGatherMod
 !
 !------------------------------------------------------------------------------
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -99,6 +101,29 @@ module ESMF_ArrayGatherMod
 !EOPI 
   end interface
 
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+^ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine c_ESMC_ArrayGather(array, farray, typekind, rank, counts, tile, &
+      rootPet, vm, rc)
+      import                :: ESMF_Array, ESMF_TypeKind_Flag, ESMF_VM
+      type(ESMF_Array)      :: array
+      type(*)               :: farray
+      type(ESMF_TypeKind_Flag):: typekind
+      integer               :: rank, counts(*), tile, rootPet
+      type(ESMF_VM)         :: vm
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+^endif
+
+!------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

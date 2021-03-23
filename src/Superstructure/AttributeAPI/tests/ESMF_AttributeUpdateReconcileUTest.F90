@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -464,8 +464,7 @@ program AttributeUpdateReconcile
 
     !!!!! Simulate Simultaneous Changes to Attribute Tree !!!!!!!!!!!!!!!!
 
-    call ESMF_AttributeUpdate(cplcomp, vm, rootList=petList1, &
-                              reconcile=.true., rc=rc)
+    call ESMF_AttributeUpdate(cplcomp, vm, rootList=petList1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !EX_UTest_Multi_Proc_Only
@@ -481,8 +480,7 @@ program AttributeUpdateReconcile
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
 
-    call ESMF_AttributeUpdate(cplcomp, vm, rootList=petList1, &
-                              reconcile=.false., rc=rc)
+    call ESMF_AttributeUpdate(cplcomp, vm, rootList=petList1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !EX_UTest_Multi_Proc_Only

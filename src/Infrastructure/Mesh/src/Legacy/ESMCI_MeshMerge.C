@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -30,7 +30,8 @@
 #include <Mesh/include/ESMCI_XGridUtil.h>
 #include <ESMCI_VM.h>
 #include <PointList/include/ESMCI_PointList.h>
- 
+#include <Mesh/include/Legacy/ESMCI_MeshRead.h>  
+
 #include <algorithm>
 #include <iterator>
 #include <ostream>
@@ -216,6 +217,21 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   for(; it != ie; ++it)
     delete it->second;
 
+}
+
+bool subject_is_offplane(unsigned int sdim, unsigned int subject_num_nodes, double *cd){
+
+  bool result = false;
+  unsigned int num_components = 0;
+  // check if one of the vertex is at origin
+  for (unsigned int i = 0; i < subject_num_nodes; i ++){
+    unsigned int num_components = 0;
+    for (unsigned int j = 0; j < sdim ; j ++)
+      if(std::abs(cd[i*sdim+j]) < 1.e-200) num_components ++;
+    // if all (sdim=3) components are essentially 0, it's not a polygon on the surface of the sphere
+    if(num_components == sdim) result = true;
+  }
+  return result;
 }
 
 void dump_elem(const MeshObj & elem, int sdim, const MEField<> & coord, bool check_local){
@@ -408,6 +424,8 @@ void MeshCreateDiff(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp, double threshol
 
 }
 
+  extern bool mathutil_debug;
+
 void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
 
   // Get dim info for mesh
@@ -459,7 +477,12 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
       coords_to_polygon(topo->num_nodes, cd, sdim, res_poly);
 
       construct_sintd(res_poly.area(sdim), topo->num_nodes, cd, pdim, sdim, 
-        &sintd_nodes, &sintd_cells);
+		      &sintd_nodes, &sintd_cells
+#ifdef BOB_XGRID_DEBUG
+                      ,elem.get_id(),-2
+#endif
+                      );
+
       ncells ++;
       delete[] cd;
 
@@ -508,7 +531,12 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
       coords_to_polygon(topo->num_nodes, cd, sdim, res_poly);
 
       construct_sintd(res_poly.area(sdim), topo->num_nodes, cd, pdim, sdim, 
-        &sintd_nodes, &sintd_cells);
+		      &sintd_nodes, &sintd_cells
+#ifdef BOB_XGRID_DEBUG
+                      ,-3,elem.get_id()
+#endif
+                      );
+
       ncells ++;
       delete[] cd;
 
@@ -530,6 +558,8 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
 
 }
 
+  extern bool xgu_debug;
+
 // srcmesh: original src (clip) mesh    (in)
 // dstmesh: original dst (subject) mesh    (in)
 // mergemesh: result merged mesh (out)
@@ -545,6 +575,13 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   // Get dim info for mesh
   int sdim=srcmesh.spatial_dim();
   int pdim=srcmesh.parametric_dim();
+
+  // figure out side
+  int side=srcmesh.side;
+  if (dstmesh.side != side) Throw() << "Meshes being merged should be on the same side of the XGrid.";
+  int side1_mesh_ind=0;
+  int side2_mesh_ind=0;
+
 
   int rc;
   unsigned int me = VM::getCurrent(&rc)->getLocalPet();
@@ -564,14 +601,36 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   {
     const Mesh & mesh = srcmesh;
 
-    // Get mask and coord field
+   // Set mesh ind
+    if (side == 1) {
+      side1_mesh_ind=mesh.ind;
+      side2_mesh_ind=0;
+    } else if (side == 2) {
+      side1_mesh_ind=0;
+      side2_mesh_ind=mesh.ind;
+    }
+
+    // Get mask, coord, and frac2 field
     MEField<> *mask_field = mesh.GetField("elem_mask");
     MEField<> &coord = *mesh.GetCoordField();
+    MEField<> *elem_frac2=mesh.GetField("elem_frac2");
+    if (!elem_frac2) Throw() << "Meshes involved in XGrid construction should have frac2 field";
 
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
       if(elem.get_owner() != me) continue;
+
+      // Set frac2 field based on mask
+      double *frac2=elem_frac2->data(elem);
+      *frac2=1.0; // Since this is priority mesh all it's frac2 should be 1.0
+      // Unless masked when they should be 0.0
+      if(mask_field){ 
+        double *msk=mask_field->data(elem);
+        if (*msk>0.5) {
+          *frac2=0.0;
+        }
+      }
 
       if(mask_field){ // do not sew an element if it's masked out
         double *msk=mask_field->data(elem);
@@ -598,7 +657,12 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
       polygon res_poly;
       coords_to_polygon(topo->num_nodes, cd, sdim, res_poly);
 
-      construct_sintd(res_poly.area(sdim), num_nodes, cd, pdim, sdim, &sintd_nodes, &sintd_cells);
+      construct_sintd(res_poly.area(sdim), num_nodes, cd, pdim, sdim, &sintd_nodes, &sintd_cells, 
+#ifdef BOB_XGRID_DEBUG
+                      elem.get_id(),-4, 
+#endif
+                      side1_mesh_ind, side2_mesh_ind);
+
       ncells ++;
       delete[] cd;
 
@@ -612,6 +676,15 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
     MEField<> &clip_coord = *srcmesh.GetCoordField();
     MEField<> *elem_frac=mesh.GetField("elem_frac2");
     if (!elem_frac) Throw() << "Meshes involved in XGrid construction should have frac2 field";
+
+    // Set mesh ind
+    if (side == 1) {
+      side1_mesh_ind=mesh.ind;
+      side2_mesh_ind=0;
+    } else if (side == 2) {
+      side1_mesh_ind=0;
+      side2_mesh_ind=mesh.ind;
+    } 
 
     // Get mask field
     MEField<> *mask_field = mesh.GetField("elem_mask");
@@ -639,6 +712,22 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         }
       }
 
+
+#ifdef BOB_XGRID_DEBUG
+#define DEBUG_DST_ID 5600
+#else
+#define DEBUG_DST_ID 0
+#endif
+
+#ifdef BOB_XGRID_DEBUG
+	if (elem.get_id() == DEBUG_DST_ID) {
+	  printf("%d# dst_id=%d Starting clipping\n",Par::Rank(),elem.get_id());
+
+	  write_3D_poly_to_vtk("mm_sub",elem.get_id(),subject_num_nodes,cd);
+	}
+#endif
+
+
       // Get rid of degenerate edges
       if(sdim == 2)
         remove_0len_edges2D(&subject_num_nodes, cd);
@@ -661,7 +750,12 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         coords_to_polygon(subject_num_nodes, cd, sdim, res_poly);
 
         construct_sintd(res_poly.area(sdim), subject_num_nodes, cd, pdim, sdim, 
-          &sintd_nodes, &sintd_cells);
+			&sintd_nodes, &sintd_cells,
+#ifdef BOB_XGRID_DEBUG
+                        -5,elem.get_id(),
+#endif
+                         side1_mesh_ind, side2_mesh_ind);
+
         delete[] cd;
         ncells ++;
       }else{ 
@@ -679,16 +773,19 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         // go through each src element that cuts into this dst element
         // Do a first cut compute total fraction reduction, if entire dst element
         // is clipped out, move onto the next dst element
+#define XGRID_CLIP_TOL 1.0E-14
         for(interp_map_iter it = range.first; it != range.second; ++it)
           fraction_deduction += it->second->fraction;
-        if(fraction_deduction >= 1.0){
+        if(fraction_deduction >= 1.0-XGRID_CLIP_TOL){
           double *f=elem_frac->data(elem);
           *f=0.;
           continue;
         }
+#undef XGRID_CLIP_TOL
 
         // Do spatial boolean math: difference, cut each intersected part off the dst mesh and 
         // triangulate the remaining polygon
+	int cp=0; 
         for(interp_map_iter it = range.first; it != range.second; ++it){
 
           // debug
@@ -711,11 +808,29 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
           int clip_num_nodes = it->second->num_clip_nodes;
           double *clip_cd = it->second->clip_coords;
 
+#ifdef BOB_XGRID_DEBUG
+          if (elem.get_id() == DEBUG_DST_ID) {
+	    printf("======= dst_id=%d cp=%d clipping against s_id=%d input dstpolys.size()=%d ================== \n",elem.get_id(),cp,clip_elem.get_id(),dstpolys.size());
+
+	    char fname[1000];
+	    sprintf(fname,"mm_cp%d_clip",cp);
+	    write_3D_poly_to_vtk(fname,clip_elem.get_id(),clip_num_nodes,clip_cd);
+	  }
+#endif 
+
           // for each polygon in cutted dst element, compute residual diff polygons
           int num_p; int *ti, *tri_ind; double *pts, *td;
           std::vector<polygon> diff;
+	  int dp=0;
           for(std::vector<polygon>::const_iterator dstpoly_it = dstpolys.begin();
             dstpoly_it != dstpolys.end(); ++ dstpoly_it){
+
+#ifdef BOB_XGRID_DEBUG
+	    if (elem.get_id() == DEBUG_DST_ID) {
+	      printf("dst_id=%d cp=%d dp=%d clipping against s_id=%d BEGIN ====\n",elem.get_id(),cp,dp,clip_elem.get_id());
+	    }
+#endif
+
 
             //if(elem.get_id() == 5497 || elem.get_id() == 6073){
             //  std::cout << "polygon being clipped: " << std::endl;
@@ -739,7 +854,8 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
               remove_0len_edges3D(&subject_num_nodes, cd);
 
             if(subject_num_nodes < 3) continue;
-          
+      
+            double subject_area = 0.;    
             double *cd_sph, *clip_cd_sph;
             if(sdim == 2) weiler_clip_difference(pdim, sdim, subject_num_nodes, cd, clip_num_nodes, clip_cd, diff);
             if(sdim == 3){
@@ -753,16 +869,36 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
               //diff.clear(); diff.resize(diff_cart.size()); std::copy(diff_cart.begin(), diff_cart.end(), diff.begin());
               bool left_turn = true;
               bool right_turn = false;
-              rot_2D_3D_sph(subject_num_nodes, cd, &left_turn, &right_turn);
+              xgrid_rot_2D_3D_sph(subject_num_nodes, cd, &left_turn, &right_turn);
               if(right_turn)
                 reverse_coord(sdim, subject_num_nodes, cd);
-              rot_2D_3D_sph(clip_num_nodes, clip_cd, &left_turn, &right_turn);
+              xgrid_rot_2D_3D_sph(clip_num_nodes, clip_cd, &left_turn, &right_turn);
               if(right_turn)
                 reverse_coord(sdim, clip_num_nodes, clip_cd);
 
               double subject_area = great_circle_area(subject_num_nodes, cd);
-              if(subject_area <= 0.) { delete[] cd; continue; }
+              if(subject_area <= 1.e-11) { delete[] cd; continue; }
+              if(subject_is_offplane(sdim, subject_num_nodes, cd)) {delete[] cd; continue; }
+
+#ifdef BOB_XGRID_DEBUG
+	      if (elem.get_id() == DEBUG_DST_ID) {
+		xgu_debug=true;
+
+		char fname[1000];
+		sprintf(fname,"mm_cp%d_dp%d_sub",cp,dp);
+		write_3D_poly_woid_to_vtk(fname, subject_num_nodes, cd);
+	      }
+#endif
+
               weiler_clip_difference(pdim, sdim, subject_num_nodes, cd, clip_num_nodes, clip_cd, diff);
+
+#ifdef BOB_XGRID_DEBUG
+	      if (elem.get_id() == DEBUG_DST_ID) {
+		printf("dst_id=%d cp=%d dp=%d clipping against s_id=%d diff.size()=%d\n",elem.get_id(),cp,dp,clip_elem.get_id(),diff.size());
+		xgu_debug=false;
+	      }
+#endif
+
               //std::vector<polygon> diff_sph;
               //cart2sph(diff, diff_sph);
             }
@@ -770,12 +906,22 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
             delete[] cd;
 
             // for each non-triangular polygon in diff, use van leer's algorithm to triangulate it
+	    int df=0;        
             std::vector<polygon>::iterator diff_it = diff.begin(), diff_ie = diff.end();
             for(;diff_it != diff_ie; ++ diff_it){
               num_p = diff_it->points.size();
               if(num_p > 3){
                 pts = new double[sdim*(diff_it->points.size())];
                 polygon_to_coords(*diff_it, sdim, pts);
+
+#ifdef BOB_XGRID_DEBUG
+                if (elem.get_id() == DEBUG_DST_ID) {
+		  char fname[1000];
+		  sprintf(fname,"mm_cp%d_dp%d_df%d_wo_b4tr",cp,dp,df);
+		  write_3D_poly_woid_to_vtk(fname, num_p, pts);
+		}
+#endif
+
                 //if(sdim == 2)
                 //  remove_0len_edges2D(&num_p, pts);
                 //else
@@ -785,10 +931,23 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
                 ti = new int[num_p];
                 tri_ind = new int[3*(num_p-2)];
                 int ret=0;
+
+#ifdef BOB_XGRID_DEBUG
+                if (elem.get_id() == DEBUG_DST_ID) {
+                  mathutil_debug=true;
+                }
+#endif
+
                 if(sdim == 2)
-                  ret=triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
+                  ret=xgrid_triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
                 if(sdim == 3)
-                  ret=triangulate_poly<GEOM_SPH2D3D>(num_p, pts, td, ti, tri_ind);
+                  ret=xgrid_triangulate_poly<GEOM_SPH2D3D>(num_p, pts, td, ti, tri_ind);
+
+#ifdef BOB_XGRID_DEBUG
+	if (elem.get_id() == DEBUG_DST_ID) {
+	  mathutil_debug=false;
+	}
+#endif
 
                 // Check return code
                 if (ret != ESMCI_TP_SUCCESS) {
@@ -797,6 +956,18 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
                          " - can't triangulate a polygon with less than 3 sides", 
                                                       ESMC_CONTEXT, &rc)) throw rc;
                   } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+#ifdef BOB_XGRID_DEBUG
+		  if (elem.get_id() == DEBUG_DST_ID) {
+		      printf("PROB WITH TRI: dst_id=%d cp=%d dp=%d df=%d \n",elem.get_id(),cp,dp,df);
+		      char fname[1000];
+		      sprintf(fname,"PROB_did%d_cp%d_dp%d_df%d",elem.get_id(),cp,dp,df);
+		      write_3D_poly_woid_to_vtk(fname, num_p, pts);
+		    }
+#endif
+
+#if 0
+                 
+		  ///// RETURN ERROR IF THERE IS A PROBLEM WITH TRIANGULATION ////
                     //dump_elem(elem, sdim, coord, false);
                     //dump_elem(clip_elem, sdim, clip_coord, false);
                     if(false){
@@ -820,6 +991,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
                     }
                     if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
                                                     ESMC_CONTEXT, &rc)) throw rc;
+#endif
                   } else {
                     if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                                       " - unknown error in triangulation", ESMC_CONTEXT, &rc)) throw rc;
@@ -829,17 +1001,29 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
                 // Add each of the triangles into the merged mesh
                 unsigned num_tri_edges = 3;
                 double * tri_cd = new double[sdim*num_tri_edges];
-                for(int ntri = 0; ntri < num_p-2; ntri ++){
-                  // copy each point of the triangle
-                  std::memcpy(tri_cd, pts+tri_ind[ntri*num_tri_edges]*sdim, sdim*sizeof(double));
-                  std::memcpy(tri_cd+sdim, pts+tri_ind[ntri*num_tri_edges+1]*sdim, sdim*sizeof(double));
-                  std::memcpy(tri_cd+2*sdim, pts+tri_ind[ntri*num_tri_edges+2]*sdim, sdim*sizeof(double));
-
-                  // append the triangles onto result polygon vector
-                  polygon triangle;
-                  coords_to_polygon(3, tri_cd, sdim, triangle);
-                  results.push_back(triangle);
-                  ncells ++; //debug line
+                if (ret == ESMCI_TP_SUCCESS) {
+                  for(int ntri = 0; ntri < num_p-2; ntri ++){
+                    // copy each point of the triangle
+                    std::memcpy(tri_cd, pts+tri_ind[ntri*num_tri_edges]*sdim, sdim*sizeof(double));
+                    std::memcpy(tri_cd+sdim, pts+tri_ind[ntri*num_tri_edges+1]*sdim, sdim*sizeof(double));
+                    std::memcpy(tri_cd+2*sdim, pts+tri_ind[ntri*num_tri_edges+2]*sdim, sdim*sizeof(double));
+                    
+                    // append the triangles onto result polygon vector
+                    polygon triangle;
+                    coords_to_polygon(3, tri_cd, sdim, triangle);
+#ifdef BOB_XGRID_DEBUG
+                    triangle.id=clip_elem.get_id(); // BOB DEBUG
+                    if (elem.get_id() == DEBUG_DST_ID) {
+                      //		    printf("dst_id=%d A1 dp=%d adding %d to results: [%3.6E %3.6E %3.6E] [%3.6E %3.6E %3.6E] [%3.6E %3.6E %3.6E]\n",elem.get_id(),dp,results.size(),tri_cd[0],tri_cd[1],tri_cd[2],tri_cd[3],tri_cd[4],tri_cd[5],tri_cd[6],tri_cd[7],tri_cd[8]);
+                      printf("dst_id=%d cp=%d dp=%d df=%d adding tri %d to results (tri) \n",elem.get_id(),cp,dp,df,results.size());
+                      // if (cp == 0) {
+                      // write_3D_poly_to_vtk("mm1_rp",results.size(),3,tri_cd);
+                      //}
+                    }
+#endif
+                    results.push_back(triangle);
+                    ncells ++; //debug line
+                  }
                 }
                 delete[] pts;
                 delete[] td;
@@ -847,11 +1031,29 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
                 delete[] tri_ind;
                 delete[] tri_cd;
               }else{ // diff_it already points to an triangle, append to results
+#ifdef BOB_XGRID_DEBUG
+                diff_it->id=clip_elem.get_id();
+		if (elem.get_id() == DEBUG_DST_ID) {
+		  double tri_cd[9];
+		 polygon_to_coords(*diff_it, sdim, tri_cd);
+		 //		 printf("dst_id=%d A2 dp=%d adding %d to results: [%3.6E %3.6E %3.6E] [%3.6E %3.6E %3.6E] [%3.6E %3.6E %3.6E]\n",elem.get_id(),dp,results.size(),tri_cd[0],tri_cd[1],tri_cd[2],tri_cd[3],tri_cd[4],tri_cd[5],tri_cd[6],tri_cd[7],tri_cd[8]);
+		 printf("dst_id=%d cp=%d dp=%d df=%d adding tri %d to results (no tri) \n",elem.get_id(),cp,dp,df,results.size());
+		  char fname[1000];
+		  sprintf(fname,"mm_cp%d_dp%d_df%d_wo_notr",cp,dp,df);
+		  write_3D_poly_woid_to_vtk(fname, 3, tri_cd);
+#endif
                 results.push_back(*diff_it);
               }
+	      df++;
             }
 
+#ifdef BOB_XGRID_DEBUG
+	    if (elem.get_id() == DEBUG_DST_ID) {
+	      printf("dst_id=%d cp=%d dp=%d clipping against s_id=%d END ====\n",elem.get_id(),cp,dp,clip_elem.get_id());
+	    }
+#endif
             //if(sdim == 3) delete[] clip_cd_sph, cd_sph;
+	    dp++;
           } // for each dst poly
           // clear dst poly vector and copy all results triangles to it to intersect with the next src element
           //if(elem.get_id() == 5497 || elem.get_id() == 6073){
@@ -863,6 +1065,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
           dstpolys.clear(); dstpolys.resize(results.size());
           std::copy(results.begin(), results.end(), dstpolys.begin());
           results.clear();
+	  cp++;
         } // iterate through each intersection pair for this dst element
         // For now, compute the remaining dst element area, compute fraction and attach to dst mesh.
         // use the fact that all src elements must be disjoint (not self-intersecting)
@@ -871,11 +1074,19 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         // After creeping all the clip polygons into subject (dst) polygons, finally construct mesh elements
         // based on the polygons in dstpolys vector.
         std::vector<polygon>::iterator res_it = dstpolys.begin(), res_end = dstpolys.end();
+        int p=0;
         for(;res_it != res_end; ++res_it){
           int n_pts = res_it->points.size();
           double * poly_cd = new double[sdim*n_pts];
           polygon_to_coords(*res_it, sdim, poly_cd);
-          construct_sintd(res_it->area(sdim), n_pts, poly_cd, pdim, sdim, &sintd_nodes, &sintd_cells);
+	  // Having the id isn't very useful since it seems like it would always be the last source in the list
+	  //          construct_sintd(res_it->area(sdim), n_pts, poly_cd, pdim, sdim, &sintd_nodes, &sintd_cells,res_it->id,elem.get_id());
+          construct_sintd(res_it->area(sdim), n_pts, poly_cd, pdim, sdim, &sintd_nodes, &sintd_cells,
+#ifdef BOB_XGRID_DEBUG
+                          -6,elem.get_id(),
+#endif
+                          side1_mesh_ind, side2_mesh_ind);
+	  p++;
           delete [] poly_cd;
         }
       } // intersected dst element
@@ -883,10 +1094,14 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   } 
 
   // We now have all the genesis cells, compute the merged mesh
-  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh);
+  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh, side);
   //char str[64]; memset(str, 0, 64);
   //sprintf(str, "mergemesh.vtk.%d", me);
   //WriteVTKMesh(mergemesh, str);
+
+#ifdef BOB_XGRID_DEBUG
+  WriteMesh(mergemesh, "MergedMesh");
+#endif
 
 }
 
@@ -1149,7 +1364,11 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
         coords_to_polygon(topo->num_nodes, cd, sdim, res_poly);
 
         construct_sintd(res_poly.area(sdim), topo->num_nodes, cd, pdim, sdim, 
-          &sintd_nodes, &sintd_cells);
+			&sintd_nodes, &sintd_cells
+#ifdef BOB_XGRID_DEBUG
+                        ,-7,elem.get_id()
+#endif
+                        );
         ncells ++;
         delete[] cd;
 
@@ -1348,9 +1567,9 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
                 ti = new int[num_p];
                 tri_ind = new int[3*(num_p-2)];
                 if(sdim == 2)
-                  triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
+                  xgrid_triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
                 if(sdim == 3)
-                  triangulate_poly<GEOM_SPH2D3D>(num_p, pts, td, ti, tri_ind);
+                  xgrid_triangulate_poly<GEOM_SPH2D3D>(num_p, pts, td, ti, tri_ind);
 
                 // Add each of the triangles into the merged mesh
                 unsigned num_tri_edges = 3;

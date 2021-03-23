@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -108,6 +108,7 @@ namespace ESMCI{
                            ESMC_ExtrapMethod_Flag *extrapMethod,
                            int *extrapNumSrcPnts,
                            float *extrapDistExponent,
+                           int *extrapNumLevels,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
                            double **factorList,
@@ -127,7 +128,14 @@ namespace ESMCI{
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
                            ESMC_Logical *create_rh,
-                           Field *srcFracField, Field *dstFracField);
+                           ESMC_FileMode_Flag *filemode,
+                           const char *srcFile,
+                           const char *dstFile,
+                           ESMC_FileFormat_Flag *srcFileType,
+                           ESMC_FileFormat_Flag *dstFileType,
+                           ESMC_Logical *largeFileFlag,
+                           Field *srcFracField, 
+                           Field *dstFracField);
     static int regrid(Field *fieldsrc, Field *fielddst,
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
     static int regridrelease(RouteHandle *routehandle);

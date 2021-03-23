@@ -3,6 +3,11 @@
 mesh unit test file
 """
 
+try:
+    from unittest import SkipTest
+except ImportError:
+    from nose import SkipTest
+
 import os
 import inspect
 
@@ -29,7 +34,7 @@ class TestMesh(TestBase):
         assert (np.all(xcoords == xcoords3))
         assert (np.all(ycoords == ycoords3))
 
-        if elemCoord is not None:
+        if not isinstance(elemCoord, type(None)):
             xelems = mesh.get_coords(0, 1)
             yelems = mesh.get_coords(1, 1)
 
@@ -45,12 +50,14 @@ class TestMesh(TestBase):
         # mesh.free_memory()
 
     def test_mesh_5(self):
-        parallel = False
         elemCoord = None
+        parallel = False
         if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -62,12 +69,14 @@ class TestMesh(TestBase):
         self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
 
     def test_mesh_10(self):
-        parallel = False
         elemCoord = None
+        parallel = False
         if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -79,12 +88,14 @@ class TestMesh(TestBase):
         self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
 
     def test_mesh_50(self):
-        parallel = False
         elemCoord = None
+        parallel = False
         if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -98,9 +109,11 @@ class TestMesh(TestBase):
     def test_mesh_50_ngons(self):
         parallel = False
         if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -112,12 +125,14 @@ class TestMesh(TestBase):
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
     def test_mesh_50_mask_area(self):
-        parallel = False
         elemCoord = None
+        parallel = False
         if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask, elemArea = \
@@ -153,9 +168,11 @@ class TestMesh(TestBase):
     def test_mesh_copy(self):
         parallel = False
         if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -169,13 +186,16 @@ class TestMesh(TestBase):
         mesh2 = mesh.copy()
         self.check_mesh(mesh2, nodeCoord, nodeOwner)
 
+    # slicing is disabled in parallel
     @attr('serial')
     def test_mesh_slicing(self):
         parallel = False
         if pet_count() > 1:
-            if pet_count() > 4:
-                raise NameError('MPI rank must be 4 in parallel mode!')
             parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
 
         if parallel:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \

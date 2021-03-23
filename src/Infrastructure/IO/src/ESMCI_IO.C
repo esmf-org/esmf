@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -34,6 +34,9 @@
 #include "ESMCI_LogErr.h"
 
 #include "esmf_io_debug.h"
+#include "json.hpp"
+
+using json = nlohmann::json;  // Convenience rename for JSON namespace.
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -987,9 +990,9 @@ int IO::addArray(
 // !ARGUMENTS:
   Array *arr_p,                             // (in) - The array to add
   const std::string &variableName,          // (in) - Name to use for array
-  Attribute *dimAttPack,                    // (in) - Attribute for dimension names
-  Attribute *varAttPack,                    // (in) - Attribute for variable attributes
-  Attribute *gblAttPack) {                  // (in) - Attribute for global attributes
+  ESMCI::Info *dimAttPack,                    // (in) - Attribute for dimension names
+  ESMCI::Info *varAttPack,                    // (in) - Attribute for variable attributes
+  ESMCI::Info *gblAttPack) {                  // (in) - Attribute for global attributes
 // !DESCRIPTION:
 //      Add an array to the list of objects to read or write. The
 //      {\tt variableName} argument will be used as the field name for
@@ -1049,7 +1052,7 @@ int IO::addArray(
 // !IROUTINE:  IO::dimlabel_get
 //
 // !INTERFACE:
-void IO::dimlabel_get (Attribute *dimAttPack, // in - AttPack with potential dimLabel attributes
+void IO::dimlabel_get (ESMCI::Info *dimAttPack, // in - AttPack with potential dimLabel attributes
     std::string labeltype,                    // in - attribute to look for (e.g., gridded or ungridded)
     std::vector<std::string> &dimLabels,      // out - labels found
     int *rc) {
@@ -1058,30 +1061,16 @@ void IO::dimlabel_get (Attribute *dimAttPack, // in - AttPack with potential dim
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int natts = dimAttPack->getCountAttr();
-  for (int i=0; i<natts; i++) {
-    Attribute *att = dimAttPack->AttPackGetAttribute (i);
-    if (!att) {
-      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
-          "Can not access Grid/DistGrid Attribute in " + dimAttPack->getName(),
-          ESMC_CONTEXT, rc)) return;
-    }
-    std::string attname = att->getName();
-    if (attname == labeltype) {
-      ESMC_TypeKind_Flag att_type = att->getTypeKind ();
-      if (att_type != ESMC_TYPEKIND_CHARACTER) {
+  assert(dimAttPack);
+  json const j = dimAttPack->getStorageRef();
+  for (json::const_iterator it=j.cbegin(); it!=j.cend(); it++) {
+    if (it.key() == labeltype) {
+      if (it.value().type() != json::value_t::array && it.value()[0].type() != json::value_t::string) {
         if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
             "Dimension label values must be character strings",
             ESMC_CONTEXT, rc)) return;
       }
-      std::vector<std::string> stringvals;
-      int localrc = att->get (&stringvals);
-      if (ESMC_LogDefault.MsgFoundError(localrc,
-          "Can not access dimension label values for " + attname,
-          ESMC_CONTEXT, rc)) return;
-
-      for (unsigned j=0; j<stringvals.size(); j++)
-        dimLabels.push_back(stringvals[j]);
+      dimLabels = it.value().get<std::vector<std::string>>();
     }
   }
 }  // end IO::dimlabel_get
@@ -1403,7 +1392,7 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
 
   // finally, create the fixed up Array using pointer to original data.
   // Assuming only 1 DE/PET since redist step would have been performed previously.
-  CopyFlag copyflag = DATA_REF;
+  DataCopyFlag copyflag = DATACOPY_REFERENCE;
   *dest_array_p = Array::create (src_array_p->getLocalarrayList(), 1,
       dg_temp, copyflag,
       NULL, NULL, NULL, NULL, NULL,

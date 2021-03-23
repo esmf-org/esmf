@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -154,6 +154,7 @@ module ESMF_DistGridMod
   public ESMF_DistGridGetInit
   public ESMF_DistGridSetInitCreated
   public ESMF_DistGridSeqIndex
+  public ESMF_DistGridGetThis
   
 !EOPI
 !------------------------------------------------------------------------------
@@ -218,6 +219,25 @@ module ESMF_DistGridMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_DistGridGet} functions.   
+!EOPI 
+  end interface
+!==============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_DistGridSet -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_DistGridSet
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_DistGridSetDefault
+    module procedure ESMF_DistGridSetPLocalDe
+      
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_DistGridSet} functions.   
 !EOPI 
   end interface
 !==============================================================================
@@ -998,7 +1018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateRD(minIndex, maxIndex, keywordEnforcer, regDecomp, &
     decompflag, regDecompFirstExtra, regDecompLastExtra, deLabelList, &
-    indexflag, connectionList, delayout, vm, rc)
+    indexflag, connectionList, delayout, vm, indexTK, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
@@ -1016,11 +1036,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)
     type(ESMF_DELayout),            intent(in),  optional :: delayout
     type(ESMF_VM),                  intent(in),  optional :: vm
+    type(ESMF_TypeKind_Flag),       intent(in),  optional :: indexTK
     integer,                        intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt indexTK} to support explicit selection
+!              between 32-bit and 64-bit sequence indices.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1104,6 +1130,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          If present, the DistGrid object (and the DELayout object if not 
 !          provided) are created on the specified {\tt ESMF\_VM} object. The 
 !          default is to use the VM of the current context. 
+!     \item[{[indexTK]}]
+!          Typekind used for global sequence indexing. See section 
+!          \ref{const:typekind} for a list of typekind options. Only integer
+!          types are supported. The default is to have ESMF automatically choose
+!          between {\tt ESMF\_TYPEKIND\_I4} and {\tt ESMF\_TYPEKIND\_I8},
+!          depending on whether the global number of elements held by the
+!          DistGrid is below or above the 32-bit limit, respectively.
+!          Because of the use of signed integers for sequence indices, 
+!          element counts of $ > 2^{31}-1 = 2,147,483,647$ will switch to 64-bit 
+!          indexing.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1175,7 +1211,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_ESMC_DistGridCreateRD(distgrid, minIndexAux, maxIndexAux, &
       regDecompAux, opt_decompflag, len_decompflag, regDecompFirstExtraAux, &
       regDecompLastExtraAux, deLabelListAux, indexflag, &
-      connectionListAux, delayout, vm, localrc)
+      connectionListAux, delayout, vm, indexTK, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -1226,7 +1262,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   function ESMF_DistGridCreateRDT(minIndexPTile, maxIndexPTile, &
     keywordEnforcer, regDecompPTile, decompflagPTile, regDecompFirstExtraPTile,&
     regDecompLastExtraPTile, deLabelList, indexflag, connectionList, &
-    delayout, vm, rc)
+    delayout, vm, indexTK, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDT
@@ -1244,11 +1280,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)
     type(ESMF_DELayout),            intent(in),  optional :: delayout
     type(ESMF_VM),                  intent(in),  optional :: vm
+    type(ESMF_TypeKind_Flag),       intent(in),  optional :: indexTK
     integer,                        intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt indexTK} to support explicit selection
+!              between 32-bit and 64-bit sequence indices.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1342,6 +1384,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[vm]}]
 !          Optional {\tt ESMF\_VM} object of the current context. Providing the
 !          VM of the current context will lower the method's overhead.
+!     \item[{[indexTK]}]
+!          Typekind used for global sequence indexing. See section 
+!          \ref{const:typekind} for a list of typekind options. Only integer
+!          types are supported. The default is to have ESMF automatically choose
+!          between {\tt ESMF\_TYPEKIND\_I4} and {\tt ESMF\_TYPEKIND\_I8},
+!          depending on whether the global number of elements held by the
+!          DistGrid is below or above the 32-bit limit, respectively.
+!          Because of the use of signed integers for sequence indices, 
+!          element counts of $ > 2^{31}-1 = 2,147,483,647$ will switch to 64-bit 
+!          indexing.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1416,7 +1468,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_ESMC_DistGridCreateRDT(distgrid, minIndexAux, maxIndexAux, &
       regDecompAux, opt_decompflag, len1_decompflag, len2_decompflag, &
       regDecompFirstExtraAux, regDecompLastExtraAux, deLabelListAux, &
-      indexflag, connectionListAux, delayout, vm, localrc)
+      indexflag, connectionListAux, delayout, vm, indexTK, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -2526,6 +2578,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     DELayout with 1 DE per PET across all PETs of the current VM is 
 !     automatically created.
 !
+!     This is a {\em collective} method across the current VM.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[arbSeqIndexList]
@@ -2584,7 +2638,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! create fitting DistGrid
     minC(1) = deblock(1,1,1)
     maxC(1) = deblock(1,2,petCount)
-    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, rc=localrc)
+    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2646,6 +2701,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The sequence indices must be unique across all PETs. A default
 !     DELayout with 1 DE per PET across all PETs of the current VM is 
 !     automatically created.
+!
+!     This is a {\em collective} method across the current VM.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2710,7 +2767,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     minC(1) = deblock(1,1,1)
     maxC(1) = deblock(1,2,petCount)
     distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
-      indexTK=ESMF_TYPEKIND_I8, rc=localrc)
+      indexTK=ESMF_TYPEKIND_I8, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2773,6 +2830,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     there are arbitrary sequence indices in the associated list.
 !     The sequence indices must be unique across all DEs. A default
 !     DELayout with the correct number of DEs per PET is automatically created.
+!
+!     This is a {\em collective} method across the current VM.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2875,7 +2934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     minC(1) = deblock(1,1,1)
     maxC(1) = deblock(1,2,globalSizesCount)
     distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
-      delayout=delayout, rc=localrc)
+      delayout=delayout, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2965,6 +3024,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     total index space described by the DistGrid object. The {\tt arbDim}
 !     argument allows to specify which dimension in the resulting DistGrid
 !     corresponds to the arbitrarily distributed one.
+!
+!     This is a {\em collective} method across the current VM.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3061,7 +3122,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       minC(i) = deblock(i,1,1)
       maxC(i) = deblock(i,2,petCount)
     enddo
-    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, rc=localrc)
+    distgrid = ESMF_DistGridCreate(minC, maxC, deBlockList=deblock, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3214,44 +3276,57 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DistGridGet()
   subroutine ESMF_DistGridGetDefault(distgrid, keywordEnforcer, delayout, &
     dimCount, tileCount, deCount, localDeCount, minIndexPTile, maxIndexPTile, &
-    elementCountPTile, minIndexPDe, maxIndexPDe, elementCountPDe, &
-    localDeToDeMap, deToTileMap, indexCountPDe, collocation, regDecompFlag, &
+    elementCountPTile, elementCountPTileI8, minIndexPDe, maxIndexPDe, &
+    elementCountPDe, elementCountPDeI8, localDeToDeMap, deToTileMap, &
+    indexCountPDe, collocation, regDecompFlag, indexTK, indexflag, &
     connectionCount, connectionList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),    intent(in)            :: distgrid
+    type(ESMF_DistGrid),      intent(in)            :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_DELayout),    intent(out), optional :: delayout
-    integer,                intent(out), optional :: dimCount
-    integer,                intent(out), optional :: tileCount
-    integer,                intent(out), optional :: deCount
-    integer,                intent(out), optional :: localDeCount
-    integer,        target, intent(out), optional :: minIndexPTile(:,:)
-    integer,        target, intent(out), optional :: maxIndexPTile(:,:)
-    integer,        target, intent(out), optional :: elementCountPTile(:)
-    integer,        target, intent(out), optional :: minIndexPDe(:,:)
-    integer,        target, intent(out), optional :: maxIndexPDe(:,:)
-    integer,        target, intent(out), optional :: elementCountPDe(:)
-    integer,        target, intent(out), optional :: localDeToDeMap(:)
-    integer,        target, intent(out), optional :: deToTileMap(:)
-    integer,        target, intent(out), optional :: indexCountPDe(:,:)
-    integer,        target, intent(out), optional :: collocation(:)
-    logical,                intent(out), optional :: regDecompFlag
-    integer,                intent(out), optional :: connectionCount
+    type(ESMF_DELayout),      intent(out), optional :: delayout
+    integer,                  intent(out), optional :: dimCount
+    integer,                  intent(out), optional :: tileCount
+    integer,                  intent(out), optional :: deCount
+    integer,                  intent(out), optional :: localDeCount
+    integer,          target, intent(out), optional :: minIndexPTile(:,:)
+    integer,          target, intent(out), optional :: maxIndexPTile(:,:)
+    integer,          target, intent(out), optional :: elementCountPTile(:)
+integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPTileI8(:)
+    integer,          target, intent(out), optional :: minIndexPDe(:,:)
+    integer,          target, intent(out), optional :: maxIndexPDe(:,:)
+    integer,          target, intent(out), optional :: elementCountPDe(:)
+integer(ESMF_KIND_I8),target, intent(out), optional :: elementCountPDeI8(:)
+    integer,          target, intent(out), optional :: localDeToDeMap(:)
+    integer,          target, intent(out), optional :: deToTileMap(:)
+    integer,          target, intent(out), optional :: indexCountPDe(:,:)
+    integer,          target, intent(out), optional :: collocation(:)
+    logical,                  intent(out), optional :: regDecompFlag
+    type(ESMF_TypeKind_Flag), intent(out), optional :: indexTK
+    type(ESMF_Index_Flag),    intent(out), optional :: indexflag
+    integer,                  intent(out), optional :: connectionCount
     type(ESMF_DistGridConnection), &
-                    target, intent(out), optional :: connectionList(:)
-    integer,                intent(out), optional :: rc
+                      target, intent(out), optional :: connectionList(:)
+    integer,                  intent(out), optional :: rc
 !         
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.0.0] Added argument {\tt deCount} to simplify access to this variable.
-! \item[7.0.0] Added arguments {\tt connectionCount} and {\tt connectionList}
-!    to provide user access to the explicitly defined connections in a DistGrid.
+! \item[7.0.0] Added argument {\tt deCount} to simplify access to this 
+!              variable. \newline
+!              Added arguments {\tt connectionCount} and {\tt connectionList}
+!              to provide user access to the explicitly defined connections in
+!              a DistGrid.
 ! \item[8.0.0] Added arguments {\tt localDeCount} and {\tt localDeToDeMap}
-!    to simplify access to these variables.
+!              to simplify access to these variables.
+! \item[8.1.0] Added argument {\tt indexTK} to allow query of the sequence index
+!              typekind.\newline
+!              Added arguments {\tt elementCountPTileI8} and
+!              {\tt elementCountPDeI8} to provide 64-bit access.\newline
+!              Added argument {\tt indexflag} to allow user to query this
+!              setting.
 ! \end{description}
 ! \end{itemize}
 !         
@@ -3282,6 +3357,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[elementCountPTile]}]
 !     Number of elements in the exclusive region per tile. Must enter
 !     allocated with {\tt shape(elementCountPTile) == (/tileCount/)}.
+!     An error will be returned if any of the counts goes above the 32-bit
+!     limit.
+!   \item[{[elementCountPTileI8]}]
+!     Same as {\tt elementCountPTile}, but of 64-bit integer kind.
 !   \item[{[minIndexPDe]}]
 !     Lower index space corner per DE. Must enter
 !     allocated with {\tt shape(minIndexPDe) == (/dimCount, deCount/)}.
@@ -3291,12 +3370,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[elementCountPDe]}]
 !     Number of elements in the exclusive region per DE. Must enter
 !     allocated with {\tt shape(elementCountPDe) == (/deCount/)}.
+!     An error will be returned if any of the counts goes above the 32-bit
+!     limit.
+!   \item[{[elementCountPDeI8]}]
+!     Same as {\tt elementCountPDe}, but of 64-bit integer kind.
 !   \item[{[localDeToDeMap]}]
 !     Global DE index for each local DE. Must enter allocated with
-!     {\tt shape(localDeToDeMap) == (/localDeCount/)}.
+!     {\tt shape(localDeToDeMap) == (/localDeCount/)}. It is recommended to
+!     use a lower bound of 0 for {\tt localDeToDeMap}, in order to support
+!     direct indexing into this map with a zero-based {\tt localDe} variable.
 !   \item[{[deToTileMap]}]
 !     Map each DE uniquely to a tile. Must enter allocated with
-!     {\tt shape(deToTileMap) == (/deCount/)}.
+!     {\tt shape(deToTileMap) == (/deCount/)}. It is recommended to
+!     use a lower bound of 0 for {\tt deToTileMap}, in order to support
+!     direct indexing into this map with a zero-based {\tt de} variable.
 !   \item[{[indexCountPDe]}]
 !     Number of indices for each dimension per DE. Must enter
 !     allocated with {\tt shape(indexCountPDe) == (/dimCount, deCount/)}.
@@ -3310,6 +3397,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     each dimension. A return value of {\tt .false.} indicates that the
 !     decomposition was {\em not} generated from a regular decomposition 
 !     description, e.g. a {\tt deBlockList} was used instead.
+!   \item[{[indexTK]}]
+!     Typekind used by the global sequence indexing. See section 
+!     \ref{const:typekind} for a list of typekind options. Only the integer
+!     types are supported for sequence indices.
+!   \item[{[indexflag]}]
+!     Return the indexing option used by the {\tt distgrid} object. See section
+!     \ref{const:indexflag} for a complete list of options.
 !   \item[{[connectionCount]}]
 !     Number of explicitly defined connections in {\tt distgrid}.
 !   \item[{[connectionList]}]
@@ -3328,9 +3422,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterArray) :: minIndexPTileAux       ! helper variable
     type(ESMF_InterArray) :: maxIndexPTileAux       ! helper variable
     type(ESMF_InterArray) :: elementCountPTileAux   ! helper variable
+    type(ESMF_InterArray) :: elementCountPTileI8Aux ! helper variable
     type(ESMF_InterArray) :: minIndexPDeAux         ! helper variable
     type(ESMF_InterArray) :: maxIndexPDeAux         ! helper variable
     type(ESMF_InterArray) :: elementCountPDeAux     ! helper variable
+    type(ESMF_InterArray) :: elementCountPDeI8Aux   ! helper variable
     type(ESMF_InterArray) :: localDeToDeMapAux      ! helper variable
     type(ESMF_InterArray) :: deToTileMapAux         ! helper variable
     type(ESMF_InterArray) :: indexCountPDeAux       ! helper variable
@@ -3359,6 +3455,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    elementCountPTileI8Aux = &
+      ESMF_InterArrayCreate(farray1DI8=elementCountPTileI8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     minIndexPDeAux = &
       ESMF_InterArrayCreate(farray2D=minIndexPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3368,6 +3468,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     elementCountPDeAux = ESMF_InterArrayCreate(elementCountPDe, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    elementCountPDeI8Aux = &
+      ESMF_InterArrayCreate(farray1DI8=elementCountPDeI8, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     localDeToDeMapAux = ESMF_InterArrayCreate(localDeToDeMap, rc=localrc)
@@ -3391,10 +3495,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGet(distgrid, dimCountAux, tileCount, deCount, &
       localDeCount, minIndexPTileAux, maxIndexPTileAux, elementCountPTileAux, &
-      minIndexPDeAux, maxIndexPDeAux, elementCountPDeAux, &
-      localDeToDeMapAux, deToTileMapAux, indexCountPDeAux, collocationAux, &
-      regDecompFlagAux, connectionCount, connectionListAux, &
-      delayout, localrc)
+      elementCountPTileI8Aux, minIndexPDeAux, maxIndexPDeAux, &
+      elementCountPDeAux, elementCountPDeI8Aux, localDeToDeMapAux, &
+      deToTileMapAux, indexCountPDeAux, collocationAux, regDecompFlagAux, &
+      connectionCount, connectionListAux, indexTK, indexFlag, delayout, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -3439,6 +3543,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(elementCountPTileAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(elementCountPTileI8Aux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterArrayDestroy(minIndexPDeAux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3446,6 +3553,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterArrayDestroy(elementCountPDeAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(elementCountPDeI8Aux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterArrayDestroy(localDeToDeMapAux, rc=localrc)
@@ -3540,19 +3650,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
   subroutine ESMF_DistGridGetPLocalDe(distgrid, localDe, keywordEnforcer, &
-    de, tile, collocation, arbSeqIndexFlag, seqIndexList, elementCount, rc)
+    de, tile, collocation, arbSeqIndexFlag, seqIndexList, seqIndexListI8, &
+    elementCount, elementCountI8, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),    intent(in)            :: distgrid
-    integer,                intent(in)            :: localDe
+    type(ESMF_DistGrid),      intent(in)            :: distgrid
+    integer,                  intent(in)            :: localDe
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out), optional :: de
-    integer,                intent(out), optional :: tile
-    integer,                intent(in),  optional :: collocation
-    logical,                intent(out), optional :: arbSeqIndexFlag
-    integer,        target, intent(out), optional :: seqIndexList(:)
-    integer,                intent(out), optional :: elementCount
-    integer,                intent(out), optional :: rc
+    integer,                  intent(out), optional :: de
+    integer,                  intent(out), optional :: tile
+    integer,                  intent(in),  optional :: collocation
+    logical,                  intent(out), optional :: arbSeqIndexFlag
+    integer,          target, intent(out), optional :: seqIndexList(:)
+integer(ESMF_KIND_I8),target, intent(out), optional :: seqIndexListI8(:)
+    integer,                  intent(out), optional :: elementCount
+    integer,                  intent(out), optional :: elementCountI8
+    integer,                  intent(out), optional :: rc
 !         
 ! !STATUS:
 ! \begin{itemize}
@@ -3560,6 +3673,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[8.0.0] Added arguments {\tt de} and {\tt tile} to simplify usage.
+! \item[8.1.0] Added arguments {\tt seqIndexListI8} and {\tt elementCountI8}
+!              to provide 64-bit access.
 ! \end{description}
 ! \end{itemize}
 !
@@ -3580,16 +3695,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Collocation for which information is requested. Default to first
 !     collocation in {\tt collocation} list.
 !   \item[{[arbSeqIndexFlag]}]
-!     Indicates whether collocation is associated with arbitrary sequence
-!     indices.
+!     A returned value of {\tt .true.} indicates that the {\tt collocation}
+!     is associated with arbitrary sequence indices. For {\tt .false.},
+!     canoncial sequence indices are used.
 !   \item[{[seqIndexList]}]
-!     \begin{sloppypar}
-!     List of sequence indices for the elements on {\tt localDe}, with
-!     {\tt shape(seqIndexList) == (/elementCountPDe(localDeToDeMap(localDe))/)}.
-!     \end{sloppypar}
+!     The sequence indices associated with the {\tt localDe}. This argument must
+!     enter allocated with a size equal to 
+!     {\tt elementCountPDe(localDeToDeMap(localDe))}.
+!     An error will be returned if any of the sequence indices are above the
+!     32-bit limit.
+!   \item[{[seqIndexListI8]}]
+!     Same as {\tt seqIndexList}, but of 64-bit integer kind.
 !   \item[{[elementCount]}]
 !     Number of elements in the localDe, i.e. identical to
 !     elementCountPDe(localDeToDeMap(localDe)).
+!     An error will be returned if the count is above the 32-bit limit.
+!   \item[{[elementCountI8]}]
+!     Same as {\tt elementCount}, but of 64-bit integer kind.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3599,6 +3721,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc            ! local return code
     type(ESMF_Logical)    :: arbSeqIndexFlagAux ! helper variable
     type(ESMF_InterArray) :: seqIndexListAux    ! helper variable
+    type(ESMF_InterArray) :: seqIndexListI8Aux  ! helper variable
     integer               :: localDeCount, deCount
     integer, allocatable  :: localDeToDeMap(:), deToTileMap(:)
 
@@ -3608,7 +3731,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
-    
+
     ! Handle requests that are available on the Fortran side
     if (present(de) .or. present(tile)) then
       call ESMF_DistGridGet(distgrid, localDeCount=localDeCount, &
@@ -3629,28 +3752,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-      ! query more information
-      allocate(localDeToDeMap(localDeCount))
-      allocate(deToTileMap(deCount))
-      call ESMF_DistGridGet(distgrid, localDeToDeMap=localDeToDeMap, &
-        deToTileMap=deToTileMap, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! now can determine return values
-      if (present(de)) de = localDeToDeMap(localDe)
-      if (present(tile)) tile = deToTileMap(localDeToDeMap(localDe)+1)
-      ! clean-up
-      deallocate(localDeToDeMap, deToTileMap)
+      if (present(de) .or. present(tile)) then
+        ! query more information
+        allocate(localDeToDeMap(0:localDeCount-1))
+        allocate(deToTileMap(0:deCount-1))
+        call ESMF_DistGridGet(distgrid, localDeToDeMap=localDeToDeMap, &
+          deToTileMap=deToTileMap, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! now can determine return values
+        if (present(de)) de = localDeToDeMap(localDe)
+        if (present(tile)) tile = deToTileMap(localDeToDeMap(localDe))
+        ! clean-up
+        deallocate(localDeToDeMap, deToTileMap)
+      endif
     endif
-    
+
     ! Deal with (optional) array arguments
     seqIndexListAux = ESMF_InterArrayCreate(seqIndexList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    seqIndexListI8Aux = &
+      ESMF_InterArrayCreate(farray1DI8=seqIndexListI8, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGetPLocalDe(distgrid, localDe, collocation, &
-      arbSeqIndexFlagAux, seqIndexListAux, elementCount, localrc)
+      arbSeqIndexFlagAux, seqIndexListAux, seqIndexListI8Aux, &
+      elementCount, elementCountI8, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -3660,6 +3790,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! garbage collection
     call ESMF_InterArrayDestroy(seqIndexListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(seqIndexListI8Aux, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3916,12 +4049,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridSet()"
+#define ESMF_METHOD "ESMF_DistGridSetDefault()"
 !BOPI
 ! !IROUTINE: ESMF_DistGridSet - Set DistGrid sequence index collocation labels
 
 ! !INTERFACE:
-  subroutine ESMF_DistGridSet(distgrid, collocationPDim, rc)
+  ! Private name; call using ESMF_DistGridSet()
+  subroutine ESMF_DistGridSetDefault(distgrid, collocationPDim, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),  intent(inout)           :: distgrid
@@ -3977,7 +4111,118 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
-  end subroutine ESMF_DistGridSet
+  end subroutine ESMF_DistGridSetDefault
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridSetPLocalDe()"
+!BOP
+! !IROUTINE: ESMF_DistGridSet - Set arbitrary sequence for a specific local DE
+
+! !INTERFACE:
+  ! Private name; call using ESMF_DistGridSet()
+  subroutine ESMF_DistGridSetPLocalDe(distgrid, localDe, collocation, &
+    keywordEnforcer, seqIndexList, seqIndexListI8, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),      intent(inout)         :: distgrid
+    integer,                  intent(in)            :: localDe
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                  intent(in),  optional :: collocation
+    integer,          target, intent(in),  optional :: seqIndexList(:)
+integer(ESMF_KIND_I8),target, intent(in),  optional :: seqIndexListI8(:)
+    integer,                  intent(out), optional :: rc
+!         
+! !DESCRIPTION:
+!   Set DistGrid information for a specific local DE.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[distgrid]
+!     Queried {\tt ESMF\_DistGrid} object.
+!   \item[localDe]
+!     Local DE for which information is set. {\tt [0,..,localDeCount-1]}
+!   \item[{[collocation]}]
+!     Collocation for which information is set. Default to first
+!     collocation in {\tt collocation} list.
+!   \item[{[seqIndexList]}]
+!     Sequence indices for the elements on {\tt localDe}. The {\tt seqIndexList}
+!     must provide exactly {\tt elementCountPDe(localDeToDeMap(localDe)} many
+!     entries. When this argument is present, the {\tt indexTK} of
+!     {\tt distgrid} will be set to {\tt ESMF\_TYPEKIND\_I4}.
+!     This argument is mutually exclusive with {\tt seqIndexListI8}. Only one
+!     or the other must be provided. An error will be returned otherwise.
+!   \item[{[seqIndexListI8]}]
+!     Same as {\tt seqIndexList}, but of 64-bit integer kind.
+!     When this argument is present, the {\tt indexTK} of
+!     {\tt distgrid} will be set to {\tt ESMF\_TYPEKIND\_I8}.
+!     This argument is mutually exclusive with {\tt seqIndexList}. Only one
+!     or the other must be provided. An error will be returned otherwise.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc            ! local return code
+    type(ESMF_InterArray) :: seqIndexListAux    ! helper variable
+    integer               :: collocationAux     ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    
+    ! deal with optional arguments
+    collocationAux = 1  ! default
+    if (present(collocation)) collocationAux = collocation
+
+    if (present(seqIndexList) .and. present(seqIndexListI8)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+        msg="Only one of the 'seqIndexList' or 'seqIndexListI8' arguments" //&
+          " must be specified at the same time", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    if (present(seqIndexList)) then
+      ! prepare seqIndexList
+      seqIndexListAux = ESMF_InterArrayCreate(seqIndexList, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! call into the C++ interface
+      call c_ESMC_DistGridSetArbSeqIndex(distgrid, seqIndexListAux, localDe, &
+        collocationAux, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+      
+    if (present(seqIndexListI8)) then
+      ! prepare seqIndexList
+      seqIndexListAux = ESMF_InterArrayCreate(farray1DI8=seqIndexListI8, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! call into the C++ interface
+      call c_ESMC_DistGridSetArbSeqIndexI8(distgrid, seqIndexListAux, localDe, &
+        collocationAux, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! garbage collection
+    call ESMF_InterArrayDestroy(seqIndexListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_DistGridSetPLocalDe
 !------------------------------------------------------------------------------
 
 
@@ -4201,6 +4446,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_DistGridSeqIndex
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridGetThis"
+!BOPI
+! !IROUTINE: ESMF_DistGridGetThis - Internal access routine for C++ pointer
+!
+! !INTERFACE:
+  subroutine ESMF_DistGridGetThis(distgrid, this, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),intent(in)              :: distgrid
+    type(ESMF_Pointer), intent(out)             :: this
+    integer,            intent(out),  optional  :: rc
+!
+!
+! !DESCRIPTION:
+!     Internal access routine for C++ pointer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid]
+!          Specified {\tt ESMF\_DistGrid} object.
+!     \item[this]
+!          C++ pointer.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Copy C++ pointer
+    this = distgrid%this
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_DistGridGetThis
 !------------------------------------------------------------------------------
 
 

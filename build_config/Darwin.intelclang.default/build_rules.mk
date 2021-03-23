@@ -10,7 +10,7 @@ ESMF_F90DEFAULT         = ifort
 ESMF_CXXDEFAULT         = clang
 ESMF_CPPDEFAULT         = clang -E -P -x c
 
-ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.6
+ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.7 -stdlib=libc++
 
 ############################################################
 # Default MPI setting.
@@ -186,19 +186,8 @@ ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
 ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
 ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
 endif
-# Link in gnu stdc++ for good measure
-ESMF_LIBGSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
-ifeq ($(ESMF_LIBGSTDCXX),libstdc++.dylib)
-ESMF_LIBGSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
-endif
-ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBGSTDCXX)) -L$(dir $(ESMF_LIBSTDCXX))
-ESMF_F90LINKLIBS  += -lstdc++ -lc++
-
-############################################################
-# Blank out variables to prevent rpath encoding
-#
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKLIBS  += -lc++
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
@@ -209,7 +198,7 @@ ESMF_F90LINKLIBS += -lm
 # Link against libesmf.a using the C++ linker front-end
 #
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)" | sed 's/\-lcrt1\.o //g')
-ESMF_CXXLINKLIBS += -lsvml -lifcore -limf -ldl -lirc -lstdc++ -lc++
+ESMF_CXXLINKLIBS += -lsvml -lifcore -limf -ldl -lirc -lc++
 
 ############################################################
 # Shared library options

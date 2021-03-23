@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -90,9 +90,10 @@ const MeshObjTopo *Vtk2Topo(UInt sdim, UInt vtk_type) {
   ////        indices and create a map from those to where in the localDE, index space we are in the array. 
 void get_node_to_array_index_map(const Mesh &mesh, std::map<MeshObj::id_type, int> &gid_to_index) {
 
-  UInt nnodes = mesh.num_nodes();
+  UInt num_nodes = mesh.num_nodes();
 
   std::vector<std::pair<int,int> > gids;
+  gids.reserve(num_nodes);
 
   Mesh::const_iterator ni = mesh.node_begin(), ne = mesh.node_end();
   for (; ni != ne; ++ni) {
@@ -115,9 +116,42 @@ void get_node_to_array_index_map(const Mesh &mesh, std::map<MeshObj::id_type, in
   }
 }
 
+  // Get node to array data index map
+  //// TODO: This will work for Meshes without custom distgrids. However, to 
+  ////        be  completely general. We need to loop through the distgrid getting the sequence
+  ////        indices and create a map from those to where in the localDE, index space we are in the array. 
+void get_elem_to_array_index_map(const Mesh &mesh, std::map<MeshObj::id_type, int> &gid_to_index) {
+
+  UInt num_elems = mesh.num_elems();
+
+  std::vector<std::pair<int,int> > gids;
+  gids.reserve(num_elems);
+
+  Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+  for (; ei != ee; ++ei) {
+
+    const MeshObj &elem = *ei;
+
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    int idx = elem.get_data_index();
+
+    gids.push_back(std::make_pair(idx, elem.get_id()));
+
+  }
+
+  std::sort(gids.begin(), gids.end());
+
+  gid_to_index.clear();
+  for (UInt i = 0; i < gids.size(); ++i) {
+    gid_to_index[gids[i].second]=i;
+  }
+}
+
+
 // Write mesh data to stream, taking into account the correct typeid
 template<typename T, typename iter>
-static void append_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, int> gid_to_index, 
+void append_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, int> gid_to_index, 
                         ESMCI::Array *array, std::ofstream &out) {
 
   // Write header
@@ -144,7 +178,7 @@ static void append_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, 
   // Get localDE lower bound
   int lbound=(array->getComputationalLBound())[localDE]; // (assumes array rank is 1)
 
-  // Loop writing out data in Array that corresponds to nodes
+  // Loop writing out data in Array that corresponds to objects
   for (; ni != ne; ++ni) {
     const MeshObj &obj=*ni;
 
@@ -166,7 +200,7 @@ static void append_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, 
     if (mi == gid_to_index.end()) {
       Throw() << "object id not found.";
     }
-    int index=mi->second+lbound; // TODO: FIX THIS TO BE + some lower bound INSTEAD OF 1
+    int index=mi->second+lbound; 
 
     // Get data
     T d;
@@ -176,6 +210,72 @@ static void append_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, 
     out << d << " ";
   }
 }
+
+// Write mesh data to stream, taking into account the correct typeid
+template<>
+void append_data_from_Array<ESMC_R8>(Mesh::const_iterator ni, Mesh::const_iterator ne, std::map<MeshObj::id_type, int> gid_to_index, 
+                        ESMCI::Array *array, std::ofstream &out) {
+
+  // Write header
+  out << "LOOKUP_TABLE default" << std::endl;
+
+  // Get local DE count
+  int localDECount=array->getDELayout()->getLocalDeCount();
+
+  // If there are no local DEs, then leave
+  if (localDECount == 0) return;
+
+  // If there is greater than 1 local DE, then complain
+  if (localDECount > 1) Throw() << "this call currently can't handle > 1 localDE per PET";
+
+
+  // Complain if the array has more than rank 1
+  if (array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
+
+
+  // Get local Array
+  int localDE=0; // for now just 0
+  LocalArray *localArray=(array->getLocalarrayList())[localDE];
+  
+  // Get localDE lower bound
+  int lbound=(array->getComputationalLBound())[localDE]; // (assumes array rank is 1)
+
+  // Loop writing out data in Array that corresponds to objects
+  for (; ni != ne; ++ni) {
+    const MeshObj &obj=*ni;
+
+    // If it's not owned write out 0
+    if (!GetAttr(obj).is_locally_owned()) {
+
+      // Get 0 of this type
+      ESMC_R8 d=0.0;
+
+      // Write it out
+      out << d << " ";
+
+      // Go to next item in loop
+      continue;
+    }
+
+    // Get index from id
+    std::map<MeshObj::id_type,int>::iterator mi = gid_to_index.find(obj.get_id());
+    if (mi == gid_to_index.end()) {
+      Throw() << "object id not found.";
+    }
+    int index=mi->second+lbound; 
+
+    // Get data
+    ESMC_R8 d;
+    localArray->getDataInternal(&index, &d);
+
+    // It seems to irritate visit if we have a number < 1.0E-300, so round down to 0.0
+    if (d < 1.0E-300) d=0.0;
+
+    // Write data
+    out << d << " ";
+  }
+}
+
 
 template<typename iter>
 static void write_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, int> &gid_to_index, 
@@ -204,11 +304,26 @@ static void write_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, i
 
 // Write mesh data to stream, taking into account the correct typeid
 template<typename T, typename iter, typename FIELD>
-static void append_data(iter ni, iter ne, const FIELD &llf, UInt d, std::ofstream &out) {
+void append_data(iter ni, iter ne, const FIELD &llf, UInt d, std::ofstream &out) {
   out << "LOOKUP_TABLE default" << std::endl;
   for (; ni != ne; ++ni) {
     if (llf.OnObj(*ni))
       out << ((T*)llf.data(*ni))[d] << " ";
+  }
+}
+
+template<>
+void append_data<double>(Mesh::const_iterator ni, Mesh::const_iterator ne, const _field &llf, UInt d, std::ofstream &out) {
+  out << "LOOKUP_TABLE default" << std::endl;
+  for (; ni != ne; ++ni) {
+    if (llf.OnObj(*ni)) {
+      // It seems to irritate visit if a value is <1.0E-300, so round down if that's the case
+      if (((double *)llf.data(*ni))[d] > 1.0E-300) {
+        out << ((double *)llf.data(*ni))[d] << " ";
+      } else {
+        out << "0 ";
+      }
+    }
   }
 }
 
@@ -385,6 +500,32 @@ static void write_data(iter ni, iter ne, const FIELD &llf, const std::string &vn
 
   } // elem vars
 
+  // Now Arrays stored on elems
+  {
+
+    // Get map from node index to index in Array
+    std::map<MeshObj::id_type, int> gid_to_index;
+    get_elem_to_array_index_map(mesh, gid_to_index);
+
+
+    // Loop over Arrays to be output
+    for (int i=0; i<num_elemArrays; i++) {
+
+      // Generate name
+      char buf[512];
+      std::sprintf(buf, "elemArray%d_%s",i+1,elemArrays[i]->getName());
+      std::string vname(buf);
+
+      // Write data to file
+      write_data_from_Array(mesh.elem_begin(), mesh.elem_end(), gid_to_index, elemArrays[i], vname, out);
+
+      // End line of data
+      out << std::endl;
+    }
+
+  } // Arrays stored on elems
+
+
   // Save off the node numbering
   {
     // Node numbers
@@ -447,17 +588,12 @@ static void write_data(iter ni, iter ne, const FIELD &llf, const std::string &vn
 
       // Write data to file
       write_data_from_Array(mesh.node_begin(), mesh.node_end(), gid_to_index, nodeArrays[i], vname, out);
+
+      // End line of data
+      out << std::endl;
     }
 
   } // Arrays stored on nodes
-
-
-  // Now Arrays stored on elems
-  {
-
-    if (num_elemArrays != 0) Throw() << "writing an Array located on elements is currently not supported.";
-
-  } // Arrays stored on elems
 
 }
 

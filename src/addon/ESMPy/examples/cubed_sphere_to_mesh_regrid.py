@@ -69,8 +69,7 @@ dstfield.data[...] = 1e20
 import os
 filename = "esmpy_example_weight_file_cs.nc"
 if ESMF.local_pet() == 0:
-    if os.path.isfile(
-        os.path.join(os.getcwd(), filename)):
+    if os.path.isfile(os.path.join(os.getcwd(), filename)):
         os.remove(os.path.join(os.getcwd(), filename))
 
 mg.barrier()
@@ -92,7 +91,7 @@ num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 maxrelerr = 0
 meanrelerr = 0
-if num_nodes is not 0:
+if num_nodes != 0:
     # ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0))[0]
     relerr = numpy.sum(numpy.abs(dstfield.data - xctfield.data) / numpy.abs(xctfield.data))
     maxrelerr = numpy.max(numpy.abs(dstfield.data - xctfield.data) / numpy.abs(xctfield.data))
@@ -104,11 +103,14 @@ if ESMF.pet_count() > 1:
     num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
 
 # output the results from one processor only
-if ESMF.local_pet() is 0:
+if ESMF.local_pet() == 0:
     meanrelerr = relerr / num_nodes
     print ("ESMPy cubed sphere regridding example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))
     print ("  interpolation max relative (pointwise) error = {0}".format(maxrelerr))
+
+    if os.path.isfile(os.path.join(os.getcwd(), filename)):
+        os.remove(os.path.join(os.getcwd(), filename))
 
     # assert (meanrelerr < 3e-3)
     # assert (maxrelerr < 4e-4)

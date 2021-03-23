@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -469,15 +469,14 @@
   
     !print *, "collecting State garbage"
 
-    ! destruct internal data allocations
-    call ESMF_StateDestruct(state%statep, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, &
-      rcToReturn=rc)) return
-
-    ! deallocate actual StateClass allocation      
     if (associated(state%statep)) then
+      ! destruct internal data allocations
+      call ESMF_StateDestruct(state%statep, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+      ! deallocate actual StateClass allocation      
       deallocate(state%statep, stat=localrc)
       localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
       if (ESMF_LogFoundAllocError(localrc, msg="Deallocating State", &

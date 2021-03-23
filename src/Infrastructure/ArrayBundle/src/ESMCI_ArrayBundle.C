@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -12,6 +12,7 @@
 #define ESMC_FILENAME "ESMCI_ArrayBundle.C"
 //==============================================================================
 #define AB_REDISTSTORE_LOG_off
+#define ABSMM_EXEC_INFO_off
 //==============================================================================
 //
 // ArrayBundle class implementation (body) file
@@ -93,7 +94,7 @@ ArrayBundle::ArrayBundle(
     // fill in the ArrayBundle object
     for (int i=0; i<arrayCount; i++){
 #if 0
-      ESMC_LogDefault.Write(arrayList[i]->getName(), ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(arrayList[i]->getName(), ESMC_LOGMSG_DEBUG);
 #endif
       arrayContainer.add(string(arrayList[i]->getName()), arrayList[i],
         multi, relaxed);
@@ -773,8 +774,9 @@ int ArrayBundle::halo(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // implemented via sparseMatMul
+  ESMC_Region_Flag zeroregionflag = ESMC_REGION_SELECT;
   localrc = sparseMatMul(arraybundle, arraybundle, routehandle,
-    ESMC_REGION_SELECT, NULL, 0, checkflag, true);
+    &zeroregionflag, 1, NULL, 0, checkflag, true);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
@@ -840,6 +842,8 @@ int ArrayBundle::redistStore(
   ArrayBundle *srcArraybundle,            // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,            // in    - destination ArrayBundle
   RouteHandle **routehandle,              // inout - handle to precomputed comm
+  ESMC_Logical *ignoreUnmatchedFlag,      // in    - unmatched indices handling
+  int len_ignoreUnmatchedFlag,            // in    - elements in ignoreUnmatched
   InterArray<int> *srcToDstTransposeMap,  // in    - mapping src -> dst dims
   ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
   void *factor                            // in    - redist factor
@@ -898,6 +902,21 @@ int ArrayBundle::redistStore(
         ESMC_CONTEXT, &rc);
       return rc;
     }
+    // convert ignoreUnmatched to bool
+    if ((len_ignoreUnmatchedFlag!=1) && (len_ignoreUnmatchedFlag!=arrayCount)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ignoreUnmatchedFlag size must be 1 or arrayCount",
+        ESMC_CONTEXT, &rc);
+      return rc;
+    }
+    vector<bool> ignoreUnmatched(arrayCount);
+    if (len_ignoreUnmatchedFlag==1){
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[0]==ESMF_TRUE);
+    }else{
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[i]==ESMF_TRUE);
+    }
     // construct local matchList
     vector<int> matchList(arrayCount);
     vector<Array *> srcArrayVector;
@@ -916,7 +935,7 @@ int ArrayBundle::redistStore(
         bool dstMatch = dstArray->isRHCompatible(dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-        if (srcMatch && dstMatch){
+        if (srcMatch && dstMatch && (ignoreUnmatched[i]==ignoreUnmatched[j])){
           // found match
           matchList[i] = matchList[j];
           break;
@@ -966,7 +985,7 @@ int ArrayBundle::redistStore(
           msg << "AB_REDISTSTORE_LOG:" << __LINE__ << " pair #" << i <<
             " does NOT require precompute! Found match with pair #" << 
             matchList[i];
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         // append the xxeSub to the xxe object with RRA offset info
@@ -980,13 +999,13 @@ int ArrayBundle::redistStore(
         {
           std::stringstream msg;
           msg << "AB_REDISTSTORE_LOG:" << __LINE__ << " pair #" << i <<
-            " DOES require precompute!";
-          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+            " DOES require precompute! ignoreUnmatched=" << ignoreUnmatched[i];
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         }
 #endif
         RouteHandle *rh;
         localrc = Array::redistStore(srcArray, dstArray, &rh,
-          srcToDstTransposeMap, typekindFactor, factor);
+          srcToDstTransposeMap, typekindFactor, factor, ignoreUnmatched[i]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         // get a handle on the XXE stored in rh
@@ -1059,8 +1078,9 @@ int ArrayBundle::redist(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // implemented via sparseMatMul
+  ESMC_Region_Flag zeroregionflag = ESMC_REGION_SELECT;
   localrc = sparseMatMul(srcArraybundle, dstArraybundle, routehandle,
-    ESMC_REGION_SELECT, NULL, 0, checkflag);
+    &zeroregionflag, 1, NULL, 0, checkflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
@@ -1127,6 +1147,8 @@ int ArrayBundle::sparseMatMulStore(
   ArrayBundle *dstArraybundle,        // in    - destination ArrayBundle
   RouteHandle **routehandle,          // inout - handle to precomputed comm
   vector<SparseMatrix<ESMC_I4,ESMC_I4> > &sparseMatrix, // in - sparse matrix
+  ESMC_Logical *ignoreUnmatchedFlag,  // in    - unmatched indices handling
+  int len_ignoreUnmatchedFlag,        // in    - elements in ignoreUnmatched
   InterArray<int> *srcTermProcessing  // inout - srcTermProcessing parameters
   ){    
 //
@@ -1215,6 +1237,21 @@ int ArrayBundle::sparseMatMulStore(
         return rc;
       }
     }
+    // convert ignoreUnmatched to bool
+    if ((len_ignoreUnmatchedFlag!=1) && (len_ignoreUnmatchedFlag!=arrayCount)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+        "ignoreUnmatchedFlag size must be 1 or arrayCount",
+        ESMC_CONTEXT, &rc);
+      return rc;
+    }
+    vector<bool> ignoreUnmatched(arrayCount);
+    if (len_ignoreUnmatchedFlag==1){
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[0]==ESMF_TRUE);
+    }else{
+      for (int i=0; i<arrayCount; i++)
+        ignoreUnmatched[i] = (ignoreUnmatchedFlag[i]==ESMF_TRUE);
+    }
     // construct local matchList
     vector<int> matchList(arrayCount);
     vector<Array *> srcArrayVector;
@@ -1233,7 +1270,7 @@ int ArrayBundle::sparseMatMulStore(
         bool dstMatch = dstArray->isRHCompatible(dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-        if (srcMatch && dstMatch){
+        if (srcMatch && dstMatch && (ignoreUnmatched[i]==ignoreUnmatched[j])){
           // found match
           matchList[i] = matchList[j];
           break;
@@ -1293,7 +1330,7 @@ int ArrayBundle::sparseMatMulStore(
 //          localPet, i);
         RouteHandle *rh;
         localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh, 
-          sparseMatrix, false, false, srcTermProcParameters[i]);
+          sparseMatrix, false, ignoreUnmatched[i], srcTermProcParameters[i]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         // get a handle on the XXE stored in rh
@@ -1335,7 +1372,7 @@ int ArrayBundle::sparseMatMulStore(
 }
 //-----------------------------------------------------------------------------
     
-    //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArrayBundle::sparseMatMul()"
 //BOPI
@@ -1352,12 +1389,13 @@ int ArrayBundle::sparseMatMul(
   ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,          // inout - destination ArrayBundle
   RouteHandle **routehandle,            // inout - handle to precomputed comm
-  ESMC_Region_Flag zeroflag,            // in    - ESMC_REGION_TOTAL:
+  ESMC_Region_Flag *zeroregionflag,     // in    - ESMC_REGION_TOTAL:
                                         //          -> zero out total region
                                         //         ESMC_REGION_SELECT:
                                         //          -> zero out target points
                                         //         ESMC_REGION_EMPTY:
                                         //          -> don't zero out any points
+  int zeroregionflag_len,               //       - elements in zeroregionflag
   ESMC_TermOrder_Flag *termorderflag,   // in    - ESMC_TERMORDER_FREE
                                         //         -> free partial sum order
                                         //       - ESMC_TERMORDER_SRCPET
@@ -1391,13 +1429,43 @@ int ArrayBundle::sparseMatMul(
     srcArraybundle->getVector(srcArrayVector, ESMC_ITEMORDER_ADDORDER);
     dstArraybundle->getVector(dstArrayVector, ESMC_ITEMORDER_ADDORDER);
     
-    // prepare termOrders vector
+    // prepare zeroRegion and termOrders vector
+    vector<ESMC_Region_Flag> zeroRegion;
     vector<ESMC_TermOrder_Flag> termOrders;
     int count=0;  // reset
     if (srcArraybundle != NULL){
       count = srcArraybundle->getCount();
     }else if (dstArraybundle != NULL){
       count = dstArraybundle->getCount();
+    }
+#ifdef ABSMM_EXEC_INFO_on
+    {
+      std::stringstream msg;
+      msg << "ABSMM exec:" << __LINE__
+        << " count=" << count;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+    if (zeroregionflag_len == 0 || zeroregionflag == NULL){
+      // set the default for all Array pairs
+      for (int i=0; i<count; i++)
+        zeroRegion.push_back(ESMC_REGION_TOTAL);
+    }else{
+      if (zeroregionflag_len == 1){
+        // set the single provided order for all Array pairs
+        for (int i=0; i<count; i++)
+          zeroRegion.push_back(*zeroregionflag);
+      }else if(zeroregionflag_len == count){
+        // copy the provided entries over
+        for (int i=0; i<count; i++)
+          zeroRegion.push_back(zeroregionflag[i]);
+      }else{
+        // inconsistency detected
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "incorrect number of elements provided in the zeroregionflag.", 
+          ESMC_CONTEXT, &rc);
+        return rc;  // bail out
+      }
     }
     if (termorderflag_len == 0 || termorderflag == NULL){
       // set the default for all Array pairs
@@ -1423,6 +1491,10 @@ int ArrayBundle::sparseMatMul(
 
     // process according to the different routehandle types        
     if (rhType == ESMC_ARRAYXXE){
+#ifdef ABSMM_EXEC_INFO_on
+      ESMC_LogDefault.Write("ABSMM exec: ESMC_ARRAYXXE branch taken",
+        ESMC_LOGMSG_DEBUG);
+#endif
       // apply same routehandle to each src/dst Array pair
       if (srcArraybundle != NULL && dstArraybundle != NULL){
         if (srcArraybundle->getCount() != dstArraybundle->getCount()){
@@ -1435,7 +1507,7 @@ int ArrayBundle::sparseMatMul(
           srcArray = srcArrayVector[i];
           dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, termOrders[i],
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroRegion[i], termOrders[i],
             checkflag, haloFlag);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc;
@@ -1444,7 +1516,7 @@ int ArrayBundle::sparseMatMul(
         for (int i=0; i<srcArraybundle->getCount(); i++){
           srcArray = srcArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, termOrders[i],
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroRegion[i], termOrders[i],
             checkflag, haloFlag);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc;
@@ -1453,7 +1525,7 @@ int ArrayBundle::sparseMatMul(
         for (int i=0; i<dstArraybundle->getCount(); i++){
           dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, termOrders[i],
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroRegion[i], termOrders[i],
             checkflag, haloFlag);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc;
@@ -1463,6 +1535,10 @@ int ArrayBundle::sparseMatMul(
       rc = ESMF_SUCCESS;
       return rc;
     }else if(rhType == ESMC_ARRAYBUNDLEXXE){
+#ifdef ABSMM_EXEC_INFO_on
+      ESMC_LogDefault.Write("ABSMM exec: ESMC_ARRAYBUNDLEXXE branch taken",
+        ESMC_LOGMSG_DEBUG);
+#endif
       // prepare for relative run-time addressing (RRA)
       vector<char *> rraList;
       vector<int> vectorLength;
@@ -1556,26 +1632,26 @@ int ArrayBundle::sparseMatMul(
         filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
         filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
         filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO_on
-        ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCPET (default)",
-          ESMC_LOGMSG_INFO);
+#ifdef ABSMM_EXEC_INFO_on
+        ESMC_LogDefault.Write("ABSMM exec: TERMORDER_SRCPET (default)",
+          ESMC_LOGMSG_DEBUG);
 #endif
       }else{
         if (termOrders[0] == ESMC_TERMORDER_SRCSEQ){
           filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
           filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
           filterBitField |= XXE::filterBitCancel;       // set Cancel filter
-#ifdef SMMINFO_on
-        ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCSEQ",
-          ESMC_LOGMSG_INFO);
+#ifdef ABSMM_EXEC_INFO_on
+        ESMC_LogDefault.Write("ABSMM exec: TERMORDER_SRCSEQ",
+          ESMC_LOGMSG_DEBUG);
 #endif
         }else if (termOrders[0] == ESMC_TERMORDER_SRCPET){
           filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
           filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
           filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO_on
-          ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_SRCPET",
-            ESMC_LOGMSG_INFO);
+#ifdef ABSMM_EXEC_INFO_on
+          ESMC_LogDefault.Write("ABSMM exec: TERMORDER_SRCPET",
+            ESMC_LOGMSG_DEBUG);
 #endif
         }else if (termOrders[0] == ESMC_TERMORDER_FREE){
           // not safe to use FREE for AB routehandle -> use TERMORDER_SRCPET
@@ -1586,15 +1662,15 @@ int ArrayBundle::sparseMatMul(
           filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
           filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
           filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
-#ifdef SMMINFO_on
-          ESMC_LogDefault.Write("AB/SMM exec: TERMORDER_FREE -> TERMORDER_SRCPET",
-            ESMC_LOGMSG_INFO);
+#ifdef ABSMM_EXEC_INFO_on
+          ESMC_LogDefault.Write("ABSMM exec: TERMORDER_FREE -> TERMORDER_SRCPET",
+            ESMC_LOGMSG_DEBUG);
 #endif
         }
       }
-      if (zeroflag!=ESMC_REGION_TOTAL)
+      if (zeroRegion[0]!=ESMC_REGION_TOTAL)
         filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
-      if (zeroflag!=ESMC_REGION_SELECT)
+      if (zeroRegion[0]!=ESMC_REGION_SELECT)
         filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
       // execute XXE stream
       localrc = xxe->exec(rraCount, &(rraList[0]), &(vectorLength[0]), 

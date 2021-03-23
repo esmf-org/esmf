@@ -255,13 +255,13 @@ void gs_data::nonlocal_info::nonlocal(realType *u, int op, MPI_Comm comm)
     start = buf;
     for (;c;--c)
       *buf++ = u[*sh_ind++];
-    MPI_Isend(start,nshared[i]*sizeof(realType),
+    MPI_Isend((void*)start,nshared[i]*sizeof(realType),
         MPI_UNSIGNED_CHAR, targ[i],id,comm,reqs++);
   }
   start = buf;
   for(i=0; i<np; ++i)
   {
-    MPI_Irecv(start,nshared[i]*sizeof(realType),MPI_UNSIGNED_CHAR,
+    MPI_Irecv((void*)start,nshared[i]*sizeof(realType),MPI_UNSIGNED_CHAR,
         targ[i],targ[i],comm,reqs++);
     start+=nshared[i];
   }
@@ -315,13 +315,13 @@ void gs_data::nonlocal_info::nonlocal_vec(realType *u, uint n,
       memcpy(buf,u+n*(*sh_ind++),size);
       buf+=n;
     }
-    MPI_Isend(start,ns*size,MPI_UNSIGNED_CHAR,targ[i],id,comm,reqs++);
+    MPI_Isend((void*)start,ns*size,MPI_UNSIGNED_CHAR,targ[i],id,comm,reqs++);
   }
   start = buf;
   for (i=0; i<np; ++i)
   {
     int nsn=n*nshared[i];
-    MPI_Irecv(start,nsn*size,MPI_UNSIGNED_CHAR,targ[i],targ[i],comm,reqs++);
+    MPI_Irecv((void*)start,nsn*size,MPI_UNSIGNED_CHAR,targ[i],targ[i],comm,reqs++);
     start+=nsn;
   }
   for (reqs=this->_reqs,i=np*2;i;--i)
@@ -379,13 +379,13 @@ void gs_data::nonlocal_info::nonlocal_many(realType **u, uint n, int op,
         *buf++=uu[sh_ind[c]];
     }
     sh_ind+=ns;
-    MPI_Isend(start,n*ns*sizeof(realType),MPI_UNSIGNED_CHAR,targ[i],id,comm,reqs++);
+    MPI_Isend((void*)start,n*ns*sizeof(realType),MPI_UNSIGNED_CHAR,targ[i],id,comm,reqs++);
   }
   start = buf;
   for (i=0; i<np; ++i)
   {
     int nsn = n*nshared[i];
-    MPI_Irecv(start,nsn*sizeof(realType),MPI_UNSIGNED_CHAR,
+    MPI_Irecv((void*)start,nsn*sizeof(realType),MPI_UNSIGNED_CHAR,
         targ[i],targ[i],comm,reqs++);
     start+=nsn;
   }
@@ -491,10 +491,10 @@ void gs_data::crystal_data::send_(uint target, int recvn)
   int i;
 
   (void)VALGRIND_CHECK_MEM_IS_DEFINED( &send->n, sizeof(uint) );
-  MPI_Isend(&send->n,sizeof(uint),MPI_UNSIGNED_CHAR,
+  MPI_Isend((void*)&send->n,sizeof(uint),MPI_UNSIGNED_CHAR,
       target ,_id ,_comm,&req[ 0]);
   for (i=0; i<recvn; ++i)
-    MPI_Irecv(&count[i] ,sizeof(uint),MPI_UNSIGNED_CHAR,
+    MPI_Irecv((void*)&count[i] ,sizeof(uint),MPI_UNSIGNED_CHAR,
       target+i,target+i,_comm,&req[i+1]);
   MPI_Waitall(recvn+1,req,status);
   sum = keep->n;
@@ -507,14 +507,14 @@ void gs_data::crystal_data::send_(uint target, int recvn)
   keep->n=sum;
 
   (void)VALGRIND_CHECK_MEM_IS_DEFINED( send->buf.ptr,send->n*sizeof(uint) );
-  MPI_Isend(send->buf.ptr,send->n*sizeof(uint),
+  MPI_Isend((void*)send->buf.ptr,send->n*sizeof(uint),
       MPI_UNSIGNED_CHAR,target,_id,_comm,&req[0]);
   if (recvn)
   {
-    MPI_Irecv(recv[0],count[0]*sizeof(uint),MPI_UNSIGNED_CHAR,
+    MPI_Irecv((void*)recv[0],count[0]*sizeof(uint),MPI_UNSIGNED_CHAR,
         target,target,_comm,&req[1]);
     if (recvn==2)
-      MPI_Irecv(recv[1],count[1]*sizeof(uint),MPI_UNSIGNED_CHAR,
+      MPI_Irecv((void*)recv[1],count[1]*sizeof(uint),MPI_UNSIGNED_CHAR,
         target+1,target+1,_comm,&req[2]);
   }
   MPI_Waitall(recvn+1,req,status);
@@ -755,18 +755,18 @@ ErrorCode gs_data::initialize(uint n, const long *label, const Ulong *ulabel,
     uint maxv, const unsigned int nlabels, const unsigned int nulabels,
     crystal_data *crystal)
 {
+  nlinfo = NULL;
   unsigned int j;
   TupleList nonzero, primary;
   ErrorCode rval;
 #ifdef MOAB_HAVE_MPI
-  nlinfo = NULL;
   TupleList shared;
 #else
   moab::TupleList::buffer buf;
 #endif
-#ifdef MOAB_HAVE_MPI
   (void)VALGRIND_CHECK_MEM_IS_DEFINED(label, nlabels * sizeof(long));
   (void)VALGRIND_CHECK_MEM_IS_DEFINED(ulabel, nlabels * sizeof(Ulong));
+#ifdef MOAB_HAVE_MPI
   MPI_Comm_dup(crystal->_comm,&this->_comm);
 #else
   buf.buffer_init(1024);

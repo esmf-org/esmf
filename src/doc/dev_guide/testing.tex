@@ -531,33 +531,6 @@ listed on the {\bf Test \& Validation} page of the ESMF website.  They
 are not distributed with the ESMF software; instead they are stored in
 a separate module in the main repository called {\tt use\_test\_cases}.
 
-\subsubsection{MAPL Testing}
-
-MAPL is a software layer that establishes usage standards and software
-tools for building ESMF compliant components. The MAPL User's Guide can be found
- \htmladdnormallink{{\it here.}}{http://www.earthsystemmodeling.org/esmf\_releases/last\_built/MAPL\_UsersGuide.pdf}
-MAPL is included in the ESMF distribution, below are the installation and testing instructions.
-
-Before MAPL can be installed and tested, ESMF has to be built with NetCDF and installed.
-Refer to the ESMF User's Guide for information on building
-ESMF with NetCDF. After ESMF is installed successfully, do the following:
-\begin{verbatim}
-
-	Using "setenv" or "export" depending on the shell being used:
-	set ESMFMKFILE = $ESMF_DIR/lib/lib$ESMF_BOPT/$ESMF_OS.$ESMF_COMPILER.
-                        $ESMF_ABI.$ESMF_COMM.$ESMF_SITE/esmf.mk.
-
-	To install MAPL, enter "gmake install_mapl".
-
-	To build the MAPL tests, enter "gmake build_mapl_tests".
-
-	To run the tests, enter "gmake run_mapl_tests" or "run_mapl_test_uni".
-
-\end{verbatim}
-
-The MAPL tests follow the same structure and testing options as
-the ESMF unit tests, see section {\bf Unit Tests} of this document for details.
-
 \subsubsection{Beta Testing}
 
 ESMF software is released in a beta form, as an Internal Release,
@@ -640,10 +613,10 @@ Another instance where this tool is useful is when a developer adds a new test, 
 \subsubsection{Building the Documentation}
 
 As software development progresses, the documentation is updated, built and posted at
-\htmladdnormallink{{\it https://www.earthsystemcog.org/projects/esmf/dev\_docs/.}}{https://www.earthsystemcog.org/projects/esmf/dev\_docs/}
+\htmladdnormallink{{\it http://earthsystemmodeling.org/docs/nightly/develop/dev_guide/}}{http://earthsystemmodeling.org/docs/nightly/develop/dev_guide/}
 
 The documents are built daily in the early morning, the results of the builds are posted at
-\htmladdnormallink{{\it http://www.earthsystemmodeling.org/developers/test/daily/2week\_results/trunk\_results\_noheader/doc\_build.shtml.}}{http://www.earthsystemmodeling.org/developers/test/daily/2week\_results/trunk\_results\_noheader/doc\_build.shtml}
+\htmladdnormallink{{\it http://earthsystemmodeling.org/doc/}}{http://earthsystemmodeling.org/doc/}
 
 These documents can be updated by the developers, by checking out the documents from the repository and submitting the edited files. To have the new version of the documents posted on the web, the developer must sent a request to the following email address: esmftest@cgd.ucar.edu. The subject of the email indicates which document to build and post.
 The following is the list of subjects that have been implemented:

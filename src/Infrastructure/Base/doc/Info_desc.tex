@@ -1,0 +1,75 @@
+% $Id$
+
+All ESMF base objects (i.e. Array, ArrayBundle, Field, FieldBundle, Grid, Mesh, DistGrid) contain a key-value attribute storage object called \texttt{ESMF\_Info}. \texttt{ESMF\_Info} objects may also be created independent of a base object. \texttt{ESMF\_Info} supports setting and getting key-value pairs where the \textit{key} is a string and the \textit{value} is a scalar or a list of common data types. An \texttt{ESMF\_Info} object may have a flat or nested data structure. The purpose of \texttt{ESMF\_Info} is to support I/O-compatible metadata structures (i.e. netCDF), internal record-keeping for model execution (NUOPC), and provide a mechanism for custom user metadata attributes.
+
+\texttt{ESMF\_Info} is designed for interoperability. To achieve this goal, \texttt{ESMF\_Info} adopted the JSON (Javascript Object Notation) specification. Internally, \texttt{ESMF\_Info} uses \textit{JSON for Modern C++} \cite{json_for_modern_cpp} to manage its storage map. There are numerous resources for JSON on the web \cite{json}. Quoting from the \textit{json.org} site \cite{json} when it introduces the format:
+\begin{quote}
+    \textit{JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write. It is easy for machines to parse and generate. It is based on a subset of the JavaScript Programming Language Standard ECMA-262 3rd Edition - December 1999. JSON is a text format that is completely language independent but uses conventions that are familiar to programmers of the C-family of languages, including C, C++, C\#, Java, JavaScript, Perl, Python, and many others. These properties make JSON an ideal data-interchange language.}
+    \textit{JSON is built on two structures:}
+    \begin{itemize}
+        \item \textit{A collection of name/value pairs. In various languages, this is realized as an object, record, struct, dictionary, hash table, keyed list, or associative array.}
+        \item \textit{An ordered list of values. In most languages, this is realized as an array, vector, list, or sequence.}
+    \end{itemize}
+    \textit{These are universal data structures. Virtually all modern programming languages support them in one form or another. It makes sense that a data format that is interchangeable with programming languages also be based on these structures.}
+\end{quote}
+
+By adopting JSON compliance for \texttt{ESMF\_Info}, ESMF made its core metadata capabilities explicitly interoperable with a widely used data structure. If data may be represented with JSON, then it is compatible with \texttt{ESMF\_Info}.
+
+\textbf{\textit{There are some aspects of the \texttt{ESMF\_Info} implementation related to JSON and \textit{JSON for Modern C++} that should be noted:}}
+\begin{enumerate}
+    \item JSON supports 64-bit data types for integers and reals (\cite{json_for_modern_cpp_64bit_int}, \cite{json_for_modern_cpp_64bit_float}). I4/R4 is converted to I8/R8 and vice versa. \texttt{ESMF\_Info} internally tracks 32-bit sets to ensure the data type may be appropriately queried.
+    \item The memory overhead per JSON object (e.g. a key-value pair) requires an additional allocator pointer for type generalization \cite{json_for_modern_cpp_memory_overhead}. Hence, the JSON map is not suited for big data storage, offering flexibility in exchange.
+    \item Keys are stored in an unordered map sorted in lexicographical order.
+\end{enumerate}
+
+\subsection{Migrating from Attribute}
+The \texttt{ESMF\_Info} class is a replacement for the \texttt{ESMF\_Attribute} class and is the preferred way of managing metadata attributes in ESMF moving forward. It is recommended that users migrate existing \texttt{ESMF\_Attribute} calls to the new \texttt{ESMF\_Info} API. The \texttt{ESMF\_Info} class provides the backend for \texttt{ESMF\_Attribute} since ESMF version 8.1. The \texttt{ESMF\_Attribute} docs are located in appendix \ref{appendix_attribute_legacy_api}. In practice, users should experience no friction when migrating client code. Please email ESMF support in the case of a migration issue. Some structural changes to \texttt{ESMF\_Attribute} did occur:
+\begin{itemize}
+    \item Changed behavior when getting fixed-size lists. List size in storage must match the size of the outgoing list.
+    \item Removed ability to use a default value with list gets.
+    \item Removed \texttt{attPackInstanceName} from all interfaces.
+    \item Removed \texttt{attcopyFlag} from all interfaces.
+    \item Removed \texttt{ESMF\_Attribute}-managed object linking.
+    \item Modified \texttt{ESMF\_AttributeAdd} to set the target key to a null JSON value.
+    \item Modified \texttt{ESMF\_AttributeSet} to not require an attribute added to an \texttt{ESMF\_AttPack} be added through \texttt{ESMF\_AttributeAdd} before setting.
+    \item Removed support for attribute XML I/O.
+    \item Removed ability to add multiple nested Attribute packages.
+    \item Removed retrieval of "internal" ESMF object Attributes.
+\end{itemize}
+
+Below are examples for setting and getting an attribute using \texttt{ESMF\_Info} and the legacy \texttt{ESMF\_Attribute}. The \texttt{ESMF\_Info} interfaces are not overloaded for ESMF object types but rather work off a handle retrieved via a get call.
+
+\subsubsection{Setting an Attribute}
+With \texttt{ESMF\_Attribute}:
+\begin{verbatim}
+call ESMF_AttributeSet(array, "aKey", 15, rc=rc)
+\end{verbatim}
+With \texttt{ESMF\_Info}:
+\begin{verbatim}
+call ESMF_InfoGetFromHost(array, info, rc=rc)
+call ESMF_InfoSet(info, "aKey", 15, rc=rc)
+\end{verbatim}
+
+\subsubsection{Getting an Attribute}
+With \texttt{ESMF\_Attribute}:
+\begin{verbatim}
+call ESMF_AttributeGet(array, "aKey", aKeyValue, rc=rc)
+\end{verbatim}
+With \texttt{ESMF\_Info}:
+\begin{verbatim}
+call ESMF_InfoGetFromHost(array, info, rc=rc)
+call ESMF_InfoGet(info, "aKey", aKeyValue, rc=rc)
+\end{verbatim}
+
+\subsection{Key Format Overview}
+\label{info_key_format}
+A key in the \texttt{ESMF\_Info} interface provides the location of a value to retrieve from the key-value storage. Keys in the \texttt{ESMF\_Info} class use the JSON Pointer syntax \cite{json_for_modern_cpp_json_pointer}. A forward slash is prepended to string keys if it does not exist. Hence, \texttt{"aKey"} and \texttt{"/aKey"} are equivalent. Note the indexing aspect of the JSON Pointer syntax is not supported.
+
+Every "key" argument in the \texttt{ESMF\_Info} class uses pathing following the JSON Pointer syntax [6]. A forward slash is prepended to string keys if it does not exist. Hence, "aKey" and "/aKey" are equivalent. Note the indexing aspect of the JSON Pointer syntax is not supported (i.e. "/my\_list~1").
+
+Some examples for valid "key" arguments:
+\begin{itemize}
+    \item \texttt{altitude} :: A simple key argument with no nesting.
+    \item \texttt{/altitude} :: A simple key argument with no nesting with the prepended pointer forward slash.
+    \item \texttt{/altitude/height\_above\_mean\_sea\_level} :: A key for an attribute "height\_above\_mean\_sea\_level" nested in a map identified with key "altitude".
+\end{itemize}

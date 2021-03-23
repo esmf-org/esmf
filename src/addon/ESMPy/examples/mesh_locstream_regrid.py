@@ -1,5 +1,10 @@
 # This example demonstrates how to regrid between a mesh and a locstream.
 
+try:
+    from unittest import SkipTest
+except ImportError:
+    from nose import SkipTest
+
 import ESMF
 import numpy
 
@@ -15,8 +20,8 @@ if ESMF.pet_count() == 1:
     mesh, _, _, _, _, _ = mesh_create_5()
     locstream = create_locstream_16()
 else:
-    if ESMF.pet_count() is not 4:
-        raise ValueError("processor count must be 4 or 1 for this example")
+    if constants._ESMF_MPIRUN_NP != 4:
+        raise SkipTest('processor count must be 4 or 1 for this example')
     else:
         mesh, _, _, _, _ = mesh_create_5_parallel()
         locstream = create_locstream_16_parallel()
@@ -54,7 +59,7 @@ dstfield = regrid(srcfield, dstfield)
 num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 meanrelerr = 0
-if num_nodes is not 0:
+if num_nodes != 0:
     ind = numpy.where((dstfield.data != 1e20) & (xctfield.data != 0))[0]
     relerr = numpy.sum(numpy.abs(dstfield.data[ind] - xctfield.data[ind]) / numpy.abs(xctfield.data[ind]))
     meanrelerr = relerr / num_nodes
@@ -65,7 +70,7 @@ if ESMF.pet_count() > 1:
     num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
 
 # output the results from one processor only
-if ESMF.local_pet() is 0:
+if ESMF.local_pet() == 0:
     meanrelerr = relerr / num_nodes
     print ("ESMPy Grid Mesh Regridding Example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -73,6 +73,11 @@ module NUOPC
   public NUOPC_CompSetInternalEntryPoint  ! method
   public NUOPC_CompSetServices            ! method
   public NUOPC_CompSpecialize             ! method
+  public &
+    label_ExternalAdvertise, &
+    label_ExternalRealize, &
+    label_ExternalDataInit, &
+    label_ExternalReset
 
   ! public Utility API
   public NUOPC_AddNestedState             ! method
@@ -83,6 +88,7 @@ module NUOPC
   public NUOPC_ChopString                 ! method, internal use only
   public NUOPC_GetAttribute               ! method
   public NUOPC_GetStateMemberLists        ! method
+  public NUOPC_GetStateMemberCount        ! method
   public NUOPC_GetTimestamp               ! method
   public NUOPC_InitAttributes             ! method, internal use only
   public NUOPC_IsAtTime                   ! method
@@ -90,6 +96,7 @@ module NUOPC
   public NUOPC_IsUpdated                  ! method
   public NUOPC_LogIntro                   ! method, internal use only
   public NUOPC_LogExtro                   ! method, internal use only
+  public NUOPC_LogPetList                 ! method, internal use only
   public NUOPC_NoOp                       ! method
   public NUOPC_Realize                    ! method
   public NUOPC_Reconcile                  ! method, internal use only 

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -40,6 +40,7 @@
 #include "ESMCI_CompTunnel.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_TraceRegion.h"
+#include "ESMCI_Info.h"
 
 using std::string;
 
@@ -677,6 +678,15 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
   // ESMCI::VMK class object. The second argument is also of type (void *)
   // and points to a cargotype structure.
 
+#if 0
+  {
+    std::stringstream msg;
+    msg << "ESMCI_FTableCallEntryPointVMHop()#" << __LINE__
+      << " entering.";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
+
   // pull out info from cargo
   ESMCI::cargotype *cargo = (ESMCI::cargotype *)cargoCast;
   char *name = cargo->name;               // name of callback
@@ -701,6 +711,15 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
     }
   }
   ((ESMCI::VM*)vm)->threadbarrier();  // synchronize all threads in local group
+
+#if 0
+  {
+    std::stringstream msg;
+    msg << "ESMCI_FTableCallEntryPointVMHop()#" << __LINE__
+      << " after threadbarrier().";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
 
   // get a pointer to the CompTunnel object
   ESMCI::Comp *f90comp = cargo->f90comp;
@@ -840,7 +859,7 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
       <<  recursionCount << " *recursionCount="
       << (recursionCount ? *recursionCount : -1)
       << " vm_cargo=" << vm_cargo << " newCargoFlag=" << newCargoFlag;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -892,15 +911,24 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
 #if 0
-std::cout << ">>> calling into vm_parent->enter() with parentVMflag:" 
-  <<  vmplan->parentVMflag <<"\n";
+  {
+    std::stringstream msg;
+    msg << "FTN_X(c_esmc_ftablecallentrypointvm)#" << __LINE__
+      << " calling into into vm_parent->enter() with parentVMflag:" 
+      <<  vmplan->parentVMflag;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
 #endif
   localrc = vm_parent->enter(vmplan, *vm_info, *vm_cargo);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return; // bail out
-
 #if 0
-std::cout << "<<< parent thread returned from vm_parent->enter()" << "\n";
+  {
+    std::stringstream msg;
+    msg << "FTN_X(c_esmc_ftablecallentrypointvm)#" << __LINE__
+      << " parent thread returned from vm_parent->enter()";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
 #endif
 
   // ... if the child VM uses threads (multi-threading or single-threading)
@@ -1852,9 +1880,15 @@ std::cout << "calling out of case FT_VOIDP1INTP" << "\n";
           localrc = comp->getBase(&base);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, &rc)) return rc; // bail out
-          ESMC_Logical presentFlag;
-          base->ESMC_BaseGetRoot()->AttributeIsPresent("ESMF_RUNTIME_COMPLIANCEICREGISTER",
-            &presentFlag);
+          ESMCI::Info *info = base->ESMC_BaseGetInfo();
+          std::string key_cr = "ESMF_RUNTIME_COMPLIANCEICREGISTER";
+          bool presentFlag;
+          try {
+            presentFlag = info->hasKey(key_cr, false);
+          } catch (ESMCI::esmc_error &exc) {
+            ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
+            return rc; // bail out
+          }
 
 //#ifdef ESMF_NO_DLFCN
           //if (presentFlag==ESMF_TRUE){
@@ -1865,39 +1899,31 @@ std::cout << "calling out of case FT_VOIDP1INTP" << "\n";
 //#endif
 
 
-          if (presentFlag==ESMF_TRUE){
+          if (presentFlag){
 
-            // access the attribute object in base
-            ESMCI::Attribute *attr=base->ESMC_BaseGetRoot()->AttributeGet(
-              "ESMF_RUNTIME_COMPLIANCEICREGISTER");
-
-            // retrieve the string value of the attribute
-            std::vector<string> value;
-            localrc = attr->get(&value);
-            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-              ESMC_CONTEXT, &rc)) return rc; // bail out
-
-            // check the number of strings associated with the attribute
-            if (value.size()!=1){
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                "Attribute must contain single string", ESMC_CONTEXT, &rc);
-              return rc;
+            // get the attribute value
+            std::string value;
+            try {
+              value = info->get<std::string>(key_cr);
+            } catch (ESMCI::esmc_error &exc) {
+              ESMC_LogDefault.MsgFoundError(exc.getReturnCode(), ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
+              return rc; // bail out
             }
 
             // convert routine name according to name mangeling mode
             //TODO: this would be a good Util method to have
 #ifdef ESMF_LOWERCASE_DOUBLEUNDERSCORE
-            std::transform(value[0].begin(), value[0].end(), value[0].begin(),
+            std::transform(value.begin(), value.end(), value.begin(),
               ::tolower);
-            value[0]+="__";
+            value+="__";
 #else
-            std::transform(value[0].begin(), value[0].end(), value[0].begin(),
+            std::transform(value.begin(), value.end(), value.begin(),
               ::tolower);
-            value[0]+="_";
+            value+="_";
 #endif
 
 #if 0
-std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
+std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value <<"\n";
 #endif
 
 #ifndef ESMF_NO_DLFCN
@@ -1910,7 +1936,7 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
                 "- shared object not found", ESMC_CONTEXT, &rc);
               return rc;
             }
-            void *pointer = (void *)dlsym(lib, value[0].c_str());
+            void *pointer = (void *)dlsym(lib, value.c_str());
             if (pointer == NULL){
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                 "- compliance IC register routine not found", ESMC_CONTEXT, &rc);
@@ -1928,18 +1954,18 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
             //therefore, go for a blind call assuming the NUOPC register
             //routines have been linked in, which is typically the case
 
-            //std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
-            if (value[0].find("nuopc_model") != std::string::npos) {
+            //std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value <<"\n";
+            if (value.find("nuopc_model") != std::string::npos) {
                 FTN_X(nuopc_model_complianceicr)((void *)comp, &registerIcUserRc);
                 if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
                               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
             }
-            else if (value[0].find("nuopc_driver") != std::string::npos) {
+            else if (value.find("nuopc_driver") != std::string::npos) {
                 FTN_X(nuopc_driver_complianceicr)((void *)comp, &registerIcUserRc);
                 if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
                               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
             }
-            else if (value[0].find("nuopc_connector") != std::string::npos) {
+            else if (value.find("nuopc_connector") != std::string::npos) {
                 FTN_X(nuopc_connector_complianceicr)((void *)comp, &registerIcUserRc);
                 if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
                               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out

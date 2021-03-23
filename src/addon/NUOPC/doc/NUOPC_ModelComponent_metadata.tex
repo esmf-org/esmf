@@ -19,7 +19,7 @@ is {\em not} part of the Attribute name!
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
      {\tt Kind} & String value indicating component kind.& Model\\ \hline
-     {\tt Verbosity} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control verbosity of the generic component implementation. Higher bits are available for user level verbosity control. \newline
+     {\tt Verbosity} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits (0-15) are reserved to control verbosity of the generic component implementation. Higher bits are available for user level verbosity control. \newline
                        {\bf bit 0}: Intro/Extro of methods with indentation.\newline
                        {\bf bit 1}: Intro/Extro with memory info.\newline
                        {\bf bit 2}: Intro/Extro with garbage collection info.\newline
@@ -36,24 +36,40 @@ is {\em not} part of the Attribute name!
                        "low": some verbosity, \newline
                        "high": more verbosity, \newline
                        "max": all lower 16 bits\\ \hline
-     {\tt Profiling} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control profiling of the generic component implementation. Higher bits are available for user level profiling control.
+     {\tt Profiling} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits (0-15) are reserved to control profiling of the generic component implementation. Higher bits are available for user level profiling control. \newline
+                       {\bf bit 0}: Top level profiling of {\em Initialize} phases.\newline
+                       {\bf bit 1}: Specialization point profiling of {\em Initialize} phases.\newline
+                       {\bf bit 2}: Additional profiling of internals of {\em Initialize} phases.\newline
+                       {\bf bit 3}: Top level profiling of {\em Run} phases.\newline
+                       {\bf bit 4}: Specialization point profiling of {\em Run} phases.\newline
+                       {\bf bit 5}: Additional profiling of internals of {\em Run} phases.\newline
+                       {\bf bit 6}: Top level profiling of {\em Finalize} phases.\newline
+                       {\bf bit 7}: Specialization point profiling of {\em Finalize} phases.\newline
+                       {\bf bit 8}: Additional profiling of internals of {\em Finalize} phases.\newline
+                       {\bf bit 9}: Leading barrier for {\em Initialize} phases.\newline
+                       {\bf bit 10}: Leading barrier for {\em Run} phases.\newline
+                       {\bf bit 11}: Leading barrier for {\em Finalize} phases.\newline
                      & 0, 1, 2, ... \newline
-                       "max" = set all lower 16 bits\\ \hline
-     {\tt Diagnostic} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control diagnostic of the generic component implementation. Higher bits are available for user level diagnostic control. \newline
-                       {\bf bit 0}: Dump fields of the importState on entering the Initialize method.\newline
-                       {\bf bit 1}: Dump fields of the exportState on entering the Initialize method.\newline
-                       {\bf bit 2}: Dump fields of the importState on exiting the Initialize method.\newline
-                       {\bf bit 3}: Dump fields of the exportState on exiting the Initialize method.\newline
-                       {\bf bit 4}: Dump fields of the importState on entering the Run method.\newline
-                       {\bf bit 5}: Dump fields of the exportState on entering the Run method.\newline
-                       {\bf bit 6}: Dump fields of the importState on exiting the Run method.\newline
-                       {\bf bit 7}: Dump fields of the exportState on exiting the Run method.\newline
-                       {\bf bit 8}: Dump fields of the importState on entering the Finalize method.\newline
-                       {\bf bit 9}: Dump fields of the exportState on entering the Finalize method.\newline
-                       {\bf bit 10}: Dump fields of the importState on exiting the Finalize method.\newline
-                       {\bf bit 11}: Dump fields of the exportState on exiting the Finalize method.
+                       "off" = 0 (default), \newline
+                       "low": Top level profiling. \newline
+                       "high": Top level, specialization point profiling, and additional profiling of internals. \newline
+                       "max": All lower 16 bits set.\\ \hline
+     {\tt Diagnostic} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits (0-15) are reserved to control diagnostic of the generic component implementation. Higher bits are available for user level diagnostic control. \newline
+                       {\bf bit 0}: Dump fields of the importState on entering {\em Initialize} phases.\newline
+                       {\bf bit 1}: Dump fields of the exportState on entering {\em Initialize} phases.\newline
+                       {\bf bit 2}: Dump fields of the importState on exiting {\em Initialize} phases.\newline
+                       {\bf bit 3}: Dump fields of the exportState on exiting {\em Initialize} phases.\newline
+                       {\bf bit 4}: Dump fields of the importState on entering {\em Run} phases.\newline
+                       {\bf bit 5}: Dump fields of the exportState on entering {\em Run} phases.\newline
+                       {\bf bit 6}: Dump fields of the importState on exiting {\em Run} phases.\newline
+                       {\bf bit 7}: Dump fields of the exportState on exiting {\em Run} phases.\newline
+                       {\bf bit 8}: Dump fields of the importState on entering {\em Finalize} phases.\newline
+                       {\bf bit 9}: Dump fields of the exportState on entering {\em Finalize} phases.\newline
+                       {\bf bit 10}: Dump fields of the importState on exiting {\em Finalize} phases.\newline
+                       {\bf bit 11}: Dump fields of the exportState on exiting {\em Finalize} phases.
                      & 0, 1, 2, ... \newline
-                       "max" = set all lower 16 bits\\ \hline
+                       "off" = 0 (default), \newline
+                       "max": All lower 16 bits set.\\ \hline
      {\tt CompLabel} & String value holding the label under which the component was added to its parent driver.& {\em no restriction}\\ \hline
      {\tt InitializePhaseMap} & List of string values, mapping the logical NUOPC initialize phases, of a specific Initialize Phase Definition (IPD) version, to the actual ESMF initialize phase number under which the entry point is registered.& IPDvXXpY=Z, where XX = two-digit revision number, e.g. 01, Y = logical NUOPC phase number, Z = actual ESMF phase number, with Y, Z > 0 and Y, Z < 10 \\ \hline
      {\tt RunPhaseMap} & List of string values, mapping the logical NUOPC run phases to the actual ESMF run phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline

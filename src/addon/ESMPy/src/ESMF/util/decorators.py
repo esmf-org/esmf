@@ -34,6 +34,23 @@ except:
         return inner
 
 
+def beta(func):
+    '''This is a decorator that can be used to mark functions
+    as beta.  Other decorators must be upper.'''
+
+    @functools.wraps(func)
+    def new_func(*args, **kwargs):
+        # for Python 2.6 to act like 2.7
+        warnings.simplefilter(action="default", append=True)
+        warnings.warn_explicit(
+            message="Call to a beta function {0}.".format(func.__name__),
+            category=UserWarning,
+            filename=func.__code__.co_filename,
+            lineno=func.__code__.co_firstlineno + 1,
+        )
+        return func(*args, **kwargs)
+    return new_func
+
 def deprecated(func):
     '''This is a decorator that can be used to mark functions
     as deprecated. It will result in a warning being emitted

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -266,6 +266,7 @@ module NUOPC_Auxiliary
     logical                     :: doItFlag
     integer                     :: localrc
     type(ESMF_FieldStatus_Flag) :: fieldStatus
+    type(ESMF_Info)             :: info
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -287,8 +288,15 @@ module NUOPC_Auxiliary
     
     if (doItFlag) then
       
-      call ESMF_AttributeGet(field, name="StandardName", &
-        value=standardName, convention="NUOPC", purpose="Instance", rc=localrc)
+      call ESMF_InfoGetFromHost(field, info=info, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+
+      call ESMF_InfoGet(info, key="/NUOPC/Instance/StandardName", &
+        value=standardName, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &

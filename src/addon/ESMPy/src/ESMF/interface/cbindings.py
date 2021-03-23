@@ -9,7 +9,7 @@ import numpy as np
 import sys
 
 import ESMF.api.constants as constants
-from ESMF.util.decorators import deprecated, netcdf
+from ESMF.util.decorators import deprecated, netcdf, beta
 from ESMF.interface.loadESMF import _ESMF
 
 
@@ -32,10 +32,13 @@ class ESMP_Field(ct.Structure):
 class ESMP_GridStruct(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
+class ESMP_LocStream(ct.Structure):
+    _fields_ = [("ptr", ct.c_void_p)]
+
 class ESMP_Mesh(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
-class ESMP_LocStream(ct.Structure):
+class ESMP_RouteHandle(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
 
 class ESMP_VM(ct.Structure):
@@ -46,7 +49,7 @@ class ESMP_VM(ct.Structure):
 class OptionalNumpyArrayFloat64(object):
         @classmethod
         def from_param(cls, param):
-            if param is None:
+            if isinstance(param, type(None)):
                 return None
             elif param.dtype != np.float64:
                 raise TypeError("array must have data type Numpy.float64")
@@ -58,7 +61,7 @@ class OptionalNumpyArrayFloat64(object):
 class OptionalStructPointer(object):
         @classmethod
         def from_param(cls, param):
-            if param is None:
+            if isinstance(param, type(None)):
                 return None
             else:
                 ptr = ct.POINTER(ESMP_InterfaceInt)
@@ -86,7 +89,7 @@ class OptionalArrayOfStrings(object):
 class OptionalField(object):
         @classmethod
         def from_param(cls, param):
-            if param is None:
+            if isinstance(param, type(None)):
                 return None
             else:
                 ptr = ct.POINTER(ct.c_void_p)
@@ -97,7 +100,7 @@ class OptionalField(object):
 class OptionalNamedConstant(object):
         @classmethod
         def from_param(cls, param):
-            if param is None:
+            if isinstance(param, type(None)):
                 return None
             else:
                 ptr = ct.POINTER(ct.c_int)
@@ -109,7 +112,7 @@ class OptionalNamedConstant(object):
 class OptionalNumpyArrayInt32(object):
         @classmethod
         def from_param(cls, param):
-            if param is None:
+            if isinstance(param, type(None)):
                 return None
             elif param.dtype != np.int32:
                 raise TypeError("array must have data type Numpy.int32")
@@ -121,7 +124,7 @@ class OptionalNumpyArrayInt32(object):
 class OptionalBool(object):
         @classmethod
         def from_param(cls, param):
-            if param is None:
+            if isinstance(param, type(None)):
                 return None
             else:
                 ptr = ct.POINTER(ct.c_int)
@@ -136,7 +139,7 @@ class OptionalBool(object):
 class OptionalInt(object):
         @classmethod
         def from_param(cls, param):
-            if param is None:
+            if isinstance(param, type(None)):
                 return None
             else:
                 ptr = ct.POINTER(ct.c_int)
@@ -147,7 +150,7 @@ class OptionalInt(object):
 class OptionalFloat(object):
         @classmethod
         def from_param(cls, param):
-            if param is None:
+            if isinstance(param, type(None)):
                 return None
             else:
                 ptr = ct.POINTER(ct.c_float)
@@ -158,17 +161,28 @@ class OptionalFloat(object):
 class OptionalPtr(object):
         @classmethod
         def from_param(cls, param):
-            if param is None:
+            if isinstance(param, type(None)):
                 return None
             else:
                 ptr = ct.POINTER(ct.c_void_p)
                 paramptr = ptr(ct.c_void_p(param))
                 return paramptr
 
+# this class allows optional arguments to be passed in place of pointers
+class OptionalInterfaceInt(object):
+        @classmethod
+        def from_param(cls, param):
+            if isinstance(param, type(None)):
+                return None
+            else:
+                ptr = ct.POINTER(ESMP_InterfaceInt)
+                paramptr = ptr(ESMP_InterfaceInt(param))
+                return paramptr
+
 class Py3Char(object):
     @classmethod
     def from_param(cls, param):
-        if param is None:
+        if isinstance(param, type(None)):
             return None
         elif isinstance(param, bytes):
             return param
@@ -447,7 +461,7 @@ def ESMP_LogSet(flush):
 #TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
 _ESMF.ESMC_GridCreate1PeriDim.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
-                                          OptionalNamedConstant,
+                                          OptionalInterfaceInt,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
@@ -455,14 +469,15 @@ _ESMF.ESMC_GridCreate1PeriDim.argtypes = [ct.POINTER(ESMP_InterfaceInt),
                                           OptionalNamedConstant,
                                           ct.POINTER(ct.c_int)]
 
-def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None,
-                            coordSys=None, coordTypeKind=None):
+def ESMP_GridCreate1PeriDim(maxIndex, polekindflag=None, periodicDim=None, 
+                            poleDim=None, coordSys=None, coordTypeKind=None):
     """
     Preconditions: ESMP has been initialized.\n
     Postconditions: An ESMP_Grid has been created.\n
     Arguments:\n
         :RETURN: ESMP_Grid    :: grid\n
         Numpy.array(dtype=int32) :: maxIndex\n
+        Numpy.array(dtype=int32) :: polekindflag\n
         integer (optional) :: periodicDim\n
         integer (optional) :: poleDim\n
         CoordSys (optional)   :: coordSys\n
@@ -486,19 +501,25 @@ def ESMP_GridCreate1PeriDim(maxIndex, periodicDim=None, poleDim=None,
     # set up the max index interface int
     maxIndex_i = ESMP_InterfaceInt(maxIndex)
 
+    #InterfaceInt requires int32 type numpy arrays
+    if not isinstance(polekindflag, type(None)):
+        if (polekindflag.dtype != np.int32):
+            raise TypeError('pole_kind must have dtype=int32')
+
     # reset the periodic_dim and pole_dim to be 1 based for ESMF
-    if periodicDim is not None:
+    if not isinstance(periodicDim, type(None)):
         periodicDim += 1
-    if poleDim is not None:
+    if not isinstance(poleDim, type(None)):
         poleDim += 1
 
     # dummy value to correspond to ESMF_INDEX_GLOBAL = 1 for global indexing
     indexflag = 1
 
     # create the ESMF Grid and retrieve a ctypes pointer to it
-    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i),
+    gridstruct = _ESMF.ESMC_GridCreate1PeriDim(ct.byref(maxIndex_i), 
+                                               polekindflag,
                                                periodicDim, poleDim, coordSys,
-                                               coordTypeKind, None, indexflag,
+                                               coordTypeKind, indexflag,
                                                ct.byref(lrc))
 
     # check the return code from ESMF
@@ -572,7 +593,7 @@ _ESMF.ESMC_GridCreateCubedSphere.argtypes = [ct.POINTER(ct.c_int),
                                              ct.POINTER(ESMP_InterfaceInt),
                                              ct.c_void_p,
                                              ct.POINTER(ct.c_int)]
-
+@beta
 def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
                                #decompFlagPTile=None, deLabelList=None,
                                staggerLocList=None, name=None):
@@ -595,28 +616,28 @@ def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
 
    # InterfaceInt requires int32 type numpy arrays
     regDecompPTile_i = regDecompPTile
-    if (regDecompPTile is not None):
+    if not isinstance(regDecompPTile, type(None)):
         if (regDecompPTile.dtype != np.int32):
             raise TypeError('regDecompPTile must have dtype==int32')
         regDecompPTile_i = ESMP_InterfaceInt(regDecompPTile)
 
     # # InterfaceInt requires int32 type numpy arrays
     # decompFlagPTile_i = decompFlagPTile
-    # if (decompFlagPTile is not None):
+    # if not isinstance(decompFlagPTile, type(None)):
     #     if (decompFlagPTile.dtype != np.int32):
     #         raise TypeError('decompFlagPTile must have dtype==int32')
     #     decompFlagPTile_i = ESMP_InterfaceInt(decompFlagPTile)
     #
     # # InterfaceInt requires int32 type numpy arrays
     # deLabelList_i = deLabelList
-    # if (deLabelList is not None):
+    # if not isinstance(deLabelList, type(None)):
     #     if (deLabelList.dtype != np.int32):
     #         raise TypeError('deLabelList must have dtype==int32')
     #     deLabelList_i = ESMP_InterfaceInt(deLabelList)
 
     # staggerLocList
     staggerLocList_i = staggerLocList
-    if (staggerLocList is not None):
+    if not isinstance(staggerLocList, type(None)):
         if (staggerLocList.dtype != np.int32):
             raise TypeError('staggerLocList must have dtype==int32')
         staggerLocList_i = ESMP_InterfaceInt(staggerLocList)
@@ -643,6 +664,7 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           ct.POINTER(ct.c_int),
                                           OptionalNumpyArrayInt32,
                                           OptionalNamedConstant,
+                                          OptionalInterfaceInt,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
@@ -653,7 +675,7 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [Py3Char, ct.c_int,
 
 @netcdf
 def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
-                            decompflag=None, isSphere=None,
+                            decompflag=None, isSphere=None, polekindflag=None, 
                             addCornerStagger=None, addUserArea=None,
                             addMask=None, varname=None, coordNames=None):
     """
@@ -669,6 +691,7 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
         List of Integers                    :: regDecomp\n
         List of Integers (optional)         :: decompflag\n
         Boolean (optional)                  :: isSphere\n
+        Numpy.array(dtype=int32)            :: polekindflag\n
         Boolean (optional)                  :: addCornerStagger\n
         Boolean (optional)                  :: addUserArea\n
         Boolean (optional)                  :: addMask\n
@@ -680,9 +703,15 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp,
     # dummy value to correspond to ESMF_INDEX_GLOBAL = 1 for global indexing
     indexflag = 1
 
+    #InterfaceInt requires int32 type numpy arrays
+    if not isinstance(polekindflag, type(None)):
+        if (polekindflag.dtype != np.int32):
+            raise TypeError('pole_kind must have dtype=int32')
+
     gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag,
                                                None, decompflag,
-                                               isSphere, addCornerStagger,
+                                               isSphere, polekindflag,
+                                               addCornerStagger,
                                                addUserArea, indexflag,
                                                addMask, varname,
                                                coordNames, ct.byref(lrc))
@@ -1587,21 +1616,21 @@ def ESMP_FieldCreateGrid(grid, name=None,
 
     # InterfaceInt requires int32 type numpy arrays
     gridToFieldMap_i = gridToFieldMap
-    if (gridToFieldMap is not None):
+    if not isinstance(gridToFieldMap, type(None)):
         if (gridToFieldMap.dtype != np.int32):
             raise TypeError('gridToFieldMap must have dtype=int32')
         gridToFieldMap_i = ESMP_InterfaceInt(gridToFieldMap)
 
     # InterfaceInt requires int32 type numpy arrays
     ungriddedLBound_i = ungriddedLBound
-    if (ungriddedLBound is not None):
+    if not isinstance(ungriddedLBound, type(None)):
         if (ungriddedLBound.dtype != np.int32):
             raise TypeError('ungriddedLBound must have dtype=int32')
         ungriddedLBound_i = ESMP_InterfaceInt(ungriddedLBound)
 
     # InterfaceInt requires int32 type numpy arrays
     ungriddedUBound_i = ungriddedUBound
-    if (ungriddedUBound is not None):
+    if not isinstance(ungriddedUBound, type(None)):
         if (ungriddedUBound.dtype != np.int32):
             raise TypeError('ungriddedUBound must have dtype=int32')
         ungriddedUBound_i = ESMP_InterfaceInt(ungriddedUBound)
@@ -1655,21 +1684,21 @@ def ESMP_FieldCreateLocStream(locstream, name=None,
 
     # InterfaceInt requires int32 type numpy arrays
     gridToFieldMap_i = gridToFieldMap
-    if (gridToFieldMap is not None):
+    if not isinstance(gridToFieldMap, type(None)):
         if (gridToFieldMap.dtype != np.int32):
             raise TypeError('gridToFieldMap must have dtype=int32')
         gridToFieldMap_i = ESMP_InterfaceInt(gridToFieldMap)
 
     # InterfaceInt requires int32 type numpy arrays
     ungriddedLBound_i = ungriddedLBound
-    if (ungriddedLBound is not None):
+    if not isinstance(ungriddedLBound, type(None)):
         if (ungriddedLBound.dtype != np.int32):
             raise TypeError('ungriddedLBound must have dtype=int32')
         ungriddedLBound_i = ESMP_InterfaceInt(ungriddedLBound)
 
     # InterfaceInt requires int32 type numpy arrays
     ungriddedUBound_i = ungriddedUBound
-    if (ungriddedUBound is not None):
+    if not isinstance(ungriddedUBound, type(None)):
         if (ungriddedUBound.dtype != np.int32):
             raise TypeError('ungriddedUBound must have dtype=int32')
         ungriddedUBound_i = ESMP_InterfaceInt(ungriddedUBound)
@@ -1727,21 +1756,21 @@ def ESMP_FieldCreateMesh(mesh, name=None,
 
     # InterfaceInt requires int32 type numpy arrays
     gridToFieldMap_i = gridToFieldMap
-    if (gridToFieldMap is not None):
+    if not isinstance(gridToFieldMap, type(None)):
         if (gridToFieldMap.dtype != np.int32):
             raise TypeError('gridToFieldMap must have dtype=int32')
         gridToFieldMap_i = ESMP_InterfaceInt(gridToFieldMap)
 
     # InterfaceInt requires int32 type numpy arrays
     ungriddedLBound_i = ungriddedLBound
-    if (ungriddedLBound is not None):
+    if not isinstance(ungriddedLBound, type(None)):
         if (ungriddedLBound.dtype != np.int32):
             raise TypeError('ungriddedLBound must have dtype=int32')
         ungriddedLBound_i = ESMP_InterfaceInt(ungriddedLBound)
 
     # InterfaceInt requires int32 type numpy arrays
     ungriddedUBound_i = ungriddedUBound
-    if (ungriddedUBound is not None):
+    if not isinstance(ungriddedUBound, type(None)):
         if (ungriddedUBound.dtype != np.int32):
             raise TypeError('ungriddedUBound must have dtype=int32')
         ungriddedUBound_i = ESMP_InterfaceInt(ungriddedUBound)
@@ -1897,7 +1926,7 @@ def ESMP_FieldRegridGetArea(field):
 
 
 _ESMF.ESMC_FieldRegridRelease.restype = ct.c_int
-_ESMF.ESMC_FieldRegridRelease.argtypes = [ct.POINTER(ct.c_void_p)]
+_ESMF.ESMC_FieldRegridRelease.argtypes = [ct.POINTER(ESMP_RouteHandle)]
 
 def ESMP_FieldRegridRelease(routehandle):
     """
@@ -1937,7 +1966,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p,              # srcField
                                         ct.c_void_p,              # dstField
                                         OptionalStructPointer,    # srcMaskValues
                                         OptionalStructPointer,    # dstMaskValues
-                                        ct.POINTER(ct.c_void_p),  # routehandle
+                                        ct.POINTER(ESMP_RouteHandle),  # routehandle
                                         OptionalNamedConstant,    # regridmethod
                                         OptionalNamedConstant,    # polemethod
                                         ct.POINTER(ct.c_void_p),  # regridPoleNPnts
@@ -1946,6 +1975,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p,              # srcField
                                         OptionalNamedConstant,    # extrapMethod
                                         OptionalInt,              # extrapNumSrcPnts
                                         OptionalFloat,            # extrapDistExponent
+                                        OptionalInt,              # extrapNumLevels
                                         OptionalNamedConstant,    # unmappedaction
                                         OptionalBool,             # ignoreDegenerate
                                         ct.POINTER(ct.POINTER(ct.c_double)),  # factorList
@@ -1968,6 +1998,7 @@ def ESMP_FieldRegridStore(srcField,
                           extrapMethod=None, 
                           extrapNumSrcPnts=None,
                           extrapDistExponent=None,
+                          extrapNumLevels=None,
                           unmappedaction=None,
                           ignoreDegenerate=None,
                           factorList=None,
@@ -1980,7 +2011,7 @@ def ESMP_FieldRegridStore(srcField,
     documentation.
     """
 
-    routehandle = ct.c_void_p(1)
+    routehandle = ESMP_RouteHandle()
     if regridPoleNPnts:
         regridPoleNPnts_ct = ct.byref(ct.c_void_p(regridPoleNPnts))
     else:
@@ -1988,14 +2019,14 @@ def ESMP_FieldRegridStore(srcField,
 
     #InterfaceInt requires int32 type numpy arrays
     srcMaskValues_i = srcMaskValues
-    if (srcMaskValues is not None):
+    if not isinstance(srcMaskValues, type(None)):
         if (srcMaskValues.dtype != np.int32):
             raise TypeError('srcMaskValues must have dtype=int32')
         srcMaskValues_i = ESMP_InterfaceInt(srcMaskValues)
 
     #InterfaceInt requires int32 type numpy arrays
     dstMaskValues_i = dstMaskValues
-    if (dstMaskValues is not None):
+    if not isinstance(dstMaskValues, type(None)):
         if (dstMaskValues.dtype != np.int32):
             raise TypeError('dstMaskValues must have dtype=int32')
         dstMaskValues_i = ESMP_InterfaceInt(dstMaskValues)
@@ -2004,7 +2035,7 @@ def ESMP_FieldRegridStore(srcField,
     # layer. It will return zero if we are not returning factors.
     numfac = ct.c_int(0)
 
-    if factorList is None:
+    if isinstance(factorList, type(None)):
         arg_factorList = None
         arg_factorIndexList = None
     else:
@@ -2028,6 +2059,7 @@ def ESMP_FieldRegridStore(srcField,
                                      extrapMethod, 
                                      extrapNumSrcPnts,
                                      extrapDistExponent,
+                                     extrapNumLevels,
                                      unmappedaction,
                                      ignoreDegenerate,
                                      arg_factorList,
@@ -2040,7 +2072,7 @@ def ESMP_FieldRegridStore(srcField,
 
     # Assign the outgoing pointer for the factor count if we are returning
     # factors.
-    if factorList is not None:
+    if not isinstance(factorList, type(None)):
         numFactors.value = numfac.value
 
     return routehandle
@@ -2051,7 +2083,7 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             ct.c_char_p,
                                             OptionalStructPointer,
                                             OptionalStructPointer,
-                                            ct.POINTER(ct.c_void_p),
+                                            ct.POINTER(ESMP_RouteHandle),
                                             OptionalNamedConstant,
                                             OptionalNamedConstant,
                                             ct.POINTER(ct.c_void_p),
@@ -2059,6 +2091,12 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             OptionalNamedConstant,
                                             OptionalNamedConstant,
                                             OptionalBool,
+                                            OptionalBool,
+                                            OptionalNamedConstant,
+                                            ct.c_char_p,
+                                            ct.c_char_p,
+                                            OptionalNamedConstant,
+                                            OptionalNamedConstant,
                                             OptionalBool,
                                             OptionalField,
                                             OptionalField]
@@ -2069,6 +2107,9 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                           polemethod=None, regridPoleNPnts=None,
                           lineType=None, normType=None, unmappedaction=None,
                           ignoreDegenerate=None, createRH=None,
+                          filemode=None, srcFile=None, dstFile=None,
+                          srcFileType=None, dstFileType=None,
+                          largeFileFlag=None,
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -2117,10 +2158,16 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                 UnmappedAction.IGNORE\n
         boolean (optional)                  :: ignoreDegenerate\n
         boolean (optional)                  :: createRH\n
+        FileMode (optional)                 :: filemode\n
+        string (optional)                   :: srcFile\n
+        string (optional)                   :: dstFile\n
+        FileFormat (optional)               :: srcFileType\n
+        FileFormat (optional)               :: dstFileType\n
+        bool (optional)                     :: largeFileFlag\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
     """
-    routehandle = ct.c_void_p(0)
+    routehandle = ESMP_RouteHandle()
     if regridPoleNPnts:
         regridPoleNPnts_ct = ct.byref(ct.c_void_p(regridPoleNPnts))
     else:
@@ -2128,14 +2175,14 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
 
     #InterfaceInt requires int32 type numpy arrays
     srcMaskValues_i = srcMaskValues
-    if (srcMaskValues is not None):
+    if not isinstance(srcMaskValues, type(None)):
         if (srcMaskValues.dtype != np.int32):
             raise TypeError('srcMaskValues must have dtype=int32')
         srcMaskValues_i = ESMP_InterfaceInt(srcMaskValues)
 
     #InterfaceInt requires int32 type numpy arrays
     dstMaskValues_i = dstMaskValues
-    if (dstMaskValues is not None):
+    if not isinstance(dstMaskValues, type(None)):
         if (dstMaskValues.dtype != np.int32):
             raise TypeError('dstMaskValues must have dtype=int32')
         dstMaskValues_i = ESMP_InterfaceInt(dstMaskValues)
@@ -2143,6 +2190,17 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
     # Need to create a C string buffer for Python 3.
     b_filename = filename.encode('utf-8')
     b_filename = ct.create_string_buffer(b_filename)
+
+    b_srcfilename = None
+    if (srcFile):
+        b_srcfilename = srcFile.encode('utf-8')
+        b_srcfilename = ct.create_string_buffer(b_srcfilename)
+
+    b_dstfilename = None
+    if (dstFile):
+        b_dstfilename = dstFile.encode('utf-8')
+        b_dstfilename = ct.create_string_buffer(b_dstfilename)
+
 
     # liD = None
     # if ignoreDegenerate == True:
@@ -2170,6 +2228,12 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                                      unmappedaction,
                                      ignoreDegenerate,
                                      createRH,
+                                     filemode,
+                                     b_srcfilename,
+                                     b_dstfilename,
+                                     srcFileType,
+                                     dstFileType,
+                                     largeFileFlag,
                                      srcFracField,
                                      dstFracField)
     if rc != constants._ESMP_SUCCESS:
@@ -2178,7 +2242,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
     return routehandle
 
 _ESMF.ESMC_FieldRegrid.restype = ct.c_int
-_ESMF.ESMC_FieldRegrid.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_void_p,
+_ESMF.ESMC_FieldRegrid.argtypes = [ct.c_void_p, ct.c_void_p, ESMP_RouteHandle,
                                    OptionalNamedConstant]
 
 def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
@@ -2200,7 +2264,7 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
 
 _ESMF.ESMC_FieldSMMStore.restype = ct.c_int
 _ESMF.ESMC_FieldSMMStore.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_char_p,
-                                     ct.c_void_p, ct.c_bool,
+                                     ct.POINTER(ESMP_RouteHandle), ct.c_bool,
                                      ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_FieldSMMStore(srcField, dstField, filename,
@@ -2220,7 +2284,7 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
         ESMP_Field                          :: srcField\n
         ESMP_Field                          :: dstField\n
     """
-    routehandle = ct.c_void_p(0)
+    routehandle = ESMP_RouteHandle()
     b_filename = filename.encode('utf-8')
 
     rc = _ESMF.ESMC_FieldSMMStore(srcField.struct.ptr,
@@ -2235,6 +2299,7 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
 
     return routehandle
 
+#### File Inquiry Utilities ##############################################
 _ESMF.ESMC_ScripInq.restype = None
 _ESMF.ESMC_ScripInq.argtypes = [Py3Char,
                                 np.ctypeslib.ndpointer(dtype=np.int32),
@@ -2285,3 +2350,39 @@ def ESMP_GridspecInq(filename):
         raise ValueError('ESMC_GridspecInq() failed with rc = '+str(rc)+'.    '+
                          constants._errmsg)
     return rank, ndims, grid_dims
+
+#### RouteHandle #####################################################
+
+_ESMF.ESMC_RouteHandleCreateFromFile.restype = ESMP_RouteHandle
+_ESMF.ESMC_RouteHandleCreateFromFile.argtypes = [Py3Char]
+def ESMP_RouteHandleCreateFromFile(filename):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions: An ESMP_RouteHandle has been created.\n
+    Arguments:\n
+        :RETURN: ESMP_RouteHandle           :: routehandle\n
+        String                              :: filename\n
+    """
+    lrc = ct.c_int(0)
+
+    routehandle = _ESMF.ESMC_RouteHandleCreateFromFile(filename, ct.byref(lrc))
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise NameError('ESMC_RouteHandleCreateFromFile() failed with rc = '+str(rc))
+    return routehandle
+
+_ESMF.ESMC_RouteHandleWrite.restype = ct.c_int
+_ESMF.ESMC_RouteHandleWrite.argtypes = [ESMP_RouteHandle, Py3Char]
+def ESMP_RouteHandleWrite(routehandle, filename):
+    """
+    Preconditions: A RouteHandle has been created.\n
+    Postconditions: A file has been written with the RouteHandle information.\n
+    Arguments:\n
+        String                              :: filename\n
+    """
+
+    rc = _ESMF.ESMC_RouteHandleWrite(routehandle, filename)
+    if rc != constants._ESMP_SUCCESS:
+        raise NameError('ESMC_RouteHandleWrite() failed with rc = '+str(rc))
+    return
+

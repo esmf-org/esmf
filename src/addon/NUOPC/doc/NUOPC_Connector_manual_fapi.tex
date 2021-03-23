@@ -56,59 +56,34 @@ Component that makes a unidirectional connection between model, mediator, and or
     integer, intent(out)  :: rc
 \end{verbatim}
 
-\bigskip{\sf INITIALIZE:}
+\bigskip{\sf SEMANTIC SPECIALIZATION LABELS:}
 \begin{itemize}
-\item phase 0: ({\sc Required, NUOPC Provided})
+  \item Initialize:
   \begin{itemize}
-  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 04 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
+    \item {\bf label\_ComputeRouteHandle}
     \begin{itemize}
-    \item IPDv04p1a = phase : ({\sc Required, NUOPC Provided})
-    \item IPDv04p1b = phase : ({\sc Required, NUOPC Provided})
-    \item IPDv04p2  = phase : ({\sc Required, NUOPC Provided})
-    \item IPDv04p3  = phase : ({\sc Required, NUOPC Provided})
-    \item IPDv04p4  = phase : ({\sc Required, NUOPC Provided})
-    \item IPDv04p5a = phase : ({\sc Required, NUOPC Provided})
-    \item IPDv04p5b = phase : ({\sc Required, NUOPC Provided})
-    \end{itemize}  
-  \end{itemize}  
-\item IPDv01p1, IPDv02p1: ({\sc NUOPC Provided})
-  \begin{itemize}
-  \item Construct a list of matching Field pairs between import and export State based on the {\tt StandardName} Field metadata. 
-  \item Store this list of {\tt StandardName} entries in the {\tt CplList} attribute of the Connector Component metadata.
+      \item Optional. By default compute routehandles according to CplList attribute.
+    \end{itemize}
   \end{itemize}
-\item IPDv01p2, IPDv02p2: ({\sc NUOPC Provided})
+  \item Run:
   \begin{itemize}
-  \item Allocate and initialize the internal state.
-  \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
-  \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
-  \end{itemize}  
-\item IPDv01p3, IPDv02p3: ({\sc NUOPC Provided})
+    \item {\bf label\_ExecuteRouteHandle}
+    \begin{itemize}
+      \item Optional. By default execute routehandles stored in the Connector.
+    \end{itemize}
+  \end{itemize}
+  \item Finalize:
   \begin{itemize}
-  \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
-  \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
-  \item {\it Optional specialization} to precompute a Connector operation: {\tt label\_ComputeRouteHandle}. Simple custom implementations store the precomputed communication RouteHandle in the {\tt rh} member of the internal state. More complex implementations use the {\tt state} member in the internal state to store auxiliary Fields, FieldBundles, and RouteHandles.
-  \item By default (if {\tt label\_ComputeRouteHandle} was {\em not} provided) precompute the Connector RouteHandle as a bilinear Regrid operation between {\tt srcFields} and {\tt dstFields}, with {\tt unmappedaction} set to {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. The resulting RouteHandle is stored in the {\tt rh} member of the internal state.
-  \end{itemize}  
-\end{itemize}
-
-\bigskip{\sf RUN:}
-\begin{itemize}
-\item phase 1: ({\sc Required, NUOPC Provided})
-  \begin{itemize}
-  \item {\it Optional specialization} to execute a Connector operation: {\tt label\_ExecuteRouteHandle}. Simple custom implementations access the {\tt srcFields}, {\tt dstFields}, and {\tt rh} members of the internal state to implement the required data transfers. More complex implementations access the {\tt state} member in the internal state, which holds the auxiliary Fields, FieldBundles, and RouteHandles that potentially were added during the optional {\tt label\_ComputeRouteHandle} method during initialize.
-  \item By default (if {\tt label\_ExecuteRouteHandle} was {\em not} provided) execute the precomputed Connector RouteHandle between {\tt srcFields} and {\tt dstFields}.
-  \item Update the time stamp on the Fields in {\tt dstFields} to match the time stamp on the Fields in {\tt srcFields}.
-  \end{itemize}    
-\end{itemize}
-
-\bigskip{\sf FINALIZE:}
-\begin{itemize}
-\item phase 1: ({\sc Required, NUOPC Provided})
-  \begin{itemize}
-  \item {\it Optional specialization} to release the custom Connector operation: {\tt label\_ReleaseRouteHandle}; or by default, if {\tt label\_ReleaseRouteHandle} was {\em not} provided, release the default Connector RouteHandle.
-  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
-  \item Internal clean-up.
-  \end{itemize}      
+    \item {\bf label\_ReleaseRouteHandle}
+    \begin{itemize}
+      \item Optional. By default release routehandles stored in the Connector.
+    \end{itemize}
+    \item {\bf label\_Finalize}
+    \begin{itemize}
+      \item Optional. By default do nothing.
+      \item Destroy any objects created during Initalize.
+    \end{itemize}
+  \end{itemize}
 \end{itemize}
 
 \mbox{}\hrulefill\ 

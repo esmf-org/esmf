@@ -114,6 +114,7 @@ extern int MPIUNI_Memcpy(void*,const void*,int);
 #define MPI_CHAR            sizeof(char)
 #define MPI_BYTE            sizeof(char)
 #define MPI_INT             sizeof(int)
+#define MPI_INTEGER         sizeof(int)
 #define MPI_UNSIGNED        sizeof(unsigned int)
 #define MPI_LOGICAL         sizeof(int)
 #define MPI_LONG            sizeof(long)
@@ -121,7 +122,14 @@ extern int MPIUNI_Memcpy(void*,const void*,int);
 #define MPI_SHORT           sizeof(short)
 #define MPI_UB              sizeof(long)
 #define MPI_FLOAT_INT       (sizeof(float)+sizeof(int))
+#define MPI_DOUBLE_INT      (sizeof(double)+sizeof(int))
+#define MPI_LONG_INT        (sizeof(long)+sizeof(int))
 #define MPI_2INT            (2*sizeof(int))
+#define MPI_SHORT_INT       (sizeof(short)+sizeof(int))
+#define MPI_LONG_DOUBLE_INT (sizeof(long double)+sizeof(int))
+#define MPI_2REAL           (2*sizeof(float))
+#define MPI_2DOUBLE_PRECISION (2*sizeof(double))
+#define MPI_2INTEGER        (2*sizeof(int))
 #define MPI_UNSIGNED_CHAR   sizeof(unsigned char)
 #define MPI_UNSIGNED_LONG   sizeof(unsigned long)
 #define MPIU_PETSCLOGDOUBLE sizeof(PetscLogDouble)
@@ -568,7 +576,7 @@ extern double ESMC_MPI_Wtime(void);
      MPI_Abort(MPI_COMM_WORLD,0)
 #define MPI_Group_size(group,size) (*(size)=1,MPI_SUCCESS)
 #define MPI_Group_rank(group,rank) (*(rank)=0,MPI_SUCCESS)
-#define MPI_Group_translate_ranks (group1,n,ranks1,\
+#define MPI_Group_translate_ranks(group1,n,ranks1,\
      group2,ranks2) MPI_Abort(MPI_COMM_WORLD,0)
 #define MPI_Group_compare(group1,group2,result) \
      (*(result)=1,MPI_SUCCESS)
@@ -595,6 +603,10 @@ extern double ESMC_MPI_Wtime(void);
      *(result)=MPI_IDENT,\
      MPI_SUCCESS)
 #define MPI_Comm_create(comm,group,newcomm)  \
+     (*(newcomm) =  (comm),\
+     MPIUNI_TMP = (void*)(long) (group),\
+     MPI_SUCCESS)
+#define MPI_Comm_create_group(comm,group,tag,newcomm)  \
      (*(newcomm) =  (comm),\
      MPIUNI_TMP = (void*)(long) (group),\
      MPI_SUCCESS)

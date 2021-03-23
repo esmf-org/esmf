@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -27,7 +27,7 @@
 
 #include <bitset>
 #include <cstdio>
-
+#include <limits>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -61,7 +61,9 @@ namespace ESMCI {
 Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
                sghost(NULL),
                committed(false),
-               is_split(false)
+               is_split(false),
+	       ind(-1), side(-1),
+               orig_comm(MPI_COMM_NULL)
 {
 
    GetCommRel(MeshObj::NODE).Init("node_sym", *this, *this, true);
@@ -1487,6 +1489,9 @@ void Mesh::Commit() {
   if (committed)
     Throw() << "Mesh is already committed!";
 
+  // Set orig mpi info  
+  orig_comm=Par::Comm();
+
   // Create sides/edges, if requested
   if (use_sides) {
     CreateAllSides();
@@ -1571,6 +1576,18 @@ void Mesh::ProxyCommit(int numSetsArg,
 
 void Mesh::CreateGhost() {
   if (sghost) return; // must already be scratched
+
+  // Only do on the original comm that this mesh was committed on, so 
+  // leave if that's not set
+  if (orig_comm == MPI_COMM_NULL) return;
+
+  // Save current comm
+  MPI_Comm curr_comm=Par::Comm();
+
+  // Switch to orig comm
+  ESMCI::Par::Init("MESHLOG", false, orig_comm);
+
+  // Create ghost comm
   sghost = new CommReg("_ghost", *this, *this);
 
   std::vector<CommRel::CommNode> selem;
@@ -1596,6 +1613,11 @@ void Mesh::CreateGhost() {
         std::vector<UInt> nprocs;
         MeshObjConn::get_node_sharing(node, GetSymNodeRel(), nprocs);
         for (UInt i = 0; i < nprocs.size(); i++) {
+
+          // DEBUG
+          //if (nprocs[i] > Par::Size()) {
+          //  printf("%d# CG Bad node proc=%d size=%d\n",Par::Rank(),nprocs[i],Par::Size());
+          //}
 
           // Add the elements (if not already present)
           for (UInt e = 0; e < elem.size(); e++) {
@@ -1632,16 +1654,28 @@ void Mesh::CreateGhost() {
   sghost->GetCommRel(MeshObj::FACE).build_range(true);
   sghost->GetCommRel(MeshObj::ELEMENT).build_range(true);
 
-
   // Send coordinates
   MEField<> *cd = GetCoordField();
   sghost->SendFields(1, &cd, &cd);
 
+  // Switch back to curr comm
+  ESMCI::Par::Init("MESHLOG", false, curr_comm);
 }
 
 void Mesh::RemoveGhost() {
   if (!sghost) return; // must already be scratched
 
+  // Only do on the original comm that this mesh was committed on, so 
+  // leave if that's not set
+  if (orig_comm == MPI_COMM_NULL) return;
+
+  // Save current comm
+  MPI_Comm curr_comm=Par::Comm();
+
+  // Switch to orig comm
+  ESMCI::Par::Init("MESHLOG", false, orig_comm);
+
+  // Traspose ghost
   sghost->Transpose();
 
   sghost->GetCommRel(MeshObj::ELEMENT).delete_domain();
@@ -1650,14 +1684,27 @@ void Mesh::RemoveGhost() {
   sghost->GetCommRel(MeshObj::NODE).delete_domain();
 
   delete sghost; sghost = 0; // does delete do this?? don't remember...
+
+  // Switch back to curr comm
+  ESMCI::Par::Init("MESHLOG", false, curr_comm);
 }
 
 // Convenience function to communicate all fields to ghost locations
  void Mesh::GhostCommAllFields() {
 
+  // Only do on the original comm that this mesh was committed on, so 
+  // leave if that's not set
+  if (orig_comm == MPI_COMM_NULL) return;
+
    // Error check
    if (!sghost) Throw()<<"Ghost communicator must be present for ghost communication.";
    
+   // Save current comm
+   MPI_Comm curr_comm=Par::Comm();
+   
+   // Switch to orig comm
+   ESMCI::Par::Init("MESHLOG", false, orig_comm);
+
    // Vector of  all Fields in mesh
    std::vector<MEField<>*> fields;
    
@@ -1666,13 +1713,17 @@ void Mesh::RemoveGhost() {
    for (; fi != fe; ++fi) {
      fields.push_back(&*fi);
    }
-   
+
    // Send Fields
    if (fields.size() > 0) {
      sghost->SendFields(fields.size(), &fields[0], &fields[0]);
    } else {
      sghost->SendFields(0, NULL, NULL);
    }
+
+
+   // Switch back to curr comm
+   ESMCI::Par::Init("MESHLOG", false, curr_comm);
  }
  
 
@@ -1847,6 +1898,8 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    MEField<> *cfield;
    MEField<> *src_mask_val;
    Mesh::MeshObjIDMap::const_iterator mb,mi,me;
+   bool check_id=false;
+   int max_ok_id=std::numeric_limits<int>::max();
 
    // Initialize the parallel environment for mesh (if not already done)
    ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
@@ -1854,9 +1907,9 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      throw localrc;  // bail out with exception
 
 
+   // Set up based on whether nodes or elem
    if (meshLoc == ESMC_MESHLOC_NODE) {
-
-     //     cfield = GetCoordField();
+     // Get coord field
      cfield = GetField("coordinates");
      if (cfield == NULL) {
        int localrc;
@@ -1864,29 +1917,37 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
                                         "- mesh node coordinates unavailable",
                                         ESMC_CONTEXT, &localrc)) throw localrc;
      }
+
+     // Get Iterators
      mb = map_begin(MeshObj::NODE);
      me = map_end(MeshObj::NODE);
 
+     // Get mask field
      src_mask_val = GetField("node_mask_val");
 
-   } else if (meshLoc == ESMC_MESHLOC_ELEMENT) {
+     // Don't need to check ids for nodes
+     check_id=false;
 
-     //need check here to see that elem coordinates are set
+   } else if (meshLoc == ESMC_MESHLOC_ELEMENT) {
+     // Get coord field
      cfield = GetField("elem_coordinates");
      if (cfield == NULL) {
-
-
-       cfield = GetField("coordinates");
-
        int localrc;
        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                         "- mesh element coordinates unavailable",
                                         ESMC_CONTEXT, &localrc)) throw localrc;
      }
+
+     // Get Iterators
      mb = map_begin(MeshObj::ELEMENT);
      me = map_end(MeshObj::ELEMENT);
 
+     // Get mask field
      src_mask_val = GetField("elem_mask_val");
+
+     // If split, make sure we aren't using split elems
+     check_id=is_split;
+     if (check_id) max_ok_id=max_non_split_id;
 
    } else {
      //unknown meshLoc
@@ -1896,21 +1957,20 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
                                       ESMC_CONTEXT, &localrc)) throw localrc;
    }
 
+   // Create point list using slighly different ways if mesh unmasked or masked
    int numMaskValues;
    int *ptrMaskValues;
-
    if (src_mask_val==NULL) {         //no masking info in mesh
-     //if (maskValuesArg!=NULL) {
-     //  int localrc;
-     //  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-     //                                 "- mask values provided but no mask info in mesh",
-     //                                 ESMC_CONTEXT, &localrc)) throw localrc;
-     //}
 
+     // Count points in mesh
      int num_local_pts=0;
      for (mi=mb; mi != me; ++mi) {
        const MeshObj &obj = *mi;
 
+       // skip if not a good id (e.g. is a split elem)
+       if (check_id && (obj.get_id() > max_ok_id)) continue;
+
+       // Count local objects
        if (GetAttr(obj).is_locally_owned()) {
          num_local_pts++;
        }
@@ -1923,6 +1983,10 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      for (mi=mb; mi != me; ++mi) {
        const MeshObj &obj = *mi;
 
+       // skip if not a good id (e.g. is a split elem)
+       if (check_id && (obj.get_id() > max_ok_id)) continue;
+
+       // Get local object coords
        if (GetAttr(obj).is_locally_owned()) {
          double *coords=cfield->data(obj);
          plp->add(obj.get_id(),coords);
@@ -1940,10 +2004,15 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
        ptrMaskValues = NULL;
      }
 
+     // Count unmasked points in mesh
      int num_local_pts=0;
      for (mi=mb; mi != me; ++mi) {
        const MeshObj &obj = *mi;
 
+       // skip if not a good id (e.g. is a split elem)
+       if (check_id && (obj.get_id() > max_ok_id)) continue;
+
+       // Count unmasked local objects
        if (GetAttr(obj).is_locally_owned()) {
          double *mv=src_mask_val->data(*mi);
          int mv_int = (int)((*mv)+0.5);
@@ -1966,10 +2035,14 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      // Create PointList
      plp = new PointList(num_local_pts,spatial_dim());
 
-     // Loop through adding local nodes
+     // Loop through adding unmasked points
      for (mi=mb; mi != me; ++mi) {
        const MeshObj &obj = *mi;
 
+       // skip if not a good id (e.g. is a split elem)
+       if (check_id && (obj.get_id() > max_ok_id)) continue;
+
+       // Get unmasked local object coords
        if (GetAttr(obj).is_locally_owned()) {
          double *mv=src_mask_val->data(*mi);
          int mv_int = (int)((*mv)+0.5);
@@ -1993,15 +2066,133 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
    }
 
 
-   //delete iterator
-   //delete ni;
-   //delete ne;
-
    if (rc!=NULL) *rc=ESMF_SUCCESS;
    return plp;
 
  }
 
+
+ // Change the node and element owners in the piece of the mesh on this processor to
+ // a different set 
+ void Mesh::map_obj_owners(int num_procs, int *proc_map) {
+
+     // Loop through nodes changing owners to owners in new VM
+     MeshDB::iterator ni = this->node_begin_all(), ne = this->node_end_all();
+     for (; ni != ne; ++ni) {
+       MeshObj &node=*ni;
+
+       // Get original owner
+       UInt orig_owner=node.get_owner();
+
+       // Error check owner
+       if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
+         Throw()<<" mesh node owner rank outside current vm";
+       }
+
+       // map to new owner rank in new vm
+       int new_owner=proc_map[orig_owner];
+
+       // Make sure that the new one is ok
+       if (new_owner < 0) {
+         Throw()<<" mesh node owner outside of new vm";
+       }
+
+       // Set new owner
+       node.set_owner((UInt)new_owner);
+     }
+
+
+     // Loop through elems changing owners to owners in new VM
+     MeshDB::iterator ei = this->elem_begin_all(), ee = this->elem_end_all();
+     for (; ei != ee; ++ei) {
+       MeshObj &elem=*ei;
+
+       // Get original owner
+       UInt orig_owner=elem.get_owner();
+
+       // Error check owner
+       if ((orig_owner < 0) || (orig_owner > num_procs-1)) {
+         Throw()<<" mesh element owner rank outside current vm";
+       }
+
+       // map to new owner rank in new vm
+       int new_owner=proc_map[orig_owner];
+
+       // Make sure that the new one is ok
+       if (new_owner < 0) {
+         Throw()<<" mesh element owner outside of new vm";
+       }
+
+       // Set new owner
+       elem.set_owner((UInt)new_owner);
+     }
+ }
+
+
+ // Change the proc numbers in a mesh to correspond to a different set. This isn't to 
+ // merge procs into one another, but to map them to different number. E.g. if they 
+ // are being switched to a different VM or MPI_COMM.
+ void Mesh::map_proc_numbers(int num_procs, int *proc_map) {
+
+   // Change node and elem ownership
+   this->map_obj_owners(num_procs, proc_map);
+   
+   // Change CommReg
+   CommReg::map_proc_numbers(num_procs, proc_map);
+   
+   // Remove ghosting, because it would be wrong now that procs have changed.
+   RemoveGhost();
+ }
+
+
+ // Switch Mesh to new comm
+ // (I.e. change node&elem ownership, orig_comm, etc.)
+ // This needs to be called across the original comm and the new comm. For
+ // pieces of the mesh not in the new comm, new_comm should be set to MPI_COMM_NULL
+ // new_comm has to contain all the pieces of the mesh that contain nodes and elems (e.g. the only pieces outside
+ // of new_comm should be empty/proxy mesh pieces)
+ void Mesh::change_comm(MPI_Comm new_comm) {
+
+    // If not in orig comm, just set and leave because there is nothing to do
+   if (orig_comm == MPI_COMM_NULL) {
+     orig_comm=new_comm;
+     return;
+   }
+
+
+   // Get rank in new comm, if not in new_comm set to -1, so it's detected if we have nodes/elems not in new_comm
+   int new_rank=-1;
+   if (new_comm != MPI_COMM_NULL) {
+     MPI_Comm_rank(new_comm, &new_rank);
+   }
+
+   // Save current comm
+   MPI_Comm curr_comm=Par::Comm();
+
+   // Switch to orig comm
+   ESMCI::Par::Init("MESHLOG", false, orig_comm);
+   
+   // Get size
+   int orig_comm_size=Par::Size();
+
+   // Allocate map
+   int *orig_to_new_map = new int[orig_comm_size];
+
+    // Fill map
+   MPI_Allgather(&new_rank, 1, MPI_INT, orig_to_new_map, 1, MPI_INT, orig_comm);
+
+   // Move nodes and elems to new owners
+   this->map_proc_numbers(orig_comm_size, orig_to_new_map);
+   
+   // Deallocate map
+   delete [] orig_to_new_map;
+   
+   // Switch back to current comm
+   ESMCI::Par::Init("MESHLOG", false, curr_comm);
+   
+   // Change comm
+   orig_comm=new_comm;
+ }
 
 
 } // namespace

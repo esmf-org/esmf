@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -252,9 +252,11 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
 
 }
 
-#ifdef REGRID_DEBUG_OVERLAP
-  // This assumes that mesh is a rendezvous mesh or is serial
-  void calc_max_overlap(Mesh &mesh, double &max_overlap, int &max_overlap_src_id, int &max_overlap_dst_id) {
+
+// This assumes that mesh is a rendezvous mesh or is serial
+// max_local_overlap_area returns the local  maximum overlap area which will be -1 if no overlap was detected
+// max_local_overlap_id1 and max_local_overlap_id2 give the element ids of the local max overlap
+void calc_max_overlap(Mesh &mesh, double &max_local_overlap_area, int &max_local_overlap_id1, int &max_local_overlap_id2) {
   Trace __trace("calc_max_overlap(Mesh &mesh, double &max_overlap, int &max_overlap_id)");
 
   // Calc search results
@@ -311,12 +313,9 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
   std::vector<sintd_cell *> tmp_cells;  
 
   // Init variables
-  int loc_max_sid=-1;
-  int loc_max_did=-1;
-  double loc_max_overlap=0.0; 
-  double loc_tot_overlap_area=0.0;
-
-  int num_big_overlap=0;
+  int loc_max_id1=-1;
+  int loc_max_id2=-1;
+  double loc_max_overlap_area=-1.0; 
 
   // Loop through search results
   for (sb = sres.begin(); sb != se; sb++) {
@@ -409,21 +408,14 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
 	// Skip if src area is 0.0 
 	if (src_elem_area == 0.0) continue;
 
-	// Compute overlap fraction
-	// double overlap= areas[i]/src_elem_area;
-	double overlap= areas[i];
-
-	loc_tot_overlap_area += areas[i];
-
-	if (overlap > 1.0E-6) {
-	 num_big_overlap++;
-	}
+	// Get overlap area
+	double overlap_area= areas[i];
 
 	// Update max
-	if (overlap > loc_max_overlap) {
-	  loc_max_sid=sr.elem->get_id();
-	  loc_max_did=sr.elems[i]->get_id();
-	  loc_max_overlap=overlap;
+	if (overlap_area > loc_max_overlap_area) {
+	  loc_max_id1=sr.elem->get_id();
+	  loc_max_id2=sr.elems[i]->get_id();
+	  loc_max_overlap_area=overlap_area;
 	}
       }
     }
@@ -444,15 +436,11 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
   }
 #endif
 
-  // TODO: Eventually get the max over all processors
-
   // Output local max for now
-  max_overlap=loc_max_overlap;
-  max_overlap_src_id=loc_max_sid;
-  max_overlap_dst_id=loc_max_did;
+  max_local_overlap_area=loc_max_overlap_area;
+  max_local_overlap_id1=loc_max_id1;
+  max_local_overlap_id2=loc_max_id2;
 }
-
-#endif
 
 /*----------------------------------------------------------------*/
 // Interp:
@@ -1792,6 +1780,34 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   MEField<> *src_area_field = srcmesh.GetField("elem_area");
 
 
+  // Get src and dst side fields
+  MEField<> *dst_side_field=dstmesh.GetField("side1_mesh_ind");
+  if (!dst_side_field) dst_side_field=dstmesh.GetField("side2_mesh_ind");
+
+  MEField<> *src_side_field=srcmesh.GetField("side1_mesh_ind");
+  if (!src_side_field) src_side_field=srcmesh.GetField("side2_mesh_ind");
+
+  // Figure out interpolation to XGrid information
+  MEField<> *src_xgrid_ind_field=NULL;
+  MEField<> *dst_xgrid_ind_field=NULL;
+  int other_side_ind=0;
+  if (srcmesh.side == 3) {
+    if (dstmesh.side==1) {
+      src_xgrid_ind_field=srcmesh.GetField("side1_mesh_ind");
+    } else if (dstmesh.side==2) {
+      src_xgrid_ind_field=srcmesh.GetField("side2_mesh_ind");
+    }    
+    other_side_ind=dstmesh.ind;
+  } else if (dstmesh.side == 3) {
+    if (srcmesh.side==1) {
+      dst_xgrid_ind_field=dstmesh.GetField("side1_mesh_ind");
+    } else if (srcmesh.side==2) {
+      dst_xgrid_ind_field=dstmesh.GetField("side2_mesh_ind");
+    }
+    other_side_ind=srcmesh.ind;
+  }
+
+
   // determine if we should use the dst_frac variable
   bool use_dst_frac=false;
   if (dst_area_field || src_area_field) use_dst_frac=true;
@@ -1865,6 +1881,19 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       if (src_frac2 == 0.0) continue;
     }
 
+    // If src is an exchange grid then skip parts that 
+    // don't involve current meshes
+    if (src_xgrid_ind_field) {
+      // Get side information from xgrid
+      double *src_xgrid_ind_dbl=src_xgrid_ind_field->data(*sr.elem);
+
+      // Convert to int rounding in case of floating point fuzziness
+      int src_xgrid_ind=static_cast<int>(*src_xgrid_ind_dbl+0.5);
+      
+      // If this cell of the exchange grid doesn't match the current mesh, skip
+      if (src_xgrid_ind != other_side_ind) continue;
+    }
+
     // Declare src_elem_area
     double src_elem_area;
 
@@ -1875,7 +1904,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
                                      &tmp_valid, &tmp_areas, &tmp_dst_areas,
-                                      midmesh, &tmp_nodes, &tmp_cells, 0, zz);
+				     midmesh, &tmp_nodes, &tmp_cells, 0, zz, src_side_field, dst_side_field);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
@@ -1899,6 +1928,22 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       }
     }
 
+    // If dst is an exchange grid then skip parts that 
+    // don't involve current meshes
+    if (dst_xgrid_ind_field) {
+      for (int i=0; i<sr.elems.size(); i++) {
+        const MeshObj &dst_elem = *sr.elems[i];
+
+        // Get side information from xgrid
+        double *dst_xgrid_ind_dbl=dst_xgrid_ind_field->data(dst_elem);
+
+        // Convert to int rounding in case of floating point fuzziness
+        int dst_xgrid_ind=static_cast<int>(*dst_xgrid_ind_dbl+0.5);
+      
+        // If this cell of the exchange grid doesn't match the current mesh, skip
+        if (dst_xgrid_ind != other_side_ind) valid[i]=0;
+      }
+    }
 
     // Set status for src masked cells, and then leave
     if (src_elem_masked) {
@@ -2007,36 +2052,101 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
           src_user_area_adj=*area/src_elem_area;
       }
 
+      // If not XGrid do old way
+      // TODO: after release merge these together
+      if ((srcmesh.side != 3) && (dstmesh.side !=3)) {
+        // Put weights into row column and then add
+        for (int i=0; i<sr.elems.size(); i++) {
+          if (valid[i]==1) {
+            
+            // Calculate dest user area adjustment
+            double dst_user_area_adj=1.0;
+            if (dst_area_field) {
+              const MeshObj &dst_elem = *(sr.elems[i]);
+              double *area=dst_area_field->data(dst_elem);
+              if (*area==0.0) Throw() << "0.0 user area in destination grid";
+              dst_user_area_adj=dst_areas[i]/(*area);
+            }
+            
+            // Set col info
+            IWeights::Entry col(sr.elem->get_id(), 0,
+                                src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
 
-      // Put weights into row column and then add
-       for (int i=0; i<sr.elems.size(); i++) {
-        if (valid[i]==1) {
-
-          // Calculate dest user area adjustment
-          double dst_user_area_adj=1.0;
-          if (dst_area_field) {
-             const MeshObj &dst_elem = *(sr.elems[i]);
-            double *area=dst_area_field->data(dst_elem);
-            if (*area==0.0) Throw() << "0.0 user area in destination grid";
-            dst_user_area_adj=dst_areas[i]/(*area);
+            // Set row info
+            IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+            
+            // Put weights into weight matrix
+            iw.InsertRowMergeSingle(row, col);
           }
-
-          // Set col info
-          IWeights::Entry col(sr.elem->get_id(), 0,
-                              src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
-
-          // Set row info
-          IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-
-          // Put weights into weight matrix
-          iw.InsertRowMergeSingle(row, col);
         }
-      }
+      } else { // If XGrid do new way
+                // Adjust weights by user area
+          if (src_area_field || dst_area_field) {
+            for (int i=0; i<sr.elems.size(); i++) {
+              if (valid[i]==1) {
+                
+                // Calculate dest user area adjustment
+                double dst_user_area_adj=1.0;
+                if (dst_area_field) {
+                  const MeshObj &dst_elem = *(sr.elems[i]);
+                  double *area=dst_area_field->data(dst_elem);
+                  if (*area==0.0) Throw() << "0.0 user area in destination grid. elem id="<<dst_elem.get_id();
+                  dst_user_area_adj=dst_areas[i]/(*area);
+                }
+                
+                // Multiply weights by user area adjustment
+                wgts[i] *= src_user_area_adj*dst_user_area_adj;
+              }
+            }
+          }
+           
+          // Adjust weights by merge fraction if source is an XGrid.
+          // (Don't need to do if the destination is an XGrid, because
+          //  each Xgrid cell is entirely contained in one source grid cell).
+          if (srcmesh.side==3) { 
+            if(dst_frac2_field){
+              for (int i=0; i<sr.elems.size(); i++) {
+                if (valid[i]==1) {
+                  const MeshObj &dst_elem = *sr.elems[i];
+                  
+                  // Calculate adjustment
+                  double mrg_adjustment=1.0;
+                  double *dst_frac2=dst_frac2_field->data(dst_elem);
+                  // Adjust unless too small (and calc. likely to be inaccurate)
+                  if (*dst_frac2 > 1.0E-15) mrg_adjustment=1.0/(*dst_frac2);
+                  else mrg_adjustment=0.0;
+                  
+              // Multiply weights by mrg adjustment
+                  wgts[i] *= mrg_adjustment;
+                }
+              }
+            }
+          }
+          
+          // Put weights into row column and then add
+          for (int i=0; i<sr.elems.size(); i++) {
+            
+            if (valid[i]==1) {
+              
+              // Set col info
+              IWeights::Entry col(sr.elem->get_id(), 0, 
+                                  wgts[i], 0);
+              
+              // Set row info
+              IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+              
+              // Put weights into weight matrix
+              iw.InsertRowMergeSingle(row, col);  
+            }
+          }           
+        }
     } // not generating mid mesh, need to compute weights
   } // for searchresult
 
-  if(midmesh != 0)
-    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh);
+
+  if(midmesh != 0) {
+    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh,3);
+  }
 
 }
 
@@ -2712,10 +2822,60 @@ static void _fill_pl_with_outside_status(PointList &pl, WMat &status) {
     }
 }
 
+// Check a Mesh for some more expensive error conditions
+// If one is detected, then fail with an error message
+static void _check_mesh(Mesh &mesh, const char *name) {
+#define OVERLAP_TOL 1.0E-15
+
+  // Do overlap detection
+  double max_local_overlap_area;
+  int max_local_overlap_id1, max_local_overlap_id2;
+  calc_max_overlap(mesh, max_local_overlap_area, max_local_overlap_id1, max_local_overlap_id2);
+
+  // Reduce to get the max overlap and proc it's located on
+  // Struct to use for MPI_MAXLOC
+  struct {
+    double area;
+    int rank;
+  } local_max, global_max;
+  local_max.area=max_local_overlap_area;
+  local_max.rank=Par::Rank();
+  MPI_Allreduce(&local_max,&global_max,1,MPI_DOUBLE_INT,MPI_MAXLOC,Par::Comm());
+
+  // If the global_max overlap is bigger than tol, then report an error
+  if (global_max.area > OVERLAP_TOL) {
+
+    // Broadcast ids from max proc, so everyone has them
+    int global_max_ids[2];
+    global_max_ids[0]=max_local_overlap_id1;
+    global_max_ids[1]=max_local_overlap_id2;
+    MPI_Bcast(global_max_ids,2,MPI_INT,global_max.rank,Par::Comm());
+
+    // Output error info on processor 0
+      ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Self Overlapping Grid or Mesh Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+      ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+      char msg[1024];
+      sprintf(msg,"  Significant self overlap (overlap area > %g) detected in %s Mesh or Grid.",OVERLAP_TOL,name);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+      sprintf(msg,"  Maximum overlap area=%g occurs between elem id=%d and elem id=%d",global_max.area, global_max_ids[0], global_max_ids[1]);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+      ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+      ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+      Throw() << " Self overlapping Grid or Mesh detected.";
+  }
+#undef OVERLAP_TOL
+
+  // TODO: add more checks
+
+
+
+}
+
 Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh,
                bool freeze_src_, int imethod,
                bool set_dst_status, WMat &dst_status,
-               MAP_TYPE mtype, int unmappedaction, int _num_src_pnts, ESMC_R8 _dist_exponent):
+               MAP_TYPE mtype, int unmappedaction, bool checkFlag, 
+               int _num_src_pnts, ESMC_R8 _dist_exponent):
 
 sres(),
 grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE)),
@@ -2765,9 +2925,9 @@ interp_method(imethod)
     // Form the parallel rendezvous meshes/specs
    //  if (Par::Rank() == 0)
        //std::cout << "Building rendezvous..." << std::endl;
-
-
-    grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0], &zz, midmesh==0? true:false);
+    grend.Build(srcF.size(), (srcF.size()>0)?(&srcF[0]):NULL, 
+                dstF.size(), (dstF.size()>0)?(&dstF[0]):NULL,
+                &zz, midmesh==0? true:false);
 
     // Check grend status, if it's not complete
     if (grend.status != GEOMREND_STATUS_COMPLETE) {
@@ -2810,6 +2970,8 @@ interp_method(imethod)
       }
     } else {
       if (search_obj_type == MeshObj::NODE) {
+
+        // Search
         OctSearch(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type,
                   unmappedaction, sres, set_dst_status, dst_status, 1e-8);
         // Redistribute regrid status
@@ -2817,6 +2979,14 @@ interp_method(imethod)
           dst_status.Migrate(*dstplist);
         }
       } else if (search_obj_type == MeshObj::ELEMENT) {
+
+        // Check meshes
+        if (checkFlag) {
+          _check_mesh(grend.GetSrcRend(), "source");
+          _check_mesh(grend.GetDstRend(), "destination");
+        }
+
+        // Search
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
         if(freeze_src_) {
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
@@ -2850,6 +3020,12 @@ interp_method(imethod)
                   unmappedaction, sres, set_dst_status, dst_status, 1e-8);
         //OctSearch(src, dest, mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
+        // Check grids
+        if (checkFlag) {
+          _check_mesh(*src, "source");
+          _check_mesh(*dest, "destination");
+        }
+
         OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
       }
     }
@@ -3111,6 +3287,10 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
    }
 
    // Go through weights calculating and setting frac
+#ifdef BOB_XGRID_DEBUG
+   int num_big_frac=0;
+   int num_little_frac=0;
+#endif
    WMat::WeightMap::iterator wi = src_frac.begin_row(), we = src_frac.end_row();
    for (; wi != we; ++wi) {
      const WMat::Entry &w = wi->first;
@@ -3141,10 +3321,36 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
      // Only put it in if it's locally owned
      if (!GetAttr(src_elem).is_locally_owned()) continue;
 
+#ifdef BOB_XGRID_DEBUG
+     if (tot > 1.0+1.0E-10) {
+       printf("SRC BIG FRAC src_id=%d frac=%20.17f \n",src_elem.get_id(),tot);
+       num_big_frac++;
+     }
+
+     if (tot < 1.0-1.0E-10) {
+       printf("SRC SMALL FRAC src_id=%d frac=%20.17f \n",src_elem.get_id(),tot);
+       num_little_frac++;
+     }
+#endif
+
      // Since weights with no mask should add up to 1.0
      // fraction is tot
      *frac=tot;
    } // for wi
+
+#ifdef BOB_XGRID_DEBUG
+   // Sum 
+   int tot_num_big_frac=0;
+   MPI_Allreduce(&num_big_frac,&tot_num_big_frac,1,MPI_INT,MPI_SUM,Par::Comm());
+
+   int tot_num_little_frac=0;
+   MPI_Allreduce(&num_little_frac,&tot_num_little_frac,1,MPI_INT,MPI_SUM,Par::Comm());
+
+   if (Par::Rank() == 0) {
+     printf("BOB: num frac >1.0+1.0E-10 = %d \n",tot_num_big_frac);
+     printf("BOB: num frac <1.0-1.0E-10 = %d \n",tot_num_little_frac);
+   }
+#endif
 
   }
 

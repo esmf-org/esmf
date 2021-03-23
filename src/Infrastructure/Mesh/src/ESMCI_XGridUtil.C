@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
-// Laboratory, University of Michigan, National Centers for Environmental
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -38,6 +38,7 @@
 #endif
 
 #include <algorithm>
+#include <set>
 
 #include <ESMCI_VM.h>
 #include "ESMCI_Macros.h"
@@ -55,7 +56,7 @@ inline double dot(const xvector & v1, const xvector & v2){
 }
 inline xvector cross(const xvector & v1, const xvector & v2){
   // cross(i) = epsilon(i,j,k)*v1,j*v2,k     i,j,k=1..3
-  return xvector(v1.c[1]*v2.c[2]-v1.c[2]*v2.c[1],
+  return xvector(v1.c[1]*v2.c[2]-v1.c[2]*v2.c[1], 
                  v1.c[2]*v2.c[0]-v1.c[0]*v2.c[2],
                  v1.c[0]*v2.c[1]-v1.c[1]*v2.c[0]);
 }
@@ -78,6 +79,10 @@ inline xvector operator /(const xvector & v, const double ratio){
   return xvector(v.c[0]/ratio, v.c[1]/ratio, v.c[2]/ratio);
 }
 
+  bool xgu_debug=false;
+
+
+
 double polygon::area(int sdim) const {
   double split_area = 0.;
   if(sdim == 2){
@@ -90,13 +95,48 @@ double polygon::area(int sdim) const {
     double * coords = new double[sdim * points.size()];
     polygon_to_coords(*this, sdim, coords);
     split_area = great_circle_area(points.size(), coords);
-    delete[] coords;
 
-    // great_circle_area does not take CCW sense into account
-    // dot of the radial normal with polygon normal gives a sense if the points are CCW arranged
-    int np = points.size(); double ccw_sense = 0.;
-    for(int i = 0; i < np-2; i++)
-      ccw_sense += dot(cross(points[(i+1)%np]-points[i], points[(i+2)%np]-points[(i+1)%np]), points[i]);
+    double ccw_sense = 0.;
+    int np = points.size(); 
+    for(int i = 0; i < np; i++) {
+      double *p0=coords+3*i;
+      double *p1=coords+3*((i+1)%np);
+      double *p2=coords+3*((i+2)%np);
+
+      // vector from 1 to 0
+      double v10[3];
+      MU_SUB_VEC3D(v10,p0,p1);
+
+      // vector from 1 to 2
+      double v12[3];
+      MU_SUB_VEC3D(v12,p2,p1);
+
+      // normal point
+      double up1[3];
+      double div_len=1.0/MU_LEN_VEC3D(p1);
+      MU_MULT_BY_SCALAR_VEC3D(up1,p1,div_len);
+
+      // Calculate angle
+      double angle=calc_angle<GEOM_SPH2D3D>(v12, v10, up1);
+
+      // Don't count if too close to call
+      if (std::abs(angle) < 1.0E-15) continue;
+      if (std::abs(M_PI-std::abs(angle)) < 1.0E-15) continue;
+
+      // reverse angle so more drastic rotation are bigger
+      if (angle < 0.0) angle=-M_PI-angle;
+      if (angle > 0.0) angle=M_PI-angle;
+
+      // Sum
+      ccw_sense += angle;
+    }
+
+#if BOB_XGRID_DEBUG
+    if (xgu_debug) {
+      printf("ccw_sense=%30.27f \n",ccw_sense);
+    }
+#endif
+
     return (ccw_sense > 0)? split_area: (-split_area);
   }
   return split_area;
@@ -127,7 +167,7 @@ xpoint polygon::centroid(int sdim) const {
     }
     for(int i = 0; i < 3; i ++) {
       sum[i] /= 3.*area;
-    }
+    } 
     return xpoint(sum, sdim);
   }else
     Throw() << "Cannot handle sdim > 3\n";
@@ -161,7 +201,7 @@ void sintd_cell::get_centroid(double * centroid, int sdim, int pdim){
  * @param[out] on_q_seg     whether the intersection is on q line segment
  * @return                  if the p and q intersects
  */
-bool line_intersect_2D_2D(double *p1, double *p2, double *q1, double *q2, double *intersect,
+bool line_intersect_2D_2D(double *p1, double *p2, double *q1, double *q2, double *intersect, 
   int & inbound, bool & on_p_seg, bool & on_q_seg){
 
   double mua,mub;
@@ -200,10 +240,10 @@ bool line_intersect_2D_2D(double *p1, double *p2, double *q1, double *q2, double
 
   // if intersection is one of the end points
   if(std::abs(mua) < epsilon || std::abs(mua-1.) < epsilon)
-    on_p_seg = false;
+    on_p_seg = false; 
 
-  if(std::abs(mub) < epsilon || std::abs(mub-1.) < epsilon)
-    on_q_seg = false;
+  if(std::abs(mub) < epsilon || std::abs(mub-1.) < epsilon) 
+    on_q_seg = false; 
 
   intersect[0] = p1[0] + mua * (p2[0] - p1[0]);
   intersect[1] = p1[1] + mua * (p2[1] - p1[1]);
@@ -228,7 +268,7 @@ bool line_intersect_2D_2D(double *p1, double *p2, double *q1, double *q2, double
 // theory computes the shortest distance between 2 3D line segments, the minima of this
 // shortest distance for intersection is inaccurate for line segments with end points on sphere.
 bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double *q3,
-                     double *intersect,
+                     double *intersect, 
   int & inbound, bool & on_p_seg, bool & on_q_seg){
 
   // Do this intersection by reprsenting the line a1 to a2 as a plane through the
@@ -237,7 +277,7 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   double plane[9];
   double plane_p[2];
   double t,u;
-  double epsilon = 1.e-15;
+  double epsilon = 1.0E-14;
   inbound = -1;
 
   // Load points defining plane into variable (these are supposed to be in counterclockwise order)
@@ -254,6 +294,12 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   // Intersect the segment with the plane
   if(!intersect_tri_with_line(plane, a1, a2, plane_p, &t))
      return false;
+
+#if BOB_XGRID_DEBUG
+  if (xgu_debug) {
+    printf("   on sub  t=%30.27E \n",t);
+  }
+#endif
 
   //if( (t < 0) || (t > 1) )
   if( (t < -epsilon) || (t > (1+epsilon)) )
@@ -274,6 +320,12 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   if(!intersect_tri_with_line(plane, q1, q2, plane_p, &u))
      return false;
 
+#if BOB_XGRID_DEBUG
+ if (xgu_debug) {
+    printf("   on clip u=%30.27E \n",u);
+  }
+#endif
+
   if( (u < -epsilon) || (u > (1+epsilon)) )
     return false;
 
@@ -283,7 +335,17 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
 
   // The two planes are coincidental
   double coincident = metric(cross(cross(xvector(a1,3), xvector(a2,3)), cross(xvector(q1,3), xvector(q2,3))));
+
+#if BOB_XGRID_DEBUG
+  if (xgu_debug) {
+    bool coin=(coincident < 1.e-15);
+    printf("   coincident=%d val=%30.27E \n",coin,coincident);
+  }
+#endif
+
+  // Don't intersect if lines are too coincident
   if(coincident < 1.e-15) return false;
+  
 
   double sense = dot(cross(v1,v2), cross(v1,p1));
   //if(std::abs(sense) < epsilon) return false;
@@ -317,7 +379,7 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
  * @param[out] on_q_seg     whether the intersection is on q line segment
  * @return                  if the p and q intersects
  */
-bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, double *q3, double *intersect,
+bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, double *q3, double *intersect, 
   int & inbound, bool & on_p_seg, bool & on_q_seg){
 
   double mua,mub;
@@ -349,7 +411,7 @@ bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, doubl
 
   if(v1.metric() < epsilon)
     return false;
-
+  
   if(v2.metric() < epsilon)
     return false;
 
@@ -375,10 +437,10 @@ bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, doubl
 
   // if intersection is one of the end points
   if(std::abs(mua) < epsilon || std::abs(mua-1.) < epsilon)
-    on_p_seg = false;
+    on_p_seg = false; 
 
-  if(std::abs(mub) < epsilon || std::abs(mub-1.) < epsilon)
-    on_q_seg = false;
+  if(std::abs(mub) < epsilon || std::abs(mub-1.) < epsilon) 
+    on_q_seg = false; 
 
   xvector a0 = a1 + mua*v1;
   xvector b0 = b1 + mub*v2;
@@ -394,7 +456,7 @@ bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, doubl
   // double sense = dot(cross(v2,v3), cross(v2,v1));
   // sense of inbound: (v1 x v2).(v1 x p1) > 0
   // if(sense > 0.) inbound = 2; // v1 going into v2,v3 in CCW sense
-  xvector l1 = xvector(p2,3)-xvector(p1,3);
+  xvector l1 = xvector(p2,3)-xvector(p1,3); 
   xvector l2 = xvector(q2,3)-xvector(q1,3);
   if(dot(cross(l1, l2), xvector(intersect, 3)) > 0) inbound = 2;
 
@@ -411,7 +473,7 @@ bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, doubl
  * @param[in] inbound       the intersection point is outbound or inbound
  * @return                  success or failure
  */
-int insert_intersect(int pdim, int sdim, std::list<xpoint> & final_nodes, const std::vector<xpoint> & nodes, unsigned int i,
+int insert_intersect(int pdim, int sdim, std::list<xpoint> & final_nodes, const std::vector<xpoint> & nodes, unsigned int i, 
   double * intersect, int n_inter, int inbound){
 
   double epsilon = 1.e-10;
@@ -452,7 +514,7 @@ int insert_intersect(int pdim, int sdim, std::list<xpoint> & final_nodes, const 
     xvector v2=xvector(*end_point);
     double d1 = metric(vp-v1);
     double d2 = metric(v2-v1);
-    if(d2 == 0.)
+    if(d2 == 0.) 
       Throw() << "Cannot have degenerate polygon (2+ nodes have identical coords)\n";
     double ratio = d1/d2;
     if((ratio > epsilon) && (ratio < (1-epsilon)) ){
@@ -519,29 +581,60 @@ bool check_angle_sum(int sdim, int n, const double * const p, const double * con
 // return value: 0 -> outside, 1 -> inside, 2 -> on edge
 unsigned int walk_polygon(int sdim, int n, const double * const p, const double * const point)
 {
-  // if point is always on left hand side (sense > 0) of polygon during CCW walk, then it's inside
-  unsigned int r = 2;
-  for(int i = 0; i < n; i ++){
-    //xvector midpoint = (xvector(p+i*sdim, sdim)+xvector(p+((i+1)%n)*sdim, sdim))/2.;
-    //double sense = dot(cross(xvector(p+i*sdim, sdim), xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)), xvector(point, sdim)-midpoint.normalize());
-    xvector midpoint = xvector(p+i*sdim, sdim);
-    double sense = dot(cross(xvector(p+i*sdim, sdim), xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)), xvector(point, sdim)-midpoint);
-    // [(p(i+1)-p(i))x(p(i+2)-p(i+1))].[(p(i+1)-p(i))x(pp-p(i))]
-    //double sense = dot( cross((xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)),
-    //                          (xvector(p+((i+2)%n)*sdim, sdim)-xvector(p+((i+1)%n)*sdim, sdim))),
-    //                    cross((xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)),
-    //                          (xvector(point, sdim)-xvector(p+i*sdim, sdim))));
-    //double sense = dot(xvector(p+i*sdim, sdim),
-    //                  cross((xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)),
-    //                        (xvector(point, sdim)-xvector(p+i*sdim, sdim))));
 
-    if(std::abs(sense) < 1.e-15)      // consider the point on edge if sense is really small, use the other point to determine if it's truely inside or not.
-      return 2;
-    if(sense < 0.)
-      return 0;
+  bool on_edge=false;
+
+  for(int i = 0; i < n; i++) {
+      const double *p0=p+3*i;
+      const double *p1=p+3*((i+1)%n);
+
+      // vector from 0 to 1
+      double v01[3];
+      MU_SUB_VEC3D(v01,p1,p0);
+
+      // If too short, not enough info, so go onto next
+      if (MU_LENSQ_VEC3D(v01) < 1.0E-30) {
+	continue;
+      }
+
+      // vector from 0 to point
+      double v0p[3];
+      MU_SUB_VEC3D(v0p,point,p0);
+
+      // If close to point, then count as on edge
+      if (MU_LENSQ_VEC3D(v0p) < 1.0E-30) {
+	on_edge=true;
+	continue;
+      }
+
+      // normal point
+      double up0[3];
+      double div_len=1.0/MU_LEN_VEC3D(p0);
+      MU_MULT_BY_SCALAR_VEC3D(up0,p,div_len);
+
+      // Calculate angle
+      double angle=calc_angle<GEOM_SPH2D3D>(v01, v0p, up0);
+
+      // Don't count if too close to call
+      if (std::abs(angle) < 1.0E-15) {
+	on_edge=true;
+	continue;
+      }
+
+      if (std::abs(M_PI-std::abs(angle)) < 1.0E-15) {
+	on_edge=true;
+	continue;
+      }
+
+      // If negative then outside, so report that and leave
+      if (angle < 0.0) return 0;
   }
-  return 1;
+
+  // Do output
+  if (on_edge) return 2;
+  else return 1;
 }
+
 
 /**
  *\brief                    test if a point is inside of a polygon, *on edge point* is considered not inside.
@@ -562,7 +655,7 @@ unsigned int point_in_poly(int pdim, int sdim, int nvert, const double * const p
          xp == xpoint(poly_cd+j*sdim,2) ) return 0;
 
       if ( ((poly_cd[i*sdim+1] > testy) != (poly_cd[j*sdim+1]>testy)) &&
-     (testx < (poly_cd[j*sdim]-poly_cd[i*sdim]) * (testy - poly_cd[i*sdim+1]) /
+     (testx < (poly_cd[j*sdim]-poly_cd[i*sdim]) * (testy - poly_cd[i*sdim+1]) / 
        (poly_cd[j*sdim+1] - poly_cd[i*sdim+1]) + poly_cd[i*sdim]) )
      // if ( ((verty[i]>testy) != (verty[j]>testy)) &&
      //(testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
@@ -597,7 +690,7 @@ unsigned int point_in_poly(int pdim, int sdim, const polygon & poly, const xpoin
  * @param[in] clip          internal polygon
  * @return                  a concave polygon with a hold inside defined by the clip polygon
  */
-polygon make_concave_polygon(const int pdim, const int sdim, const std::vector<xpoint> & subject,
+polygon make_concave_polygon(const int pdim, const int sdim, const std::vector<xpoint> & subject, 
   const std::vector<xpoint> & clip){
   double * cd = new double [sdim*(subject.size()+clip.size())];
   polygon_to_coords(polygon(subject), sdim, cd);
@@ -617,7 +710,7 @@ polygon make_concave_polygon(const int pdim, const int sdim, const std::vector<x
 // output argument: s_contains_c, if s contains c
 // output argument: c_contains_s, if c contains s
 */
-bool disjoint(int pdim, int sdim, const std::vector<xpoint> & subject, const std::vector<xpoint> & clip,
+bool disjoint(int pdim, int sdim, const std::vector<xpoint> & subject, const std::vector<xpoint> & clip, 
   bool & s_contains_c, bool & c_contains_s){
 
   int i; int num_clip_p=clip.size(), num_subject_p=subject.size();
@@ -687,9 +780,20 @@ void add_polygon_to_vector(int sdim, const polygon & nodal_poly, std::vector<pol
   delete[] coords;
 }
 
+
+
 // Assume a counter clock wise order of points in p and q
-int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, double *q,
+int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, double *q, 
   std::vector<polygon> & difference){
+
+  static unsigned int count = 0;
+
+#if BOB_XGRID_DEBUG
+  if (xgu_debug) {
+    printf("In weiler: Beg\n");
+  }
+#endif
+
 
   // return if the subject polygon is empty
   if(num_p < 3) return 0;
@@ -698,14 +802,14 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
   std::vector<xpoint> pnodes, qnodes;
   if(sdim == 2){
     for(int i = 0; i < num_p; i ++)
-      pnodes.push_back(xpoint(*(p+sdim*i), *(p+sdim*i+1), 'A'+i));
+      pnodes.push_back(xpoint(*(p+sdim*i), *(p+sdim*i+1), 'A'+i)); 
     for(int i = 0; i < num_q; i ++)
-      qnodes.push_back(xpoint(*(q+sdim*i), *(q+sdim*i+1), 'a'+i));
+      qnodes.push_back(xpoint(*(q+sdim*i), *(q+sdim*i+1), 'a'+i)); 
   }else if(sdim == 3){
     for(int i = 0; i < num_p; i ++)
-      pnodes.push_back(xpoint(*(p+sdim*i), *(p+sdim*i+1), *(p+sdim*i+2), 'A'+i));
+      pnodes.push_back(xpoint(*(p+sdim*i), *(p+sdim*i+1), *(p+sdim*i+2), 'A'+i)); 
     for(int i = 0; i < num_q; i ++)
-      qnodes.push_back(xpoint(*(q+sdim*i), *(q+sdim*i+1), *(q+sdim*i+2), 'a'+i));
+      qnodes.push_back(xpoint(*(q+sdim*i), *(q+sdim*i+1), *(q+sdim*i+2), 'a'+i)); 
   }
 
   // return the subject polygon if the clip polygon is empty
@@ -714,9 +818,17 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     return 0;
   }
 
+#if BOB_XGRID_DEBUG
+  if (xgu_debug) {
+    printf("In weiler: past initial setup and error checking\n");
+  }
+#endif
+
   if(true){ // Check if the two polygons are the same
     // The number of p and q points have to be the same
     if(num_p == num_q ) {
+
+
       // 1. Find the two points on p and q with smallest arc length distance
       int qj = 0; int pi = 0;
       for(int i = 0; i < num_p; i ++){
@@ -724,8 +836,8 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         double arcdistance = PI;
         for(int j = 0; j < num_q; j ++){
           double newdistance = PI;
-                                        if(sdim == 3) newdistance = gcdistance(p0.c, qnodes[j].c);
-                                        if(sdim == 2) newdistance = (xvector(p0)-xvector(qnodes[j])).metric();
+					if(sdim == 3) newdistance = gcdistance(p0.c, qnodes[j].c);
+					if(sdim == 2) newdistance = (xvector(p0)-xvector(qnodes[j])).metric();
           if( arcdistance > newdistance){
             qj = j;
             pi = i;
@@ -736,37 +848,63 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 
       // 2. pi, qj contains the indices of the two points with the smallest distance
       //    check if all vertices pair wise identical
-      double identical = true;
+      bool identical = true;
       double identical_threshold = 1.e-13;
       for(int i = pi; i < pi+num_p; i ++){
         xpoint p0 = xpoint(pnodes[i%num_p].c, sdim);
         xpoint q0 = xpoint(qnodes[(qj++)%num_q].c, sdim);
         double newdistance = PI;
-                                if(sdim == 3) newdistance = gcdistance(p0.c, q0.c);
-                                if(sdim == 2) newdistance = (xvector(p0) - xvector(q0)).metric();
+				if(sdim == 3) newdistance = gcdistance(p0.c, q0.c);
+				if(sdim == 2) newdistance = (xvector(p0) - xvector(q0)).metric();
         if(newdistance > identical_threshold) identical = false;
       }
 
       if(identical){
-        difference.push_back(polygon(pnodes));
-        //if(count ++ < 10) {
-        //  dump_polygon(polygon(pnodes), true);
-        //  dump_polygon(polygon(qnodes), true);
-        //}
+
+#if BOB_XGRID_DEBUG
+      if (xgu_debug) {
+	printf("In weiler: identical polygons.\n");
+      }
+#endif
         return 0;
       }
     }
   }
 
-  //double * sintd_coords = new double[120]; int num_sintd_nodes;
+  // Calculate some overlap relationships
+  //// Also used later...
+  bool s_contains_c = false, c_contains_s = false;
+  bool neither_contains_others_nodes=disjoint(pdim, sdim, pnodes, qnodes, s_contains_c, c_contains_s);
+
+#if BOB_XGRID_DEBUG
+  if (xgu_debug) {
+    printf(" s_contains_c=%d c_contains_s=%d nco=%d \n",s_contains_c,c_contains_s,neither_contains_others_nodes); 
+  }
+#endif
+
+  // If clip contains subject and is convex, then the entire subject has been clipped away, so leave.
+  if (c_contains_s) {
+
+    // Detect which turns clip polygon contains
+    bool left_turn = false;
+    bool right_turn = false;
+    if (sdim==2) rot_2D_2D_cart(num_q, q, &left_turn, &right_turn);
+    else if (sdim==3) xgrid_rot_2D_3D_sph(num_q, q, &left_turn, &right_turn);
+
+    // If only one direction of turns, then it's convex
+    if ((!right_turn && left_turn) || (right_turn && !left_turn)) return 0;
+  }
+
+  
+  //double * sintd_coords = new double[120]; int num_sintd_nodes; 
   //double * tmp_coords=new double[120];
   //if(sdim == 3)
   //  intersect_convex_2D_3D_sph_gc_poly(num_p, p,
   //                                   num_q, q,
   //                                   tmp_coords,
-  //                                   &num_sintd_nodes, sintd_coords);
+  //                                   &num_sintd_nodes, sintd_coords); 
   //delete[] tmp_coords;
-
+  
   // phase 1, find all intersection points, note degenerated points too
   std::list<xpoint> final_pnodes, final_qnodes, degenerated;
 
@@ -787,15 +925,26 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     for(int j = 0; j < num_q; j ++){
 
       double *q1 = (qnodes[j].c);
-      double *q2 = (qnodes[(j+1)%num_q].c);
+      double *q2 = (qnodes[(j+1)%num_q].c); 
       double *q3 = (qnodes[(j+2)%num_q].c);
 
+#if BOB_XGRID_DEBUG
+  if (xgu_debug) {
+    printf("In weiler: intersecting subject %d %d with clip %d %d \n",i,(i+1)%num_p,j,(j+1)%num_q);
+  }
+#endif
       bool result = false;
       if(sdim == 2)
         result = line_intersect_2D_2D(p1, p2, q1, q2, intersect, inbound, on_p_seg, on_q_seg);
       else{
         result = line_intersect_2D_3D(p1, p2, q1, q2, q3, intersect, inbound, on_p_seg, on_q_seg);
       }
+
+#if BOB_XGRID_DEBUG
+  if (xgu_debug) {
+    printf(" => result=%d inbound=%d\n ",result,(inbound&2));
+  }
+#endif
 
       if(result){
 
@@ -808,6 +957,13 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     }
   }
   delete [] intersect;
+
+
+#if BOB_XGRID_DEBUG
+    if (xgu_debug) {
+      printf("In weiler: before retally:  n_inter=%d num_inbinter=%d\n",n_inter,num_inbinter);
+    }
+#endif
 
   // reTally the number of num_inbinter, because intersection points can be coincidental
   n_inter = 0;
@@ -822,24 +978,68 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     }
   }
 
+#if BOB_XGRID_DEBUG
+  if (xgu_debug) {
+    printf("In weiler: after retally:  n_inter=%d num_inbinter=%d\n",n_inter,num_inbinter);
+  }
+#endif
+
   // First, handle the corner cases, no intersect, no inbound point or odd number of inter/inbound point
   // p: subject, q: clip
-  // No intersection points => a) p and q are disjoint, return p
+  // No intersection points => a) p and q are disjoint, return p 
   //                           b) q contains p, return nothing
   //                           c) p contains q, return concave polygon
   assert(num_inbinter <= n_inter);
   if(n_inter == 0 || num_inbinter == 0 || (n_inter == num_inbinter && num_inbinter%2)) {
+
+#if BOB_XGRID_DEBUG
+    if (xgu_debug) {
+      printf("In weiler: inside n_inter == 0 block: n_inter=%d num_inbinter=%d\n",n_inter,num_inbinter);
+    }
+#endif
+
     xpoint p_centroid = polygon(pnodes).centroid(sdim);
     xpoint q_centroid = polygon(qnodes).centroid(sdim);
-    bool s_contains_c = false, c_contains_s = false;
-    if(disjoint(pdim, sdim, pnodes, qnodes, s_contains_c, c_contains_s)){
-      difference.push_back(polygon(pnodes));
-      return 0;
+
+    // Calculate some overlap relationships
+    // BOB: now calculated above
+    // bool s_contains_c = false, c_contains_s = false;
+    //bool neither_contains_others_nodes=disjoint(pdim, sdim, pnodes, qnodes, s_contains_c, c_contains_s);
+
+    // If there are 1 or fewer intersections and neither contains the points of one another then
+    // they are disjoint. (If they had more intersections then there could still be overlap
+    // (e.g. two triangles overlapping to form a 6 pointed star). 
+    if((n_inter <= 1) && neither_contains_others_nodes && !point_in_poly(pdim, sdim, qnodes, p_centroid)) {
+	difference.push_back(polygon(pnodes));
+#if BOB_XGRID_DEBUG
+	if (xgu_debug) {
+	  printf("In weiler: inside n_inter == 0 block: Disjoint\n");
+	}
+#endif
+	return 0;
+      }
+#if BOB_XGRID_DEBUG
+    if (xgu_debug) {
+      printf("In weiler: inside n_inter == 0 H1\n");
     }
-    if(c_contains_s && n_inter == 0 && point_in_poly(pdim, sdim, qnodes, p_centroid) ) return 0;
+#endif
+    if(c_contains_s && n_inter == 0 && point_in_poly(pdim, sdim, qnodes, p_centroid) ) return 0; 
+#if BOB_XGRID_DEBUG
+    if (xgu_debug) {
+      printf("In weiler: inside n_inter == 0 H2\n");
+    }
+#endif
+
     if(s_contains_c && n_inter == 0 && point_in_poly(pdim, sdim, pnodes, q_centroid) ){
       assert(pnodes.size() == final_pnodes.size());
       assert(qnodes.size() == final_qnodes.size());
+
+#if BOB_XGRID_DEBUG
+      if (xgu_debug) {
+	printf("In weiler p contains q\n");
+      }
+#endif
+
       // 1. Find the two points on p and q with smallest arc length distance
       int qj = 0; int pi = 0;
       for(int i = 0; i < num_p; i ++){
@@ -878,62 +1078,66 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       //dump_polygon(polygon(r_plist), true);
       //dump_polygon(polygon(r_qlist), true);
 
-      unsigned int prev_i = 0; unsigned int next_i = r_plist.size(); bool coincident = false; double ppos; double qpos;
-      xpoint jpm1;                       // j'-1 intersection point
-      bool start = false;
-      double * intersect = new double[sdim];
-      double *q1 = (r_qlist[0].c); // This point is fixed as the common vertex
-      for(unsigned int j = 1; j < r_qlist.size(); j ++){ // loop index: j: clip; i: subject
-        double *q2 = r_qlist[j].c;
-        std::vector<xpoint> res_polygon; // This is resulting polygon
-        res_polygon.push_back(r_qlist[j-1]);            // j-1
-        if(j > 1) res_polygon.push_back(jpm1);
-        //if(j ==1) res_polygon.push_back(r_plist[0]);    //  !! different from common vertex
-        for(unsigned int i = prev_i; i < next_i; i ++){ // by definition j0-1 cannot intersect i0-1, so start with i1-2
-          double *p1 = (r_plist[i].c);
-          double *p2 = (r_plist[(i+1)%(r_plist.size())].c);
-          bool result = intersect_line_with_line(p1, p2, q1, q2, intersect, &coincident, &ppos, &qpos);
-          if(same_point(intersect, q1)) continue; // Not looking for the intersection point that is the common vertex
-          if(ppos > 1.e-20 ){                               // intersect withIN p line segment
-            jpm1 = xpoint(intersect, sdim);                 // Save this j'-1 point for the next polygon
-            if(i != prev_i || !start){
-              if(!start){                                    // First polygon 0,1,..,I',I
-                for(unsigned int k = 0; k < i+1; k ++)
-                  res_polygon.push_back(r_plist[k]);
-                start = true;
-              }
-              else{
-                if(i != prev_i)                               // J-1 J-1' prev_i+1, .. i, J' J
-                  for(unsigned int k = prev_i+1; k < i+1; k ++)
-                    res_polygon.push_back(r_plist[k]);
-              }
-              prev_i = i;
-            }
-            res_polygon.push_back(xpoint(intersect,sdim));  // j'
-            res_polygon.push_back(r_qlist[j]);              // j
-            //dump_polygon(polygon(res_polygon), true);       // debug
-            //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
-            add_polygon_to_vector(sdim, polygon(pnodes), difference);
-            break;                                          // Go on to the next q vertex in j loop
-          }
-        }
+#if 0
+#if BOB_XGRID_DEBUG
+      if (xgu_debug) {
+	double pcoords[300];
+	polygon_to_coords(polygon(r_plist), sdim, pcoords);
+	write_3D_poly_to_vtk("r_plist",0,r_plist.size(),pcoords);
+	polygon_to_coords(polygon(r_qlist), sdim, pcoords);
+	write_3D_poly_to_vtk("r_qlist",0,r_qlist.size(),pcoords);
       }
-      std::vector<xpoint> res_polygon;                // This is resulting polygon
-      res_polygon.push_back(r_qlist[0]);              //
-      res_polygon.push_back(jpm1);                    // last intersection point
-      for(unsigned int k = prev_i+1; k < r_plist.size(); k ++) // add all the remaining points on the plist
-        res_polygon.push_back(r_plist[k]);
-      res_polygon.push_back(r_plist[0]);              //  !! different from common vertex
-      //dump_polygon(polygon(res_polygon), true);       // debug
-      //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
-      add_polygon_to_vector(sdim, polygon(pnodes), difference);
+#endif
+#endif
 
-      delete[] intersect;
+      // Resulting polygon       
+      std::vector<xpoint> res_polygon; 
+
+      // Push p nodes on first 
+      for (int i=0; i<r_plist.size(); i++) {
+	res_polygon.push_back(r_plist[i]);
+      }
+
+      // Push first p node on again
+      res_polygon.push_back(r_plist[0]);
+
+      // Push first qnode on
+      res_polygon.push_back(r_qlist[0]);
+
+      // Push q nodes on in backwards order including first 1 node.
+      for (int i=r_qlist.size()-1; i>-1; i--) {
+	res_polygon.push_back(r_qlist[i]);
+      }
+
+      // Add to output
+      add_polygon_to_vector(sdim, polygon(res_polygon), difference);
+
+#if BOB_XGRID_DEBUG
+      if (xgu_debug) {
+	printf("In weiler p contains q diff.size()=%d\n",difference.size());
+      }
+#endif
+
+      // leave
       return 0;
     }
+
+#if BOB_XGRID_DEBUG
+    if (xgu_debug) {
+      printf("In weiler: inside n_inter == 0 H3\n");
+    }
+#endif
+
     // This is a special case when difference polygon is ring shaped concave polygon
     // Subject polygon contains clipping polygon with 1 common vertex
     if(s_contains_c && n_inter == 1){
+
+#if BOB_XGRID_DEBUG
+      if (xgu_debug) {
+	printf("In weiler: p contains q, but intersect at 1 point \n");
+      }
+#endif
+
       //// 0. subject and clip polygons only intersect at their common vertex
       //if(pnodes.size() != final_pnodes.size() || qnodes.size() != final_qnodes.size()){
       //  std::cout << pnodes.size() << ' ' << final_pnodes.size() << std::endl;
@@ -950,10 +1154,11 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       //}
       // 1. Make sure both polygons are convex
       bool left_turn=false, right_turn=false;
-      rot_2D_3D_sph(num_p, p, &left_turn, &right_turn);
+      xgrid_rot_2D_3D_sph(num_p, p, &left_turn, &right_turn);
       if(left_turn && right_turn) return 1; // clip polygon is concave
-      rot_2D_3D_sph(num_q, q, &left_turn, &right_turn);
+      xgrid_rot_2D_3D_sph(num_q, q, &left_turn, &right_turn);
       if(left_turn && right_turn) return 2; // subject polygon is concave
+
 
       // 2. Find the common vertex in *qit and *pit
       // p -> subject; q -> clip
@@ -989,7 +1194,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       //dump_polygon(polygon(r_plist), true);
       //dump_polygon(polygon(r_qlist), true);
 
-        // 3.2
+        // 3.2 
         // find intersection point j' between line segment 0-j on q and i-(i+1) on p
         //      output is point j' and new i-th index on p
         // form a polygon j-1, cur_i, cur_i + 1, ... new_i, j', j, j-1
@@ -1002,12 +1207,12 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         double *q1 = (r_qlist[0].c); // This point is fixed as the common vertex
         for(unsigned int j = 1; j < r_qlist.size(); j ++){ // loop index: j: clip; i: subject
           double *q2 = r_qlist[j].c;
-          std::vector<xpoint> res_polygon; // This is resulting polygon
+          std::vector<xpoint> res_polygon; // This is resulting polygon       
           res_polygon.push_back(r_qlist[j-1]);            // j-1
           if(j > 1) res_polygon.push_back(jpm1);
           for(unsigned int i = prev_i; i < next_i; i ++){ // by definition j0-1 cannot intersect i0-1, so start with i1-2
             double *p1 = (r_plist[i].c);
-            double *p2 = (r_plist[(i+1)%(r_plist.size())].c);
+            double *p2 = (r_plist[(i+1)%(r_plist.size())].c); 
             bool result = intersect_line_with_line(p1, p2, q1, q2, intersect, &coincident, &ppos, &qpos);
             if(same_point(intersect, q1)) continue; // Not looking for the intersection point that is the common vertex
             if(ppos > 1.e-20 ){                               // intersect withIN p line segment
@@ -1029,25 +1234,39 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
               res_polygon.push_back(r_qlist[j]);              // j
               //dump_polygon(polygon(res_polygon), true);       // debug
               //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
-              add_polygon_to_vector(sdim, polygon(pnodes), difference);
+
+	      // ORIG  add_polygon_to_vector(sdim, polygon(pnodes), difference);
+	      add_polygon_to_vector(sdim, polygon(res_polygon), difference);
               break;                                          // Go on to the next q vertex in j loop
-            }
+            } 
           }
-        }
-        std::vector<xpoint> res_polygon;                // This is resulting polygon
+        } 
+        std::vector<xpoint> res_polygon;                // This is resulting polygon       
         res_polygon.push_back(r_qlist[0]);              // common vertex
-        res_polygon.push_back(jpm1);                    // last intersection point
+        res_polygon.push_back(jpm1);                    // last intersection point 
         for(unsigned int k = prev_i+1; k < r_plist.size(); k ++) // add all the remaining points on the plist
           res_polygon.push_back(r_plist[k]);
         //dump_polygon(polygon(res_polygon), true);       // debug
         //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
-        add_polygon_to_vector(sdim, polygon(pnodes), difference);
 
+	// ORIG  add_polygon_to_vector(sdim, polygon(pnodes), difference);
+	add_polygon_to_vector(sdim, polygon(res_polygon), difference);
         delete[] intersect;
         return 0;
     }
+
+#if BOB_XGRID_DEBUG
+    if (xgu_debug) {
+      printf("In weiler: inside n_inter == 0 End\n");
+    }
+#endif
   }
 
+#if BOB_XGRID_DEBUG
+  if (xgu_debug) {
+    printf("In weiler: after degenerate cases\n");
+  }
+#endif
 
   // At this point, we know we have a 'cliping' scenario to deal with
   if(false){ // debug: dump final lists
@@ -1063,6 +1282,12 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 
   // Phase 2, compute difference
   {
+    
+#if BOB_XGRID_DEBUG
+    if (xgu_debug) {
+      printf("In weiler: regular clipping \n");
+    }
+#endif
 
     unsigned int npts = 0;  // number of inbound points used from p(subject) list
     bool done = false;
@@ -1075,8 +1300,21 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     bool start = false;
     while(! done){
 
+#if BOB_XGRID_DEBUG
+      if (xgu_debug) {
+	printf("In weiler: loop top label=%c inter=%d ibnd=%d\n",it->label,it->intersection,it->inbound);
+      }
+#endif
+      
       // completed a loop, save this polygon
       if(it->visited && on_subject) {
+
+#if BOB_XGRID_DEBUG
+	if (xgu_debug) {
+	  printf("In weiler: save what's in nodes: nodes.size=%d\n",nodes.size());
+	}
+#endif
+
         std::list<xpoint>::iterator tmpit = it;
         // clear visited attributes
         for(it = final_pnodes.begin(); it != final_pnodes.end(); ++it) it->visited = false;
@@ -1091,12 +1329,34 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         polygon_to_coords(nodal_poly, sdim, coords);
         if(sdim == 2) remove_0len_edges2D(&num_nodes, coords);
         if(sdim == 3) remove_0len_edges3D(&num_nodes, coords);
+    
+	if (xgu_debug) {
+	  printf("In weiler: save what's in nodes: after proc. num_nodes=%d\n",num_nodes);
+	}
 
+        // If at least a triangle, output what's in nodes 
+        // (unless it's too small or in the wrong order)
         if(num_nodes >=3){
           polygon res_poly;
           coords_to_polygon(num_nodes, coords, sdim, res_poly);
-          if(res_poly.area(sdim) > 0)
+          double area=res_poly.area(sdim);
+#if BOB_XGRID_DEBUG
+	  if (xgu_debug) {
+	    static int out=0;
+	    printf("In weiler: save what's in nodes: area=%30.27f vtk out=%d\n",area,out);
+	    //	    write_3D_poly_to_vtk("poly_out",out,num_nodes,coords);	    
+	    out++;
+	  }
+#endif
+	  if(area > 1.0E-15) {
+	    //if(res_poly.area(sdim) > 0) {
+#if BOB_XGRID_DEBUG
+	    if (xgu_debug) {
+	      printf("In weiler: save what's in nodes: actually adding poly to diff. \n");
+	    }
+#endif
             difference.push_back(res_poly);
+	  }
         }
         delete[] coords;
 
@@ -1110,16 +1370,27 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 
       // if after a traverse, all inbound intersection points are used, then exit
       if(!start && npts == num_inbinter){
+#if BOB_XGRID_DEBUG
+	if (xgu_debug) {
+	  printf("In weiler: rc: Exiting! \n");
+	}
+#endif
         done = true;
         continue;
       }
 
-      // if p is not an inbound intersection,
-      //   save p, mark it visited, switch to clip list and move to previous clip polygon node.
+      // if p is not an inbound intersection, 
+      //   save p, mark it visited, switch to clip list and move to previous clip polygon node. 
       // else
       //   if(star loop) save, mark
       //   move to the next subject polygon node;
       if(on_subject){
+#if BOB_XGRID_DEBUG
+	if (xgu_debug) {
+	  printf("In weiler: on subject\n");
+	}
+#endif
+
         if(it->intersection && it->inbound & 2){
           if(!start){ // if this inbound node has been visited in previous loop, continue on subject polygon
             std::vector<xpoint>::iterator it_tmp = std::find(visited_inbnodes.begin(), visited_inbnodes.end(), *it);
@@ -1132,7 +1403,14 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
           visited_inbnodes.push_back(*it);
           start = true;
           it->visited = true;
+
+#if BOB_XGRID_DEBUG
+	if (xgu_debug) {
+	  printf("In weiler: H1 adding node=%d (label=%c inter=%d ibnd=%d) \n",nodes.size(),it->label,it->intersection,it->inbound);
+	}
+#endif
           nodes.push_back(*it);
+
           it = std::find(final_qnodes.begin(), final_qnodes.end(), *it);
           if(it == final_qnodes.end()) Throw() << "it must be on final qnodes list\n";
           it->visited = true; // mark intersection point on q list at the same time
@@ -1140,21 +1418,40 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
           else --it;
           npts ++;
           on_subject = false;
-        }
-        else{
+        } else{
           if(start) {
             it->visited = true;
+
+#if BOB_XGRID_DEBUG
+	if (xgu_debug) {
+	  printf("In weiler: H2 adding node=%d (label=%c inter=%d ibnd=%d) \n",nodes.size(),it->label,it->intersection,it->inbound);
+	}
+#endif
             nodes.push_back(*it);
           }
           if(it == --final_pnodes.end()) it = final_pnodes.begin();
           else ++it;
         }
       }else{
+
+#if BOB_XGRID_DEBUG
+	if (xgu_debug) {
+	  printf("In weiler: NOT on subject\n");
+	}
+#endif
+
         // if q is an intersection, save q, mark it visited, switch to p(subject) list
         // and move to next subject polygon node
-        // else move to the previous clip polygon node, save, mark visited,
+        // else move to the previous clip polygon node, save, mark visited, 
         if(it->intersection){
           it->visited = true;
+
+#if BOB_XGRID_DEBUG
+	if (xgu_debug) {
+	  printf("In weiler: H3 adding node=%d (label=%c inter=%d ibnd=%d) \n",nodes.size(),it->label,it->intersection,it->inbound);
+	}
+#endif
+
           nodes.push_back(*it);
           it = std::find(final_pnodes.begin(), final_pnodes.end(), *it);
           if(it == final_pnodes.end()) Throw() << "it must be on final pnodes list\n";
@@ -1165,27 +1462,88 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         }else{
           if(start) {
             it->visited = true;
+
+#if BOB_XGRID_DEBUG
+	if (xgu_debug) {
+	  printf("In weiler: H4 adding node=%d (label=%c inter=%d ibnd=%d) \n",nodes.size(),it->label,it->intersection,it->inbound);
+	}
+#endif
             nodes.push_back(*it);
           }
           if(it == final_qnodes.begin()) it = --final_qnodes.end();
           else --it;
-        }
+        }   
       }
     }
   }
 
   return 0;
-
 }
 
 
-void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_cell *> & sintd_cells, int pdim, int sdim, Mesh *midmesh){
+  class UC {
+  public:
+    std::vector<UInt> ids;
+
+    bool operator < (const UC & that) const{
+      if (ids.size() < that.ids.size()) return true;
+      if (ids.size() > that.ids.size()) return false;
+      // now we can assume that the sizes are equal
+
+      for(int i = 0; i < ids.size(); i ++){
+	if(ids[i] < that.ids[i]) return true;
+	if(ids[i] > that.ids[i]) return false;
+      }
+      return false;
+    };
+  };
+
+  void unique_cell_list(std::vector<sintd_cell *> & sintd_cells) {
+
+    // Structure for tracking unique list of cell ids
+    std::set<UC> unique_cell_ids; 
+    
+    // New list of unique cells
+    std::vector<sintd_cell *>  unique_cells;
+    
+    // Loop through cells
+    for (int i=0; i<sintd_cells.size(); i++) {
+      
+      // Get number of edges in cell
+      int num_edges = sintd_cells[i]->num_edges();
+      
+      // Add ids to tmp_uc
+      UC tmp_uc;
+      tmp_uc.ids.reserve(num_edges);
+      for(int in = 0; in < num_edges; in ++){
+	tmp_uc.ids.push_back(sintd_cells[i]->operator[](in)->get_node()->get_id());
+      }
+      
+      // Sort ids
+      std::sort(tmp_uc.ids.begin(), tmp_uc.ids.end());
+      
+      // Insert into set also checking for uniqueness
+      std::pair<std::set<UC>::iterator,bool> ret;
+      ret=unique_cell_ids.insert(tmp_uc);
+      
+      // ret.second is true if tmp_uc wasn't in the set, so add to list
+      if (ret.second) {
+	unique_cells.push_back(sintd_cells[i]);
+      }
+    }
+    
+    // Put unique list back into original
+    sintd_cells.clear(); sintd_cells.reserve(unique_cells.size());
+    sintd_cells.insert(sintd_cells.begin(),unique_cells.begin(),unique_cells.end());
+  } 
+  
+  void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_cell *> & sintd_cells, int pdim, int sdim, Mesh *midmesh, int side){
 
   // Debug
   //if(false){
   //  std::vector<sintd_node *>::iterator ib = sintd_nodes.begin();
   //  std::vector<sintd_node *>::iterator ie = sintd_nodes.end();
-  //
+  //  
   //  for(; ib != ie; ib++){
   //    if((*ib)->get_dim() != 2 && (*ib)->get_dim() != 3) (*ib)->print();
   //  }
@@ -1193,17 +1551,17 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
   //if(false){
   //  std::vector<sintd_cell *>::iterator ib = sintd_cells.begin();
   //  std::vector<sintd_cell *>::iterator ie = sintd_cells.end();
-  //
+  //  
   //  for(; ib != ie; ib++){
   //    for(int i = 0; i < (*ib)->num_edges(); i ++)
-  //      if((*ib)->operator[](i)->get_dim() != 2 && (*ib)->operator[](i)->get_dim() != 3)
+  //      if((*ib)->operator[](i)->get_dim() != 2 && (*ib)->operator[](i)->get_dim() != 3) 
   //        (*ib)->operator[](i)->print();
   //  }
   //}
   // collect all the unique intersection points
   std::vector<sintd_node *> tmpnodes;
   std::stable_sort(sintd_nodes.begin(), sintd_nodes.end(), sintd_node_less());
-  { // make sure the genesis cells in the duplicates are pointing
+  { // make sure the genesis cells in the duplicates are pointing 
     // to the retained node. The two loops take linear time.
     std::vector<sintd_node *>::iterator it = sintd_nodes.begin();
     while(it != sintd_nodes.end()){
@@ -1227,15 +1585,15 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
   Mesh & meshmid = *midmesh;
   meshmid.set_parametric_dimension(pdim);
   meshmid.set_spatial_dimension(sdim);
-  meshmid.orig_spatial_dim=pdim;
+  meshmid.side=side;
   int rc;
   int me = VM::getCurrent(&rc)->getLocalPet();
 
   int offset=0;
   { //reduction to compute the global ids
     int nnodes = sintd_nodes.size();
-    int lrc = MPI_Scan((void *)&nnodes, (void*)&offset, 1, MPI_INT, MPI_SUM,
-      VM::getCurrent(&rc)->getMpi_c());
+    int lrc = MPI_Scan((void *)&nnodes, (void*)&offset, 1, MPI_INT, MPI_SUM, 
+      VM::getCurrent(&rc)->getMpi_c()); 
     if(lrc != 0) Throw() << "MPI_Scan failed to reduce the local offset.\n";
     offset -= nnodes;
   }
@@ -1246,11 +1604,11 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
   node_list.resize(num_int);
 
   for (int i=0; i<num_int; i++) {
-    // Create new node in mesh object
+    // Create new node in mesh object       
     MeshObj *node = new MeshObj(MeshObj::NODE,i+offset+1,i);
-    node->set_owner(me);
+    node->set_owner(me); 
 
-    // Add to mesh
+    // Add to mesh    
     meshmid.add_node(node, 0);
 
     // Add to local list
@@ -1262,7 +1620,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
 
   // Register the nodal coordinate field.
   IOField<NodalField> *node_coord = meshmid.RegisterNodalField(meshmid, "coordinates", meshmid.spatial_dim());
-
+  
   // Add coordinates to Nodes
   for (int i=0; i<num_int; i++) {
     double *c = node_coord->data(*(node_list[i]));
@@ -1272,6 +1630,9 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     }
   }
 
+  // Reduce cell list to just unique cells
+  //  unique_cell_list(sintd_cells);
+
   // collect all the unique intersection cells ? shouldn't need to do this
   //std::stable_sort(sintd_cells.begin(), sintd_cells.end());
   //sintd_cells.erase(unique(sintd_cells.begin(), sintd_cells.end()), sintd_cells.end());
@@ -1279,8 +1640,8 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
   offset = 0;
   { //reduction to compute the global ids
     int ncells = sintd_cells.size();
-    int lrc = MPI_Scan((void *)&ncells, (void*)&offset, 1, MPI_INT, MPI_SUM,
-      VM::getCurrent(&rc)->getMpi_c());
+    int lrc = MPI_Scan((void *)&ncells, (void*)&offset, 1, MPI_INT, MPI_SUM, 
+      VM::getCurrent(&rc)->getMpi_c()); 
     if(lrc != 0) Throw() << "MPI_Scan failed to reduce the local offset.\n";
     offset -= ncells;
   }
@@ -1303,6 +1664,20 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
       nodes.push_back(sintd_cells[i]->operator[](in)->get_node());
     }
 
+
+#if BOB_XGRID_DEBUG
+    int cell_gid=i+offset+1;
+    if ((cell_gid == 59955) || (cell_gid == 59955)) {
+      printf("%d# %d BOBMM s_id=%d d_id=%d cell id=%d node ids=",Par::Rank(),i,
+	     sintd_cells[i]->s_id,sintd_cells[i]->d_id,
+	     cell_gid);
+      for (int j=0; j<nodes.size(); ++j) {
+	printf(" %d ",nodes[j]->get_id());
+      }
+      printf("\n");
+    }
+#endif
+
     meshmid.add_element(cell, nodes, num_edges, sintd_cells[i]->get_topo(sdim, pdim));
     elem_list[i] = cell;
   }
@@ -1319,6 +1694,22 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
                      MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
   MEField<> *elem_centroid = meshmid.RegisterField("elem_centroid",
                      MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
+
+  // Field to record original mesh ind per elem
+  MEField<> *side1_mesh_ind = NULL;
+  MEField<> *side2_mesh_ind = NULL;
+  if (side == 1) {
+    side1_mesh_ind = meshmid.RegisterField("side1_mesh_ind",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+  } else if (side == 2) {
+    side2_mesh_ind = meshmid.RegisterField("side2_mesh_ind",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+  } else if (side == 3) {
+    side1_mesh_ind = meshmid.RegisterField("side1_mesh_ind",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    side2_mesh_ind = meshmid.RegisterField("side2_mesh_ind",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);  
+  } 
 
   // Finalize mesh
   meshmid.build_sym_comm_rel(MeshObj::NODE);
@@ -1340,6 +1731,20 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     //std::cout << i << "th cell area: " << *area << "\n";
     double *centroid = elem_centroid->data(*(elem_list[i]));
     sintd_cells[i]->get_centroid(centroid, sdim, pdim);
+
+    if (side == 1) {
+      double *side1_mesh_ind_ptr = side1_mesh_ind->data(*(elem_list[i]));
+      *side1_mesh_ind_ptr=sintd_cells[i]->side1_mesh_ind;
+    } else if (side == 2) {
+      double *side2_mesh_ind_ptr = side2_mesh_ind->data(*(elem_list[i]));
+      *side2_mesh_ind_ptr=sintd_cells[i]->side2_mesh_ind;
+    } else if (side == 3) {
+      double *side1_mesh_ind_ptr = side1_mesh_ind->data(*(elem_list[i]));
+      *side1_mesh_ind_ptr=sintd_cells[i]->side1_mesh_ind;
+      double *side2_mesh_ind_ptr = side2_mesh_ind->data(*(elem_list[i]));
+      *side2_mesh_ind_ptr=sintd_cells[i]->side2_mesh_ind;
+    }
+
   }
 
   //char str[64]; memset(str, 0, 64);
@@ -1359,8 +1764,12 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
 }
 
 // Compute cells of middle mesh based on clipping results
-void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim,
-  std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct * zz){
+void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
+			       std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct * zz, 
+#if BOB_XGRID_DEBUG
+                               int s_id, int d_id, 
+#endif
+                               int side1_mesh_ind, int side2_mesh_ind){
 
   // bubble up the nodes and cells
   // cross reference the nodes and cells
@@ -1368,7 +1777,7 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
   int proc, part;
   int me = VM::getCurrent(&rc)->getLocalPet();
   int npet = VM::getCurrent(&rc)->getNpets();
-
+  
   if(npet != 1 && zz){
     // determine if we want to build the nodes/cells on this proc
     int num_owned = 0;
@@ -1376,7 +1785,7 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
     for(int in = 0; in < num_sintd_nodes; in ++){
       Zoltan_LB_Point_PP_Assign(zz, sintd_coords+sdim*in, &proc, &part);
       if(proc == me) num_owned ++;
-      proc_owned[proc]++;
+      proc_owned[proc]++; 
     }
     // if none of the nodes is owned by this proc, return
     if(num_owned == 0) return;
@@ -1411,13 +1820,21 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
     }
   }
 
-  construct_sintd(area, num_sintd_nodes, sintd_coords, pdim, sdim,
-    sintd_nodes, sintd_cells);
+  construct_sintd(area, num_sintd_nodes, sintd_coords, pdim, sdim, 
+		  sintd_nodes, sintd_cells,
+#if BOB_XGRID_DEBUG
+                  s_id, d_id, 
+#endif
+                  side1_mesh_ind, side2_mesh_ind);
 
 }
 
-void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim,
-  std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells){
+void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
+		     std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, 
+#if BOB_XGRID_DEBUG
+                     int s_id, int d_id,
+#endif
+		     int side1_mesh_ind, int side2_mesh_ind){
 
   // Get rid of degenerate edges
   if(sdim == 2)
@@ -1464,12 +1881,18 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 
       // every cell keeps track of the nodes enclosing it
       sintd_cell * cell = new sintd_cell(split_area, cell_nodes);
+#if BOB_XGRID_DEBUG
+      cell->s_id=s_id;
+      cell->d_id=d_id;
+#endif
+      cell->side1_mesh_ind=side1_mesh_ind;
+      cell->side2_mesh_ind=side2_mesh_ind;
       sintd_cells->push_back(cell);
 
       for(int in = 0; in < 3; in ++)
         (*(cell_nodes[in])).set_cell(cell);
     }
-    delete[] coords;
+    delete[] coords; 
 
 //    // Init variables for polygon triangulation
 //    int num_tri=num_sintd_nodes-2;
@@ -1477,7 +1900,7 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 //    double *td=new double[sdim*num_sintd_nodes];
 //    int *ti=new int[num_sintd_nodes];
 //
-//    // Triangulate polygon
+//    // Triangulate polygon       
 //    int rc;
 //    if(sdim == 2) {
 //      rc=triangulate_poly<GEOM_CART2D>(num_sintd_nodes, sintd_coords, td, ti, tri_ind);
@@ -1522,7 +1945,7 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 //
 //      // List of cell nodes
 //      std::vector<sintd_node *> cell_nodes;
-//
+//      
 //      // Add nodes to list
 //      for (int j=0; j<3; j++) {
 //        sintd_node * node = new sintd_node(sdim, tri_coords+sdim*j);
@@ -1533,8 +1956,8 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 //      // every cell keeps track of the nodes enclosing it
 //      sintd_cell * cell = new sintd_cell(split_area, cell_nodes);
 //      sintd_cells->push_back(cell);
-//
-//      // nodes refer to their cell
+//      
+//      // nodes refer to their cell    
 //      for(int in = 0; in < 3; in ++) {
 //        (*(cell_nodes[in])).set_cell(cell);
 //      }
@@ -1543,7 +1966,7 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 //    delete[] tri_ind;
 //    delete[] td;
 //    delete[] ti;
-
+      
   }else{
     // Make sure cell area is non-zero
     double split_area;
@@ -1563,6 +1986,12 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 
     // every cell keeps track of the nodes enclosing it
     sintd_cell * cell = new sintd_cell(area, cell_nodes);
+#if BOB_XGRID_DEBUG
+    cell->s_id=s_id;
+    cell->d_id=d_id;
+#endif
+    cell->side1_mesh_ind=side1_mesh_ind;
+    cell->side2_mesh_ind=side2_mesh_ind;
     sintd_cells->push_back(cell);
 
     // every node associated with this genesis cell refers to it
@@ -1573,7 +2002,7 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 
 // A different path for online regrid
 int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &wts,
-                  int *regridConserve, int *regridMethod,
+                  int *regridConserve, int *regridMethod, 
                   int *unmappedaction) {
 
   // Conservative regridding
@@ -1586,21 +2015,21 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
   bool tmp_set_dst_status=false;
   int tmpExtrapMethod=0;
   int tmpExtrapNumSrcPnts=1;
+  ESMC_R8 tmpExtrapDistExponent=2.0;    
   int tmpExtrapNumLevels=1;
   int tmpExtrapNumInputLevels=1;
-  ESMC_R8 tmpExtrapDistExponent=2.0;
   IWeights tmp_dst_status;
 //WriteVTKMesh(srcmesh, "srcmesh");
 //WriteVTKMesh(dstmesh, "dstmesh");
-  if (!regrid(&srcmesh, NULL, &dstmesh, NULL, midmesh, wts, regridMethod, &regridScheme,
-              &regridPoleType, &regridPoleNPnts, &map_type,
+  if (!regrid(&srcmesh, NULL, &dstmesh, NULL, midmesh, wts, regridMethod, &regridScheme, 
+              &regridPoleType, &regridPoleNPnts, &map_type, 
               &tmpExtrapMethod,
-              &tmpExtrapNumSrcPnts,
+              &tmpExtrapNumSrcPnts, 
               &tmpExtrapDistExponent,
               &tmpExtrapNumLevels,
               &tmpExtrapNumInputLevels,
-              unmappedaction,
-              tmp_set_dst_status, tmp_dst_status))
+              unmappedaction, 
+              tmp_set_dst_status, tmp_dst_status, false))
     Throw() << "Regridding error" << std::endl;
 
   return 1;
@@ -1627,7 +2056,7 @@ int polygon_to_coords(const struct polygon & poly, const int sdim, double *p, bo
 }
 int coords_to_polygon(const int num_p, const double * const p, const int sdim, struct polygon & poly){
   for(int i = 0; i < num_p; i ++){
-    if(sdim == 2){
+    if(sdim == 2){ 
       poly.points.push_back(xpoint(p[i*sdim], p[i*sdim+1], 'p'));
     }else if(sdim == 3){
       poly.points.push_back(xpoint(p[i*sdim], p[i*sdim+1], p[i*sdim+2], 'p'));
@@ -1769,7 +2198,7 @@ void test_clip3D(int pdim, int sdim, int num_s, double * s_coord, int num_c, dou
     if(num_p > 3){
       double *pts = new double[sdim*(diff_it->points.size())];
       polygon_to_coords(*diff_it, sdim, pts);
-
+    
       if(me == 0){
         double * sph_pts = new double[diff_it->points.size()*2];
         cart2sph(diff_it->points.size(), pts, sph_pts);
@@ -1800,8 +2229,8 @@ void test_clip3D(int pdim, int sdim, int num_s, double * s_coord, int num_c, dou
 
 bool same_point(const double * const p1, const double * const p2, const double epsilon){
 
-return ((std::abs(p1[0]-p2[0]) < epsilon) &&    
-                           (std::abs(p1[1]-p2[1]) < epsilon) &&         
+return ((std::abs(p1[0]-p2[0]) < epsilon) &&	
+                           (std::abs(p1[1]-p2[1]) < epsilon) &&	
                            (std::abs(p1[2]-p2[2]) < epsilon));
 }
 
@@ -1816,18 +2245,19 @@ double lngi2 = PI*g2/CIRC;
 double v = sin(lati1)*sin(lati2) + cos(lati1)*cos(lati2)*cos(lngi1-lngi2);
 if (v >= 1.0) return 0.0;
 if (v <= -1.0) return 2*PI;
-return acos(v);
+return acos(v); 
 }
 // arc length = arc angle * radius = arc angle * 1 = arccos(v1.v2)
 double gcdistance(double * v1, double * v2){
-  double dotprod = dot(xvector(v1, 3), xvector(v2, 3));
+   double dotprod = dot(xvector(v1, 3), xvector(v2, 3));
   // Work around spurious floating point result
   if(std::abs(dotprod) > 1.01) Throw() << "Dot product from two unit vectors exceeded 1. by 1%\n";
-  if(std::abs(dotprod) > 1) return 0;
+  if(dotprod > 1.0) return 0;
+  if(dotprod < -1.0) return PI;
   return acos(dotprod);
 }
 
-bool intersect_line_with_line(const double *p1, const double *p2, const double *q1, const double *q2, double * result, bool * coincident,
+bool intersect_line_with_line(const double *p1, const double *p2, const double *q1, const double *q2, double * result, bool * coincident, 
   double * pidx, double *qidx){
   if(same_point(p1,p2)) Throw() << "Cannot find intersect between point and line\n";
   if(same_point(q1,q2)) Throw() << "Cannot find intersect between point and line\n";
@@ -1856,9 +2286,9 @@ bool intersect_line_with_line(const double *p1, const double *p2, const double *
   // n2 = q1 x q2 : normal vector perpendicular to first great circle formed by origin, q1, q2
   // s = n1 x n2  : vector parallel to the line intersecting the two great circle planes
   // if (s . (p1+p2)/2 > 0) this vector points in the direction of the hemisphere containing s and (p1+p2)/2
-  xvector origin(0., 0., 0.);
+  xvector origin(0., 0., 0.); 
   xvector normal1=cross(xvector(p1, 3), xvector(p2, 3));
-  xvector normal2=cross(xvector(q1, 3), xvector(q2, 3));
+  xvector normal2=cross(xvector(q1, 3), xvector(q2, 3)); 
   xvector s = cross(normal1, normal2);
   xvector intersect = s/s.metric();
   if(dot(intersect, (xvector(p1,3)+xvector(p2,3))/2) > 0. &&

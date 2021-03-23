@@ -65,7 +65,7 @@ class TestMaskedArray(TestBase):
         Manager()
 
         # create a ctypes grid object to hold pointer and other info for ctypes layer
-        if array.dtype is not np.int32:
+        if not isinstance(array.dtype, np.int32):
             array = np.array(array, dtype=np.int32)
         esmfalloc = self.ctypesgrid(array)
 
@@ -110,7 +110,7 @@ class TestMaskedArray(TestBase):
 
     def test_slice2(self):
 
-        dataptr, lb, ub = self.make_maskedarray(np.array([10, 10], dtype=np.int32))
+        dataptr, lb, ub = self.make_maskedarray(np.array([100, 100], dtype=np.int32))
 
         array0 = MaskedArray(dataptr, None, TypeKind.R8, ub-lb)
 

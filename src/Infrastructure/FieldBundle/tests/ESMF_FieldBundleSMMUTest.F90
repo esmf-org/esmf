@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -538,7 +538,6 @@ contains
 #define ESMF_METHOD "test_field_bundle_smm_store_from_file"
 
 subroutine test_field_bundle_smm_store_from_file(rc, srcTermProcessing)
-  use ESMF
   use ESMF_IOScripMod
 
   integer, intent(inout) :: rc
@@ -726,7 +725,6 @@ end subroutine test_field_bundle_smm_store_from_file
 #define ESMF_METHOD "test_field_bundle_smm_source_term_processing"
 
 subroutine test_field_bundle_smm_source_term_processing(srcTermProcessing, rc)
-  use ESMF
 
   integer, parameter :: fieldCount = 2
   integer, parameter :: dstMaxIndex(2) = (/10, 20/)
@@ -884,8 +882,6 @@ end subroutine test_field_bundle_smm_source_term_processing
 type(ESMF_Grid) function grid_create_no_peri_dim_by_max_index(maxIndex, rc) &
   result(grid)
 
-  use ESMF
-
   integer, intent(in)    :: maxIndex(2)
   integer, intent(inout) :: rc
 
@@ -929,8 +925,6 @@ end function grid_create_no_peri_dim_by_max_index
 type(ESMF_FieldBundle) function field_bundle_create(grid, fieldCount, shouldFill, &
   rc) result(fieldBundle)
 
-  use ESMF
-
   type(ESMF_Grid), intent(in) :: grid
   integer, intent(in) :: fieldCount
   integer, intent(inout) :: rc
@@ -965,8 +959,6 @@ end function field_bundle_create
 #define ESMF_METHOD "field_bundle_destroy"
 
 subroutine field_bundle_destroy(fieldBundle, rc)
-
-  use ESMF
 
   type(ESMF_FieldBundle), intent(inout) :: fieldBundle
   integer, intent(inout) :: rc

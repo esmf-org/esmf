@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -101,8 +101,9 @@ void FTN_X(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp,
   meshp->meshwrite(name, &localrc, nlen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
-  // Get rid of Mesh
-  delete meshp;
+  // Get rid of Mesh, also considering garbage collection
+  localrc = MeshCap::destroy(&meshp, true);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
   // Return success
   if (rc) *rc = ESMF_SUCCESS;
@@ -171,8 +172,9 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
   meshp->meshwrite(name, &localrc, nlen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
-  // Get rid of Mesh
-  delete meshp;
+  // Get rid of Mesh, also considering garbage collection
+  localrc = MeshCap::destroy(&meshp, true);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
   // Return success
   if (rc) *rc = ESMF_SUCCESS;
@@ -217,8 +219,9 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
   meshp->meshwrite(name, &localrc, nlen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
-  // Get rid of Mesh
-  delete meshp;
+  // Get rid of Mesh, also considering garbage collection
+  localrc = MeshCap::destroy(&meshp, true);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
   // Return success
   if (rc) *rc = ESMF_SUCCESS;

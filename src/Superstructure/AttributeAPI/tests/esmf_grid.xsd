@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <xsd:element name="GridSpec">
+    <xsd:complexType>
+      <xsd:sequence>
+
+        <xsd:element name="Mosaic">
+          <xsd:complexType>
+            <xsd:sequence>
+
+              <xsd:element name="attribute_package">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <!-- for (conv, purp) = (GridSpec, General) -->
+                    <xsd:element name="GridType" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="CongruentTiles" type="xsd:boolean" minOccurs="0"/>
+                    <xsd:element name="NumberOfGridTiles" type="xsd:unsignedLong" minOccurs="0"/>
+                    <xsd:element name="DimensionOrder" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="DiscretizationType" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="GeometryType" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="IsConformal" type="xsd:boolean" minOccurs="0"/>
+                    <xsd:element name="IsRegular" type="xsd:boolean" minOccurs="0"/>
+                    <xsd:element name="IsUniform" type="xsd:boolean" minOccurs="0"/>
+                    <xsd:element name="NorthPoleLocation" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="NumberOfCells" type="xsd:unsignedLong" minOccurs="0"/>
+                    <xsd:element name="NX" type="xsd:unsignedInt" minOccurs="0"/>
+                    <xsd:element name="NY" type="xsd:unsignedInt" minOccurs="0"/>
+                    <xsd:element name="HorizontalResolution" type="xsd:string" minOccurs="0"/>
+                  </xsd:sequence>
+                  <xsd:attribute name="convention" type="xsd:string" use="required"/>
+                  <xsd:attribute name="purpose" type="xsd:string" use="required"/>
+                </xsd:complexType>
+              </xsd:element>
+ 
+              <!-- Optional attributes for specifying the decomposition.
+                     Note that these are not part of the GridSpec Attribute 
+                     Package, since they do not describe any part of the grid
+                     itself. -->
+              <xsd:element name="RegDecompX" minOccurs="0"/>
+              <xsd:element name="RegDecompY" minOccurs="0"/>
+
+            </xsd:sequence>
+            <xsd:attribute name="name" type="xsd:string"/>
+          </xsd:complexType>
+        </xsd:element>
+
+      </xsd:sequence>
+      <xsd:attribute name="name" type="xsd:string"/>
+    </xsd:complexType>
+  </xsd:element>
+
+</xsd:schema>

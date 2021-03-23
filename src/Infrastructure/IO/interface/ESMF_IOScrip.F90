@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -43,8 +43,8 @@
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
+      use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoSet, ESMF_InfoGetFromPointer
 
-!     NEED TO ADD MORE HERE
       implicit none
 
 !------------------------------------------------------------------------------
@@ -165,7 +165,6 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     type(ESMF_AttPack) :: attpack
     integer :: lens(3), lens2(1), nfactors, ii, localPet, petCount, startIndex, &
                stopIndex, localrc, memstat, hasFactors, nLivePETs(1), offset
-    character(len=22), parameter :: specString = "distgridnetcdfmetadata"
     character(len=23), parameter :: name = "ESMF:gridded_dim_labels"
     character(len=3), parameter :: value = "n_s"
     character(len=70), parameter :: noFactorsMsg = '"factorList" has size 0 and PET count is 1. There is nothing to write.'
@@ -174,7 +173,9 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     integer(ESMF_KIND_I4), dimension(1) :: sendData, recvData
     integer(ESMF_KIND_I4), dimension(2) :: bcstData
     integer(ESMF_KIND_I4), allocatable, dimension(:,:,:) :: deBlockList
-    
+    type(ESMF_Info) :: idg
+    type(ESMF_Pointer) :: ptr
+
     ! ==============================================================================
 
     if (present(rc)) then
@@ -298,33 +299,15 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     !NOTE: removed distgridcreate from factorIndexList so that all
     !      Arrays could share the same DistGrid (i.e. dimensions)
 
-    ! distgrid metadata
-    lens(1) = 8
-    lens(2) = 6
-    lens(3) = 8
-    
-    lens2(1) = 3
-    
-    ! set up the metadata on distgrid
-    call c_ESMC_AttPackCreateCustom(distgridFL, size(lens), specString, &
-                                    lens, attpack, localrc)
-    !call ESMF_AttributeAdd(grid, convention="netcdf", purpose="metadata",  &
-    !  attrList=(/ ESMF_ATT_GRIDDED_DIM_LABELS /), rc=rc)
+    call ESMF_DistGridGetThis(distgridFL, ptr, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    !call c_ESMC_AttPackAddAtt(grid, name, size(lens), specString, &
-    !                          lens, rc)
-    call c_ESMC_AttPackAddAtt(name, attpack, localrc)
+    ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InfoGetFromPointer(ptr, idg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    call c_ESMC_AttPackSetCharList(distgridFL, name, ESMF_TYPEKIND_CHARACTER, &
-                                  1, value, lens2, attpack, 0, localrc)
-    !call ESMF_AttributeSet(grid, name=ESMF_ATT_GRIDDED_DIM_LABELS, &
-    !                       convention="netcdf", purpose="metadata",  &
-    !                       valueList=(/ "n_s"/), rc=rc)
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InfoSet(idg, "/netcdf/metadata/"//name, (/ value /), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! ==============================================================================
     ! Create arrays.

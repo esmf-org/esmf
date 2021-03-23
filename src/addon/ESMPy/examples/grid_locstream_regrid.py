@@ -9,6 +9,11 @@
 # from ESMF.util.cache_data import cache_data_file
 # cache_data_file(os.path.join(DD, "ll1deg_grid.nc"))
 
+try:
+    from unittest import SkipTest
+except ImportError:
+    from nose import SkipTest
+
 import ESMF
 import numpy
 
@@ -24,8 +29,8 @@ domask=True
 if ESMF.pet_count() == 1:
     locstream = create_locstream_spherical_16(coord_sys=coord_sys, domask=domask)
 else:
-    if ESMF.pet_count() is not 4:
-        raise ValueError("processor count must be 4 or 1 for this example")
+    if constants._ESMF_MPIRUN_NP != 4:
+        raise SkipTest('processor count must be 4 or 1 for this example')
     else:
         locstream = create_locstream_spherical_16_parallel(coord_sys=coord_sys, domask=domask)
 
@@ -78,7 +83,7 @@ meanrelerr = 0
 dstfield = numpy.ravel(dstfield.data)
 xctfield = numpy.ravel(xctfield.data)
 
-if num_nodes is not 0:
+if num_nodes != 0:
     ind = numpy.where((dstfield != 1e20) & (xctfield != 0))[0]
     relerr = numpy.sum(numpy.abs(dstfield[ind] - xctfield[ind]) / numpy.abs(xctfield[ind]))
     meanrelerr = relerr / num_nodes
@@ -89,7 +94,7 @@ if ESMF.pet_count() > 1:
     num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
 
 # output the results from one processor only
-if ESMF.local_pet() is 0:
+if ESMF.local_pet() == 0:
     meanrelerr = relerr / num_nodes
     print ("ESMPy Grid LocStream Regridding Example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))

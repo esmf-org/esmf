@@ -1,16 +1,16 @@
 /**
  * MOAB, a Mesh-Oriented datABase, is a software component for creating,
  * storing and accessing finite element mesh data.
- * 
+ *
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
  * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  */
 
 /****************************************************
@@ -33,11 +33,12 @@
 #include "Internals.hpp"
 #include "moab/CN.hpp"
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #ifdef HAVE_BOOST_POOL_SINGLETON_POOL_HPP
 #  include <boost/pool/singleton_pool.hpp>
-   typedef boost::singleton_pool< moab::Range::PairNode , sizeof(moab::Range::PairNode) > 
+   typedef boost::singleton_pool< moab::Range::PairNode , sizeof(moab::Range::PairNode) >
     PairAlloc;
 //   static inline moab::Range::PairNode* alloc_pair()
 //    { return new (PairAlloc::malloc()) moab::Range::PairNode; }
@@ -56,7 +57,7 @@
 
 namespace moab {
 
-/*! 
+/*!
   returns the number of values this list represents
  */
 size_t Range::size() const
@@ -82,7 +83,7 @@ Range::const_iterator& Range::const_iterator::operator+=( EntityID sstep )
     return operator-=( -sstep );
   }
   EntityHandle step = sstep;
-  
+
     // Handle current PairNode.  Either step is within the current
     // node or need to remove the remainder of the current node
     // from step.
@@ -104,16 +105,16 @@ Range::const_iterator& Range::const_iterator::operator+=( EntityID sstep )
     node = node->mNext;
     node_size = node->second - node->first + 1;
   }
-  
+
     // Advance into the resulting node by whatever is
     // left in step.
   mNode = node;
   mValue = mNode->first + step;
   return *this;
 }
-  
-    
- 
+
+
+
 /*!
   regress iterator
 */
@@ -125,7 +126,7 @@ Range::const_iterator& Range::const_iterator::operator-=( EntityID sstep )
     return operator+=( -sstep );
   }
   EntityHandle step = sstep;
-  
+
     // Handle current PairNode.  Either step is within the current
     // node or need to remove the remainder of the current node
     // from step.
@@ -147,16 +148,16 @@ Range::const_iterator& Range::const_iterator::operator-=( EntityID sstep )
     node = node->mPrev;
     node_size = node->second - node->first + 1;
   }
-  
+
     // Advance into the resulting node by whatever is
     // left in step.
   mNode = node;
   mValue = mNode->second - step;
   return *this;
 }
-  
- 
-  
+
+
+
 
   //! another constructor that takes an initial range
 Range::Range( EntityHandle val1, EntityHandle val2 )
@@ -184,7 +185,7 @@ Range::Range(const Range& copy)
   }
 }
 
-  //! clears the contents of the list 
+  //! clears the contents of the list
 void Range::clear()
 {
   PairNode* tmp_node = mHead.mNext;
@@ -231,7 +232,7 @@ Range::iterator Range::insert( Range::iterator hint, EntityHandle val )
     mHead.mNext = mHead.mPrev = alloc_pair(&mHead, &mHead, val, val);
     return iterator(mHead.mNext, val);
   }
-  
+
   // find the location in the list where we can safely insert
   // new items and keep it ordered
   PairNode* hter = hint.mNode;
@@ -252,7 +253,7 @@ Range::iterator Range::insert( Range::iterator hint, EntityHandle val )
   // 2. the previous range needs to be forwardly extended
   // 3. a new range needs to be added
 
-  
+
   // extend this range back a bit
   else if( (iter->first == (val+1)) && (iter != &mHead) )
   {
@@ -289,13 +290,13 @@ Range::iterator Range::insert( Range::iterator hint, EntityHandle val )
 }
 
 Range::iterator Range::insert( Range::iterator prev,
-                                   EntityHandle val1, 
+                                   EntityHandle val1,
                                    EntityHandle val2 )
 {
   if(val1 == 0 || val1 > val2)
     return end();
 
-  // Empty 
+  // Empty
   if (mHead.mNext == &mHead)
   {
     assert( prev == end() );
@@ -303,21 +304,21 @@ Range::iterator Range::insert( Range::iterator prev,
     mHead.mNext = mHead.mPrev = new_node;
     return iterator( mHead.mNext, val1 );
   }
-  
+
   PairNode* iter = prev.mNode;
     // If iterator is at end, set it to last.
     // Thus if the hint was to append, we start searching
     // at the end of the list.
-  if (iter == &mHead) 
+  if (iter == &mHead)
     iter = mHead.mPrev;
     // if hint (prev) is past insert position, reset it to the beginning.
   if (iter != &mHead && iter->first > val2+1)
     iter = mHead.mNext;
-  
+
     // If hint is bogus then search backwards
   while (iter != mHead.mNext && iter->mPrev->second >= val1-1)
     iter = iter->mPrev;
-  
+
   // Input range is before beginning?
   if (iter->mPrev == &mHead && val2 < iter->first - 1)
   {
@@ -325,12 +326,12 @@ Range::iterator Range::insert( Range::iterator prev,
     mHead.mNext = iter->mPrev = new_node;
     return iterator( mHead.mNext, val1 );
   }
-  
+
   // Find first intersecting list entry, or the next entry
   // if none intersects.
   while (iter != &mHead && iter->second+1 < val1)
     iter = iter->mNext;
-  
+
   // Need to insert new pair (don't intersect any existing pair)?
   if (iter == &mHead || iter->first-1 > val2)
   {
@@ -338,29 +339,29 @@ Range::iterator Range::insert( Range::iterator prev,
     iter->mPrev = iter->mPrev->mNext = new_node;
     return iterator( iter->mPrev, val1 );
   }
-  
+
   // Make the first intersecting pair the union of itself with [val1,val2]
   if (iter->first > val1)
     iter->first = val1;
-  if (iter->second >= val2)  
+  if (iter->second >= val2)
     return iterator( iter, val1 );
   iter->second = val2;
-  
+
   // Merge any remaining pairs that intersect [val1,val2]
   while (iter->mNext != &mHead && iter->mNext->first <= val2 + 1)
   {
     PairNode* dead = iter->mNext;
     iter->mNext = dead->mNext;
     dead->mNext->mPrev = iter;
-    
+
     if (dead->second > val2)
       iter->second = dead->second;
     free_pair( dead );
   }
-  
+
   return iterator( iter, val1 );
 }
-    
+
 
 /*!
   erases an item from this list and returns an iterator to the next item
@@ -381,7 +382,7 @@ Range::iterator Range::erase(iterator iter)
   ++new_iter;
 
   PairNode* kter = iter.mNode;
-  
+
   // just remove the range
   if(kter->first == kter->second)
   {
@@ -419,19 +420,19 @@ Range::iterator Range::erase(iterator iter)
 Range::iterator Range::erase( iterator iter1, iterator iter2)
 {
   iterator result;
-  
+
   if (iter1.mNode == iter2.mNode) {
     if (iter2.mValue <= iter1.mValue) {
         // empty range OK, otherwise invalid input
       return iter2;
     }
-    
+
       // If both iterators reference the same pair node, then
       // we're either removing values from the front of the
       // node or splitting the node.  We can never be removing
       // the last value in the node in this case because iter2
       // points *after* the last entry to be removed.
-    
+
     PairNode* node = iter1.mNode;
     if (iter1.mValue == node->first) {
         node->first = iter2.mValue;
@@ -453,7 +454,7 @@ Range::iterator Range::erase( iterator iter1, iterator iter2)
       dn->second = iter1.mValue-1;
       dn = dn->mNext;
     }
-    if (iter2.mNode != &mHead) 
+    if (iter2.mNode != &mHead)
       iter2.mNode->first = iter2.mValue;
     while (dn != iter2.mNode) {
       PairNode* dead = dn;
@@ -464,10 +465,10 @@ Range::iterator Range::erase( iterator iter1, iterator iter2)
       dead->mPrev = dead->mNext = 0;
       delete dead;
     }
-    
+
     result = iter2;
   }
-  
+
   return result;
 }
 
@@ -486,7 +487,7 @@ EntityHandle Range::pop_front()
   EntityHandle retval = front();
   if (mHead.mNext->first == mHead.mNext->second) // need to remove pair from range
     delete_pair_node( mHead.mNext );
-  else 
+  else
     ++(mHead.mNext->first); // otherwise just adjust start value of pair
 
   return retval;
@@ -526,14 +527,14 @@ void Range::insert( Range::const_iterator begini,
 {
   if (begini == endi)
     return;
-  
+
   PairNode* node = begini.mNode;
   if (endi.mNode == node)
   {
     insert( *begini, (*endi)-1 );
     return;
   }
-  
+
   Range::iterator hint = insert( *begini, node->second );
   node = node->mNext;
   while (node != endi.mNode)
@@ -541,7 +542,7 @@ void Range::insert( Range::const_iterator begini,
     hint = insert( hint, node->first, node->second );
     node = node->mNext;
   }
-  
+
   if (*endi > node->first)
   {
     if (*endi <= node->second)
@@ -551,8 +552,8 @@ void Range::insert( Range::const_iterator begini,
   }
 }
 
-  
-  
+
+
 
 #include <algorithm>
 
@@ -566,7 +567,7 @@ void Range::sanity_check() const
   const PairNode* node = mHead.mNext;
   std::vector<const PairNode*> seen_before;
   bool stop_it = false;
-  
+
   for(; stop_it == false; node = node->mNext)
   {
     // have we seen this node before?
@@ -588,82 +589,92 @@ void Range::sanity_check() const
 
 }
 
+const std::string Range::str_rep(const char* indent_prefix) const {
+  std::stringstream str_stream;
+  std::string indent_prefix_str;
+  if (NULL != indent_prefix) {
+    indent_prefix_str += indent_prefix;
+  }
+
+  if (empty()) {
+    str_stream << indent_prefix_str << "\tempty" << std::endl;
+    return str_stream.str().c_str();
+  }
+
+  for (const_pair_iterator i = const_pair_begin(); i != const_pair_end(); ++i) {
+    EntityType t1 = TYPE_FROM_HANDLE( i->first );
+    EntityType t2 = TYPE_FROM_HANDLE( i->second );
+
+    str_stream << indent_prefix_str << "\t" << CN::EntityTypeName( t1 ) << " "
+           << ID_FROM_HANDLE( i->first );
+    if(i->first != i->second) {
+      str_stream << " - ";
+      if (t1 != t2)
+        str_stream << CN::EntityTypeName( t2 ) << " ";
+      str_stream << ID_FROM_HANDLE( i->second );
+    }
+    str_stream << std::endl;
+  }
+
+  return str_stream.str();
+}
+
+void Range::print(std::ostream& stream, const char *indent_prefix) const
+{
+  stream << str_rep(indent_prefix);
+}
+
 // for debugging
 void Range::print(const char *indent_prefix) const
 {
   print(std::cout, indent_prefix);
 }
 
-void Range::print(std::ostream& stream, const char *indent_prefix) const
-{
-  std::string indent_prefix_str;
-  if (NULL != indent_prefix) indent_prefix_str += indent_prefix;
-  
-  if (empty()) {
-    stream << indent_prefix_str << "\tempty" << std::endl;
-    return;
-  }
-  
-  for (const_pair_iterator i = const_pair_begin(); i != const_pair_end(); ++i) {
-    EntityType t1 = TYPE_FROM_HANDLE( i->first );
-    EntityType t2 = TYPE_FROM_HANDLE( i->second );
-  
-    stream << indent_prefix_str << "\t" << CN::EntityTypeName( t1 ) << " " 
-           << ID_FROM_HANDLE( i->first );
-    if(i->first != i->second) {
-      stream << " - ";
-      if (t1 != t2) 
-        stream << CN::EntityTypeName( t2 ) << " ";
-      stream << ID_FROM_HANDLE( i->second );
-    }
-    stream << std::endl;
-  }
-}
 
   // intersect two ranges, placing the results in the return range
 #define MAX(a,b) (a < b ? b : a)
 #define MIN(a,b) (a > b ? b : a)
-Range intersect(const Range &range1, const Range &range2) 
+Range intersect(const Range &range1, const Range &range2)
 {
-  Range::const_pair_iterator r_it[2] = { range1.const_pair_begin(), 
+  Range::const_pair_iterator r_it[2] = { range1.const_pair_begin(),
                                            range2.const_pair_begin() };
   EntityHandle low_it, high_it;
-  
+
   Range lhs;
   Range::iterator hint = lhs.begin();
-  
+
     // terminate the while loop when at least one "start" iterator is at the
     // end of the list
   while (r_it[0] != range1.end() && r_it[1] != range2.end()) {
-    
+
     if (r_it[0]->second < r_it[1]->first)
         // 1st subrange completely below 2nd subrange
       ++r_it[0];
-    else if (r_it[1]->second < r_it[0]->first) 
+    else if (r_it[1]->second < r_it[0]->first)
         // 2nd subrange completely below 1st subrange
       ++r_it[1];
-    
+
     else {
         // else ranges overlap; first find greater start and lesser end
       low_it = MAX(r_it[0]->first, r_it[1]->first);
       high_it = MIN(r_it[0]->second, r_it[1]->second);
-      
+
         // insert into result
       hint = lhs.insert(hint, low_it, high_it);
-      
+
         // now find bounds of this insertion and increment corresponding iterator
       if (high_it == r_it[0]->second) ++r_it[0];
       if (high_it == r_it[1]->second) ++r_it[1];
     }
   }
-  
+
   return lhs;
 }
 
-Range subtract(const Range &range1, const Range &range2) 
+Range subtract(const Range &range1, const Range &range2)
 {
   const bool braindead = false;
-  
+
   if (braindead) {
       // brain-dead implementation right now
     Range res( range1 );
@@ -674,10 +685,10 @@ Range subtract(const Range &range1, const Range &range2)
   }
   else {
     Range lhs( range1 );
-  
+
     Range::pair_iterator r_it0 = lhs.pair_begin();
     Range::const_pair_iterator r_it1 = range2.const_pair_begin();
-  
+
       // terminate the while loop when at least one "start" iterator is at the
       // end of the list
     while (r_it0 != lhs.end() && r_it1 != range2.end()) {
@@ -700,9 +711,9 @@ Range subtract(const Range &range1, const Range &range2)
         ++r_it0;
       }
         // case d: pair completely surrounds subtracted pair
-      else if (r_it0->first < r_it1->first && 
+      else if (r_it0->first < r_it1->first &&
                r_it0->second > r_it1->second) {
-        Range::PairNode* new_node = alloc_pair(r_it0.node(), r_it0.node()->mPrev, 
+        Range::PairNode* new_node = alloc_pair(r_it0.node(), r_it0.node()->mPrev,
                                         r_it0->first, r_it1->first - 1);
         new_node->mPrev->mNext = new_node->mNext->mPrev = new_node;
         r_it0.node()->first = r_it1->second+1;
@@ -714,15 +725,15 @@ Range subtract(const Range &range1, const Range &range2)
         while (r_it1->second < r_it0->first && r_it1 != range2.end()) ++r_it1;
       }
     }
-    
+
     return lhs;
   }
 }
 
-Range &Range::operator-=(const Range &range2) 
+Range &Range::operator-=(const Range &range2)
 {
   const bool braindead = false;
-  
+
   if (braindead) {
       // brain-dead implementation right now
     Range res( *this );
@@ -734,7 +745,7 @@ Range &Range::operator-=(const Range &range2)
   else {
     Range::pair_iterator r_it0 = this->pair_begin();
     Range::const_pair_iterator r_it1 = range2.const_pair_begin();
-  
+
       // terminate the while loop when at least one "start" iterator is at the
       // end of the list
     while (r_it0 != this->end() && r_it1 != range2.end()) {
@@ -757,9 +768,9 @@ Range &Range::operator-=(const Range &range2)
         ++r_it0;
       }
         // case d: pair completely surrounds subtracted pair
-      else if (r_it0->first < r_it1->first && 
+      else if (r_it0->first < r_it1->first &&
                r_it0->second > r_it1->second) {
-        Range::PairNode* new_node = alloc_pair(r_it0.node(), r_it0.node()->mPrev, 
+        Range::PairNode* new_node = alloc_pair(r_it0.node(), r_it0.node()->mPrev,
                                         r_it0->first, r_it1->first - 1);
         new_node->mPrev->mNext = new_node->mNext->mPrev = new_node;
         r_it0.node()->first = r_it1->second+1;
@@ -775,8 +786,8 @@ Range &Range::operator-=(const Range &range2)
   }
 }
 
-  
-EntityID 
+
+EntityID
 operator-( const Range::const_iterator& it2, const Range::const_iterator& it1 )
 {
   assert( !it2.mValue || *it2 >= *it1 );
@@ -810,7 +821,7 @@ Range::const_iterator Range::lower_bound(Range::const_iterator first,
       return const_iterator(iter, val);
     }
   }
-  
+
   if (iter->first >= val)
     return const_iterator( iter, iter->first );
   else if(*last > val)
@@ -846,7 +857,7 @@ Range::const_iterator Range::lower_bound( EntityType type,
 Range::const_iterator Range::upper_bound( EntityType type ) const
 {
     // if (type+1) overflows, err will be true and we return end().
-  int err; 
+  int err;
   EntityHandle handle = CREATE_HANDLE( type + 1, 0, err );
   return err ? end() : lower_bound( begin(), end(), handle );
 }
@@ -854,7 +865,7 @@ Range::const_iterator Range::upper_bound( EntityType type,
                                               const_iterator first ) const
 {
     // if (type+1) overflows, err will be true and we return end().
-  int err; 
+  int err;
   EntityHandle handle = CREATE_HANDLE( type + 1, 0, err );
   return err ? end() : lower_bound( first, end(), handle );
 }
@@ -871,17 +882,17 @@ Range::equal_range( EntityType type ) const
   result.second = err ? end() : lower_bound( result.first, end(), handle );
   return result;
 }
-  
+
 bool Range::all_of_type( EntityType type ) const
 {
-  return empty() 
+  return empty()
       || (TYPE_FROM_HANDLE(front()) == type
        && TYPE_FROM_HANDLE(back()) == type);
 }
 
 bool Range::all_of_dimension( int dimension ) const
 {
-  return empty() 
+  return empty()
       || (CN::Dimension(TYPE_FROM_HANDLE(front())) == dimension
        && CN::Dimension(TYPE_FROM_HANDLE(back())) == dimension);
 }
@@ -891,7 +902,7 @@ unsigned Range::num_of_type( EntityType type ) const
   const_pair_iterator iter = const_pair_begin();
   while(iter != const_pair_end() && TYPE_FROM_HANDLE((*iter).second) < type)
     ++iter;
-  
+
   unsigned count = 0;
   for ( ; iter != const_pair_end(); ++iter)
   {
@@ -899,7 +910,7 @@ unsigned Range::num_of_type( EntityType type ) const
     EntityType end_type = TYPE_FROM_HANDLE((*iter).second);
     if (start_type > type)
       break;
-   
+
     EntityID sid = start_type < type ? 1 : ID_FROM_HANDLE((*iter).first);
     EntityID eid = end_type > type ? MB_END_ID : ID_FROM_HANDLE((*iter).second);
     count += eid - sid + 1;
@@ -907,13 +918,13 @@ unsigned Range::num_of_type( EntityType type ) const
 
   return count;
 }
-  
+
 unsigned Range::num_of_dimension( int dim ) const
 {
   const_pair_iterator iter = const_pair_begin();
   while(iter != const_pair_end() && CN::Dimension(TYPE_FROM_HANDLE((*iter).second)) < dim)
     ++iter;
-  
+
   int junk;
   unsigned count = 0;
   for ( ; iter != const_pair_end(); ++iter)
@@ -922,8 +933,8 @@ unsigned Range::num_of_dimension( int dim ) const
     int end_dim = CN::Dimension(TYPE_FROM_HANDLE((*iter).second));
     if (start_dim > dim)
       break;
-      
-    EntityHandle sh = start_dim < dim ? 
+
+    EntityHandle sh = start_dim < dim ?
                         CREATE_HANDLE( CN::TypeDimensionMap[dim].first, 1, junk ) :
                         (*iter).first;
     EntityHandle eh = end_dim > dim ?
@@ -934,8 +945,8 @@ unsigned Range::num_of_dimension( int dim ) const
 
   return count;
 }
-  
-    
+
+
 
 
 //! swap the contents of this range with another one
@@ -975,7 +986,7 @@ Range Range::subset_by_dimension( int d ) const
 {
   EntityHandle handle1 = CREATE_HANDLE( CN::TypeDimensionMap[d].first, 0 );
   iterator st = lower_bound( begin(), end(), handle1 );
-  
+
   iterator en;
   if (d < 4) { // dimension 4 is MBENTITYSET
     EntityHandle handle2 = CREATE_HANDLE( CN::TypeDimensionMap[d+1].first, 0 );
@@ -995,7 +1006,7 @@ bool operator==( const Range& r1, const Range& r2 )
   Range::const_pair_iterator i1, i2;
   i1 = r1.const_pair_begin();
   i2 = r2.const_pair_begin();
-  for ( ; i1 != r1.const_pair_end(); ++i1, ++i2) 
+  for ( ; i1 != r1.const_pair_end(); ++i1, ++i2)
     if (i2 == r2.const_pair_end() ||
         i1->first != i2->first ||
         i1->second != i2->second)
@@ -1017,7 +1028,7 @@ bool Range::contains( const Range& othr ) const
     return true;
   if (empty())
     return false;
-  
+
     // neither range is empty, so both have valid pair nodes
     // other than dummy mHead
   const PairNode* this_node = mHead.mNext;
@@ -1044,10 +1055,9 @@ bool Range::contains( const Range& othr ) const
     if (othr_node->first <= this_node->second)
       break;
   }
-  
+
     // should be unreachable
   return false;
 }
-  
-} // namespace moab
 
+} // namespace moab

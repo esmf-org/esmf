@@ -111,6 +111,12 @@ except:
     else:
         constants._ESMF_MPIRUN = "mpiexec"
 
+# look for ESMF_NUM_PROCS
+try:
+    constants._ESMF_MPIRUN_NP = os.environ['ESMF_NUM_PROCS']
+except:
+    constants._ESMF_MPIRUN_NP = 4
+
 # in-memory factors only supported on the GNU stack given inability to
 # deallocate Fortran pointers associated using c_f_pointer in other compilers.
 # some compilers may support this, but only the GNU stack is guaranteed at this

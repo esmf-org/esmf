@@ -758,8 +758,10 @@ void MBCN_SubEntityVertexIndices(const int this_type,
   //! \param source_dim Dimension of source entity
   //! \param target_dim Dimension of target entity
   //! \param index_list Indices of target entities (returned)
+  //! \param num_indices Number of indices of target entities (returned)
   //! \param operation_type Specify either CN::INTERSECT (0) or CN::UNION (1) to get intersection
   //!        or union of target entity lists over source entities
+  //! \param rval Error code indicating success or failure (returned)
 void MBCN_AdjacentSubEntities(const int this_type,
                               const int *source_indices,
                               const int num_source_indices,
@@ -870,7 +872,7 @@ void MBCN_OppositeSide(const int parent_type,
   //! \param num_vertices Number of entries in <em>conn1</em> and <em>conn2</em>
   //! \param direct If positive, entities have the same sense (returned)
   //! \param offset Offset of <em>conn2</em>'s first vertex in <em>conn1</em>
-  //! \return int Returns true if <em>conn1</em> and <em>conn2</em> match
+  //! \return rval Returns true if <em>conn1</em> and <em>conn2</em> match
 void MBCN_ConnectivityMatchInt(const int *conn1,
                                const int *conn2,
                                const int num_vertices,

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -35,7 +35,11 @@ module ESMF_FieldWrMod
   use ESMF_ArrayMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
+  use ESMF_StaggerLocMod
   use ESMF_GridMod
+  use ESMF_GridUtilMod
+  use ESMF_MeshMod
+  use ESMF_GeomBaseMod
   use ESMF_InitMacrosMod
   use ESMF_IOMod
 
@@ -51,6 +55,7 @@ module ESMF_FieldWrMod
 !
 ! - ESMF-public methods:
   public ESMF_FieldWrite              ! Write Field to a file
+  public ESMF_FieldWriteVTK           ! Write Field to a VTK file
 
 !------------------------------------------------------------------------------
 
@@ -318,5 +323,81 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_FieldWrite
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldWriteVTK"
+
+!BOPI
+! !IROUTINE:  ESMF_FieldWriteVTK - Write Field data into a VTK file
+
+! !INTERFACE:
+  subroutine ESMF_FieldWriteVTK(field, fileName, keywordEnforcer, rc)
+!
+!
+! !ARGUMENTS:
+    type(ESMF_Field),           intent(in)             :: field 
+    character(*),               intent(in)             :: fileName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                    intent(out), optional  :: rc
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                         :: localrc
+    type(ESMF_GeomType_Flag)        :: geomtype
+    type(ESMF_StaggerLoc)           :: staggerloc
+    type(ESMF_MeshLoc)              :: meshloc
+    type(ESMF_Array)                :: array
+    type(ESMF_Grid)                 :: grid
+    type(ESMF_Mesh)                 :: mesh
+
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    call ESMF_FieldGet(field, geomtype=geomtype, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (geomtype==ESMF_GEOMTYPE_GRID) then
+      call ESMF_FieldGet(field, grid=grid, array=array, staggerloc=staggerloc, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_GridWriteVTK(grid, filename=fileName, staggerloc=staggerloc, &
+        array1=array, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+      call ESMF_FieldGet(field, mesh=mesh, array=array, meshloc=meshloc, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (meshloc==ESMF_MESHLOC_ELEMENT) then
+        call ESMF_MeshWriteVTK(mesh, filename=fileName, elemArray1=array, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      elseif (meshloc==ESMF_MESHLOC_NODE) then
+        call ESMF_MeshWriteVTK(mesh, filename=fileName, nodeArray1=array, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Unsupported MESHLOC detected.", &
+          ESMF_CONTEXT, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Unsupported geomtype detected.", &
+        ESMF_CONTEXT, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldWriteVTK
 
 end module ESMF_FieldWrMod

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -94,16 +94,11 @@ module ESMF
     use ESMF_StateTypesMod
     use ESMF_StateVaMod
     use ESMF_StateMod
-!    use ESMF_StateSetMod
-!    use ESMF_StateGetMod
-!    use ESMF_StateReconcileMod,  only: ESMF_StateReconcile_old => ESMF_StateReconcile
-    use ESMF_StateReconcile2Mod
+    use ESMF_StateReconcileMod
     use ESMF_CompMod
     use ESMF_GridCompMod
     use ESMF_CplCompMod
     use ESMF_SciCompMod
-    
-    use ESMF_InfoMod
     
     use ESMF_AttachMethodsMod
     
@@ -123,5 +118,9 @@ module ESMF
     use & ! prevent MOD_FUNC from grabbing this dependency during build
       ESMF_MapperUtilMod
 #endif
+
+    use ESMF_InfoMod
+    use ESMF_InfoDescribeMod
+    use ESMF_InfoSyncMod
 
 end module ESMF

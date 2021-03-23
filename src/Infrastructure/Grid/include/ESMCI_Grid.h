@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -266,10 +266,10 @@ template <class TYPE>
                                ESMC_IndexFlag *indexflag,
                                int *rc);
   static Grid* create1peridim(ESMC_InterArrayInt *maxIndex, 
+                              ESMC_InterArrayInt *polekindflag,
                               int *periodicDim, int *poleDim,
                               ESMC_CoordSys_Flag *coordSys,
                               ESMC_TypeKind_Flag *coordTypeKind, 
-                              ESMC_PoleKind_Flag *poleKind,
                               ESMC_IndexFlag *indexflag,
                               int *rc);
   static Grid* createcubedsphere(int *tilesize,
@@ -282,7 +282,8 @@ template <class TYPE>
                                  int *rc);
   static Grid* createfromfile(const char *filename, int fileTypeFlag, 
                               int *regDecomp, int *decompflag,
-                              int *isSphere, int *addCornerStagger,
+                              int *isSphere, ESMC_InterArrayInt *polekindflag,
+                              int *addCornerStagger,
                               int *addUserArea, ESMC_IndexFlag *indexflag,
                               int *addMask, const char *varname,
                               const char **coordNames, int *rc);
@@ -549,7 +550,7 @@ int getComputationalUBound(
                    int *_staggerloc,
            int *item,    
                    Array *_array,
-                   CopyFlag *_docopy
+                   DataCopyFlag *_docopy
                    );
 
 
@@ -557,7 +558,7 @@ int getComputationalUBound(
  Array *getItemArray(
                       int *_staggerloc,
                       int *item, 
-                      CopyFlag *_docopy,
+                      DataCopyFlag *_docopy,
                       int *rcArg
                       );
 
@@ -587,7 +588,7 @@ int getComputationalUBound(
                    int *_staggerloc,
                    int *_coord,
                    Array *_array,
-                   CopyFlag *_docopy
+                   DataCopyFlag *_docopy
                    );
 
 
@@ -596,7 +597,7 @@ int getComputationalUBound(
                        int *staggerlocArg,        // (in) optional
                        int arrayCount,             // (in) 
                        Array **arrayList,           // (in)
-                       CopyFlag *docopyArg,   // (in) optional
+                       DataCopyFlag *docopyArg,   // (in) optional
                        InterArray<int> *_staggerEdgeLWidthArg,
                        InterArray<int> *_staggerEdgeUWidthArg,
                        InterArray<int> *_staggerAlign
@@ -621,7 +622,7 @@ int getComputationalUBound(
  Array *getCoordArray(
                       int *_staggerloc,
                       int _coord,
-                      CopyFlag *_docopy,
+                      DataCopyFlag *_docopy,
                       int *rcArg
                       );
 

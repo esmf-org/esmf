@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -466,6 +466,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
+    ESMC_Logical *ignoreUnmatchedFlag, int *len_ignoreUnmatchedFlag,
     ESMCI::InterArray<int> *srcToDstTransposeMap,
     ESMC_TypeKind_Flag *typekind,
     void *factor, int *rc){
@@ -475,14 +476,15 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::redistStore(
-      *srcArraybundle, *dstArraybundle, routehandle, srcToDstTransposeMap,
-      *typekind, factor),
+      *srcArraybundle, *dstArraybundle, routehandle, ignoreUnmatchedFlag,
+      *len_ignoreUnmatchedFlag, srcToDstTransposeMap, *typekind, factor),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arraybundlerediststorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
+    ESMC_Logical *ignoreUnmatchedFlag, int *len_ignoreUnmatchedFlag,
     ESMCI::InterArray<int> *srcToDstTransposeMap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlerediststorenf()"
@@ -490,7 +492,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::redistStore(
-      *srcArraybundle, *dstArraybundle, routehandle, srcToDstTransposeMap),
+      *srcArraybundle, *dstArraybundle, routehandle, ignoreUnmatchedFlag,
+      *len_ignoreUnmatchedFlag, srcToDstTransposeMap),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -608,9 +611,10 @@ extern "C" {
   }
  
   void FTN_X(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
-    ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
+    ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
-    ESMCI::InterArray<int> *factorIndexList, 
+    ESMCI::InterArray<int> *factorIndexList,
+    ESMC_Logical *ignoreUnmatchedFlag, int *len_ignoreUnmatchedFlag,
     ESMCI::InterArray<int> *srcTermProcessing, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstore()"
@@ -656,7 +660,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
       *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix,
-      srcTermProcessing),
+      ignoreUnmatchedFlag, *len_ignoreUnmatchedFlag, srcTermProcessing),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     
@@ -680,6 +684,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlesmmstorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
+    ESMC_Logical *ignoreUnmatchedFlag, int *len_ignoreUnmatchedFlag,
     ESMCI::InterArray<int> *srcTermProcessing, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstorenf()"
@@ -690,15 +695,16 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMulStore(
       *srcArraybundle, *dstArraybundle, routehandle, sparseMatrix,
-      srcTermProcessing),
+      ignoreUnmatchedFlag, *len_ignoreUnmatchedFlag, srcTermProcessing),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arraybundlesmm)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
-    ESMC_Region_Flag *zeroflag, ESMC_TermOrder_Flag *termorderflag,
-    int *termorderflag_len, ESMC_Logical *checkflag, int *rc){
+    ESMC_Region_Flag *zeroregionflag, int *zeroregionflag_len,
+    ESMC_TermOrder_Flag *termorderflag, int *termorderflag_len,
+    ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmm()"
     // Initialize return code; assume routine not implemented
@@ -709,8 +715,8 @@ extern "C" {
       if (*checkflag == ESMF_TRUE) checkflagOpt = true;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::sparseMatMul(
-      *srcArraybundle, *dstArraybundle, routehandle, *zeroflag, 
-      termorderflag, *termorderflag_len, checkflagOpt),
+      *srcArraybundle, *dstArraybundle, routehandle, zeroregionflag,
+      *zeroregionflag_len, termorderflag, *termorderflag_len, checkflagOpt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

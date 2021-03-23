@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -210,6 +210,7 @@ program ESMF_NUOPC_UTest
   integer, allocatable            :: factorIndexList(:,:)
   character(len=40)       :: phaseLabel
   logical                 :: isSet
+  integer                 :: fieldCount
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -290,7 +291,7 @@ program ESMF_NUOPC_UTest
   call ESMF_GridCompInitialize(gridComp, userRc=urc, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (urc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_CompGet() Test"
@@ -987,6 +988,14 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_GetStateMemberCount() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_GetStateMemberCount(stateA, fieldCount=fieldCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_GetStateMemberLists() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(stdAttrNameList)  ! prepare for the following call
@@ -1092,6 +1101,14 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_AddNestedState(stateA, Namespace="def", nestedState=stateC, &
     rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_GetStateMemberCount() for nested State namespace Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_GetStateMemberCount(stateC, fieldCount=fieldCount, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <iostream>
+#include <fstream>
 
 #include "moab/TupleList.hpp"
 
@@ -501,7 +502,38 @@ void TupleList::print(const char *name) const
   std::cout << "=======================================" << std::endl
       << std::endl;
 }
+void TupleList::print_to_file(const char * filename) const
+{
+  std::ofstream ofs;
+  ofs.open (filename, std::ofstream::out | std::ofstream::app);
 
+  ofs <<  "Printing Tuple " << filename << "===================" << std::endl;
+  unsigned long i = 0, l = 0, ul = 0, r = 0;
+  for (uint k = 0; k < n; k++)
+  {
+    for (uint j = 0; j < mi; j++)
+    {
+      ofs << vi[i++] << " | ";
+    }
+    for (uint j = 0; j < ml; j++)
+    {
+      ofs << vl[l++] << " | ";
+    }
+    for (uint j = 0; j < mul; j++)
+    {
+      ofs << vul[ul++] << " | ";
+    }
+    for (uint j = 0; j < mr; j++)
+    {
+      ofs << vr[r++] << " | ";
+    }
+    ofs << std::endl;
+  }
+  ofs << "=======================================" << std::endl
+      << std::endl;
+
+  ofs.close();
+}
 void TupleList::permute(uint *perm, void *work)
 {
   const unsigned int_size = mi * sizeof(sint), long_size = ml * sizeof(slong),

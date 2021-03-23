@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -38,6 +38,7 @@ module ESMF_FieldCreateMod
   use ESMF_StaggerLocMod
   use ESMF_GridMod
   use ESMF_XGridMod
+  use ESMF_XGridCreateMod
   use ESMF_XGridGetMod
   use ESMF_XGridGeomBaseMod
   use ESMF_DistGridMod
@@ -412,9 +413,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateGBArraySpec(geombase, arrayspec, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    totalLWidth, totalUWidth, name, rc)
+  function ESMF_FieldCreateGBArraySpec(geombase, arrayspec, gridToFieldMap, &
+    ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
+    pinflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGBArraySpec
@@ -427,7 +428,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(in), optional :: ungriddedUBound(:)
     integer, intent(in), optional :: totalLWidth(:)
     integer, intent(in), optional :: totalUWidth(:)
-    character (len=*), intent(in), optional :: name
+    type(ESMF_Pin_Flag),  intent(in), optional :: pinflag
+    character (len=*),    intent(in), optional :: name
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -491,6 +493,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[name]}]
 !       Field name.
 ! \item [{[rc]}]
@@ -755,16 +762,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        call ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
                                 localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                                 ungriddedUBound, localMaxHaloLWidth(1:gridDimCount_norep), &
-                                localMaxHaloUWidth(1:gridDimCount_norep), name=name, &
-                                rc=localrc)
+                                localMaxHaloUWidth(1:gridDimCount_norep), &
+                                pinflag=pinflag, name=name, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
     else
           call ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
                                 localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
-                                ungriddedUBound, name=name, &
-                                rc=localrc)
+                                ungriddedUBound, &
+                                pinflag=pinflag, name=name, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -941,7 +948,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         actualFlag = .false.  ! local PET is not for an actual member
       endif
     endif
-    
+
     if (actualFlag) then
 
       ! check init status of input parameters
@@ -1050,10 +1057,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     ! fieldDimCount should be the same as the memDimCount
                     fieldDimCount = memDimCount
                     exit
-                  endif   
+                  endif
                endif
              enddo
-          endif           
+          endif
       endif
 
       if(fieldDimCount .lt. gridDimCount_norep) then
@@ -1190,7 +1197,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-      
+
     endif ! - actualFlag
 
     ! Set return values.
@@ -1550,7 +1557,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateGridTKR(grid, typekind, keywordEnforcer, &
     indexflag, staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    totalLWidth, totalUWidth, name, rc)
+    totalLWidth, totalUWidth, pinflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGridTKR
@@ -1566,12 +1573,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),  optional :: ungriddedUBound(:)
     integer,                 intent(in),  optional :: totalLWidth(:)
     integer,                 intent(in),  optional :: totalUWidth(:)
+    type(ESMF_Pin_Flag),     intent(in),  optional :: pinflag
     character (len=*),       intent(in),  optional :: name
     integer,                 intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1658,6 +1671,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[name]}]
 !       Field name.
 ! \item [{[rc]}]
@@ -1723,9 +1741,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_FieldCreateGridTKR = ESMF_FieldCreate(grid, arrayspec, &
-      indexflag=indexflag, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
-      ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-      totalLWidth=totalLWidth, totalUWidth=totalUWidth, name=name, rc=localrc)
+      indexflag=indexflag, staggerloc=staggerloc, &
+      gridToFieldMap=gridToFieldMap, ungriddedLBound=ungriddedLBound, &
+      ungriddedUBound=ungriddedUBound, totalLWidth=totalLWidth, &
+      totalUWidth=totalUWidth, pinflag=pinflag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1744,7 +1763,7 @@ end function ESMF_FieldCreateGridTKR
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateGridArraySpec(grid, arrayspec, keywordEnforcer, &
     indexflag, staggerloc, gridToFieldMap, ungriddedLBound, &
-    ungriddedUBound, totalLWidth, totalUWidth, name, rc)
+    ungriddedUBound, totalLWidth, totalUWidth, pinflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGridArraySpec
@@ -1760,12 +1779,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(in),  optional :: ungriddedUBound(:)
     integer,               intent(in),  optional :: totalLWidth(:)
     integer,               intent(in),  optional :: totalUWidth(:)
+    type(ESMF_Pin_Flag),   intent(in),  optional :: pinflag
     character (len=*),     intent(in),  optional :: name
     integer,               intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1851,6 +1876,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[name]}]
 !       Field name.
 ! \item [{[rc]}]
@@ -1863,7 +1893,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_StaggerLoc)  :: localStaggerLoc
     type(ESMF_Index_Flag)   :: g_indexflag
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_Logical) :: linkChange
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1929,19 +1958,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateGridArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        totalLWidth, totalUWidth, name, rc=localrc)
+        totalLWidth, totalUWidth, pinflag=pinflag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! remember that geombase was created internally
     ESMF_FieldCreateGridArraySpec%ftypep%geomb_internal = .true.
-
-    !  link the Attribute hierarchies
-    linkChange = ESMF_TRUE
-    call c_ESMC_AttributeLink(ESMF_FieldCreateGridArraySpec%ftypep%base, &
-                              grid, linkChange, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc))  return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -2081,7 +2103,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase) :: geombase
     type(ESMF_StaggerLoc) :: localStaggerloc
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_Logical) :: linkChange
     type(ESMF_Pointer)                    :: vmThis
     logical                               :: actualFlag
 
@@ -2102,9 +2123,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         actualFlag = .false.  ! local PET is not for an actual member
       endif
     endif
-    
+
     if (actualFlag) then
-    
+
       ! check init status of input parameters
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
@@ -2156,13 +2177,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! remember that geombase was created internally
       ESMF_FieldCreateGridArray%ftypep%geomb_internal = .true.
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(ESMF_FieldCreateGridArray%ftypep%base, &
-                              grid, linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc))  return
 
     endif ! - actualFlag
 
@@ -2339,7 +2353,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase) :: geombase @\
     type(ESMF_StaggerLoc) :: localStaggerloc@\
     type(ESMF_GridDecompType)      :: decompType @\
-    type(ESMF_Logical) :: linkChange @\
 @\
     ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
@@ -2401,14 +2414,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! remember that geombase was created internally @\
     ESMF_FieldCreateGridData##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
-@\
-    !  link the Attribute hierarchies @\
-    linkChange = ESMF_TRUE @\
-    call c_ESMC_AttributeLink( & @\
-      ESMF_FieldCreateGridData##mrank##D##mtypekind%ftypep%base, & @\
-      grid, linkChange, localrc) @\
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-      ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateGridData##mrank##D##mtypekind  @\
@@ -2555,7 +2560,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase) :: geombase @\
     type(ESMF_StaggerLoc) :: localStaggerloc@\
     type(ESMF_GridDecompType)      :: decompType @\
-    type(ESMF_Logical) :: linkChange @\
 @\
     ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
@@ -2616,14 +2620,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! remember that geombase was created internally @\
     ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind%ftypep%geomb_internal = .true. @\
 @\
-    !  link the Attribute hierarchies @\
-    linkChange = ESMF_TRUE @\
-    call c_ESMC_AttributeLink( & @\
-      ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind%ftypep%base, & @\
-      grid, linkChange, localrc) @\
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-       ESMF_CONTEXT, rcToReturn=rc))  return @\
-@\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind  @\
 !------------------------------------------------------------------------------ @\
@@ -2641,9 +2637,8 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateLSTKR(locstream, typekind, &
-    keywordEnforcer, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, rc)
+  function ESMF_FieldCreateLSTKR(locstream, typekind, keywordEnforcer, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, pinflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateLSTKR
@@ -2655,6 +2650,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),  optional :: gridToFieldMap(:)
     integer,                 intent(in),  optional :: ungriddedLBound(:)
     integer,                 intent(in),  optional :: ungriddedUBound(:)
+    type(ESMF_Pin_Flag),     intent(in),  optional :: pinflag
     character (len=*),       intent(in),  optional :: name
     integer,                 intent(out), optional :: rc
 !
@@ -2709,6 +2705,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       must be specified. When both are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[name]}]
 !       Field name.
 ! \item [{[rc]}]
@@ -2757,7 +2758,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateLSTKR = ESMF_FieldCreate(locstream, arrayspec, &
         gridToFieldMap=gridToFieldMap, &
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-        name=name, rc=localrc)
+        pinflag=pinflag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2773,9 +2774,8 @@ end function ESMF_FieldCreateLSTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateLSArraySpec(locstream, arrayspec, &
-    keywordEnforcer, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, rc)
+  function ESMF_FieldCreateLSArraySpec(locstream, arrayspec, keywordEnforcer, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, pinflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateLSArraySpec
@@ -2787,6 +2787,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in),  optional :: gridToFieldMap(:)
     integer,              intent(in),  optional :: ungriddedLBound(:)
     integer,              intent(in),  optional :: ungriddedUBound(:)
+    type(ESMF_Pin_Flag),  intent(in),  optional :: pinflag
     character (len=*),    intent(in),  optional :: name
     integer,              intent(out), optional :: rc
 !
@@ -2840,6 +2841,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       must be specified. When both are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[name]}]
 !       Field name.
 ! \item [{[rc]}]
@@ -2871,7 +2877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateLSArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        name=name, rc=localrc)
+        pinflag=pinflag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3316,9 +3322,9 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateMeshTKR(mesh, typekind, &
-    keywordEnforcer, meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, rc)
+  function ESMF_FieldCreateMeshTKR(mesh, typekind, keywordEnforcer, indexflag, &
+    meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    pinflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateMeshTKR
@@ -3327,10 +3333,12 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
     type(ESMF_Mesh),          intent(in)            :: mesh
     type(ESMF_TypeKind_Flag), intent(in)            :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Index_Flag),    intent(in),  optional :: indexflag
     type(ESMF_MeshLoc),       intent(in),  optional :: meshloc
     integer,                  intent(in),  optional :: gridToFieldMap(:)
     integer,                  intent(in),  optional :: ungriddedLBound(:)
     integer,                  intent(in),  optional :: ungriddedUBound(:)
+    type(ESMF_Pin_Flag),      intent(in),  optional :: pinflag
     character (len=*),        intent(in),  optional :: name
     integer,                  intent(out), optional :: rc
 !
@@ -3347,6 +3355,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [typekind]
 !       The typekind of the Field. See section \ref{const:typekind}
 !       for a list of valid typekind options.
+! \item [{[indexflag]}]
+!       Indicate how DE-local indices are defined. See section
+!       \ref{const:indexflag} for a list of valid indexflag options.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       The part of the Mesh on which to build the Field. For valid
@@ -3391,6 +3402,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       must be specified. When both are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[name]}]
 !       Field name.
 ! \item [{[rc]}]
@@ -3404,6 +3420,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: memDimCount
     type(ESMF_MeshLoc) :: localMeshloc
     type(ESMF_Distgrid) :: localDistgrid
+    type(ESMF_Index_Flag) :: l_indexflag
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -3474,9 +3491,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_FieldCreateMeshTKR = ESMF_FieldCreate(mesh, arrayspec, &
-      meshloc=meshloc, gridToFieldMap=gridToFieldMap, &
+      indexflag=indexflag, meshloc=meshloc, gridToFieldMap=gridToFieldMap, &
       ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-      name=name, rc=localrc)
+      pinflag=pinflag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3492,9 +3509,9 @@ end function ESMF_FieldCreateMeshTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateMeshArraySpec(mesh, arrayspec, &
-    keywordEnforcer, meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, rc)
+  function ESMF_FieldCreateMeshArraySpec(mesh, arrayspec, keywordEnforcer, &
+    indexflag, meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    pinflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateMeshArraySpec
@@ -3503,10 +3520,12 @@ end function ESMF_FieldCreateMeshTKR
     type(ESMF_Mesh),      intent(in)            :: mesh
     type(ESMF_ArraySpec), intent(in)            :: arrayspec
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Index_Flag),intent(in),  optional :: indexflag
     type(ESMF_MeshLoc),   intent(in),  optional :: meshloc
     integer,              intent(in),  optional :: gridToFieldMap(:)
     integer,              intent(in),  optional :: ungriddedLBound(:)
     integer,              intent(in),  optional :: ungriddedUBound(:)
+    type(ESMF_Pin_Flag),  intent(in),  optional :: pinflag
     character (len=*),    intent(in),  optional :: name
     integer,              intent(out), optional :: rc
 !
@@ -3523,6 +3542,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_Mesh} object.
 ! \item [arrayspec]
 !       Data type and kind specification.
+! \item [{[indexflag]}]
+!       Indicate how DE-local indices are defined. See section
+!       \ref{const:indexflag} for a list of valid indexflag options.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       The part of the Mesh on which to build the Field. For valid
@@ -3567,6 +3589,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       must be specified. When both are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[name]}]
 !       Field name.
 ! \item [{[rc]}]
@@ -3590,7 +3617,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
     ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh, meshloc,  rc=localrc)
+    geombase=ESMF_GeomBaseCreate(mesh, indexflag=indexflag, loc=meshloc,  rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3598,7 +3625,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateMeshArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        name=name, rc=localrc)
+        pinflag=pinflag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3728,7 +3755,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
     ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh, meshloc,  rc=localrc)
+    geombase=ESMF_GeomBaseCreate(mesh, loc=meshloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3891,7 +3918,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
 @\
     ! Create GeomBase from Mesh@\
-    geombase=ESMF_GeomBaseCreate(mesh,meshloc, rc=localrc)@\
+    geombase=ESMF_GeomBaseCreate(mesh, indexflag=indexflag, loc=meshloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
       ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
@@ -4034,7 +4061,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
 @\
     ! Create GeomBase from Mesh@\
-    geombase=ESMF_GeomBaseCreate(mesh,meshloc, rc=localrc)@\
+    geombase=ESMF_GeomBaseCreate(mesh, loc=meshloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
       ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
@@ -4069,10 +4096,9 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGTKR(xgrid, typekind, &
-    keywordEnforcer, xgridside, gridindex, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, rc)
+  function ESMF_FieldCreateXGTKR(xgrid, typekind, keywordEnforcer, xgridside, &
+    gridindex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    pinflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateXGTKR
@@ -4086,6 +4112,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                   intent(in),  optional :: gridToFieldMap(:)
     integer,                   intent(in),  optional :: ungriddedLBound(:)
     integer,                   intent(in),  optional :: ungriddedUBound(:)
+    type(ESMF_Pin_Flag),       intent(in),  optional :: pinflag
     character (len=*),         intent(in),  optional :: name
     integer,                   intent(out), optional :: rc
 !
@@ -4147,6 +4174,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       must be specified. When both are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[name]}]
 !       Field name.
 ! \item [{[rc]}]
@@ -4210,7 +4242,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateXGTKR = ESMF_FieldCreate(xgrid, arrayspec, &
         xgridside=xgridside, gridindex=gridIndex, &
         gridToFieldMap=gridToFieldMap, ungriddedLBound=ungriddedLBound, &
-        ungriddedUBound=ungriddedUBound, name=name, rc=localrc)
+        ungriddedUBound=ungriddedUBound, pinflag=pinflag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4226,10 +4258,9 @@ end function ESMF_FieldCreateXGTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGArraySpec(xgrid, arrayspec, &
-    keywordEnforcer, xgridside, gridindex, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, rc)
+  function ESMF_FieldCreateXGArraySpec(xgrid, arrayspec, keywordEnforcer, &
+    xgridside, gridindex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    pinflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateXGArraySpec
@@ -4243,6 +4274,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                   intent(in),  optional :: gridToFieldMap(:)
     integer,                   intent(in),  optional :: ungriddedLBound(:)
     integer,                   intent(in),  optional :: ungriddedUBound(:)
+    type(ESMF_Pin_Flag),       intent(in),  optional :: pinflag
     character (len=*),         intent(in),  optional :: name
     integer,                   intent(out), optional :: rc
 !
@@ -4303,6 +4335,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       must be specified. When both are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[name]}]
 !       Field name.
 ! \item [{[rc]}]
@@ -4351,7 +4388,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_FieldCreateXGArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        name=name, rc=localrc)
+        pinflag=pinflag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5013,6 +5050,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc        ! local return code
     type(ESMF_Status)       :: basestatus
+    type(ESMF_GeomType_Flag):: geomtype
+    type(ESMF_Grid)         :: grid
+    type(ESMF_Mesh)         :: mesh
+    type(ESMF_LocStream)    :: locstream
+    type(ESMF_Xgrid)        :: xgrid
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -5031,7 +5073,72 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if(ftype%is_proxy .or. ftype%geomb_internal) then
+        
+        if (ftype%is_proxy .or. ftype%geomb_internal) then
+        
+          if (ftype%is_proxy) then
+            ! proxies destroy their actual geometry object, but must leave
+            ! in garbage collection because multiple fields might be referencing
+            ! the same actual geometry object, and try to destroy
+
+            call ESMF_GeomBaseGet(ftype%geombase, geomtype=geomtype, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+            ! call into the GEOMTYPE specific Destroy() method
+            if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
+              call ESMF_GeomBaseGet(ftype%geombase, grid=grid, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the Grid proxy
+              call ESMF_GridDestroy(grid, noGarbage=.false., rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype .eq. ESMF_GEOMTYPE_MESH) then
+              call ESMF_GeomBaseGet(ftype%geombase, mesh=mesh, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the Mesh proxy
+              call ESMF_MeshDestroy(mesh, noGarbage=.false., rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype .eq. ESMF_GEOMTYPE_LOCSTREAM) then
+              call ESMF_GeomBaseGet(ftype%geombase, locstream=locstream, &
+                rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the LocStream proxy
+              call ESMF_LocStreamDestroy(locstream, noGarbage=.false., &
+                rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (geomtype .eq. ESMF_GEOMTYPE_XGRID) then
+              call ESMF_GeomBaseGet(ftype%geombase, xgrid=xgrid, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+              ! destroy the XGrid proxy
+              call ESMF_XGridDestroy(xgrid, noGarbage=.false., rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            else
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_INTNRL_BAD, &
+                msg="Unvalid GeomType detected. Garbage collection issue?", &
+                ESMF_CONTEXT, rcToReturn=rc)
+              return
+            endif
+            
+          endif
+
+          ! proxy or not, the GeomBase needs to be destroyed
           call ESMF_GeomBaseDestroy(ftype%geombase, noGarbage=noGarbage, &
             rc=localrc)
           if (ESMF_LogFoundError(localrc, &

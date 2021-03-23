@@ -30,8 +30,9 @@ class Field(object):
     have different staggerings can share the same :class:`~ESMF.api.grid.Grid` object without needing to
     replicate it multiple times.
 
-    For more information about the ESMF Field class, please see the `ESMF Field documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
+    Refer to the Field Class of the 
+    `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
+    for more information.
 
     The following parameters are used to create a :class:`~ESMF.api.field.Field`
     from a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or
@@ -72,11 +73,11 @@ class Field(object):
                 meshloc=None,
                 ndbounds=None):
         # optional arguments
-        if staggerloc is None:
+        if isinstance(staggerloc, type(None)):
             staggerloc = StaggerLoc.CENTER
-        if typekind is None:
+        if isinstance(typekind, type(None)):
             typekind = TypeKind.R8
-        if meshloc is None:
+        if isinstance(meshloc, type(None)):
             meshloc = MeshLoc.NODE
 
         # extra levels?
@@ -88,7 +89,7 @@ class Field(object):
         try:
             local_ndbounds = ndbounds.tolist()
         except AttributeError:
-            if ndbounds is not None:
+            if not isinstance(ndbounds, type(None)):
                 local_ndbounds = list(ndbounds)
 
         # TODO: flip ndbounds
@@ -349,7 +350,7 @@ class Field(object):
         Release the memory associated with a :class:`~ESMF.api.field.Field`.
         """
         if hasattr(self, '_finalized'):
-            if self._finalized is False:
+            if self._finalized == False:
                 ESMP_FieldDestroy(self)
                 self._finalized = True
 
@@ -385,7 +386,7 @@ class Field(object):
         """
 
         import ESMF.api.constants as constants
-        if constants._ESMF_COMM is constants._ESMF_COMM_MPIUNI:
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
             raise ImportError("Field.Read() requires PIO and does not work if ESMF has not been built with MPI support")
 
         assert (type(filename) is str)

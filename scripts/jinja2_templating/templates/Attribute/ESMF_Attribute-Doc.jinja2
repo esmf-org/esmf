@@ -1,0 +1,1167 @@
+!==============================================================================
+! ESMF_Attribute Legacy Docs
+!==============================================================================
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add an ESMF Attribute package
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd()
+!     subroutine ESMF_AttAddPackInfo(info, convention, purpose, attrList, &
+!       nestConvention, nestPurpose, attpack, rc)
+!
+! !ARGUMENTS:
+!     type(<ESMF_Info>),   intent(inout)           :: info
+!     character (len = *), intent(in)              :: convention
+!     character (len = *), intent(in)              :: purpose
+!     character (len = *), intent(in),    optional :: attrList(:)
+!     character (len = *), intent(in)     optional :: nestConvention
+!     character (len = *), intent(in)     optional :: nestPurpose
+!     type(ESMF_AttPack),  intent(out),   optional :: attpack
+!     integer,             intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Add an ESMF Attribute package.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!           An {\tt ESMF\_Info} object.
+!     \item [convention]
+!           The convention of the new Attribute package.
+!     \item [purpose]
+!           The purpose of the new Attribute package.
+!     \item [{[attrList]}]
+!           The list of Attribute names to add to the Attribute package.
+!     \item [{[nestConvention]}]
+!           The convention(s) of the standard Attribute package(s) around
+!           which to nest the new Attribute package.
+!     \item [{[nestPurpose]}]
+!           The purpose(s) of the standard Attribute package(s) around
+!           which to nest the new Attribute package.
+!     \item [{[attpack]}]
+!           An optional handle to the Attribute package that is to be created.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeAdd  - Add a nested ESMF Attribute package
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeAdd()
+!     subroutine ESMF_AttAddPackStd(target, convention, purpose, attrList, &
+!       nestConvention, nestPurpose, attpack, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),      intent(inout)           :: target
+!     character (len = *), intent(in)              :: convention
+!     character (len = *), intent(in)              :: purpose
+!     character (len = *), intent(in),    optional :: attrList(:)
+!     character (len = *), intent(in)     optional :: nestConvention
+!     character (len = *), intent(in)     optional :: nestPurpose
+!     type(ESMF_AttPack),  intent(out),   optional :: attpack
+!     integer,             intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Add an ESMF Attribute package containing a nested Attribute package.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the new Attribute package.
+!     \item [purpose]
+!           The purpose of the new Attribute package.
+!     \item [{[attrList]}]
+!           The list of Attribute names to add to the Attribute package.
+!     \item [{[nestConvention]}]
+!           The convention(s) of the standard Attribute package(s) around
+!           which to nest the new Attribute package.
+!     \item [{[nestPurpose]}]
+!           The purpose(s) of the standard Attribute package(s) around
+!           which to nest the new Attribute package.
+!     \item [{[attpack]}]
+!           An optional handle to the Attribute package that is to be created.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeCopy - Copy an Attribute hierarchy
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeCopy()
+!     subroutine ESMF_AttributeCopy(src, dst, attcopy, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),          intent(in)            :: src
+!     type(<object>),          intent(inout)         :: dst
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     type(ESMF_AttCopy_Flag), intent(in),  optional :: attcopy
+!     integer,                 intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Copy an Attribute hierarchy from \texttt{src} to \texttt{dst}.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     \textit{NOTE: Copies between different ESMF object types are not possible.}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [src]
+!           An {\tt Attribute}-bearing ESMF object.
+!     \item [dst]
+!           An {\tt Attribute}-bearing ESMF object.
+!     \item [{[attcopy]}]
+!           A flag to determine if the copy is by value (the default) or reference.
+!           This flag is documented in section \ref{const:attcopy}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute from an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(target, name, attpack, <value> &
+!       keywordEnforcer, <defaultvalue>, attnestflag, isPresent, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),         intent(in)              :: target
+!     character (len = *),    intent(in)              :: name
+!     type(ESMF_AttPack),     intent(inout)           :: attpack
+!     <value>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     <defaultvalue>, see below for supported values
+!     type(ESMF_AttNest_Flag),intent(in),  optional   :: attnestflag
+!     logical,                intent(out), optional   :: isPresent
+!     integer,                intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt value} from the \texttt{target}, or from an Attribute
+!     package on the \texttt{target}, specified by {\tt attpack}. A {\tt defaultvalue}
+!     argument may be given if a return code is not desired when the Attribute is
+!     not found.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+{% include "ESMF_Attribute-Doc-ValueTypes.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [<value>]
+!           The value of the named Attribute.
+!     \item [{[<defaultvalue>]}]
+!           The default value of the named Attribute.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the Attribute hierarchy when
+!           looking for this Attribute, the default is {\tt ESMF\_ATTNEST\_ON}.
+!           This flag is documented in section \ref{const:attnest}.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute from an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(target, name, attpack, <valueList>, &
+!       keywordEnforcer, <defaultvalueList>, attnestflag, itemCount, &
+!       isPresent, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),         intent(in)              :: target
+!     character (len = *),    intent(in)              :: name
+!     type(ESMF_AttPack),     intent(inout)           :: attpack
+!     <valueList>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     <defaultvalueList>, see below for supported values
+!     type(ESMF_AttNest_Flag),intent(in),  optional   :: attnestflag
+!     integer,                intent(out), optional   :: itemCount
+!     logical,                intent(out), optional   :: isPresent
+!     integer,                intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt valueList} from the \texttt{target}, or from an
+!     Attribute package on the \texttt{target}, specified by {\tt attpack}. A
+!     {\tt defaultvalueList} list argument may be given if a return code is not
+!     desired when the Attribute is not found.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+{% include "ESMF_Attribute-Doc-ValueTypes-List.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [<valueList>]
+!           The valueList of the named Attribute.
+!     \item [{[<defaultvalueList>]}]
+!           The default value list of the named Attribute.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the Attribute hierarchy when
+!           looking for this Attribute, the default is {\tt ESMF\_ATTNEST\_ON}.
+!           This flag is documented in section \ref{const:attnest}.
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(target, name, <value>, <defaultvalue>, &
+!       convention, purpose, attnestflag, isPresent, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),         intent(in)              :: target
+!     character (len = *),    intent(in)              :: name
+!     <value>, see below for supported values
+!     <defaultvalue>, see below for supported values
+!     character (len = *),    intent(in),    optional :: convention
+!     character (len = *),    intent(in),    optional :: purpose
+!     type(ESMF_AttNest_Flag),intent(in),    optional :: attnestflag
+!     logical,                intent(out),   optional :: isPresent
+!     integer,                intent(inout), optional :: rc
+!
+{% set removed_parameters = ["attPackInstanceName"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt value} from the \texttt{target}, or from an Attribute
+!     package on the \texttt{target}, specified by {\tt convention} and {\tt purpose}.
+!     A {\tt defaultvalue} argument may be given if a return code is not desired
+!     when the Attribute is not found.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+{% include "ESMF_Attribute-Doc-ValueTypes.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [<value>]
+!           The value of the named Attribute.
+!     \item [{[<defaultvalue>]}]
+!           The default value of the named Attribute.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(target, name, <valueList>, <defaultvalueList>, &
+!       convention, purpose, attnestflag, itemCount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),         intent(in)              :: target
+!     character (len = *),    intent(in)              :: name
+!     <valueList>, see below for supported values
+!     <defaultvalueList>, see below for supported values
+!     character (len = *),    intent(in),    optional :: convention
+!     character (len = *),    intent(in),    optional :: purpose
+!     type(ESMF_AttNest_Flag),intent(in),    optional :: attnestflag
+!     integer,                intent(out),   optional :: itemCount
+!     logical,                intent(out),   optional :: isPresent
+!     integer,                intent(inout), optional :: rc
+!
+{% set removed_parameters = ["attPackInstanceName"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt valueList} from the \texttt{target}, or from an
+!     Attribute package on the \texttt{target}, specified by {\tt convention}
+!     and {\tt purpose}. A {\tt defaultvalueList} list argument may be given if
+!     a return code is not desired when the Attribute is not found.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+{% include "ESMF_Attribute-Doc-ValueTypes-List.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [<valueList>]
+!           The valueList of the named Attribute.
+!     \item [{[<defaultvalueList>]}]
+!           The default value list of the named Attribute.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get the Attribute count from an ESMF_AttPack
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetCount(target, attpack, count, &
+!                                       attcountflag, attnestflag, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),             intent(in)              :: target
+!     type(ESMF_AttPack),         intent(inout)           :: attpack
+!     integer,                    intent(inout)           :: count
+!     type(ESMF_AttGetCountFlag), intent(in),    optional :: attcountflag
+!     type(ESMF_AttNest_Flag),    intent(in),    optional :: attnestflag
+!     integer,                    intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Return the Attribute count for \texttt{target}.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [count]
+!           The number of all existing Attributes of the type designated in the
+!           {\it attcountflag}, not just Attribute that have been set.
+!     \item [{[attcountflag]}]
+!           The flag to specify which attribute count to return, the
+!           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE.  This flag is documented
+!           in section \ref{const:attgetcount}.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get the Attribute count
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetCount(target, count, convention, purpose, &
+!       attcountflag, attnestflag, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),             intent(in)              :: target
+!     integer,                    intent(inout)           :: count
+!     character (len=*),          intent(in),    optional :: convention
+!     character (len=*),          intent(in),    optional :: purpose
+!     type(ESMF_AttGetCountFlag), intent(in),    optional :: attcountflag
+!     type(ESMF_AttNest_Flag),    intent(in),    optional :: attnestflag
+!     integer,                    intent(inout), optional :: rc
+!
+{% set removed_parameters = ["attPackInstanceName"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Return the Attribute count for \texttt{target}.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [count]
+!           The number of all existing Attributes of the type designated in the
+!           {\it attcountflag}, not just Attribute that have been set.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attcountflag]}]
+!           The flag to specify which attribute count to return, the
+!           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE.  This flag is documented
+!           in section \ref{const:attgetcount}.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name from an ESMF_AttPack
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetInfoByNamAP(target, name, attpack, &
+!       keywordEnforcer, attnestflag, typekind, itemCount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),           intent(in)              :: target
+!     character (len = *),      intent(in)              :: name
+!     type(ESMF_AttPack),       intent(inout)           :: attpack
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     type(ESMF_AttNest_Flag),  intent(in),    optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out),   optional :: typekind
+!     integer,                  intent(out),   optional :: itemCount
+!     logical,                  intent(out),   optional :: isPresent
+!     integer,                  intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Return information associated with an Attribute in an Attribute package,
+!     including {\tt typekind} and {\tt itemCount}.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to query.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetInfoByNam(target, name, keywordEnforcer, &
+!       convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),           intent(in)              :: target
+!     character (len = *),      intent(in)              :: name
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     character (len=*),        intent(in),    optional :: convention
+!     character (len=*),        intent(in),    optional :: purpose
+!     type(ESMF_AttNest_Flag),  intent(in),    optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out),   optional :: typekind
+!     integer,                  intent(out),   optional :: itemCount
+!     logical,                  intent(out),   optional :: isPresent
+!     integer,                  intent(inout), optional :: rc
+!
+{% set removed_parameters = ["attPackInstanceName"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Return information associated with the named Attribute,
+!     including {\tt typekind} and {\tt itemCount}.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to query.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number from an ESMF_AttPack
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetInfoByNum(target, attributeIndex, &
+!       name, attpack, attnestflag, typekind, itemcount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),           intent(in)            :: target
+!     integer,                  intent(in)            :: attributeIndex
+!     character (len = *),      intent(out)           :: name
+!     type(ESMF_AttPack),       intent(inout)         :: attpack
+!     type(ESMF_AttNest_Flag),  intent(in),  optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+!     integer,                  intent(out), optional :: itemCount
+!     logical,                  intent(out), optional :: isPresent
+!     integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Returns information associated with the indexed Attribute,
+!     including {\tt name}, {\tt typekind} and {\tt itemCount}.  Keep in
+!     mind that these indices start from 1, as expected in a Fortran API.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [attributeIndex]
+!           The index number of the Attribute to query.
+!     \item [name]
+!           The name of the Attribute.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetInfoByNum(target, attributeIndex, &
+!       name, convention, purpose, attnestflag, typekind, itemcount, isPresent, &
+!       rc)
+!
+! !ARGUMENTS:
+!     type(<object>),           intent(in)              :: target
+!     integer,                  intent(in)              :: attributeIndex
+!     character (len = *),      intent(out)             :: name
+!     character (len = *),      intent(in),    optional :: convention
+!     character (len = *),      intent(in),    optional :: purpose
+!     type(ESMF_AttNest_Flag),  intent(in),    optional :: attnestflag
+!     type(ESMF_TypeKind_Flag), intent(out),   optional :: typekind
+!     integer,                  intent(out),   optional :: itemCount
+!     logical,                  intent(out),   optional :: isPresent
+!     integer,                  intent(inout), optional :: rc
+!
+{% set removed_parameters = ["attPackInstanceName"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Returns information associated with the indexed Attribute,
+!     including {\tt name}, {\tt typekind} and {\tt itemCount}.  Keep in
+!     mind that these indices start from 1, as expected in a Fortran API.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [attributeIndex]
+!           The index number of the Attribute to query.
+!     \item [name]
+!           The name of the Attribute.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when looking for this Attribute, the default
+!           is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in section
+!           \ref{const:attnest}.
+!     \item [{[typekind]}]
+!           The typekind of the Attribute. This flag is documented in section
+!           \ref{const:typekind}.
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object and/or query for presence
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGetAttPack()
+!     subroutine ESMF_AttGetAttPack(target, convention, purpose, keywordEnforcer, &
+!       attpack, attnestflag, isPresent, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),          intent(in)               :: target
+!     character (len = *),     intent(in)               :: convention
+!     character (len = *),     intent(in)               :: purpose
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     type(ESMF_AttPack),      intent(inout),  optional :: attpack
+!     type(ESMF_AttNest_Flag), intent(in),     optional :: attnestflag
+!     logical,                 intent(out),    optional :: isPresent
+!     integer,                 intent(out),    optional :: rc
+!
+{% set removed_parameters = ["attPackInstanceName"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Get an ESMF Attribute package object.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object.
+!     \item [convention]
+!           The convention of the Attribute package.
+!     \item [purpose]
+!           The purpose of the Attribute package.
+!     \item [{[attpack]}]
+!           A handle to the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package, the
+!           default is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in
+!           section \ref{const:attnest}.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute package is present or not.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeRead  - Read Attributes from a JSON file
+! \label{api:AttributeRead}
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeRead(target, fileName, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),      intent(inout)         :: target
+!     character (len = *), intent(in)            :: fileName
+!     integer,             intent(out), optional :: rc
+!
+{% set removed_parameters = ["schemaFileName"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Read Attributes for \texttt{target} from \texttt{fileName}, whose format is JSON.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           The {\tt ESMF} object onto which the read Attributes will be placed.
+!     \item [fileName]
+!           The name of the JSON file to read.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package using an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeRemove(target, keywordEnforcer, name, &
+!       attpack, attnestflag, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),          intent(inout)           :: target
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     character (len = *),     intent(in),    optional :: name
+!     type(ESMF_AttPack),      intent(inout), optional :: attpack
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Remove an Attribute, or Attribute package on \texttt{target}.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [{[name]}]
+!           The name of the Attribute to remove.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package, the
+!           default is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in
+!           section \ref{const:attnest}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!     NOTE:  An entire Attribute package can be removed by specifying
+!            {\tt attpack} only, without {\tt name}.  By specifying
+!            {\tt attpack} an Attribute will be removed
+!            from the corresponding Attribute package, if it exists.  An
+!            Attribute can be removed directly from \texttt{target} by specifying
+!            {\tt name}, without {\tt attpack}.
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeRemove(target, name, convention, purpose, &
+!       attnestflag, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),          intent(inout)           :: target
+!     character (len = *),     intent(in),    optional :: name
+!     character (len = *),     intent(in),    optional :: convention
+!     character (len = *),     intent(in),    optional :: purpose
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
+!
+{% set removed_parameters = ["attPackInstanceName"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Remove an Attribute, or Attribute package on \texttt{target}.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [{[name]}]
+!           The name of the Attribute to remove.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attnestflag]}]
+!           A flag to determine whether to descend the
+!           Attribute hierarchy when searching for this Attribute package, the
+!           default is {\tt ESMF\_ATTNEST\_ON}.  This flag is documented in
+!           section \ref{const:attnest}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!     NOTE:  An entire Attribute package can be removed by specifying
+!            {\tt convention}, {\tt purpose}, and {\tt attPackInstanceName}
+!            only, without {\tt name}. An
+!            Attribute can be removed directly from <object> by specifying
+!            {\tt name}, without {\tt convention}, {\tt purpose}, and
+!            {\tt attPackInstanceName}.
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(target, name, <value>, attpack, &
+!       keywordEnforcer, itemcount, attnestflag, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),          intent(in)              :: target
+!     character (len = *),     intent(in)              :: name
+!     <value>, see below for supported values
+!     type(ESMF_AttPack),      intent(inout)           :: attpack
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     integer,                 intent(in),    optional :: itemcount
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to \texttt{target}, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and {\tt value},
+!     and, if in an Attribute package, a {\tt attpack}.
+!
+!     The \texttt{itemcount} and \texttt{attnestflag} are NOOP. The 
+!     \texttt{target} is a NOOP if the \texttt{attpack} is used.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+{% include "ESMF_Attribute-Doc-ValueTypes.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<value>]
+!           The value of the Attribute to set.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[itemcount]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[attnestflag]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an ESMF_AttPack
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(target, name, <valueList>, attpack, &
+!       keywordEnforcer, itemCount,  attnestflag, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),          intent(in)              :: target
+!     character (len = *),     intent(in)              :: name
+!     <valueList>, see below for supported values
+!     type(ESMF_AttPack),      intent(inout)           :: attpack
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     integer,                 intent(in),    optional :: itemcount
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to \texttt{target}, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and a
+!     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute
+!     package, a {\tt attpack}.
+!
+!     The \texttt{itemcount} and \texttt{attnestflag} are NOOP. The 
+!     \texttt{target} is a NOOP if the \texttt{attpack} is used.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+{% include "ESMF_Attribute-Doc-ValueTypes-List.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<valueList>]
+!           The valueList of the Attribute to set.
+!     \item [attpack]
+!           A handle to the Attribute package.
+!     \item [{[itemcount]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[attnestflag]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(target, name, <value>, &
+!       convention, purpose, itemcount, attnestflag, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),          intent(inout)           :: target
+!     character (len = *),     intent(in)              :: name
+!     <value>, see below for supported values
+!     character (len = *),     intent(in),    optional :: convention
+!     character (len = *),     intent(in),    optional :: purpose
+!     integer,                 intent(in),    optional :: itemcount
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
+!
+{% set removed_parameters = ["attPackInstanceName"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Attach an Attribute to \texttt{target}, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and {\tt value},
+!     and, if in an Attribute package, {\tt convention} and {\tt purpose}.
+!
+!     The \texttt{itemcount} and \texttt{attnestflag} are NOOP.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+{% include "ESMF_Attribute-Doc-ValueTypes.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<value argument>]
+!           The value of the Attribute to set.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[itemcount]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[attnestflag]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(target, name, <valueList>, &
+!       convention, purpose, itemCount, attnestflag, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),          intent(inout)           :: target
+!     character (len = *),     intent(in)              :: name
+!     <valueList>, see below for supported values
+!     character (len = *),     intent(in),    optional :: convention
+!     character (len = *),     intent(in),    optional :: purpose
+!     integer,                 intent(in),    optional :: itemcount
+!     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
+!     integer,                 intent(inout), optional :: rc
+!
+{% set removed_parameters = ["attPackInstanceName"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Attach an Attribute to \texttt{target}, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and a
+!     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute
+!     package, {\tt convention} and {\tt purpose}.
+!
+!     The \texttt{itemcount} and \texttt{attnestflag} are NOOP.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+{% include "ESMF_Attribute-Doc-ValueTypes-List.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [<valueList>]
+!           The valueList of the Attribute to set.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[itemcount]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[attnestflag]}]
+!           This parameter is only included for backward compatibility, it is NOOP.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeUpdate  - Update an Attribute hierarchy
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeUpdate(target, vm, rootList, rc)
+!
+! !ARGUMENTS:
+!     <target>, see below for supported values
+!     type(ESMF_VM), intent(in)            :: vm
+!     integer,       intent(in)            :: rootList(:)
+!     integer,       intent(out), optional :: rc
+!
+{% set removed_parameters = ["reconcile"] %}
+{% include "ESMF_Attribute-Doc-Status.jinja2" %}{{ "" }}
+!
+! !DESCRIPTION:
+!     Update an Attribute hierarchy during runtime. The information from
+!     the PETs in the {\tt rootList} is transferred to the PETs that are not
+!     in the {\tt rootList}.  Care should be taken to ensure that the
+!     information contained in the Attributes on the PETs in the {\tt rootList}
+!     is consistent.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+{% for et in meta['STATE_SYNC_TYPES'] %}
+!     \item \texttt{ESMF\_{{ et }}}
+{% endfor %}
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [vm]
+!           The virtual machine over which this Attribute hierarchy
+!           should be updated.
+!     \item [rootList]
+!           The list of PETs that are to be used as the source of the update.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
+! \label{api:AttributeWrite}
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeWrite(target, fileName, convention, purpose, &
+!       attwriteflag, rc)
+!
+! !ARGUMENTS:
+!     type(<object>),          intent(in)            :: target
+!     character (len = *),     intent(in)            :: fileName
+!     character (len = *),     intent(in),  optional :: convention
+!     character (len = *),     intent(in),  optional :: purpose
+!     type(ESMF_AttWriteFlag), intent(in),  optional :: attwriteflag
+!     integer,                 intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Write the Attribute package to file for \texttt{target}. JSON is the
+!     default format.
+!
+{% include "ESMF_Attribute-Doc-Objects.jinja2" %}{{ "" }}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [target]
+!           An {\tt ESMF} object.
+!     \item [fileName]
+!           The name of the JSON file to write.
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attwriteflag]}]
+!           The flag to specify which format is desired for the write, the
+!           default is ESMF\_ATTWRITE\_JSON.  This flag is documented in
+!           section \ref{const:attwrite}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------

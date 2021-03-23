@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -35,13 +35,15 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod           ! ESMF utility types
   use ESMF_InitMacrosMod          ! ESMF initializer macros
   use ESMF_BaseMod                ! ESMF base class
   use ESMF_LogErrMod              ! ESMF error handling
   use ESMF_F90InterfaceMod        ! ESMF F90-C++ interface helper
   use ESMF_IOUtilMod              ! ESMF I/O utility layer
-  
+
   implicit none
 
 !------------------------------------------------------------------------------
@@ -92,7 +94,7 @@ module ESMF_RHandleMod
     real(ESMF_KIND_R8)  :: dynamicDstMaskValue
     logical             :: handleAllElements
   end type
-  
+
   type ESMF_DynamicMaskStateWrpR8R8R8
     type(ESMF_DynamicMaskStateR8R8R8), pointer :: wrap
   end type
@@ -123,7 +125,7 @@ module ESMF_RHandleMod
     real(ESMF_KIND_R8)  :: dynamicDstMaskValue
     logical             :: handleAllElements
   end type
-  
+
   type ESMF_DynamicMaskStateWrpR8R8R8V
     type(ESMF_DynamicMaskStateR8R8R8V), pointer :: wrap
   end type
@@ -152,11 +154,11 @@ module ESMF_RHandleMod
     real(ESMF_KIND_R4)  :: dynamicDstMaskValue
     logical             :: handleAllElements
   end type
-  
+
   type ESMF_DynamicMaskStateWrpR4R8R4
     type(ESMF_DynamicMaskStateR4R8R4), pointer :: wrap
   end type
-  
+
   !----
 
   interface
@@ -181,7 +183,7 @@ module ESMF_RHandleMod
     real(ESMF_KIND_R4)  :: dynamicDstMaskValue
     logical             :: handleAllElements
   end type
-  
+
   type ESMF_DynamicMaskStateWrpR4R8R4V
     type(ESMF_DynamicMaskStateR4R8R4V), pointer :: wrap
   end type
@@ -210,11 +212,11 @@ module ESMF_RHandleMod
     real(ESMF_KIND_R4)  :: dynamicDstMaskValue
     logical             :: handleAllElements
   end type
-  
+
   type ESMF_DynamicMaskStateWrpR4R4R4
     type(ESMF_DynamicMaskStateR4R4R4), pointer :: wrap
   end type
-  
+
   !----
 
   interface
@@ -239,7 +241,7 @@ module ESMF_RHandleMod
     real(ESMF_KIND_R4)  :: dynamicDstMaskValue
     logical             :: handleAllElements
   end type
-  
+
   type ESMF_DynamicMaskStateWrpR4R4R4V
     type(ESMF_DynamicMaskStateR4R4R4V), pointer :: wrap
   end type
@@ -276,23 +278,28 @@ module ESMF_RHandleMod
   public ESMF_RouteHandleDestroy
 
   public ESMF_RouteHandleIsCreated
-  
+
   public ESMF_RouteHandleRelease
 
   public ESMF_RouteHandlePrepXXE
   public ESMF_RouteHandleAppend
-  
+
   public ESMF_RouteHandleGet
   public ESMF_RouteHandleSet
- 
+
   public ESMF_RouteHandleValidate
   public ESMF_RouteHandlePrint
 
   public ESMF_RouteHandleWrite
-  
+
   public ESMF_RouteHandleOptimize
 
   public ESMF_RouteHandleCopyThis
+  public ESMF_RouteHandleGetThis
+  
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+  public c_ESMC_RouteHandleSetDynSrcMask, c_ESMC_RouteHandleSetDynDstMask
+#endif
  
 !EOPI
 !------------------------------------------------------------------------------
@@ -303,7 +310,7 @@ module ESMF_RHandleMod
     '$Id$'
 
 !==============================================================================
-! 
+!
 ! INTERFACE BLOCKS
 !
 !==============================================================================
@@ -324,6 +331,33 @@ module ESMF_RHandleMod
     module procedure ESMF_RouteHandleSetI
   end interface
 
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine c_ESMC_RouteHandleSetDynSrcMask(routehandle, value, rc)
+      import                :: ESMF_RouteHandle
+      type(ESMF_RouteHandle):: routehandle
+      type(*)               :: value
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_RouteHandleSetDynDstMask(routehandle, value, rc)
+      import                :: ESMF_RouteHandle
+      type(ESMF_RouteHandle):: routehandle
+      type(*)               :: value
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+#endif
+
+!------------------------------------------------------------------------------
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -337,7 +371,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteHandleGetInit"
 !BOPI
-! !IROUTINE: ESMF_RouteHandleGetInit - Get the Init status 
+! !IROUTINE: ESMF_RouteHandleGetInit - Get the Init status
 
 ! !INTERFACE:
   function ESMF_RouteHandleGetInit(d)
@@ -353,8 +387,8 @@ contains
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[d] 
-!     The class to be queried 
+!   \item[d]
+!     The class to be queried
 !   \end{description}
 !
 !EOPI
@@ -363,7 +397,7 @@ contains
       ESMF_RouteHandleGetInit=ESMF_INIT_GET(d)
     else
       ESMF_RouteHandleGetInit=ESMF_INIT_CREATED
-    endif 
+    endif
   end function ESMF_RouteHandleGetInit
 !------------------------------------------------------------------------------
 
@@ -380,16 +414,16 @@ contains
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: rh
     integer,                intent(out),  optional  :: rc
-!         
+!
 !
 ! !DESCRIPTION:
 !   Set init code in RouteHandle object to "CREATED".
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[rh] 
+!   \item[rh]
 !     Specified {\tt ESMF\_RouteHandle} object.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -397,13 +431,13 @@ contains
 !------------------------------------------------------------------------------
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Set init code
     ESMF_INIT_SET_CREATED(rh)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_RouteHandleSetInitCreated
 !------------------------------------------------------------------------------
 
@@ -425,12 +459,12 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Allocates memory for a new {\tt ESMF\_RouteHandle} object and 
+!   Allocates memory for a new {\tt ESMF\_RouteHandle} object and
 !   constructs its internals.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -442,7 +476,7 @@ contains
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     rhandle%this = ESMF_NULL_POINTER
     ESMF_RouteHandleCreateDef = rhandle
 
@@ -498,20 +532,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{sloppypar}
 !     The petList on which the incoming {\tt routehandle} is defined to operate.
 !     If present, then {\tt targetPetList} must also be present and of the same
-!     size. The petLists are used to map origin PETs to target PETs. By 
+!     size. The petLists are used to map origin PETs to target PETs. By
 !     convention the petLists are constructed to first list the PETs of the
 !     source component, followed by the PETs of the destination component.
-!     Defaults, to the petList of the current component context, meaning that 
+!     Defaults, to the petList of the current component context, meaning that
 !     the PETs in the RouteHandle are not modified.
 !     \end{sloppypar}
 !   \item[{[targetPetList]}]
 !     \begin{sloppypar}
 !     The petList on which the newly created RouteHandle is defined to operate.
 !     If present, then {\tt originPetList} must also be present and of the same
-!     size. The petLists are used to map origin PETs to target PETs. By 
+!     size. The petLists are used to map origin PETs to target PETs. By
 !     convention the petLists are constructed to first list the PETs of the
 !     source component, followed by the PETs of the destination component.
-!     Defaults, to the petList of the current component context, meaning that 
+!     Defaults, to the petList of the current component context, meaning that
 !     the PETs in the RouteHandle are not modified.
 !     \end{sloppypar}
 !   \item[{[rc]}]
@@ -586,12 +620,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Create a new {\tt ESMF\_RouteHandle} object from a file.
+!   Create a new {\tt ESMF\_RouteHandle} object from a file. This method must
+!   be called from a VM context that holds exactly as many PETs as were used
+!   when generating the file.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[fileName]
-!     The name of the RouteHandle file.
+!     The name of the RouteHandle file to be read in.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -637,7 +673,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     noGarbage, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout)          :: routehandle   
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),   optional :: noGarbage
     integer,                intent(out),  optional :: rc
@@ -648,27 +684,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[routehandle] 
+!   \item[routehandle]
 !     The {\tt ESMF\_RouteHandle} to be destroyed.
 !   \item[{[noGarbage]}]
 !     If set to {\tt .TRUE.} the object will be fully destroyed and removed
-!     from the ESMF garbage collection system. Note however that under this 
-!     condition ESMF cannot protect against accessing the destroyed object 
-!     through dangling aliases -- a situation which may lead to hard to debug 
+!     from the ESMF garbage collection system. Note however that under this
+!     condition ESMF cannot protect against accessing the destroyed object
+!     through dangling aliases -- a situation which may lead to hard to debug
 !     application crashes.
-! 
+!
 !     It is generally recommended to leave the {\tt noGarbage} argument
-!     set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!     set to {\tt .FALSE.} (the default), and to take advantage of the ESMF
 !     garbage collection system which will prevent problems with dangling
 !     aliases or incorrect sequences of destroy calls. However this level of
 !     support requires that a small remnant of the object is kept in memory
 !     past the destroy call. This can lead to an unexpected increase in memory
-!     consumption over the course of execution in applications that use 
-!     temporary ESMF objects. For situations where the repeated creation and 
-!     destruction of temporary objects leads to memory issues, it is 
-!     recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!     consumption over the course of execution in applications that use
+!     temporary ESMF objects. For situations where the repeated creation and
+!     destruction of temporary objects leads to memory issues, it is
+!     recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully
 !     removing the entire temporary object from memory.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -692,7 +728,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (routehandle%this .eq. ESMF_NULL_POINTER) then
       if (present(rc)) rc = ESMF_SUCCESS
       return
-    endif 
+    endif
 
     ! Call C++ destroy code
     call c_ESMC_RouteHandleDestroy(routehandle, opt_noGarbage, localrc)
@@ -703,7 +739,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! nullify pointer
     routehandle%this = ESMF_NULL_POINTER
     ESMF_INIT_SET_DELETED(routehandle)
-    
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -733,11 +769,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[routehandle] 
+!     \item[routehandle]
 !          {\tt ESMF\_RouteHandle} to be queried.
 !     \item [{[name]}]
 !          Name of the RouteHandle object.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -757,7 +793,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -786,11 +822,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[routehandle] 
+!     \item[routehandle]
 !          {\tt ESMF\_RouteHandle} to be queried.
 !     \item[htype]
 !          Route type.
-!     \item[rc] 
+!     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -815,6 +851,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_RouteHandleGetI
 !------------------------------------------------------------------------------
 
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleGetThis()"
+!BOPI
+! !IROUTINE: ESMF_RouteHandleGetThis - Internal access routine for C++ pointer
+
+! !INTERFACE:
+subroutine ESMF_RouteHandleGetThis(rh, this, rc)
+! ARGUMENTS:
+  type(ESMF_RouteHandle), intent(in) :: rh
+  type(ESMF_Pointer), intent(out) :: this
+  integer, intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Internal access routine for C++ pointer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[rh]
+!          Specified {\tt ESMF\_RouteHandle} object.
+!     \item[this]
+!          C++ pointer.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  this = rh%this
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_RouteHandleGetThis
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
@@ -833,8 +902,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt routehandle} has been created. Otherwise return 
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   Return {\tt .true.} if the {\tt routehandle} has been created. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !
 ! The arguments are:
@@ -846,7 +915,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOP
-  !-----------------------------------------------------------------------------    
+  !-----------------------------------------------------------------------------
     ESMF_RouteHandleIsCreated = .false.   ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
     if (ESMF_RouteHandleGetInit(routehandle)==ESMF_INIT_CREATED) &
@@ -865,7 +934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_RouteHandleRelease(routehandle, keywordEnforcer, noGarbage, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout)          :: routehandle   
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),   optional :: noGarbage
     integer,                intent(out),  optional :: rc
@@ -875,27 +944,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[routehandle] 
+!   \item[routehandle]
 !     The {\tt ESMF\_RouteHandle} to be released.
 !   \item[{[noGarbage]}]
 !     If set to {\tt .TRUE.} the object will be fully destroyed and removed
-!     from the ESMF garbage collection system. Note however that under this 
-!     condition ESMF cannot protect against accessing the destroyed object 
-!     through dangling aliases -- a situation which may lead to hard to debug 
+!     from the ESMF garbage collection system. Note however that under this
+!     condition ESMF cannot protect against accessing the destroyed object
+!     through dangling aliases -- a situation which may lead to hard to debug
 !     application crashes.
-! 
+!
 !     It is generally recommended to leave the {\tt noGarbage} argument
-!     set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!     set to {\tt .FALSE.} (the default), and to take advantage of the ESMF
 !     garbage collection system which will prevent problems with dangling
 !     aliases or incorrect sequences of destroy calls. However this level of
 !     support requires that a small remnant of the object is kept in memory
 !     past the destroy call. This can lead to an unexpected increase in memory
-!     consumption over the course of execution in applications that use 
-!     temporary ESMF objects. For situations where the repeated creation and 
-!     destruction of temporary objects leads to memory issues, it is 
-!     recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!     consumption over the course of execution in applications that use
+!     temporary ESMF objects. For situations where the repeated creation and
+!     destruction of temporary objects leads to memory issues, it is
+!     recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully
 !     removing the entire temporary object from memory.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -917,7 +986,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_RouteHandleRelease
 !------------------------------------------------------------------------------
 
@@ -937,14 +1006,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !DESCRIPTION:
-!   Prepare an {\tt ESMF\_RouteHandle} to be of type ARRAYBUNDLEXXE, and 
+!   Prepare an {\tt ESMF\_RouteHandle} to be of type ARRAYBUNDLEXXE, and
 !   ready for {\tt ESMF\_RouteHandleAppend()} calls.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[routehandle] 
+!   \item[routehandle]
 !     {\tt ESMF\_RouteHandle} to be prepared.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -957,7 +1026,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
-    
+
     call c_ESMC_RouteHandlePrepXXE(routehandle, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -990,19 +1059,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !DESCRIPTION:
-!   Append the exchange pattern stored in {\tt appendRoutehandle} to the 
+!   Append the exchange pattern stored in {\tt appendRoutehandle} to the
 !   {\tt routehandle}. Optionally transfer ownership of the exchange pattern
 !   stored in the incoming {\tt appendRoutehandle} to the {\tt routehandle}.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[routehandle] 
+!   \item[routehandle]
 !     {\tt ESMF\_RouteHandle} to be appended to.
-!   \item[appendRoutehandle] 
+!   \item[appendRoutehandle]
 !     {\tt ESMF\_RouteHandle} to be appended and cleared.
-!   \item[{[transferflag]}] 
+!   \item[{[transferflag]}]
 !     If set to {\tt .true.}, the ownership of the appended exchange will be
-!     transferred to {\tt routehandle}. This means that the exchange will be 
+!     transferred to {\tt routehandle}. This means that the exchange will be
 !     released when {\tt routehandle} is released. Even when ownership of the
 !     exchange pattern is transferred, {\tt appendRoutehandle} still can be used
 !     as a container to reference the exchange, e.g. to append the same
@@ -1021,7 +1090,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
-    
+
     if (present(transferflag)) then
       transferflagArg = transferflag
     else
@@ -1051,7 +1120,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_RouteHandlePrint(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)            :: routehandle      
+    type(ESMF_RouteHandle), intent(in)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
@@ -1060,9 +1129,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[routehandle] 
+!   \item[routehandle]
 !     {\tt ESMF\_RouteHandle} to print contents of.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -1087,7 +1156,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_RouteHandlePrint
 !------------------------------------------------------------------------------
 
@@ -1105,7 +1174,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(len = *),     intent(in),  optional :: name    
+    character(len = *),     intent(in),  optional :: name
     integer,                intent(out), optional :: rc
 
 !
@@ -1114,11 +1183,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[routehandle] 
+!   \item[routehandle]
 !     {\tt ESMF\_RouteHandle} to be modified.
 !   \item [{[name]}]
 !     The RouteHandle name.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -1131,7 +1200,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
-    
+
     if (present(name)) then
       call c_ESMC_SetName(routehandle, "RouteHandle", name, localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1167,11 +1236,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[routehandle] 
+!   \item[routehandle]
 !     {\tt ESMF\_RouteHandle} to be modified.
 !   \item[htype]
 !     Route type.
-!   \item[rc] 
+!   \item[rc]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -1184,7 +1253,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
-    
+
     call c_ESMC_RouteHandleSetType(routehandle, htype, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -1207,7 +1276,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_RouteHandleValidate(routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)            :: routehandle       
+    type(ESMF_RouteHandle), intent(in)            :: routehandle
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1215,9 +1284,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[routehandle] 
+!   \item[routehandle]
 !     {\tt ESMF\_RouteHandle} to be queried.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -1231,14 +1300,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
-    call c_ESMC_RouteHandleValidate(routehandle, localrc)   
+    call c_ESMC_RouteHandleValidate(routehandle, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_RouteHandleValidate
 !------------------------------------------------------------------------------
 
@@ -1253,23 +1322,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_RouteHandleWrite(routehandle, fileName, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout)         :: routehandle   
+    type(ESMF_RouteHandle), intent(inout)         :: routehandle
     character(*),           intent(in)            :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Write the RouteHandle to file. The generated file can then be used to
-!   re-create the same RouteHandle through via the 
+!   re-create the same RouteHandle, on the same number of PETs, using the
 !   {\tt ESMF\_RouteHandleCreate(fileName=...)} method.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[routehandle] 
+!   \item[routehandle]
 !     The {\tt ESMF\_RouteHandle} to be written.
 !   \item[fileName]
 !     The name of the output file to which the RouteHandle is written.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -1290,7 +1359,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_RouteHandleWrite
 !------------------------------------------------------------------------------
 
@@ -1305,7 +1374,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_RouteHandleOptimize(routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in)            :: routehandle      
+    type(ESMF_RouteHandle), intent(in)            :: routehandle
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1314,10 +1383,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[routehandle] 
+!   \item[routehandle]
 !     {\tt ESMF\_RouteHandle} holding the communication patter for which the
 !     optimization is carried out.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -1331,14 +1400,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
-    call c_ESMC_RouteHandleOptimize(routehandle, localrc)   
+    call c_ESMC_RouteHandleOptimize(routehandle, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_RouteHandleOptimize
 !------------------------------------------------------------------------------
 
@@ -1356,18 +1425,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle), intent(in)              :: rhandleIn
     type(ESMF_RouteHandle), intent(inout)           :: rhandleOut
     integer,                intent(out),  optional  :: rc
-!         
+!
 !
 ! !DESCRIPTION:
 !     Copy RouteHandle this member. Do not set init code.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[rhandleIn] 
+!     \item[rhandleIn]
 !          Input {\tt ESMF\_RouteHandle} object.
-!     \item[rhandleOut] 
+!     \item[rhandleOut]
 !          Output {\tt ESMF\_RouteHandle} object.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1378,13 +1447,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
-    
+
     ! Copy this member
     rhandleOut%this = rhandleIn%this
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_RouteHandleCopyThis
 !------------------------------------------------------------------------------
 
@@ -1434,10 +1503,10 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
 
   ! access the dynamicMaskState that is stored inside the Routehandle
   nullify(dynamicMaskState%wrap)
-  call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskState, localrc)
+  call c_ESMC_RouteHandleGetASR8R8R8(routehandle, dynamicMaskState, localrc)
   if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
     ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
   ! look at typeKey to see what needs to be done
   if (dynamicMaskState%wrap%typeKey == "R8R8R8") then
     ! non-vector version
@@ -1512,7 +1581,7 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
   else if (dynamicMaskState%wrap%typeKey == "R8R8R8V") then
     ! vector version -> use correct variables
     nullify(dynamicMaskStateV%wrap)
-    call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskStateV, localrc)
+    call c_ESMC_RouteHandleGetASR8R8R8V(routehandle, dynamicMaskStateV, localrc)
     if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
       ESMF_CONTEXT, rcToReturn=rc)) return
     ! prepare the dynamicMaskListV
@@ -1559,7 +1628,7 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
-  else    
+  else
     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
       msg="Inconsistency between the provided 'dynamicMaskRoutine' and "// &
       "actual data types.", &
@@ -1616,10 +1685,10 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
 
   ! access the dynamicMaskState that is stored inside the Routehandle
   nullify(dynamicMaskState%wrap)
-  call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskState, localrc)
+  call c_ESMC_RouteHandleGetASR4R8R4(routehandle, dynamicMaskState, localrc)
   if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
     ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
   ! look at typeKey to see what needs to be done
   if (dynamicMaskState%wrap%typeKey == "R4R8R4") then
     ! non-vector version
@@ -1693,7 +1762,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
   else if (dynamicMaskState%wrap%typeKey == "R4R8R4V") then
     ! vector version -> use correct variables
     nullify(dynamicMaskStateV%wrap)
-    call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskStateV, localrc)
+    call c_ESMC_RouteHandleGetASR4R8R4V(routehandle, dynamicMaskStateV, localrc)
     if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
       ESMF_CONTEXT, rcToReturn=rc)) return
     ! prepare the dynamicMaskListV
@@ -1739,7 +1808,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
     ! error handling of call back into user routine
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-  else    
+  else
     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
       msg="Inconsistency between the provided 'dynamicMaskRoutine' and "// &
       "actual data types.", &
@@ -1752,7 +1821,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
 
 end subroutine f_esmf_dynmaskcallbackr4r8r4
 !------------------------------------------------------------------------------
- 
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1795,10 +1864,10 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
 
   ! access the dynamicMaskState that is stored inside the Routehandle
   nullify(dynamicMaskState%wrap)
-  call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskState, localrc)
+  call c_ESMC_RouteHandleGetASR4R4R4(routehandle, dynamicMaskState, localrc)
   if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
     ESMF_CONTEXT, rcToReturn=rc)) return
-  
+
   ! look at typeKey to see what needs to be done
   if (dynamicMaskState%wrap%typeKey == "R4R4R4") then
     ! non-vector version
@@ -1872,7 +1941,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
   else if (dynamicMaskState%wrap%typeKey == "R4R4R4V") then
     ! vector version -> use correct variables
     nullify(dynamicMaskStateV%wrap)
-    call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskStateV, localrc)
+    call c_ESMC_RouteHandleGetASR4R4R4V(routehandle, dynamicMaskStateV, localrc)
     if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
       ESMF_CONTEXT, rcToReturn=rc)) return
     ! prepare the dynamicMaskListV
@@ -1918,7 +1987,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
     ! error handling of call back into user routine
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-  else    
+  else
     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
       msg="Inconsistency between the provided 'dynamicMaskRoutine' and "// &
       "actual data types.", &

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -323,9 +323,21 @@ void CommReg::clear() {
   elem_rel.clear();
 }
 
+
+   // Change proc numbers to different ones. This is useful when 
+  // moving a mesh to different VM
+void CommReg::map_proc_numbers(int num_procs, int *proc_map) {
+  node_rel.map_proc_numbers(num_procs, proc_map);
+  edge_rel.map_proc_numbers(num_procs, proc_map);
+  face_rel.map_proc_numbers(num_procs, proc_map);
+  elem_rel.map_proc_numbers(num_procs, proc_map);
+}
+
+
 template void CommReg::SwapOp<double>(UInt nfields, MEField<> **sfields,int);
 template void CommReg::SwapOp<int>(UInt nfields, MEField<> **sfields,int);
 template void CommReg::SwapOp<char>(UInt nfields, MEField<> **sfields,int);
 template void CommReg::SwapOp<long>(UInt nfields, MEField<> **sfields,int);
+
 
 } // namespace 

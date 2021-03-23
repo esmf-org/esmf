@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -38,6 +38,8 @@
 #include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_ArrayBundle.h"
+#include "ESMCI_Info.h"
+#include "json.hpp"
 
 // Define PIO NetCDF and Parallel NetCDF flags
 #ifdef ESMF_PNETCDF
@@ -51,6 +53,8 @@
 #include "pio_types.h"
 
 #include "esmf_io_debug.h"
+
+using json = nlohmann::json;  // Convenience rename for JSON namespace.
 
 // For error checking
 #define CHECKPIOERROR(_err, _str, _rc_code, _rc)                                        \
@@ -774,8 +778,8 @@ void PIO_Handler::arrayWrite(
   const char * const name,                // (in) Optional array name
   const std::vector<std::string> &dimLabels, // (in) Optional dimension labels
   int *timeslice,                         // (in) Optional timeslice
-  const Attribute *varAttPack,            // (in) Optional per-variable Attribute Package
-  const Attribute *gblAttPack,            // (in) Optional global Attribute Package
+  const ESMCI::Info *varAttPack,            // (in) Optional per-variable Attribute Package
+  const ESMCI::Info *gblAttPack,            // (in) Optional global Attribute Package
   int *rc                                 // (out) - Error return code
 //
   ) {
@@ -1523,9 +1527,9 @@ void PIO_Handler::attPackPut (
 //
 // !ARGUMENTS:
 //
-  pio_var_desc_t vardesc,                 // (in) - variable to write attributes into, NULL for global
-  const Attribute *attPack,               // (in) - AttPack containing name/value(s) pairs
-  int *rc                                 // (out) - Error return code
+  pio_var_desc_t vardesc,      // (in) - variable to write attributes into, NULL for global
+  const ESMCI::Info *attPack,  // (in) - AttPack containing name/value(s) pairs
+  int *rc                      // (out) - Error return code
   ) {
 //
 // !DESCRIPTION:
@@ -1537,93 +1541,88 @@ void PIO_Handler::attPackPut (
   int localrc;
   int piorc;
 
-  int natts = attPack->getCountAttr();
-  for (int i=0; i<natts; i++) {
-    Attribute *att = attPack->AttPackGetAttribute (i);
-    if (!att) {
-      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
-          "Can not access Attribute in " + attPack->getName(),
-          ESMC_CONTEXT, rc)) return;
-    }
-    if (att->getName().substr(0,5) == "ESMF:") {
-#if 0
-      std::cout << ESMC_METHOD << ": NOTE: ESMF internal attribute " << att->getName() << " ignored." << std::endl;
-#endif
+  const json &j = attPack->getStorageRef();
+  for (json::const_iterator it=j.cbegin(); it!=j.cend(); it++) {
+    if (it.key().rfind("ESMF:", 0) == 0) {
       continue;
     }
+    json jcurr;
+    if (it.value().is_array()) {
+      jcurr = it.value();
+    } else {
+      json arr = json::array();
+      arr.push_back(it.value());
+      jcurr = arr;
+    }
+    if (!(jcurr.is_array())) {
+      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_WRONGTYPE, "Only JSON arrays supported. Key is: " + it.key(), ESMC_CONTEXT, rc))
+        return;
+    }
+    int size = (int)(jcurr.size());
 
-    ESMC_TypeKind_Flag att_type = att->getTypeKind ();
+    // Determine if the target key is 32-bit
+    bool is_32bit = false;
+    try {
+      json::json_pointer jp = attPack->formatKey(it.key());
+      is_32bit = ESMCI::retrieve_32bit_flag(attPack->getTypeStorage(), jp, true);
+    }
+    ESMC_CATCH_ERRPASSTHRU
+
+    ESMC_TypeKind_Flag att_type = ESMCI::json_type_to_esmf_typekind(jcurr, true, is_32bit);
     switch (att_type) {
-      case ESMC_TYPEKIND_CHARACTER:
-      {
-        std::vector<std::string> stringvals;
-        localrc = att->get (&stringvals);
-        if (ESMC_LogDefault.MsgFoundError(localrc,
-            "Can not access string Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) return;
-        if (stringvals.size() > 1) {
-          if (ESMC_LogDefault.MsgFoundError(localrc,
-              "Only scalar string Attribute value for " + att->getName() + " is currently supported",
-              ESMC_CONTEXT, rc)) return;
+      case ESMC_TYPEKIND_CHARACTER: {
+        if (size > 1) {
+          if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_WRONGTYPE, "JSON arrays with size > 1 not supported for strings. Key is: " + it.key(), ESMC_CONTEXT, rc))
+            return;
         }
+        const std::string value = jcurr[0];
         piorc = pio_cpp_put_att_string (pioFileDesc, vardesc,
-            att->getName().c_str(), stringvals[0].c_str());
-        if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) return;
+                                        it.key().c_str(), value.c_str());
+        if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + it.key(),
+                           ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
-
-      case ESMC_TYPEKIND_I4:
-      {
-        int nvals;
-        std::vector<ESMC_I4> intvals;
-        localrc = att->get (&nvals, &intvals);
-        if (ESMC_LogDefault.MsgFoundError(localrc,
-            "Can not access int Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) return;
+      case ESMC_TYPEKIND_I8: {
+        const std::vector<int> value = jcurr.get<std::vector<int>>();
         piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc,
-            att->getName().c_str(), &intvals[0], intvals.size());
-        if (!CHECKPIOERROR(piorc, "Attempting to set int Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) return;
+                                      it.key().c_str(), value.data(), size);
+        if (!CHECKPIOERROR(piorc, "Attempting to set I8 Attribute: " + it.key(),
+                           ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
-
-      case ESMC_TYPEKIND_R4:
-      {
-        int nvals;
-        std::vector<ESMC_R4> floatvals;
-        localrc = att->get (&nvals, &floatvals);
-        if (ESMC_LogDefault.MsgFoundError(localrc,
-            "Can not access float Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) return;
-        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc,
-            att->getName().c_str(), &floatvals[0], floatvals.size());
-        if (!CHECKPIOERROR(piorc, "Attempting to set float Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) return;
-        break;
-      }
-
-      case ESMC_TYPEKIND_R8:
-      {
-        int nvals;
-        std::vector<ESMC_R8> doublevals;
-        localrc = att->get (&nvals, &doublevals);
-        if (ESMC_LogDefault.MsgFoundError(localrc,
-            "Can not access double Attribute value for " + att->getName(),
-            ESMC_CONTEXT, rc)) return;
+      case ESMC_TYPEKIND_R8: {
+        const std::vector<double> value = jcurr.get<std::vector<double>>();
         piorc = pio_cpp_put_att_doubles (pioFileDesc, vardesc,
-            att->getName().c_str(), &doublevals[0], doublevals.size());
-        if (!CHECKPIOERROR(piorc, "Attempting to set double Attribute: " + att->getName(),
-            ESMF_RC_FILE_WRITE, (*rc))) return;
+                                         it.key().c_str(), value.data(), size);
+        if (!CHECKPIOERROR(piorc, "Attempting to set R8 Attribute: " + it.key(),
+                           ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
-
+      case ESMC_TYPEKIND_I4: {
+        const std::vector<int> value = jcurr.get<std::vector<int>>();
+        piorc = pio_cpp_put_att_ints (pioFileDesc, vardesc,
+                                      it.key().c_str(), value.data(), size);
+        if (!CHECKPIOERROR(piorc, "Attempting to set I4 Attribute: " + it.key(),
+                           ESMF_RC_FILE_WRITE, (*rc))) return;
+        break;
+      }
+      case ESMC_TYPEKIND_R4: {
+        const std::vector<float> value = jcurr.get<std::vector<float>>();
+        piorc = pio_cpp_put_att_floats (pioFileDesc, vardesc,
+                                         it.key().c_str(), value.data(), size);
+        if (!CHECKPIOERROR(piorc, "Attempting to set R4 Attribute: " + it.key(),
+                           ESMF_RC_FILE_WRITE, (*rc))) return;
+        break;
+      }
       default:
         if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ATTR_NOTSET,
-            "Attribute " + att->getName() + " has unsupported value type",
-            ESMC_CONTEXT, rc)) return;
+                                          "Attribute " + it.key() + " has unsupported value type",
+                                          ESMC_CONTEXT, rc)) return;
     }
-  } // natts loop
+  }
+
+  if (rc) {*rc = ESMF_SUCCESS;}
+
 } // PIO_Handler::attPackPut()
 //-----------------------------------------------------------------------------
 

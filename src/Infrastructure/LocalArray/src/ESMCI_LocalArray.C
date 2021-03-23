@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -60,7 +60,7 @@ extern "C" {
     ESMC_TypeKind_Flag*, const int *, const int *, const int *, int *);
 
   void FTN_X(f_esmf_localarraycopyf90ptr)(const ESMCI::LocalArray** laIn, 
-    ESMCI::LocalArray** laOut, int *rc);
+    ESMCI::LocalArray** laOut, ESMCI::DataCopyFlag *copyflag, int *rc);
   
   void FTN_X(f_esmf_localarrayctof90)(ESMCI::LocalArray**, void *, int *, 
     ESMC_TypeKind_Flag*, int *, int *, int *, int *);
@@ -143,7 +143,7 @@ int LocalArray::construct(
 //
 // !ARGUMENTS:
   bool aflag,                 // allocate space for data?
-  CopyFlag docopy,            // make a data copy from ibase_addr?
+  DataCopyFlag docopy,        // make a data copy from ibase_addr?
   ESMC_TypeKind_Flag tk,      // I1, I2, I4, I8, R4, R8
   int irank,                  // 1, 2, ..., ESMF_MAXDIM
   LocalArrayOrigin oflag,     // create called from Fortran or C++?
@@ -174,18 +174,19 @@ int LocalArray::construct(
   typekind = tk;
   base_addr = ibase_addr;
   int totalcount = 1;
+  int lboundKeep[ESMF_MAXDIM], uboundKeep[ESMF_MAXDIM];
   for (int i=0; i<rank; i++) {
     counts[i] = icounts ? icounts[i] : 1;        
-    lbound[i] = lbounds ? lbounds[i] : 1;
-    ubound[i] = ubounds ? ubounds[i] : counts[i];
+    lboundKeep[i] = lbound[i] = lbounds ? lbounds[i] : 1;
+    uboundKeep[i] = ubound[i] = ubounds ? ubounds[i] : counts[i];
     bytestride[i] = 1;
     offset[i] = offsets ? offsets[i] : 0;
     totalcount *= counts[i];
   }
   for (int i=rank; i<ESMF_MAXDIM; i++) {
     counts[i] = 1;
-    lbound[i] = 1;
-    ubound[i] = 1;
+    lboundKeep[i] = lbound[i] = 1;
+    uboundKeep[i] = ubound[i] = 1;
     bytestride[i] = 1;
     offset[i] = 0;
   }
@@ -204,13 +205,19 @@ int LocalArray::construct(
       lbound, ubound, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
-  }else if (docopy == DATA_REF){
+  }else if (docopy == DATACOPY_REFERENCE){
     // call into Fortran to cast ibase_addr to Fortran pointer
     LocalArray *aptr = this;
     FTN_X(f_esmf_localarrayctof90)(&aptr, ibase_addr, &rank, &typekind, counts, 
       lbound, ubound, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
+    // somehow the lbound and ubound get reset to start lbound at 1, not correct
+    // copy the correct bounds back in
+    for (int i=0; i<ESMF_MAXDIM; i++){
+      lbound[i] = lboundKeep[i];
+      ubound[i] = uboundKeep[i];
+    }
   }
 
   // Setup info for calculating index tuple location quickly
@@ -223,7 +230,7 @@ int LocalArray::construct(
     currOff *=counts[i];
   }  
 
-  if (docopy == DATA_COPY){
+  if (docopy == DATACOPY_VALUE){
     if (ibase_addr == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Cannot copy data when ibase_addr not provided", ESMC_CONTEXT, &rc);
@@ -328,7 +335,7 @@ LocalArray *LocalArray::create(
     return ESMC_NULL_POINTER;
   }
   
-  localrc = a->construct(false, DATA_NONE, tk, rank, oflag, false,
+  localrc = a->construct(false, DATACOPY_NONE, tk, rank, oflag, false,
     NULL, NULL, NULL, NULL, NULL, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return ESMC_NULL_POINTER;
@@ -357,7 +364,7 @@ LocalArray *LocalArray::create(
   int rank,                   // 1, 2, ..., ESMF_MAXDIM
   const int *counts,          // number of items in each dim
   void *base_addr,            // if non-null, this is allocated memory
-  CopyFlag docopy,            // make a data copy from base_addr?
+  DataCopyFlag docopy,        // make a data copy from base_addr?
   int *rc){                   // return code
 //
 // !DESCRIPTION:
@@ -387,10 +394,10 @@ LocalArray *LocalArray::create(
 
   // check whether allocation is needed on the Fortran side
   bool allocateF = true;
-  if (docopy == DATA_REF){
+  if (docopy == DATACOPY_REFERENCE){
     if (base_addr == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "Must provide valid pointer for DATA_REF", ESMC_CONTEXT, rc);
+        "Must provide valid pointer for DATACOPY_REFERENCE", ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
     allocateF = false; // no allocation on Fortran side needed
@@ -428,7 +435,7 @@ LocalArray *LocalArray::create(
   const int *lbounds,         // lower index number per dim
   const int *ubounds,         // upper index number per dim
   void *base_addr,            // if non-null, this is allocated memory
-  CopyFlag docopy,            // make a data copy from base_addr?
+  DataCopyFlag docopy,        // make a data copy from base_addr?
   int *rc){                   // return code
 //
 // !DESCRIPTION:
@@ -458,10 +465,10 @@ LocalArray *LocalArray::create(
 
   // check whether allocation is needed on the Fortran side
   bool allocateF = true;
-  if (docopy == DATA_REF){
+  if (docopy == DATACOPY_REFERENCE){
     if (base_addr == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "Must provide valid pointer for DATA_REF", ESMC_CONTEXT, rc);
+        "Must provide valid pointer for DATACOPY_REFERENCE", ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
     allocateF = false; // no allocation on Fortran side needed
@@ -485,67 +492,6 @@ LocalArray *LocalArray::create(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::LocalArray::create()"
 //BOPI
-// !IROUTINE:  ESMCI::LocalArray::create - create ESMCI::LocalArray from copy
-//
-// !INTERFACE:
-LocalArray *LocalArray::create(
-//
-// !RETURN VALUE:
-//    pointer to newly allocated ESMCI::LocalArray object
-//
-// !ARGUMENTS:
-  const LocalArray *larrayIn, // object to copy from
-  const int *lbounds,         // lower index number per dim
-  const int *ubounds,         // upper index number per dim
-  int *rc){                   // return code
-//
-// !DESCRIPTION:
-//  Deep copy from {\tt larrayIn} with the option to adjust lbounds and ubounds.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  if (rc != NULL) *rc = ESMC_RC_NOT_IMPL;
-  int localrc = ESMC_RC_NOT_IMPL;
-
-  LocalArray *larrayOut;
-  try{
-    larrayOut = new LocalArray;
-  }catch(...){
-    // allocation error
-    ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);  
-    return ESMC_NULL_POINTER;
-  }
-
-  *larrayOut = *larrayIn; // copy larrayIn content into larrayOut
-  
-  // if lbounds and ubounds arguments were specified set them in larrayOut
-  if (lbounds)
-    for (int i=0; i<larrayOut->rank; i++)
-      larrayOut->lbound[i] = lbounds[i];
-  if (ubounds)
-    for (int i=0; i<larrayOut->rank; i++)
-      larrayOut->ubound[i] = ubounds[i];
-  
-  // mark LocalArray responsible for deallocation of its data area allocation
-  larrayOut->dealloc = true;
-
-  // call into Fortran copy method, which will use larrayOut's lbound and ubound
-  FTN_X(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    rc)) return ESMC_NULL_POINTER;
-  
-  // return successfully 
-  if (rc != NULL) *rc = ESMF_SUCCESS;
-  return larrayOut;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::LocalArray::create()"
-//BOPI
 // !IROUTINE:  ESMCI::LocalArray::create - create ESMCI::LocalArray from existing object, adjusting bounds in Fortran dope vector
 //
 // !INTERFACE:
@@ -556,7 +502,7 @@ LocalArray *LocalArray::create(
 //
 // !ARGUMENTS:
   const LocalArray *larrayIn, // object to copy from
-  CopyFlag copyflag,          // copy or reference original data
+  DataCopyFlag copyflag,      // copy or reference original data
   const int *lbounds,         // lower index number per dim
   const int *ubounds,         // upper index number per dim
   int *rc){                   // return code
@@ -583,38 +529,50 @@ LocalArray *LocalArray::create(
   int totalcount = 1;
   for (int i=0; i<rank; i++){
     totalcount *= counts[i];
-    if (counts[i] != ubounds[i] - lbounds[i] + 1){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- Mismatch of lbounds, ubounds and counts", ESMC_CONTEXT, rc);
-      return NULL;
+    if (ubounds && lbounds){
+      if (counts[i] != ubounds[i] - lbounds[i] + 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- Mismatch of lbounds, ubounds and counts", ESMC_CONTEXT, rc);
+        return NULL;
+      }
     }
   }
-
-  LocalArray *larrayOut;
   
-  if (copyflag == DATA_COPY){
-    // make a copy of the LocalArray object including the data allocation
-    larrayOut = LocalArray::create(larrayIn, lbounds, ubounds, &localrc);
+  // allocate memory for new LocalArray object
+  LocalArray *larrayOut;
+  try{
+    larrayOut = new LocalArray;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);  
+    return ESMC_NULL_POINTER;
+  }
+  // copy the LocalArray members, including the _reference_ to its data alloc.
+  *larrayOut = *larrayIn;
+
+  // if lbounds and ubounds arguments were specified set them in larrayOut
+  if (lbounds)
+    for (int i=0; i<larrayOut->rank; i++)
+      larrayOut->lbound[i] = lbounds[i];
+  if (ubounds)
+    for (int i=0; i<larrayOut->rank; i++)
+      larrayOut->ubound[i] = ubounds[i];
+
+  if ((copyflag==DATACOPY_VALUE)||(copyflag==DATACOPY_ALLOC)){
+    // make a copy of the LocalArray object, create new data allocation
+
+    // mark LocalArray responsible for deallocation of its data area allocation
+    larrayOut->dealloc = true;
+
+    // call into Fortran copy method, which will use larrayOut's lbound and ubound
+    FTN_X(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &copyflag,
+      &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) return NULL;
+      rc)) return ESMC_NULL_POINTER;
   }else{
-    // allocate memory for new LocalArray object
-    try{
-      larrayOut = new LocalArray;
-    }catch(...){
-      // allocation error
-      ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);  
-      return ESMC_NULL_POINTER;
-    }
-    // copy the LocalArray members, including the _reference_ to its data alloc.
-    *larrayOut = *larrayIn;
     // mark this copy not to be responsible for deallocation
     larrayOut->dealloc = false;
-    // adjust the lbound and ubound members in larray copy
-    for (int i=0; i<rank; i++){
-      larrayOut->lbound[i] = lbounds[i];
-      larrayOut->ubound[i] = ubounds[i];
-    }
+
     if (totalcount > 0){
       // adjust the Fortran dope vector to reflect the new bounds
       FTN_X(f_esmf_localarrayadjust)(&larrayOut, &rank, &typekind, counts,
@@ -623,7 +581,7 @@ LocalArray *LocalArray::create(
         ESMC_CONTEXT, rc)) return NULL;
     }
   }
-  
+
   // Setup info for calculating index tuple location quickly
   // Needs to be done after lbounds and counts are set
   int currOff=1;
@@ -632,7 +590,7 @@ LocalArray *LocalArray::create(
     larrayOut->dimOff[i]=currOff;
     larrayOut->lOff +=currOff*(larrayOut->lbound[i]);
     currOff *=larrayOut->counts[i];
-  }  
+  }
 
   // return successfully 
   if (rc) *rc = ESMF_SUCCESS;

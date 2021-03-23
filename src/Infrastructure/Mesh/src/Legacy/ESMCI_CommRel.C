@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1233,6 +1233,63 @@ UInt CommRel::SetMsgPattern(SparseMsg &msg) {
   return ndproc;
 
 }
+
+  // Change proc numbers to different ones. This is useful when 
+  // moving a mesh to different VM
+void CommRel::map_proc_numbers(int num_procs, int *proc_map) {
+
+  // Map Domain procs
+  MapType::iterator di = domain_begin(), de = domain_end();
+  for (; di != de; ++di) {
+    UInt orig_proc = di->processor;
+  
+    // Error check owner
+    if ((orig_proc < 0) || (orig_proc > num_procs-1)) {
+      Throw()<<" CommNode processor is outside current vm";
+    }
+
+    // map to new owner rank in new vm
+    int new_proc=proc_map[orig_proc];
+    
+    // Make sure that the new one is ok
+    if (new_proc < 0) {
+      Throw()<<" CommNode processor is outside of new vm";
+    }
+    
+    // Set new owner
+    di->processor=((UInt)new_proc);
+  }
+
+  // Rebuild domain proc list
+  build_domain_procs();
+
+
+  // Map Range procs
+  MapType::iterator ri = range_begin(), re = range_end();
+  for (; ri != re; ++ri) {
+    UInt orig_proc = ri->processor;
+  
+    // Error check owner
+    if ((orig_proc < 0) || (orig_proc > num_procs-1)) {
+      Throw()<<" CommNode processor is outside current vm";
+    }
+
+    // map to new owner rank in new vm
+    int new_proc=proc_map[orig_proc];
+    
+    // Make sure that the new one is ok
+    if (new_proc < 0) {
+      Throw()<<" CommNode processor is outside of new vm";
+    }
+    
+    // Set new owner
+    ri->processor=((UInt)new_proc);
+  }
+
+  // Rebuild range proc list
+  build_range_procs();
+}
+
 
 std::ostream &operator<<(std::ostream &os, const CommRel::CommNode &cn) {
   int rank = Par::Rank();

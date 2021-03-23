@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -37,8 +37,9 @@
 #include "ESMCI_Alarm.h"
 #include "ESMCI_Clock.h"
 
-// attribute
-#include "ESMCI_Attribute.h"
+// info (attribute)
+//#include "ESMCI_Attribute.h"
+#include "ESMCI_Info.h"
 
 // local array, datamap
 #include "ESMCI_ArraySpec.h"

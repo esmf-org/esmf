@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -635,53 +635,58 @@ program ESMF_FieldIOUTest
   rc = ESMF_SUCCESS                   ! Initialize
   write(name, *) "Write Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  ESMF_BLOCK(write_field_test)
-    grid = ESMF_GridCreateNoPeriDim(maxIndex=(/44, 8/), gridEdgeLWidth=(/0,0/), &
-      rc=rc)
-    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
-        line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
 
-    field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, &
-      staggerLoc=ESMF_STAGGERLOC_EDGE1, name="velocity", &
-      totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
-    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
-        line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
+  grid = ESMF_GridCreateNoPeriDim(maxIndex=(/44, 8/), gridEdgeLWidth=(/0,0/), &
+    rc=rc)
+  if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+    line=__LINE__, file=ESMF_FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_FieldGet(field, farrayPtr=fptr, &
-      totalLBound=tlb, totalUBound=tub, &
-      rc=rc)
-    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
-        line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
+  field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, &
+    staggerLoc=ESMF_STAGGERLOC_EDGE1, name="velocity", &
+    totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
+  if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+    line=__LINE__, file=ESMF_FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    if (.not. associated (fptr)) rc = ESMF_RC_PTR_NOTALLOC
-    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
-        line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
+  call ESMF_FieldGet(field, farrayPtr=fptr, &
+    totalLBound=tlb, totalUBound=tub, &
+    rc=rc)
+  if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+    line=__LINE__, file=ESMF_FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!    print *, tlb, tub
+  if (.not. associated (fptr)) rc = ESMF_RC_PTR_NOTALLOC
+  if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+    line=__LINE__, file=ESMF_FILENAME)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    ! Replace file first time through
-    statusFlag = ESMF_FILESTATUS_REPLACE
-    do k = 1, 5
-      do i = tlb(1), tub(1)
-        do j = tlb(2), tub(2)
-          fptr(i,j) = ((i-1)*(tub(2)-tlb(2))+j)*(10**(k-1))
-        enddo
+!  print *, tlb, tub
+
+  ! Replace file first time through
+  statusFlag = ESMF_FILESTATUS_REPLACE
+  do k = 1, 5
+    do i = tlb(1), tub(1)
+      do j = tlb(2), tub(2)
+        fptr(i,j) = ((i-1)*(tub(2)-tlb(2))+j)*(10**(k-1))
       enddo
+    enddo
 
-      call ESMF_FieldWrite(field, fileName='halof.nc', timeslice=k,   &
-           status=statusFlag, overwrite=.true., rc=rc)
+    call ESMF_FieldWrite(field, fileName='halof.nc', timeslice=k,   &
+         status=statusFlag, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
-        line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
+      line=__LINE__, file=ESMF_FILENAME)) &
+      call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
-      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, rc == ESMF_RC_LIB_NOT_PRESENT)
-      exit write_field_test
+    if (rc/=ESMF_RC_LIB_NOT_PRESENT) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    rc = ESMF_SUCCESS
 #endif
-      ! Next time through the loop, write to same file
-      statusFlag = ESMF_FILESTATUS_OLD
+    ! Next time through the loop, write to same file
+    statusFlag = ESMF_FILESTATUS_OLD
 
-    enddo
-  ESMF_ENDBLOCK(write_field_test)
+  enddo
+
   call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------

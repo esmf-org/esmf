@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -398,6 +398,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             enum ESMC_ExtrapMethod_Flag *extrapMethod,
                             int *extrapNumSrcPnts,
                             float *extrapDistExponent,
+                            int *extrapNumLevels,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             ESMC_Logical *ignoreDegenerate,
                             double **factorList,
@@ -447,6 +448,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                                         extrapMethod,
                                         extrapNumSrcPnts,
                                         extrapDistExponent,
+                                        extrapNumLevels,
                                         unmappedaction,
                                         ignoreDegenerate,
                                         factorList,
@@ -492,6 +494,12 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             enum ESMC_Logical *ignoreDegenerate,
                             enum ESMC_Logical *create_rh,
+                            ESMC_FileMode_Flag *filemode,
+                            const char *srcFile,
+                            const char *dstFile,
+                            enum ESMC_FileFormat_Flag *srcFileType,
+                            enum ESMC_FileFormat_Flag *dstFileType,
+                            enum ESMC_Logical *largeFileFlag,
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
 
@@ -515,7 +523,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     localrc = ESMCI::Field::regridstorefile(fieldpsrc, fieldpdst, filename,
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod,
       polemethod, regridPoleNPnts, lineType, normType, unmappedaction, 
-      ignoreDegenerate, create_rh, srcfracp, dstfracp);
+      ignoreDegenerate, create_rh, filemode, srcFile, dstFile, 
+      srcFileType, dstFileType, largeFileFlag, srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 

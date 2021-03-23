@@ -1,0 +1,12 @@
+!     Supported types for <valueList> and <defaultvalueList> are:
+!     \begin{description}
+{% set doc_object_types = ["integer(ESMF\_KIND\_I4)",
+                           "integer(ESMF\_KIND\_I8)",
+                           "real(ESMF\_KIND\_R4)",
+                           "real(ESMF\_KIND\_R8)",
+                           "logical",
+                           "character(len=*)"] %}
+{% for d in doc_object_types %}
+!     \item \texttt{ {{ d }}, intent(out), dimension(:)}
+{% endfor %}
+!     \end{description}

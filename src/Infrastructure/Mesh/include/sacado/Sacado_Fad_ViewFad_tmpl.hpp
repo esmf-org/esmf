@@ -261,7 +261,7 @@ namespace Sacado {
 
       // Bring in constructors
       // NOTE (bekozi): Commented out per W. Spector testing on Darwin. Build
-      // complains that ”view_fad_type” has already been declared in the current
+      // complains that "view_fad_type" has already been declared in the current
       // scope.
       // using view_fad_type::view_fad_type;
 

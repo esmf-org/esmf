@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -92,138 +92,6 @@ program ESMF_AttributeGridCompUTest
 AttributeTestMacro(gridcomp, a GridComp, EX_UTest, NEX_UTest)
 
 AttributeTestCopyMacro(gridcomp, ESMF_GridComp, a GridComp, ESMF_GridComp, EX_UTest, NEX_UTest)
-
-    !-------------------------------------------------------------------------
-    !  Attribute hierarchy linking
-    !-------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Link a GridComp Attribute hierarchy to a State Attribute hierarchy GridComp Test
-      call ESMF_AttributeLink(gridcomp, sfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a GridComp hierarchy to a State hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Link a GridComp Attribute hierarchy to a CplComp Attribute hierarchy GridComp Test
-      call ESMF_AttributeLink(gridcomp, cfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a GridComp hierarchy to a CplComp hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Link a GridComp Attribute hierarchy to a GridComp Attribute hierarchy GridComp Test
-      call ESMF_AttributeLink(gridcomp, gfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a GridComp hierarchy to a GridComp hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^ifdef ESMF_TESTEXHAUSTIVE
-
-      !EX_UTest
-      ! Link a GridComp Attribute hierarchy to a State Attribute hierarchy GridComp Test, again
-      call ESMF_AttributeLink(gridcomp, sfg, rc=rc)
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking a GridComp hierarchy to a State hierarchy Test, again"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Link a GridComp Attribute hierarchy to a CplComp Attribute hierarchy GridComp Test, again
-      call ESMF_AttributeLink(gridcomp, cfg, rc=rc)
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking a GridComp hierarchy to a CplComp hierarchy Test, again"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Link a GridComp Attribute hierarchy to a GridComp Attribute hierarchy GridComp Test, again
-      call ESMF_AttributeLink(gridcomp, gfg, rc=rc)
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking a GridComp hierarchy to a GridComp hierarchy Test, again"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^endif
-
-      !NEX_UTest
-      ! Unlink a GridComp Attribute hierarchy from a State Attribute hierarchy GridComp Test
-      call ESMF_AttributeLinkRemove(gridcomp, sfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a GridComp hierarchy from a State hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Unlink a GridComp Attribute hierarchy from a CplComp Attribute hierarchy GridComp Test
-      call ESMF_AttributeLinkRemove(gridcomp, cfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a GridComp hierarchy from a CplComp hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Unlink a GridComp Attribute hierarchy from a GridComp Attribute hierarchy GridComp Test
-      call ESMF_AttributeLinkRemove(gridcomp, gfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a GridComp hierarchy from a GridComp hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^ifdef ESMF_TESTEXHAUSTIVE
-
-      !EX_UTest
-      ! Unlink a GridComp Attribute hierarchy from a State Attribute hierarchy GridComp Test 2
-      call ESMF_AttributeLinkRemove(gridcomp, sfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a GridComp hierarchy from a State hierarchy Test 2"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink a GridComp Attribute hierarchy from a CplComp Attribute hierarchy GridComp Test 2
-      call ESMF_AttributeLinkRemove(gridcomp, cfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a GridComp hierarchy from a CplComp hierarchy Test 2"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink a GridComp Attribute hierarchy from a GridComp Attribute hierarchy GridComp Test 2
-      call ESMF_AttributeLinkRemove(gridcomp, gfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a GridComp hierarchy from a GridComp hierarchy Test 2"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink a GridComp Attribute hierarchy from a State Attribute hierarchy GridComp Test 3
-      call ESMF_AttributeLinkRemove(gridcomp, sfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a GridComp hierarchy from a State hierarchy Test 3"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink a GridComp Attribute hierarchy from a CplComp Attribute hierarchy GridComp Test 3
-      call ESMF_AttributeLinkRemove(gridcomp, cfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a GridComp hierarchy from a CplComp hierarchy Test 3"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink a GridComp Attribute hierarchy from a GridComp Attribute hierarchy GridComp Test 3
-      call ESMF_AttributeLinkRemove(gridcomp, gfg, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a GridComp hierarchy from a GridComp hierarchy Test 3"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^endif
 
       !------------------------------------------------------------------------
       ! clean up      

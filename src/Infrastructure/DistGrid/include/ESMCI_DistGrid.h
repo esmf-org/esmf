@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -88,7 +88,7 @@ namespace ESMCI {
     int *regDecomp;               // regular decomposition descriptor
                                   // [dimCount*tileCount]
     Decomp_Flag *decompflag;      // decomposition scheme [dimCount*tileCount]
-    ESMC_IndexFlag *indexflag;    // index scheme
+    ESMC_IndexFlag indexflag;     // index scheme
     // lower level object references
     DELayout *delayout;
     bool delayoutCreator;
@@ -103,13 +103,11 @@ namespace ESMCI {
     // native constructor and destructor
     DistGrid(VM *vm=NULL):ESMC_Base(vm){ // allow specific VM instead default
       decompflag = NULL;
-      indexflag = NULL;
       // initialize the name for this DistGrid object in the Base class
       ESMC_BaseSetName(NULL, "DistGrid");
     }
     DistGrid(int baseID):ESMC_Base(baseID){ // prevent baseID counter increment
       decompflag = NULL;
-      indexflag = NULL;
       // initialize the name for this DistGrid object in the Base class
       ESMC_BaseSetName(NULL, "DistGrid");
     }
@@ -179,6 +177,7 @@ namespace ESMCI {
     // get() and set()
     int getDimCount() const {return dimCount;}
     int getTileCount() const {return tileCount;}
+    ESMC_IndexFlag getIndexflag() const  {return indexflag;}
     ESMC_TypeKind_Flag getIndexTK() const {return indexTK;}
     int getDiffCollocationCount() const {return diffCollocationCount;}
     int const *getMinIndexPDimPTile() const {return minIndexPDimPTile;}
@@ -225,15 +224,17 @@ namespace ESMCI {
       const {return elementCountPCollPLocalDe;}
     void const *getArbSeqIndexList(int localDe, int collocation=1, int *rc=NULL)
       const;
+    template<typename T> int setArbSeqIndex(std::vector<T> &arbSeqIndex, 
+      int localDe, int collocation=1);
     template<typename T> int setArbSeqIndex(InterArray<T> *arbSeqIndex, 
       int localDe, int collocation=1);
     int setArbSeqIndex(void *ptr, int localDe, int collocation=1);
     int setCollocationPDim(InterArray<int> *collocationPDim);
     // fill()
+    template<typename T> int fillSeqIndexList(std::vector<T> &seqIndexList,
+      int localDe, int collocation=1) const;
     template<typename T> int fillSeqIndexList(InterArray<T> *seqIndexList,
       int localDe, int collocation=1) const;
-    int fillSeqIndexList(std::vector<int> &seqIndexList, int localDe,
-      int collocation=1) const;
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
       VMK::commhandle **commh, int rootPet, VM *vm=NULL) const;
     // misc.
@@ -268,11 +269,40 @@ namespace ESMCI {
     std::vector<int> indexTupleWatchStart; // watched region
     std::vector<int> indexTupleWatchEnd;   // watched region
     bool skipBlockedRegionFlag;
+    void *seqIndex;                   // sequence index of current iterator
+    DistGrid const *distgrid;         // DistGrid for sequence index optimiz.
+    int localDe;                      // for sequence index look up optimization
+    bool arbSeq;                      // arbitrary sequence indices present
    public:
     MultiDimIndexLoop();
-    MultiDimIndexLoop(std::vector<int> const &sizes);
+    MultiDimIndexLoop(std::vector<int> const &sizes,
+      bool seqIndexEnabled=false, const DistGrid *distgrid=NULL, int localDe=-1);
     MultiDimIndexLoop(std::vector<int> const &offsets,
       std::vector<int> const &sizes);
+    ~MultiDimIndexLoop(){
+      if (seqIndex){
+        if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4)
+          delete (ESMC_I4*) seqIndex;
+        else if (distgrid->getIndexTK()==ESMC_TYPEKIND_I8)
+          delete (ESMC_I8*) seqIndex;
+      }
+    }
+    template<typename T> T getSequenceIndex()const{
+      if (seqIndex){
+        T tempSeqIndex;
+        ESMC_I8 controlSeqIndex;
+        if (distgrid->getIndexTK()==ESMC_TYPEKIND_I4){
+          tempSeqIndex = (T)(*(ESMC_I4*)seqIndex);
+          controlSeqIndex = (ESMC_I8)(*(ESMC_I4*)seqIndex);
+        }else if (distgrid->getIndexTK()==ESMC_TYPEKIND_I8){
+          tempSeqIndex = (T)(*(ESMC_I8*)seqIndex);
+          controlSeqIndex = (ESMC_I8)(*(ESMC_I8*)seqIndex);
+        }
+        if ((ESMC_I8)tempSeqIndex == controlSeqIndex)
+          return tempSeqIndex;  // no truncation detected, okay to return
+      }
+      throw ESMC_RC_ARG_BAD;
+    }
     void setSkipDim(int dim);
     void setBlockStart(std::vector<int> const &blockStart);
     void setBlockEnd(std::vector<int> const &blockEnd);
@@ -290,7 +320,7 @@ namespace ESMCI {
     int const *getIndexTuple()const;
     int const *getIndexTupleEnd()const;
     int const *getIndexTupleStart()const;
-    void log()const;
+    void log(ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;
   };  // class MultiDimIndexLoop
   //============================================================================
 

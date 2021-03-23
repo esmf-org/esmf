@@ -47,19 +47,47 @@ extern "C" {
   
   int __wrap_MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm);
   
+  int __wrap_MPI_Bsend(ESMF_MPI_CONST void *buffer, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm);
+  
   int __wrap_MPI_Gather(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm);
   
   int __wrap_MPI_Gatherv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, ESMF_MPI_CONST int recvcounts[], ESMF_MPI_CONST int displs[], MPI_Datatype recvtype, int root, MPI_Comm comm);
+  
+  int __wrap_MPI_Iprobe(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status);
+  
+  int __wrap_MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request);
+  
+  int __wrap_MPI_Irsend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request);
+  
+  int __wrap_MPI_Isend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request);
+  
+  int __wrap_MPI_Issend(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request);
+  
+  int __wrap_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status);
   
   int __wrap_MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status);
   
   int __wrap_MPI_Reduce(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm);
   
+  int __wrap_MPI_Rsend(ESMF_MPI_CONST void *sendbuf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm);
+  
+  int __wrap_MPI_Scan(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);
+  
   int __wrap_MPI_Scatter(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm);
+  
+  int __wrap_MPI_Scatterv(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST int sendcounts[], ESMF_MPI_CONST int displs[], MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm);
   
   int __wrap_MPI_Send(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm);
   
   int __wrap_MPI_Sendrecv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, int dest, int sendtag, void *recvbuf, int recvcount, MPI_Datatype recvtype, int source, int recvtag, MPI_Comm comm, MPI_Status *status);
+  
+  int __wrap_MPI_Test(MPI_Request *request, int *flag, MPI_Status *status);
+  
+  int __wrap_MPI_Testall(int count, MPI_Request requests[], int *flag, MPI_Status statuses[]);
+  
+  int __wrap_MPI_Testany(int count, MPI_Request requests[], int *index, int *flag, MPI_Status statuses[]);
+  
+  int __wrap_MPI_Testsome(int incount, MPI_Request requests[], int *outcount, int indices[], MPI_Status statuses[]);
   
   int __wrap_MPI_Wait(MPI_Request *request, MPI_Status *status);
   
@@ -87,17 +115,33 @@ extern "C" {
   
   void FTN_X(__wrap_mpi_bcast)(MPI_Fint *buffer, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr);
   
+  void FTN_X(__wrap_mpi_bsend)(MPI_Fint *buffer, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr);
+  
   void FTN_X(__wrap_mpi_exscan)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr);
   
   void FTN_X(__wrap_mpi_gather)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr);
   
   void FTN_X(__wrap_mpi_gatherv)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr);
   
+  void FTN_X(__wrap_mpi_iprobe)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_irecv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_irsend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_isend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_issend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *request, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_probe)(MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);
+  
   void FTN_X(__wrap_mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);
   
   void FTN_X(__wrap_mpi_reduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr);
   
   void FTN_X(__wrap_mpi_reduce_scatter)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_rsend)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr);
   
   void FTN_X(__wrap_mpi_scatter)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr);
   
@@ -106,6 +150,16 @@ extern "C" {
   void FTN_X(__wrap_mpi_scan)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr);
   
   void FTN_X(__wrap_mpi_send)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_sendrecv)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *dest, MPI_Fint *sendtag, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *source, MPI_Fint *recvtag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_test)(MPI_Fint *request, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_testall)(MPI_Fint *count, MPI_Fint *requests, MPI_Fint *flag, MPI_Fint *statuses, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_testany)(MPI_Fint *count, MPI_Fint *requests, MPI_Fint *index, MPI_Fint *flag, MPI_Fint *status, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_testsome)(MPI_Fint *incount, MPI_Fint *requests, MPI_Fint *outcount, MPI_Fint *indices, MPI_Fint *statuses, MPI_Fint *ierr);
   
   void FTN_X(__wrap_mpi_wait)(MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr);
   
@@ -117,4 +171,3 @@ extern "C" {
 
 #endif
 #endif
-

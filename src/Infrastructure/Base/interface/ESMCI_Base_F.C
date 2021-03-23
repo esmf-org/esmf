@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -75,8 +75,8 @@ extern "C" {
   // nested States.
   size_t slc = cname.find_first_of ("/");
   if (slc != string::npos) {
-    ESMC_LogDefault.Write(cname+" must not have a slash (/) in its name", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
+    ESMC_LogDefault.Write(cname+" must not have a slash (/) in its name",
+      ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc) *rc = ESMF_RC_ARG_VALUE;
     return;
   }
@@ -171,7 +171,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_WARN,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;
@@ -231,7 +231,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_WARN,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;
@@ -283,7 +283,7 @@ extern "C" {
   *base = new ESMC_Base(-1);
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object error", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    ESMC_LogDefault.Write("Base object error", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }
@@ -368,7 +368,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_ERROR,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_FAILURE;
     return;
@@ -500,8 +500,8 @@ extern "C" {
   // nested States.
   size_t slc = oname.find_first_of ("/");
   if (slc != string::npos) {
-    ESMC_LogDefault.Write(oname+" must not have a slash (/) in its name", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
+    ESMC_LogDefault.Write(oname+" must not have a slash (/) in its name",
+      ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc) *rc = ESMF_RC_ARG_VALUE;
     return;
   }
@@ -877,6 +877,39 @@ extern "C" {
 
 }  // end c_ESMC_IsProxy
 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_SetPersist - set the persist flag
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_setpersist)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setpersist()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in - base object
+      ESMC_Logical *persistArg, // in - true or false
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     
+//
+//EOP
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  bool persist = (*persistArg == ESMF_TRUE);
+  (*base)->ESMC_BaseSetPersist(persist);
+  
+  // return successfully
+  *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_IsProxy
 
 
 } // extern "C"

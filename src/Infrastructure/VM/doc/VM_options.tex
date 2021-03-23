@@ -1,0 +1,33 @@
+% $Id$
+
+% Earth System Modeling Framework
+% Copyright 2002-2021, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+\subsubsection{ESMF\_VMEPOCH}
+\label{const:vmepoch_flag}
+
+{\sf DESCRIPTION:\\}
+Specifies the kind of VM Epoch being entered.
+
+The type of this flag is:
+
+{\tt type(ESMF\_VMEpoch\_Flag)}
+
+The valid values are:
+\begin{description}
+  \item [ESMF\_VMEPOCH\_NONE] 
+    An epoch wihout special behavior.
+  \item [ESMF\_VMEPOCH\_BUFFER]
+    This option must only be used for parts of the code with distinct sending
+    and receiving PETs, i.e. where no PETs are both sender and receiver.
+    All non-blocking messages are being buffered. A single message is sent
+    between unique pairs of src-dst PETs. This can significantly improve
+    performance for cases with a large imbalance in the number of sending
+    versus receiving PETs. The extra buffering also improves the overall
+    asynchronous behavior between the sending and receiving side.
+\end{description}

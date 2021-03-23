@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -61,12 +61,16 @@ enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
 enum ESMC_ExtrapMethod_Flag {ESMC_EXTRAPMETHOD_NONE=0,
                              ESMC_EXTRAPMETHOD_NEAREST_STOD,
                              ESMC_EXTRAPMETHOD_NEAREST_IDAVG,
-                             ESMC_EXTRAPMETHOD_CREEP};
+                             ESMC_EXTRAPMETHOD_NEAREST_D,
+                             ESMC_EXTRAPMETHOD_CREEP,
+                             ESMC_EXTRAPMETHOD_CREEP_NRST_D};
 
 enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
                            ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,
                            ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
                            ESMC_FILEFORMAT_GRIDSPEC};
+
+typedef enum ESMC_FileMode_Flag {ESMC_FILEMODE_BASIC, ESMC_FILEMODE_WITHAUX} ESMC_FileMode_Flag;
 
 // File status flag (for IO write functions)
 typedef enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,
@@ -105,17 +109,21 @@ enum ESMC_LineType_Flag { ESMC_LINETYPE_CART=0,
 enum ESMC_Logical { ESMF_TRUE=1,
                     ESMF_FALSE };
 
+// keep in sync with ESMF_LogKind_Flag
 enum ESMC_LogKind_Flag{
-                ESMC_LOGKIND_SINGLE=1,
-                ESMC_LOGKIND_MULTI =2,
-                ESMC_LOGKIND_NONE  =3 };
+                ESMC_LOGKIND_SINGLE         =1,
+                ESMC_LOGKIND_MULTI          =2,
+                ESMC_LOGKIND_MULTI_ON_ERROR =3,
+                ESMC_LOGKIND_NONE           =4 };
 
+// keep in sync with ESMF_LogMsg_Flag
 enum ESMC_LogMsgType_Flag{
                 ESMC_LOGMSG_INFO =1,
                 ESMC_LOGMSG_WARN =2,
                 ESMC_LOGMSG_ERROR=3,
                 ESMC_LOGMSG_TRACE=4,
-                ESMC_LOGMSG_JSON =5 };
+                ESMC_LOGMSG_DEBUG=5,
+                ESMC_LOGMSG_JSON =6 };
 
 enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=0,
                         ESMC_MESHLOC_ELEMENT};

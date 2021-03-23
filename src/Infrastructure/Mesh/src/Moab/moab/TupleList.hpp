@@ -275,6 +275,7 @@ namespace moab
     uint inc_n();
     
     void print(const char *) const;
+    void print_to_file(const char *) const;
 
     //Variables to allow for direct write access
     sint *vi_wr; slong *vl_wr; Ulong *vul_wr; realType *vr_wr;

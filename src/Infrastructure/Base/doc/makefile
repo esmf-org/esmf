@@ -4,9 +4,9 @@ All: onedoc
 
 LOCDIR    = src/Infrastructure/Base/doc
 
-DVIFILES  = 
-PDFFILES  = 
-HTMLFILES = 
+DVIFILES  = Info_refdoc.dvi
+PDFFILES  = Info_refdoc.pdf
+HTMLFILES = Info_refdoc
 
 #
 # Tex Files to make
@@ -42,6 +42,6 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 CLEANDIRS   = Base_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              Base_refdoc.tex $(PDFFILES)
+              Info_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 

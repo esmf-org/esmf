@@ -124,6 +124,30 @@ inline bool first( const CartVect& a, const CartVect& b) {
   }
 }
 
+double plucker_edge_test(const CartVect& vertexa, const CartVect& vertexb,
+                         const CartVect& ray, const CartVect& ray_normal) {
+
+  double pip;
+  const double near_zero = 10*std::numeric_limits<double>::epsilon();
+  
+  if(first(vertexa,vertexb)) {
+    const CartVect edge = vertexb-vertexa;
+    const CartVect edge_normal = edge*vertexa;
+    pip = ray % edge_normal + ray_normal % edge;
+  } else {
+    const CartVect edge = vertexa-vertexb;
+    const CartVect edge_normal = edge*vertexb;
+    pip = ray % edge_normal + ray_normal % edge;
+    pip = -pip;
+  }
+
+  if (near_zero > fabs(pip)) pip = 0.0;
+
+  return pip;
+}
+  
+#define EXIT_EARLY if(type) *type = NONE; return false;
+
 /* This test uses the same edge-ray computation for adjacent triangles so that
    rays passing close to edges/nodes are handled consistently.
 
@@ -140,99 +164,66 @@ inline bool first( const CartVect& a, const CartVect& b) {
 bool plucker_ray_tri_intersect( const CartVect vertices[3],
                                 const CartVect& origin,
                                 const CartVect& direction,
-                                double /* tolerance */,
                                 double& dist_out,
                                 const double* nonneg_ray_len,
                                 const double* neg_ray_len,
                                 const int*    orientation,
-			        intersection_type* type ) {
+                                intersection_type* type ) {
 
   const CartVect raya = direction;
   const CartVect rayb = direction*origin;
 
-  // edge 0
-  double pip0;
-  if(first(vertices[0],vertices[1])) {
-    const CartVect edge0a = vertices[1]-vertices[0];
-    const CartVect edge0b = edge0a*vertices[0];
-    pip0 = raya % edge0b + rayb % edge0a;
-  } else {
-    const CartVect edge0a = vertices[0]-vertices[1];
-    const CartVect edge0b = edge0a*vertices[1];
-    pip0 = raya % edge0b + rayb % edge0a;
-    pip0 = -pip0;
+
+
+  // Determine the value of the first Plucker coordinate from edge 0
+  double plucker_coord0 = plucker_edge_test(vertices[0], vertices[1], raya, rayb);
+
+  // If orientation is set, confirm that sign of plucker_coordinate indicate
+  // correct orientation of intersection
+  if(orientation && (*orientation)*plucker_coord0 > 0) {
+    EXIT_EARLY
   }
 
-  // try to exit early
-  if(orientation && (*orientation)*pip0 > 0) {
-    if(type) *type = NONE;
-    return false;
-  }
+  // Determine the value of the second Plucker coordinate from edge 1
+  double plucker_coord1 = plucker_edge_test(vertices[1], vertices[2], raya, rayb);
 
-  // edge 1
-  double pip1;
-  if(first(vertices[1],vertices[2])) {
-    const CartVect edge1a = vertices[2]-vertices[1];
-    const CartVect edge1b = edge1a*vertices[1];
-    pip1 = raya % edge1b + rayb % edge1a;
-  } else {
-    const CartVect edge1a = vertices[1]-vertices[2];
-    const CartVect edge1b = edge1a*vertices[2];
-    pip1 = raya % edge1b + rayb % edge1a;
-    pip1 = -pip1;
-  }
-
-  // try to exit early
+  // If orientation is set, confirm that sign of plucker_coordinate indicate
+  // correct orientation of intersection
   if(orientation) {
-    if( (*orientation)*pip1 > 0) {
-      if(type) *type = NONE;
-      return false;
+    if( (*orientation)*plucker_coord1 > 0) {
+      EXIT_EARLY
     }
-  // If the orientation is not specified, all pips must be the same sign or zero.
-  } else if( (0.0<pip0 && 0.0>pip1) || (0.0>pip0 && 0.0<pip1) ) {
-    if(type) *type = NONE;
-    return false;
+  // If the orientation is not specified, all plucker_coords must be the same sign or zero.
+  } else if( (0.0<plucker_coord0 && 0.0>plucker_coord1) || (0.0>plucker_coord0 && 0.0<plucker_coord1) ) {
+    EXIT_EARLY
   }
 
-  // edge 2
-  double pip2;
-  if(first(vertices[2],vertices[0])) {
-    const CartVect edge2a = vertices[0]-vertices[2];
-    const CartVect edge2b = edge2a*vertices[2];
-    pip2 = raya % edge2b + rayb % edge2a;
-  } else {
-    const CartVect edge2a = vertices[2]-vertices[0];
-    const CartVect edge2b = edge2a*vertices[0];
-    pip2 = raya % edge2b + rayb % edge2a;
-    pip2 = -pip2;
-  }
+  // Determine the value of the second Plucker coordinate from edge 2
+  double plucker_coord2 = plucker_edge_test(vertices[2], vertices[0], raya, rayb);
 
-  // try to exit early
+  // If orientation is set, confirm that sign of plucker_coordinate indicate
+  // correct orientation of intersection
   if(orientation) {
-    if( (*orientation)*pip2 > 0) {
-      if(type) *type = NONE;
-      return false;
+    if( (*orientation)*plucker_coord2 > 0) {
+      EXIT_EARLY
     }
-  // If the orientation is not specified, all pips must be the same sign or zero.
-  } else if( (0.0<pip1 && 0.0>pip2) || (0.0>pip1 && 0.0<pip2) ||
-             (0.0<pip0 && 0.0>pip2) || (0.0>pip0 && 0.0<pip2) ) {
-    if(type) *type = NONE;
-    return false;
+  // If the orientation is not specified, all plucker_coords must be the same sign or zero.
+  } else if( (0.0<plucker_coord1 && 0.0>plucker_coord2) || (0.0>plucker_coord1 && 0.0<plucker_coord2) ||
+             (0.0<plucker_coord0 && 0.0>plucker_coord2) || (0.0>plucker_coord0 && 0.0<plucker_coord2) ) {
+    EXIT_EARLY
   }
 
   // check for coplanar case to avoid dividing by zero
-  if(0==pip0 && 0==pip1 && 0==pip2) {
-    //std::cout << "plucker: coplanar" << std::endl;
-    if(type) *type = NONE;
-    return false;
+  if(0.0==plucker_coord0 && 0.0==plucker_coord1 && 0.0==plucker_coord2) {
+    EXIT_EARLY
   }
 
   // get the distance to intersection
-  const double inverse_sum = 1.0/(pip0+pip1+pip2);
+  const double inverse_sum = 1.0/(plucker_coord0+plucker_coord1+plucker_coord2);
   assert(0.0 != inverse_sum);
-  const CartVect intersection(pip0*inverse_sum*vertices[2]+ 
-         	       	      pip1*inverse_sum*vertices[0]+
-			      pip2*inverse_sum*vertices[1]);
+  const CartVect intersection(plucker_coord0*inverse_sum*vertices[2]+ 
+                              plucker_coord1*inverse_sum*vertices[0]+
+                              plucker_coord2*inverse_sum*vertices[1]);
 
   // To minimize numerical error, get index of largest magnitude direction.
   int idx = 0;
@@ -246,52 +237,18 @@ bool plucker_ray_tri_intersect( const CartVect vertices[3],
   const double dist = (intersection[idx]-origin[idx])/direction[idx];
 
   // is the intersection within distance limits?
-  if(nonneg_ray_len && *nonneg_ray_len<dist) {
-    if(type) *type = NONE;
-    return false;
+  if((nonneg_ray_len && *nonneg_ray_len<dist) || // intersection is beyond positive limit
+     (neg_ray_len && *neg_ray_len>=dist) ||      // intersection is behind negative limit
+     (!neg_ray_len && 0>dist) ) {                  // Unless a neg_ray_len is used, don't return negative distances
+    EXIT_EARLY
   }
-  if(neg_ray_len && *neg_ray_len>=dist) {
-    if(type) *type = NONE;
-    return false;
 
-  // Unless a neg_ray_len is used, don't return negative distances
-  } else if (!neg_ray_len && 0>dist) {
-    if(type) *type = NONE;
-    return false;
-  }    
   dist_out = dist;
- 
-  // check for special cases
-  if(0==pip0 || 0==pip1 || 0==pip2) {
-    if       (0==pip0 && 0==pip1) {
-      //std::cout << "plucker: node1" << std::endl;
-      if(type) *type = NODE1;
-      return true;
-    } else if(0==pip1 && 0==pip2) {
-      //std::cout << "plucker: node2" << std::endl;
-      if(type) *type = NODE2;
-      return true;
-    } else if(0==pip2 && 0==pip0) {
-      //std::cout << "plucker: node0" << std::endl;
-      if(type) *type = NODE0;
-      return true;
-    } else if(0==pip0) {
-      //std::cout << "plucker: edge0" << std::endl;
-      if(type) *type = EDGE0;
-      return true;
-    } else if(0==pip1) {
-      //std::cout << "plucker: edge1" << std::endl;
-      if(type) *type = EDGE1;
-      return true;
-    } else if(0==pip2) {
-      //std::cout << "plucker: edge2" << std::endl;
-      if(type) *type = EDGE2;
-      return true;
-    }
-  }
 
-  // if here, ray intersects interior of tri
-  if(type) *type = INTERIOR;
+  if (type) *type = type_list[  ( (0.0==plucker_coord2)<<2 ) +
+                                ( (0.0==plucker_coord1)<<1 ) +
+                                  ( 0.0==plucker_coord0 )       ];
+
   return true;
 }
 
@@ -299,7 +256,6 @@ bool plucker_ray_tri_intersect( const CartVect vertices[3],
 bool ray_tri_intersect( const CartVect vertices[3],
                         const CartVect& b,
                         const CartVect& v,
-                        double /*tolerance*/,
                         double& t_out,
                         const double* ray_length)
 {
@@ -1424,16 +1380,76 @@ bool bounding_boxes_overlap (const CartVect * list1, int num1, const CartVect * 
 
   return boxes_overlap(box_min1, box_max1, box_min2, box_max2, tolerance);
 }
+
+// see if boxes formed by 2 lists of 2d coordinates overlap (num1>=3, num2>=3, do not check)
+bool bounding_boxes_overlap_2d (const double * list1, int num1, const double * list2, int num2,
+      double tolerance)
+{
+  /*
+   * box1:
+   *         (bmax11, bmax12)
+   *      |-------|
+   *      |       |
+   *      |-------|
+   *  (bmin11, bmin12)
+
+   *         box2:
+   *                (bmax21, bmax22)
+   *             |----------|
+   *             |          |
+   *             |----------|
+   *     (bmin21, bmin22)
+   */
+  double bmin11, bmax11, bmin12, bmax12;
+  bmin11=bmax11=list1[0];
+  bmin12=bmax12=list1[1];
+
+  double bmin21, bmax21, bmin22, bmax22;
+  bmin21=bmax21=list2[0];
+  bmin22=bmax22=list2[1];
+
+  for (int i=1; i<num1; i++)
+  {
+    if(bmin11>list1[2*i])
+      bmin11=list1[2*i];
+    if(bmax11<list1[2*i])
+      bmax11=list1[2*i];
+    if(bmin12>list1[2*i+1])
+      bmin12=list1[2*i+1];
+    if(bmax12<list1[2*i+1])
+      bmax12=list1[2*i+1];
+  }
+  for (int i=1; i<num2; i++)
+  {
+    if(bmin21>list2[2*i])
+      bmin21=list2[2*i];
+    if(bmax21<list2[2*i])
+      bmax21=list2[2*i];
+    if(bmin22>list2[2*i+1])
+      bmin22=list2[2*i+1];
+    if(bmax22<list2[2*i+1])
+      bmax22=list2[2*i+1];
+  }
+
+  if ( (bmax11 <  bmin21 + tolerance) || (bmax21 <  bmin11 + tolerance))
+    return false;
+
+  if ( (bmax12 <  bmin22 + tolerance) || (bmax22 <  bmin12 + tolerance))
+    return false;
+
+  return true;
+}
+
 /**\brief Class representing a 3-D mapping function (e.g. shape function for volume element) */
 class VolMap {
   public:
-      /**\brief Return $\vec \xi$ corresponding to logical center of element */
+      /**\brief Return \f$\vec \xi\f$ corresponding to logical center of element */
     virtual CartVect center_xi() const = 0;
-      /**\brief Evaluate mapping function (calculate $\vec x = F($\vec \xi)$ )*/
+      /**\brief Evaluate mapping function (calculate \f$\vec x = F($\vec \xi)\f$ )*/
     virtual CartVect evaluate( const CartVect& xi ) const = 0;
       /**\brief Evaluate Jacobian of mapping function */
     virtual Matrix3 jacobian( const CartVect& xi ) const = 0;
-      /**\brief Evaluate inverse of mapping function (calculate $\vec \xi = F^-1($\vec x)$ )*/
+      /**\brief Evaluate inverse of mapping function (calculate \f$\vec \xi = F^-1($\vec x)\f$ )*/
     bool solve_inverse( const CartVect& x, CartVect& xi, double tol ) const ;
 };
 
@@ -1449,7 +1465,7 @@ bool VolMap::solve_inverse( const CartVect& x, CartVect& xi, double tol ) const
     det = J.determinant();
     if (det < std::numeric_limits<double>::epsilon())
       return false;
-    xi -= J.inverse(1.0/det) * delta;
+    xi -= J.inverse() * delta;
     delta = evaluate( xi ) - x;
   }
   return true;

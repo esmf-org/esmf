@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -31,6 +31,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <sstream>
 using namespace std;
 
 #if !defined (ESMF_OS_MinGW)
@@ -92,7 +93,7 @@ extern "C" {
 
   if (!string) {
     //printf("uninitialized String object\n");
-    ESMC_LogDefault.Write("String object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("String object uninitialized", ESMC_LOGMSG_WARN,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;

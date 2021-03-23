@@ -12,7 +12,6 @@ DIRS      = ESMF_CompCreate \
             ESMF_RecursiveComponent \
             ESMF_ArrayScatterGather \
             ESMF_Attribute \
-            ESMF_AttributeCIM \
             ESMF_ComplianceChecker \
             ESMF_ArraySparseMatMul \
             ESMF_ArrayRedist \
@@ -21,11 +20,15 @@ DIRS      = ESMF_CompCreate \
             ESMF_ArrayRedist3D \
             ESMF_ArrayBundleSparseMatMul \
             ESMF_ArrayBundleRedist \
-            ESMF_FieldSparseMatMul \
+            ESMF_ArrayRedistOpenMP \
+            ESMF_ArrayRedistOpenACC \
+            ESMF_ArraySharedDeSSI \
             ESMF_ConcurrentComponent \
             ESMF_FieldConcurrentComp \
             ESMF_FieldBundleSMM \
             ESMF_FieldBundleSMMPacked \
+            ESMF_FieldBundleRedistPacked \
+            ESMF_FieldBundleRegridPacked \
             ESMF_FieldRedist \
             ESMF_FieldRedistBlk2Blk \
             ESMF_FieldRedistBlk2Arb \
@@ -40,6 +43,8 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRegridOverlap \
             ESMF_FieldRegridMesh \
             ESMF_FieldRegridMeshToMesh \
+            ESMF_FieldSparseMatMul \
+            ESMF_FieldSharedDeSSI \
             ESMF_FieldLSRedistArb2Arb \
             ESMF_FieldLSRedistArb2ArbUngrdDim \
             ESMF_FieldLSSMM \
@@ -48,9 +53,6 @@ DIRS      = ESMF_CompCreate \
             ESMF_TransferMesh \
             ESMF_SequentialEnsemble \
             ESMF_ConcurrentEnsemble \
-            ESMF_ArrayRedistOpenMP \
-            ESMF_ArrayRedistOpenACC \
-            ESMF_ArraySharedDeSSI \
             ESMF_DirectCoupling \
             ESMF_XGridConcurrent \
             ESMF_XGridSerial \

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -30,8 +30,9 @@
 !EOE
 !BOC
 program ESMF_ArrayLarrayEx
+!EOC
 #include "ESMF.h"
-
+!BOC
   use ESMF
   use ESMF_TestMod
   

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -257,7 +257,7 @@ void GeomRend::build_dest(double cmin[], double cmax[], ZoltanUD &zud) {
 
           zud.dstObj.push_back(&obj);
 
-          BBox obox(coord, obj, 0.25);
+          BBox obox(coord, obj, 0.25, on_sph);
 
           for (UInt d = 0; d < sdim; d++) {
             if (obox.getMin()[d] < cmin[d]) cmin[d] = obox.getMin()[d];
@@ -958,6 +958,10 @@ void GeomRend::prep_meshes() {
     srcmesh_rend.set_spatial_dimension(srcmesh->spatial_dim());
     srcmesh_rend.set_parametric_dimension(srcmesh->parametric_dim());
 
+    // Set temp. XGrid info
+    srcmesh_rend.side=srcmesh->side;
+    srcmesh_rend.ind=srcmesh->ind;
+
     // Contexts
     srcmesh_rend.AssumeContexts(*srcmesh);
 
@@ -992,6 +996,24 @@ void GeomRend::prep_meshes() {
        MeshObj::ELEMENT, src_elem_frac2->GetContext(), src_elem_frac2->dim());
     }
 
+    MEField<> *side1_mesh_ind= srcmesh->GetField("side1_mesh_ind");
+    if (side1_mesh_ind != NULL) {
+      srcmesh_rend.RegisterField("side1_mesh_ind", 
+				 side1_mesh_ind->GetMEFamily(),
+				 MeshObj::ELEMENT, 
+				 side1_mesh_ind->GetContext(), 
+				 side1_mesh_ind->dim());
+    }
+
+    MEField<> *side2_mesh_ind= srcmesh->GetField("side2_mesh_ind");
+    if (side2_mesh_ind != NULL) {
+      srcmesh_rend.RegisterField("side2_mesh_ind", 
+				 side2_mesh_ind->GetMEFamily(),
+				 MeshObj::ELEMENT, 
+				 side2_mesh_ind->GetContext(), 
+				 side2_mesh_ind->dim());
+    }
+
   }
   }
 
@@ -1003,6 +1025,10 @@ void GeomRend::prep_meshes() {
   dstmesh_rend.set_spatial_dimension(dstmesh->spatial_dim());
   dstmesh_rend.set_parametric_dimension(dstmesh->parametric_dim());
 
+  // Set temp. XGrid info
+  dstmesh_rend.side=dstmesh->side;
+  dstmesh_rend.ind=dstmesh->ind;
+
   // Contexts
   dstmesh_rend.AssumeContexts(*dstmesh);
 
@@ -1013,6 +1039,12 @@ void GeomRend::prep_meshes() {
     MEField<> &dcoord = *dstmesh->GetCoordField();
     dstmesh_rend.RegisterField("coordinates", dcoord.GetMEFamily(), MeshObj::ELEMENT,
                                dcoord.GetContext(), dcoord.dim());
+
+    MEField<> *dnm = dstmesh->GetField("mask");
+    if (dnm != NULL) {
+      dstmesh_rend.RegisterField("mask", dnm->GetMEFamily(),
+                                 MeshObj::ELEMENT, dnm->GetContext(), dnm->dim());
+    }
 
     MEField<> *dst_elem_mask = dstmesh->GetField("elem_mask");
     if (dst_elem_mask != NULL) {
@@ -1031,6 +1063,24 @@ void GeomRend::prep_meshes() {
     if (dst_elem_frac2 != NULL) {
       dstmesh_rend.RegisterField("elem_frac2", dst_elem_frac2->GetMEFamily(),
                                  MeshObj::ELEMENT, dst_elem_frac2->GetContext(), dst_elem_frac2->dim());
+    }
+
+    MEField<> *side1_mesh_ind= dstmesh->GetField("side1_mesh_ind");
+    if (side1_mesh_ind != NULL) {
+      dstmesh_rend.RegisterField("side1_mesh_ind", 
+				 side1_mesh_ind->GetMEFamily(),
+				 MeshObj::ELEMENT, 
+				 side1_mesh_ind->GetContext(), 
+				 side1_mesh_ind->dim());
+    }
+
+    MEField<> *side2_mesh_ind= dstmesh->GetField("side2_mesh_ind");
+    if (side2_mesh_ind != NULL) {
+      dstmesh_rend.RegisterField("side2_mesh_ind", 
+				 side2_mesh_ind->GetMEFamily(),
+				 MeshObj::ELEMENT, 
+				 side2_mesh_ind->GetContext(), 
+				 side2_mesh_ind->dim());
     }
 
   } else {
@@ -1079,7 +1129,7 @@ void GeomRend::src_migrate_meshes() {
 
     // Now send the fields
     int num_snd=0;
-    MEField<> *snd[5],*rcv[5];
+    MEField<> *snd[7],*rcv[7];
 
     MEField<> *sc = srcmesh->GetCoordField();
     MEField<> *sc_r = srcmesh_rend.GetCoordField();
@@ -1133,6 +1183,30 @@ void GeomRend::src_migrate_meshes() {
       num_snd++;
     }
 
+
+    // Do side1 mesh index
+    MEField<> *s1mi = srcmesh->GetField("side1_mesh_ind");
+    if (s1mi != NULL) {
+      MEField<> *s1mi_r = srcmesh_rend.GetField("side1_mesh_ind");
+      
+      // load mask fields
+      snd[num_snd]=s1mi;
+      rcv[num_snd]=s1mi_r;
+      num_snd++;            
+    }
+
+    // Do side2 mesh index
+    MEField<> *s2mi = srcmesh->GetField("side2_mesh_ind");
+    if (s2mi != NULL) {
+      MEField<> *s2mi_r = srcmesh_rend.GetField("side2_mesh_ind");
+      
+      // load mask fields
+      snd[num_snd]=s2mi;
+      rcv[num_snd]=s2mi_r;
+      num_snd++;            
+    }
+
+
     // For the actual mesh
     srcComm.SendFields(num_snd, snd, rcv);
 
@@ -1165,7 +1239,7 @@ void GeomRend::dst_migrate_meshes() {
 
   if (iter_is_obj) {
     int num_snd=0;
-    MEField<> *snd[5],*rcv[5];
+    MEField<> *snd[7],*rcv[7];
 
     MEField<> *dc = dstmesh->GetCoordField();
     MEField<> *dc_r = dstmesh_rend.GetCoordField();
@@ -1219,6 +1293,28 @@ void GeomRend::dst_migrate_meshes() {
       num_snd++;
     }
 
+    // Do side1 mesh index
+    MEField<> *s1mi = dstmesh->GetField("side1_mesh_ind");
+    if (s1mi != NULL) {
+      MEField<> *s1mi_r = dstmesh_rend.GetField("side1_mesh_ind");
+      
+      // load mask fields
+      snd[num_snd]=s1mi;
+      rcv[num_snd]=s1mi_r;
+      num_snd++;            
+    }
+
+    // Do side2 mesh index
+    MEField<> *s2mi = dstmesh->GetField("side2_mesh_ind");
+    if (s2mi != NULL) {
+      MEField<> *s2mi_r = dstmesh_rend.GetField("side2_mesh_ind");
+      
+      // load mask fields
+      snd[num_snd]=s2mi;
+      rcv[num_snd]=s2mi_r;
+      num_snd++;            
+    }
+
      dstComm.SendFields(num_snd, snd, rcv);
 
   } else {
@@ -1268,7 +1364,7 @@ void GeomRend::migrate_meshes() {
 
 
 void mesh_isect(const MEField<> & scoord, const BBox & srcBBox, const MEField<> & dcoord, std::vector<MeshObj *> objlist,
-  std::vector<CommRel::CommNode> & mignode, double tol, int sdim){
+                std::vector<CommRel::CommNode> & mignode, double tol, int sdim, bool on_sph){
 
   // all gather all srcBBox on all pets
   // construct local buffer
@@ -1290,7 +1386,7 @@ void mesh_isect(const MEField<> & scoord, const BBox & srcBBox, const MEField<> 
 
   for (; si != se; ++si) {
     MeshObj &elem = **si;
-    BBox ebox(dcoord, elem, 0.25);
+    BBox ebox(dcoord, elem, 0.25, on_sph);
     // Insersect with each of the src bounding box
     for(int i = 0; i < commsize; i ++)
       if (BBoxIntersect(ebox, srcBBoxList[i], tol))
@@ -1316,7 +1412,7 @@ void GeomRend::Build_Merge(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> *
   ThrowRequire(!dcfg.neighbors || srcmesh->HasGhost());
         
   MEField<> &scoord = *srcmesh->GetCoordField();
-  BBox srcBBox(scoord, *srcmesh);
+  BBox srcBBox(scoord, *srcmesh, on_sph);
   BBox gsrcBBox = BBoxParUnion(srcBBox);
 
   MEField<> &dcoord = *dstmesh->GetCoordField();
@@ -1327,14 +1423,14 @@ void GeomRend::Build_Merge(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> *
   Mesh::iterator ei = dstmesh->elem_begin(), ee = dstmesh->elem_end();
   for (; ei != ee; ++ei) {
     MeshObj &elem = *ei;
-    BBox ebox(dcoord, elem, 0.25);
+    BBox ebox(dcoord, elem, 0.25, on_sph);
     if (BBoxIntersect(ebox, gsrcBBox, dcfg.geom_tol))
       dstObjList.push_back(&elem);
   } // for ei
 
   // Build the destination migration
   std::vector<CommRel::CommNode> mignode;
-  mesh_isect(scoord, srcBBox, dcoord, dstObjList, mignode, dcfg.geom_tol, sdim);
+  mesh_isect(scoord, srcBBox, dcoord, dstObjList, mignode, dcfg.geom_tol, sdim, on_sph);
   // Add results to the migspec
   CommRel &dst_migration = dstComm.GetCommRel(dcfg.obj_type);
   dst_migration.Init("dst_migration", *dstmesh, dstmesh_rend, false);
@@ -1395,14 +1491,14 @@ void GeomRend::build_dst_mig_all_overlap(ZoltanUD &zud) {
   MEField<> &scoord = *(srcmesh_rend.GetCoordField());
 
   // get local and global bounding boxes of srcmesh_rend
-  BBox srcBBox(scoord, srcmesh_rend);
+  BBox srcBBox(scoord, srcmesh_rend, on_sph);
 
   // Get coord field of destination mesh
   MEField<> &dcoord = *(dstmesh->GetCoordField());
 
   // Build the destination migration
   std::vector<CommRel::CommNode> mignode;
-  mesh_isect(scoord, srcBBox, dcoord, zud.dstObj, mignode, dcfg.geom_tol, sdim);
+  mesh_isect(scoord, srcBBox, dcoord, zud.dstObj, mignode, dcfg.geom_tol, sdim, on_sph);
 
   // Add results to the migspec
   CommRel &dst_migration = dstComm.GetCommRel(dcfg.obj_type);

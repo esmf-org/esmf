@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -34,7 +34,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 
-#include "Mesh/include/Legacy/ESMCI_FindPnts.h"
+#include "Mesh/include/Legacy/ESMCI_DDir.h"
 #include "Mesh/include/ESMCI_XGridUtil.h"
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -45,18 +45,18 @@
 
 using namespace ESMCI;
 
-void MBMesh_create(void **mbmpp,
+void MBMesh_create(MBMesh **mbmpp,
                    int *pdim, int *sdim,
                    ESMC_CoordSys_Flag *coordSys, int *rc);
 
 
-void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
+void MBMesh_addnodes(MBMesh **mbmpp, int *num_nodes, int *nodeId,
                      double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                      int *rc);
 
 
-void MBMesh_addelements(void **mbmpp,
+void MBMesh_addelements(MBMesh **mbmpp,
                         int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                         int *_coordsPresent, double *elemCoords,
@@ -65,166 +65,105 @@ void MBMesh_addelements(void **mbmpp,
                         int *rc);
 
 
-void MBMesh_destroy(void **mbmpp, int *rc);
+void MBMesh_destroy(MBMesh **mbmpp, int *rc);
 
-void MBMesh_write(void **mbmpp, char *fname, int *rc,
+void MBMesh_write(MBMesh **mbmpp, char *fname, int *rc,
                   ESMCI_FortranStrLenArg nlen);
 
 
-void MBMesh_createnodedistgrid(void **meshpp, int *ngrid, int *num_lnodes, int *rc);
+void MBMesh_createnodedistgrid(MBMesh **meshpp, int *ngrid, int *num_lnodes, int *rc);
 
-void MBMesh_createelemdistgrid(void **meshpp, int *egrid, int *num_lelems, int *rc);
+void MBMesh_createelemdistgrid(MBMesh **meshpp, int *egrid, int *num_lelems, int *rc);
 
-void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
+void MBMesh_createredistelems(MBMesh **src_meshpp, int *num_elem_gids, int *elem_gids,
+                              MBMesh **output_meshpp, int *rc);
+
+void MBMesh_createredistnodes(MBMesh **src_meshpp, int *num_node_gids, int *node_gids,
+                              MBMesh **output_meshpp, int *rc);
+
+void MBMesh_createredist(MBMesh **src_meshpp, int *num_node_gids, int *node_gids,
+                            int *num_elem_gids, int *elem_gids,  MBMesh **output_meshpp, int *rc);
+
+void MBMesh_checkelemlist(MBMesh **meshpp, int *_num_elem_gids, int *elem_gids,
+                                           int *rc);
+
+void MBMesh_checknodelist(MBMesh **meshpp, int *_num_node_gids, int *node_gids,
+                                             int *rc);
+
+void MBMesh_FitOnVM(MBMesh **meshpp, VM **new_vm, int *rc);
+
+void MBMesh_getarea(MBMesh **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
 
-void MBMesh_getlocalcoords(void **meshpp, double *ncoords,
+void MBMesh_GetCentroid(MBMesh *meshp, int *num_elem, double *elem_centroid, int *rc);
+
+void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, int *rc);
+
+void MBMesh_GetElemCount(MBMesh *meshp, int *elemCount, int *rc);
+
+void MBMesh_GetNodeCount(MBMesh *meshp, int *nodeCount, int *rc);
+
+void MBMesh_GetElemConnCount(MBMesh *meshp, int *elemConnCount, int *rc);
+
+void MBMesh_GetElemInfoPresence(MBMesh *meshp, 
+                                int *elemMaskIsPresent,
+                                int *elemAreaIsPresent,
+                                int *elemCoordsIsPresent,
+                                int *rc);
+
+void MBMesh_GetElemCreateInfo(MBMesh *mesh,
+                              ESMCI::InterArray<int> *elemIds,
+                              ESMCI::InterArray<int> *elemTypes,
+                              ESMCI::InterArray<int> *elemConn,
+                              ESMCI::InterArray<int> *elemMask,
+                              ESMCI::InterArray<ESMC_R8> *elemArea,
+                              ESMCI::InterArray<ESMC_R8> *elemCoords, int *rc);
+
+void MBMesh_GetNodeInfoPresence(MBMesh *meshp, 
+                                int *nodeMaskIsPresent,
+                                int *rc);
+
+void MBMesh_GetNodeCreateInfo(MBMesh *meshp,
+                              ESMCI::InterArray<int> *nodeIds,
+                              ESMCI::InterArray<ESMC_R8> *nodeCoords,
+                              ESMCI::InterArray<int> *nodeOwners,
+                              ESMCI::InterArray<int> *nodeMask,
+                              int *rc);
+
+void MBMesh_geteleminfointoarray(MBMesh *vmbmp,
+                                 ESMCI::DistGrid *elemDistgrid, 
+                                 int numElemArrays,
+                                 int *infoTypeElemArrays, 
+                                 ESMCI::Array **elemArrays, 
+                                 int *rc);
+
+void MBMesh_SetElemCreateInfo(MBMesh *meshp,
+                              ESMCI::InterArray<int> *elemMask,
+                              ESMCI::InterArray<ESMC_R8> *elemArea,
+                              int *rc);
+
+void MBMesh_getlocalcoords(MBMesh **meshpp, double *ncoords,
                                int *_orig_sdim, int *rc);
 
-void MBMesh_getlocalelemcoords(void **meshpp, double *ecoords,
+void MBMesh_getlocalelemcoords(MBMesh **meshpp, double *ecoords,
                                int *_orig_sdim, int *rc);
 
+void MBMesh_serialize(MBMesh **mbmpp, char *buffer, int *length, 
+                      int *offset, ESMC_InquireFlag *inquireflag, int *rc,
+                      ESMCI_FortranStrLenArg buffer_l);
 
-void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
-void MBMesh_turnoffelemmask(void **mbmpp, int *rc);
+void MBMesh_deserialize(MBMesh **mbmpp, char *buffer, int *offset, int *rc,
+                        ESMCI_FortranStrLenArg buffer_l);
 
-void MBMesh_turnonnodemask(void **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
-void MBMesh_turnoffnodemask(void **meshpp, int *rc);
+void MBMesh_turnonelemmask(MBMesh **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
+void MBMesh_turnoffelemmask(MBMesh **mbmpp, int *rc);
 
-EntityType get_entity_type(int pdim, int etype);
+void MBMesh_turnonnodemask(MBMesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
+void MBMesh_turnoffnodemask(MBMesh **meshpp, int *rc);
 
-int ElemType2NumNodes(int pdim, int sdim, int etype);
+void MBMesh_getelemfrac(MBMesh *mbmesh, int *_num_elem, double *elem_fracs, int *rc);
 
-#if 0
-
-
-/**
- * Routines for reading in a test VTK mesh to fortran arrays (for testing the array interface)
- */
-void ESMCI_meshvtkheader(char *filename, int *num_elem, int *num_node, int *conn_size, int *rc,
-                         ESMCI_FortranStrLenArg nlen);
-
-void ESMCI_meshvtkbody(char *filename, int *nodeId, double *nodeCoord,
-                    int *nodeOwner, int *elemId, int *elemType, int *elemConn, int *rc,
-                       ESMCI_FortranStrLenArg nlen);
-
-void ESMCI_meshdestroy(Mesh **meshpp, int *rc);
-
-void ESMCI_meshfreememory(Mesh **meshpp, int *rc);
-
-
-void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc);
-
-
-void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc);
-
-void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, int *rc);
-
-void ESMCI_meshinfoserialize(int *intMeshFreed,
-                char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *rc,
-                             ESMCI_FortranStrLenArg buffer_l);
-
-void ESMCI_meshinfodeserialize(int *intMeshFreed,
-                                 char *buffer, int *offset, int *rc,
-                               ESMCI_FortranStrLenArg buffer_l);
-
-void ESMCI_meshserialize(Mesh **meshpp,
-                char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *rc,
-                         ESMCI_FortranStrLenArg buffer_l);
-
-void ESMCI_meshdeserialize(Mesh **meshpp,
-                                 char *buffer, int *offset, int *rc,
-                           ESMCI_FortranStrLenArg buffer_l);
-
-
-void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *numPnts,
-                       double *pnts, int *pets, int *rc);
-
-void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int *rc);
-
-
-void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc);
-
-void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *rc);
-
-void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, int *rc);
-
-void ESMCI_meshgetfrac(Mesh **meshpp, int *_num_elem, double *elem_fracs, int *rc);
-
-void ESMCI_meshgetfrac2(Mesh **meshpp, int *num_elem, double *elem_fracs, int *rc);
-
-// Interface to internal code to triangulate a polygon
-// Input is: pnts (the polygon of size numPnts*sdim
-//           td a temporary buffer of the same size as pnts
-//           ti a temporary buffer of size numPnts
-// Output is: tri_ind, which are the 0-based indices of the triangles
-//             making up the triangulization. tri_ind should be of size 3*(numPnts-2).
-//
-void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
-                       double *pnts, double *td, int *ti, int *triInd, int *rc);
-
-void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
-
-// Turn OFF masking
-void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc);
-
-////////////
-void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
-
-// Turn OFF masking
-void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc);
-
-////////////
-
-void ESMCI_get_polygon_area(int *spatialdim, int *nedges,
-                            double *points, double *area, int *rc);
-
-void ESMCI_meshcreatefrommeshes(Mesh **meshapp, Mesh **meshbpp, Mesh **meshpp,
-                                ESMC_MeshOp_Flag * meshop, double * threshold, int *rc);
-
-
-void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *elem_gids,
-                                 Mesh **output_meshpp, int *rc);
-
-
-void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *node_gids,
-                                 Mesh **output_meshpp, int *rc);
-
-
-void ESMCI_meshcreateredist(Mesh **src_meshpp, int *num_node_gids, int *node_gids,
-                            int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc);
-
-// This method verifies that nodes in node_gids array are the same as the local nodes in meshpp, otherwise
-// it returns an error (used to test MeshRedist()).
-// To do this check make sure the number of nodes in both cases are the same and that every
-// entry in node_gids is contained in meshpp
-void ESMCI_meshchecknodelist(Mesh **meshpp, int *_num_node_gids, int *node_gids,
-                             int *rc);
-
-
-// This method verifies that elems in elem_gids array are the same as the local elems in meshpp, otherwise
-// it returns an error (used to test MeshRedist()).
-// To do this check make sure the number of elems in both cases are the same and that every
-// entry in elem_gids is contained in meshpp
-void ESMCI_meshcheckelemlist(Mesh **meshpp, int *_num_elem_gids, int *elem_gids,
-                             int *rc);
-
-// Interface to internal code to convert coords from spherical in degrees to Cartesian
-// Input is: lon, lat - spherical coordinates in degrees
-// Output is: x,y,z - Cartesian coordinates
-//
-void ESMCI_sphdeg_to_cart(double *lon, double *lat,
-                          double *x, double *y, double *z, int *rc);
-
-// This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles
-void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
-                        int *rc);
-
-void ESMCI_meshcreatedual(Mesh **src_meshpp, Mesh **output_meshpp, int *rc);
-
-#endif
+void MBMesh_get_elem_frac_into_Array(MBMesh *mbmesh, ESMCI::Array *array, int *rc);
 
 #endif // ESMF_MOAB
 

@@ -382,17 +382,6 @@ module user_model1
                            convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! link the component to the state
-    call ESMF_AttributeLink(comp, exportState, rc=rc)
-
-#if 0
-    ! write out the Attributes
-    call ESMF_AttributeWrite(comp, conv, purp, rc=rc)
-    call ESMF_AttributeWrite(comp, conv, purp, &
-                             attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) return
-#endif
-
   end subroutine user_init
 
 !-------------------------------------------------------------------------
@@ -438,11 +427,6 @@ module user_model1
     call ESMF_StateGet(exportState, "fieldbundle", fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Write the Attribute package from the FieldBundle
-!    call ESMF_AttributeWrite(fieldbundle,conv,purp,rc=rc)
-!    call ESMF_AttributeWrite(fieldbundle,conv,purp, &
-!                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-
     ! Get the Grid
     !call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
     !if (rc/=ESMF_SUCCESS) return ! bail out
@@ -451,16 +435,12 @@ module user_model1
     do k = 1, 10
         call ESMF_FieldBundleGet(fieldbundle, fieldIndex=k, field=field, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
-        ! Write the Attribute packages from the Fields
-!        call ESMF_AttributeWrite(field,conv,purp,rc=rc)
-!        call ESMF_AttributeWrite(field,conv,purp, &
-!                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
         call ESMF_AttributeGetAttPack(field, conv, purp, attpack=attpack, rc=rc)
         call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 #if 1
         call ESMF_AttributeAdd(field, convention=conv, purpose=purp2, &
-                               attrList=attrList, count=2, &
+                               attrList=attrList, &
                                nestConvention=conv, nestPurpose=purp, rc=rc)
         call ESMF_AttributeSet(field, name='Coordinates', value='Latlon', &
                                convention=conv, purpose=purp2, rc=rc)
@@ -468,12 +448,7 @@ module user_model1
                                convention=conv, purpose=purp2, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 #endif
-        call ESMF_AttributeRemove(field, name=name3, convention="CF", &
-                                  purpose="General", rc=rc)
-        if (rc/=ESMF_SUCCESS) return ! bail out
     enddo
-
-    !print *, 'myPet = ', myPet
 
     ! Nothing happens in this run cycle for this simple example
 

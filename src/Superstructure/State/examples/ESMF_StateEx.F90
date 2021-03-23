@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -31,7 +31,7 @@
     type(ESMF_FieldBundle) :: bundle1, bundle2
     type(ESMF_State) :: state1, state2, state3
     integer :: finalrc
-    logical :: neededFlag(1)
+    logical :: neededFlag
     integer :: result = 0     ! all pass
     character(ESMF_MAXSTR) :: testname
     character(ESMF_MAXSTR) :: failMsg
@@ -199,11 +199,11 @@
 
 !BOC
     dataname = "Downward wind:needed"
-    call ESMF_AttributeGet (state3, dataname, valueList=neededFlag, rc=rc)
+    call ESMF_AttributeGet (state3, dataname, value=neededFlag, rc=rc)
 !EOC
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    if (rc == ESMF_SUCCESS .and. neededFlag(1)) then
+    if (rc == ESMF_SUCCESS .and. neededFlag) then
         bundlename = dataname
         bundle2 = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
 !EOC

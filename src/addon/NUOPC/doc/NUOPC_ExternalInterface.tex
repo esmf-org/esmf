@@ -1,0 +1,108 @@
+% $Id$
+%
+
+\label{ExternalInterface}
+
+Complete applications can easily be built by assembling NUOPC compliant components. Many such NUOPC applications are in productive use across several institutions. The top level of such applications is typically implemented via a very thin application layer holding the main program that calls into the top level driver component that derives from {\tt NUOPC\_Driver}. Model components sit under the top level driver, interacting with one another and the driver through the NUOPC protocols. Complex systems have one or more component hierarchy levels under the top level driver as discussed in the previous section.
+
+There are situation, however, where a NUOPC application needs to be controlled by an outside component. Such an outside component does not derive from any of the generic NUOPC components, and cannot be expected to implement the complete NUOPC protocol. Typically such an external component implements its own control structure outside of NUOPC and ESMF. One example of such a situation are data assimilation systems that want to drive a NUOPC forecast application. 
+
+In order to facilitate the external access into a NUOPC application, the {\tt NUOPC\_Driver} provides an {\em external interface}. This interface is implemented through the standard ESMF component methods: Initialize, Run, and Finalize. This interface with the top level NUOPC driver allows an external component to control and interact with the entire NUOPC application.
+
+The standard ESMF component interfaces hold {\tt importState}, {\tt exportState}, and a {\tt clock} argument. These arguments are used to pass data in and out of the NUOPC application, and control the time stepping of the NUOPC model, respectively. The top level driver of a NUOPC application has access to any field that is advertised by any of the components and therefore serves as a single point of access for the entire application.
+
+The external NUOPC interface is currently defined by the Initialize, Run, and Finalize phases documented in the following table.
+
+\vspace*{2ex}
+\begin{longtable}[h]{|p{.30\textwidth}|p{.20\textwidth}|p{.50\textwidth}|}
+     \hline\hline
+     {\bf methodFlag} & {\bf phaseLabel} & {\bf Meaning}\\
+     \hline\hline
+     {\tt ESMF\_METHOD\_INITIALIZE} & label\_ExternalAdvertise & Called after the external component has 
+                                                                 set up the import- and exportStates with 
+                                                                 fields (advertised) that it plans to interact with.
+                                                                 On the NUOPC application side this call will
+                                                                 got through the complete advertise cylce.\\ \hline
+     {\tt ESMF\_METHOD\_INITIALIZE} & label\_ExternalRealize   & Called after the external component has
+                                                                 been informed about the connected status of
+                                                                 the fields in the import- and exportState.
+                                                                 On the NUOPC application side this call will
+                                                                 finish setting up RouteHandles between all
+                                                                 components involved.\\ \hline
+     {\tt ESMF\_METHOD\_INITIALIZE} & label\_ExternalDataInit  & Trigger a complete data initialize throughout
+                                                                 the NUOPC application. The expectation is that
+                                                                 all components reset their data consistent with
+                                                                 the {\tt clock} argument.\\ \hline
+     {\tt ESMF\_METHOD\_RUN}        &                          & The default Run() method steps the NUOPC
+                                                                 application forward in time according to
+                                                                 the {\tt clock} argument.\\ \hline
+     {\tt ESMF\_METHOD\_FINALIZE}   & label\_ExternalReset     & Inform the NUOPC application about a {\tt clock}
+                                                                 reset.\\ \hline
+     {\tt ESMF\_METHOD\_FINALIZE}   &                          & Completely finalize and shut down the NUOPC application.\\ \hline\hline
+\end{longtable}
+
+Here {\tt methodFlag} and {\tt phaseLabel} corrsepond to the respective arguments of method {\tt NUOPC\_CompSearchPhaseMap()}. This method is used to determine the actual ESMF phase index needed when calling into {\tt ESMF\_GridCompInitialize()}, {\tt ESMF\_GridCompRun()}, or {\tt ESMF\_GridCompFinalize()}. In cases where no {\tt phaseLabel} is indicated, the default phase is used for the implementation, accessible by not specifying the argument.
+
+For a complete example of how the {\em External NUOPC API} is used in practice, see {\tt\small https://github.com/esmf-org/nuopc-app-prototypes/tree/develop/ExternalDriverAPIProto}. The following code snippets demonstrates the critical pieces of code from the external layer interacting with NUOPC/ESMF.
+
+\begin{verbatim}
+  ! Create the external level import/export States
+  ! NOTE: The "stateintent" must be specified, and it must be set from the
+  ! perspective of the external level:
+  ! -> state holding fields exported by the external level to the ESM component
+  externalExportState = ESMF_StateCreate(stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
+    ! check rc
+  ! -> state holding fields imported by the external level from the ESM component
+  externalImportState = ESMF_StateCreate(stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
+    ! check rc
+
+  ! Advertise field(s) in external import state to receive from the NUOPC layer
+  call NUOPC_Advertise(externalImportState, &
+    StandardNames=(/"sea_surface_temperature"/), &
+    TransferOfferGeomObject="cannot provide", SharePolicyField="share", rc=rc)
+    ! check rc
+
+  ! Call "ExternalAdvertise" Initialize for the earth system Component
+  call NUOPC_CompSearchPhaseMap(nuopcApp, methodflag=ESMF_METHOD_INITIALIZE, &
+    phaseLabel=label_ExternalAdvertise, phaseIndex=phase, rc=rc)
+    ! check rc
+  call ESMF_GridCompInitialize(nuopcApp, phase=phase, clock=clock, &
+    importState=externalExportState, exportState=externalImportState, userRc=urc, rc=rc)
+    ! check rc and urc
+
+  ! Call "ExternalRealize" Initialize for the earth system Component
+  call NUOPC_CompSearchPhaseMap(nuopcApp, methodflag=ESMF_METHOD_INITIALIZE, &
+    phaseLabel=label_ExternalRealize, phaseIndex=phase, rc=rc)
+    ! check rc
+  call ESMF_GridCompInitialize(nuopcApp, phase=phase, clock=clock, &
+    importState=externalExportState, exportState=externalImportState, userRc=urc, rc=rc)
+    ! check rc and urc
+
+  ! Call "ExternalDataInit" Initialize for the earth system Component
+  call NUOPC_CompSearchPhaseMap(nuopcApp, methodflag=ESMF_METHOD_INITIALIZE, &
+    phaseLabel=label_ExternalDataInit, phaseIndex=phase, rc=rc)
+    ! check rc
+  call ESMF_GridCompInitialize(nuopcApp, phase=phase, clock=clock, &
+    importState=externalExportState, exportState=externalImportState, userRc=urc, rc=rc)
+    ! check rc and urc
+
+  ! Explicit time stepping loop on the external level, here based on ESMF_Clock
+  do while (.not.ESMF_ClockIsStopTime(clock, rc=rc))
+    ! Run the earth system Component: i.e. step ESM forward by timestep
+    call ESMF_GridCompRun(nuopcApp, clock=clock, &
+      importState=externalExportState, exportState=externalImportState, userRc=urc, rc=rc)
+    ! check rc and urc
+    ! Advance the clock
+    call ESMF_ClockAdvance(clock, rc=rc)
+    ! check rc
+  end do
+
+  ! Finalize the earth system Component
+  call ESMF_GridCompFinalize(nuopcApp, clock=clock, &
+    importState=externalExportState, exportState=externalImportState, userRc=urc, rc=rc)
+    ! check rc and urc
+\end{verbatim}
+
+
+
+

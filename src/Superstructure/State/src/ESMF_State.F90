@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -73,6 +73,7 @@ module ESMF_StateMod
       public ESMF_StateRead
       public ESMF_StateWrite
       public ESMF_StatePrint
+      public ESMF_StateSet
 
       public ESMF_StateSerialize, ESMF_StateDeserialize
 

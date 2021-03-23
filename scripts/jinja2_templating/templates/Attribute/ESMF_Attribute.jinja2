@@ -1,0 +1,1472 @@
+{#Data type iteration target#}
+{% set ts = meta['THETYPES'].values() %}
+{#ESMF type list#}
+{% set ets = meta['ESMF_TYPES'] %}
+{#Indicates if the interface is for an array/list#}
+{% set do_array = [False, True] %}
+{{ meta['ESMF_FILEHEADER'] }}
+
+!====================================================================================
+#define ESMF_FILENAME "src/Superstructure/AttributeAPI/interface/ESMF_Attribute.F90"
+!====================================================================================
+
+{{ meta['F_JINJADISCLAIMER'] }}
+
+{% set update_esmf_types = ["CplComp", "GridComp", "SciComp", "Field", "FieldBundle", "State"] %}
+#include "ESMF.h"
+
+module ESMF_AttributeMod
+
+use iso_c_binding, only : C_PTR, C_NULL_PTR, c_associated
+
+use ESMF_UtilTypesMod
+use ESMF_LogErrMod
+use ESMF_InfoMod
+use ESMF_InfoDescribeMod
+use ESMF_InfoSyncMod
+use ESMF_InitMacrosMod
+use ESMF_StateTypesMod
+{% for et in ets %}
+use ESMF_{{ et }}Mod
+{% endfor %}
+
+implicit none
+
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+  private
+
+!------------------------------------------------------------------------------
+! !PUBLIC MEMBER FUNCTIONS:
+!
+
+public ESMF_AttPackStreamJSON
+public ESMF_AttributeAdd
+public ESMF_AttributeCopy
+public ESMF_AttributeGet
+public ESMF_AttributeGetAttPack
+public ESMF_AttributeSet
+public ESMF_AttributeRead
+public ESMF_AttributeRemove
+public ESMF_AttributeUpdate
+public ESMF_AttributeWrite
+
+public ESMF_InfoFormatKey
+
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+!
+
+public ESMF_AttPack
+
+!------------------------------------------------------------------------------
+
+           character(*), parameter :: ESMF_ATTR_DEFAULT_CONVENTION="ESMF"
+           character(*), parameter :: ESMF_ATTR_DEFAULT_PURPOSE ="General"
+           character(*), parameter :: ESMF_ATTR_DEFAULT_ROOTKEY ="/ESMF/General"
+                logical, parameter :: ESMF_ATTR_DEFAULT_FORCE =.true.
+type(ESMF_AttNest_Flag), parameter :: ESMF_ATTR_DEFAULT_ATTNEST = ESMF_ATTNEST_ON
+
+type ESMF_AttPack
+  character(ESMF_MAXSTR) :: root_key
+  type(C_PTR) :: info = C_NULL_PTR
+contains
+  procedure, private, pass :: initialize => attpack_initialize
+  procedure, private, pass :: formatKey => attpack_formatKey
+  procedure, private, pass :: getPayload => attpack_getPayload
+end type ESMF_AttPack
+
+interface ESMF_AttributeAdd
+{% for et in ets %}
+  module procedure ESMF_AttributeAddAttPackStd{{ et }}
+{% endfor %}
+end interface
+
+{% set proc_suffixes = ["AttPack", "Obj"] %}
+{% set generic_procname = "ESMF_AttributeSet" %}
+interface {{ generic_procname }}
+{% for proc_suffix in proc_suffixes %}{% for et in ets %}{% for t in ts %}{% for d in do_array %}
+  {% set pname = generic_procname~proc_suffix~et~t.esmf_suffix %}
+  {% if d %}
+    {% set pname = pname~meta['LIST_TOKEN'] %}
+  {% endif %}
+  module procedure {{ pname }}
+{% endfor %}{% endfor %}{% endfor %}{% endfor %}
+end interface
+
+interface ESMF_AttributeGet
+{% set proc_suffixes = ["AttPack", "Obj"] %}
+{% set generic_procname = "ESMF_AttributeGet" %}
+{% for proc_suffix in proc_suffixes %}{% for et in ets %}{% for t in ts %}{% for d in do_array %}
+  {% set pname = generic_procname~proc_suffix~et~t.esmf_suffix %}
+  {% if d %}
+    {% set pname = pname~meta['LIST_TOKEN'] %}
+  {% endif %}
+  module procedure {{ pname }}
+{% endfor %}{% endfor %}{% endfor %}{% endfor %}
+{% set proc_suffixes = ["Count", "CountAttPack", "InfoByNamAP", "InfoByNam", "InfoByNum"] %}
+{% for proc_suffix in proc_suffixes %}{% for et in ets %}
+  {% set pname = generic_procname~proc_suffix~et %}
+  module procedure {{ pname }}
+{% endfor %}{% endfor %}
+end interface
+
+interface ESMF_AttributeGetAttPack
+{% for et in ets %}
+  module procedure ESMF_AttributeGetAttPack{{ et }}
+{% endfor %}
+end interface
+
+{#{% set proc_suffixes = ["AttPack", "Obj"] %}#}
+{% set proc_suffixes = ["AttPack"] %}
+interface ESMF_AttributeRemove
+{% for proc_suffix in proc_suffixes %}{% for et in ets %}
+  module procedure ESMF_AttributeRemove{{ proc_suffix }}{{ et }}
+{% endfor %}{% endfor %}
+end interface
+
+interface ESMF_AttributeCopy
+{% for et in ets %}
+{{ "  " }}module procedure ESMF_AttributeCopy{{ et }}To{{ et }}
+{% endfor %}
+end interface
+
+interface ESMF_AttributeUpdate
+{% for update_esmf_type in update_esmf_types %}
+  module procedure ESMF_AttributeUpdate{{ update_esmf_type }}
+{% endfor %}
+end interface
+
+interface ESMF_AttributeRead
+{% for et in ets %}
+  module procedure ESMF_AttributeRead{{ et }}
+{% endfor %}
+end interface
+
+interface ESMF_AttributeWrite
+{% for et in ets %}
+  module procedure ESMF_AttributeWrite{{ et }}
+{% endfor %}
+end interface
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+character(*), parameter, private :: version = '$Id$'
+!------------------------------------------------------------------------------
+
+contains  !====================================================================
+
+{% include "ESMF_Attribute-Doc.jinja2" %}{{ "" }}
+
+!==============================================================================
+! AttPack Procedures
+!==============================================================================
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "attpack_initialize"
+subroutine attpack_initialize(self, info, convention, purpose, rootKey, rc)
+  class(ESMF_AttPack), intent(out) :: self
+  type(ESMF_Info), intent(in) :: info
+  character(*), intent(in), optional :: convention
+  character(*), intent(in), optional :: purpose
+  character(*), intent(in), optional :: rootKey
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: local_convention, local_purpose
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_FAILURE
+  if (.not. present(rootKey)) then
+    if (present(convention)) then
+      local_convention = TRIM(convention)
+    else
+      local_convention = TRIM(ESMF_ATTR_DEFAULT_CONVENTION)
+    end if
+    if (present(purpose)) then
+      local_purpose = TRIM(purpose)
+    else
+      local_purpose = TRIM(ESMF_ATTR_DEFAULT_PURPOSE)
+    end if
+    self%root_key = "/"//local_convention//"/"//local_purpose
+  else
+    self%root_key = rootKey
+  end if
+  self%info = info%ptr
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine attpack_initialize
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "attpack_formatkey"
+function attpack_formatKey(self, name, rc) result(key)
+  ! Get the key in JSON Pointer syntax to the location in the associated Info
+  ! object this attribute package points to
+  class(ESMF_AttPack), intent(in) :: self
+  character(*), intent(in), optional :: name
+  integer, intent(inout), optional :: rc
+  character(:), allocatable :: key
+
+  integer :: localrc
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_FAILURE
+  if (present(name)) then
+    if (LEN(name) > 0) then
+        key = TRIM(self%root_key)//"/"//name
+    else
+        key = TRIM(self%root_key)
+    end if
+  else
+    key = TRIM(self%root_key)
+  end if
+  if (present(rc)) rc = ESMF_SUCCESS
+end function attpack_formatKey
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "attpack_getPayload"
+function attpack_getPayload(self, rc) result(payload)
+  ! Get a handle to the Info object associated with this attribute package
+  class(ESMF_AttPack), intent(in) :: self
+  integer, intent(inout), optional :: rc
+  type(ESMF_Info) :: payload
+  integer :: localrc
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_FAILURE
+  if (.not. c_associated(self%info)) then
+    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="ptr may not be null", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+  payload%ptr = self%info
+  if (present(rc)) rc = ESMF_SUCCESS
+end function attpack_getPayload
+
+!==============================================================================
+! Helper Functions
+!==============================================================================
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "parse_json_pointer()"
+subroutine parse_json_pointer(jptr, keyParent, keyChild)
+  character(len=*), intent(in) :: jptr
+  character(:), allocatable, intent(out) :: keyParent
+  character(:), allocatable, intent(out) :: keyChild
+
+  integer :: ii, jj, kk
+  character(:), allocatable :: jptr_trim
+
+  jptr_trim = TRIM(jptr)
+
+  jj = LEN(jptr_trim)
+  do ii=1,jj-1
+    kk = jj - ii
+    if (jptr_trim(kk:kk) == '/') exit
+  end do
+
+  keyParent = jptr_trim(1:jj-ii-1)
+  keyChild = jptr_trim(jj-ii+1:jj)
+end subroutine
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoFormatKey()"
+subroutine ESMF_InfoFormatKey(key, name, rc, convention, purpose)
+  character(:), allocatable, intent(out) :: key
+  character(len=*), intent(in) :: name
+  integer, intent(inout) :: rc
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+
+  character(*), parameter :: msg="Both convention & purpose are required if either is present"
+
+  if (present(convention)) then
+    if (.not. present(purpose)) then
+      if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg=msg, ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+  if (present(purpose)) then
+    if (.not. present(convention)) then
+      if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg=msg, ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (present(convention)) then
+    if (LEN(name) > 0) then
+      key = "/"//trim(convention)//"/"//trim(purpose)//"/"//trim(name)
+    else
+      key = "/"//trim(convention)//"/"//trim(purpose)
+    end if
+  else
+    if (LEN(name) > 0) then
+      key = ESMF_ATTR_DEFAULT_ROOTKEY//"/"//trim(name)
+    else
+      key = ESMF_ATTR_DEFAULT_ROOTKEY
+    end if
+  endif
+
+  rc = ESMF_SUCCESS
+end subroutine ESMF_InfoFormatKey
+
+!==============================================================================
+! ESMF_AttributeAdd
+!==============================================================================
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeAddAttPackStdInfo"
+subroutine ESMF_AttributeAddAttPackStdInfo(info, convention, purpose, attrList, nestConvention, nestPurpose, attpack, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: convention
+  character(len=*), intent(in) :: purpose
+  character(len=*), dimension(:), intent(in), optional :: attrList
+  character(len=*), intent(in), optional :: nestConvention
+  character(len=*), intent(in), optional :: nestPurpose
+  type(ESMF_AttPack), intent(out), optional :: attpack
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, nest_conv_count
+  character(:), allocatable :: key, key_nest_get, key_nest_set
+  type(ESMF_Info) :: tmp_info, tmp_nest_info
+  logical :: is_present
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_FAILURE
+
+  if (present(nestConvention)) then
+    if (.not. present(nestPurpose)) then
+      if (ESMF_LogFoundError(ESMF_FAILURE, msg="nestPurpose required", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+  if (present(nestPurpose)) then
+    if (.not. present(nestConvention)) then
+      if (ESMF_LogFoundError(ESMF_FAILURE, msg="nestConvention required", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  key = "/"//TRIM(convention)//"/"//TRIM(purpose)
+  if (present(nestConvention)) then
+    key_nest_get = "/"//TRIM(nestConvention)//"/"//TRIM(nestPurpose)
+    key_nest_set = key//key_nest_get
+  else
+    key_nest_get = ""
+    key_nest_set = ""
+  end if
+
+  ! Only create a package if it doesn't exist
+  is_present = ESMF_InfoIsPresent(info, key, isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (.not. is_present) then
+    tmp_info = ESMF_InfoCreate(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InfoSet(info, key, tmp_info, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InfoDestroy(tmp_info, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(nestConvention)) then
+       tmp_nest_info = ESMF_InfoCreate(info, key_nest_get, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InfoSet(info, key_nest_set, tmp_nest_info, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InfoDestroy(tmp_nest_info, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_InfoRemove(info, nestConvention, keyChild=nestPurpose, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! -----------------------------------------------------------------------
+       ! If the nestConvention now has no members, remove it as well
+
+       call ESMF_InfoGet(info, key=nestConvention, size=nest_conv_count, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if (nest_conv_count == 0) then
+         call ESMF_InfoRemove(info, nestConvention, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+       end if
+       ! -----------------------------------------------------------------------
+    end if
+  end if
+
+  if (present(attrList)) then
+    do ii=1,SIZE(attrList)
+      call ESMF_InfoSetNULL(info, key//"/"//trim(attrList(ii)), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    end do
+  end if
+
+  if (present(attpack)) then
+    call attpack%initialize(info, rootKey=key, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeAddAttPackStdInfo
+{% for et in ets %}
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeAddAttPackStd{{ et }}"
+subroutine ESMF_AttributeAddAttPackStd{{ et }}(target, convention, purpose, attrList, nestConvention, nestPurpose, attpack, rc)
+  type(ESMF_{{ et }}), intent(inout) :: target
+  character(len=*), intent(in) :: convention
+  character(len=*), intent(in) :: purpose
+  character(len=*), dimension(:), intent(in), optional :: attrList
+  character(len=*), intent(in), optional :: nestConvention
+  character(len=*), intent(in), optional :: nestPurpose
+  type(ESMF_AttPack), intent(out), optional :: attpack
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_AttributeAddAttPackStdInfo(info, convention, purpose, attrList, nestConvention, nestPurpose, attpack, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeAddAttPackStd{{ et }}
+{% endfor %}
+
+!==============================================================================
+! ESMF_AttributeSet
+!==============================================================================
+{% set set_or_get = "Set" %}
+{% for et in ets %}{% for t in ts %}{% for d in do_array %}
+
+{% set proc_suffix = "AttPack" %}
+{% if d %}
+{% set arglist = "(target, name, valueList, attpack, keywordEnforcer, itemcount, attnestflag, rc)" %}
+{% else %}
+{% set arglist = "(target, name, value, attpack, keywordEnforcer, itemcount, attnestflag, rc)" %}
+{% endif %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  ! 39.11.35/37 - Target is a NOOP only the attpack is used; itemcount is NOOP; attnestflag is NOOP
+  type(ESMF_{{ et }}), intent(in) :: target
+  character(len=*), intent(in) :: name
+  {{ t.full_ftype }}, {% if d %}dimension(:), {% endif %}intent(in) :: value{% if d %}List{% endif %}{{ "" }}
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: pkey
+  type(ESMF_Info) :: info
+  logical :: is_present
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  pkey = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = attpack%getPayload(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!  is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  is_present = .true.
+
+  if (is_present) then
+    call ESMF_InfoSet(info, TRIM(name), value{% if d %}List{% endif %}, force=ESMF_ATTR_DEFAULT_FORCE, pkey=TRIM(pkey), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+
+{% set proc_suffix = "Obj" %}
+{% if d %}
+    {% set arglist = "(target, name, valueList, convention, purpose, itemcount, attnestflag, rc)" %}
+{% else %}
+    {% set arglist = "(target, name, value, convention, purpose, itemcount, attnestflag, rc)" %}
+{% endif %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  type(ESMF_{{ et }}), intent(inout) :: target
+  character(len=*), intent(in) :: name
+  {{ t.full_ftype }}, {% if d %}dimension(:), {% endif %}intent(in) :: value{% if d %}List{% endif %}{{ "" }}
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  integer, intent(in), optional :: itemcount
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: len_key, localrc
+  character(:), allocatable :: key, pkey
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_present
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_attnestflag%value == ESMF_ATTNEST_ON%value) then
+    call ESMF_InfoFormatKey(pkey, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, TRIM(pkey)//"/"//TRIM(name), attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, name, value{% if d %}List{% endif %}, force=ESMF_ATTR_DEFAULT_FORCE, pkey=pkey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  else
+    call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+!    is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    is_present = .true.
+
+    if (is_present) then
+      call ESMF_InfoSet(info, key, value{% if d %}List{% endif %}, force=ESMF_ATTR_DEFAULT_FORCE, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="Attribute must be added before it is set", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  end if
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+{% endfor %}{% endfor %}{% endfor %}
+
+!==============================================================================
+! ESMF_AttributeGet
+!==============================================================================
+{% set set_or_get = "Get" %}
+{% set d = False %}
+{% for et in ets %}{% for t in ts %}
+{% set proc_suffix = "AttPack" %}
+{% set arglist = "(target, name, attpack, value, defaultvalue, attnestflag, isPresent, rc)" %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  ! 39.11.7
+  type(ESMF_{{ et }}), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  {{ t.full_ftype }}, intent(out) :: value
+  {{ t.full_ftype }}, intent(in), optional :: defaultvalue
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: debug = .false.
+  integer :: size
+  logical :: is_array, local_isPresent
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": key="//TRIM(key), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) then
+    isPresent = local_isPresent
+  endif
+
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  if (local_isPresent) then
+    call ESMF_InfoGetArrayMeta(attpack%getPayload(), key, is_array, size, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(attpack%getPayload(), key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(attpack%getPayload(), key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+
+{% set proc_suffix = "Obj" %}
+{% set arglist = "(target, name, value, defaultvalue, convention, purpose, attnestflag, isPresent, rc)" %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  type(ESMF_{{ et }}), intent(in) :: target
+  character(len=*), intent(in) :: name
+  {{ t.full_ftype }}, intent(out) :: value
+  {{ t.full_ftype }}, intent(in), optional :: defaultvalue
+  character(len=*), optional, intent(in) :: convention
+  character(len=*), optional, intent(in) :: purpose
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  integer :: size
+  logical :: is_array, local_isPresent
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, &
+    isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) then
+    isPresent = local_isPresent
+  endif
+
+  ! For Attribute, we support scalar to array stuff for single element arrays.
+  ! Check if the target is an array with size 1. Operate on it as if it were a
+  ! scalar.
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key=key, size=size, isArray=is_array, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    ! Supply some default values for array and size checks to allow logical test
+    ! for scalar-array implicit conversion.
+    is_array = .false.
+    size = 0
+  endif
+
+  if (local_isPresent .and. is_array .and. size==1) then
+    call ESMF_InfoGet(info, key, value, idx=1, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_InfoGet(info, key, value, default=defaultvalue, &
+      attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  deallocate(key)
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+
+{% endfor %}{% endfor %}
+!==============================================================================
+! ESMF_AttributeGet (Lists)
+!==============================================================================
+{% set set_or_get = "Get" %}
+{% set d = True %}
+{% for et in ets %}{% for t in ts %}
+{% set proc_suffix = "AttPack" %}
+{% set arglist = "(target, name, attpack, valueList, defaultvalueList, attnestflag, itemcount, isPresent, rc)" %}
+
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  ! 39.11.9
+  type(ESMF_{{ et }}), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+  {{ t.full_ftype }}, dimension(:), intent(out) :: valueList
+  {{ t.full_ftype }}, dimension(:), intent(in), optional :: defaultvalueList
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(attpack%getPayload(), key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(attpack%getPayload(), key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        if (present(itemcount)) itemcount = 0
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = SIZE(defaultvalueList)
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//TRIM(name)//"' is not present and no default value is provided", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+
+!------------------------------------------------------------------------------
+{% set proc_suffix = "Obj" %}
+{% set arglist = "(target, name, valueList, defaultvalueList, convention, purpose, attnestflag, itemcount, isPresent, rc)" %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  type(ESMF_{{ et }}), intent(in) :: target
+  character(len=*), intent(in) :: name
+  {{ t.full_ftype }}, dimension(:), intent(out) :: valueList
+  {{ t.full_ftype }}, dimension(:), intent(in), optional :: defaultvalueList
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: itemcount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, ii, local_itemcount
+  logical :: local_isPresent
+  character(:), allocatable :: key
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  local_isPresent = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = local_isPresent
+
+  if (present(defaultvalueList)) then
+    if (SIZE(defaultvalueList) /= SIZE(valueList)) then
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_ITEMSOFF, msg="SIZE(defaultvalueList) /= SIZE(valueList)", ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  if (local_isPresent) then
+    call ESMF_InfoGet(info, key, valueList, itemcount=local_itemcount, attnestflag=local_attnestflag, scalarToArray=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(itemcount)) itemcount = local_itemcount
+  else
+    if (present(defaultvalueList)) then
+      do ii=1,size(defaultvalueList)
+        valueList(ii) = defaultvalueList(ii)
+      enddo
+      if (present(itemcount)) itemcount = size(defaultvalueList)
+    else
+      if (present(itemcount)) itemcount = 0
+      if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="The key '"//trim(name)//"' is not present and no default value is provided", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+  endif
+
+  deallocate(key)
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+
+{% endfor %}{% endfor %}
+!==============================================================================
+! ESMF_AttributeGet (Inquire)
+!==============================================================================
+{% set d = False %}
+{% set set_or_get = "Get" %}
+{% set t = "" %}
+{% set proc_suffix = "Count" %}
+{% set arglist = "(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)" %}
+{% for et in ets %}
+
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  ! 39.11.15
+  type(ESMF_{{ et }}), intent(in) :: target
+  integer, intent(inout) :: count
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  type(ESMF_Info) :: info
+  type(ESMF_AttGetCountFlag) :: l_attcountflag
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  type(ESMF_InfoDescribe) :: eidesc
+  integer :: countSingle, countTotal, attPackCount, localrc, attPackCountTotal
+  character(:), allocatable :: key
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  if (present(attcountflag)) then
+    l_attcountflag = attcountflag
+  else
+    l_attcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE
+  end if
+
+  if (present(convention)) then
+    call ESMF_InfoFormatKey(key, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    key = ""
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_InfoGet(info, key=key, attrCount=countSingle, attrCountTotal=countTotal, &
+    attPackCount=attPackCount, attnestflag=local_attnestflag, attrCompliance=.true., &
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(attcountflag)) then
+    l_attcountflag = attcountflag
+  else
+    l_attcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE
+  end if
+
+  if (l_attcountflag%value==ESMF_ATTGETCOUNT_ATTRIBUTE%value) then
+    if (local_attnestflag%value==ESMF_ATTNEST_ON%value) then
+      count = countTotal
+    else
+      count = countSingle
+    end if
+  else if (l_attcountflag%value==ESMF_ATTGETCOUNT_TOTAL%value) then
+    count = countTotal
+  else if (l_attcountflag%value==ESMF_ATTGETCOUNT_ATTPACK%value) then
+    count = attPackCount
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+
+{% set set_or_get = "Get" %}
+{% set t = "" %}
+{% set proc_suffix = "CountAttPack" %}
+{% set arglist = "(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)" %}
+
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  type(ESMF_{{ et }}), intent(in) :: target
+  type(ESMF_AttPack), intent(inout) :: attpack
+  integer, intent(inout) :: count
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  type(ESMF_AttGetCountFlag) :: l_attcountflag
+  integer :: countSingle, countTotal, attPackCount, localrc
+  character(:), allocatable :: key
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  call ESMF_InfoGet(attpack%getPayload(), key=attpack%formatKey(), attrCount=countSingle, &
+    attrCountTotal=countTotal, attPackCount=attPackCount, attnestflag=local_attnestflag, &
+    attrCompliance=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(attcountflag)) then
+    l_attcountflag = attcountflag
+  else
+    l_attcountflag = ESMF_ATTGETCOUNT_ATTRIBUTE
+  end if
+
+  if (l_attcountflag%value==ESMF_ATTGETCOUNT_ATTRIBUTE%value) then
+    count = countSingle
+  else if (l_attcountflag%value==ESMF_ATTGETCOUNT_TOTAL%value) then
+    count = countTotal
+  else if (l_attcountflag%value==ESMF_ATTGETCOUNT_ATTPACK%value) then
+    count = attPackCount
+  else
+    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+
+{% set set_or_get = "Get" %}
+{% set proc_suffix = "InfoByNamAP" %}
+{% set arglist = "(target, name, attpack, keywordEnforcer, attnestflag, typekind, itemCount, isPresent, rc)" %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  ! 39.11.16
+  type(ESMF_{{ et }}), intent(in) :: target
+  character(len=*), intent(in) :: name
+  type(ESMF_AttPack), intent(inout) :: attpack
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+  integer, intent(out), optional :: itemCount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: countSingle, localrc
+  character(:), allocatable :: key
+  logical :: is_present, is_structured, is_null
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  key = attpack%formatKey(name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (.not. present(typekind) .and. .not. present(itemCount) .and. .not. present(isPresent)) then
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="Missing query argument. Nothing to do", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  is_present = ESMF_InfoIsPresent(attpack%getPayload(), key, attnestflag=local_attnestflag, &
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = is_present
+
+  if (is_present) then
+    call ESMF_InfoGet(attpack%getPayload(), key=key, size=itemCount, attnestflag=local_attnestflag, &
+      typekind=typekind, isStructured=is_structured, isNull=is_null, attrCompliance=.true., &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (.not. is_structured) then
+      if (present(itemCount)) then
+        if (is_null) then
+          itemCount = 0
+        else
+          itemCount = 1
+        endif
+      end if
+    end if
+  else
+    if (present(itemCount)) itemCount = 0
+    if (present(typekind)) typekind = ESMF_NOKIND
+  end if
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+{% set set_or_get = "Get" %}
+{% set proc_suffix = "InfoByNam" %}
+{% set arglist = "(target, name, keywordEnforcer, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)" %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  ! 39.11.17
+  type(ESMF_{{ et }}), intent(in) :: target
+  character(len=*), intent(in) :: name
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+  integer, intent(out), optional :: itemCount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: countSingle, localrc
+  character(:), allocatable :: key
+  logical :: is_present, is_structured, is_null
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  call ESMF_InfoFormatKey(key, name, localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (.not. present(typekind) .and. .not. present(itemCount) .and. .not. present(isPresent)) then
+    if (ESMF_LogFoundError(ESMF_RC_ATTR_NOTSET, msg="Missing query argument. Nothing to do", ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  is_present = ESMF_InfoIsPresent(info, key, isPointer=.true., attnestflag=local_attnestflag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) isPresent = is_present
+
+  if (is_present) then
+    call ESMF_InfoGet(info, key=key, size=itemCount, attnestflag=local_attnestflag, &
+      typekind=typekind, isStructured=is_structured, isNull=is_null, attrCompliance=.true., &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    if (.not. is_structured) then
+      if (present(itemCount)) then
+        if (is_null) then
+          itemCount = 0
+        else
+          itemCount = 1
+        endif
+      end if
+    end if
+  else
+    if (present(itemCount)) itemCount = 0
+    if (present(typekind)) typekind = ESMF_NOKIND
+  end if
+
+  deallocate(key)
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+{% set set_or_get = "Get" %}
+{% set proc_suffix = "InfoByNum" %}
+{% set arglist = "(target, attributeIndex, name, convention, purpose, attnestflag, typekind, itemCount, isPresent, rc)" %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  type(ESMF_{{ et }}), intent(in) :: target
+  integer, intent(in) :: attributeIndex
+  character(len=*), intent(out) :: name
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+  integer, intent(out), optional :: itemCount
+  logical, intent(out), optional :: isPresent
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical :: is_structured, is_null
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  call ESMF_InfoFormatKey(key, "", localrc, convention=convention, purpose=purpose)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_InfoGet(info, key=key, size=itemCount, typekind=typekind, &
+    idx=attributeIndex, ikey=name, isPresent=isPresent, isNull=is_null, attnestflag=local_attnestflag, &
+    isStructured=is_structured, attrCompliance=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  if (.not. is_structured) then
+    if (present(itemCount)) then
+      if (is_null) then
+        itemCount = 0
+      else
+        itemCount = 1
+      endif
+    end if
+  end if
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+
+!==============================================================================
+! ESMF_AttributeGetAttPack
+!==============================================================================
+
+{% set set_or_get = "Get" %}
+{% set proc_suffix = "AttPack" %}
+{% set arglist = "(target, convention, purpose, keywordEnforcer, attpack, attnestflag, isPresent, rc)" %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  ! 39.11.21
+  type(ESMF_{{ et }}), intent(in) :: target
+  character(len=*), intent(in) :: convention
+  character(len=*), intent(in) :: purpose
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(out), optional :: isPresent
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: key
+  logical :: is_present
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+
+  logical, parameter :: debug = .false.
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  info = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": convention="//TRIM(convention))
+    call ESMF_LogWrite(ESMF_METHOD//": purpose="//TRIM(purpose))
+    call ESMF_LogWrite(ESMF_METHOD//": Info Dump="//ESMF_InfoDump(info, rc=localrc), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  key = "/"//TRIM(convention)//"/"//TRIM(purpose)
+  is_present = ESMF_InfoIsPresent(info, key, attnestflag=local_attnestflag, isPointer=.true., rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(isPresent)) then
+    isPresent = is_present
+  end if
+
+  ! If the attpack object is provided but it does not exist, then bail out since
+  ! the attpack will never be initialized properly
+  if (.not. is_present) then
+    if (present(attpack)) then
+      if (.not. present(isPresent)) then
+        if (debug) then
+          call ESMF_LogWrite(ESMF_METHOD//": convention="//TRIM(convention))
+          call ESMF_LogWrite(ESMF_METHOD//": purpose="//TRIM(purpose))
+        end if
+        if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg="convention/purpose not found and attpack object present", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    end if
+  end if
+
+  if (is_present) then
+    if (present(attpack)) then
+      call attpack%initialize(info, convention=convention, purpose=purpose, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      if (debug) then
+        call ESMF_LogWrite(ESMF_METHOD//": attpack%root_key="//TRIM(attpack%root_key), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    end if
+  end if
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}
+{% endfor %}
+
+!==============================================================================
+! ESMF_AttributeRemove
+!==============================================================================
+{% for et in ets %}
+{% set set_or_get = "Remove" %}
+{% set proc_suffix = "AttPack" %}
+{% set arglist = "(target, name, attpack, convention, purpose, attnestflag, rc)" %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  type(ESMF_{{ et }}), intent(inout) :: target
+  character(len=*), intent(in), optional :: name
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc, purpsize
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info
+  character(:), allocatable :: keyParent, keyChild, keyParent2, keyChild2
+  type(ESMF_AttNest_Flag) :: local_attnestflag
+  logical, parameter :: debug = .false.
+  character(len=ESMF_MAXSTR) :: logmsg
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+{% include "ESMF_Attribute-HandleAttNest.jinja2" %}{{ "" }}
+
+  ! If attpack, use target as info source
+  if (present(attpack)) then
+    info = attpack%getPayload()
+  else
+    ! If no attpack, use target as info source
+    info = eidesc%GetInfo(target, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  if (debug) then
+    call ESMF_LogWrite(ESMF_METHOD//": info dump=...", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_LogWrite(ESMF_InfoDump(info, rc=localrc), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  end if
+
+  ! If a name is provided, use this as the key to remove
+  if (present(name)) then
+    keyChild = name
+
+    if (present(attpack)) then
+      keyParent = attpack%formatKey(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_InfoFormatKey(keyParent, "", localrc, convention=convention, purpose=purpose)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
+    call ESMF_InfoRemove(info, keyParent, keyChild=keyChild, attnestflag=local_attnestflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Otherwise, remove the whole attpack
+  else
+    if (.not. present(attpack)) then
+      if (.not. present(convention)) then
+        if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="No name, attpack, or conv/purp provided. Nothing to remove.", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_InfoRemove(info, TRIM(convention), keyChild=TRIM(purpose), attnestflag=local_attnestflag, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Check for conventions with no purposes
+        call ESMF_InfoGet(info, key=TRIM(convention), size=purpsize, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! If there are no purposes, the convention is orphaned and should be removed
+        if (purpsize == 0) then
+          call ESMF_InfoRemove(info, "", keyChild=TRIM(convention), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+      end if
+    else
+      keyParent = attpack%formatKey(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call parse_json_pointer(keyParent, keyParent2, keyChild2)
+
+      call ESMF_InfoRemove(info, keyParent2, keyChild=keyChild2, attnestflag=local_attnestflag, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Check for conventions with no purposes
+      call ESMF_InfoGet(info, key=TRIM(keyParent2), size=purpsize, attnestflag=local_attnestflag, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! If there are no purposes, the convention is orphaned and should be removed
+      if (purpsize == 0) then
+        call ESMF_InfoRemove(info, "", keyChild=TRIM(keyParent2(2:)), attnestflag=local_attnestflag, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+    end if
+  endif
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+
+{#{% set proc_suffix = "Obj" %}#}
+{#{% set arglist = "(target, name, convention, purpose, attnestflag, rc)" %}#}
+{#{% include "ESMF_Attribute-ProcHeader.jinja2" %}#}
+{#  type(ESMF_{{ et }}), intent(inout) :: target#}
+{#  character(len=*), intent(in), optional :: name#}
+{#  character(len=*), intent(in), optional :: convention#}
+{#  character(len=*), intent(in), optional :: purpose#}
+{#  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag#}
+{#  integer, intent(inout), optional :: rc#}
+{##}
+{#  integer :: localrc#}
+{#  type(ESMF_InfoDescribe) :: eidesc#}
+{#  type(ESMF_Info) :: info#}
+{#  character(:), allocatable :: key#}
+{#  character(:), allocatable :: l_name#}
+{##}
+{#{% include "ESMF_Attribute-ProcInit.jinja2" %}#}
+{##}
+{#  if (present(name)) then#}
+{#    l_name = name#}
+{#  else#}
+{#    l_name = ""#}
+{#  endif#}
+{##}
+{#  call ESMF_InfoFormatKey(key, l_name, localrc, convention=convention, purpose=purpose)#}
+{#  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return#}
+{##}
+{#  info = eidesc%GetInfo(target, rc=localrc)#}
+{#  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return#}
+{##}
+{#  call ESMF_InfoRemove(info, key, rc=localrc)#}
+{#  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return#}
+{##}
+{#  deallocate(key)#}
+{##}
+{#{% include "ESMF_Attribute-ProcFinalize.jinja2" %}#}
+{% endfor %}
+!==============================================================================
+! ESMF_AttributeCopy ==========================================================
+!==============================================================================
+{% for et in ets %}
+{% set et_dst = et %}
+
+{% include "ESMF_Attribute-Copy.jinja2" %}
+
+{% endfor %}
+!==============================================================================
+! ESMF_AttributeRead ==========================================================
+!==============================================================================
+{% for et in ets %}
+{% set set_or_get = "Read" %}
+{% set proc_suffix = "" %}
+{% set arglist = "(target, filename, keywordenforcer, rc)" %}
+
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  ! 39.11.32 - removed schemaFileName
+  type(ESMF_{{ et }}), intent(inout) :: target
+  character(len=*), intent(in) :: fileName
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: isrc, idst
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+  isrc = ESMF_InfoReadJSON(filename, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  idst = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_InfoDestroy(idst, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  idst%ptr = isrc%ptr
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+{% endfor %}
+
+!==============================================================================
+! ESMF_AttributeUpdate
+!==============================================================================
+{% set set_or_get = "Update" %}
+{% for update_esmf_type in update_esmf_types %}
+
+{% set et = update_esmf_type %}
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeUpdate{{ update_esmf_type }}"
+subroutine ESMF_AttributeUpdate{{ update_esmf_type }}(target, vm, rootList, rc)
+  type(ESMF_{{ update_esmf_type }}), intent(inout) :: target
+  type(ESMF_VM), intent(in) :: vm
+  integer, dimension(:), intent(in) :: rootList
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+  call ESMF_InfoSync(target, rootList(1), vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttributeUpdate{{ update_esmf_type }}
+{% endfor %}
+
+!==============================================================================
+! ESMF_AttributeWrite
+!==============================================================================
+{% for et in ets %}
+
+{% set set_or_get = "Write" %}
+{% set proc_suffix = "" %}
+{% set arglist = "(target, filename, keywordenforcer, convention, purpose, attwriteflag, rc)" %}
+{% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
+  ! 39.11.42 - attwrite flag only supports JSON
+  type(ESMF_{{ et }}), intent(inout) :: target
+  character(len=*), intent(in) :: fileName
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+  character(len=*), intent(in), optional :: convention
+  character(len=*), intent(in), optional :: purpose
+  type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_Info) :: info, isrc
+  character(:), allocatable :: key
+
+{% include "ESMF_Attribute-ProcInit.jinja2" %}{{ "" }}
+
+  isrc = eidesc%GetInfo(target, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(convention)) then
+    call ESMF_InfoFormatKey(key, "", localrc, convention=convention, purpose=purpose)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+    info = ESMF_InfoCreate(isrc, key, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    info = isrc
+  endif
+
+  call ESMF_InfoWriteJSON(info, filename, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(convention)) then
+    deallocate(key)
+    call ESMF_InfoDestroy(info, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+{% include "ESMF_Attribute-ProcFinalize.jinja2" %}{{ "" }}
+{% endfor %}
+
+subroutine ESMF_AttPackStreamJSON(attpack, output, rc)
+  type(ESMF_AttPack), intent(in) :: attpack
+  character(len=*), intent(out), optional :: output
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  character(:), allocatable :: c_output, key
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  key = attpack%formatKey(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  c_output = ESMF_InfoDump(attpack%getPayload(), key=key, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (LEN(output) < LEN(c_output)) then
+    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="output buffer length too small", ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+  output = c_output
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_AttPackStreamJSON
+
+end module ESMF_AttributeMod

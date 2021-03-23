@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -351,8 +351,7 @@ contains
               return  ! bail out
 
             if (isPresent) then
-                call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                call ESMF_AttPackStreamJSON(attpack, output=jsonstring, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
                   file=FILENAME, &
@@ -522,8 +521,7 @@ contains
               return  ! bail out
 
             if (isPresent) then
-                call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                call ESMF_AttPackStreamJSON(attpack, output=jsonstring, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
                   file=FILENAME, &
@@ -911,8 +909,7 @@ contains
                   return  ! bail out
 
               if (isPresent) then
-                  call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                  call ESMF_AttPackStreamJSON(attpack, output=jsonstring, rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
                       line=__LINE__, &
                       file=FILENAME, &
@@ -1737,8 +1734,7 @@ contains
                   return  ! bail out
 
             if (isPresent) then
-                call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                call ESMF_AttPackStreamJSON(attpack, output=jsonstring, rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
                   file=FILENAME, &
@@ -2412,7 +2408,6 @@ contains
         phaseLabel, attributeToCheck, rc)
 
         ! remove these when put into NUOPC_Comp module
-        use ESMF
         use NUOPC_Base, only : NUOPC_PhaseMapStringLength
         implicit none
 
@@ -2512,7 +2507,6 @@ contains
         phaseLabel, rc)
 
         ! remove these when put into NUOPC_Comp module
-        use ESMF
         use NUOPC_Base, only : NUOPC_PhaseMapStringLength
         implicit none
 

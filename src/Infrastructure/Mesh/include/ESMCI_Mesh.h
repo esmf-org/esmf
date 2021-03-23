@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -112,6 +112,12 @@ void build_sym_comm_rel(UInt obj_type);
 
 void proxy_build_sym_comm_rel(UInt obj_type);
 
+void map_proc_numbers(int num_procs, int *proc_map);
+
+void map_obj_owners(int num_procs, int *proc_map);
+
+void change_comm(MPI_Comm new_comm);
+
 /*
  * When shared objects are marked to delete, we must find a new owner
  * for the shared object (on a proc that will keep it around)..  This
@@ -133,6 +139,13 @@ void resolve_cspec_delete_owners(UInt obj_type);
 
  // Save original dimension
  int orig_spatial_dim;
+
+ // Temp XGrid info
+ int side; // 1=A, 2=B, 3= middle
+ int ind; // which number grid on the side
+
+ // Original comm where this mesh was commited               
+ MPI_Comm orig_comm;
 
   private:
 void assign_new_ids();

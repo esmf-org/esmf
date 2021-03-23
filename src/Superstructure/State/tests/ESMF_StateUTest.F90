@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -143,14 +143,20 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-      !NEX_UTest      
-      ! Test Creation of an empty import State 
-      statename = "Atmosphere In"
-      state1 = ESMF_StateCreate(name=statename, stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating an empty import State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+  !NEX_UTest
+  ! Test Creation of an empty import State 
+  statename = "Atmosphere In"
+  state1 = ESMF_StateCreate(name=statename, stateIntent=ESMF_STATEINTENT_IMPORT, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Creating an empty import State Test"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !NEX_UTest
+  ! Test Set
+  call ESMF_StateSet(state1, stateIntent=ESMF_STATEINTENT_EXPORT, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Setting stateIntent on State Test"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -1194,31 +1200,11 @@
         result, ESMF_SRCLINE)
 
       !EX_UTest
-      ! Test attribute count
-      call ESMF_AttributeGet(state_attr, count=linkcount, &
-          attcountflag=ESMF_ATTGETCOUNT_ATTLINK,  &
-          rc=localrc)
-      write (failmsg, *) "Attribute link count /= 0 (", linkcount, ")"
-      write (name, *) "Empty state attribute count test"
-      call ESMF_Test (linkcount == 0, name, failMsg,  &
-        result, ESMF_SRCLINE)
-
-      !EX_UTest
       ! Add an Array
       call ESMF_StateAdd (state_attr, (/array10/), rc=rc)
       write (failmsg, *) "Adding an Array for Attribute count testing"
       write (name, *) "Adding an Array for attribute count testing"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
-        result, ESMF_SRCLINE)
-
-      !EX_UTest
-      ! Test attribute count
-      call ESMF_AttributeGet(state_attr, count=linkcount, &
-          attcountflag=ESMF_ATTGETCOUNT_ATTLINK,  &
-          rc=localrc)
-      write (failmsg, *) "Attribute link count /= 1 (", linkcount, ")"
-      write (name, *) "State with Array item attribute count test"
-      call ESMF_Test (linkcount == 1, name, failMsg,  &
         result, ESMF_SRCLINE)
 
       !EX_UTest
@@ -1228,17 +1214,6 @@
       write (name, *) "Removing an Array for attribute count testing"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
-
-      !EX_UTest
-      ! Test attribute count
-      call ESMF_AttributeGet(state_attr, count=linkcount, &
-          attcountflag=ESMF_ATTGETCOUNT_ATTLINK,  &
-          rc=localrc)
-      write (failmsg, *) "Attribute link count /= 0 (", linkcount, ")"
-      write (name, *) "State with Array item attribute count test"
-      call ESMF_Test (linkcount == 0, name, failMsg,  &
-        result, ESMF_SRCLINE)
-
 
       !------------------------------------------------------------------------
       ! Test StateAddReplace on Array

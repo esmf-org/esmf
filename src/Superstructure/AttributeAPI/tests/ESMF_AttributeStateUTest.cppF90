@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -97,138 +97,6 @@ program ESMF_AttributeStateUTest
 AttributeTestMacro(state, a State, EX_UTest, NEX_UTest)
 
 AttributeTestCopyMacro(state, ESMF_State, a State, ESMF_State, EX_UTest, NEX_UTest)
-
-    !-------------------------------------------------------------------------
-    !  Attribute hierarchy linking
-    !-------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Link a State Attribute hierarchy to a State Attribute hierarchy State Test
-      call ESMF_AttributeLink(state, sfs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a State hierarchy to a State hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Link a State Attribute hierarchy to a Field Attribute hierarchy State Test
-      call ESMF_AttributeLink(state, ffs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a State hierarchy to a Field hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Link a State Attribute hierarchy to a FieldBundle Attribute hierarchy State Test
-      call ESMF_AttributeLink(state, fbfs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^ifdef ESMF_TESTEXHAUSTIVE
-
-      !EX_UTest
-      ! Link a State Attribute hierarchy to a State Attribute hierarchy State Test, again
-      call ESMF_AttributeLink(state, sfs, rc=rc)
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking a State hierarchy to a State hierarchy Test, again"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Link a State Attribute hierarchy to a Field Attribute hierarchy State Test, again
-      call ESMF_AttributeLink(state, ffs, rc=rc)
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking a State hierarchy to a Field hierarchy Test, again"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Link a State Attribute hierarchy to a FieldBundle Attribute hierarchy State Test, again
-      call ESMF_AttributeLink(state, fbfs, rc=rc)
-      write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
-      write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test, again"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^endif
-
-      !NEX_UTest
-      ! Unlink a State Attribute hierarchy from a State Attribute hierarchy State Test
-      call ESMF_AttributeLinkRemove(state, sfs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a State hierarchy from a State hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Unlink a State Attribute hierarchy from a Field Attribute hierarchy State Test
-      call ESMF_AttributeLinkRemove(state, ffs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a State hierarchy from a Field hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !NEX_UTest
-      ! Unlink a State Attribute hierarchy from a FieldBundle Attribute hierarchy State Test
-      call ESMF_AttributeLinkRemove(state, fbfs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a State hierarchy from a FieldBundle hierarchy Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^ifdef ESMF_TESTEXHAUSTIVE
-
-      !EX_UTest
-      ! Unlink a State Attribute hierarchy from a State Attribute hierarchy State Test 2
-      call ESMF_AttributeLinkRemove(state, sfs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a State hierarchy from a State hierarchy Test 2"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink a State Attribute hierarchy from a Field Attribute hierarchy State Test 2
-      call ESMF_AttributeLinkRemove(state, ffs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a State hierarchy from a Field hierarchy Test 2"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink a State Attribute hierarchy from a FieldBundle Attribute hierarchy State Test 2
-      call ESMF_AttributeLinkRemove(state, fbfs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a State hierarchy from a FieldBundle hierarchy Test 2"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink a State Attribute hierarchy from a State Attribute hierarchy State Test 3
-      call ESMF_AttributeLinkRemove(state, sfs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a State hierarchy from a State hierarchy Test 3"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink a State Attribute hierarchy from a Field Attribute hierarchy State Test 3
-      call ESMF_AttributeLinkRemove(state, ffs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a State hierarchy from a Field hierarchy Test 3"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Unlink a State Attribute hierarchy from a FieldBundle Attribute hierarchy State Test 3
-      call ESMF_AttributeLinkRemove(state, fbfs, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Unlinking a State hierarchy from a FieldBundle hierarchy Test 3"
-      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-^endif
 
       !------------------------------------------------------------------------
       ! clean up

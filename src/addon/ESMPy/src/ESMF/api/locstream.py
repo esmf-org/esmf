@@ -34,8 +34,9 @@ class LocStream(dict):
     called keys. Keys can include other descriptors besides location, including
     a second set of coordinates.
     
-    For more information about the ESMF LocStream class, please see the
-    `ESMF LocStream documentation <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
+    Refer to the LocStrea Class of the 
+    `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
+    for more information.
     
     :class:`~ESMF.api.locstream.LocStream` follows standard dictionary syntax. For example:
     
@@ -159,7 +160,7 @@ class LocStream(dict):
         # check types
         if not isinstance(value, (list, tuple, np.ndarray)):
             raise ValueError("type of value must be list, tuple, or numpy array")
-        if type(value) is not np.ndarray:
+        if not isinstance(value, np.ndarray):
             value = np.array(value)
         if len(value) != self.size:
             raise ValueError("value must be of length " + str(self.size))

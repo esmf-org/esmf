@@ -127,11 +127,6 @@ ESMF_F90OPTFLAG_G       += -traceback -check bounds
 ESMF_F90COMPILEOPTS += -assume realloc_lhs
 
 ############################################################
-# Intel runtime library on Darwin does not currently seem thread-safe
-#
-ESMF_PTHREADS := OFF
-
-############################################################
 # Construct the ABISTRING
 #
 ifeq ($(ESMF_MACHINE),x86_64)
@@ -163,9 +158,9 @@ endif
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS += -threads
+ESMF_F90COMPILEOPTS += -pthread -threads
 ESMF_CXXCOMPILEOPTS += -pthread
-ESMF_F90LINKOPTS    += -threads
+ESMF_F90LINKOPTS    += -pthread -threads
 ESMF_CXXLINKOPTS    += -pthread
 ESMF_SL_LIBOPTS     += -pthread
 endif

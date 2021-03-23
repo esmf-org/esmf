@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -34,6 +34,8 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -83,6 +85,7 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleCreate
   public ESMF_ArrayBundleDestroy
   public ESMF_ArrayBundleGet
+  public ESMF_ArrayBundleGetThis
   public ESMF_ArrayBundleHalo
   public ESMF_ArrayBundleHaloRelease
   public ESMF_ArrayBundleHaloStore
@@ -305,6 +308,51 @@ module ESMF_ArrayBundleMod
   end interface
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
+      routehandle, ignoreUnmatchedFlag, len_ignoreUnmatchedFlag, &
+      srcToDstTransposeMap, typekind, factor, rc)
+      import                :: ESMF_ArrayBundle, ESMF_RouteHandle
+      import                :: ESMF_InterArray, ESMF_TypeKind_Flag, ESMF_Logical
+      type(ESMF_ArrayBundle):: srcArrayBundle, dstArrayBundle
+      type(ESMF_RouteHandle):: routehandle
+      type(ESMF_Logical)    :: ignoreUnmatchedFlag
+      integer               :: len_ignoreUnmatchedFlag
+      type(ESMF_InterArray) :: srcToDstTransposeMap
+      type(ESMF_TypeKind_Flag):: typekind
+      type(*)               :: factor
+      integer               :: rc
+    end subroutine
+
+    subroutine c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
+      routehandle, typekindFactors, factorList, factorListCount, &
+      factorIndexList, ignoreUnmatchedFlag, len_ignoreUnmatchedFlag, &
+      srcTermProcessing, rc)
+      import                :: ESMF_ArrayBundle, ESMF_RouteHandle
+      import                :: ESMF_InterArray, ESMF_TypeKind_Flag, ESMF_Logical
+      type(ESMF_ArrayBundle):: srcArrayBundle, dstArrayBundle
+      type(ESMF_RouteHandle):: routehandle
+      type(ESMF_TypeKind_Flag):: typekindFactors
+      type(*)               :: factorList(*)
+      integer               :: factorListCount
+      type(ESMF_InterArray) :: factorIndexList
+      type(ESMF_Logical)    :: ignoreUnmatchedFlag
+      integer               :: len_ignoreUnmatchedFlag
+      type(ESMF_InterArray) :: srcTermProcessing
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+#endif
+
+!------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -656,7 +704,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: arrayCount, i
     type(ESMF_Pointer), allocatable :: arrayPointerList(:)
     integer                       :: len_name
-    type(ESMF_Logical)            :: linkChange
     type(ESMF_Logical)            :: multiflagArg
     type(ESMF_Logical)            :: relaxedflagArg
 
@@ -720,14 +767,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Garbage collection
     deallocate(arrayPointerList)
-
-    ! link the Attribute hierarchies
-    linkChange = ESMF_TRUE;
-    do i=1,arrayCount
-      call c_ESMC_AttributeLink(arraybundle, arrayList(i), linkChange, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc))  return
-    enddo
 
     ! Set return value
     ESMF_ArrayBundleCreate = arraybundle
@@ -1174,6 +1213,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_ArrayBundleGetList
 !------------------------------------------------------------------------------
 
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleGetThis()"
+!BOPI
+! !IROUTINE: ESMF_ArrayBundleGetThis - Internal access routine for C++ pointer
+
+! !INTERFACE:
+subroutine ESMF_ArrayBundleGetThis(arrayBundle, this, rc)
+! !ARGUMENTS:
+  type(ESMF_ArrayBundle), intent(in) :: arrayBundle
+  type(ESMF_Pointer), intent(inout) :: this
+  integer, intent(inout), optional :: rc
+!
+! !DESCRIPTION:
+!     Internal access routine for C++ pointer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arrayBundle]
+!          Specified {\tt ESMF\_ArrayBundle} object.
+!     \item[this]
+!          C++ pointer.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  this = arrayBundle%this
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_ArrayBundleGetThis
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1879,20 +1951,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayBundleRedistStore()
 ! subroutine ESMF_ArrayBundleRedistStore<type><kind>(srcArrayBundle, &
-!   dstArrayBundle, routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
+!   dstArrayBundle, routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+!   srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_ArrayBundle),   intent(in)            :: srcArrayBundle
-!   type(ESMF_ArrayBundle),   intent(inout)         :: dstArrayBundle
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)            :: factor
+!   type(ESMF_ArrayBundle),  intent(in)            :: srcArrayBundle
+!   type(ESMF_ArrayBundle),  intent(inout)         :: dstArrayBundle
+!   type(ESMF_RouteHandle),  intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>),intent(in)            :: factor
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
-!   integer,                  intent(out), optional :: rc
+!   logical,                 intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+!   integer,                 intent(in),  optional :: srcToDstTransposeMap(:)
+!   integer,                 intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where source and destination side do not cover the exact same index space.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1942,6 +2021,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Handle to the precomputed Route.
 !   \item [factor]
 !     Factor by which to multiply source data.
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover the identical index space, using precisely matching sequence
+!     indices. If set to {.true.}, mismatching sequence indices between source
+!     and destination side are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Arrays in the {\tt srcArrayBundle} and {\tt dstArrayBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Array pair separately. If only one element is specified, it is
+!     used for {\em all} Array pairs.
 !   \item [{[srcToDstTransposeMap]}]
 !     List with as many entries as there are dimensions in the Arrays in
 !     {\tt srcArrayBundle}. Each
@@ -1965,21 +2054,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
   subroutine ESMF_ArrayBundleRedistStoreI4(srcArrayBundle, dstArrayBundle, &
-    routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
+    routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+    srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)             :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout)          :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)          :: routehandle
-    integer(ESMF_KIND_I4),  intent(in)             :: factor
+    type(ESMF_ArrayBundle), intent(in)            :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)         :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)         :: routehandle
+    integer(ESMF_KIND_I4),  intent(in)            :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),   optional :: srcToDstTransposeMap(:)
-    integer,                intent(out),  optional :: rc
+    logical,                intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+    integer,                intent(in),  optional :: srcToDstTransposeMap(:)
+    integer,                intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_InterArray)   :: srcToDstTransposeMapArg   ! index helper
+    integer                       :: localrc      ! local return code
+    type(ESMF_Logical), pointer   :: opt_ignoreUnmatched(:)
+    type(ESMF_Logical), target    :: def_ignoreUnmatched(1)
+    integer                       :: len_ignoreUnmatched
+    type(ESMF_InterArray)         :: srcToDstTransposeMapArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1989,7 +2083,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
-    ! Deal with (optional) array arguments
+    ! Deal with ignoreUnmatchedIndicesFlag
+    def_ignoreUnmatched(1) = .false.
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      if (size(ignoreUnmatchedIndicesFlag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'ignoreUnmatchedIndicesFlag' argument must not be zero.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      allocate(opt_ignoreUnmatched(size(ignoreUnmatchedIndicesFlag)))
+      opt_ignoreUnmatched(:) = ignoreUnmatchedIndicesFlag(:)
+    else
+      opt_ignoreUnmatched => def_ignoreUnmatched
+    endif
+    len_ignoreUnmatched = size(opt_ignoreUnmatched)
+
+    ! Deal with srcToDstTransposeMap
     srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1997,7 +2107,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
-      routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, localrc)
+      routehandle, opt_ignoreUnmatched(1), len_ignoreUnmatched, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2010,6 +2121,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      deallocate(opt_ignoreUnmatched)
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2027,21 +2141,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
   subroutine ESMF_ArrayBundleRedistStoreI8(srcArrayBundle, dstArrayBundle, &
-    routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
+    routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+    srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)             :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout)          :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)          :: routehandle
-    integer(ESMF_KIND_I8),  intent(in)             :: factor
+    type(ESMF_ArrayBundle), intent(in)            :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)         :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)         :: routehandle
+    integer(ESMF_KIND_I8),  intent(in)            :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),   optional :: srcToDstTransposeMap(:)
-    integer,                intent(out),  optional :: rc
+    logical,                intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+    integer,                intent(in),  optional :: srcToDstTransposeMap(:)
+    integer,                intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer               :: localrc      ! local return code
-    type(ESMF_InterArray) :: srcToDstTransposeMapArg   ! index helper
+    integer                       :: localrc      ! local return code
+    type(ESMF_Logical), pointer   :: opt_ignoreUnmatched(:)
+    type(ESMF_Logical), target    :: def_ignoreUnmatched(1)
+    integer                       :: len_ignoreUnmatched
+    type(ESMF_InterArray)         :: srcToDstTransposeMapArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2051,7 +2170,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
-    ! Deal with (optional) array arguments
+    ! Deal with ignoreUnmatchedIndicesFlag
+    def_ignoreUnmatched(1) = .false.
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      if (size(ignoreUnmatchedIndicesFlag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'ignoreUnmatchedIndicesFlag' argument must not be zero.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      allocate(opt_ignoreUnmatched(size(ignoreUnmatchedIndicesFlag)))
+      opt_ignoreUnmatched(:) = ignoreUnmatchedIndicesFlag(:)
+    else
+      opt_ignoreUnmatched => def_ignoreUnmatched
+    endif
+    len_ignoreUnmatched = size(opt_ignoreUnmatched)
+
+    ! Deal with srcToDstTransposeMap
     srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2059,7 +2194,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
-      routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_I8, factor, localrc)
+      routehandle, opt_ignoreUnmatched(1), len_ignoreUnmatched, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_I8, factor, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2072,6 +2208,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      deallocate(opt_ignoreUnmatched)
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2089,21 +2228,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
   subroutine ESMF_ArrayBundleRedistStoreR4(srcArrayBundle, dstArrayBundle, &
-    routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
+    routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+    srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)             :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout)          :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)          :: routehandle
-    real(ESMF_KIND_R4),     intent(in)             :: factor
+    type(ESMF_ArrayBundle), intent(in)            :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)         :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)         :: routehandle
+    real(ESMF_KIND_R4),     intent(in)            :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),   optional :: srcToDstTransposeMap(:)
-    integer,                intent(out),  optional :: rc
+    logical,                intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+    integer,                intent(in),  optional :: srcToDstTransposeMap(:)
+    integer,                intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer               :: localrc      ! local return code
-    type(ESMF_InterArray) :: srcToDstTransposeMapArg   ! index helper
+    integer                       :: localrc      ! local return code
+    type(ESMF_Logical), pointer   :: opt_ignoreUnmatched(:)
+    type(ESMF_Logical), target    :: def_ignoreUnmatched(1)
+    integer                       :: len_ignoreUnmatched
+    type(ESMF_InterArray)         :: srcToDstTransposeMapArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2113,7 +2257,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
-    ! Deal with (optional) array arguments
+    ! Deal with ignoreUnmatchedIndicesFlag
+    def_ignoreUnmatched(1) = .false.
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      if (size(ignoreUnmatchedIndicesFlag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'ignoreUnmatchedIndicesFlag' argument must not be zero.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      allocate(opt_ignoreUnmatched(size(ignoreUnmatchedIndicesFlag)))
+      opt_ignoreUnmatched(:) = ignoreUnmatchedIndicesFlag(:)
+    else
+      opt_ignoreUnmatched => def_ignoreUnmatched
+    endif
+    len_ignoreUnmatched = size(opt_ignoreUnmatched)
+
+    ! Deal with srcToDstTransposeMap
     srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2121,7 +2281,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
-      routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_R4, factor, localrc)
+      routehandle, opt_ignoreUnmatched(1), len_ignoreUnmatched, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_R4, factor, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2134,6 +2295,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      deallocate(opt_ignoreUnmatched)
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2151,21 +2315,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
   subroutine ESMF_ArrayBundleRedistStoreR8(srcArrayBundle, dstArrayBundle, &
-    routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
+    routehandle, factor, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+    srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)             :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout)          :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)          :: routehandle
-    real(ESMF_KIND_R8),     intent(in)             :: factor
+    type(ESMF_ArrayBundle), intent(in)            :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)         :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)         :: routehandle
+    real(ESMF_KIND_R8),     intent(in)            :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),   optional :: srcToDstTransposeMap(:)
-    integer,                intent(out),  optional :: rc
+    logical,                intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
+    integer,                intent(in),  optional :: srcToDstTransposeMap(:)
+    integer,                intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer               :: localrc      ! local return code
-    type(ESMF_InterArray) :: srcToDstTransposeMapArg   ! index helper
+    integer                       :: localrc      ! local return code
+    type(ESMF_Logical), pointer   :: opt_ignoreUnmatched(:)
+    type(ESMF_Logical), target    :: def_ignoreUnmatched(1)
+    integer                       :: len_ignoreUnmatched
+    type(ESMF_InterArray)         :: srcToDstTransposeMapArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2175,7 +2344,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
-    ! Deal with (optional) array arguments
+    ! Deal with ignoreUnmatchedIndicesFlag
+    def_ignoreUnmatched(1) = .false.
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      if (size(ignoreUnmatchedIndicesFlag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'ignoreUnmatchedIndicesFlag' argument must not be zero.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      allocate(opt_ignoreUnmatched(size(ignoreUnmatchedIndicesFlag)))
+      opt_ignoreUnmatched(:) = ignoreUnmatchedIndicesFlag(:)
+    else
+      opt_ignoreUnmatched => def_ignoreUnmatched
+    endif
+    len_ignoreUnmatched = size(opt_ignoreUnmatched)
+
+    ! Deal with srcToDstTransposeMap
     srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2183,7 +2368,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
-      routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_R8, factor, localrc)
+      routehandle, opt_ignoreUnmatched(1), len_ignoreUnmatched, &
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_R8, factor, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2196,6 +2382,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      deallocate(opt_ignoreUnmatched)
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2213,19 +2402,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
   subroutine ESMF_ArrayBundleRedistStoreNF(srcArrayBundle, dstArrayBundle, &
-    routehandle, keywordEnforcer, srcToDstTransposeMap, rc)
+    routehandle, keywordEnforcer, ignoreUnmatchedIndicesFlag, &
+    srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)            :: srcArrayBundle
     type(ESMF_ArrayBundle), intent(inout)         :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional :: ignoreUnmatchedIndicesFlag(:)
     integer,                intent(in),  optional :: srcToDstTransposeMap(:)
     integer,                intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where source and destination side do not cover the exact same index space.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2268,6 +2464,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover the identical index space, using precisely matching sequence
+!     indices. If set to {.true.}, mismatching sequence indices between source
+!     and destination side are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Arrays in the {\tt srcArrayBundle} and {\tt dstArrayBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Array pair separately. If only one element is specified, it is
+!     used for {\em all} Array pairs.
 !   \item [{[srcToDstTransposeMap]}]
 !     List with as many entries as there are dimensions in the Arrays in
 !     {\tt srcArrayBundle}. Each
@@ -2280,18 +2486,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer               :: localrc      ! local return code
-    type(ESMF_InterArray) :: srcToDstTransposeMapArg   ! index helper
+    integer                       :: localrc      ! local return code
+    type(ESMF_Logical), pointer   :: opt_ignoreUnmatched(:)
+    type(ESMF_Logical), target    :: def_ignoreUnmatched(1)
+    integer                       :: len_ignoreUnmatched
+    type(ESMF_InterArray)         :: srcToDstTransposeMapArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
-    ! Deal with (optional) array arguments
+    ! Deal with ignoreUnmatchedIndicesFlag
+    def_ignoreUnmatched(1) = .false.
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      if (size(ignoreUnmatchedIndicesFlag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'ignoreUnmatchedIndicesFlag' argument must not be zero.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      allocate(opt_ignoreUnmatched(size(ignoreUnmatchedIndicesFlag)))
+      opt_ignoreUnmatched(:) = ignoreUnmatchedIndicesFlag(:)
+    else
+      opt_ignoreUnmatched => def_ignoreUnmatched
+    endif
+    len_ignoreUnmatched = size(opt_ignoreUnmatched)
+
+    ! Deal with srcToDstTransposeMap
     srcToDstTransposeMapArg = ESMF_InterArrayCreate(srcToDstTransposeMap, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2299,7 +2524,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedistStoreNF(srcArrayBundle, dstArrayBundle, &
-      routehandle, srcToDstTransposeMapArg, localrc)
+      routehandle, opt_ignoreUnmatched(1), len_ignoreUnmatched, &
+      srcToDstTransposeMapArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2312,6 +2538,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(srcToDstTransposeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      deallocate(opt_ignoreUnmatched)
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2531,17 +2760,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleSMM(srcArrayBundle, dstArrayBundle, &
-    routehandle, keywordEnforcer, zeroregion, termorderflag, checkflag, rc)
+    routehandle, keywordEnforcer, &
+    zeroregion, & ! DEPRECATED ARGUMENT
+    zeroregionflag, termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),    intent(in),    optional :: srcArrayBundle
-    type(ESMF_ArrayBundle),    intent(inout), optional :: dstArrayBundle
-    type(ESMF_RouteHandle),    intent(inout)           :: routehandle
+    type(ESMF_ArrayBundle),    intent(in),         optional :: srcArrayBundle
+    type(ESMF_ArrayBundle),    intent(inout),      optional :: dstArrayBundle
+    type(ESMF_RouteHandle),    intent(inout)                :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
-    type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag(:)
-    logical,                   intent(in),    optional :: checkflag
-    integer,                   intent(out),   optional :: rc
+    type(ESMF_Region_Flag),    intent(in), optional :: zeroregion ! DEPRECATED ARGUMENT
+    type(ESMF_Region_Flag),    intent(in), target, optional :: zeroregionflag(:)
+    type(ESMF_TermOrder_Flag), intent(in), target, optional :: termorderflag(:)
+    logical,                   intent(in),         optional :: checkflag
+    integer,                   intent(out),        optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -2551,6 +2783,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[7.0.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
+! \item[8.1.0] Added argument {\tt zeroregionflag}, and deprecated
+!              {\tt zeroregion}. The new argument allows greater flexibility
+!              in setting the zero region for individual ArrayBundle members.
 ! \end{description}
 ! \end{itemize}
 !
@@ -2574,7 +2809,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_ArrayBundle} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[zeroregion]}]
+!   \item [{[zeroregion]}] 
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of 
 !     all DEs in all Arrays in {\tt dstArrayBundle} will be initialized to zero 
 !     before updating the elements with the results of the sparse matrix 
@@ -2585,6 +2820,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     zero out those elements in the destination Arrays that will be updated
 !     by the sparse matrix multiplication. See section \ref{const:region}
 !     for a complete list of valid settings.
+!   \item [{[zeroregionflag]}] 
+!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of 
+!     all DEs in the destination Array will be initialized to zero 
+!     before updating the elements with the results of the sparse matrix 
+!     multiplication. If set to {\tt ESMF\_REGION\_EMPTY} the elements in the
+!     destination Array will not be modified prior to the sparse
+!     matrix multiplication and results will be added to the incoming element
+!     values. A setting of {\tt ESMF\_REGION\_SELECT} will only
+!     zero out those elements in the destination Array that will be updated
+!     by the sparse matrix multiplication. See section \ref{const:region}
+!     for a complete list of valid settings.
+!     The size of this array argument must either be 1 or equal the number of
+!     Arrays in the {\tt srcArrayBundle} and {\tt dstArrayBundle} arguments. In
+!     the latter case, the zero region for each Array SMM operation is
+!     indicated separately. If only one zero region element is specified, it is
+!     used for {\em all} Array pairs.
 !   \item [{[termorderflag]}]
 !     Specifies the order of the source side terms in all of the destination
 !     sums. The {\tt termorderflag} only affects the order of terms during 
@@ -2614,9 +2865,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                   :: localrc      ! local return code
     type(ESMF_ArrayBundle)    :: opt_srcArrayBundle ! helper variable
     type(ESMF_ArrayBundle)    :: opt_dstArrayBundle ! helper variable
-    type(ESMF_Region_Flag)    :: opt_zeroregion     ! helper variable
+    type(ESMF_Region_Flag), pointer    :: opt_zeroregion(:) ! helper variable
+    type(ESMF_Region_Flag), target     :: def_zeroregion(1) ! helper variable
+    type(ESMF_TermOrder_Flag), pointer :: opt_termorder(:)  ! helper variable
+    type(ESMF_TermOrder_Flag), target  :: def_termorder(1)  ! helper variable
     type(ESMF_Logical)        :: opt_checkflag      ! helper variable
-    integer                   :: len                ! helper variable
+    integer                   :: zeroRegionFlag_len ! helper variable
+    integer                   :: termOrderFlag_len  ! helper variable
     
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2640,29 +2895,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    
-    ! Set default flags
-    opt_zeroregion = ESMF_REGION_TOTAL
-    if (present(zeroregion)) opt_zeroregion = zeroregion
+
+    ! Deal with optional arguments and defaults
+    ! - zeroregionflag
+    def_zeroregion = ESMF_REGION_TOTAL
+    if (present(zeroregionflag)) then
+      if (size(zeroregionflag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'zeroregionflag' argument must not be zero.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      opt_zeroregion => zeroregionflag
+    else
+      opt_zeroregion => def_zeroregion
+    endif
+    zeroRegionFlag_len = size(opt_zeroregion)
+    ! - termorderflag
+    def_termorder = ESMF_TERMORDER_FREE
+    if (present(termorderflag)) then
+      if (size(termorderflag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'termorderflag' argument must not be zero.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      opt_termorder => termorderflag
+    else
+      opt_termorder => def_termorder
+    endif
+    termOrderFlag_len = size(opt_termorder)
+    ! - checkflag
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
     
-    if (present(termorderflag)) then
-      len = size(termorderflag)
-      ! Call into the C++ interface, which will sort out optional arguments
-      call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
-        routehandle, opt_zeroregion, termorderflag, len, opt_checkflag, &
-        localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      len = 0
-      ! Call into the C++ interface, which will sort out optional arguments
-      call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
-        routehandle, opt_zeroregion, len, len, opt_checkflag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    !TODO: remove this block once 'zeroregion' has been removed from API
+    ! Handle deprecated 'zeroregion' argument while still supported
+    if (present(zeroregion)) then
+      if (present(zeroregionflag)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+          msg="The 'zeroregion' and 'zeroregionflag' arguments must not both"//&
+          " be specified.", ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      def_zeroregion = zeroregion
     endif
+    
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
+      routehandle, opt_zeroregion(1), zeroRegionFlag_len, opt_termorder(1), &
+      termOrderFlag_len, opt_checkflag, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2758,7 +3042,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! ! Private name; call using ESMF_ArrayBundleSMMStore()
 ! subroutine ESMF_ArrayBundleSMMStore<type><kind>(srcArrayBundle, &
 !   dstArrayBundle, routehandle, factorList, factorIndexList, keywordEnforcer, &
-!   srcTermProcessing, rc)
+!   ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
 !   type(ESMF_ArrayBundle),           intent(in)    :: srcArrayBundle
@@ -2767,6 +3051,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   <type>(ESMF_KIND_<kind>), target, intent(in)    :: factorList(:)
 !   integer,                          intent(in)    :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   logical,                intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
 !   integer,                intent(inout), optional :: srcTermProcessing(:)
 !   integer,                intent(out),   optional :: rc
 !
@@ -2779,6 +3064,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise 
 !              reproducibility.
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where the sparse matrix includes terms with source or destination sequence
+!    indices not present in the source or destination array.
 ! \end{description}
 ! \end{itemize}
 !
@@ -2861,6 +3149,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     Array {\em sequence indices} and {\em tensor sequence indices}.
+!
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover all of the squence indices defined in the sparse matrix. An error
+!     will be returned if a sequence index in the sparse matrix does not match
+!     on either the source or destination side.
+!     If set to {.true.}, mismatching sequence indices are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Arrays in the {\tt srcArrayBundle} and {\tt dstArrayBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Array pair separately. If only one element is specified, it is
+!     used for {\em all} Array pairs.
+!
 !   \item [{[srcTermProcessing]}]
 !       Source term summing options for route handle creation. See
 !       {\tt ESMF\_ArraySMMStore} documentation for a full parameter description.
@@ -2887,17 +3188,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreI4(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, keywordEnforcer, &
-    srcTermProcessing, rc)
+    ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),        intent(in)            :: srcArrayBundle
-    type(ESMF_ArrayBundle),        intent(inout)         :: dstArrayBundle
-    type(ESMF_RouteHandle),        intent(inout)         :: routehandle
-    integer(ESMF_KIND_I4), target, intent(in)            :: factorList(:)
-    integer,                       intent(in)            :: factorIndexList(:,:)
+    type(ESMF_ArrayBundle),        intent(in)           :: srcArrayBundle
+    type(ESMF_ArrayBundle),        intent(inout)        :: dstArrayBundle
+    type(ESMF_RouteHandle),        intent(inout)        :: routehandle
+    integer(ESMF_KIND_I4), target, intent(in)           :: factorList(:)
+    integer,                       intent(in)           :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(inout),  optional :: srcTermProcessing(:)
-    integer,                    intent(out),    optional :: rc
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+    integer,                    intent(inout), optional :: srcTermProcessing(:)
+    integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -2905,6 +3207,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), pointer  :: opt_factorList(:)    ! helper variable
     integer                         :: len_factorList       ! helper variable
     type(ESMF_InterArray)           :: factorIndexListArg   ! helper variable
+    type(ESMF_Logical), pointer     :: opt_ignoreUnmatched(:)
+    type(ESMF_Logical), target      :: def_ignoreUnmatched(1)
+    integer                         :: len_ignoreUnmatched
     type(ESMF_InterArray)           :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -2923,6 +3228,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Deal with ignoreUnmatchedIndicesFlag
+    def_ignoreUnmatched(1) = .false.
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      if (size(ignoreUnmatchedIndicesFlag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'ignoreUnmatchedIndicesFlag' argument must not be zero.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      allocate(opt_ignoreUnmatched(size(ignoreUnmatchedIndicesFlag)))
+      opt_ignoreUnmatched(:) = ignoreUnmatchedIndicesFlag(:)
+    else
+      opt_ignoreUnmatched => def_ignoreUnmatched
+    endif
+    len_ignoreUnmatched = size(opt_ignoreUnmatched)
+
     ! Wrap srcTermProcessing argument
     srcTermProcessingArg = &
       ESMF_InterArrayCreate(srcTermProcessing, rc=localrc)
@@ -2932,7 +3253,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_I4, opt_factorList, len_factorList, &
-      factorIndexListArg, srcTermProcessingArg, localrc)
+      factorIndexListArg, opt_ignoreUnmatched(1), len_ignoreUnmatched, &
+      srcTermProcessingArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2940,6 +3262,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      deallocate(opt_ignoreUnmatched)
+    endif
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
@@ -2963,17 +3288,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreI8(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, keywordEnforcer, &
-    srcTermProcessing, rc)
+    ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),        intent(in)            :: srcArrayBundle
-    type(ESMF_ArrayBundle),        intent(inout)         :: dstArrayBundle
-    type(ESMF_RouteHandle),        intent(inout)         :: routehandle
-    integer(ESMF_KIND_I8), target, intent(in)            :: factorList(:)
-    integer,                       intent(in)            :: factorIndexList(:,:)
+    type(ESMF_ArrayBundle),        intent(in)           :: srcArrayBundle
+    type(ESMF_ArrayBundle),        intent(inout)        :: dstArrayBundle
+    type(ESMF_RouteHandle),        intent(inout)        :: routehandle
+    integer(ESMF_KIND_I8), target, intent(in)           :: factorList(:)
+    integer,                       intent(in)           :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                     intent(inout), optional :: srcTermProcessing(:)
-    integer,                     intent(out),   optional :: rc
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+    integer,                    intent(inout), optional :: srcTermProcessing(:)
+    integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -2981,6 +3307,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I8), pointer  :: opt_factorList(:)    ! helper variable
     integer                         :: len_factorList       ! helper variable
     type(ESMF_InterArray)           :: factorIndexListArg   ! helper variable
+    type(ESMF_Logical), pointer     :: opt_ignoreUnmatched(:)
+    type(ESMF_Logical), target      :: def_ignoreUnmatched(1)
+    integer                         :: len_ignoreUnmatched
     type(ESMF_InterArray)           :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -2999,6 +3328,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Deal with ignoreUnmatchedIndicesFlag
+    def_ignoreUnmatched(1) = .false.
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      if (size(ignoreUnmatchedIndicesFlag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'ignoreUnmatchedIndicesFlag' argument must not be zero.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      allocate(opt_ignoreUnmatched(size(ignoreUnmatchedIndicesFlag)))
+      opt_ignoreUnmatched(:) = ignoreUnmatchedIndicesFlag(:)
+    else
+      opt_ignoreUnmatched => def_ignoreUnmatched
+    endif
+    len_ignoreUnmatched = size(opt_ignoreUnmatched)
+
     ! Wrap srcTermProcessing argument
     srcTermProcessingArg = &
       ESMF_InterArrayCreate(srcTermProcessing, rc=localrc)
@@ -3008,7 +3353,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_I8, opt_factorList, len_factorList, &
-      factorIndexListArg, srcTermProcessingArg, localrc)
+      factorIndexListArg, opt_ignoreUnmatched(1), len_ignoreUnmatched, &
+      srcTermProcessingArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -3016,6 +3362,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      deallocate(opt_ignoreUnmatched)
+    endif
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
@@ -3039,25 +3388,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreR4(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, keywordEnforcer, &
-    srcTermProcessing, rc)
+    ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)            :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)         :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
-    real(ESMF_KIND_R4), target, intent(in)            :: factorList(:)
-    integer,                    intent(in)            :: factorIndexList(:,:)
+    type(ESMF_ArrayBundle),     intent(in)             :: srcArrayBundle
+    type(ESMF_ArrayBundle),     intent(inout)          :: dstArrayBundle
+    type(ESMF_RouteHandle),     intent(inout)          :: routehandle
+    real(ESMF_KIND_R4), target, intent(in)             :: factorList(:)
+    integer,                    intent(in)             :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                 intent(inout), optional  :: srcTermProcessing(:)
-    integer,                 intent(out),   optional  :: rc
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+    integer,                    intent(inout), optional :: srcTermProcessing(:)
+    integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                       :: localrc              ! local return code
-    real(ESMF_KIND_R4), pointer   :: opt_factorList(:)    ! helper variable
-    integer                       :: len_factorList       ! helper variable
-    type(ESMF_InterArray)         :: factorIndexListArg   ! helper variable
-    type(ESMF_InterArray)         :: srcTermProcessingArg ! helper variable
+    integer                         :: localrc              ! local return code
+    real(ESMF_KIND_R4), pointer     :: opt_factorList(:)    ! helper variable
+    integer                         :: len_factorList       ! helper variable
+    type(ESMF_InterArray)           :: factorIndexListArg   ! helper variable
+    type(ESMF_Logical), pointer     :: opt_ignoreUnmatched(:)
+    type(ESMF_Logical), target      :: def_ignoreUnmatched(1)
+    integer                         :: len_ignoreUnmatched
+    type(ESMF_InterArray)           :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3075,6 +3428,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Deal with ignoreUnmatchedIndicesFlag
+    def_ignoreUnmatched(1) = .false.
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      if (size(ignoreUnmatchedIndicesFlag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'ignoreUnmatchedIndicesFlag' argument must not be zero.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      allocate(opt_ignoreUnmatched(size(ignoreUnmatchedIndicesFlag)))
+      opt_ignoreUnmatched(:) = ignoreUnmatchedIndicesFlag(:)
+    else
+      opt_ignoreUnmatched => def_ignoreUnmatched
+    endif
+    len_ignoreUnmatched = size(opt_ignoreUnmatched)
+
     ! Wrap srcTermProcessing argument
     srcTermProcessingArg = &
       ESMF_InterArrayCreate(srcTermProcessing, rc=localrc)
@@ -3084,7 +3453,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_R4, opt_factorList, len_factorList, &
-      factorIndexListArg, srcTermProcessingArg, localrc)
+      factorIndexListArg, opt_ignoreUnmatched(1), len_ignoreUnmatched, &
+      srcTermProcessingArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -3092,6 +3462,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      deallocate(opt_ignoreUnmatched)
+    endif
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
@@ -3115,25 +3488,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreR8(srcArrayBundle, dstArrayBundle, &
     routehandle, factorList, factorIndexList, keywordEnforcer, &
-    srcTermProcessing, rc)
+    ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)            :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)         :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
-    real(ESMF_KIND_R8), target, intent(in)            :: factorList(:)
-    integer,                    intent(in)            :: factorIndexList(:,:)
+    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
+    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
+    integer,                    intent(in)              :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                 intent(inout), optional  :: srcTermProcessing(:)
-    integer,                 intent(out),   optional  :: rc
+    logical,                    intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
+    integer,                    intent(inout), optional :: srcTermProcessing(:)
+    integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                       :: localrc              ! local return code
-    real(ESMF_KIND_R8), pointer   :: opt_factorList(:)    ! helper variable
-    integer                       :: len_factorList       ! helper variable
-    type(ESMF_InterArray)         :: factorIndexListArg   ! helper variable
-    type(ESMF_InterArray)         :: srcTermProcessingArg ! helper variable
+    integer                         :: localrc              ! local return code
+    real(ESMF_KIND_R8), pointer     :: opt_factorList(:)    ! helper variable
+    integer                         :: len_factorList       ! helper variable
+    type(ESMF_InterArray)           :: factorIndexListArg   ! helper variable
+    type(ESMF_Logical), pointer     :: opt_ignoreUnmatched(:)
+    type(ESMF_Logical), target      :: def_ignoreUnmatched(1)
+    integer                         :: len_ignoreUnmatched
+    type(ESMF_InterArray)           :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3151,6 +3528,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Deal with ignoreUnmatchedIndicesFlag
+    def_ignoreUnmatched(1) = .false.
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      if (size(ignoreUnmatchedIndicesFlag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'ignoreUnmatchedIndicesFlag' argument must not be zero.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      allocate(opt_ignoreUnmatched(size(ignoreUnmatchedIndicesFlag)))
+      opt_ignoreUnmatched(:) = ignoreUnmatchedIndicesFlag(:)
+    else
+      opt_ignoreUnmatched => def_ignoreUnmatched
+    endif
+    len_ignoreUnmatched = size(opt_ignoreUnmatched)
+
     ! Wrap srcTermProcessing argument
     srcTermProcessingArg = &
       ESMF_InterArrayCreate(srcTermProcessing, rc=localrc)
@@ -3160,7 +3553,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_R8, opt_factorList, len_factorList, &
-      factorIndexListArg, srcTermProcessingArg, localrc)
+      factorIndexListArg, opt_ignoreUnmatched(1), len_ignoreUnmatched, &
+      srcTermProcessingArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -3168,6 +3562,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterArrayDestroy(factorIndexListArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      deallocate(opt_ignoreUnmatched)
+    endif
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
@@ -3190,13 +3587,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreNF(srcArrayBundle, dstArrayBundle, &
-    routehandle, keywordEnforcer, srcTermProcessing, rc)
+    routehandle, keywordEnforcer, ignoreUnmatchedIndicesFlag, srcTermProcessing, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),  intent(in)              :: srcArrayBundle
     type(ESMF_ArrayBundle),  intent(inout)           :: dstArrayBundle
     type(ESMF_RouteHandle),  intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                 intent(in),    optional :: ignoreUnmatchedIndicesFlag(:)
     integer,                 intent(inout), optional :: srcTermProcessing(:)
     integer,                 intent(out),   optional :: rc
 !
@@ -3209,6 +3607,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise 
 !              reproducibility.
+! \item[8.1.0] Added argument {\tt ignoreUnmatchedIndicesFlag} to support cases
+!    where the sparse matrix includes terms with source or destination sequence
+!    indices not present in the source or destination array.
 ! \end{description}
 ! \end{itemize}
 !
@@ -3254,6 +3655,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
+!
+!   \item [{[ignoreUnmatchedIndicesFlag]}] 
+!     If set to {.false.}, the {\em default}, source and destination side must
+!     cover all of the squence indices defined in the sparse matrix. An error
+!     will be returned if a sequence index in the sparse matrix does not match
+!     on either the source or destination side.
+!     If set to {.true.}, mismatching sequence indices are silently ignored.
+!     The size of this array argument must either be 1 or equal the number of
+!     Arrays in the {\tt srcArrayBundle} and {\tt dstArrayBundle} arguments. In
+!     the latter case, the handling of unmatched indices is specified for each
+!     Array pair separately. If only one element is specified, it is
+!     used for {\em all} Array pairs.
+!
 !   \item [{[srcTermProcessing]}]
 !       Source term summing options for route handle creation. See
 !       {\tt ESMF\_ArraySMMStore} documentation for a full parameter description.
@@ -3268,8 +3682,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer               :: localrc              ! local return code
-    type(ESMF_InterArray) :: srcTermProcessingArg ! helper variable
+    integer                         :: localrc              ! local return code
+    type(ESMF_Logical), pointer     :: opt_ignoreUnmatched(:)
+    type(ESMF_Logical), target      :: def_ignoreUnmatched(1)
+    integer                         :: len_ignoreUnmatched
+    type(ESMF_InterArray)           :: srcTermProcessingArg ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3279,6 +3696,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, srcArrayBundle, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, dstArrayBundle, rc)
     
+    ! Deal with ignoreUnmatchedIndicesFlag
+    def_ignoreUnmatched(1) = .false.
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      if (size(ignoreUnmatchedIndicesFlag)==0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+          msg="Size of 'ignoreUnmatchedIndicesFlag' argument must not be zero.",&
+          ESMF_CONTEXT, rcToReturn=rc)
+        return ! bail out
+      endif
+      allocate(opt_ignoreUnmatched(size(ignoreUnmatchedIndicesFlag)))
+      opt_ignoreUnmatched(:) = ignoreUnmatchedIndicesFlag(:)
+    else
+      opt_ignoreUnmatched => def_ignoreUnmatched
+    endif
+    len_ignoreUnmatched = size(opt_ignoreUnmatched)
+
     ! Wrap srcTermProcessing argument
     srcTermProcessingArg = &
       ESMF_InterArrayCreate(srcTermProcessing, rc=localrc)
@@ -3287,10 +3720,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStoreNF(srcArrayBundle, dstArrayBundle, &
-      routehandle, srcTermProcessingArg, localrc)
+      routehandle, opt_ignoreUnmatched(1), len_ignoreUnmatched, &
+      srcTermProcessingArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Garbage collection
+    if (present(ignoreUnmatchedIndicesFlag)) then
+      deallocate(opt_ignoreUnmatched)
+    endif
+
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

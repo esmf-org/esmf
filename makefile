@@ -97,6 +97,7 @@ endif
 ifeq ($(pathtype),abs)
 	-@echo "--------------------------------------------------------------"
 	-@echo "NetCDF library version: `$(ESMF_NETCDF) --version`"
+	-@echo "NetCDF Fortran version: `$(ESMF_NFCONFIG) --version`"
 endif
 ifeq ($(ESMF_NETCDF),nc-config)
 	-@echo "--------------------------------------------------------------"
@@ -209,6 +210,18 @@ endif
 	  if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
 	    echo "ESMF_NETCDF_LIBPATH:     $(ESMF_NETCDF_LIBPATH)" ; \
           fi; \
+	  if [ -n "$(ESMF_NFCONFIG)" ] ; then \
+	    echo "ESMF_NFCONFIG:           $(ESMF_NFCONFIG)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_INCLUDE)" ] ; then \
+	    echo "ESMF_NETCDFF_INCLUDE:    $(ESMF_NETCDFF_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBS)" ] ; then \
+	    echo "ESMF_NETCDFF_LIBS:       $(ESMF_NETCDFF_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBPATH)" ] ; then \
+	    echo "ESMF_NETCDFF_LIBPATH:    $(ESMF_NETCDFF_LIBPATH)" ; \
+          fi; \
          fi
 	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
 	  echo "ESMF_PNETCDF:            $(ESMF_PNETCDF)" ; \
@@ -220,6 +233,18 @@ endif
           fi; \
 	  if [ -n "$(ESMF_PNETCDF_LIBPATH)" ] ; then \
 	    echo "ESMF_PNETCDF_LIBPATH:    $(ESMF_PNETCDF_LIBPATH)" ; \
+          fi; \
+         fi
+	-@if [ -n "$(ESMF_PIO)" ] ; then \
+	  echo "ESMF_PIO:                $(ESMF_PIO)" ; \
+	  if [ -n "$(ESMF_PIO_INCLUDE)" ] ; then \
+	    echo "ESMF_PIO_INCLUDE:        $(ESMF_PIO_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_PIO_LIBS)" ] ; then \
+	    echo "ESMF_PIO_LIBS:           $(ESMF_PIO_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_PIO_LIBPATH)" ] ; then \
+	    echo "ESMF_PIO_LIBPATH:        $(ESMF_PIO_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \
@@ -244,18 +269,6 @@ endif
           fi; \
 	  if [ -n "$(ESMF_YAMLCPP_LIBPATH)" ] ; then \
 	    echo "ESMF_YAMLCPP_LIBPATH:    $(ESMF_YAMLCPP_LIBPATH)" ; \
-          fi; \
-         fi
-	-@if [ -n "$(ESMF_PIO)" ] ; then \
-	  echo "ESMF_PIO:                $(ESMF_PIO)" ; \
-	  if [ -n "$(ESMF_PIO_INCLUDE)" ] ; then \
-	    echo "ESMF_PIO_INCLUDE:        $(ESMF_PIO_INCLUDE)" ; \
-          fi; \
-	  if [ -n "$(ESMF_PIO_LIBS)" ] ; then \
-	    echo "ESMF_PIO_LIBS:           $(ESMF_PIO_LIBS)" ; \
-          fi; \
-	  if [ -n "$(ESMF_PIO_LIBPATH)" ] ; then \
-	    echo "ESMF_PIO_LIBPATH:        $(ESMF_PIO_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_PROJ4)" ] ; then \
@@ -546,6 +559,18 @@ endif
 	  if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
 	    echo "# ESMF_NETCDF_LIBPATH:    $(ESMF_NETCDF_LIBPATH)" >> $(MKINFO) ; \
           fi; \
+	  if [ -n "$(ESMF_NFCONFIG)" ] ; then \
+	    echo "# ESMF_NFCONFIG:          $(ESMF_NFCONFIG)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_INCLUDE)" ] ; then \
+	    echo "# ESMF_NETCDFF_INCLUDE:   $(ESMF_NETCDFF_INCLUDE)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBS)" ] ; then \
+	    echo "# ESMF_NETCDFF_LIBS:      $(ESMF_NETCDFF_LIBS)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_NETCDFF_LIBPATH)" ] ; then \
+	    echo "# ESMF_NETCDFF_LIBPATH:   $(ESMF_NETCDFF_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
          fi
 	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
 	  echo "# ESMF_PNETCDF:           $(ESMF_PNETCDF)" >> $(MKINFO) ; \
@@ -557,6 +582,18 @@ endif
           fi; \
 	  if [ -n "$(ESMF_PNETCDF_LIBPATH)" ] ; then \
 	    echo "# ESMF_PNETCDF_LIBPATH:   $(ESMF_PNETCDF_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
+         fi
+	-@if [ -n "$(ESMF_PIO)" ] ; then \
+	  echo "# ESMF_PIO:               $(ESMF_PIO)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_PIO_INCLUDE)" ] ; then \
+	    echo "# ESMF_PIO_INCLUDE:       $(ESMF_PIO_INCLUDE)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_PIO_LIBS)" ] ; then \
+	    echo "# ESMF_PIO_LIBS:          $(ESMF_PIO_LIBS)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_PIO_LIBPATH)" ] ; then \
+	    echo "# ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" >> $(MKINFO) ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \
@@ -583,18 +620,6 @@ endif
 	    echo "# ESMF_YAMLCPP_LIBPATH:   $(ESMF_YAMLCPP_LIBPATH)" >> $(MKINFO) ; \
           fi; \
          fi
-	-@if [ -n "$(ESMF_PIO)" ] ; then \
-	  echo "# ESMF_PIO:               $(ESMF_PIO)" >> $(MKINFO) ; \
-	  if [ -n "$(ESMF_PIO_INCLUDE)" ] ; then \
-	    echo "# ESMF_PIO_INCLUDE:       $(ESMF_PIO_INCLUDE)" >> $(MKINFO) ; \
-          fi; \
-	  if [ -n "$(ESMF_PIO_LIBS)" ] ; then \
-	    echo "# ESMF_PIO_LIBS:          $(ESMF_PIO_LIBS)" >> $(MKINFO) ; \
-          fi; \
-	  if [ -n "$(ESMF_PIO_LIBPATH)" ] ; then \
-	    echo "# ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" >> $(MKINFO) ; \
-          fi; \
-         fi
 	-@if [ -n "$(ESMF_PROJ4)" ] ; then \
 	  echo "# ESMF_PROJ4:               $(ESMF_PROJ4)" >> $(MKINFO) ; \
 	  if [ -n "$(ESMF_PROJ4_INCLUDE)" ] ; then \
@@ -619,7 +644,7 @@ install_apps:
 
 # Ranlib on the libraries
 ranlib:
-	$(ESMF_RANLIB) $(wildcard $(ESMF_LIBDIR)/lib*.$(ESMF_LIB_SUFFIX))
+	$(ESMF_RANLIB) $(wildcard $(ESMF_LIBDIR)/libesmf*.$(ESMF_LIB_SUFFIX))
 
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
@@ -650,17 +675,18 @@ install:
 	mkdir -p $(ESMF_INSTALL_MODDIR_ABSPATH)
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
-	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	cp -f $(ESMF_LIBDIR)/libesmf*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	@for lib in $(wildcard $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf*.dylib) foo ; do \
+	  if [ $$lib != "foo" ]; then \
+	    install_name_tool -id "$$lib" $$lib ; \
+	  fi ; \
+	done
 ifeq ($(ESMF_TRACE_LIB_BUILD),ON)
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 	$(MAKE) ESMF_PRELOADDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) build_preload_script
 endif
 endif
-ifneq ($(ESMF_OS),Cygwin)
-	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/lib*.$(ESMF_LIB_SUFFIX)
-else
-	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf.$(ESMF_LIB_SUFFIX)
-endif
+	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf*.$(ESMF_LIB_SUFFIX)
 	$(MAKE) install_apps
 	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)
 	@if [ -d $(ESMF_DOCDIR) ]; then \

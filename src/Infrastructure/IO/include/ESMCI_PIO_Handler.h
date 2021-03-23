@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -112,8 +112,8 @@ namespace ESMCI {
     void arrayWrite(Array *arr_p, const char * const name,
                     const std::vector<std::string> &dimLabels,
                     int *timeslice = NULL,
-                    const Attribute *varAttPack = NULL,
-                    const Attribute *gblAttPack = NULL,
+                    const ESMCI::Info *varAttPack = NULL,
+                    const ESMCI::Info *gblAttPack = NULL,
                     int *rc = NULL);
 
     // get() and set()
@@ -146,7 +146,7 @@ namespace ESMCI {
                             int *narrDims = (int *)NULL,
                             int *basepiotype = (int *)NULL,
                             int *rc = (int *)NULL);
-    void attPackPut (pio_var_desc_t vardesc, const Attribute *attPack, int *rc);
+    void attPackPut (pio_var_desc_t vardesc, const ESMCI::Info *attPack, int *rc);
     // Error recording routine
     static bool CheckPIOError(int pioRetCode,
                               int line, const char * const file,

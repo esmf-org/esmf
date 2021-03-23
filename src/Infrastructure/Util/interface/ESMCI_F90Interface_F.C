@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -84,6 +84,31 @@ extern "C" {
     ESMC_I8 *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interarraycreate3di8()"
+    array->set(farray, 3, len);
+    *rc = ESMF_SUCCESS;
+  }
+
+
+  void FTN_X(c_esmc_interarraycreate1dr8)(ESMCI::InterArray<ESMC_R8> *array, 
+    ESMC_R8 *farray, int *len, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_interarraycreate1dr8()"
+    array->set(farray, 1, len);
+    *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_interarraycreate2dr8)(ESMCI::InterArray<ESMC_R8> *array, 
+    ESMC_R8 *farray, int *len, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_interarraycreate2dr8()"
+    array->set(farray, 2, len);
+    *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_interarraycreate3dr8)(ESMCI::InterArray<ESMC_R8> *array, 
+    ESMC_R8 *farray, int *len, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_interarraycreate3dr8()"
     array->set(farray, 3, len);
     *rc = ESMF_SUCCESS;
   }

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -37,6 +37,8 @@
       integer:: init_sec, end_sec, delay_time
       integer, allocatable:: array1(:), array3(:),array3_soln(:)
       integer, allocatable:: array4(:), array5(:)
+      integer, allocatable:: ssiMap(:)
+      character(800)  :: ssiMapString
       integer, dimension (:, :), allocatable:: array2
       integer::  func_results, myresults
       integer:: nsize, i, j
@@ -75,8 +77,19 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Test_VM Get Test"
       call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, &
-        rc=rc)
+        ssiMap=ssiMap, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      write(ssiMapString,*) "ssiMap=", ssiMap
+      call ESMF_LogWrite(ssiMapString, ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return correct bounds"
+      write(name, *) "Test bounds of ssiMap"
+      call ESMF_Test(((lbound(ssiMap,1)==0).and.(ubound(ssiMap,1)==test_npets-1)),&
+        name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -154,7 +167,6 @@
       if (delay_time.lt.0) delay_time=delay_time + 60
       print *, "delay_time =", delay_time
       call ESMF_Test((delay_time.eq.5.or.delay_time.eq.6), name, failMsg, result, ESMF_SRCLINE)
-
       
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1089,12 +1101,10 @@
       integer   :: id_value
       character :: key_value
 
-      type(ESMF_Grid)     :: grid, grid_temp
-      type(ESMF_Pointer)  :: grid_tempp
+      type(ESMF_Grid)     :: grid
       type(ESMF_Base)     :: base
       integer             :: id_temp, ssiCount, ssiMinPetCount, ssiMaxPetCount
       type(ESMF_VMId)     :: vmid_temp
-      type(ESMF_Logical)  :: object_found
       type(ESMF_Log)      :: log
       character(len=80)   :: msg
 
@@ -1203,7 +1213,7 @@
       allocate(f4array2(nsize,npets))
       do j=1, npets 
         do i=1, nsize
-           array2(i,j) = (j-1) * 100 + i
+          array2(i,j) = (j-1) * 100 + i
           farray2(i,j)  = real( array2(i,j) , ESMF_KIND_R8)
           f4array2(i,j) = real(farray2(i,j))
         enddo
@@ -1410,43 +1420,6 @@
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_VMIdPrint (vmid_temp, rc=rc)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test obtaining a pointer to an object, given its id and vmid.
-      ! WARNING: This is testing an INTERNAL method.  It is NOT
-      ! part of the supported ESMF user API!
-      write(name, *) "Obtain pointer to object via id/vmid lookup"
-      write(failMsg, *) 'Can not access object'
-      call c_esmc_vmgetobject (grid_temp,  &
-          id_temp, vmid_temp, "Grid", ESMF_PROXYNO,  &
-          object_found, rc)
-      grid_temp%isInit = ESMF_INIT_CREATED
-      call ESMF_Test((rc == ESMF_SUCCESS), &
-          name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test for object found.
-      ! WARNING: This is testing an INTERNAL method.  It is NOT
-      ! part of the supported ESMF user API!
-      write(name, *) "Test for object found"
-      write(failMsg, *) 'Did not find object'
-      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, object_found == ESMF_TRUE)
-      call ESMF_Test((rc == ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Print aliased Grid object.
-      ! WARNING: This is testing an INTERNAL method.  It is NOT
-      ! part of the supported ESMF user API!
-      write(name, *) "Print aliased Grid object"
-      write(failMsg, *) 'Could not print object'
-      print *, 'calling ESMF_GridPrint(grid_temp):'
-      call ESMF_GridPrint (grid_temp, rc=rc)
-      call ESMF_Test((rc == ESMF_SUCCESS), &
-          name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest

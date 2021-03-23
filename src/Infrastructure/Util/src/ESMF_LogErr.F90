@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -69,29 +69,32 @@ type ESMF_LogMsg_Flag
     integer      :: mtype
 end type
 
-!     ! Msg Types
+!     ! Msg Types -  keep in sync with ESMC_LogMsgType_Flag
 type(ESMF_LogMsg_Flag), parameter           :: &
     ESMF_LOGMSG_INFO  =   ESMF_LogMsg_Flag(1), &
     ESMF_LOGMSG_WARNING = ESMF_LogMsg_Flag(2), &
     ESMF_LOGMSG_ERROR =   ESMF_LogMsg_Flag(3), &
     ESMF_LOGMSG_TRACE =   ESMF_LogMsg_Flag(4), &
-    ESMF_LOGMSG_JSON  =   ESMF_LogMsg_Flag(5)
+    ESMF_LOGMSG_DEBUG =   ESMF_LogMsg_Flag(5), &
+    ESMF_LOGMSG_JSON  =   ESMF_LogMsg_Flag(6)
 
 character(8), parameter ::  &
-    ESMF_LogMsgString(5) = (/ &
+    ESMF_LogMsgString(6) = (/ &
       'INFO    ', &
       'WARNING ', &
       'ERROR   ', &
       'TRACE   ', &
+      'DEBUG   ', &
       'JSON    '  &
     /)
 
 type(ESMF_LogMsg_Flag), parameter :: &
-    ESMF_LOGMSG_ALL(5) = (/ &
+    ESMF_LOGMSG_ALL(6) = (/ &
       ESMF_LOGMSG_INFO,     &
       ESMF_LOGMSG_WARNING,  &
       ESMF_LOGMSG_ERROR,    &
       ESMF_LOGMSG_TRACE,    &
+      ESMF_LOGMSG_DEBUG,    &
       ESMF_LOGMSG_JSON      &
     /)
 
@@ -105,10 +108,11 @@ type(ESMF_LogMsg_Flag) :: &
 #endif
 
 type(ESMF_LogMsg_Flag), parameter :: &
-   ESMF_LOGMSG_NOTRACE(4) = (/ &
+   ESMF_LOGMSG_NOTRACE(5) = (/ &
       ESMF_LOGMSG_INFO,     &
       ESMF_LOGMSG_WARNING,  &
       ESMF_LOGMSG_ERROR,    &
+      ESMF_LOGMSG_DEBUG,    &
       ESMF_LOGMSG_JSON      &
     /)
 
@@ -120,7 +124,7 @@ type ESMF_LogKind_Flag
     integer      :: ftype
 end type
 
-!     ! Log Types
+!     ! Log Types - keep in sync with ESMC_LogKind_Flag
 type(ESMF_LogKind_Flag), parameter :: &
     ESMF_LOGKIND_SINGLE = ESMF_LogKind_Flag(1), &
     ESMF_LOGKIND_MULTI = ESMF_LogKind_Flag(2),  &
@@ -216,6 +220,7 @@ end type ESMF_LogPrivate
     public ESMF_LOGMSG_WARNING
     public ESMF_LOGMSG_ERROR
     public ESMF_LOGMSG_TRACE
+    public ESMF_LOGMSG_DEBUG
     public ESMF_LOGMSG_JSON
     public ESMF_LOGMSG_ALL
     public ESMF_LOGMSG_NONE
@@ -941,6 +946,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present (log)) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
               ": ESMF_Log not open -- cannot ESMF_LogFlush()."
+          call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
           if (present (rc))  &
             rc=ESMF_RC_FILE_OPEN
         else
@@ -994,6 +1000,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (memstat /= 0) then
             write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
                 ": Deallocation error."
+            call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
             localrc = ESMF_RC_MEM_DEALLOCATE
             if (present (rc)) then
               rc = localrc
@@ -1012,6 +1019,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_UtilIOUnitFlush (alog%unitNumber, rc=localrc2)
       if (localrc2 /= ESMF_SUCCESS) then
         write (ESMF_UtilIOStderr,*) 'unit flush failed, rc =', localrc2
+        call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
         localrc = localrc2
       end if
 
@@ -1830,6 +1838,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ": This ESMF_Log is already open with file '", &
           trim(ESMF_LogTable(log%logTableIndex)%nameLogErrFile), "'"
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
       if (present(rc)) then
         rc=ESMF_RC_FILE_OPEN
       endif
@@ -1874,6 +1883,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (len_trim (filename) > ESMF_MAXPATHLEN-4) then
             write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
                 ": Filename exceeded", ESMF_MAXPATHLEN, " characters."
+            call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
             if (present(rc)) then
                 rc = ESMF_RC_LONG_STR
             endif
@@ -1884,6 +1894,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (len_trim (filename) > ESMF_MAXPATHLEN-4) then
             write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
                 ": Filename exceeded", ESMF_MAXPATHLEN, " characters."
+            call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
             if (present(rc)) then
                 rc = ESMF_RC_LONG_STR
             endif
@@ -1905,13 +1916,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   endif
 
-    !TODO: this is really strange because every time ESMF_LogOpen() is called
-    !TODO: the _default_ Log on the C side is initialized, odd, isn't it? *gjt*
+  !TODO: this is really strange because every time ESMF_LogOpen() is called
+  !TODO: the _default_ Log on the C side is initialized, odd, isn't it? *gjt*
+  
+  !TODO: an attempt to at least only call the initialize for default log...
+  
+  if (log%logTableIndex == ESMF_LogDefault%logTableIndex) then
+    ! this is the default log
     call c_ESMC_LogInitialize(filename,alog%petNumber,alog%logkindflag,rc2)
-    if (present(rc)) then
-        rc=ESMF_SUCCESS
-    endif
+    !TODO: this is so messed up, why is rc2 not looked at, or passed back???
+  endif
 
+  if (present(rc)) rc=ESMF_SUCCESS
+  
 end subroutine ESMF_LogOpen
 
 !--------------------------------------------------------------------------
@@ -1967,10 +1984,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rc=ESMF_FAILURE
   endif
 
-  call ESMF_LogOpen (ESMF_LogDefault, filename, appendflag=appendflag, logkindflag=logkindflag, rc=localrc)
+  call ESMF_LogOpen (ESMF_LogDefault, filename, appendflag=appendflag, &
+    logkindflag=logkindflag, rc=localrc)
   if (localrc /= ESMF_SUCCESS) then
     call ESMF_LogRc2Msg (localrc, msg=errmsg, msglen=errmsg_len)
     write (ESMF_UtilIOStderr,*) ESMF_METHOD, ': ', errmsg(:errmsg_len)
+    call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
   end if
 
   if (present (rc)) then
@@ -2047,10 +2066,11 @@ end subroutine ESMF_LogOpenDefault
 
     ! if unable to open file then error out
     if (alog%FileIsOpen /= ESMF_TRUE) then
-      rc=ESMF_RC_FILE_UNEXPECTED
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ': error opening file: ', trim (alog%nameLogErrFile),  &
           ', iostat =', iostat
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
+      rc=ESMF_RC_FILE_UNEXPECTED
       return
     endif
 
@@ -2062,6 +2082,7 @@ end subroutine ESMF_LogOpenDefault
     if (memstat /= 0) then
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ': Allocation of buffer failed.'
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
       rc = ESMF_RC_MEM_ALLOCATE
       return
     endif
@@ -2226,6 +2247,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (alog%FileIsOpen /= ESMF_TRUE .and. .not. isDefault) then
         write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
             ": ESMF_Log not open -- cannot ESMF_LogSet()."
+        call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
         if (present (rc)) rc = ESMF_RC_CANNOT_SET
         return
       endif
@@ -2581,11 +2603,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     case (2)
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ": Deprecated: Use logmsgFlag instead of logmsgList."
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
       local_logmsgflag = logmsgList
 
     case (3)
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ": Do not specify both logmsgFlag and logmsgList.  Use logmsgFlag."
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
       if (present(rc)) then
         rc=ESMF_RC_ARG_INCOMP
       end if
@@ -2599,7 +2623,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (alog%logkindflag /= ESMF_LOGKIND_NONE) then
 
         if (alog%deferredOpenFlag) then
-          if (logmsgFlag == ESMF_LOGMSG_ERROR) then
+          if (local_logmsgflag == ESMF_LOGMSG_ERROR) then
             call ESMF_LogOpenFile (alog, rc=localrc)
             if (localrc /= ESMF_SUCCESS) then
               if (present (rc)) then
@@ -2619,6 +2643,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (alog%FileIsOpen /= ESMF_TRUE) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
               ": ESMF_Log not open -- cannot ESMF_LogWrite().  Log message = ", trim (msg)
+          call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
           if (present(rc)) rc=ESMF_FAILURE
           return
         endif
@@ -2722,6 +2747,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
           ": ESMF_Log not open -- cannot ESMF_LogWrite().  Log message = ", trim (msg)
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStderr, rc=rc)
       if (present (rc)) then
         rc = localrc
       end if

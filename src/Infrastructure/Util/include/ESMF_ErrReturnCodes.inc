@@ -2,7 +2,7 @@
 $Id$
 
 Earth System Modeling Framework
-Copyright 2002-2019, University Corporation for Atmospheric Research,
+Copyright 2002-2021, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -28,7 +28,7 @@ Special macro for use in ESM[F,C]_LogMsgFoundError(), e.g.
 
 #if 0
 Return codes are defined here; corresponding error messages are defined in
-ESMC_LogErrMsgs.C
+ESMCI_ErrMsgs.C
 #endif
 
 #if 0

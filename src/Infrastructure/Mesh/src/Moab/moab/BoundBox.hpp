@@ -30,13 +30,18 @@ namespace moab {
       void compute_center(CartVect &center);
       void update(const BoundBox &other_box);
       void update(const double *coords);
-      ErrorCode update(Interface &iface, const Range& elems);
-      ErrorCode update(Interface &iface, const EntityHandle ent);
+      ErrorCode update(Interface &iface, const Range& elems, bool spherical = false,
+          double radius=1.);
+      ErrorCode update(Interface &iface, const EntityHandle ent, bool spherical = false,
+          double radius=1.);
       void update_min(const BoundBox &other_box);
       void update_min(const double *coords);
       void update_max(const BoundBox &other_box);
       void update_max(const double *coords);
       ErrorCode get(double *coords);
+      /** in case of spherical elements, account for curvature if needed
+       */
+      void update_box_spherical_elem(const CartVect * coordverts, int len, double radius);
 
         /** \brief Return the diagonal length of this box
          */
@@ -152,10 +157,10 @@ namespace moab {
       return out;
     }
 
-    inline ErrorCode BoundBox::update(Interface &iface, const EntityHandle ent) 
+    inline ErrorCode BoundBox::update(Interface &iface, const EntityHandle ent, bool spherical, double radius)
     {
       Range tmp_range(ent, ent);
-      return update(iface, tmp_range);
+      return update(iface, tmp_range, spherical, radius);
     }
 
     inline double BoundBox::distance_squared(const double *from_point) const
@@ -189,6 +194,7 @@ namespace moab {
           DBL_MAX == bMin[0] || DBL_MAX == bMin[1] || DBL_MAX == bMin[2]) return DBL_MAX;
       return (bMax - bMin).length_squared();
     }
+
 }
 
 #endif

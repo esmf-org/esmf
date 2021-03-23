@@ -42,8 +42,8 @@ module user_model2
     call ESMF_LogWrite("Executing 'userm2_setvm'", ESMF_LOGMSG_INFO, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! The following call will give each PET up to the number of PEs that are
-    ! held by the largest SSI. This will reduce the number of PETs that are
+    ! The following call will give each PET up to half the number of PEs that
+    ! are held by the largest SSI. This will reduce the number of PETs that are
     ! executing the component, but each PET will have multipe PEs available,
     ! e.g. to do user-level OpenMP threading.
 
@@ -53,14 +53,11 @@ module user_model2
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, &
       ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    if (pthreadsEnabled) then
+    if (pthreadsEnabled.and.ssiSharedMemoryEnabled) then
       call ESMF_VMGet(vm, ssiMaxPetCount=ssiMaxPetCount, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
-      if (.not.ssiSharedMemoryEnabled) then
-        ! do not maximize PEs on fewer PETs if SSI shared memory not supported
-        ssiMaxPetCount=1
-      endif
-      call ESMF_GridCompSetVMMaxPEs(comp, maxPeCountPerPet=ssiMaxPetCount, &
+      call ESMF_GridCompSetVMMaxPEs(comp, &
+        maxPeCountPerPet=ssiMaxPetCount/2, &  ! 2 PETs for each SSI
         rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
     endif
@@ -87,7 +84,7 @@ module user_model2
 !--------------------------------------------------------------------------------
 !   !  The Run routine where data is validated.
 !   !
- 
+
   subroutine user2_run(comp, importState, exportState, clock, rc)
 !$  use omp_lib
     type(ESMF_GridComp) :: comp
@@ -98,62 +95,83 @@ module user_model2
     ! Local variables
     real(ESMF_KIND_R8)    :: pi
     type(ESMF_VM)         :: vm
-    type(ESMF_Array)      :: array
-    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j, tid, localPet, peCount
-    integer               :: ssiLocalDeCount, lde
+    logical               :: ssiSharedMemoryEnabled
+    type(ESMF_DELayout)   :: delayout
+    type(ESMF_Array)      :: arrayImport, array
+    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)   ! matching F90 array pointer
+    integer               :: i, j, k, loop, tid, currentSsiPe
+    integer               :: localDeCount, lde, deCount
     integer, allocatable  :: localDeToDeMap(:)
     type(ESMF_LocalArray), allocatable :: localArrayList(:)
-    character(len=160)    :: msg
+    character(len=320)    :: msg
     logical               :: dataOkay
-    
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    call ESMF_LogWrite("Executing 'user2_run'", ESMF_LOGMSG_INFO, rc=rc)
+    call ESMF_LogWrite("Entering 'user2_run'", ESMF_LOGMSG_INFO, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     pi = 3.14159d0
 
+    ! Query the VM and do some logging
+    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_VMGet(vm, ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_VMLog(vm, prefix="model2: ", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     ! Get the source Array from the export State
-    call ESMF_StateGet(importState, "MyArray", array, rc=rc)
+    call ESMF_StateGet(importState, "MyArray", arrayImport, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
-    ! Determine how many DEs are accessible by this PET across the entire SSI
-    call ESMF_ArrayGet(array, ssiLocalDeCount=ssiLocalDeCount, rc=rc)
+
+    ! Conditionally migrate the incoming DEs via shared memory or leave as is
+    if (ssiSharedMemoryEnabled) then
+      ! Distribute the incoming DEs across the available PETs
+      call ESMF_ArrayGet(arrayImport, deCount=deCount, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
+      delayout = ESMF_DELayoutCreate(deCount=deCount, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
+      array = ESMF_ArrayCreate(arrayImport, delayout=delayout, &
+        datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
+    else
+      array = arrayImport ! no DE migration, use the imported Array directly
+    endif
+
+    ! Determine how many local DEs there are to service by the local PET
+    call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
+
     ! Allocate map and list variables
-    allocate(localDeToDeMap(ssiLocalDeCount))
-    allocate(localArrayList(ssiLocalDeCount))
-    
+    allocate(localDeToDeMap(0:localDeCount-1))
+    allocate(localArrayList(0:localDeCount-1))
+
     ! Request map and list variables from the Array
     call ESMF_ArrayGet(array, localDeToDeMap=localDeToDeMap, &
       localarrayList=localArrayList, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Query the VM of the Component for the number of PEs this PET has access to
-    ! -> Set the number of OpenMP threads accordingly
-    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, pet=localPet, peCount=peCount, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-!$  call omp_set_num_threads(peCount)
-
+    ! Test sharing for correctness
     dataOkay = .true.
+
+do loop=1, 5 ! repeatedly go through the work loops to monitor PE affinity.
 
 !$omp parallel do reduction (.and.:dataOkay) &
 !$omp& default (none)  &
-!$omp& shared  (pi, localArrayList, ssiLocalDeCount)  &
-!$omp& private (lde, i, j, tid, farrayPtr, msg, rc)
+!$omp& shared  (vm, pi, localArrayList, localDeToDeMap, localDeCount)  &
+!$omp& private (lde, i, j, tid, currentSsiPe, farrayPtr, msg, rc)
     ! Loop over all the locally accessible DEs and check for data correctness
 
-    do lde=1, ssiLocalDeCount
+    do lde=0, localDeCount-1
 !$    tid = omp_get_thread_num()
       ! Access the data pointer for this DE
       call ESMF_LocalArrayGet(localArrayList(lde), farrayPtr=farrayPtr, rc=rc)
+      ! No RC checking inside OpenMP region
+      
+      call ESMF_VMGet(vm, currentSsiPe=currentSsiPe, rc=rc)
       ! No RC checking inside OpenMP region
       
       !! Doing logging inside the OpenMP loop is just done to produce output
@@ -161,28 +179,33 @@ module user_model2
       !! for real applications!
 !$omp critical
       write(msg,*) "user2_run: OpenMP thread:", tid, &
-        " Testing data for localDe =", lde-1, &
+        " on SSIPE: ", currentSsiPe, " Testing data for localDe =", lde, &
+        " DE=", localDeToDeMap(lde), &
         " lbound:", lbound(farrayPtr), " ubound:", ubound(farrayPtr)
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
       ! No RC checking inside OpenMP region
-      call ESMF_LogFlush(rc=rc)
+      !call ESMF_LogFlush(rc=rc)
       ! No RC checking inside OpenMP region
 !$omp end critical
 
       ! Test Array data against exact solution
+      do k = lbound(farrayPtr, 3), ubound(farrayPtr, 3)
       do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-        do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-          if (abs(farrayPtr(i,j) - (10.0d0 &
-            + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
-            + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi))) > 1.d-8) then
-            dataOkay = dataOkay .and. .false.
-          endif
-        enddo
+      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+        if (abs(farrayPtr(i,j,k) - (10.0d0 &
+          + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
+          + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi))) > 1.d-8) then
+          dataOkay = dataOkay .and. .false.
+        endif
+      enddo
+      enddo
       enddo
 
     enddo
 !$omp end parallel do
 
+enddo
+  
     if (dataOkay) then
       write(msg,*) "user2_run: All data correct."
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
@@ -193,7 +216,21 @@ module user_model2
       if (rc/=ESMF_SUCCESS) return ! bail out
       rc=ESMF_FAILURE ! pass error back to the parent level
     endif
- 
+
+    ! Deallocate map and list variables
+    deallocate(localDeToDeMap)
+    deallocate(localArrayList)
+
+    if (ssiSharedMemoryEnabled) then
+      call ESMF_ArrayDestroy(array, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
+      call ESMF_DELayoutDestroy(delayout, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
+    endif
+
+    call ESMF_LogWrite("Exiting 'user2_run'", ESMF_LOGMSG_INFO, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
   end subroutine user2_run
 
 end module user_model2

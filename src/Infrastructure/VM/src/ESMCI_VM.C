@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research,
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -12,6 +12,7 @@
 #define ESMC_FILENAME "ESMCI_VM.C"
 //==============================================================================
 #define GARBAGE_COLLECTION_LOG_off
+#define TRANSLATE_VMID_LOG_off
 //==============================================================================
 //
 // VM class implementation (body) file
@@ -39,11 +40,16 @@
 #include "ESMCI_VM.h"
 
 // include higher level, 3rd party or system headers
+#include <map>
 #include <vector>
 #include <string>
 #include <cstdlib>
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
 #include <malloc.h>
+#include <execinfo.h>
+#endif
+#if (defined ESMF_OS_Darwin)
+#include <mach/mach.h>
 #endif
 #include "ESMF_Pthread.h"
 #include "ESMCI_IO_Handler.h"
@@ -57,6 +63,7 @@
 
 using std::string;
 using std::vector;
+using std::map;
 
 
 //-----------------------------------------------------------------------------
@@ -128,27 +135,83 @@ static bool esmfFinalized = false;
 //-----------------------------------------------------------------------------
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VMIdKeyCompare()"
+#define ESMC_METHOD "ESMCI::VMKeyCompare()"
 static bool VMKeyCompare(unsigned char *vmKey1, unsigned char *vmKey2){
   int i;
-#if 0
-  std::cout << ESMC_METHOD << ": entered" << std::endl;
-#endif
   for (i=0; i<vmKeyWidth; i++)
     if (vmKey1[i] != vmKey2[i]){
-#if 0
-      std::cout << ESMC_METHOD << "loop broke with i = " << i
-        << ", vmKeyWidth = " << vmKeyWidth << std::endl;
-#endif
       break;
     }
   if (i==vmKeyWidth) return true;
-#if 0
-  else
-    std::cout << ESMC_METHOD  << ": vmKey1[" << i << "] = " << vmKey1[i]
-        << " != vmKey2[" << i << "] = " << vmKey2[i] << std::endl;
-#endif
   return false;
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMKeyLessThan()"
+static bool VMKeyLessThan(unsigned char *vmKey1, unsigned char *vmKey2){
+  // notice that left most VAS bits set leads to less than condition
+  // this is so that where this is used in a sort, the desired order is 
+  // achieved
+  int i;
+  for (i=0; i<vmKeyWidth; i++)
+    if (vmKey1[i] != vmKey2[i]){
+      break;
+    }
+  if (i==vmKeyWidth) return false;  // case of equality
+  // now compare the first byte where a difference was found
+  if ((int)vmKey1[i] > (int)vmKey2[i]) return true;  // left most bits set in vmKey1, not vmKey2
+  return false;
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMKeyFirstBitFromLeft()"
+static unsigned VMKeyFirstBitFromLeft(unsigned char *vmKey){
+  // a value returned of vmKeyWidth * 8 indicates that no bit was set
+  int i;
+  for (i=0; i<vmKeyWidth; i++)
+    if (vmKey[i] > 0){
+      break;
+    }
+  if (i==vmKeyWidth) return (unsigned) vmKeyWidth * 8; // indicating no bit set
+  unsigned offSet = (unsigned)i * 8;
+  unsigned char testByte = 128; // first bit from left set
+  unsigned index;
+  unsigned upper = 8;
+  if (i==vmKeyWidth-1) upper -= vmKeyOff;
+  for (index=0; index<upper; index++){
+    if (vmKey[i] & testByte) break;
+    testByte = testByte >> 1;  // shift the set bit one to the right
+  }
+  return offSet+index;
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMKeyVasList()"
+static void VMKeyVasList(unsigned char *vmKey, vector<unsigned> &vasList){
+  vasList.clear();  // clear the vector
+  for (int i=0; i<vmKeyWidth; i++){
+    if (vmKey[i] > 0){
+      // there is at least one bit set in this byte
+      unsigned char testByte = 128; // first bit from left set
+      unsigned upper = 8;
+      if (i==vmKeyWidth-1) upper -= vmKeyOff;
+      for (unsigned index=0; index<upper; index++){
+#if 0
+{
+  std::stringstream msg;
+  msg << "VMKeyVasList i="<<i<<" index="<<index<<" vmKey[i]="<<(int)vmKey[i]
+    <<" testByte="<<(int)testByte<<" (vmKey[i] & testByte)="<< (vmKey[i] & testByte);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+}
+#endif    
+        if (vmKey[i] & testByte){
+          // index byte is set
+          vasList.push_back(i*8+index);
+        }
+        testByte = testByte >> 1;  // shift the set bit one to the right
+      }
+    }
+  }
 }
 
 #undef  ESMC_METHOD
@@ -262,14 +325,13 @@ int VMId::deserialize(const char *buffer, int *offset, bool offsetonly) {
   if (r!=0) *offset += 8-r;  // alignment
 
   ip = (int *)(buffer + *offset);
-  int keywidth = *ip++;
   if (!offsetonly)
     localID = *ip;
   ip++;
   cp = (char *)ip;
   if (!offsetonly) {
     if (vmKey) {
-      memcpy (vmKey, cp, keywidth);
+      memcpy (vmKey, cp, vmKeyWidth);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "Null vmKey encountered when deserializing a VMId object",
@@ -277,7 +339,7 @@ int VMId::deserialize(const char *buffer, int *offset, bool offsetonly) {
       return localrc;
     }
   }
-  cp += keywidth;
+  cp += vmKeyWidth;
 
   // update offset to point to past the current obj
   *offset = (cp - buffer);
@@ -322,7 +384,7 @@ int VMId::get(
   // Initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
   *localID = this->localID;
-  if (key_len < ESMCI::vmKeyWidth) {
+  if (key_len < vmKeyWidth) {
     localrc = ESMC_RC_ARG_SIZE;
     return localrc;
   }
@@ -364,7 +426,7 @@ int VMId::set(
   // Initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
   this->localID = localID;
-  if (key_len < ESMCI::vmKeyWidth) {
+  if (key_len < vmKeyWidth) {
     localrc = ESMC_RC_ARG_SIZE;
     return localrc;
   }
@@ -388,7 +450,8 @@ void VMId::log(
 //
 // !ARGUMENTS:
 //
-  std::string prefix
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType
   )const{
 //
 // !DESCRIPTION:
@@ -403,19 +466,21 @@ void VMId::log(
   char digits[64];
   char msg[256];
   std::stringstream info;
-  info << "  vmKeyWidth = " << vmKeyWidth;
+  info << "  vmKeyWidth (bytes) = " << vmKeyWidth
+    <<" vmKeyOff (invalid bits end of last byte) = " << vmKeyOff;
   sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg, msgType);
   info.str(""); // clear info
   info << "  vmKey=0x";
   int bitmap=0;
   int k=0;
   for (int i=0; i<vmKeyWidth; i++){
     bitmap |= vmKey[i];
-    bitmap = bitmap << 8;
     ++k;
-    if (k==4){
-      sprintf(digits, "%X", bitmap);
+    if (k<4){
+      bitmap = bitmap << 8;
+    }else{
+      sprintf(digits, "%08X", bitmap);
       info << digits;
       bitmap=0;
       k=0;
@@ -423,15 +488,15 @@ void VMId::log(
   }
   if (k!=0){
     bitmap = bitmap << (3-k)*8;
-    sprintf(digits, "%X", bitmap);
+    sprintf(digits, "%08X", bitmap);
     info << digits;
   }
   sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg, msgType);
   info.str(""); // clear info
   info << "  localID = " << localID;
   sprintf(msg, "%s - VMId: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msg, msgType);
 }
 //-----------------------------------------------------------------------------
 
@@ -466,17 +531,18 @@ int VMId::print() const{
   int k=0;
   for (int i=0; i<vmKeyWidth; i++){
     bitmap |= vmKey[i];
-    bitmap = bitmap << 8;
     ++k;
-    if (k==4){
-      printf("%X", bitmap);
+    if (k<4){
+      bitmap = bitmap << 8;
+    }else{
+      printf("%08X", bitmap);
       bitmap=0;
       k=0;
     }
   }
   if (k!=0){
     bitmap = bitmap << (3-k)*8;
-    printf("%X\n", bitmap);
+    printf("%08X\n", bitmap);
   }
   std::cout << "  localID = " << localID << std::endl;
   std::cout << "--- ESMCI::VMId::print() end ---" << std::endl;
@@ -521,32 +587,36 @@ int VMId::serialize(
   int r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
 
-  int fixedpart = 2*sizeof (int) + vmKeyWidth;
-  if (inquireflag == ESMF_INQUIREONLY) {
-    *offset += fixedpart;
-  } else {
+  int fixedpart = sizeof(int) + vmKeyWidth;
+  if (inquireflag != ESMF_INQUIREONLY){
     if ((*length - *offset) < fixedpart) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to serialize a VMId object",
-          ESMC_CONTEXT, &localrc);
+        "Buffer too short to serialize a VMId object",
+        ESMC_CONTEXT, &localrc);
       return localrc;
     }
-    ip = (int *)(buffer + *offset);
-    *ip++ = vmKeyWidth;
+  }
+  
+  ip = (int *)(buffer + *offset);
+  if (inquireflag != ESMF_INQUIREONLY)
     *ip++ = localID;
-    cp = (char *) ip;
+  else
+    ip += 1;
+  
+  cp = (char *) ip;
+  if (inquireflag != ESMF_INQUIREONLY){
     if (vmKey == NULL) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Null vmKey when serializing a VMId object",
-          ESMC_CONTEXT, &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "Null vmKey when serializing a VMId object",
+      ESMC_CONTEXT, &localrc);
       return localrc;
     }
     memcpy (cp, vmKey, vmKeyWidth);
-    cp += vmKeyWidth;
-
-    // update offset to point to past the current obj
-    *offset = (cp - buffer);
   }
+  cp += vmKeyWidth;
+
+  // update offset to point to past the current obj
+  *offset = (cp - buffer);
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -655,8 +725,8 @@ bool VMIdCompare(
 //
 // !ARGUMENTS:
 //
-  VMId *vmID1,
-  VMId *vmID2
+  const VMId *vmID1,
+  const VMId *vmID2
   ){
 //
 // !DESCRIPTION:
@@ -664,25 +734,52 @@ bool VMIdCompare(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#if 0
-  std::cout << ESMC_METHOD << ": entered" << std::endl;
-#endif
   if (vmID1==NULL || vmID2==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "- Invalid vmIDs", ESMC_CONTEXT, NULL);
     return false;    // bail out
   }
   if (vmID1->localID != vmID2->localID){
-#if 0
-    std::cout << ESMC_METHOD << ": localID " << vmID1->localID << " != " << vmID2->localID << std::endl;
-#endif
     return false;
   }
-  bool match = VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
-#if 0
-  if (!match) std::cout << ESMC_METHOD << ": keys don't compare" << std::endl;
-#endif
-  return match;
+  return VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMIdLessThan()"
+//BOPI
+// !IROUTINE:  ESMCI::VMIdLessThan
+//
+// !INTERFACE:
+bool VMIdLessThan(
+//
+// !RETURN VALUE:
+//    bool indicating vmID1 < vmID2
+//
+// !ARGUMENTS:
+//
+  const VMId *vmID1,
+  const VMId *vmID2
+  ){
+//
+// !DESCRIPTION:
+//    Compare two {\tt ESMC\_VMId} objects with less than.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  if (vmID1==NULL || vmID2==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "- Invalid vmIDs", ESMC_CONTEXT, NULL);
+    return false;    // bail out
+  }
+  if (VMKeyCompare(vmID1->vmKey, vmID2->vmKey)){
+    // keys identical, look at localID part
+    return (vmID1->localID < vmID2->localID);
+  }
+  return VMKeyLessThan(vmID1->vmKey, vmID2->vmKey);
 }
 //-----------------------------------------------------------------------------
 
@@ -725,94 +822,6 @@ int VMIdCopy(
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VMIdGet()"
-//BOPI
-// !IROUTINE:  ESMCI::VMIdGet
-//
-// !INTERFACE:
-void VMIdGet(
-//
-// !RETURN VALUE:
-//
-//
-// !ARGUMENTS:
-//
-  VMId *vmID,
-  int  *localID,
-  char *key,
-  int   key_len,
-  int  *rc
-  ){
-//
-// !DESCRIPTION:
-//    Get the elements of a {\tt ESMC\_VMId} object.
-//
-//    This method is primarily intended for use by VM unit tests.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // Initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-  int localrc = ESMC_RC_NOT_IMPL;
-  *localID = vmID->localID;
-  if (key_len < ESMCI::vmKeyWidth) {
-    if (rc != NULL) *rc = ESMC_RC_ARG_SIZE;
-    return;
-  }
-  for (int i=0; i<vmKeyWidth; i++){
-    key[i] = vmID->vmKey[i];
-  }
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VMIdSet()"
-//BOPI
-// !IROUTINE:  ESMCI::VMIdSet
-//
-// !INTERFACE:
-void VMIdSet(
-//
-// !RETURN VALUE:
-//
-//
-// !ARGUMENTS:
-//
-  VMId *vmID,
-  int   localID,
-  char *key,
-  int   key_len,
-  int  *rc
-  ){
-//
-// !DESCRIPTION:
-//    Set the elements of an existing {\tt ESMC\_VMId} object.
-//
-//    This method is primarily intended for use by VM unit tests.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // Initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-  int localrc = ESMC_RC_NOT_IMPL;
-  vmID->localID = localID;
-  if (key_len < ESMCI::vmKeyWidth) {
-    if (rc != NULL) *rc = ESMC_RC_ARG_SIZE;
-    return;
-  }
-  for (int i=0; i<vmKeyWidth; i++){
-    vmID->vmKey[i] = key[i];
-  }
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -1015,6 +1024,12 @@ void VM::shutdown(
         try{
           // The following loop deallocates deep Fortran ESMF objects
           for (int k=matchTable_FObjects[i].size()-1; k>=0; k--){
+#ifdef GARBAGE_COLLECTION_LOG_on
+            std::stringstream debugmsg;
+            debugmsg << "ESMF Automatic Garbage Collection: FObject delete: "
+              << *(void **)&(matchTable_FObjects[i][k].fobject);
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+#endif
             if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
               FTN_X(f_esmf_fieldcollectgarbage)
                 (&(matchTable_FObjects[i][k].fobject),&localrc);
@@ -1028,6 +1043,16 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
+#if 0
+//gjt: Disable cleaning up GeomBase from the garbage collection level because
+//gjt: each Field actually owns its own instance of the GeomBase. The way
+//gjt: FieldDestruct() currently works, it looks at the GeomBase, and if that
+//gjt: were already destroyed, it causes issues. In the long run this might
+//gjt: be better implemented via a protection against accessing GeomBase from
+//gjt: FieldDestruct() in that case. But then it is important that all of the
+//gjt: Geom types correctly implement their destructor. Right now the Mesh
+//gjt: destructur is not doing all that is needed, and so the Mesh cleanup
+//ght: actually does depend on the Field garbage collection.
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_GEOMBASE.objectID){
               FTN_X(f_esmf_geombasecollectgarbage)(
@@ -1035,6 +1060,7 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
+#endif
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_XGRIDGEOMBASE.objectID){
               FTN_X(f_esmf_xgridgeombasecolgarbage)(
@@ -1042,6 +1068,11 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
+#if 0
+//gjt: Disable cleaning up LocStream from the garbage collection level because
+//gjt: it leads to issues when a field tries to destroy it later.
+//gjt: This is going to be tricky to resolve with Fortran implemented classes.
+//gjt: For now rather have small memory leaks than invalid memory access.
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_LOCSTREAM.objectID){
               FTN_X(f_esmf_locstreamcollectgarbage)(
@@ -1049,6 +1080,7 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
+#endif
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_STATE.objectID){
               FTN_X(f_esmf_statecollectgarbage)(
@@ -1093,8 +1125,9 @@ void VM::shutdown(
             std::stringstream debugmsg;
             debugmsg << "ESMF Automatic Garbage Collection: delete: "
               << matchTable_Objects[i][k]->ESMC_BaseGetClassName() << " : "
-              << matchTable_Objects[i][k]->ESMC_BaseGetName();
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+              << matchTable_Objects[i][k]->ESMC_BaseGetName() << " : "
+              << matchTable_Objects[i][k];
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
 #endif
             delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
             matchTable_Objects[i].pop_back();
@@ -1412,7 +1445,7 @@ int VM::alltoallvVMId(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   int localrc;
 
-  int petCount = GlobalVM->getNpets();
+  int petCount = getPetCount();
   int send_sum=0, recv_sum=0;
   for (int i=0; i<petCount; i++) {
     send_sum += sendcounts[i];
@@ -1520,9 +1553,9 @@ int VM::allgathervVMId(
       return rc;
     }
   }
-  int petCount = GlobalVM->getNpets();
-  int mypet    = GlobalVM->getMypet();
-  if (sendcount != recvcounts[mypet]){
+  int petCount = getPetCount();
+  int localPet = getLocalPet();
+  if (sendcount != recvcounts[localPet]){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- non-matching send/recv count", ESMC_CONTEXT, &rc);
     return rc;
@@ -1531,16 +1564,15 @@ int VM::allgathervVMId(
   // TODO: Convert this to a real AllGatherV
 
   // Each PET copies its send data into its receive area, then broadcast
-  for (int i=0; i<recvcounts[mypet]; i++) {
-    int localrc = VMIdCopy (recvvmid[recvoffsets[mypet]+i], sendvmid[i]);
-    if (localrc != ESMF_SUCCESS){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Bad VMIdCopy", ESMC_CONTEXT, &rc);
-      return rc;
-    }
+  for (int i=0; i<recvcounts[localPet]; i++) {
+    int localrc = VMIdCopy(recvvmid[recvoffsets[localPet]+i], sendvmid[i]);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;
   }
   for (int root=0; root<petCount; root++) {
-    bcastVMId(recvvmid+recvoffsets[root], recvcounts[root], root);
+    int localrc = bcastVMId(recvvmid+recvoffsets[root], recvcounts[root], root);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;
   }
 
   // return successfully
@@ -1609,6 +1641,328 @@ int VM::bcastVMId(
   }
   delete[] local_ids;
 
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::translateVMId()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::translateVMId
+//
+// !INTERFACE:
+int VM::translateVMId(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VMId **vmIDs,                       // in  - VMId
+  ESMCI::InterArray<int> *ids,        // out - ids
+  ESMCI::InterArray<int> *rootVmIds,  // out - indices of vmIds local PET is root
+  int *rootVmIdCount                  // out - number of vmIds local PET is root
+  ){
+//
+// !DESCRIPTION:
+//    Construct globally unique integer ids for the {\tt ESMCI::VMId} elements.
+// The number of elements in the vmIDs, and ids arrays must be identical. There
+// is no check of this condition possible on this level, and it is an assumption
+// made to be true!
+//    The rootVmIds object is created and filled with indices pointing into the
+// local vmIDs array for those entries for which the local PET is root.
+//    The algorithm makes the following assumptions about the vmIDs passed into
+// the PETs across the current VM:
+//  1. Each VMId object must be present on all the PETs of the current VM that
+//     are associated with the VAS bits set in the VMId key.
+//  2. VMId objects that have VAS bits set outside what is covered by the PETs
+//     of the current VM are supported.
+//  3. VMId objects must NOT be present on any PET associated with a VAS for
+//     which the corresponding VMId key bit is not set. (E.g. proxy objects
+//     would bring in such VMIds.)
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  if (ids->dimCount != 1){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+      "ids must enter with one dimension",
+      ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  int elementCount = ids->extent[0];
+  int *idsArray = ids->array;
+  int petCount = getPetCount();
+  int localPet = getLocalPet();
+  MPI_Comm mpiComm = getMpi_c();
+  MPI_Group mpiGroup;
+  MPI_Comm_group(mpiComm, &mpiGroup);
+  
+  *rootVmIdCount = 0; // initialize
+  int *rootVmIdsArray = rootVmIds->array;
+
+  if (elementCount > 0){
+    // there is work to be done...
+
+    struct Helper1{
+      VMId *vmID;
+      int index;
+      int id;
+      bool operator==(const Helper1 &cmp)const{
+        return VMIdCompare(vmID,cmp.vmID);
+      }
+      bool operator<(const Helper1 &cmp)const{
+        return VMIdLessThan(vmID,cmp.vmID);
+      }
+      bool vmKeyEqual(const Helper1 &cmp)const{
+        return VMKeyCompare(vmID->vmKey,cmp.vmID->vmKey);
+      }
+      void getVasList(vector<unsigned> &vasList)const{
+        VMKeyVasList(vmID->vmKey, vasList);
+      }
+    };
+    
+    // set up helper1 vector and sort
+    vector<Helper1> helper1(elementCount);
+    for (int i=0; i<elementCount; i++){
+      helper1[i].vmID = vmIDs[i];
+      helper1[i].index = i;
+    }
+    sort(helper1.begin(), helper1.end());
+
+#ifdef TRANSLATE_VMID_LOG_on
+    // development log
+    for (unsigned i=0; i<helper1.size(); i++){
+      std::stringstream prefix;
+      prefix << "sorted helper1[" << i << "]";
+      helper1[i].vmID->log(prefix.str());
+    }
+#endif
+
+    // record the unique helper1 index in idsArray for later back reference
+    int ii = 0; // init
+    idsArray[helper1[0].index] = ii; // spin up
+    for (unsigned i=1; i<helper1.size(); i++){
+      if (!(helper1[i] == helper1[i-1])) ++ii;
+      idsArray[helper1[i].index] = ii;
+    }
+    
+    // cut out duplicate elements from sorted helper1 vector
+    helper1.erase(unique(helper1.begin(),helper1.end()),helper1.end());
+
+#ifdef TRANSLATE_VMID_LOG_on
+    // development log
+    for (unsigned i=0; i<helper1.size(); i++){
+      std::stringstream prefix;
+      prefix << "unique helper1[" << i << "]";
+      helper1[i].vmID->log(prefix.str());
+    }
+#endif
+
+    struct Helper2{
+      unsigned indexH1; // index into helper1 vector
+      unsigned count;   // number of different localIDs within the same vmKey
+      MPI_Comm subComm; // communicator across participating PETs as per vmKey
+      int rootPet;      // the root PET for this vmKey within current VM
+      int subRootPet;   // the root PET for this vmKey within subComm
+      Helper2(int index){
+        indexH1 = index;
+        count = 1;
+        subComm = MPI_COMM_NULL;
+        rootPet = -1;
+        subRootPet = -1;
+      }
+    };
+    
+    // setup helper2 to only reference elements in helper1 with unique vmKey
+    vector<Helper2> helper2;
+    helper2.reserve(helper1.size());  // maximum possible size
+    helper2.push_back(Helper2(0));
+    for (unsigned i=1; i<helper1.size(); i++){
+      if (helper1[i].vmKeyEqual(helper1[i-1])){
+        // same vmKey -> count this to previous helper2 element
+        helper2.back().count++;
+      }else{
+        // new vmKey -> add a new helper2 element
+        helper2.push_back(Helper2(i));
+      }
+    }
+
+#ifdef TRANSLATE_VMID_LOG_on
+    // development log
+    for (unsigned i=0; i<helper2.size(); i++){
+      std::stringstream msg;
+      msg << "helper2[" << i << "] - indexH1=" << helper2[i].indexH1
+        << " - count=" << helper2[i].count;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
+    map<unsigned,unsigned> vasToPetMap;
+    // The global VAS index is equal to the rank in the MPI_COMM_WORLD. It also
+    // corresponds to the bits in order of the vmKey. This is mapped against the
+    // local PET index.
+    for (int i=0; i<petCount; i++)
+      vasToPetMap[getVas(i)] = i;
+
+#ifdef TRANSLATE_VMID_LOG_on
+    // development log
+    map<unsigned,unsigned>::iterator it;
+    for (it=vasToPetMap.begin(); it!=vasToPetMap.end(); ++it){
+      std::stringstream msg;
+      msg << "vasToPetMap - vas=" << it->first
+        << " - pet=" << it->second;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
+    // determine rootPet for each entry in helper2, sum up totalLocalIds, and
+    // create mpiComm to handle the respective vmKey PET subspace
+    int totalLocalIds = 0; // init
+    for (unsigned i=0; i<helper2.size(); i++){
+      vector<unsigned> vasList;
+      helper1[helper2[i].indexH1].getVasList(vasList);
+#ifdef TRANSLATE_VMID_LOG_on
+      // development log
+      for (unsigned k=0; k<vasList.size(); k++){
+        std::stringstream msg;
+        msg << "vasList[" << k << "]=" << vasList[k];
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
+      vector<int> petList;
+      petList.reserve(vasList.size());  // only edge cases might have less PETs
+      unsigned kk = 0;
+      for (unsigned k=0; k<vasList.size(); k++){
+        if (vasToPetMap.find(vasList[k]) != vasToPetMap.end()){
+          // the VAS exists in the current VM
+          if (kk==0){
+            // first active PET that is found handling a VAS becomes rootPet
+            helper2[i].rootPet = vasToPetMap[vasList[k]];
+            if (helper2[i].rootPet == localPet){
+              totalLocalIds += helper2[i].count;
+            }
+          }
+          // add to petList
+          petList.push_back(vasToPetMap[vasList[k]]);
+          if (petList[kk]==helper2[i].rootPet)
+            helper2[i].subRootPet=kk;
+#ifdef TRANSLATE_VMID_LOG_on
+          // development log
+          std::stringstream msg;
+          msg << "petList["<<kk<<"]=" << petList[kk]
+            << " vasList[k=" << k << "]=" << vasList[k];
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          // end development log
+#endif
+          ++kk;
+        }
+      }
+      MPI_Group subGroup;
+      MPI_Group_incl(mpiGroup, petList.size(), &(petList[0]), &subGroup);
+      MPI_Comm_create_group(mpiComm, subGroup, 99, &(helper2[i].subComm));
+      if (helper2[i].subComm == MPI_COMM_NULL){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "This VMId's key does not have this PET's VAS bit set. Unsupported!",
+          ESMC_CONTEXT, &rc);
+          return rc;
+      }
+      // clean-up
+      MPI_Group_free(&subGroup);
+    }
+
+    // deal with rootVmIds
+    *rootVmIdCount = totalLocalIds; // return this value to caller
+    int j=0;
+    for (unsigned i=0; i<helper2.size(); i++){
+      if (helper2[i].rootPet == localPet){
+        // rootPet for this id  -> fill into rootVmIdsArray
+        for (unsigned k=0; k<helper2[i].count; k++){
+          rootVmIdsArray[j++]=helper1[helper2[i].indexH1+k].index;
+        }
+      }
+    }
+
+#ifdef TRANSLATE_VMID_LOG_on
+    // development log
+    for (unsigned i=0; i<helper2.size(); i++){
+      std::stringstream msg;
+      msg << "helper2[" << i << "] - indexH1=" << helper2[i].indexH1
+        << " - count=" << helper2[i].count 
+        << " - rootPet=" << helper2[i].rootPet;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+    {
+      std::stringstream msg;
+      msg << "totalLocalIds=" << totalLocalIds;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
+    // AllGather() the totalLocalIds
+    vector<int> totalLocalIdsList(petCount);
+    allgather(&totalLocalIds, &(totalLocalIdsList[0]), sizeof(int));
+
+#ifdef TRANSLATE_VMID_LOG_on
+    // development log
+    for (unsigned i=0; i<totalLocalIdsList.size(); i++){
+      std::stringstream msg;
+      msg << "totalLocalIdsList[" << i << "]=" << totalLocalIdsList[i];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
+    // determine beginning value of localId
+    unsigned localId = 0;
+    for (int i=0; i<localPet; i++){
+      localId += totalLocalIdsList[i];
+    }
+
+#ifdef TRANSLATE_VMID_LOG_on
+    // development log
+    {
+      std::stringstream msg;
+      msg << "localId=" << localId;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
+    // determine globally unique integer indices for all the entries in helper2
+    for (unsigned i=0; i<helper2.size(); i++){
+      unsigned localIdTemp;
+      if (helper2[i].rootPet == localPet){
+        // rootPet for this id
+        localIdTemp = localId;
+        localId += helper2[i].count;
+      }
+      // broadcast localIdTemp from root to all other participating PETs
+      MPI_Bcast(&localIdTemp, sizeof(unsigned), MPI_BYTE, helper2[i].subRootPet,
+        helper2[i].subComm);
+      // all PETs can fill in the globally unique integer id
+      for (unsigned k=0; k<helper2[i].count; k++){
+        helper1[helper2[i].indexH1+k].id = localIdTemp+k;
+      }
+      // clean-up
+      MPI_Comm_free(&(helper2[i].subComm));
+    }
+    
+    // finish up by filling the globally unique integer id into the idsArray
+    for (int i=0; i<elementCount; i++){
+      idsArray[i] = helper1[idsArray[i]].id;
+    }
+    
+  } // elementCount > 0
+  
+  // clean-up
+  MPI_Group_free(&mpiGroup);
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1919,16 +2273,18 @@ void VM::getCurrentGarbageInfo(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VM::logCurrentGarbageInfo()"
+#define ESMC_METHOD "ESMCI::VM::logGarbageInfo()"
 //BOPI
-// !IROUTINE:  ESMCI::VM::logCurrentGarbageInfo - Log garbage info of current VM
+// !IROUTINE:  ESMCI::VM::logGarbageInfo - Log garbage info of current VM
 //
 // !INTERFACE:
-void VM::logCurrentGarbageInfo(
+void VM::logGarbageInfo(
 //
 // !ARGUMENTS:
 //
-  std::string prefix
+  std::string prefix,
+  bool current,
+  ESMC_LogMsgType_Flag msgType
   ){
 //
 // !DESCRIPTION:
@@ -1955,32 +2311,94 @@ void VM::logCurrentGarbageInfo(
       throw rc;
     }
   }
-  // found a match
+  // found the current VM
+  
+  int ic=i;
+  int lb=0;
+  int ub=matchTableBound;
+  if (current){
+    lb = ic;
+    ub = ic+1;
+  }
 
   char msg[512];
-  sprintf(msg, "%s - CurrGarbInfo: Fortran objs=%lu", prefix.c_str(),
-    matchTable_FObjects[i].size());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
-    sprintf(msg, "%s - CurrGarbInfo: fortran objs[%d]: %d", prefix.c_str(), j,
-      matchTable_FObjects[i][j].objectID);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  for (int i=lb; i<ub; i++){
+    if (i==ic)
+      sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i"
+        " ***current VM context****", prefix.c_str(), i);
+    else
+      sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i", prefix.c_str(), i);
+    ESMC_LogDefault.Write(msg, msgType);
+    sprintf(msg, "%s - GarbInfo: Fortran objs=%lu", prefix.c_str(),
+      matchTable_FObjects[i].size());
+    ESMC_LogDefault.Write(msg, msgType);
+    for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
+      void *basePtr = NULL;
+      if (matchTable_FObjects[i][j].objectID != ESMC_ID_GEOMBASE.objectID)
+        basePtr = **(void ***)(&matchTable_FObjects[i][j].fobject);
+      sprintf(msg, "%s - GarbInfo: fortran objs[%d]: %s %p - %p",
+        prefix.c_str(), j,
+        ESMC_ObjectID_Name(matchTable_FObjects[i][j].objectID),
+        *(void **)(&matchTable_FObjects[i][j].fobject), basePtr);
+      ESMC_LogDefault.Write(msg, msgType);
+    }
+    sprintf(msg, "%s - GarbInfo: Base objs=%lu", prefix.c_str(),
+      matchTable_Objects[i].size());
+    ESMC_LogDefault.Write(msg, msgType);
+    for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
+      const char *proxyString;
+      proxyString="actual object";
+      if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
+        proxyString="proxy object";
+      sprintf(msg, "%s - GarbInfo: base objs[%d]: %s : %p : %s : %d ; %s",
+        prefix.c_str(), j, matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
+        matchTable_Objects[i][j],
+        matchTable_Objects[i][j]->ESMC_BaseGetName(),
+        matchTable_Objects[i][j]->ESMC_BaseGetID(), proxyString);
+      ESMC_LogDefault.Write(msg, msgType);
+    }
   }
-  sprintf(msg, "%s - CurrGarbInfo: Base objs=%lu", prefix.c_str(),
-    matchTable_Objects[i].size());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
-    const char *proxyString;
-    proxyString="actual object";
-    if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
-      proxyString="proxy object";
-    sprintf(msg, "%s - CurrGarbInfo: base objs[%d]: %p : %s : %s : %d ; %s",
-      prefix.c_str(), j, matchTable_Objects[i][j],
-      matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
-      matchTable_Objects[i][j]->ESMC_BaseGetName(),
-      matchTable_Objects[i][j]->ESMC_BaseGetID(), proxyString);
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+
+  // return successfully
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::logBacktrace()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::logBacktrace - Log backtrace
+//
+// !INTERFACE:
+void VM::logBacktrace(
+//
+// !ARGUMENTS:
+//
+  std::string prefix,
+  ESMC_LogMsgType_Flag msgType
+  ){
+//
+// !DESCRIPTION:
+//   Log the backtrace of the current call stack.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  const int size=1000;
+  void *buffer[size];
+  int count = backtrace(buffer, size);
+  char **symbols = backtrace_symbols(buffer, count);
+  for (int i=0; i<count; i++){
+    std::stringstream info;
+    info << prefix << " - Backtrace: " << symbols[i];
+    ESMC_LogDefault.Write(info, msgType);
   }
+  free(symbols);
+#endif
 
   // return successfully
 }
@@ -2032,6 +2450,8 @@ void VM::getMemInfo(
   vm->unlock();
 #endif
 
+
+
   // return successfully
 }
 //-----------------------------------------------------------------------------
@@ -2049,6 +2469,7 @@ void VM::logMemInfo(
 // !ARGUMENTS:
 //
   std::string prefix,
+  ESMC_LogMsgType_Flag msgType,
   ESMCI::LogErr *log
   ){
 //
@@ -2073,7 +2494,7 @@ void VM::logMemInfo(
       int len = strlen(line);
       line[len-1] = '\0'; // replace the newline with null
       sprintf(msg, "%s - MemInfo: \t%s", prefix.c_str(), line);
-      log->Write(msg, ESMC_LOGMSG_INFO);
+      log->Write(msg, msgType);
     }
   }
   fclose(file);
@@ -2082,31 +2503,31 @@ void VM::logMemInfo(
   struct mallinfo m = mallinfo();
   info << "Non-mmapped space allocated (bytes):       \t" << m.arena;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Space allocated in mmapped regions (bytes):\t" << m.hblkhd;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Maximum total allocated space (bytes):     \t" << m.usmblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Space in freed fastbin blocks (bytes):     \t" << m.fsmblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Total allocated space (bytes):             \t" << m.uordblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Total free space (bytes):                  \t" << m.fordblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   info.str(""); // clear info
   info << "Top-most, releasable space (bytes):        \t" << m.keepcost;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   long total = 0; // init
   if (m.hblkhd>=0 && m.uordblks>=0){
     total = (long)m.hblkhd+(long)m.uordblks;
@@ -2115,7 +2536,7 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space in use, mmap + non-mmap (KiB): \t" << total;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   // access through malloc_stats()
   FILE *stderrOrig = stderr;
   char *buf;
@@ -2136,7 +2557,7 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space held (mmap + non-mmap) (KiB):  \t" << system;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   pos = malloc_stats_output.rfind("in use bytes     =");
   pos += 18;
   long in_use = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
@@ -2144,14 +2565,76 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space used (mmap + non-mmap) (KiB):  \t" << in_use;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
   // output the wtime since execution start
   double wt;
   ESMCI::VMK::wtime(&wt);
   info.str(""); // clear info
   info << "Wall-clock time since execution start (s): \t" << wt;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, msgType);
+  // unlock again
+  vm->unlock();
+#endif
+#if (defined ESMF_OS_Darwin)
+  // must lock/unlock for thread-safety
+  VM *vm = getCurrent();
+  vm->lock();
+
+  // string storage
+  char msg[256];
+
+  // Get memory
+  task_vm_info_data_t mem_info;
+  mach_msg_type_number_t size = TASK_VM_INFO_COUNT;
+  kern_return_t kerr = task_info(mach_task_self(),
+                                 TASK_VM_INFO,
+                                 (task_info_t)&mem_info,
+                                 &size);
+  if( kerr == KERN_SUCCESS ) {
+    sprintf(msg, "%s - MemInfo: VmRSS:                       \t%d (bytes)",prefix.c_str(),mem_info.resident_size);
+    log->Write(msg, msgType);
+    sprintf(msg, "%s - MemInfo: VmHWM:                       \t%d (bytes)",prefix.c_str(),mem_info.resident_size_peak);
+    log->Write(msg, msgType);
+    sprintf(msg, "%s - MemInfo: Total allocated space (bytes): \t%d",prefix.c_str(),mem_info.virtual_size);
+    log->Write(msg, msgType);
+
+    // Other memory info that might be useful at some point
+#if 0
+    sprintf(msg, "%s - MemInfo: v_size:                       \t%d",prefix.c_str(),mem_info.virtual_size);
+    log->Write(msg, msgType);
+
+    sprintf(msg, "%s - MemInfo: r_size:                       \t%d",prefix.c_str(),mem_info.resident_size);
+    log->Write(msg, msgType);
+
+    sprintf(msg, "%s - MemInfo: internal:                       \t%d",prefix.c_str(),mem_info.internal);
+    log->Write(msg, msgType);
+
+    sprintf(msg, "%s - MemInfo: external:                       \t%d",prefix.c_str(),mem_info.external);
+    log->Write(msg, msgType);
+
+    sprintf(msg, "%s - MemInfo: resusable:                       \t%d",prefix.c_str(),mem_info.reusable);
+    log->Write(msg, msgType);
+
+    sprintf(msg, "%s - MemInfo: compressed:                       \t%d",prefix.c_str(),mem_info.compressed);
+    log->Write(msg, msgType);
+
+    sprintf(msg, "%s - MemInfo: phys_footprint:                       \t%d",prefix.c_str(),mem_info.phys_footprint);
+    log->Write(msg, msgType);
+#endif
+
+  }
+
+
+  // output the wtime since execution start
+  std::stringstream info;
+  double wt;
+  ESMCI::VMK::wtime(&wt);
+  info.str(""); // clear info
+  info << "Wall-clock time since execution start (s): \t" << wt;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  log->Write(msg, msgType);
+
   // unlock again
   vm->unlock();
 #endif
@@ -2237,6 +2720,14 @@ void VM::addObject(
   VM *vm = getCurrent();
   vm->lock();
   matchTable_Objects[i].push_back(object);
+
+#ifdef GARBAGE_COLLECTION_LOG_on
+  std::stringstream msg;
+  msg << "VM::addObject() object added: " << object;
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+  //logBacktrace("VM::addObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
+#endif
+
   vm->unlock();
 }
 //-----------------------------------------------------------------------------
@@ -2266,6 +2757,10 @@ void VM::rmObject(
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;   // final return code
 
+  //gjt: Disabled the following block of code because we allow object sharing
+  //gjt: across VMs. Therefore garbage collection functionality like removing
+  //gjt: an object must loop through _all_ of the VMs.
+#if 0
   // find current VM index
   esmf_pthread_t mytid;
 #ifndef ESMF_NO_PTHREADS
@@ -2283,21 +2778,30 @@ void VM::rmObject(
       throw rc;
     }
   }
-
   // found a match
   // proceed to remove object from this VM's garbage collection table
+#endif
 
   // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
   vm->lock();
+  for (int i=0; i<matchTableBound; i++){  //gjt: loop through all of the VMs
   for (vector<ESMC_Base *>::iterator
     it = matchTable_Objects[i].begin();
     it != matchTable_Objects[i].end(); ++it){
     if (*it == object){
       matchTable_Objects[i].erase(it);  // erase the object entry
+#ifdef GARBAGE_COLLECTION_LOG_on
+    std::stringstream msg;
+    msg << "VM::rmObject() object removed: " << object;
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+    //logBacktrace("VM::rmObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
+#endif
       break;
     }
   }
+  }
+
   vm->unlock();
 }
 //-----------------------------------------------------------------------------
@@ -2352,176 +2856,20 @@ void VM::addFObject(
   FTN_X(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
 
   matchTable_FObjects[i][size].objectID = objectID;
+  
+#ifdef GARBAGE_COLLECTION_LOG_on
+  std::stringstream msg;
+  msg << "VM::addFObject() object added: " <<
+    string(ESMC_ObjectID_Name(objectID)) << " " << *(void **)fobject << " - " <<
+    **(void ***)fobject;
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+  //logBacktrace("VM::addFObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
+#endif
+
   vm->unlock();
 }
 //-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VM::getObject()"
-//BOPI
-// !IROUTINE:  ESMCI::VM::getObject - Find and return an ESMF object.
-//
-// !INTERFACE:
-void VM::getObject(
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-//
-  void **fobject,     // out - alias to object
-  int objectID,       // in - identifying ID
-  VMId *vmID,         // in - identifying vmID
-  const string &name, // in - identifying object name
-  ESMC_ProxyFlag proxyflag,  // in - proxy/non-proxy flag
-  bool *object_found, // out - true if found, false if not
-  int *rc) {
-//
-// !DESCRIPTION:
-//    Find and return a object in matchTable_FObjects list for a
-//    given ID/vmId.
-//
-//    If proxyflag is ESMF_PROXYYES, only match proxies.  Likewise, if
-//    ESMF_PROXYNO, only match non-proxies.  ESMF_PROXYANY matches any.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-
-  const bool debug = false;
-
-  // initialize return code; assume routine not implemented
-  *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  switch (proxyflag) {
-    case ESMF_PROXYYES:
-    case ESMF_PROXYNO:
-    case ESMF_PROXYANY:
-      break;
-    default: {
-      *rc = ESMC_RC_ARG_BAD;
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "- Bad proxyflag value", ESMC_CONTEXT, rc);
-      return;
-    }
-  }
-
-  if (debug) {
-    std::stringstream msg;
-    msg << "looking for object ID: " << objectID;
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-  }
-  *fobject = NULL;          // assume not found
-  *object_found = false;
-
-  // find VMId
-
-  bool vmid_found = false;
-  int i;
-  for (i=0; i<matchTableBound; i++) {
-    if (VMIdCompare(vmID, &matchTable_vmID[i])) {
-      vmid_found = true;
-      break;
-    }
-  }
-  if (debug) {
-    std::stringstream msg;
-    msg << "VMid " << (vmid_found ? "":"not ") << "found";
-    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-  }
-  if (!vmid_found){
-    *rc = ESMF_SUCCESS;
-    return;
-  }
-
-  // Search for and validate ID
-
-  // must lock/unlock for thread-safe access to std::vector
-  ESMC_Base *fobject_temp;
-  bool id_found = false;
-  VM *vm = getCurrent();
-  vm->lock();
-  for (unsigned it=0; it<matchTable_Objects[i].size(); ++it){
-
-    fobject_temp = matchTable_Objects[i][it];
-    int ID = (fobject_temp)->ESMC_BaseGetID();
-    if (debug) {
-      std::stringstream msg;
-      msg << "comparing ID " << ID << " to object ID " << objectID;
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-    }
-    if (ID != objectID)
-      continue;
-
-
-    if (debug)
-      ESMC_LogDefault.Write("validating baseStatus and Status", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-    ESMC_Status baseStatus = (fobject_temp)->ESMC_BaseGetBaseStatus();
-    ESMC_Status     Status = (fobject_temp)->ESMC_BaseGetStatus();
-    if ((baseStatus != ESMF_STATUS_READY) || (Status != ESMF_STATUS_READY))
-      continue;
-
-    ESMC_ProxyFlag fobject_proxy = (fobject_temp)->ESMC_BaseGetProxyFlag();
-    if (debug) {
-      std::stringstream msg;
-      msg << "validating proxyflag " << proxyflag << " to " <<
-          fobject_proxy;
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-    }
-    switch (proxyflag) {
-      case ESMF_PROXYYES: {
-        id_found = fobject_proxy == ESMF_PROXYYES;
-        if (debug)
-          ESMC_LogDefault.Write("PROXYYES", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-        break;
-      }
-      case ESMF_PROXYNO: {
-        id_found = fobject_proxy == ESMF_PROXYNO;
-        if (debug)
-          ESMC_LogDefault.Write("PROXYNO", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-        break;
-      }
-      case ESMF_PROXYANY:
-        id_found = true;
-    }
-    if (debug) {
-      std::stringstream msg;
-      msg << "object " << name << (id_found ? " ":" not ") << "validated";
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-    }
-    if (id_found) break;
-  }  // end of ID search loop
-
-  // Compare name
-
-  // TODO: In theory, VMId/ID should be sufficient to distinguish an object and the objects
-  // name shouldn't be needed.  However some tests (e.g., in ESMF_TransferGridSTest) have
-  // shown that further qualification is needed.  This needs to be investigated.
-
-  if (id_found) {
-    char *fobject_name = (fobject_temp)->ESMC_BaseGetName();
-    if (debug) {
-      std::stringstream msg;
-      msg << "comparing requested name: " << name << " to: " <<
-          fobject_name;
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-    }
-    if (name == fobject_name) {
-      *fobject = fobject_temp;
-      // TODO: Bump Base refCount?  Gerhard says not yet.
-      *object_found = true;
-    }
-    if (debug) {
-      std::stringstream msg;
-      msg << "object " << name << (*object_found ? " ":" not ") << "found";
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
-    }
-  }
-
-  vm->unlock();
-  if (rc) *rc = ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -2547,6 +2895,10 @@ void VM::rmFObject(
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;   // final return code
 
+  //gjt: Disabled the following block of code because we allow object sharing
+  //gjt: across VMs. Therefore garbage collection functionality like removing
+  //gjt: an object must loop through _all_ of the VMs.
+#if 0
   // find current VM index
   esmf_pthread_t mytid;
 #ifndef ESMF_NO_PTHREADS
@@ -2564,13 +2916,14 @@ void VM::rmFObject(
       throw rc;
     }
   }
-
   // found a match
   // proceed to remove object from this VM's garbage collection table
+#endif
 
   // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
   vm->lock();
+  for (int i=0; i<matchTableBound; i++){  //gjt: loop through all of the VMs
   for (vector<FortranObject>::iterator
     it = matchTable_FObjects[i].begin();
     it != matchTable_FObjects[i].end(); ++it){
@@ -2582,10 +2935,63 @@ void VM::rmFObject(
 
     if (flag){
       matchTable_FObjects[i].erase(it);  // erase the object entry
+#ifdef GARBAGE_COLLECTION_LOG_on
+      std::stringstream msg;
+      msg << "VM::rmFObject() object removed: " << *(void **)fobject << " - " <<
+        **(void ***)fobject;
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+      //logBacktrace("VM::rmFObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
+#endif
       break;
     }
   }
+  }
+
   vm->unlock();
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::validObject()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::validObject - Check if an object is valid in garbage collection
+//
+// !INTERFACE:
+bool VM::validObject(
+//
+// !RETURN VALUE:
+//    true/false
+//
+// !ARGUMENTS:
+//
+  ESMC_Base *object){   // object to be checked
+//
+// !DESCRIPTION:
+//    Check if an object is valid in garbage collection
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // must lock/unlock for thread-safe access to std::vector
+  bool valid = false;
+  VM *vm = getCurrent();
+  vm->lock();
+  for (int i=0; i<matchTableBound; i++){
+  for (vector<ESMC_Base *>::iterator
+    it = matchTable_Objects[i].begin();
+    it != matchTable_Objects[i].end(); ++it){
+    if (*it == object){
+      valid = true;
+      break;
+    }
+  }
+  }
+  vm->unlock();
+  return valid;
 }
 //-----------------------------------------------------------------------------
 
@@ -2903,6 +3309,16 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
+#if 0
+//gjt: Disable cleaning up GeomBase from the garbage collection level because
+//gjt: each Field actually owns its own instance of the GeomBase. The way
+//gjt: FieldDestruct() currently works, it looks at the GeomBase, and if that
+//gjt: were already destroyed, it causes issues. In the long run this might
+//gjt: be better implemented via a protection against accessing GeomBase from
+//gjt: FieldDestruct() in that case. But then it is important that all of the
+//gjt: Geom types correctly implement their destructor. Right now the Mesh
+//gjt: destructur is not doing all that is needed, and so the Mesh cleanup
+//ght: actually does depend on the Field garbage collection.
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_GEOMBASE.objectID){
         FTN_X(f_esmf_geombasecollectgarbage)(
@@ -2910,6 +3326,7 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
+#endif
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_XGRIDGEOMBASE.objectID){
         FTN_X(f_esmf_xgridgeombasecolgarbage)(
@@ -2917,6 +3334,11 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
+#if 0
+//gjt: Disable cleaning up LocStream from the garbage collection level because
+//gjt: it leads to issues when a field tries to destroy it later.
+//gjt: This is going to be tricky to resolve with Fortran implemented classes.
+//gjt: For now rather have small memory leaks than invalid memory access.
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_LOCSTREAM.objectID){
         FTN_X(f_esmf_locstreamcollectgarbage)(
@@ -2924,6 +3346,7 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
+#endif
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_STATE.objectID){
         FTN_X(f_esmf_statecollectgarbage)(
@@ -2968,8 +3391,9 @@ void VM::finalize(
       std::stringstream debugmsg;
       debugmsg << "ESMF Automatic Garbage Collection: delete: "
         << matchTable_Objects[0][k]->ESMC_BaseGetClassName() << " : "
-        << matchTable_Objects[0][k]->ESMC_BaseGetName();
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        << matchTable_Objects[0][k]->ESMC_BaseGetName() << " : "
+        << matchTable_Objects[0][k];
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
 #endif
       delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
       matchTable_Objects[0].pop_back();
@@ -3122,7 +3546,9 @@ void VM::timerLog(
 //
 // !ARGUMENTS:
 //
-  std::string timer){
+  std::string timer,
+  ESMC_LogMsgType_Flag msgType
+  ){
 //
 // !DESCRIPTION:
 //    Log the timer information to the default log
@@ -3133,7 +3559,7 @@ void VM::timerLog(
   std::map<std::string, VMTimer>::iterator t = timers.find(timer);
   timerMsg << "Timer '" << timer << "' accumulated time: "
     << t->second.taccu << " seconds in " << t->second.iters << " iterations.";
-  ESMC_LogDefault.Write(timerMsg.str(), ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(timerMsg.str(), msgType);
 }
 //-----------------------------------------------------------------------------
 

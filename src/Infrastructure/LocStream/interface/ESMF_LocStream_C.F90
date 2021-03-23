@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -184,3 +184,42 @@
 
   end subroutine f_esmf_locstreamdestroy
 
+  subroutine f_esmf_locstreamcollectgarbage(locstream, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldcollectgarbage()"
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_LocStreamMod
+
+    implicit none
+
+    type(ESMF_LocStream) :: locstream
+    integer, intent(out) :: rc     
+  
+    integer :: localrc              
+  
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+  
+    !print *, "collecting LocStream garbage"
+  
+    ! destruct internal data allocations
+    call ESMF_LocStreamDestruct(locstream%lstypep, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! deallocate actual LocStreamType allocation      
+    if (associated(locstream%lstypep)) then
+      deallocate(locstream%lstypep, stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg="Deallocating LocStream", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    nullify(locstream%lstypep)
+
+    ! return successfully  
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_locstreamcollectgarbage

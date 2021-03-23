@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -15,7 +15,7 @@
 
 //==============================================================================
 //BOP
-// !PROGRAM: ESMC_TestUTest - Check ESMCI::Test functionality
+// !PROGRAM: ESMCI_ExceptionsUTest - Check C++ exception functionality
 //
 // !DESCRIPTION:
 //
@@ -24,6 +24,14 @@
 
 void bareThrow(){
   throw 1;
+}
+
+void deepThrow(){
+  try{
+    throw -1;
+  }catch (int localCaught) {
+    throw localCaught;
+  }
 }
 
 class classNoDestructor{
@@ -68,6 +76,19 @@ int main(void){
   ESMCI::Test(caught==1, name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Deep throw Test");
+  strcpy(failMsg, "Did not catch correct exception value");
+  caught = 0;
+  try{
+    deepThrow();
+  }catch(int localCaught){
+    caught=localCaught;
+  }
+  ESMCI::Test(caught==-1, name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "ClassNoDestructor throw Test");

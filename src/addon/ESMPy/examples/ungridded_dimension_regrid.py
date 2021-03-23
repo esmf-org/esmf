@@ -119,10 +119,10 @@ for level in range(levels):
 from operator import mul
 num_nodes = numpy.prod(xctfield.data.shape[:])
 meanrelerr = 0
-if num_nodes is not 0:
+if num_nodes != 0:
     meanrelerr = relerr / num_nodes
 csrverr = 0
-if dstmass is not 0:
+if dstmass != 0:
     csrverr = numpy.abs(srcmass - dstmass) / dstmass
 
 # Handle the parallel case
@@ -133,7 +133,7 @@ if ESMF.pet_count() > 1:
     dstmass = helpers.reduce_val(dstmass, op=constants.Reduce.SUM)
 
 # Output the results from one processor only
-if ESMF.local_pet() is 0:
+if ESMF.local_pet() == 0:
     meanrelerr = relerr / num_nodes
     csrverr = numpy.abs(srcmass - dstmass) / dstmass
 

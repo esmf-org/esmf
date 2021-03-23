@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -45,6 +45,31 @@ typedef struct{
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_RouteHandleCreateFromFile - Create a RouteHandle
+//
+// !INTERFACE:
+ESMC_RouteHandle ESMC_RouteHandleCreateFromFile(
+  char *filename,
+  int *rc
+);
+// !RETURN VALUE:
+//  ESMC_RouteHandle
+//
+// !DESCRIPTION:
+//
+//  Create an {\tt ESMC\_RouteHandle} object.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[filename] 
+//    The file that describes the {\tt ESMC\_RouteHandle} object.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_RouteHandlePrint - Print a RouteHandle
 //
 // !INTERFACE:
@@ -62,6 +87,34 @@ int ESMC_RouteHandlePrint(
 //  \begin{description}
 //  \item[rh] 
 //    {\tt ESMC\_RouteHandle} object to be printed.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_RouteHandleWrite - Write a RouteHandle to file
+//
+// !INTERFACE:
+int ESMC_RouteHandleWrite(
+  ESMC_RouteHandle rh,          // in
+  char *filename                // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Write {\tt ESMC\_RouteHandle} object to file to save regrid information for
+//  fast input for regridding operations during runtime.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[rh] 
+//    {\tt ESMC\_RouteHandle} object to be printed.
+//  \item[filename] 
+//    The name of the file for writing the {\tt ESMC\_RouteHandle} object.
 //  \end{description}
 //
 //EOP

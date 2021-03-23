@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -72,10 +72,11 @@ use ESMF_IOScripMod
   filename = "doodle.nc"
 
   !NEX_UTest
+  write(failMsg, *) "did not return ESMF_SUCCESS"
+  write(name, *) "ESMF_OutputWeightFile"
+  call ESMF_LogWrite("Starting Test: "//trim(name))
   rc = ESMF_FAILURE
   call ESMF_OutputWeightFile(filename, factorList, factorIndexList, rc=rc)
-  write(failMsg, *) "did not return ESMF_SUCCESS"
-  write(name, *) "call ESMF_OutputWeightFile"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -102,9 +103,9 @@ use ESMF_IOScripMod
   endif
   
   !NEX_UTest
+  write(name, *) "call ESMF_OutputWeightFile with empty factor list on four PETs"
   rc = ESMF_FAILURE
   call ESMF_OutputWeightFile("doodle2.nc", factorListParallel, factorIndexListParallel, rc=rc)
-  write(name, *) "call ESMF_OutputWeightFile with empty factor list on four PETs"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   if (petCount == 1) then
     write(failMsg, *) "Did not return ESMF_RC_NOT_IMPL"

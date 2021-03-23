@@ -7,7 +7,6 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = ftn
-ESMF_F90LINKERDEFAULT   = CC
 ESMF_CXXDEFAULT         = CC
 
 ############################################################
@@ -46,54 +45,53 @@ endif
 # Print compiler version string
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 
 ############################################################
-# on XT with CCE optimization level must be set explicitely
+# Cray Fortran compiler still needs a numerical opt level default
 #
-#ESMF_OPTLEVELDEFAULT  = 2
+ESMF_OPTLEVELDEFAULT  = 2
 
 ############################################################
-# XT compute nodes do not have support for POSIX IPC (memory mapped files)
+# Disable POSIX IPC (memory mapped files) support on Cray XC
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
-# XT compute nodes do not have support for POSIX dynamic linking
+# Disable POSIX dynamic linking support on Cray XC
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
 
 ############################################################
-# XT compute nodes do not have support for "gethostid()"
+# Disable "gethostid()" support on Cray XC
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
 
 ############################################################
-# XT compute nodes do not have support for signals
+# Disable signals support on Cray XC
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
 
 ############################################################
-# XT compute nodes do not have support for system call
+# Disable system call support on Cray XC
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
 
 ############################################################
-# XT compute nodes do not have support for Pthreads
+# Disable Pthreads support on Cray XC
 #
 ESMF_PTHREADS := OFF
 
 ############################################################
-# XT compute nodes do not have support for OpenMP
+# OpenMP compiler and linker flags
 #
-ESMF_OPENMP := OFF
-ESMF_F90COMPILEOPTS += -h noomp
-ESMF_CXXCOMPILEOPTS += -h noomp
+ESMF_F90COMPILEOPTS += -homp
+ESMF_CXXCOMPILEOPTS += -fopenmp
 
 ############################################################
 # How to specify module directories
 #
-ESMF_F90IMOD        = -em -J
+ESMF_F90IMOD        = -I
 
 ############################################################
 # Help ftn to understand Fortran suffices
@@ -104,28 +102,25 @@ ESMF_F90COMPILEFIXCPP    = -f fixed -N 132 -F
 ESMF_F90COMPILEFIXNOCPP  = -f fixed -N 132
 
 ############################################################
-# Conditionally switch to C++11 standard
+# Set rpath syntax
 #
-ifneq ($(ESMF_CXXSTD),default)
-ESMF_CXXSTDFLAG         = -hstd=c++$(ESMF_CXXSTD)
-endif
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 
 ############################################################
-# Blank out variables to prevent rpath encoding
+# Shared library options
 #
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
+ESMF_SL_LIBOPTS  += -shared
 
 ############################################################
-# Special libs to link against
+# Shared object options
 #
-ESMF_F90LINKLIBS += -lpgas-dmapp
-ESMF_CXXLINKLIBS += -lpgas-dmapp
-
-############################################################
-# Blank out shared library options
-#
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_SO_F90COMPILEOPTS  = -fPIC
+ESMF_SO_F90LINKOPTS     = -shared
+ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+ESMF_SO_CXXLINKOPTS     = -shared
+ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
 
 ############################################################
 # Disable WebService testing for now

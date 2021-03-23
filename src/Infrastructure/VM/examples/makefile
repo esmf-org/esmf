@@ -14,6 +14,7 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx \
                     $(ESMF_EXDIR)/ESMF_VMUserMpiCommMultiEx \
                     $(ESMF_EXDIR)/ESMF_VMComponentEx \
                     $(ESMF_EXDIR)/ESMF_VMSendVMRecvEx \
+                    $(ESMF_EXDIR)/ESMF_VMNonBlockingEx \
                     $(ESMF_EXDIR)/ESMF_VMScatterVMGatherEx \
                     $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx \
                     $(ESMF_EXDIR)/ESMF_VMHigherRankDataEx
@@ -25,6 +26,7 @@ EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx \
                     run_ESMF_VMUserMpiCommMultiEx \
                     run_ESMF_VMComponentEx \
                     run_ESMF_VMSendVMRecvEx \
+                    run_ESMF_VMNonBlockingEx \
                     run_ESMF_VMScatterVMGatherEx \
                     run_ESMF_VMAllFullReduceEx \
                     run_ESMF_VMHigherRankDataEx
@@ -36,6 +38,7 @@ EXAMPLES_RUN_UNI  = run_ESMF_VMDefaultBasicsEx_uni \
                     run_ESMF_VMUserMpiCommMultiEx_uni \
                     run_ESMF_VMComponentEx_uni \
                     run_ESMF_VMSendVMRecvEx_uni \
+                    run_ESMF_VMNonBlockingEx_uni \
                     run_ESMF_VMScatterVMGatherEx_uni \
                     run_ESMF_VMAllFullReduceEx_uni \
                     run_ESMF_VMHigherRankDataEx_uni
@@ -93,6 +96,12 @@ run_ESMF_VMSendVMRecvEx:
 
 run_ESMF_VMSendVMRecvEx_uni:
 	$(MAKE) EXNAME=VMSendVMRecv NP=1 exfrun
+
+run_ESMF_VMNonBlockingEx:
+	$(MAKE) EXNAME=VMNonBlocking NP=4 exfrun
+
+run_ESMF_VMNonBlockingEx_uni:
+	$(MAKE) EXNAME=VMNonBlocking NP=1 exfrun
 
 run_ESMF_VMScatterVMGatherEx:
 	$(MAKE) EXNAME=VMScatterVMGather NP=4 exfrun

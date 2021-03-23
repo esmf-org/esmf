@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -41,6 +41,8 @@ module ESMF_ArrayScatterMod
 !
 !------------------------------------------------------------------------------
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -94,16 +96,35 @@ module ESMF_ArrayScatterMod
     TypeKindRankInterfaceMacro(ArrayScatter)
     module procedure ESMF_ArrayScatterNotRoot
 
-    module procedure ESMF_ArrayScatterB        !1st prototype
-    module procedure ESMF_ArrayScatterNBRoot   !1st prototype
-    module procedure ESMF_ArrayScatterNB       !1st prototype
-
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_ArrayScatter} functions.   
 !EOPI 
   end interface
 
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+^ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine c_ESMC_ArrayScatter(array, farray, typekind, rank, counts, tile, &
+      rootPet, vm, rc)
+      import                :: ESMF_Array, ESMF_TypeKind_Flag, ESMF_VM
+      type(ESMF_Array)      :: array
+      type(*)               :: farray
+      type(ESMF_TypeKind_Flag):: typekind
+      integer               :: rank, counts(*), tile, rootPet
+      type(ESMF_VM)         :: vm
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+^endif
+
+!------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -315,215 +336,5 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !----------------------------------------------------------------------------
 
 
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-!!!!!!!!!!!!!! old-style newArray calls of 1st prototype calls !!!!!!!!!!!!!!!!!
-
-! -------------------------- ESMF-public method -------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayScatterB()"
-!BOPI
-! !IROUTINE: ESMF_ArrayScatter - Scatter a LocalArray across Array
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayScatter()
-  subroutine ESMF_ArrayScatterB(array, larray, rootPET, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),    intent(inout)           :: array
-    type(ESMF_LocalArray),  intent(in)  :: larray
-    integer,                intent(in)              :: rootPET
-    type(ESMF_VM),          intent(in),   optional  :: vm
-    integer,                intent(out),  optional  :: rc  
-!
-! !DESCRIPTION:
-!     Scatter the data of an {\tt ESMF\_LocalArray} located on {\tt rootPET} 
-!     across an {ESMF\_Array} object. This version of the interface 
-!     implements the PET-based blocking paradigm: Each PET of the VM must issue
-!     this call exactly once for {\em all} of its DEs. The call is 
-!     PET-collective, meaning that all PETs must issue the call regardless 
-!     whether {\tt array}|s DELayout associates DEs with a PET or not. The
-!     call will block until all PET-local data objects are accessible.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object across which data will be scattered.
-!     \item[{[larray]}]
-!        The {\tt ESMF\_LocalArray} object that is to be scattered. Only root
-!        must provide a valid larray.
-!     \item[rootPET]
-!          PET that holds the valid data in {\tt larray}.
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method|s overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_ArrayScatterB
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayScatterNBRoot()"
-!BOPI
-! !IROUTINE: ESMF_ArrayScatter - Scatter a LocalArray across Array
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayScatter()
-  subroutine ESMF_ArrayScatterNBRoot(array, larray, rootPET, commhandle, &
-    vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),    intent(inout)           :: array
-    type(ESMF_LocalArray),  intent(in),   optional  :: larray
-    integer,                intent(in)              :: rootPET
-    type(ESMF_CommHandle),  intent(inout)           :: commhandle
-    type(ESMF_VM),          intent(in),   optional  :: vm
-    integer,                intent(out),  optional  :: rc  
-!
-! !DESCRIPTION:
-!     Scatter the data of an {\tt ESMF\_LocalArray} located on {\tt rootPET} 
-!     across an {ESMF\_Array} object. This version of the interface 
-!     implements the DE-based non-blocking paradigm.
-!     Although only {\tt rootPET} {\em must} issue this call, it is no error
-!     for other PETs to also call this routine. However, only {\tt rootPET}
-!     will receive a valid {\tt commhandle} which can be used in
-!     {\tt ESMF\_ArrayWait} to ensure that access to {\tt larray} is
-!     safe again.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object across which data will be scattered.
-!     \item[{[larray]}]
-!        The {\tt ESMF\_LocalArray} object that is to be scattered. Only root
-!        must provide a valid larray.
-!     \item[rootPET]
-!          PET that holds the valid data in {\tt larray}.
-!     \item[commhandle]
-!          Upon return {\tt commhandle} on {\tt rootPET} holds the 
-!          {\tt ESMF\_CommHandle} associated with the non-blocking scatter 
-!          operation.
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method|s overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayScatterNBRoot(array, larray, rootPET, commhandle, vm,&
-!      localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_ArrayScatterNBRoot
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayScatterNB()"
-!BOPI
-! !IROUTINE: ESMF_ArrayScatter - Scatter a LocalArray across Array
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayScatter()
-  subroutine ESMF_ArrayScatterNB(array, larray, rootPET, de, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),    intent(inout)           :: array
-    type(ESMF_LocalArray),  intent(in)  :: larray
-    integer,                intent(in)              :: rootPET
-    integer,                intent(in)              :: de
-    type(ESMF_VM),          intent(in),   optional  :: vm
-    integer,                intent(out),  optional  :: rc  
-!
-! !DESCRIPTION:
-!     Scatter the data of an {\tt ESMF\_LocalArray} located on {\tt rootPET} 
-!     across an {ESMF\_Array} object. This version of the interface 
-!     implements the DE-based non-blocking paradigm.
-!     Each PET must issue this call once for {\em each} of its DEs. The call
-!     is non-blocking and will return immediately. Use {\tt ESMF\_ArrayWait}
-!     to wait for the completion on a specific DE. No {\tt ESMF\_CommHandle} is
-!     necessary for the per DE-synchronization because the {\tt array} variable
-!     holds all required information and it is not allowed to have more than 
-!     one pending communication call per DE per Array.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object across which data will be scattered.
-!     \item[{[larray]}]
-!        The {\tt ESMF\_LocalArray} object that is to be scattered. Only root
-!        must provide a valid larray.
-!     \item[rootPET]
-!          PET that holds the valid data in {\tt larray}.
-!     \item[de]
-!          DE for which this call is issued.
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method|s overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayScatterNB(array, larray, rootPET, de, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_ArrayScatterNB
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
 end module ESMF_ArrayScatterMod
 

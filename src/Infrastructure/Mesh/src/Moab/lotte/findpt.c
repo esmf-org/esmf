@@ -1122,7 +1122,7 @@ static const char opt_constr_num_3[27] = {
 };
 
 /* which direction is constrained? */
-static const char opt_constr_dir_2[9] = {-1, 1,-1,  0,-1, 0, -1, 1,-1};
+/* static const char opt_constr_dir_2[9] = {-1, 1,-1,  0,-1, 0, -1, 1,-1}; */
 static const char opt_constr_dir_3[27] = {
   -1,-1,-1, -1, 2,-1, -1,-1,-1, 
   -1, 1,-1,  0,-1, 0, -1, 1,-1, 

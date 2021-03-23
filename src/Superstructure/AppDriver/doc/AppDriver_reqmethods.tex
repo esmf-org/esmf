@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2019, University Corporation for Atmospheric Research, 
+% Copyright 2002-2021, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -115,6 +115,10 @@ Inside the user-code called by the SetVM routine, the component has the option t
 
 Sections \ref{sec:GridSetVM} and \ref{sec:CplSetVM} provide examples for
 simple user-written SetVM routines.
+
+One common use of the SetVM approach is to implement hybrid parallelism based on MPI+OpenMP. Under ESMF, each component can use its own hybrid parallelism implementation. Different components, even if running on the same PE resources, do not have to agree on the number of MPI processes (i.e. PETs), or the number of OpenMP threads launched under each PET. Hybrid and non-hybrid components can be mixed within the same application. Coupling between components of any flavor is supported under ESMF.
+
+In order to obtain best performance when using SetVM based resource control for hybrid parallelism, it is {\em strongly recommended} to set {\tt OMP\_WAIT\_POLICY=PASSIVE} in the environment. This is one of the standard OpenMP environment variables. The {\tt PASSIVE} setting ensures that OpenMP threads relinquish the PEs as soon as they have completed their work. Without that setting ESMF resource control threads can be delayed, and context switching between components becomes more expensive.
 
 \subsubsection{Use of {\tt internal procedures} as user-provided procedures}
 \label{sec:AppDriverIntProc}

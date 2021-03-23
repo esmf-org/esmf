@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<component>
+  <attribute_package convention="ESG" purpose="General">
+    <ComponentShortName>GEOS</ComponentShortName>
+    <ComponentLongName>Goddard Earth Observing System Model</ComponentLongName>
+    <Agency>NASA</Agency>
+    <Institution>Global Modeling and Assimilation Office (GMAO)</Institution>
+    <Version>5</Version>
+    <Author>Max Suarez</Author>
+    <Discipline>Atmosphere</Discipline>
+    <PhysicalDomain>Earth System</PhysicalDomain>
+    <CodingLanguage>Fortran 90</CodingLanguage>
+    <ModelComponentFramework>ESMF (Earth System Modeling Framework)</ModelComponentFramework>
+  </attribute_package>
+</component>

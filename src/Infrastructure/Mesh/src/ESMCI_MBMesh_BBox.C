@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2019, University Corporation for Atmospheric Research, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -194,23 +194,18 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp, bool i
 
   } else {
 
-    // Get Verts in element
-    int num_verts;
-    const EntityHandle *verts;
-    merr=mbmp->mesh->get_connectivity(elem,verts,num_verts);
-    if (merr != MB_SUCCESS) {
-      Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-    }
+    // Get nodes in element
+    int num_corner_nodes;
+    const EntityHandle *corner_nodes;
+    mbmp->get_elem_corner_nodes(elem, num_corner_nodes, corner_nodes);
 
-    // Loop over verts
-    for(int i=0; i<num_verts; i++) {
-      // Get vert coords
+    // Loop over corner_nodes in elem
+    for(int i=0; i<num_corner_nodes; i++) {
+
+      // Get node coords
       double coords[3];
-      merr=mbmp->mesh->get_coords(verts+i,1,coords);
-      if (merr != MB_SUCCESS) {
-        Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-      }
-
+      mbmp->get_node_cart_coords(corner_nodes[i], coords);   
+      
       // Modify min-max
       for (int j = 0; j < dim; j++) {
         if (coords[j] < min[j]) min[j] = coords[j];
@@ -237,27 +232,25 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp, bool i
       //   const double *coord = coords.data(node);
 
       // Loop over verts
-      for(int i=0; i<num_verts; i++) {
-        // Get vert coords
+      for(int i=0; i<num_corner_nodes; i++) {
+
+        // Get node coords
         double coord[3];
-        merr=mbmp->mesh->get_coords(verts+i,1,coord);
-        if (merr != MB_SUCCESS) {
-          Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-        }
-    
+        mbmp->get_node_cart_coords(corner_nodes[i], coord);   
+        
         // Compute unit vector in direction of point 
         double len=std::sqrt(coord[0]*coord[0]+coord[1]*coord[1]+coord[2]*coord[2]);
         double uvec[3];
         uvec[0]=coord[0]/len;
         uvec[1]=coord[1]/len;
         uvec[2]=coord[2]/len;
-    
+        
         // Compute new point
         double new_pnt[3];
         new_pnt[0]=coord[0]+diam*uvec[0];
         new_pnt[1]=coord[1]+diam*uvec[1];
         new_pnt[2]=coord[2]+diam*uvec[2];
-    
+        
         for (UInt j = 0; j < 3; j++) {
           if (new_pnt[j] < min[j]) min[j] = new_pnt[j];
           if (new_pnt[j] > max[j]) max[j] = new_pnt[j];
@@ -274,32 +267,34 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp) :
 {
 
   int merr;
-
+  
   // Set dim as spatial dim
   dim=mbmp->sdim;
-
+  
   // Init
   for (int i =0; i < dim; i++) {
     min[i] = std::numeric_limits<double>::max();
     max[i] = -std::numeric_limits<double>::max();
   }
-
-  // Loop verts
-  for(int i=0; i<mbmp->num_verts; i++) {
-      // Get vert coords
-      double coords[3];
-      merr=mbmp->mesh->get_coords(mbmp->verts+i,1,coords);
-      if (merr != MB_SUCCESS) {
-        Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
-      }
-
-      // Modify min-max
-      for (int j = 0; j < dim; j++) {
-        if (coords[j] < min[j]) min[j] = coords[j];
-        if (coords[j] > max[j]) max[j] = coords[j];
-      }
+  
+  // Get all nodes
+  Range all_nodes;
+  mbmp->get_all_nodes(all_nodes);
+  
+  // Loop nodes
+  for (Range::iterator it=all_nodes.begin(); it !=all_nodes.end(); it++) {
+    EntityHandle node=*it;
+    
+    // Get node coords
+    double coords[3];
+    mbmp->get_node_cart_coords(node, coords);   
+    
+    // Modify min-max
+    for (int j = 0; j < dim; j++) {
+      if (coords[j] < min[j]) min[j] = coords[j];
+      if (coords[j] > max[j]) max[j] = coords[j];
+    }
   }
-
 }
 
 void MBMesh_BBox::checkEmpty() {

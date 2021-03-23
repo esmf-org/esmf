@@ -98,9 +98,9 @@ module user_coupler
     ! Need to reconcile import and export states
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateReconcile(importState, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_StateReconcile(importState, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateReconcile(exportState, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_StateReconcile(exportState, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
                                   
   end subroutine user_init
@@ -145,8 +145,7 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
                           
     ! copy all Attribute information into export State
-    call ESMF_AttributeCopy(importState, exportState, &
-      attcopy=ESMF_ATTCOPY_HYBRID, rc=rc)
+    call ESMF_AttributeCopy(importState, exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
   
   end subroutine user_run

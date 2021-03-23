@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -370,7 +370,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     integer                       :: localElemCount, sdim, pdim
     type(ESMF_XGridGeomType_Flag), allocatable :: xggt_a(:), xggt_b(:)
     integer :: tileCount
-    
+    integer :: side
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -776,6 +776,15 @@ function ESMF_XGridCreate(keywordEnforcer, &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
       endif
+
+      ! Set temp xgrid info in mesh
+      side=1
+      call c_esmc_meshsetxgridinfo(meshAt(i), side, i, localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Merge meshes
       if(i == 1) meshA = meshAt(i)
       if(i .ge. 2) then
         ! call into mesh merge with priority taken into account
@@ -788,7 +797,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
         if(i .gt. 2) then
           ! the intermediate meshA is only a pointer type of mesh at this point, 
           ! call the C api to destroy it
-          call C_ESMC_MeshDestroy(meshA%this, localrc)
+          call C_ESMC_MeshDestroy(meshA%this, ESMF_TRUE, localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -856,6 +865,14 @@ function ESMF_XGridCreate(keywordEnforcer, &
         return
       endif
 
+      ! Set temp xgrid info in mesh
+      side=2
+      call c_esmc_meshsetxgridinfo(meshBt(i), side, i, localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Merge meshes
       if( i == 1) meshB = meshBt(i)
       ! call into mesh merge with priority taken into account
       ! meshBt is truncated(if necessary) and concatenated onto meshB 
@@ -866,7 +883,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         if(i .gt. 2) then
-          call C_ESMC_MeshDestroy(meshB%this, localrc)
+          call C_ESMC_MeshDestroy(meshB%this, ESMF_TRUE, localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1031,7 +1048,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! When there is only 1 grid per side, optimization can be done but it's not clear for multiple Grids.
     compute_midmesh = 0
     do i = 1, ngrid_a
-      call c_esmc_xgridregrid_create(meshAt(i), mesh, &
+      call c_esmc_xgridregrid_createP(meshAt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -1058,9 +1075,12 @@ function ESMF_XGridCreate(keywordEnforcer, &
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
+
+
       
       ! Now the reverse direction
-      call c_esmc_xgridregrid_create(mesh, meshAt(i), &
+#ifndef BOB_XGRID_DEBUG
+      call c_esmc_xgridregrid_createP(mesh, meshAt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -1069,6 +1089,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+      nentries=0
+#endif
       allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
       if(nentries .ge. 1) then
@@ -1091,7 +1114,8 @@ function ESMF_XGridCreate(keywordEnforcer, &
 
     ! now do the B side
     do i = 1, ngrid_b
-      call c_esmc_xgridregrid_create(meshBt(i), mesh, &
+#ifndef BOB_XGRID_DEBUG
+      call c_esmc_xgridregrid_createP(meshBt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -1100,6 +1124,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+      nentries=0
+#endif
       allocate(xgtype%sparseMatB2X(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatB2X(i)%factorList(nentries))
       if(nentries .ge. 1) then
@@ -1120,7 +1147,8 @@ function ESMF_XGridCreate(keywordEnforcer, &
       endif
     
       ! Now the reverse direction
-      call c_esmc_xgridregrid_create(mesh, meshBt(i), &
+#ifndef BOB_XGRID_DEBUG
+      call c_esmc_xgridregrid_createP(mesh, meshBt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
@@ -1129,6 +1157,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#else
+      nentries=0
+#endif
       allocate(xgtype%sparseMatX2B(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatX2B(i)%factorList(nentries))
       if(nentries .ge. 1) then
@@ -1171,7 +1202,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
       xgtype%mesh = mesh
 
      !! Debug output of xgrid mesh
-     ! call ESMF_MeshWrite(mesh, "xgrid_mesh")
+#ifdef BOB_XGRID_DEBUG
+      call ESMF_MeshWrite(mesh, "xgrid_mid_mesh")
+#endif
 
     else
       call ESMF_MeshDestroy(mesh, rc=localrc)
@@ -2821,16 +2854,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_XGridDestroy - Release resources associated with an XGrid
 ! !INTERFACE:
 
-  subroutine ESMF_XGridDestroy(xgrid, keywordEnforcer, rc)
+  subroutine ESMF_XGridDestroy(xgrid, keywordEnforcer, noGarbage, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_XGrid), intent(inout)          :: xgrid       
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,          intent(in),   optional :: noGarbage
     integer,          intent(out),  optional :: rc     
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt noGarbage}.
+!   The argument provides a mechanism to override the default garbage collection
+!   mechanism when destroying an ESMF object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2841,6 +2881,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [xgrid]
 !       {\tt ESMF\_XGrid} object.
+! \item[{[noGarbage]}]
+!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!      from the ESMF garbage collection system. Note however that under this
+!      condition ESMF cannot protect against accessing the destroyed object
+!      through dangling aliases -- a situation which may lead to hard to debug
+!      application crashes.
+!
+!      It is generally recommended to leave the {\tt noGarbage} argument
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF
+!      garbage collection system which will prevent problems with dangling
+!      aliases or incorrect sequences of destroy calls. However this level of
+!      support requires that a small remnant of the object is kept in memory
+!      past the destroy call. This can lead to an unexpected increase in memory
+!      consumption over the course of execution in applications that use
+!      temporary ESMF objects. For situations where the repeated creation and
+!      destruction of temporary objects leads to memory issues, it is
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully
+!      removing the entire temporary object from memory.
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2849,7 +2907,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     ! Local variables
     integer :: localrc, i
-    type(ESMF_Status) :: xgridstatus
+    type(ESMF_Status)   :: xgridstatus
+    type(ESMF_Logical)  :: valid
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -2864,6 +2923,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif 
+
+    ! See if this object is even still valid in garbage collection
+    call c_ESMC_VMValidObject(xgrid%xgtypep%base, valid, localrc)
+    if (ESMF_LogFoundError(localrc, &
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+    if (valid/=ESMF_TRUE) then
+      ! nothing to be done here, return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+      return
+    endif
 
     if(xgrid%xgtypep%storeOverlay) then
       call ESMF_MeshDestroy(xgrid%xgtypep%mesh, rc=localrc)
@@ -3031,8 +3101,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(noGarbage)) then
+      if (noGarbage) then
+        ! destroy Base object (which also removes it from garbage collection)
+        call ESMF_BaseDestroy(xgrid%xgtypep%base, noGarbage, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! remove reference to this object from ESMF garbage collection table
+        call c_ESMC_VMRmFObject(xgrid)
+        ! deallocate the actual field data structure
+        deallocate(xgrid%xgtypep, stat=localrc)
+        if (ESMF_LogFoundDeallocError(localrc, &
+          msg="Deallocating XGrid information", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
+
+    ! Mark this XGrid as invalid
+    nullify(xgrid%xgtypep)
+
+    ! Set init status to indicate structure has been destroyed
     ESMF_INIT_SET_DELETED(xgrid)
 
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_XGridDestroy

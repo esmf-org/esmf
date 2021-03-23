@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -82,13 +82,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
-      integer, parameter :: ESMF_VERSION_MINOR        = 0
+      integer, parameter :: ESMF_VERSION_MINOR        = 1
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .true.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.0.0"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.1.0"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -654,8 +654,7 @@
       end type
 
       type(ESMF_AttWriteFlag), parameter ::  &
-        ESMF_ATTWRITE_TAB = ESMF_AttWriteFlag(0), &
-        ESMF_ATTWRITE_XML = ESMF_AttWriteFlag(1)
+        ESMF_ATTWRITE_JSON = ESMF_AttWriteFlag(0)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttReconcileFlag
@@ -689,8 +688,7 @@
 
       type(ESMF_AttCopy_Flag), parameter ::  &
         ESMF_ATTCOPY_REFERENCE = ESMF_AttCopy_Flag(0), &
-        ESMF_ATTCOPY_VALUE = ESMF_AttCopy_Flag(1), &
-        ESMF_ATTCOPY_HYBRID = ESMF_AttCopy_Flag(2)
+        ESMF_ATTCOPY_VALUE = ESMF_AttCopy_Flag(1)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttGetCountFlag
@@ -708,8 +706,7 @@
       type(ESMF_AttGetCountFlag), parameter ::  &
         ESMF_ATTGETCOUNT_ATTRIBUTE = ESMF_AttGetCountFlag(0), &
         ESMF_ATTGETCOUNT_ATTPACK = ESMF_AttGetCountFlag(1), &
-        ESMF_ATTGETCOUNT_ATTLINK = ESMF_AttGetCountFlag(2), &
-        ESMF_ATTGETCOUNT_TOTAL = ESMF_AttGetCountFlag(3)
+        ESMF_ATTGETCOUNT_TOTAL = ESMF_AttGetCountFlag(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttNestFlag
@@ -778,7 +775,10 @@
            ESMF_EXTRAPMETHOD_NONE    = ESMF_ExtrapMethod_Flag(0), &
            ESMF_EXTRAPMETHOD_NEAREST_STOD = ESMF_ExtrapMethod_Flag(1), &
            ESMF_EXTRAPMETHOD_NEAREST_IDAVG = ESMF_ExtrapMethod_Flag(2), &
-           ESMF_EXTRAPMETHOD_CREEP = ESMF_ExtrapMethod_Flag(3)
+           ESMF_EXTRAPMETHOD_NEAREST_D = ESMF_ExtrapMethod_Flag(3), &
+           ESMF_EXTRAPMETHOD_CREEP = ESMF_ExtrapMethod_Flag(4), &
+           ESMF_EXTRAPMETHOD_CREEP_NRST_D = ESMF_ExtrapMethod_Flag(5)
+
 
 !------------------------------------------------------------------------------
       type ESMF_LineType_Flag
@@ -908,6 +908,20 @@
         ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(7), &
         ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(8)
 
+
+!------------------------------------------------------------------------------
+!
+  type ESMF_FileMode_Flag
+#ifndef ESMF_NO_SEQUENCE
+  sequence
+#endif
+ ! private
+    integer :: filemode
+  end type
+
+  type(ESMF_FileMode_Flag), parameter :: &
+        ESMF_FILEMODE_BASIC = ESMF_FileMode_Flag(0), &
+        ESMF_FILEMODE_WITHAUX = ESMF_FileMode_Flag(1)
 
 !------------------------------------------------------------------------------
 !
@@ -1100,14 +1114,12 @@
              ESMF_PIN_DE_TO_SSI_CONTIG
              
       public ESMF_AttCopy_Flag, &
-             ESMF_ATTCOPY_HYBRID, &
              ESMF_ATTCOPY_REFERENCE, &
              ESMF_ATTCOPY_VALUE
-             
+
       public ESMF_AttGetCountFlag, &
              ESMF_ATTGETCOUNT_ATTRIBUTE, &
              ESMF_ATTGETCOUNT_ATTPACK, &
-             ESMF_ATTGETCOUNT_ATTLINK, &
              ESMF_ATTGETCOUNT_TOTAL
              
       public ESMF_AttReconcileFlag, &
@@ -1119,9 +1131,8 @@
              ESMF_ATTNEST_ON
              
       public ESMF_AttWriteFlag, &
-             ESMF_ATTWRITE_TAB, &
-             ESMF_ATTWRITE_XML
-             
+             ESMF_ATTWRITE_JSON
+
       public ESMF_ATT_GRIDDED_DIM_LABELS, &
              ESMF_ATT_UNGRIDDED_DIM_LABELS
 
@@ -1137,7 +1148,9 @@
              ESMF_EXTRAPMETHOD_NONE, & 
              ESMF_EXTRAPMETHOD_NEAREST_STOD, &
              ESMF_EXTRAPMETHOD_NEAREST_IDAVG, &
-             ESMF_EXTRAPMETHOD_CREEP
+             ESMF_EXTRAPMETHOD_NEAREST_D, &
+             ESMF_EXTRAPMETHOD_CREEP, &
+             ESMF_EXTRAPMETHOD_CREEP_NRST_D
 
       public ESMF_LineType_Flag, &
              ESMF_LINETYPE_CART, &
@@ -1213,6 +1226,8 @@
              ESMF_FILEFORMAT_CFGRID, ESMF_FILEFORMAT_MOSAIC, &
              ESMF_FILEFORMAT_UNKNOWN, ESMF_FILEFORMAT_TILE
 
+      public ESMF_FileMode_Flag, ESMF_FILEMODE_BASIC, ESMF_FILEMODE_WITHAUX
+
       public ESMF_FileStatus_Flag, ESMF_FILESTATUS_UNKNOWN,   &
                                   ESMF_FILESTATUS_OLD,       &
                                   ESMF_FILESTATUS_NEW,       &
@@ -1262,6 +1277,7 @@ interface operator (==)
   module procedure ESMF_bfeq
   module procedure ESMF_ctfeq
   module procedure ESMF_tnfeq
+  module procedure ESMF_pineq
   module procedure ESMF_freq
   module procedure ESMF_ifeq
   module procedure ESMF_inqfeq
@@ -1270,6 +1286,7 @@ interface operator (==)
   module procedure ESMF_ioeq
   module procedure ESMF_RegridPoleEq
   module procedure ESMF_FileFormatEq
+  module procedure ESMF_FileModeEq
   module procedure ESMF_FileStatusEq
   module procedure ESMF_RegridMethodEq
   module procedure ESMF_ExtrapMethodEq
@@ -1288,10 +1305,13 @@ interface operator (/=)
   module procedure ESMF_bfne
   module procedure ESMF_ctfne
   module procedure ESMF_tnfne
+  module procedure ESMF_ifneq
+  module procedure ESMF_pinne
   module procedure ESMF_frne
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
   module procedure ESMF_FileFormatNe
+  module procedure ESMF_FileModeNe
   module procedure ESMF_FileStatusNe
   module procedure ESMF_RegridMethodNe
   module procedure ESMF_ExtrapMethodNe
@@ -1719,6 +1739,23 @@ subroutine ESMF_tfas2_v (tfval, lval)
 end subroutine
 
 !------------------------------------------------------------------------------
+! function to compare two ESMF_Pin_Flag types
+
+function ESMF_pineq(pin1, pin2)
+ logical ESMF_pineq
+ type(ESMF_Pin_Flag), intent(in) :: pin1, pin2
+
+ ESMF_pineq = (pin1%value == pin2%value)
+end function
+
+function ESMF_pinne(pin1, pin2)
+ logical ESMF_pinne
+ type(ESMF_Pin_Flag), intent(in) :: pin1, pin2
+
+ ESMF_pinne = (pin1%value /= pin2%value)
+end function
+
+!------------------------------------------------------------------------------
 ! function to compare two ESMF_Direction_Flag types
 
 function ESMF_freq(fr1, fr2)
@@ -1760,6 +1797,13 @@ function ESMF_ifeq(if1, if2)
   type(ESMF_Index_Flag), intent(in) :: if1, if2
 
   ESMF_ifeq = (if1%i_type == if2%i_type)
+end function
+
+function ESMF_ifneq(if1, if2)
+  logical ESMF_ifneq
+  type(ESMF_Index_Flag), intent(in) :: if1, if2
+
+  ESMF_ifneq = (if1%i_type /= if2%i_type)
 end function
 
 !------------------------------------------------------------------------------
@@ -1805,8 +1849,7 @@ end function
 ! subroutine to print the corresponding C pointer of ESMF_Pointer object
 
 subroutine ESMF_PointerPrint(ptr)
- type(ESMF_Pointer), intent(in) :: ptr
-
+  type(ESMF_Pointer), intent(in) :: ptr
   call c_pointerprint(ptr)
 end subroutine
 
@@ -1883,9 +1926,34 @@ end function ESMF_FileFormatEq
 
 end function ESMF_FileFormatNe
 
-
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileModeEq"
+function ESMF_FileModeEq(FileMode1, FileMode2)
+
+  logical :: ESMF_FileModeEq
+
+  type (ESMF_FileMode_Flag), intent(in) :: FileMode1, FileMode2
+
+  ESMF_FileModeEq = (FileMode1%filemode == FileMode2%filemode)
+
+end function ESMF_FileModeEq
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileModeNe"
+function ESMF_FileModeNe(FileMode1, FileMode2)
+
+  logical :: ESMF_FileModeNe
+
+  type (ESMF_FileMode_Flag), intent(in) :: FileMode1, FileMode2
+
+  ESMF_FileModeNe = (FileMode1%filemode /= FileMode2%filemode)
+
+end function ESMF_FileModeNe
+!------------------------------------------------------------------------------
+
 ! function to compare/assign two ESMF_FileStatus_Flags
+!------------------------------------------------------------------------------
 
 subroutine ESMF_FileStatusAs(fs1, fs2)
  type(ESMF_FileStatus_Flag), intent(out) :: fs1
@@ -2318,7 +2386,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2019 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2021 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"

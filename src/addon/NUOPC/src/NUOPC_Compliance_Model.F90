@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research, 
+! Copyright 2002-2021, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -529,15 +529,6 @@ contains
             !    line=__LINE__, &
             !    file=FILENAME)) &
             !    return  ! bail out
-
-            ! Component Attributes should be set up -> ready to output
-            !    call ESMF_AttributeWrite(comp, convention='CIM 1.5', &
-            !      purpose='ModelComp', &
-            !      attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-            !    if (ESMF_LogFoundError(rc, &
-            !      line=__LINE__, &
-            !      file=FILENAME)) &
-            !      return  ! bail out
 
             call dispatchPhaseChecks(prefix, comp, ESMF_METHOD_INITIALIZE, &
                 phase, importState, exportState, clock, .false., rc=rc)
@@ -1337,7 +1328,7 @@ contains
     !      file=FILENAME)) &
     !      return  ! bail out
     !
-    !    attributeName = "TransferOfferGeomObject"
+    !    attributeName = "ProducerTransferOffer"
     !    call checkFieldAttribute(prefix, field=field, &
     !      attributeName=attributeName, convention=convention, purpose=purpose, &
     !      rc=rc)
@@ -1346,7 +1337,25 @@ contains
     !      file=FILENAME)) &
     !      return  ! bail out
     !
-    !    attributeName = "TransferActionGeomObject"
+    !    attributeName = "ProducerTransferAction"
+    !    call checkFieldAttribute(prefix, field=field, &
+    !      attributeName=attributeName, convention=convention, purpose=purpose, &
+    !      rc=rc)
+    !    if (ESMF_LogFoundError(rc, &
+    !      line=__LINE__, &
+    !      file=FILENAME)) &
+    !      return  ! bail out
+    !
+    !    attributeName = "ConsumerTransferOffer"
+    !    call checkFieldAttribute(prefix, field=field, &
+    !      attributeName=attributeName, convention=convention, purpose=purpose, &
+    !      rc=rc)
+    !    if (ESMF_LogFoundError(rc, &
+    !      line=__LINE__, &
+    !      file=FILENAME)) &
+    !      return  ! bail out
+    !
+    !    attributeName = "ConsumerTransferAction"
     !    call checkFieldAttribute(prefix, field=field, &
     !      attributeName=attributeName, convention=convention, purpose=purpose, &
     !      rc=rc)
@@ -1482,7 +1491,7 @@ contains
             rcToReturn=rc)) &
             return  ! bail out
 
-        attributeName = "TransferOfferGeomObject"
+        attributeName = "ProducerTransferOffer"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
             rc=localrc)
@@ -1492,7 +1501,27 @@ contains
             rcToReturn=rc)) &
             return  ! bail out
 
-        attributeName = "TransferActionGeomObject"
+        attributeName = "ProducerTransferAction"
+        call NUOPC_CheckFieldAttribute(prefix, field=field, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+
+        attributeName = "ConsumerTransferOffer"
+        call NUOPC_CheckFieldAttribute(prefix, field=field, &
+            attributeName=attributeName, convention=convention, purpose=purpose, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+
+        attributeName = "ConsumerTransferAction"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
             rc=localrc)

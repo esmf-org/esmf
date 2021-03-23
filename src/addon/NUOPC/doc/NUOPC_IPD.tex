@@ -3,6 +3,8 @@
 
 \label{IPD}
 
+{\bf IMPORTANT:  Use of explicit Initialize Phase Definition versions and phase labels is deprecated - this section is provided only for reference for NUOPC caps that still use the IPD syntax.  See the section on Semantic Specialization Labels for the preferred method of specializing NUOPC caps.}
+
 The interaction between NUOPC compliant components during the initialization process is regulated by the {\bf Initialize Phase Definition} or {\bf IPD}. The IPDs are versioned, with a higher version number indicating backward compatibility with all previous versions.
 
 There are two perspectives of looking at the IPD. From the driver perspective the IPD regulates the sequence in which it must call the different phases of the Initialize() routines of its child components. To this end the generic {\tt NUOPC\_Driver} component implements support for IPDs up to a version specified in the API documentation.
@@ -11,7 +13,7 @@ The other angle of looking at the IPD is from the driver's child components. Fro
 
 The driver also calls into its own internal initialize methods. This allows the driver to participate in the initialization of its children in a structured fashion. The internal initialization phases of a driver are published via the {\tt InternalInitializePhaseMap} attribute.
 
-The following tables document the meaning of each initialization phase of the available IPD versions for the child components and for the driver component itself. The phases are listed in the same sequence in which the driver calls them.
+The following tables document the meaning of each initialization phase of the available IPD versions for the child components and for the driver component itself. The phases are listed in the sequence in which the driver calls them.
 \newline
 
 \vspace*{2ex}
@@ -190,3 +192,458 @@ The following tables document the meaning of each initialization phase of the av
      dependencies have been statisfied, or a dead-lock situation is detected.}\\ 
      \hline\hline
 \end{longtable}
+
+\subsection{NUOPC\_Driver IPD implementation}
+\bigskip{\sf INITIALIZE:}
+\begin{itemize}
+\item phase 0: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item Ensure that the {\tt InitializePhaseMap} and {\tt InternalInitializePhaseMap} attributes are set consistent with the available NUOPC Initialize Phase Definition (IPD) versions (see section \ref{IPD} for a precise definition). The default implementation uses IPDv02 for {\tt InitializePhaseMap}, and sets
+    \begin{itemize}
+    \item IPDv02p1  ({\sc NUOPC Provided})
+    \item IPDv02p3  ({\sc NUOPC Provided})
+    \item IPDv02p5  ({\sc NUOPC Provided}).
+    \end{itemize}  
+ The default implementation uses IPDv05 for {\tt InternalInitializePhaseMap}, and sets
+    \begin{itemize}
+    \item IPDv05p1  ({\sc NUOPC Provided})
+    \item IPDv05p2  ({\sc NUOPC Provided})
+    \item IPDv05p3  ({\sc NUOPC Provided})
+    \item IPDv05p4  ({\sc NUOPC Provided})
+    \item IPDv05p6  ({\sc NUOPC Provided})
+    \item IPDv05p8  ({\sc NUOPC Provided}).
+    \end{itemize}    
+  \end{itemize}  
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+    \item A default Initialize entry point for the higher level (e.g. application level) to initialize the Driver with a single call.
+    \item Internally calls into the  {\tt InitializePhaseMap}: IPDv02p1, IPDv02p3, IPDv02p5 phases in sequence.
+  \end{itemize}  
+
+\item {\tt InitializePhaseMap}: IPDv02p1 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Allocate and initialize internal data structures.
+  \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, but only if the incoming clock is valid.
+  \item {\it Required specialization} to set component services: {\tt label\_SetModelServices}.
+  \begin{itemize}
+    \item Call {\tt NUOPC\_DriverAddComp()} for all Model, Mediator, and Connector components to be added.
+    \item Optionally replace the default clock. 
+  \end{itemize}
+  \item Create States for all of the child GridComps.
+  \item Create Connectors to/from Driver component itself.
+  \item Set default run sequence.
+  \item Execute Initialize phase=0 for all Model, Mediator, and Connector components. This is the method where each component is required to initialize its {\tt InitializePhaseMap} Attribute.
+  \item {\it Optional specialization} to analyze and modify the {\tt InitializePhaseMap} Attribute of the child components before the Driver uses it: {\tt label\_ModifyInitializePhaseMap}.
+  \item {\it Optional specialization} to set run sequence: {\tt label\_SetRunSequence}.
+  \item Drive the initialize sequence for the child components, compatible with up to IPDv05, as documented in section \ref{IPD}, through IPDv05p3.
+  \end{itemize}  
+
+\item {\tt InitializePhaseMap}: IPDv02p3 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Continue to drive the initialize sequence for the child components, compatible with up to IPDv05, as documented in section \ref{IPD}, through IPDv05p7.
+  \end{itemize}  
+
+\item {\tt InitializePhaseMap}: IPDv02p5 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Continue to drive the initialize sequence for the child components, compatible with up to IPDv05, as documented in section \ref{IPD}, through IPDv05p8.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p1 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Request that fields in export and import State of child components are mirrored onto the driver's own import and export States.
+  \item This includes transferring the associated Grid, Mesh, or LocStream objects.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p2 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Reset the request of field mirroring.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p3 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Add the {\tt REMAPMETHOD=redist} option to all entries in {\tt CplList} attribute on all Connectors to/from the driver itself.
+  \item {\it Optional specialization} to modify the {\tt CplList} attribute on all of the Connectors: {\tt label\_ModifyCplLists}.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p4 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Check that all connected fields in the driver's own import and export State have a producer connection.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p6 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Complete the allocation of all the fields in the driver's own import and export State.
+  \end{itemize}  
+
+\item {\tt InternalInitializePhaseMap}: IPDv05p8 ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Set the {\tt InitializeDataComplete} consistent with the data-dependency protocol.
+  \end{itemize}  
+
+\end{itemize}
+
+\bigskip{\sf RUN:}
+\begin{itemize}
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item If the incoming clock is valid, set the internal stop time to one time step interval on the incoming clock.
+  \item Drive the time stepping loop, from current time to stop time, incrementing by time step.
+  \begin{itemize}
+    \item For each time step iteration the Model and Connector components Run() methods are being called according to the run sequence.
+  \end{itemize}  
+  \end{itemize}    
+\end{itemize}
+
+\bigskip{\sf FINALIZE:}
+\begin{itemize}
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item Execute the Finalize() methods of all Connector components in order.
+  \item Execute the Finalize() methods of all Model components in order.
+  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
+  \item Destroy all Model components and their import and export states.
+  \item Destroy all Connector components.
+  \item Internal clean-up.
+  \end{itemize}      
+\end{itemize}
+
+\subsection{NUOPC\_ModelBase IPD implementation}
+\bigskip{\sf INITIALIZE:}
+\begin{itemize}
+\item phase 0: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
+    \begin{itemize}
+    \item IPDv00p1 = 1: ({\sc Required, Implementor Provided})
+    \item IPDv00p2 = 2: ({\sc Required, Implementor Provided})
+    \item IPDv00p3 = 3: ({\sc Required, Implementor Provided})
+    \item IPDv00p4 = 4: ({\sc Required, Implementor Provided})
+    \end{itemize}  
+  \end{itemize}  
+\end{itemize}
+
+\bigskip{\sf RUN:}
+\begin{itemize}
+\item phase 1: ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item {\sc Specialization Required/Provided}: {\tt label\_SetRunClock} to check and set the internal Clock against the incoming Clock.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: By default check that internal Clock and incoming Clock agree on current time and that the time step of the incoming Clock is a multiple of the internal Clock time step. Under these conditions set the internal stop time to one time step interval of the incoming Clock. Otherwise exit with error, flagging an incompatibility.
+  \end{itemize}
+  \item {\sc Specialization Required/Provided}: {\tt label\_CheckImport} to check Fields in the import State.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization is present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: By default check that all import Fields are at the current time of the internal Clock.
+  \end{itemize}
+  \item Time stepping loop: starting at current time, running to stop time of the internal Clock.
+  \begin{itemize}
+  \item Timestamp the Fields in the export State according to the current time of the internal Clock.
+  \item {\sc Specialization Required}: {\tt label\_Advance} to execute model or mediation code.
+  \item {\sc Specialization Optional}: {\tt label\_AdvanceClock} to advance the current time of the internal Clock. By default (without specialization) advance the current time of the internal Clock according to the time step of the internal Clock.
+  \end{itemize}
+  \item {\sc Specialization Optional}: {\tt label\_TimestampExport} to timestamp Fields in the export State.
+  \end{itemize}    
+\end{itemize}
+
+\bigskip{\sf FINALIZE:}
+\begin{itemize}
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
+  \end{itemize}      
+\end{itemize}
+
+\subsection{NUOPC\_Model IPD implementation}
+\bigskip{\sf INITIALIZE:}
+\begin{itemize}
+\item phase 0: Set Initialize Phase Definition Version ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
+    \begin{itemize}
+    \item IPDv00p1 = 1: ({\sc Required, Implementor Provided})
+      \begin{itemize}
+      \item Advertise Fields in import and export States.
+      \end{itemize}
+    \item IPDv00p2 = 2: ({\sc Required, Implementor Provided})
+      \begin{itemize}
+      \item Realize the advertised Fields in import and export States.
+      \end{itemize}  
+    \item IPDv00p3 = 3: ({\sc Required, NUOPC Provided})
+      \begin{itemize}
+      \item Check compatibility of the Fields' Connected status.
+      \end{itemize}
+    \item IPDv00p4 = 4: ({\sc Required, NUOPC Provided})
+      \begin{itemize}
+      \item Handle Field data initialization. Time stamp the export Fields.
+      \end{itemize}
+    \end{itemize}  
+  \end{itemize}  
+\item IPDv00p1, IPDv01p1, IPDv02p1, IPDv03p1, IPDv04p1, IPDv05p1: Advertise fields in import and export States ({\sc Required, Implementor Provided})
+  \begin{itemize}
+  \item Advertise fields in import/export states using one of the two {\tt NUOPC\_Advertise} methods (\ref{NUOPC_AdvertiseField}, \ref{NUOPC_AdvertiseFields}). The methods require Standard Names for each field, and the Standard Names must appear in the NUOPC Field Dictionary or a runtime error is generated.  {\tt NUOPC\_Advertise} accepts a {\tt TransferOfferGeomObject} argument which may be one of:
+    \begin{itemize}
+    \item ``will provide'' (default) - The field will provide its own geometric object (i.e., Grid, Mesh, or LocStream)
+    \item ``can provide''- The field can provide its own geometric object, but only if the connected field in the other component will not provide it
+    \item ``cannot provide'' - The field cannot provide its own geometric object. It must accept a geometric object from a connected field.
+    \end{itemize}
+  See section \ref{TransferGeom} for more details about transferring geometric objects between NUOPC components.
+  Memory is not allocated for advertised fields, but attributes are set on the field which can be used in later phases, especially for determining if another component can provide and/or consume the advertised field.
+  \end{itemize}
+\item IPDv00p2, IPDv01p3, IPDv02p3, IPDv03p3, IPDv04p3, IPDv05p4: Realize field {\em providing} a geometric object ({\sc Required*, Implementor Provided})
+  \begin{itemize}
+  \item Realize connected import and export fields that have their TransferActionGeomObject attribute set to ``provide'', i.e., that will provide their own geometric object (i.e., Grid, Mesh, or LocStream). ``provide'' is the default value of TransferActionGeomObject. Realize means an ESMF\_Field object is created on a geometric object and memory for the field is allocated or referenced.
+
+The {\tt NUOPC\_Realize} methods (\ref{NUOPC_RealizeCompleteG}, \ref{NUOPC_RealizeCompleteLS}, \ref{NUOPC_RealizeCompleteM}, \ref{NUOPC_RealizeField}, \ref{NUOPC_RealizeTransfer}) are used to realize fields. Only previously advertised fields can be realized and the field's name is used to search the state for the previously advertised field.
+
+*Note: This phase is not required if all fields are {\em accepting} a geometric object.
+  \end{itemize}
+\item IPDv03p4, IPDv04p4, IPDv05p5: Modify decomposition of accepted geometric object ({\sc Optional, Implementor Provided})
+  \begin{itemize}
+  \item Optionally modify the decomposition information of any accepted geometric object by replacing the DistGrid. In the case of the Grid geometric object, this can be accomplished by retrieving the Grid (and its DistGrid) from the Field, creating a new DistGrid with modified decomposition, creating a new Grid on the new (modified) DistGrid, and then using {\tt ESMF\_FieldEmptySet} to replace the existing Grid with the new one.
+
+This phase is useful when accepting a Grid from another component, but when the PET counts differ between components. In this case, a new decomposition needs to be set based on the current processor count.
+  \end{itemize}
+\item IPDv03p5, IPDv04p5, IPDv05p6: Realize fields {\em accepting} a geometric object ({\sc Required*, Implementor Provided})
+  \begin{itemize}
+  \item Realize connected import and export fields that have their TransferActionGeomObject attribute set to ``accept'', i.e., that will accept a geometric object from a connected field in another component.  If the generic {\tt NUOPC\_Connector} is used, at this point the full geometric object has already been set in the field and only a call to {\tt ESMF\_FieldEmptyComplete} is required to allocate memory for the field.
+
+The {\tt NUOPC\_Realize} methods (\ref{NUOPC_RealizeCompleteG}, \ref{NUOPC_RealizeCompleteLS}, \ref{NUOPC_RealizeCompleteM}, \ref{NUOPC_RealizeField}, \ref{NUOPC_RealizeTransfer}) are used to realize fields. Only previously advertised fields can be realized and the field's name is used to search the state for the previously advertised field.
+
+  *Note: This phase is not required if all fields are {\em providing} a geometric object.
+  \end{itemize}
+\item IPDv00p3, IPDv01p4, IPDv02p4, IPDv03p6, IPDv04p6, IPDv05p7: Verify import fields connected and set clock ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item If the model internal clock is found to be not set, then set the model internal clock as a copy of the incoming clock. 
+  \item {\it Optional specialization} to set the internal clock and/or alarms: {\tt label\_SetClock}.
+  \item Check compatibility, ensuring all advertised import Fields are connected.
+  \end{itemize}   
+\item IPDv00p4, IPDv01p5:  Initialize export fields ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
+  \item Time stamp Fields in export State for compatibility checking.
+  \end{itemize}    
+\item IPDv02p5, IPDv03p7, IPDv04p7, IPDv05p8: Initialize export fields ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
+  \item Timestamp Fields in export State for compatibility checking.
+  \item Set Component metadata used to resolve initialize data dependencies.
+  \end{itemize}    
+\end{itemize}
+
+\bigskip{\sf RUN:}
+\begin{itemize}
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item {\sc Specialization Required/Provided}: {\tt label\_SetRunClock} to check and set the internal Clock against the incoming Clock.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: By default check that internal Clock and incoming Clock agree on current time and that the time step of the incoming Clock is a multiple of the internal Clock time step. Under these conditions set the internal stop time to one time step interval of the incoming Clock. Otherwise exit with error, flagging an incompatibility.
+  \end{itemize}
+  \item {\sc Specialization Required/Provided}: {\tt label\_CheckImport} to check Fields in the import State.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization is present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: By default check that all import Fields are at the current time of the internal Clock.
+  \end{itemize}
+  \item Time stepping loop: starting at current time, running to stop time of the internal Clock.
+  \begin{itemize}
+  \item Timestamp the Fields in the export State according to the current time of the internal Clock.
+  \item {\sc Specialization Required}: {\tt label\_Advance} to execute model code.
+  \item {\sc Specialization Optional}: {\tt label\_AdvanceClock} to advance the current time of the internal Clock. By default (without specialization) advance the current time of the internal Clock according to the time step of the internal Clock.
+  \end{itemize}
+  \item {\sc Specialization Optional/Provided}: {\tt label\_TimestampExport} to timestamp Fields in the export State.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: Timestamp all Fields in the export State according to the current time of the internal Clock, which now is identical to the stop time of the internal Clock.
+  \end{itemize}
+  \end{itemize}    
+\end{itemize}
+
+\bigskip{\sf FINALIZE:}
+\begin{itemize}
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
+  \end{itemize}      
+\end{itemize}
+
+\subsubsection{Initialize Phase Specialization - label\_SetClock}
+{\sc Optional, Implementor Provided}\\
+{\em Called from: IPDv00p3, IPDv01p4, IPDv02p4, IPDv03p6, IPDv04p6, IPDv05p7}\\
+
+The specialization method can change aspects of the internal clock, which defaults to a copy of the incoming parent clock. For example, the timeStep size may be changed and/or Alarms may be set on the clock.\\
+
+The method {\tt NUOPC\_CompSetClock(comp, externalClock, stabilityTimeStep)} (\ref{NUOPC_GridCompSetClock}) can be used to set the internal clock as a copy of externalClock, but with a timeStep that is less than or equal to the stabilityTimeStep. At the same time it ensures that the timeStep of the external clock is a multiple of the timeStep of the internal clock. If the stabilityTimeStep argument is not provided then the internal clock will simply be set as a copy of the external clock.
+
+\subsubsection{Initialize Phase Specialization - label\_DataInitialize}
+{\sc Optional, Implementor Provided}\\
+{\em Called from: IPDv00p4, IPDv01p5, IPDv02p5, IPDv03p7, IPDv04p7, IPDv05p8}\\
+
+The specialization method should initialize field data in the export state. Fields in the export state will be timestamped automatically by the calling phase for all fields that have the ``Updated'' attribute set to ``true''.
+
+\subsubsection{Run Phase Specialization - label\_SetRunClock}
+{\sc Required, NUOPC Provided}\\
+{\em Called from: default run phase}\\
+
+A specialization method to check and set the internal clock against the incoming clock. This method is called by the default run phase.\\
+
+If not overridden, the default method will check that the internal clock and incoming clock agree on the current time and that the time step of the incoming clock is a multiple of the internal clock time step. Under these conditions set the internal stop time to one time step interval of the incoming clock. Otherwise exit with error, flagging an incompatibility.
+
+\subsubsection{Run Phase Specialization - label\_CheckImport}
+{\sc Required, NUOPC Provided}\\
+{\em Called from: default run phase}\\
+
+A specialization method to verify import fields before advancing in time. If not overridden, the default method verifies that all import fields are at the current time of the internal clock.
+
+\subsubsection{Run Phase Specialization - label\_Advance}
+{\sc Required, Implementor Provided}\\
+{\em Called from: default run phase}\\
+
+A specialization method that advances the model forward in time by one timestep of the internal clock. This method will be called iteratively by the default run phase until reaching the stop time on the internal clock.
+
+\subsubsection{Run Phase Specialization - label\_TimestampExport}
+{\sc Required, NUOPC Provided}\\
+{\em Called from: default run phase}\\
+
+A specialization method to set the timestamp on export fields after the model has advanced. If not overridden, the default method sets the timestamp on all export fields to the stop time on the internal clock (which is also now the current model time).
+
+\subsubsection{Finalize Phase Specialization - label\_Finalize}
+{\sc Optional, Implementor Provided}\\
+{\em Called from: default finalize phase}\\
+
+An optional specialization method for custom finalization code and deallocations of user data structures.
+
+\subsection{NUOPC\_Mediator IPD implementation}
+\bigskip{\sf INITIALIZE:}
+\begin{itemize}
+\item phase 0: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
+    \begin{itemize}
+    \item IPDv00p1 = 1: ({\sc Required, Implementor Provided})
+      \begin{itemize}
+      \item Advertise Fields in import and export States.
+      \end{itemize}
+    \item IPDv00p2 = 2: ({\sc Required, Implementor Provided})
+      \begin{itemize}
+      \item Realize the advertised Fields in import and export States.
+      \end{itemize}  
+    \item IPDv00p3 = 3: ({\sc Required, NUOPC Provided})
+      \begin{itemize}
+      \item Check compatibility of the Fields' Connected status.
+      \end{itemize}
+    \item IPDv00p4 = 4: ({\sc Required, NUOPC Provided})
+      \begin{itemize}
+      \item Handle Field data initialization. Time stamp the export Fields.
+      \end{itemize}
+    \end{itemize}  
+  \end{itemize}  
+\item IPDv00p3, IPDv01p4, IPDv02p4: ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Set the Mediator internal clock as a copy of the incoming clock. 
+  \item Check compatibility, ensuring all advertised import Fields are connected.
+  \end{itemize}  
+\item IPDv00p4, IPDv01p5: ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
+  \item Time stamp Fields in import and export States for compatibility checking.
+  \end{itemize}    
+\item IPDv02p5: ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
+  \item Time stamp Fields in export State for compatibility checking.
+  \item Set Component metadata used to resolve initialize data dependencies.
+  \end{itemize}    
+\end{itemize}
+
+\bigskip{\sf RUN:}
+\begin{itemize}
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item {\sc Specialization Required/Provided}: {\tt label\_SetRunClock} to check and set the internal Clock against the incoming Clock.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: By default check that internal Clock and incoming Clock agree on current time and that the time step of the incoming Clock is a multiple of the internal Clock time step. Under these conditions set the internal stop time to one time step interval of the incoming Clock. Otherwise exit with error, flagging an incompatibility.
+  \end{itemize}
+  \item {\sc Specialization Required/Provided}: {\tt label\_CheckImport} to check Fields in the import State.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization is present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: By default check that all import Fields are at the current time of the internal Clock.
+  \end{itemize}
+  \item Time stepping loop: starting at current time, running to stop time of the internal Clock.
+  \begin{itemize}
+  \item Timestamp the Fields in the export State according to the current time of the internal Clock.
+  \item {\sc Specialization Required}: {\tt label\_Advance} to execute mediation code.
+  \item {\sc Specialization Optional}: {\tt label\_AdvanceClock} to advance the current time of the internal Clock. By default (without specialization) advance the current time of the internal Clock according to the time step of the internal Clock.
+  \end{itemize}
+  \item {\sc Specialization Optional/Provided}: {\tt label\_TimestampExport} to timestamp Fields in the export State.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: Timestamp all Fields in the export State according to the current time of the internal Clock when {\em entering} the RUN method.
+  \end{itemize}
+  \end{itemize}    
+\end{itemize}
+
+\bigskip{\sf FINALIZE:}
+\begin{itemize}
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
+  \end{itemize}      
+\end{itemize}
+
+\subsection{NUOPC\_Connector IPD implementation}
+\bigskip{\sf INITIALIZE:}
+\begin{itemize}
+\item phase 0: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 04 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
+    \begin{itemize}
+    \item IPDv04p1a = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p1b = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p2  = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p3  = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p4  = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p5a = phase : ({\sc Required, NUOPC Provided})
+    \item IPDv04p5b = phase : ({\sc Required, NUOPC Provided})
+    \end{itemize}  
+  \end{itemize}  
+\item IPDv01p1, IPDv02p1: ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Construct a list of matching Field pairs between import and export State based on the {\tt StandardName} Field metadata. 
+  \item Store this list of {\tt StandardName} entries in the {\tt CplList} attribute of the Connector Component metadata.
+  \end{itemize}
+\item IPDv01p2, IPDv02p2: ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Allocate and initialize the internal state.
+  \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
+  \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
+  \end{itemize}  
+\item IPDv01p3, IPDv02p3: ({\sc NUOPC Provided})
+  \begin{itemize}
+  \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
+  \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
+  \item {\it Optional specialization} to precompute a Connector operation: {\tt label\_ComputeRouteHandle}. Simple custom implementations store the precomputed communication RouteHandle in the {\tt rh} member of the internal state. More complex implementations use the {\tt state} member in the internal state to store auxiliary Fields, FieldBundles, and RouteHandles.
+  \item By default (if {\tt label\_ComputeRouteHandle} was {\em not} provided) precompute the Connector RouteHandle as a bilinear Regrid operation between {\tt srcFields} and {\tt dstFields}, with {\tt unmappedaction} set to {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. The resulting RouteHandle is stored in the {\tt rh} member of the internal state.
+  \end{itemize}  
+\end{itemize}
+
+\bigskip{\sf RUN:}
+\begin{itemize}
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item {\it Optional specialization} to execute a Connector operation: {\tt label\_ExecuteRouteHandle}. Simple custom implementations access the {\tt srcFields}, {\tt dstFields}, and {\tt rh} members of the internal state to implement the required data transfers. More complex implementations access the {\tt state} member in the internal state, which holds the auxiliary Fields, FieldBundles, and RouteHandles that potentially were added during the optional {\tt label\_ComputeRouteHandle} method during initialize.
+  \item By default (if {\tt label\_ExecuteRouteHandle} was {\em not} provided) execute the precomputed Connector RouteHandle between {\tt srcFields} and {\tt dstFields}.
+  \item Update the time stamp on the Fields in {\tt dstFields} to match the time stamp on the Fields in {\tt srcFields}.
+  \end{itemize}    
+\end{itemize}
+
+\bigskip{\sf FINALIZE:}
+\begin{itemize}
+\item phase 1: ({\sc Required, NUOPC Provided})
+  \begin{itemize}
+  \item {\it Optional specialization} to release the custom Connector operation: {\tt label\_ReleaseRouteHandle}; or by default, if {\tt label\_ReleaseRouteHandle} was {\em not} provided, release the default Connector RouteHandle.
+  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
+  \item Internal clean-up.
+  \end{itemize}      
+\end{itemize}

@@ -16,9 +16,9 @@ class Regrid(object):
     scope (this only happens when the :class:`~ESMF.api.esmpymanager.Manager` goes out of scope, there is a
     destroy() call for explicit deallocation of the :class:`~ESMF.api.regrid.Regrid`).
 
-    For more information about the ESMF Regridding functionality, please see
-    the `ESMF Regrid documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
+    Refer to the ESMF_FieldRegrid methods in the 
+    `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
+    for more information.
 
     The following arguments are used to create a handle to a Regridding
     operation between two :class:`Fields <ESMF.api.field.Field>`.
@@ -33,7 +33,8 @@ class Regrid(object):
 
     *OPTIONAL:*
 
-    :param string filename: path to the output netCDF weight file
+    :param string filename: path to the output netCDF weight file.
+    :param string rh_filename: path to the output RouteHandle file.
     :param ndarray src_mask_values: a numpy array of values that should be
         considered masked value on the source :class:`~ESMF.api.field.Field`.
     :param ndarray dst_mask_values: a numpy array of values that should be
@@ -70,6 +71,10 @@ class Regrid(object):
         calculating weights for the :attr:`~ESMF.api.constants.ExtrapMethod.NEAREST_IDAVG`
         extrapolation method. A higher value reduces the influence of more distant
         points. If not specified, defaults to ``2.0``.
+    :param int extrap_num_levels: The number of levels to output for the extrapolation 
+        methods that fill levels (e.g. :attr:`~ESMF.api.constants.ExtrapMethod.CREEP`). 
+        When a method is used that requires this, then an error will be returned if it 
+        is not specified.
     :param UnmappedAction unmapped_action: specifies which action to take if a
         destination point is found which does not map to any source point. If
         ``None``, defaults to :attr:`~ESMF.api.constants.UnmappedAction.ERROR`.
@@ -92,16 +97,26 @@ class Regrid(object):
         are retrievable via :meth:`~ESMF.api.regrid.get_factors` or :meth:`~ESMF.api.regrid.get_weights_dict`.
         See the respective documentation on those methods for additional information.
         For more information on how ``ESMF`` treats factor retrieval see the
-        documentation for `ESMF_FieldRegridStore <http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_refdoc/node5.html#SECTION050366000000000000000>`_.
+        ESMF_FieldRegridStore interface in the 
+        `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_.
+    :param bool large_file: If ``True``, create the weight file in NetCDF using the 
+        64-bit  offset format to allow variables larger than 2GB. Note the 64-bit offset 
+        format is not supported in the NetCDF version earlier than 3.6.0.  An error message 
+        will be generated if this flag is specified while the application is linked with a 
+        NetCDF library earlier than 3.6.0. Defaults to ``False``.
+
     """
 
     @initialize
-    def __init__(self, srcfield=None, dstfield=None, filename=None, src_mask_values=None,
+    def __init__(self, srcfield=None, dstfield=None, filename=None, rh_filename=None, 
+                 src_mask_values=None,
                  dst_mask_values=None, regrid_method=None, pole_method=None,
                  regrid_pole_npoints=None, line_type=None, norm_type=None, extrap_method=None,
-                 extrap_num_src_pnts=None, extrap_dist_exponent=None, unmapped_action=None,
-                 ignore_degenerate=None, create_rh=None, src_frac_field=None,
-                 dst_frac_field=None, factors=False):
+                 extrap_num_src_pnts=None, extrap_dist_exponent=None, extrap_num_levels=None,
+                 unmapped_action=None, ignore_degenerate=None, create_rh=None, filemode=None, 
+                 src_file=None, dst_file=None, src_file_type=None, dst_file_type=None, 
+                 factors=False, large_file=None,
+                 src_frac_field=None, dst_frac_field=None):
 
         # Confirm the ESMF compiler will suport in-memory factor retrieval
         if factors and not constants._ESMF_USE_INMEM_FACTORS:
@@ -121,13 +136,13 @@ class Regrid(object):
 
         # Convert source and destination mask values to NumPy arrays if they
         # are present.
-        if src_mask_values is not None:
+        if not isinstance(src_mask_values, type(None)):
             src_mask_values = np.array(src_mask_values, dtype=np.int32)
-        if dst_mask_values is not None:
+        if not isinstance(dst_mask_values, type(None)):
             dst_mask_values = np.array(dst_mask_values, dtype=np.int32)
 
         # Write weights to file if requested.
-        if filename is not None:
+        if not isinstance(filename, type(None)):
             if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
                 msg = "Regrid(filename) requires PIO and does not work if ESMF has " \
                       "not been built with MPI support"
@@ -147,9 +162,14 @@ class Regrid(object):
                 unmappedaction=unmapped_action,
                 ignoreDegenerate=ignore_degenerate,
                 createRH=create_rh,
+                filemode=filemode,
+                srcFile=src_file,
+                dstFile=dst_file,
+                srcFileType=src_file_type,
+                dstFileType=dst_file_type,
+                largeFileFlag=large_file,
                 srcFracField=src_frac_field,
-                dstFracField=dst_frac_field
-            )
+                dstFracField=dst_frac_field)
         else:
             # Initialize the factor array pointers if we are returning factors.
             if factors:
@@ -174,6 +194,7 @@ class Regrid(object):
                 extrapMethod=extrap_method,
                 extrapNumSrcPnts=extrap_num_src_pnts,
                 extrapDistExponent=extrap_dist_exponent,
+                extrapNumLevels=extrap_num_levels,
                 unmappedaction=unmapped_action,
                 ignoreDegenerate=ignore_degenerate,
                 factorList=fl,
@@ -188,6 +209,9 @@ class Regrid(object):
             if factors:
                 self._handle_factors_(fil, fl, num_factors)
 
+        if not isinstance(rh_filename, type(None)):
+            ESMP_RouteHandleWrite(self._routehandle, rh_filename)
+
         self._srcfield = srcfield
         self._dstfield = dstfield
         self._src_mask_values = src_mask_values
@@ -201,8 +225,14 @@ class Regrid(object):
         self._extrap_dist_exponent = extrap_dist_exponent
         self._unmapped_action = unmapped_action
         self._ignore_degenerate = ignore_degenerate
+        self._Print = filemode
+        self._src_file = src_file
+        self._dst_file = dst_file
+        self._src_file_type = src_file_type
+        self._dst_file_type = dst_file_type
         self._src_frac_field = src_frac_field
         self._dst_frac_field = dst_frac_field
+        # factors and large_file are not considered persistent object metadata
 
         # for arbitrary metadata
         self._meta = {}
@@ -266,6 +296,14 @@ class Regrid(object):
         return self._dstfield
 
     @property
+    def dst_file(self):
+        return self._dst_file
+
+    @property
+    def dst_file_type(self):
+        return self._dst_file_type
+
+    @property
     def dst_frac_field(self):
         return self._dst_frac_field
 
@@ -284,6 +322,10 @@ class Regrid(object):
     @property
     def extrap_dist_exponent(self):
         return self._extrap_dist_exponent
+
+    @property
+    def filemode(self):
+        return self._filemode
 
     @property
     def finalized(self):
@@ -326,6 +368,14 @@ class Regrid(object):
     @property
     def srcfield(self):
         return self._srcfield
+
+    @property
+    def src_file(self):
+        return self._src_file
+
+    @property
+    def src_file_type(self):
+        return self._src_file_type
 
     @property
     def src_frac_field(self):
@@ -375,7 +425,7 @@ class Regrid(object):
                 ESMP_FieldRegridRelease(self.routehandle)
 
                 # Also destroy factor allocations in Fortran
-                if self._ptr_fl is not None:
+                if not isinstance(self._ptr_fl, type(None)):
                     numfac = ct.c_int(self._num_factors)
                     self._factor_list = None
                     self._factor_index_list = None
@@ -392,7 +442,8 @@ class Regrid(object):
         """
         Return factor and factor index arrays. These arrays will only be
         available if the ``Regrid`` object was initialized with ``factors=True``.
-        See the `ESMF documentation <http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_refdoc/node5.html#SECTION050366000000000000000>`_
+        See the ESMF_FieldRegridStore interface in the 
+        `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
         for additional information on these arrays (see below for indexing in
         Python though).
 
@@ -508,8 +559,8 @@ class RegridFromFile(object):
     the :class:`~ESMF.api.regrid.RegridFromFile`).
 
     For more information about the ESMF Regridding functionality, please see
-    the `ESMF Regrid documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
+    the ESMF_FieldRegrid methods in the 
+    `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_.
 
     The following arguments are used to create a handle to a regridding
     operation between two :class:`Fields <ESMF.api.field.Field>`.
@@ -525,12 +576,22 @@ class RegridFromFile(object):
         may be overwritten by this call.
     :param string filename: the name of the file from which to retrieve the
         weights.
+    :param string rh_filename: the name of the file from which to retrieve the
+        routehandle information.
     """
 
     @initialize
-    def __init__(self, srcfield, dstfield, filename):
+    def __init__(self, srcfield, dstfield, filename=None, rh_filename=None):
 
-        self._routehandle = ESMP_FieldSMMStore(srcfield, dstfield, filename)
+        if (not isinstance(filename, type(None))) and (not isinstance(rh_filename, type(None))):
+            raise ValueError('only a regrid file or a routehandle file can be specified')
+        elif (isinstance(filename, type(None))) and (isinstance(rh_filename, type(None))):
+            raise ValueError('either a regrid file or a routehandle file must be specified')
+
+        if not isinstance(filename, type(None)):
+            self._routehandle = ESMP_FieldSMMStore(srcfield, dstfield, filename)
+        elif not isinstance(rh_filename, type(None)):
+            self._routehandle = ESMP_RouteHandleCreateFromFile(rh_filename)
 
         # Holds arbitrary metadata if needed by the client.
         self._meta = {}

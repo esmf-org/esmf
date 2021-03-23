@@ -17,7 +17,7 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf NUOPC Layer Reference}}
 \newcommand{\myauthors}{\large {\it Content Standards Committee (CSC) Members}}
-\newcommand{\myversion}{ESMF 8.0.0}
+\newcommand{\myversion}{ESMF 8.1.0}
 % set a standard paragraph style
 \setlength{\parskip}{0pt}
 \setlength{\parindent}{0pt}
@@ -137,18 +137,11 @@
 
 \subsection{Initialization}
 
-\subsubsection{Phase Maps and Component Labels}
+\subsubsection{Phase Maps, Semantic Specialization Labels, and Component Labels}
 #ifdef STANDALONE
 \input{NUOPC_PhaseMaps}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_PhaseMaps}
-#endif
-
-\subsubsection{Initialize Phase Definitions}
-#ifdef STANDALONE
-\input{NUOPC_IPD}
-#elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_IPD}
 #endif
 
 \subsubsection{Field Pairing}
@@ -214,11 +207,26 @@
 \input{../addon/NUOPC/doc/NUOPC_ComponentHierarchies}
 #endif
 
+\subsection{Resource Control and Threaded Components}
+#ifdef STANDALONE
+\input{NUOPC_ResourceControl}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ResourceControl}
+#endif
+
+\subsection{External NUOPC Interface}
+#ifdef STANDALONE
+\input{NUOPC_ExternalInterface}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ExternalInterface}
+#endif
+
 \newpage
 
 \section{API}
 
 \subsection{Generic Component: NUOPC\_Driver}
+\label{NUOPC_Driver}
 #ifdef STANDALONE
 \input{NUOPC_Driver_manual_fapi}
 \input{NUOPC_Driver_fapi}
@@ -228,6 +236,7 @@
 #endif
 
 \subsection{Generic Component: NUOPC\_ModelBase}
+\label{NUOPC_ModelBase}
 #ifdef STANDALONE
 \input{NUOPC_ModelBase_manual_fapi}
 #elif defined(CONSTITUENT)
@@ -235,6 +244,7 @@
 #endif
 
 \subsection{Generic Component: NUOPC\_Model}
+\label{NUOPC_Model}
 #ifdef STANDALONE
 \input{NUOPC_Model_manual_fapi}
 \input{NUOPC_Model_fapi}
@@ -244,6 +254,7 @@
 #endif
 
 \subsection{Generic Component: NUOPC\_Mediator}
+\label{NUOPC_Mediator}
 #ifdef STANDALONE
 \input{NUOPC_Mediator_manual_fapi}
 \input{NUOPC_Mediator_fapi}
@@ -253,6 +264,7 @@
 #endif
 
 \subsection{Generic Component: NUOPC\_Connector}
+\label{NUOPC_Connector}
 #ifdef STANDALONE
 \input{NUOPC_Connector_manual_fapi}
 \input{NUOPC_Connector_fapi}
@@ -336,7 +348,7 @@ NUOPC core functionality.
 
 \newpage
 
-\section{Appendix A: Run Sequence}
+\section{Appendix A: Run Sequence Implementation}
 
 The NUOPC Driver utilizes an internal class to parametrize the run sequence. The {\tt NUOPC\_RunSequence} provides a unified data structure that allows simple as well as complex time loops to be encoded and executed. There are entry points that allow different run phases to be mapped against distinctly different time loops. 
 
@@ -351,6 +363,14 @@ Figure \ref{fig:NUOPCRunSequence} depicts the data structures surrounding the {\
 
 \newpage
 
+\section{Appendix B: Initialize Phase Definition Versions}
+#ifdef STANDALONE
+\input{NUOPC_IPD}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_IPD}
+#endif
+
+\newpage
 
 %#ifdef STANDALONE
 %\section{Bibliography}

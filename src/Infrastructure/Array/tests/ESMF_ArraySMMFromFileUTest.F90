@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2019, University Corporation for Atmospheric Research,
+! Copyright 2002-2021, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -38,7 +38,7 @@ module ESMF_ArraySMMFromFileUTestMod
     rc = ESMF_FAILURE
 
     ! Generate the netCDF weights file.
-    call ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, rc=rc)
+    call ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile=weightFile, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return
 
