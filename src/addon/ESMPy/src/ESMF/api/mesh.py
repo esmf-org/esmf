@@ -40,7 +40,7 @@ class Mesh(object):
 
     For more information about the ESMF Mesh class, please see the `ESMF Mesh
     documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
+    <http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
 
     An unstructured :class:`~ESMF.api.mesh.Mesh` can be created in two different ways, as a :class:`~ESMF.api.mesh.Mesh` in
     memory, or from a SCRIP formatted or CF compliant UGRID file. The arguments

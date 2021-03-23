@@ -35,7 +35,7 @@ class LocStream(dict):
     a second set of coordinates.
     
     For more information about the ESMF LocStream class, please see the
-    `ESMF LocStream documentation <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
+    `ESMF LocStream documentation <http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
     
     :class:`~ESMF.api.locstream.LocStream` follows standard dictionary syntax. For example:
     
