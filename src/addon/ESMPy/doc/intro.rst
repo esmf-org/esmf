@@ -21,13 +21,11 @@ gives a nice overview of the ESMF regridding functionality, including an
 overview of the functionality that is available through
 various interfaces to ESMF regridding.
 
-The `ESMF_RegridWeightGen application
-<http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/node3.html#SECTION03020000000000000000>`_
-is a command-line version of the functionality that is available through ESMPy.
-
-The `Regrid section of the ESMF Reference Manual 
-<http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_ 
-gives a thorough overview of the regridding engine that is used by ESMPy.
+The ESMF_RegridWeightGen application is a command-line version of the functionality that is available through ESMPy.
+The Regid class gives a thorough overview of the regridding engine that is used by ESMPy.
+Information on these can be found in the 
+`ESMF Reference Manual
+<http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_.
 
 Please contact esmf_support@ucar.edu with any questions or problems.
 

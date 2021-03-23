@@ -31,10 +31,10 @@ class Grid(object):
     code so that sufficient information is available to perform regridding
     operations.
 
-    For more information about the ESMF Grid class, please see the 
-    `ESMF Grid documentation
-    <http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
- 
+    Refer to the Grid Class of the 
+    `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
+    for more information.
+
     A :class:`~ESMF.api.grid.Grid` can be created in two different ways, as a
     :class:`~ESMF.api.grid.Grid` in memory, or from SCRIP formatted or CF compliant GRIDSPEC file. The
     arguments for each type of :class:`~ESMF.api.grid.Grid` creation are

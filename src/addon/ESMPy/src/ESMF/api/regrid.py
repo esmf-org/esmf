@@ -16,9 +16,9 @@ class Regrid(object):
     scope (this only happens when the :class:`~ESMF.api.esmpymanager.Manager` goes out of scope, there is a
     destroy() call for explicit deallocation of the :class:`~ESMF.api.regrid.Regrid`).
 
-    For more information about the ESMF Regridding functionality, please see
-    the `ESMF Regrid documentation
-    <http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
+    Refer to the ESMF_FieldRegrid methods in the 
+    `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
+    for more information.
 
     The following arguments are used to create a handle to a Regridding
     operation between two :class:`Fields <ESMF.api.field.Field>`.
@@ -97,7 +97,8 @@ class Regrid(object):
         are retrievable via :meth:`~ESMF.api.regrid.get_factors` or :meth:`~ESMF.api.regrid.get_weights_dict`.
         See the respective documentation on those methods for additional information.
         For more information on how ``ESMF`` treats factor retrieval see the
-        documentation for `ESMF_FieldRegridStore <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/node5.html#SECTION050366000000000000000>`_.
+        ESMF_FieldRegridStore interface in the 
+        `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_.
     :param bool large_file: If ``True``, create the weight file in NetCDF using the 
         64-bit  offset format to allow variables larger than 2GB. Note the 64-bit offset 
         format is not supported in the NetCDF version earlier than 3.6.0.  An error message 
@@ -441,7 +442,8 @@ class Regrid(object):
         """
         Return factor and factor index arrays. These arrays will only be
         available if the ``Regrid`` object was initialized with ``factors=True``.
-        See the `ESMF documentation <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/node5.html#SECTION050366000000000000000>`_
+        See the ESMF_FieldRegridStore interface in the 
+        `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
         for additional information on these arrays (see below for indexing in
         Python though).
 
@@ -557,8 +559,8 @@ class RegridFromFile(object):
     the :class:`~ESMF.api.regrid.RegridFromFile`).
 
     For more information about the ESMF Regridding functionality, please see
-    the `ESMF Regrid documentation
-    <http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
+    the ESMF_FieldRegrid methods in the 
+    `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_.
 
     The following arguments are used to create a handle to a regridding
     operation between two :class:`Fields <ESMF.api.field.Field>`.
