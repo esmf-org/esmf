@@ -34,8 +34,9 @@ class LocStream(dict):
     called keys. Keys can include other descriptors besides location, including
     a second set of coordinates.
     
-    For more information about the ESMF LocStream class, please see the
-    `ESMF LocStream documentation <http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
+    Refer to the LocStrea Class of the 
+    `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
+    for more information.
     
     :class:`~ESMF.api.locstream.LocStream` follows standard dictionary syntax. For example:
     

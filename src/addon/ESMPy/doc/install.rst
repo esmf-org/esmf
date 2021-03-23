@@ -8,7 +8,7 @@ Requirements
 
 The following packages are *required* to work with ESMPy:
 
-* `ESMF installation <http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_usrdoc/node9.html>`_
+* `ESMF installation <http://earthsystemmodeling.org/docs/release/latest/ESMF_usrdoc/>`_
 * `python <http://python.org/>`_
 * `numpy <http://www.numpy.org/>`_
 
@@ -26,10 +26,10 @@ Getting the code
 The ESMPy source code can be downloaded from the 
 `ESMF git repository <https://github.com/esmf-org/esmf>`_.
 
-The `ESMF User's Guide <http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_usrdoc/>`_
+The `ESMF User's Guide <http://earthsystemmodeling.org/docs/release/latest/ESMF_usrdoc/>`_
 contains information on building and installing ESMF.
 
-The `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/ESMF_8_1_0/ESMF_refdoc/>`_
+The `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
 contains information on the architecture of ESMF, example code, and details of the API (Application Programming
 Interface).
 
