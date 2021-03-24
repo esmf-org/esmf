@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuxo pipefail
 
-git config --global user.email "himanshu@ucar.edu"
+git config --global user.email "dunlap@ucar.edu"
 git config --global user.name "esmf-orgbot"
 
 cd
