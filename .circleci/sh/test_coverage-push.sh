@@ -30,4 +30,7 @@ git commit -a -m " `echo ${CIRCLE_BRANCH}` Test Coverage pushed in the artifacts
 # Push the changes ------------------------------------------------------------
 
 git remote prune origin
+
+# helps to avoid failures due to commits than come in between
+git pull --no-edit
 git push origin main
