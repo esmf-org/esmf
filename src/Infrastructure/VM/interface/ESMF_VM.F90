@@ -3446,6 +3446,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Made argument {\tt vm} optional to simplify usage when calling
+!   on the current VM.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
