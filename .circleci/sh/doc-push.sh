@@ -3,7 +3,7 @@ set -Eeuxo pipefail
 
 DOC_ARTIFACTS="/tmp/artifacts/artifacts"
 
-git config --global user.email "himanshu@ucar.edu"
+git config --global user.email "dunlap@ucar.edu"
 git config --global user.name "esmf-orgbot"
 
 cd
