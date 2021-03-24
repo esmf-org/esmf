@@ -1360,10 +1360,10 @@ module NUOPC_Base
     if (itemCount > 0) then
 
       ! determine fieldCount, potentially throughout nested state structure
-call ESMF_TraceRegionEnter("calling NUOPC_GetStateMemberCount", rc=rc)
+!call ESMF_TraceRegionEnter("calling NUOPC_GetStateMemberCount", rc=rc)
       call NUOPC_GetStateMemberCount(state, fieldCount=fieldCount, &
         nestedFlag=l_nestedFlag, rc=localrc)
-call ESMF_TraceRegionExit("calling NUOPC_GetStateMemberCount", rc=rc)
+!call ESMF_TraceRegionExit("calling NUOPC_GetStateMemberCount", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -1374,7 +1374,7 @@ call ESMF_TraceRegionExit("calling NUOPC_GetStateMemberCount", rc=rc)
       fieldCount = 0
     endif
 
-call ESMF_TraceRegionEnter("deal with allocs", rc=rc)
+!call ESMF_TraceRegionEnter("deal with allocs", rc=rc)
     ! deal with optional StandardNameList
     if (present(StandardNameList)) then
       if (associated(StandardNameList)) then
@@ -1507,16 +1507,16 @@ call ESMF_TraceRegionEnter("deal with allocs", rc=rc)
           return  ! bail out
       endif
     endif
-call ESMF_TraceRegionExit("deal with allocs", rc=rc)
+!call ESMF_TraceRegionExit("deal with allocs", rc=rc)
 
     if (fieldCount > 0) then
-call ESMF_TraceRegionEnter("call first level NUOPC_GetStateMemberListsIntrnl", rc=rc)
+!call ESMF_TraceRegionEnter("call first level NUOPC_GetStateMemberListsIntrnl", rc=rc)
       ! fill lists that are present
       itemIndex = 1 ! initialize
       call NUOPC_GetStateMemberListsIntrnl(state, StandardNameList, &
         ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, &
         stateList, l_nestedFlag, "", itemIndex, rc=localrc)
-call ESMF_TraceRegionExit("call first level NUOPC_GetStateMemberListsIntrnl", rc=rc)
+!call ESMF_TraceRegionExit("call first level NUOPC_GetStateMemberListsIntrnl", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -4481,7 +4481,7 @@ call ESMF_TraceRegionExit("call first level NUOPC_GetStateMemberListsIntrnl", rc
     ! initialize timestamp array
     timestamp = (/yy,mm,dd,h,m,s,ms,us,ns,ckf/)
     ! set timestamp on each field
-call ESMF_TraceRegionEnter("loop over fields", rc=rc)
+!call ESMF_TraceRegionEnter("loop over fields", rc=rc)
     if (selectiveArg) then
       do i=1, size(fieldList)
         call NUOPC_GetAttribute(fieldList(i), name="Updated", value=value, &
@@ -4512,7 +4512,7 @@ call ESMF_TraceRegionEnter("loop over fields", rc=rc)
           return  ! bail out
       enddo
     endif
-call ESMF_TraceRegionExit("loop over fields", rc=rc)
+!call ESMF_TraceRegionExit("loop over fields", rc=rc)
   end subroutine
   !-----------------------------------------------------------------------------
 
