@@ -116,6 +116,12 @@ ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
 ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
 
 ############################################################
+# Currently NAG does not support the Fortran2018 assumed type feature
+#
+ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
+
+############################################################
 # nag currently does not support OpenMP
 #
 ESMF_OPENMP := OFF
