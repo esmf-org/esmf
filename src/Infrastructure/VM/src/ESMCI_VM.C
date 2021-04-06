@@ -55,6 +55,7 @@
 #include "ESMCI_IO_Handler.h"
 
 // include ESMF headers
+#include "ESMCI_VMKernel.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_Base.h"
 #include "ESMCI_F90Interface.h"
@@ -1190,7 +1191,7 @@ int VM::enter(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   int matchTableIndex_old;
-  if(vmp->nothreadflag){
+  if(!vmp->supportContributors){  //TODO: replace with useOwnPthread
     // take care of book keeping for ESMF...
     matchTableIndex_old = matchTableIndex;
     if (vmp->nspawn > 0){
@@ -1210,7 +1211,7 @@ int VM::enter(
   // enter the VMK
   VMK::enter(static_cast<VMKPlan *>(vmp), info, cargo);
 
-  if(vmp->nothreadflag){
+  if(!vmp->supportContributors){  //TODO: replace with useOwnPthread
     // restore book keeping for ESMF...
     matchTableIndex = matchTableIndex_old;
   }

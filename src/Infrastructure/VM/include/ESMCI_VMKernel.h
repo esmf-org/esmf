@@ -257,7 +257,7 @@ class VMK{
     int *ssiLocalPetList; // PETs that are on the same SSI as localPet (incl.)
     // general information about this VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
-    int nothreadsflag; // 0-threaded VM, 1-non-threaded VM
+    bool threadsflag; // threaded or none-threaded VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
@@ -531,7 +531,7 @@ class VMKPlan{
     int npets;
     int nplist;       // number of PETs in petlist that participate
     int *petlist;     // keeping sequence of parent pets
-    int nothreadflag; // 0-default threaded VM, 1-non-threaded VM
+    bool supportContributors; // default: false
     int parentVMflag; // 0-create child VM, 1-run on parent VM
     int *spawnflag;   // for each pet: 0-don't spawn, >=1-spawn threads
     int *contribute;  // pet id to which non-spawning pet contributes its cores
@@ -617,10 +617,10 @@ class VMKPlan{
       // set up a VMKPlan that will have pets with the maximum number of
       // cores available, but not more than max and only use PETs listed in
       // plist
-    void vmkplan_print();  
+    void vmkplan_print();
 
   friend class VMK;
-  
+
 };
 
 

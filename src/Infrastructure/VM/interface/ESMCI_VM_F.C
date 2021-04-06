@@ -18,6 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMCI_VM.h"
+#include "ESMCI_VMKernel.h"
 
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Macros.h"
@@ -1246,8 +1247,8 @@ extern "C" {
       (*ptr)->vmkplan_minthreads(**vm, 1);
       (*ptr)->vmkplan_mpi_c_part(**vm);
     }
-    // set the nothreadflag because this is the default for new VMs
-    (*ptr)->nothreadflag = 1; // override what vmkplan_minthreads() above set
+    // reset the supportContributors flag to default for new VMs
+    (*ptr)->supportContributors = false; // override vmkplan_minthreads() setting
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMCI::VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMCI::VMPlan
