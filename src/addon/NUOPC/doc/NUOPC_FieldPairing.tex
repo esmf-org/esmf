@@ -5,9 +5,7 @@
 
 The NUOPC Model and Mediator components are required to advertise their import and export Fields with a standard set of Field metadata. This set includes the {\tt StandardName} attribute. The NUOPC Layer implements a strategy of pairing advertised Fields that is based primarily on the {\tt StandardName} of the Fields, and in more complex situations further utilizes the {\tt Namespace} attribute on States.
 
-Field pairing is accomplished as part of the initialization procedure and is a collective effort of the Driver and its child components: Models, Mediator, Connectors. The exact handshakes between these components is outlined as part of the Initialize Phase Definition in section \ref{IPD}.
-
-The Connectors are the most active players when it comes to Field pairing. The end result of the process is where each Connector has a list of Fields that it connects between its importState and its exportState. Each connector keeps this list in its component level metadata as {\tt CplList} attribute.
+Field pairing is accomplished as part of the initialization procedure and is a collective effort of the Driver and its child components: Models, Mediator, Connectors. The Connectors are the most active players when it comes to Field pairing. The end result of the process is where each Connector has a list of Fields that it connects between its importState and its exportState. Each connector keeps this list in its component level metadata as {\tt CplList} attribute.
 
 During the first stage of Field pairing, each Connector matches all of the Fields in its importState to all of the Fields in its exportState by looking at their {\tt StandardName} attribute. For every match a {\em bondLevel} is calculated and stored in the Field on the export side, i.e. on the consumer side of the connection, in the Field's {\tt ConsumerConnection} attribute. The larges found bondLevel is kept for each Field on the export side.
 

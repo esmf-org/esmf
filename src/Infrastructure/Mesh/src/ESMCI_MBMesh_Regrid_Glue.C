@@ -467,14 +467,24 @@ void MBMesh_regrid_create(MBMesh **meshsrcpp, ESMCI::Array **arraysrcpp,
 //////////////////////////////////////////////////////////////////////////////////////
 
 
+// split id translation currently not supported, so return an error
+// When implementing, do inside conservative weight calc. method instead of here
 #if 0
     ///// If conservative, translate split element weights to non-split //////
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       if (mbmsrcp.is_split) translate_split_src_elems_in_wts(mbmsrcp, num_entries, iientries);
       if (mbmdstp.is_split) translate_split_dst_elems_in_wts(mbmdstp, num_entries, iientries, factors);
     }
+#else
+    ///// Split translation not implemented yet
+    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if (mbmsrcp->is_split) Throw() << "Cells with >4 sides currently not supported with conservative regridding using MOAB internal mesh representation.";
+      if (mbmdstp->is_split) Throw() << "Cells with >4 sides currently not supported with conservative regridding using MOAB internal mesh representation.";
+    }
+#endif
 
 
+#if 0
     ///// If conservative then modify weights according to norm type //////
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       if (*norm_type==ESMC_NORMTYPE_FRACAREA) change_wts_to_be_fracarea(mbmdstp, num_entries, iientries, factors);
@@ -1183,11 +1193,12 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
                                set_dst_status, dst_status,
                                regridMethod, extrapNumSrcPnts,
                                extrapDistExponent);
-    } else if (*regridMethod == ESMC_REGRID_METHOD_PATCH) {
-      calc_patch_regrid_wgts(srcmbmp, dstpl, wts, map_type,
-                                set_dst_status, dst_status);
+      // PATCH NOT WORKING YET
+      //    } else if (*regridMethod == ESMC_REGRID_METHOD_PATCH) {
+      //calc_patch_regrid_wgts(srcmbmp, dstpl, wts, map_type,
+      //                           set_dst_status, dst_status);
     } else {
-      Throw() << "This regrid method is not currently supported.";
+      Throw() << "This regrid method is not currently supported when using MOAB for internal mesh representation.";
     }
 
     // Do extrapolation if the user has requested it

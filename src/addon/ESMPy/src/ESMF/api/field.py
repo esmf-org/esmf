@@ -30,8 +30,9 @@ class Field(object):
     have different staggerings can share the same :class:`~ESMF.api.grid.Grid` object without needing to
     replicate it multiple times.
 
-    For more information about the ESMF Field class, please see the `ESMF Field documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
+    Refer to the Field Class of the 
+    `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
+    for more information.
 
     The following parameters are used to create a :class:`~ESMF.api.field.Field`
     from a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or

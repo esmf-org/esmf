@@ -1,8 +1,8 @@
 # $Id$ 
 
-ALL: build_examples
-
-run: run_examples
+ALL:      build_examples
+run:      run_examples
+run_uni:  run_examples_uni
 
 LOCDIR	  = src/Infrastructure/LogErr/examples
 

@@ -82,13 +82,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
-      integer, parameter :: ESMF_VERSION_MINOR        = 1
+      integer, parameter :: ESMF_VERSION_MINOR        = 2
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.1.0 beta snapshot"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.2.0 beta snapshot"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -1277,6 +1277,7 @@ interface operator (==)
   module procedure ESMF_bfeq
   module procedure ESMF_ctfeq
   module procedure ESMF_tnfeq
+  module procedure ESMF_pineq
   module procedure ESMF_freq
   module procedure ESMF_ifeq
   module procedure ESMF_inqfeq
@@ -1305,6 +1306,7 @@ interface operator (/=)
   module procedure ESMF_ctfne
   module procedure ESMF_tnfne
   module procedure ESMF_ifneq
+  module procedure ESMF_pinne
   module procedure ESMF_frne
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
@@ -1735,6 +1737,23 @@ subroutine ESMF_tfas2_v (tfval, lval)
 
  tfval = merge (ESMF_TRUE, ESMF_FALSE, lval)
 end subroutine
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_Pin_Flag types
+
+function ESMF_pineq(pin1, pin2)
+ logical ESMF_pineq
+ type(ESMF_Pin_Flag), intent(in) :: pin1, pin2
+
+ ESMF_pineq = (pin1%value == pin2%value)
+end function
+
+function ESMF_pinne(pin1, pin2)
+ logical ESMF_pinne
+ type(ESMF_Pin_Flag), intent(in) :: pin1, pin2
+
+ ESMF_pinne = (pin1%value /= pin2%value)
+end function
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Direction_Flag types

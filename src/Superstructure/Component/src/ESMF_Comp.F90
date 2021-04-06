@@ -1052,6 +1052,7 @@ contains
     integer                 :: portArg
     integer                 :: timeoutArg
     real(ESMF_KIND_R8)      :: usedTime
+    character(160)          :: msgString
         
     ! dummys that will provide initializer values if args are not present
     type(ESMF_State)        :: dummyis, dummyes
@@ -1206,7 +1207,10 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! callback into user code
-!print *, "ESMF_CompExecute(), calling c_ESMC_FTableCallEntryPointVM(): timeoutArg=",timeoutArg
+#if 0
+write (msgString,*) "ESMF_CompExecute(), calling c_ESMC_FTableCallEntryPointVM(): timeoutArg=",timeoutArg
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
+#endif
       call c_ESMC_FTableCallEntryPointVM(compp%compw, compp%vm_parent, &
         compp%vmplan, compp%vm_info, compp%vm_cargo, compp%ftable, method, &
         phaseArg, portArg, timeoutArg, compp%vm_recursionCount, localrc)
@@ -1229,7 +1233,10 @@ contains
         usedTime = usedTime - compp%startTime
         ! allow remaining time for timeout, but at least 1 second to wrap up
         timeoutArg = max(timeoutArg - int(usedTime), 1)
-!print *, "ESMF_CompExecute(), calling c_ESMC_CompWait(): usedTime=",usedTime,"timeoutArg=",timeoutArg
+#if 0
+write (msgString,*) "ESMF_CompExecute(), calling c_ESMC_CompWait(): usedTime=",usedTime,"timeoutArg=",timeoutArg
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
+#endif
         call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
           compp%vm_cargo, timeoutArg, compp%vm_recursionCount, localUserRc, &
           localrc)

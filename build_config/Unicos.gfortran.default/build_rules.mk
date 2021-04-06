@@ -50,7 +50,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -Wall -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fbounds-check
+ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fimplicit-none -fcheck=all,no-pointer
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 
 ############################################################
@@ -82,34 +82,22 @@ endif
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
-# XT compute nodes do not have support for POSIX dynamic linking
+# Conditionally add pthread compiler and linker flags
 #
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_F90COMPILEOPTS += -pthread
+ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_F90LINKOPTS    += -pthread
+ESMF_CXXLINKOPTS    += -pthread
+endif
 
 ############################################################
-# XT compute nodes do not have support for "gethostid()"
+# OpenMP compiler and linker flags
 #
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
-# XT compute nodes do not have support for signals
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
-
-############################################################
-# XT compute nodes do not have support for system call
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
-
-############################################################
-# XT compute nodes do not have support for Pthreads
-#
-ESMF_PTHREADS := OFF
-
-############################################################
-# XT compute nodes do not have support for OpenMP
-#
-ESMF_OPENMP := OFF
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
@@ -121,12 +109,6 @@ ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 # Set unlimited line length limit for free format files
 #
 ESMF_F90COMPILEOPTS += -ffree-line-length-none
-
-############################################################
-# Blank out variables to prevent rpath encoding
-#
-#ESMF_F90LINKRPATHS      =
-#ESMF_CXXLINKRPATHS      =
 
 ############################################################
 # Set rpath syntax

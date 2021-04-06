@@ -28,11 +28,11 @@ for development tags is:
 ESMF_<VERSION>_beta_snapshot_<NUMBER>
 \end{verbatim}
 
-For example, to check out ESMF version 8.1.0 beta snapshot 16, use the
+For example, to check out ESMF version 8.2.0 beta snapshot 01, use the
 following command:
 
 \begin{verbatim}
-  git clone https://github.com/esmf-org/esmf.git --branch ESMF_8_1_0_beta_snapshot_16 --depth 1
+  git clone https://github.com/esmf-org/esmf.git --branch ESMF_8_2_0_beta_snapshot_01 --depth 1
 \end{verbatim}
 
 Once downloaded, development snapshots are built in the same way as releases.
@@ -467,6 +467,56 @@ typical case where {\tt ESMF\_YAMLCPP} is set to {\tt "standard"},
 {\tt ESMF\_YAMLCPP\_LIBS} is set to {\tt "-lyaml-cpp"}.
 \end{description}
 
+
+\subsubsection{MOAB}
+\label{sec:MOAB}
+
+The Mesh Oriented datABase
+(\htmladdnormallink{MOAB}{https://sigma.mcs.anl.gov/moab-library/})
+can be used to build an ESMF unstructured Mesh as an alternative to the 
+"native" ESMF Mesh implementation. The decision to use either MOAB or the 
+native ESMF Mesh implementation is made at run time. This aspect is described 
+in the Reference Manual, section {\tt ESMF\_MeshSetMOAB()} .The default is to use 
+the native ESMF Mesh. ESMF will build an internal version of MOAB by default, 
+but an external MOAB installation can be used if desired. The build parameters 
+covered in this section are used to determine which version of MOAB is 
+available to ESMF. 
+
+\begin{description}
+
+\item[ESMF\_MOAB] Possible values: {\tt "internal"} (default), {\tt "OFF"},
+{\tt "external"}.
+
+\begin{description}
+\item[{\tt "internal"} (default)] The MOAB dependent code inside of ESMF will
+be enabled.
+The MOAB sources included with ESMF will be used to provide MOAB support.
+The {\tt ESMF\_MOAB\_INCLUDE}, {\tt ESMF\_MOAB\_LIBPATH}, and
+{\tt ESMF\_MOAB\_LIBS} environment variables will be ignored.
+
+\item[{\tt "OFF"}] Disables MOAB dependent code.
+
+\item[{\tt "external"}] The MOAB dependent code inside of ESMF will
+be enabled.
+The {\tt ESMF\_MOAB\_INCLUDE}, {\tt ESMF\_MOAB\_LIBPATH} and 
+{\tt ESMF\_MOAB\_LIBS} environment variables must also be specified.
+\end{description}
+
+\item[ESMF\_MOAB\_INCLUDE] Typical value: {\tt /usr/local/include}
+(no default).
+
+Specifies the path where the MOAB C++ header files are located.
+
+\item[ESMF\_MOAB\_LIBPATH] Typical value: {\tt /usr/local/lib} (no default).
+
+Specifies the path where the MOAB C++ library file is located.
+
+\item[ESMF\_MOAB\_LIBS] Typical value: {\tt "-lMOAB"} (no default).
+
+Specifies the linker directives needed to link the MOAB C++ library to
+the application.
+
+\end{description}
 
 \subsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
@@ -1146,4 +1196,4 @@ Additionally, it is typically convenient to append the user's {\tt PATH} environ
 
 {\em Hint.} By default, file {\tt esmf.mk} is located next to the ESMF library file in  directory {\tt ESMF\_INSTALL\_LIBDIR}. Consequently, unless {\tt esmf.mk} has been moved to a different location after the installation, the correct setting for {\tt ESMFMKFILE} is {\tt \$(ESMF\_INSTALL\_LIBDIR)/esmf.mk}.
 
-{\em Rationale.} The only piece of information that is needed to use an ESMF installation is the exact location of the associated {\tt esmf.mk} file. This file contains all of the relevant settings and flags that allow a user to build their application against the ESMF installation. Standardizing the mechanism by which the location of {\tt esmf.mk} is made available to the user by the system will help users in the design of portable application build systems. (See sections \ref{sec:Use} and \ref{sec:Apps} for details about the usage of {\tt esmf.mk}.) Further, modifying the user's {\tt PATH} environment variable is optional, since the location of the ESMF application binaries is available through the {\tt esmf.mk} file. However, setting the user's {\tt PATH} variable so that the ESMF applications are directly and conveniently accessible from the command line is recommended, especially if management software (e.g. {\em modules, softenv, ...}) is used on the system.
+{\em Rationale.} The only piece of information that is needed to use an ESMF installation is the exact location of the associated {\tt esmf.mk} file. This file contains all of the relevant settings and flags that allow a user to build their application against the ESMF installation. Standardizing the mechanism by which the location of {\tt esmf.mk} is made available to the user by the system will help users in the design of portable application build systems. (See sections \ref{sec:Use} and \ref{sec:CLTs} for details about the usage of {\tt esmf.mk}.) Further, modifying the user's {\tt PATH} environment variable is optional, since the location of the ESMF application binaries is available through the {\tt esmf.mk} file. However, setting the user's {\tt PATH} variable so that the ESMF applications are directly and conveniently accessible from the command line is recommended, especially if management software (e.g. {\em modules, softenv, ...}) is used on the system.

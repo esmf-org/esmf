@@ -35,5 +35,5 @@ CLOBBERDIRS =
 
 
 RUN_ArrayRedistOpenMP:
-	$(MAKE) TNAME=ArrayRedistOpenMP NP=8 stest
+	env OMP_WAIT_POLICY=passive $(MAKE) TNAME=ArrayRedistOpenMP NP=8 stest
 

@@ -623,15 +623,6 @@ module ESMF_ComplianceICMod
             file=FILENAME)) &
             return  ! bail out
     
-    ! Component Attributes should be set up -> ready to output
-!    call ESMF_AttributeWrite(comp, convention='CIM 1.5', &
-!      purpose='ModelComp', &
-!      attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-!    if (ESMF_LogFoundError(rc, &
-!      line=__LINE__, &
-!      file=FILENAME)) &
-!      return  ! bail out
-    
     end if
     
     write(output,*) ">STOP InitializeEpilogue for phase=", phase

@@ -5,7 +5,7 @@
 
 Once the field pairing discussed in the previous sections is completed, each Connector component holds an attribute by the name of {\tt CplList}. The {\tt CplList} is a list type attribute with as many entries as there are fields for which the Connector component is responsible for connecting. The first part of each of these entries is always the {\tt StandardName} of the associated field. See section \ref{field_dictionary} for a discussion of the NUOPC field dictionary and standard names.
 
-After the {\tt StandardName} part, each {\tt CplList} entry may optionally contain a string of {\em connection options}. Each Driver component has the chance as part of the internal {\tt IPDv04p2} phase (see \ref{IPD}) to modify the {\tt CplList} attribute of all the Connectors that it drives.
+After the {\tt StandardName} part, each {\tt CplList} entry may optionally contain a string of {\em connection options}. Each Driver component has the chance as part of the {\tt label\_ModifyInitializePhaseMap} specialization, to modify the {\tt CplList} attribute of all the Connectors that it drives.
 
 The individual connection options are colon separated, leading to the following format for each {\tt CplList} entry:
 

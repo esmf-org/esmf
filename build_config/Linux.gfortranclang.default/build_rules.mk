@@ -43,10 +43,6 @@ ESMF_F90LINKLIBS       += -lmpi++
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-# Under ticket #3614573 found that MPT has issues. One of the following macros
-# must be set!
-#ESMF_CXXCOMPILEOPTS    += -DMUST_USE_BLOCKING_SEND
-ESMF_CXXCOMPILEOPTS    += -DMUST_NOTUSE_MALLOC_TRIM
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
@@ -133,7 +129,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -Wall -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fbounds-check
+ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fimplicit-none -fcheck=all,no-pointer
 
 ############################################################
 # Fortran symbol convention

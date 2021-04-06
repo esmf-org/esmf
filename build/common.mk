@@ -1359,6 +1359,10 @@ ifdef ESMF_NCCONFIG
   ifneq ($(origin ESMF_NETCDF_LIBPATH), environment)
     # query nc-config for the LIBPATH
     ESMF_NETCDF_LIBPATH := $(shell $(ESMF_NCCONFIG) --libdir)
+    ifneq (,$(findstring unknown,$(ESMF_NETCDF_LIBPATH)))
+      # older nc-config -> extract the -L options out of the --libs return value
+      ESMF_NETCDF_LIBPATH := $(subst -L,,$(filter -L%,$(shell $(ESMF_NCCONFIG) --libs)))
+    endif
     export ESMF_NETCDF_LIBPATH
   endif
   # NetCDF Fortran options -------------------------------------------------------

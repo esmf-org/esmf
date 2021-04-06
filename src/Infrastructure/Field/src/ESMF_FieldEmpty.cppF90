@@ -127,9 +127,9 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptyComplete()
-subroutine ESMF_FieldEmptyCompAS(field, arrayspec, &
- keywordEnforcer, indexflag, gridToFieldMap, &
- ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, rc)
+subroutine ESMF_FieldEmptyCompAS(field, arrayspec, keywordEnforcer, indexflag, &
+ gridToFieldMap, ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
+ pinflag, rc)
 
 !
 ! !ARGUMENTS:
@@ -142,11 +142,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  integer,               intent(in),  optional :: ungriddedUBound(:)
  integer,               intent(in),  optional :: totalLWidth(:)
  integer,               intent(in),  optional :: totalUWidth(:)
+ type(ESMF_Pin_Flag),   intent(in),  optional :: pinflag
  integer,               intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -224,6 +230,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -236,7 +247,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomType_Flag)       :: geomtype
     type(ESMF_Grid)           :: grid
     type(ESMF_FieldStatus_Flag)    :: status
-
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -305,7 +315,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FieldEmptyGBArraySpec(field, geombase, &
           arrayspec, gridToFieldMap=gridToFieldMap, &
           ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-          totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
+          totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+          pinflag=pinflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -327,7 +338,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                             ungriddedLBound=ungriddedLBound, &
                             ungriddedUBound=ungriddedUBound, &
                             hasBase=.true., &
-                            rc=localrc)
+                            pinflag=pinflag, rc=localrc)
 
      if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -348,9 +359,9 @@ end subroutine ESMF_FieldEmptyCompAS
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptyComplete()
-subroutine ESMF_FieldEmptyCompTK(field, typekind, &
- keywordEnforcer, indexflag, gridToFieldMap, &
- ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, rc)
+subroutine ESMF_FieldEmptyCompTK(field, typekind, keywordEnforcer, indexflag, &
+ gridToFieldMap, ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
+ pinflag, rc)
 
 !
 ! !ARGUMENTS:
@@ -363,11 +374,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  integer,                  intent(in),  optional :: ungriddedUBound(:)
  integer,                  intent(in),  optional :: totalLWidth(:)
  integer,                  intent(in),  optional :: totalUWidth(:)
+ type(ESMF_Pin_Flag),      intent(in),  optional :: pinflag
  integer,                  intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -454,6 +471,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -468,7 +490,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid)           :: grid
     type(ESMF_FieldStatus_Flag)    :: status
     type(ESMF_GridDecompType) :: decompType
-
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -539,7 +560,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_FieldEmptyComplete(field, arrayspec, &
       indexflag=indexflag, gridToFieldMap=gridToFieldMap, &
       ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-      totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
+      totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+      pinflag=pinflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -558,7 +580,7 @@ end subroutine ESMF_FieldEmptyCompTK
 ! !INTERFACE:
   subroutine ESMF_FieldEmptyGBArraySpec(field, geombase, arrayspec, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    totalLWidth, totalUWidth, rc)
+    totalLWidth, totalUWidth, pinflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout)    :: field
@@ -569,6 +591,7 @@ end subroutine ESMF_FieldEmptyCompTK
     integer, intent(in), optional :: ungriddedUBound(:)
     integer, intent(in), optional :: totalLWidth(:)
     integer, intent(in), optional :: totalUWidth(:)
+    type(ESMF_Pin_Flag), intent(in),  optional :: pinflag
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -631,6 +654,11 @@ end subroutine ESMF_FieldEmptyCompTK
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -881,7 +909,7 @@ end subroutine ESMF_FieldEmptyCompTK
                                 ungriddedUBound, localMaxHaloLWidth(1:gridDimCount_norep), &
                                 localMaxHaloUWidth(1:gridDimCount_norep), &
                                 hasBase=.true., &
-                                rc=localrc)
+                                pinflag=pinflag, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -890,7 +918,7 @@ end subroutine ESMF_FieldEmptyCompTK
                               localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                               ungriddedUBound, &
                               hasBase=.true., &
-                              rc=localrc)
+                              pinflag=pinflag, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -917,7 +945,7 @@ end subroutine ESMF_FieldEmptyCompTK
 ! !INTERFACE:
   subroutine ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    totalLWidth, totalUWidth, hasBase, name, rc)
+    totalLWidth, totalUWidth, hasBase, pinflag, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldType), pointer            :: ftype
@@ -929,7 +957,8 @@ end subroutine ESMF_FieldEmptyCompTK
     integer, intent(in), optional            :: totalLWidth(:)
     integer, intent(in), optional            :: totalUWidth(:)
     logical, intent(in), optional            :: hasBase
-    character (len=*), intent(in), optional  :: name
+    type(ESMF_Pin_Flag), intent(in), optional:: pinflag
+    character (len=*),   intent(in), optional:: name
     integer, intent(out), optional           :: rc
 !
 ! !DESCRIPTION:
@@ -998,6 +1027,11 @@ end subroutine ESMF_FieldEmptyCompTK
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[hasBase]}]
 !       Input ftype already has a base associated with it.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
 ! \item [{[name]}]
 !       Field name.
 ! \item [{[rc]}]
@@ -1095,7 +1129,7 @@ end subroutine ESMF_FieldEmptyCompTK
       ! are the dimension of the array,
       distgridDimCount_norep = arrayRank - ungriddedDimCount
       array=ESMF_ArrayCreate(distgrid=distgrid, arrayspec=arrayspec, &
-                distgridToArrayMap=distgridToArrayMap, &
+                pinflag=pinflag, distgridToArrayMap=distgridToArrayMap, &
                 totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
                 indexflag=indexflag, &
                 undistLBound=arrayLBound, undistUBound=arrayUBound, &
@@ -1122,7 +1156,7 @@ end subroutine ESMF_FieldEmptyCompTK
       ! are the dimension of the array,
       distgridDimCount_norep = arrayRank - ungriddedDimCount
       array=ESMF_ArrayCreate(distgrid=distgrid, arrayspec=arrayspec, &
-                distgridToArrayMap=distgridToArrayMap, &
+                pinflag=pinflag, distgridToArrayMap=distgridToArrayMap, &
                 totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
                 indexflag=indexflag, &
                 name=name, &

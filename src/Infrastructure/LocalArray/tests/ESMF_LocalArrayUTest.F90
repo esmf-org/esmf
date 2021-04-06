@@ -654,7 +654,7 @@
 
 !-------------------------------------------------------------------------------
 !   !  Create based on an existing, allocated F90 pointer. 
-!   !  Data is type Real, 2D.  DATA_COPY set
+!   !  Data is type Real, 2D.  DATACOPY_VALUE set
  
     ! Allocate and set initial data values
     ni = 4015 
@@ -719,7 +719,7 @@
 
 !-------------------------------------------------------------------------------
 !   !  Create based on an existing, allocated F90 pointer. 
-!   !  Data is type Real, 3D.  DATA_COPY set
+!   !  Data is type Real, 3D.  DATACOPY_VALUE set
  
     ! Allocate and set initial data values
     ni = 5 
@@ -737,7 +737,7 @@
     !--------------------------------------------------------------------------
    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Local Array 3D DATA_COPY Real Data Test"
+    write(name, *) "Creating a Local Array 3D DATACOPY_VALUE Real Data Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, datacopyflag=ESMF_DATACOPY_VALUE, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -832,7 +832,7 @@
     !--------------------------------------------------------------------------
    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Local Array 3D DATA_COPY Real Data Test"
+    write(name, *) "Creating a Local Array 3D DATACOPY_REFERENCE Real Data Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -857,7 +857,7 @@
     !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did return ESMF_SUCCESS"
-    write(name, *) "Creating a Local Array 3D DATA_REF Real Data with deallocated array Test"
+    write(name, *) "Creating a Local Array 3D DATACOPY_REFERENCE Real Data with deallocated array Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -883,7 +883,7 @@
     !EX_UTest
     allocate(real3dptr(ni,nj,nk))
     write(failMsg, *) "Did return ESMF_SUCCESS"
-    write(name, *) "Creating a Local Array 3D DATA_REF Real Data with an allocated array Test"
+    write(name, *) "Creating a Local Array 3D DATACOPY_REFERENCE Real Data with an allocated array Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -906,7 +906,7 @@
     !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
-    write(name, *) "Creating a Local Array 3D DATA_REF Real Data with an allocated array Test"
+    write(name, *) "Creating a Local Array 3D DATACOPY_REFERENCE Real Data with an allocated array Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 4e create returned"

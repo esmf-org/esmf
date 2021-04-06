@@ -756,7 +756,7 @@ int Grid::addCoordArray(
   int rc, localrc;
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap;
   Array *array;
   DistGrid *staggerDistgrid;
@@ -1077,7 +1077,7 @@ int Grid::addCoordFromArrayList(
                         int *staggerlocArg,        // (in) optional
                         int arrayCount,             // (in) 
                         Array **arrayList,           // (in)
-                        CopyFlag *docopyArg,   // (in) optional
+                        DataCopyFlag *docopyArg,   // (in) optional
                         InterArray<int> *staggerEdgeLWidthArg, // (in) optional
                         InterArray<int> *staggerEdgeUWidthArg, // (in) optional
                         InterArray<int> *staggerAlignArg   // (in) optional 
@@ -1102,7 +1102,7 @@ int Grid::addCoordFromArrayList(
   int rc;
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   int *staggerAlign;
   int *staggerEdgeLWidth;
   int *staggerEdgeUWidth;
@@ -1377,7 +1377,7 @@ int Grid::addItemArrayArb(
   // local vars
   int rc, localrc;
   int staggerloc,item;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap;
   Array *array;
   int extent[1];
@@ -1891,7 +1891,7 @@ Array *Grid::getCoordArray(
 //
                         int *staggerlocArg,        // (in) optional
                         int coordArg,              // (in) base-1
-                        CopyFlag *docopyArg,  // (in) optional
+                        DataCopyFlag *docopyArg,  // (in) optional
                         int *rcArg                 // (out) optional return code 
   ) {
 //
@@ -1904,7 +1904,7 @@ Array *Grid::getCoordArray(
   int localrc;                 // local error status
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   int dimCount;
   Array *array;
 
@@ -1935,13 +1935,13 @@ Array *Grid::getCoordArray(
 
   // If docopyArg wasn't passed in, use default, else copy the value
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Copy option isn't working for now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, rcArg);
       return ESMC_NULL_POINTER;
@@ -1978,7 +1978,7 @@ Array *Grid::getItemArray(
 //
                         int *staggerlocArg,        // (in) optional
                         int *itemArg,              // (in) required
-                        CopyFlag *docopyArg,  // (in) optional
+                        DataCopyFlag *docopyArg,  // (in) optional
                         int *rcArg                 // (out) optional return code 
   ) {
 //
@@ -1990,7 +1990,7 @@ Array *Grid::getItemArray(
   // local vars
   int localrc;                 // local error status
   int staggerloc, item;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   int dimCount;
   Array *array;
 
@@ -2032,13 +2032,13 @@ Array *Grid::getItemArray(
 
   // If docopyArg wasn't passed in, use default, else copy the value
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Copy option isn't working for now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, rcArg);
       return ESMC_NULL_POINTER;
@@ -3563,7 +3563,7 @@ int Grid::setCoordArray(
                         int *staggerlocArg,        // (in) optional
                         int *coordArg,             // (in) 
                         Array *arrayArg,           // (in)
-                        CopyFlag *docopyArg   // (in) optional
+                        DataCopyFlag *docopyArg   // (in) optional
   ) {
 //
 // !DESCRIPTION:
@@ -3577,7 +3577,7 @@ int Grid::setCoordArray(
   int rc;
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap, *arrayUndistLBound, *arrayUndistUBound;
   const int *gridUndistLBound, *gridUndistUBound;
   bool ok;  
@@ -3639,13 +3639,13 @@ int Grid::setCoordArray(
 
   // If docopyArg hasn't been passed in use a default otherwise, copy it. 
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Don't support copy right now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, &rc);
       return rc;
@@ -3754,7 +3754,7 @@ int Grid::setItemArray(
                         int *staggerlocArg,        // (in) optional
                         int *itemArg,              // (in)
                         Array *arrayArg,           // (in)
-                        CopyFlag *docopyArg   // (in) optional
+                        DataCopyFlag *docopyArg   // (in) optional
   ) {
 //
 // !DESCRIPTION:
@@ -3767,7 +3767,7 @@ int Grid::setItemArray(
   int localrc;
   int rc;
   int staggerloc, item;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap;
   bool ok;  
   DistGrid *staggerDistgrid;
@@ -3816,13 +3816,13 @@ int Grid::setItemArray(
 
   // If docopyArg hasn't been passed in use a default otherwise, copy it. 
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Don't support copy right now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, &rc);
       return rc;

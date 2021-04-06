@@ -48,9 +48,10 @@ program ESMF_AttributeArrayUTest
       integer :: result = 0
 
       ! local variables
-      type(ESMF_Array)     :: array
+      type(ESMF_Array)     :: array, array2
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_DistGrid)  :: distgrid
+      type(ESMF_Info)      :: info
 
       ! macro variables
       AttributeTestVariablesMacro()
@@ -76,6 +77,7 @@ program ESMF_AttributeArrayUTest
       distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
         regDecomp=(/2,3/), rc=rc)
       array = ESMF_ArrayCreate(distgrid, arrayspec, rc=rc)
+      array2 = ESMF_ArrayCreate(distgrid, arrayspec, rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
@@ -83,6 +85,11 @@ program ESMF_AttributeArrayUTest
 !-------------------------------------------------------------------------
 
 AttributeTestMacro(array, an Array, EX_UTest, NEX_UTest)
+
+! Uncomment this line to activate the Read/Write tests
+#if 0
+AttributeReadWriteTestMacro(array, array2, an Array, EX_UTest, NEX_UTest)
+#endif
 
       !------------------------------------------------------------------------
       ! clean up

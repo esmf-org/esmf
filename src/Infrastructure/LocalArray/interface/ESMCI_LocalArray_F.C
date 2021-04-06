@@ -73,7 +73,8 @@ extern "C" {
       return;
     }
     // call into C++
-    *larrayOut = ESMCI::LocalArray::create(*ptr, NULL, NULL, &localrc);
+    *larrayOut = ESMCI::LocalArray::create(*ptr, ESMCI::DATACOPY_VALUE,
+      NULL, NULL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully

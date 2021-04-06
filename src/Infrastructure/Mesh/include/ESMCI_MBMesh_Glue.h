@@ -161,9 +161,9 @@ void MBMesh_turnoffelemmask(MBMesh **mbmpp, int *rc);
 void MBMesh_turnonnodemask(MBMesh **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
 void MBMesh_turnoffnodemask(MBMesh **meshpp, int *rc);
 
-EntityType get_entity_type(int pdim, int etype);
+void MBMesh_getelemfrac(MBMesh *mbmesh, int *_num_elem, double *elem_fracs, int *rc);
 
-int ElemType2NumNodes(int pdim, int etype);
+void MBMesh_get_elem_frac_into_Array(MBMesh *mbmesh, ESMCI::Array *array, int *rc);
 
 #endif // ESMF_MOAB
 

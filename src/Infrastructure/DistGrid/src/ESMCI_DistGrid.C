@@ -288,7 +288,7 @@ DistGrid *DistGrid::create(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
         larrayList[i] = LocalArray::create(dg->indexTK, 1,
-          &(elementCount[0][i]), keepArbPtr[i], DATA_COPY, &localrc);
+          &(elementCount[0][i]), keepArbPtr[i], DATACOPY_VALUE, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
         // disable arbitrary sequence indices temporarily for canoncial Redist
@@ -299,12 +299,12 @@ DistGrid *DistGrid::create(
       if (dg->delayout->getLocalDeCount() == 0){
         // need to prepare a dummy LocalArray object
         larrayList[0] = LocalArray::create(dg->indexTK, 1,
-          NULL, NULL, DATA_NONE, &localrc);
+          NULL, NULL, DATACOPY_NONE, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
       Array *srcArbSeqArray = Array::create(larrayList,
-        larrayCount, dg, DATA_REF, NULL, NULL, NULL,
+        larrayCount, dg, DATACOPY_REFERENCE, NULL, NULL, NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;

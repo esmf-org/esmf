@@ -1,0 +1,5 @@
+Settings for Linux, using the NVIDIA HPC compilers.
+
+Requires the following environment settings:
+
+ESMF_COMPILER nvhpc

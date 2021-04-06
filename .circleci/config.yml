@@ -1,7 +1,3 @@
-#TODO: Test applications (i.e. RegridWeightGen)
-#TODO: Build ESMF tags in ESCOMP
-#TODO: Remove old bekozi Docker credentials from CircleCi
-
 version: 2.1
 
 jobs:
@@ -42,12 +38,10 @@ jobs:
       - image: cimg/base:2020.01
     resource_class: xlarge
     steps:
-#      - run: exit 0
       - setup_remote_docker
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
-#          command: git clone --depth 1 --branch esmpy-doc-base-to-ubuntu https://github.com/esmf-org/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
@@ -78,6 +72,20 @@ jobs:
       - run: exit 0
 
   should-build-docs:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
+      
+  should-run-test-coverage:
+    docker:
+      - image: cimg/base:2020.01
+    resource_class: small
+    steps:
+      - run: exit 0
+  
+  should-run-api-change:
     docker:
       - image: cimg/base:2020.01
     resource_class: small
@@ -131,17 +139,23 @@ jobs:
     steps:
       - setup_remote_docker
       - run:
+         name: "Removing slash from branch name "
+         command: |
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo $CIRCLE_BRANCH_NEW
+                  source $BASH_ENV
+      - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
+          command: git clone --branch $CIRCLE_BRANCH  --depth 1 https://github.com/esmf-org/esmf.git
       - run:
           name: Docker Build esmf-doc
-          command: docker build -t "esmf/esmf-doc:${CIRCLE_BRANCH}" --file "ESCOMP-Containers/ESMF/doc/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
+          command: docker build -t "esmf/esmf-doc:${CIRCLE_BRANCH_NEW}" --file "ESCOMP-Containers/ESMF/doc/esmf-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
       - run:
           name: Extract Artifacts
-          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-artifacts.zip" "esmf/esmf-doc:${CIRCLE_BRANCH}"
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-artifacts.zip" "esmf/esmf-doc:${CIRCLE_BRANCH_NEW}"
       - save_cache:
           key: esmf-docs-{{ .Revision }}
           paths:
@@ -153,7 +167,7 @@ jobs:
 
   publish-esmf-docs:
     machine: true
-    resource_class: small
+    resource_class: medium
     steps:
       - restore_cache:
           keys:
@@ -165,48 +179,97 @@ jobs:
           name: Push to github.io
           command: bash esmf/.circleci/sh/doc-push.sh
           
-  build-test-coverage:
+  run-test-coverage:
     docker:
       - image: cimg/base:2020.01
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
+      - setup_remote_docker
+      - run:
+         name: "Removing slash from branch name "
+         command: |
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo $CIRCLE_BRANCH_NEW
+                  source $BASH_ENV
       - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
       - run:
           name: Checkout Code (ESMF)
-          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git src
+          command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - run:
-          name: Docker Build esmf-doc-base
-          command: docker build -t "esmf/esmf-doc-base" --file "ESCOMP-Containers/ESMF/doc/esmf-doc-base/Dockerfile" .
+          name: Docker Run Test Coverage
+          command: docker build -t "esmf/test-coverage:${CIRCLE_BRANCH_NEW}" --file "ESCOMP-Containers/ESMF/test_coverage/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
       - run:
-          name: Make log directory
-          command: mkdir log 
-      - run:
-          name: Set and echo env variable
-          command: |
-            homedir=`pwd`
-            echo "export homedir=$homedir" >> $BASH_ENV
-            ESMF_DIR=$homedir/src
-            echo "export ESMF_DIR=$ESMF_DIR" >> $BASH_ENV
-            LOGDIR=$homedir/log
-            echo "export LOGDIR=$LOGDIR" >> $BASH_ENV
-      - run:
-          name: Run Test Coverage
-          command: |
-            cd src
-            bash .circleci/sh/test_coverage.sh
+          name: Extract Test Coverage
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/test_coverage-artifacts.zip" "esmf/test-coverage:${CIRCLE_BRANCH_NEW}"
+      - save_cache:
+          key: test-coverage-{{ .Revision }}
+          paths:
+            - /tmp/artifacts
+            - esmf
+      - store_artifacts:
+          path: /tmp/artifacts/test_coverage-artifacts.zip
+          destination: test_coverage-artifacts.zip
 
   publish-test-coverage:
     machine: true
-    resource_class: small
+    resource_class: medium
     steps:
+      - restore_cache:
+          keys:
+            - test-coverage-{{ .Revision }}
       - run:
-          name: Push to esmf-test-artifacts 
-          command: |
-            cd ..
-            bash src/.circleci/sh/test_coverage-push.sh
+          name: Prep Test Coverage
+          command: cd /tmp/artifacts && unzip test_coverage-artifacts.zip
+      - run:
+          name: Push to esmf-test-artifacts
+          command: bash esmf/.circleci/sh/test_coverage-push.sh
+
+  run-api-change:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - setup_remote_docker
+      - run:
+         name: "Removing slash from branch name "
+         command: |
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo $CIRCLE_BRANCH_NEW
+                  source $BASH_ENV
+      - run:
+          name: Checkout Code (ESCOMP-Containers)
+          command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
+      - run:
+          name: Checkout Code (ESMF)
+          command: git clone --branch $CIRCLE_BRANCH https://github.com/esmf-org/esmf.git
+      - run:
+          name: Docker Run API Changes
+          command: docker build -t "esmf/api-change:${CIRCLE_BRANCH_NEW}" --file "ESCOMP-Containers/ESMF/API_changes/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" --build-arg TAG1="ESMF_8_0_0" --build-arg TAG2="${CIRCLE_BRANCH}" --no-cache .
+      - run:
+          name: Extract API Changes
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/api_change-artifacts.zip" "esmf/api-change:${CIRCLE_BRANCH_NEW}"
+      - save_cache:
+          key: api-change-{{ .Revision }}
+          paths:
+            - /tmp/artifacts
+            - esmf
+      - store_artifacts:
+          path: /tmp/artifacts/api_change-artifacts.zip
+          destination: api_change-artifacts.zip
+
+  publish-api-change:
+    machine: true
+    resource_class: medium
+    steps:
+      - restore_cache:
+          keys:
+            - api-change-{{ .Revision }}
+      - run:
+          name: Prep API Changes
+          command: cd /tmp/artifacts && unzip api_change-artifacts.zip
+      - run:
+          name: Push to esmf-test-artifacts
+          command: bash esmf/.circleci/sh/api_changes-push.sh
 
   esmpy-test:
     parameters:
@@ -231,6 +294,12 @@ jobs:
     steps:
       - setup_remote_docker
       - run:
+         name: "Removing slash from branch name "
+         command: |
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo $CIRCLE_BRANCH_NEW
+                  source $BASH_ENV
+      - run:
           name: Checkout Code (ESCOMP-Containers)
           command: git clone --depth 1 https://github.com/ESCOMP/ESCOMP-Containers.git
 #          command: git clone --depth 1 --branch esmpy-doc-base-to-ubuntu https://github.com/esmf-org/ESCOMP-Containers.git
@@ -239,10 +308,10 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH --depth 1 https://github.com/esmf-org/esmf.git
       - run:
           name: Docker Build esmpy-doc
-          command: docker build -t "esmf/esmpy-doc" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
+          command: docker build -t "esmf/esmpy-doc:${CIRCLE_BRANCH_NEW}" --file "ESCOMP-Containers/ESMF/doc/esmpy-doc/Dockerfile" --build-arg ESMF_BRANCH="${CIRCLE_BRANCH}" --build-arg DOCKER_NAMESPACE="esmf" --no-cache .
       - run:
           name: Extract Doc Artifacts
-          command: bash esmf/.circleci/sh/extract-artifacts.sh /tmp/artifacts /artifacts/doc-esmpy.zip esmf/esmpy-doc
+          command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/doc-esmpy.zip" "esmf/esmpy-doc:${CIRCLE_BRANCH_NEW}"
       - save_cache:
           key: esmpy-docs-{{ .Revision }}
           paths:
@@ -254,7 +323,7 @@ jobs:
 
   publish-esmpy-docs:
     machine: true
-    resource_class: small
+    resource_class: medium
     steps:
       - restore_cache:
           keys:
@@ -414,6 +483,9 @@ workflows:
     jobs:
 #      - should-build-docs:
 #          type: approval
+#      - build-esmf-docs:
+#          requires:
+#            - should-build-docs
       - build-esmf-docs
       - publish-esmf-docs:
           requires:
@@ -423,23 +495,44 @@ workflows:
               only:
                 - develop
       - build-esmpy-docs
+#          requires:
+#            - should-build-docs
       - publish-esmpy-docs:
           requires:
             - build-esmpy-docs
-          filters:
-            branches:
-              only:
-                - develop
-  test-coverage:
+#          filters:
+#            branches:
+#              only:
+#                - develop
+  test-coverage-commit:
     jobs:
-      - should-build-docs:
+      - should-run-test-coverage:
          type: approval
-      - build-test-coverage:
+      - run-test-coverage:
           requires:
-            - should-build-docs
+            - should-run-test-coverage
       - publish-test-coverage:
           requires:
-            - build-test-coverage
+            - run-test-coverage
+#          filters:
+#            branches:
+#              only:
+#                - develop  
+
+  api-change-commit:
+    jobs:
+      - should-run-api-change:
+         type: approval
+      - run-api-change:
+          requires:
+            - should-run-api-change
+      - publish-api-change:
+          requires:
+            - run-api-change
+#          filters:
+#            branches:
+#              only:
+#                - develop
 
 #  osx-commit:
 #    jobs:
@@ -448,3 +541,4 @@ workflows:
 #      - osx-esmf:
 #          requires:
 #            - should-run-osx
+
