@@ -1191,8 +1191,8 @@ int VM::enter(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   int matchTableIndex_old;
-  if(!vmp->supportContributors){  //TODO: replace with useOwnPthread
-    // take care of book keeping for ESMF...
+  if(!vmp->eachChildPetOwnPthread){
+    // book keeping for ESMF, for simple case of no new local threads
     matchTableIndex_old = matchTableIndex;
     if (vmp->nspawn > 0){
       int i;
@@ -1211,8 +1211,8 @@ int VM::enter(
   // enter the VMK
   VMK::enter(static_cast<VMKPlan *>(vmp), info, cargo);
 
-  if(!vmp->supportContributors){  //TODO: replace with useOwnPthread
-    // restore book keeping for ESMF...
+  if(!vmp->eachChildPetOwnPthread){
+    // restore book keeping for ESMF, for simple case of no new local threads
     matchTableIndex = matchTableIndex_old;
   }
 

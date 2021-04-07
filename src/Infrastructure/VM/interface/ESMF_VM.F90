@@ -9891,7 +9891,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_VMPlanMaxPEs(vmplan, vm, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, &
+    forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
@@ -9902,6 +9903,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
+    logical,           intent(in),  optional :: forceEachChildPetOwnPthread
     integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -9925,6 +9927,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of PETs in petlist
 !   \item[petlist] 
 !        List of PETs that the parent VM will provide to the child VM
+!   \item[{[forceEachChildPetOwnPthread]}] 
+!        For {\tt .true.}, force each child PET to execute in its own Pthread.
+!        By default, {\tt .false.}, single PETs spawned from a parent PET
+!        execute in the same thread (or MPI process) as the parent PET. Multiple
+!        child PETs spawned by the same parent PET always execute as their own
+!        Pthreads.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -9944,7 +9952,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface.
     call c_ESMC_VMPlanMaxPEs(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, localrc)
+      npetlist, petlist, forceEachChildPetOwnPthread, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -9963,7 +9971,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_VMPlanMaxThreads(vmplan, vm, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, &
+    forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
@@ -9974,6 +9983,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
+    logical,           intent(in),  optional :: forceEachChildPetOwnPthread
     integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -9997,6 +10007,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of PETs in petlist
 !   \item[petlist] 
 !        List of PETs that the parent VM will provide to the child VM
+!   \item[{[forceEachChildPetOwnPthread]}] 
+!        For {\tt .true.}, force each child PET to execute in its own Pthread.
+!        By default, {\tt .false.}, single PETs spawned from a parent PET
+!        execute in the same thread (or MPI process) as the parent PET. Multiple
+!        child PETs spawned by the same parent PET always execute as their own
+!        Pthreads.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -10016,7 +10032,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface.
     call c_ESMC_VMPlanMaxThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, localrc)
+      npetlist, petlist, forceEachChildPetOwnPthread, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -10035,7 +10051,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_VMPlanMinThreads(vmplan, vm, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, &
+    forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
@@ -10046,6 +10063,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
+    logical,           intent(in),  optional :: forceEachChildPetOwnPthread
     integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -10069,6 +10087,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of PETs in petlist
 !   \item[petlist] 
 !        List of PETs that the parent VM will provide to the child VM
+!   \item[{[forceEachChildPetOwnPthread]}] 
+!        For {\tt .true.}, force each child PET to execute in its own Pthread.
+!        By default, {\tt .false.}, single PETs spawned from a parent PET
+!        execute in the same thread (or MPI process) as the parent PET. Multiple
+!        child PETs spawned by the same parent PET always execute as their own
+!        Pthreads.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -10088,7 +10112,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface.
     call c_ESMC_VMPlanMinThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, localrc)
+      npetlist, petlist, forceEachChildPetOwnPthread, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

@@ -3002,7 +3002,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, keywordEnforcer, &
     maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
-    minStackSize, openMpHandling, openMpNumThreads, rc)
+    minStackSize, openMpHandling, openMpNumThreads, &
+    forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3014,6 +3015,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: minStackSize
     character(*),        intent(in),  optional :: openMpHandling
     integer,             intent(in),  optional :: openMpNumThreads
+    logical,             intent(in),  optional :: forceEachChildPetOwnPthread
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3082,6 +3084,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Number of OpenMP threads in each OpenMP thread team. This can be any
 !   positive number. By default, or if {\tt openMpNumThreads} is negative, each
 !   PET sets the number of OpenMP threads to its local peCount.
+! \item[{[forceEachChildPetOwnPthread]}] 
+!   For {\tt .true.}, force each child PET to execute in its own Pthread.
+!   By default, {\tt .false.}, single PETs spawned from a parent PET
+!   execute in the same thread (or MPI process) as the parent PET. Multiple
+!   child PETs spawned by the same parent PET always execute as their own
+!   Pthreads.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3099,7 +3107,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompSetVMMaxPEs(gridcomp%compp, maxPeCountPerPet, &
       prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, &
-      openMpHandling, openMpNumThreads, rc=localrc)
+      openMpHandling, openMpNumThreads, forceEachChildPetOwnPthread, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3119,7 +3127,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxThreads(gridcomp, keywordEnforcer, &
     maxPetCountPerVas, prefIntraProcess, prefIntraSsi, prefInterSsi, &
-    minStackSize, rc)
+    minStackSize, forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3129,6 +3137,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
     integer,             intent(in),  optional :: minStackSize
+    logical,             intent(in),  optional :: forceEachChildPetOwnPthread
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3183,6 +3192,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Depending on how much private data is used by the user code under
 !   the master thread, the default might be too small, and {\tt minStackSize}
 !   must be used to allocate sufficient stack space.
+! \item[{[forceEachChildPetOwnPthread]}] 
+!   For {\tt .true.}, force each child PET to execute in its own Pthread.
+!   By default, {\tt .false.}, single PETs spawned from a parent PET
+!   execute in the same thread (or MPI process) as the parent PET. Multiple
+!   child PETs spawned by the same parent PET always execute as their own
+!   Pthreads.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3199,7 +3214,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMaxThreads(gridcomp%compp, maxPetCountPerVas, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, &
+      forceEachChildPetOwnPthread, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3219,7 +3235,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMinThreads(gridcomp, keywordEnforcer, &
     maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
-    minStackSize, rc)
+    minStackSize, forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3229,6 +3245,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
     integer,             intent(in),  optional :: minStackSize
+    logical,             intent(in),  optional :: forceEachChildPetOwnPthread
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3280,6 +3297,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Depending on how much private data is used by the user code under
 !   the master thread, the default might be too small, and {\tt minStackSize}
 !   must be used to allocate sufficient stack space.
+! \item[{[forceEachChildPetOwnPthread]}] 
+!   For {\tt .true.}, force each child PET to execute in its own Pthread.
+!   By default, {\tt .false.}, single PETs spawned from a parent PET
+!   execute in the same thread (or MPI process) as the parent PET. Multiple
+!   child PETs spawned by the same parent PET always execute as their own
+!   Pthreads.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3296,7 +3319,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMinThreads(gridcomp%compp, maxPeCountPerPet, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, &
+      forceEachChildPetOwnPthread, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

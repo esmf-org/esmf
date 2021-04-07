@@ -239,25 +239,27 @@ module NUOPC_ModelBase
 #endif
           if (maxCount == -1 .and. minStackSize == -1) then
             call ESMF_GridCompSetVMMaxPEs(gcomp, openMpHandling=openMpHandling,&
-              openMpNumThreads=openMpNumThreads, rc=rc)
+              openMpNumThreads=openMpNumThreads, &
+              forceEachChildPetOwnPthread=.true., rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else if (maxCount > -1 .and. minStackSize == -1) then
             call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
               openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
-              rc=rc)
+              forceEachChildPetOwnPthread=.true., rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else if (maxCount == -1 .and. minStackSize > -1) then
             call ESMF_GridCompSetVMMaxPEs(gcomp, minStackSize=minStackSize, &
               openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
-              rc=rc)
+              forceEachChildPetOwnPthread=.true., rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else if (maxCount > -1 .and. minStackSize > -1) then
             call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
               minStackSize=minStackSize, openMpHandling=openMpHandling, &
-              openMpNumThreads=openMpNumThreads, rc=rc)
+              openMpNumThreads=openMpNumThreads, &
+              forceEachChildPetOwnPthread=.true., rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif

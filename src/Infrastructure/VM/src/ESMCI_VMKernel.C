@@ -16,7 +16,7 @@
 #define WITHBLOCKER_on
 
 #define VM_PTHREADLOG_on
-#define VM_PETMANAGEMENTLOG_on
+#define VM_PETMANAGEMENTLOG_off
 #define VM_MEMLOG_off
 #define VM_COMMQUEUELOG_off
 #define VM_EPOCHLOG_off
@@ -2148,9 +2148,10 @@ void *VMK::startup(class VMKPlan *vmp,
     // threading stuff
     sarg[i].openmphandling = vmp->openmphandling;
     sarg[i].openmpnumthreads = vmp->openmpnumthreads;
-    sarg[i].threadsflag = vmp->supportContributors;   //TODO: does not mean threaded!!!
-    if (!vmp->supportContributors){
-      // for a VM that is not thread-based the VM can already be constructed
+    sarg[i].threadsflag = vmp->eachChildPetOwnPthread;
+    if (!vmp->eachChildPetOwnPthread){
+      // For a VM that does not create new Pthreads, the VM can already be
+      // constructed.
       // obtain reference to the vm instance on heap
       VMK &vm = *(sarg[0].myvm);
       // setup the pet section in this vm instance
@@ -2161,10 +2162,10 @@ void *VMK::startup(class VMKPlan *vmp,
 #endif
       vm.construct((void *)&sarg[0]);
     }else{
-      // if this is a thread-based VM then...
-      // ...finally spawn threads from this pet...
-      // in the thread-based case the VM cannot be constructured until the
-      // pthreadID is known!
+      // For a VM that creates new Pthreads...
+      // ... spawn threads from this pet ...
+      // ... cannot construct new VM here ...
+      // ... must construct under the new Pthread where pthreadID is known!
       *rc = vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i],
         false, vmp->minStackSize); // not a service thread
       if (*rc) return NULL;  // could not create pthread -> bail out
@@ -2210,7 +2211,8 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
   simpleBlockingCallback |= vmp->parentVMflag;
   // the non-thread based VMs simply do a blocking callback for all the 
   // spawning PETs.
-  simpleBlockingCallback |= (!vmp->supportContributors && vmp->spawnflag[mypet]==1);
+  simpleBlockingCallback |= 
+    (!vmp->supportContributors && vmp->spawnflag[mypet]==1);
   // finally execute the simple blocking callback
   if (simpleBlockingCallback){
 #ifdef VM_PETMANAGEMENTLOG_on
@@ -2309,8 +2311,7 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
 #endif
       }
     // now all contributors are in, pets that spawn need to release their vmkts
-    bool usePthread=true;  //TODO: where will this be set by user?
-    if (usePthread){
+    if (vmp->eachChildPetOwnPthread){
       // Each child PET in its own Pthread
       for (int i=0; i<vmp->spawnflag[mypet]; i++){
 #ifdef VM_PETMANAGEMENTLOG_on
@@ -2367,8 +2368,7 @@ void VMK::exit(class VMKPlan *vmp, void *arg){
     }
 #endif
     // pets that spawn in a thread-based VM need to catch their vmkts
-    bool usePthread=true;  //TODO: where will this be set by user?
-    if (usePthread){
+    if (vmp->eachChildPetOwnPthread){
       // Each child PET in its own Pthread
       for (int i=0; i<vmp->spawnflag[mypet]; i++){
 #ifdef VM_PETMANAGEMENTLOG_on
@@ -2446,7 +2446,7 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
     return;
   }
   for (int i=0; i<vmp->spawnflag[mypet]; i++){
-    if (!vmp->supportContributors){
+    if (!vmp->eachChildPetOwnPthread){
       // obtain reference to the vm instance on heap
       VMK &vm = *(sarg[0].myvm);
       vm.epochFinal();  // close down epoch handling
@@ -2702,6 +2702,7 @@ int VMK::getMaxTag(){
 VMKPlan::VMKPlan(){
   // native constructor
   supportContributors = false; // by default do not support contributors
+  eachChildPetOwnPthread = false; // by default do not create new Pthreads
   parentVMflag = 0; // default is to create a new VM for every child
   openmphandling = 3; // default to pin OpenMP threads
   openmpnumthreads = -1; // default to local peCount
@@ -2959,11 +2960,13 @@ void VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist,
   delete [] nssiid;
   // now deal with mypet specific members
   nspawn = spawnflag[vm.mypet];
+  if (nspawn > 1) eachChildPetOwnPthread = true;
 }
 
 
 int VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist, 
-  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
+  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+  bool forceEachChildPetOwnPthread){
   // set the communication preferences
   if (pref_intra_process >= 0)
     this->pref_intra_process = pref_intra_process;
@@ -2973,6 +2976,7 @@ int VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist,
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_maxthreads(vm, max, plist, nplist);
   if ((vm.isPthreadsEnabled()==false) && supportContributors) return 1; // error
+  if (forceEachChildPetOwnPthread) eachChildPetOwnPthread=true;
   return 0;
 }
 
@@ -3073,11 +3077,13 @@ void VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
   delete [] first_pet_index;
   // now deal with mypet specific members
   nspawn = spawnflag[vm.mypet];
+  if (nspawn > 1) eachChildPetOwnPthread = true;
 }
 
 
 int VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
-  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
+  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+  bool forceEachChildPetOwnPthread){
   // set the communication preferences
   if (pref_intra_process >= 0)
     this->pref_intra_process = pref_intra_process;
@@ -3087,6 +3093,7 @@ int VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_minthreads(vm, max, plist, nplist);
   if ((vm.isPthreadsEnabled()==false) && supportContributors) return 1; // error
+  if (forceEachChildPetOwnPthread) eachChildPetOwnPthread=true;
   return 0;
 }
 
@@ -3192,11 +3199,13 @@ void VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
   delete [] nssiid;
   // now deal with mypet specific members
   nspawn = spawnflag[vm.mypet];
+  if (nspawn > 1) eachChildPetOwnPthread = true;
 }
 
 
 int VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist, 
-  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
+  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+  bool forceEachChildPetOwnPthread){
   // set the communication preferences
   if (pref_intra_process >= 0)
     this->pref_intra_process = pref_intra_process;
@@ -3206,6 +3215,7 @@ int VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_maxcores(vm, max, plist, nplist);
   if ((vm.isPthreadsEnabled()==false) && supportContributors) return 1; // error
+  if (forceEachChildPetOwnPthread) eachChildPetOwnPthread=true;
   return 0;
 }
 
@@ -3214,6 +3224,7 @@ void VMKPlan::vmkplan_print(){
   // print info about the VMKPlan object
   printf("--- vmkplan_print start ---\n");
   printf("supportContributors = %d\n", supportContributors);
+  printf("eachChildPetOwnPthread = %d\n", eachChildPetOwnPthread);
   printf("parentVMflag = %d\n", parentVMflag);
   printf("npets = %d\n", npets);
   for (int i=0; i<npets; i++)

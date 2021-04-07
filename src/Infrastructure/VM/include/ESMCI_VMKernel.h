@@ -531,7 +531,8 @@ class VMKPlan{
     int npets;
     int nplist;       // number of PETs in petlist that participate
     int *petlist;     // keeping sequence of parent pets
-    bool supportContributors; // default: false
+    bool supportContributors;     // default: false
+    bool eachChildPetOwnPthread;  // default: false
     int parentVMflag; // 0-create child VM, 1-run on parent VM
     int *spawnflag;   // for each pet: 0-don't spawn, >=1-spawn threads
     int *contribute;  // pet id to which non-spawning pet contributes its cores
@@ -581,7 +582,8 @@ class VMKPlan{
       // set up a VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
     int vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist,
-      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
+      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+      bool forceEachChildPetOwnPthread=false);
       // set up a VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
     void vmkplan_minthreads(VMK &vm);
@@ -597,7 +599,8 @@ class VMKPlan{
       // up to max cores per pet but only allow PETs listed in plist to
       // participate
     int vmkplan_minthreads(VMK &vm, int max, int *plist, int nplist,
-      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
+      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+      bool forceEachChildPetOwnPthread=false);
       // set up a VMKPlan that will only have single threaded pet
       // instantiations and claim all cores of pets that don't make it through,
       // up to max cores per pet but only allow PETs listed in plist to
@@ -613,7 +616,8 @@ class VMKPlan{
       // cores available, but not more than max and only use PETs listed in
       // plist
     int vmkplan_maxcores(VMK &vm, int max, int *plist, int nplist,
-      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
+      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+      bool forceEachChildPetOwnPthread=false);
       // set up a VMKPlan that will have pets with the maximum number of
       // cores available, but not more than max and only use PETs listed in
       // plist
