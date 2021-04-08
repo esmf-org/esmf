@@ -72,8 +72,7 @@ module ESMF_VMComponentUTest_gcomp_mod
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
     if (pthreadsEnabled) then
-      call ESMF_GridCompSetVMMinThreads(gcomp, &
-        forceEachChildPetOwnPthread=.true., rc=rc)
+      call ESMF_GridCompSetVMMinThreads(gcomp, forceChildPthreads=.true., rc=rc)
     endif
 #endif
   end subroutine !--------------------------------------------------------------

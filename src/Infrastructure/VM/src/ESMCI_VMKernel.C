@@ -198,7 +198,7 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
     pthread_attr_getstacksize(&pthreadAttrs, &stack_size);
     std::stringstream msg;
     msg << "vmkt_create()#" << __LINE__
-      << " service=" << service << " (0: actual thread, 1: service thread) -"
+      << " service=" << service << " (0: actual PET, 1: service thread) -"
       << " PTHREAD_STACK_MIN: " << PTHREAD_STACK_MIN << " bytes"
       << " stack_size: " << stack_size << " bytes";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);

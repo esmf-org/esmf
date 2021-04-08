@@ -3002,8 +3002,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, keywordEnforcer, &
     maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
-    minStackSize, openMpHandling, openMpNumThreads, &
-    forceEachChildPetOwnPthread, rc)
+    pthreadMinStackSize, openMpHandling, openMpNumThreads, &
+    forceChildPthreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3012,10 +3012,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
-    integer,             intent(in),  optional :: minStackSize
+    integer,             intent(in),  optional :: pthreadMinStackSize
     character(*),        intent(in),  optional :: openMpHandling
     integer,             intent(in),  optional :: openMpNumThreads
-    logical,             intent(in),  optional :: forceEachChildPetOwnPthread
+    logical,             intent(in),  optional :: forceChildPthreads
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3049,25 +3049,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
-! \item[{[minStackSize]}]
-!   Minimum stack size in byte of any Pthread that is created in the VM with the
-!   intention of executing user code as a PET. For cases where OpenMP threads
+! \item[{[pthreadMinStackSize]}]
+!   Minimum stack size in byte of any child PET executing as Pthread. By default
+!   single threaded child PETs do {\em not} execute as Pthread, and their stack
+!   size is unaffected by this argument. However, for multi-threaded child PETs,
+!   or if {\tt forceChildPthreads} is {\tt .true.}, child PETs execute
+!   as Pthreads with their own private stack.
+!
+!   For cases where OpenMP threads
 !   are used by the user code, each thread allocates its own private stack. For
 !   all threads {\em other} than the master, the stack size is set via the 
 !   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
 !   however, becomes the {\em master} of the OpenMP thread team, and is not
 !   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
-!   sized via the {\tt minStackSize} argument, and a large enough size is often
-!   critical.
+!   sized via the {\tt pthreadMinStackSize} argument, and a large enough size
+!   is often critical.
 !
-!   When {\tt minStackSize} is absent, the default is to use the system default
+!   When {\tt pthreadMinStackSize}
+!   is absent, the default is to use the system default
 !   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
 !   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
 !   {\em unlimited}, or any setting below the ESMF implemented minimum,
 !   will result in setting the stack size to 20MiB (the ESMF minimum).
 !   Depending on how much private data is used by the user code under
-!   the master thread, the default might be too small, and {\tt minStackSize}
-!   must be used to allocate sufficient stack space.
+!   the master thread, the default might be too small, and
+!   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
 ! \item[{[openMpHandling]}] 
 !   Handling of OpenMP threads. Supported options are:
 !   \begin{itemize}
@@ -3084,7 +3090,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Number of OpenMP threads in each OpenMP thread team. This can be any
 !   positive number. By default, or if {\tt openMpNumThreads} is negative, each
 !   PET sets the number of OpenMP threads to its local peCount.
-! \item[{[forceEachChildPetOwnPthread]}] 
+! \item[{[forceChildPthreads]}] 
 !   For {\tt .true.}, force each child PET to execute in its own Pthread.
 !   By default, {\tt .false.}, single PETs spawned from a parent PET
 !   execute in the same thread (or MPI process) as the parent PET. Multiple
@@ -3106,8 +3112,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMaxPEs(gridcomp%compp, maxPeCountPerPet, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, &
-      openMpHandling, openMpNumThreads, forceEachChildPetOwnPthread, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, pthreadMinStackSize, &
+      openMpHandling, openMpNumThreads, forceChildPthreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3127,7 +3133,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxThreads(gridcomp, keywordEnforcer, &
     maxPetCountPerVas, prefIntraProcess, prefIntraSsi, prefInterSsi, &
-    minStackSize, forceEachChildPetOwnPthread, rc)
+    pthreadMinStackSize, forceChildPthreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3136,8 +3142,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
-    integer,             intent(in),  optional :: minStackSize
-    logical,             intent(in),  optional :: forceEachChildPetOwnPthread
+    integer,             intent(in),  optional :: pthreadMinStackSize
+    logical,             intent(in),  optional :: forceChildPthreads
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3173,26 +3179,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
-! \item[{[minStackSize]}]
-!   Minimum stack size in byte of any Pthread that is created in the VM with the
-!   intention of executing user code as a PET. For cases where OpenMP threads
+! \item[{[pthreadMinStackSize]}]
+!   Minimum stack size in byte of any child PET executing as Pthread. By default
+!   single threaded child PETs do {\em not} execute as Pthread, and their stack
+!   size is unaffected by this argument. However, for multi-threaded child PETs,
+!   or if {\tt forceChildPthreads} is {\tt .true.}, child PETs execute
+!   as Pthreads with their own private stack.
+!
+!   For cases where OpenMP threads
 !   are used by the user code, each thread allocates its own private stack. For
 !   all threads {\em other} than the master, the stack size is set via the 
 !   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
 !   however, becomes the {\em master} of the OpenMP thread team, and is not
 !   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
-!   sized via the {\tt minStackSize} argument, and a large enough size is often
-!   critical.
+!   sized via the {\tt pthreadMinStackSize} argument, and a large enough size
+!   is often critical.
 !
-!   When {\tt minStackSize} is absent, the default is to use the system default
+!   When {\tt pthreadMinStackSize}
+!   is absent, the default is to use the system default
 !   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
 !   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
 !   {\em unlimited}, or any setting below the ESMF implemented minimum,
 !   will result in setting the stack size to 20MiB (the ESMF minimum).
 !   Depending on how much private data is used by the user code under
-!   the master thread, the default might be too small, and {\tt minStackSize}
-!   must be used to allocate sufficient stack space.
-! \item[{[forceEachChildPetOwnPthread]}] 
+!   the master thread, the default might be too small, and
+!   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
+! \item[{[forceChildPthreads]}] 
 !   For {\tt .true.}, force each child PET to execute in its own Pthread.
 !   By default, {\tt .false.}, single PETs spawned from a parent PET
 !   execute in the same thread (or MPI process) as the parent PET. Multiple
@@ -3214,8 +3226,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMaxThreads(gridcomp%compp, maxPetCountPerVas, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, &
-      forceEachChildPetOwnPthread, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, pthreadMinStackSize, &
+      forceChildPthreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3235,7 +3247,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMinThreads(gridcomp, keywordEnforcer, &
     maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
-    minStackSize, forceEachChildPetOwnPthread, rc)
+    pthreadMinStackSize, forceChildPthreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
@@ -3244,8 +3256,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
-    integer,             intent(in),  optional :: minStackSize
-    logical,             intent(in),  optional :: forceEachChildPetOwnPthread
+    integer,             intent(in),  optional :: pthreadMinStackSize
+    logical,             intent(in),  optional :: forceChildPthreads
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3278,26 +3290,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
-! \item[{[minStackSize]}]
-!   Minimum stack size in byte of any Pthread that is created in the VM with the
-!   intention of executing user code as a PET. For cases where OpenMP threads
+! \item[{[pthreadMinStackSize]}]
+!   Minimum stack size in byte of any child PET executing as Pthread. By default
+!   single threaded child PETs do {\em not} execute as Pthread, and their stack
+!   size is unaffected by this argument. However, for multi-threaded child PETs,
+!   or if {\tt forceChildPthreads} is {\tt .true.}, child PETs execute
+!   as Pthreads with their own private stack.
+!
+!   For cases where OpenMP threads
 !   are used by the user code, each thread allocates its own private stack. For
 !   all threads {\em other} than the master, the stack size is set via the 
 !   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
 !   however, becomes the {\em master} of the OpenMP thread team, and is not
 !   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
-!   sized via the {\tt minStackSize} argument, and a large enough size is often
-!   critical.
+!   sized via the {\tt pthreadMinStackSize} argument, and a large enough size
+!   is often critical.
 !
-!   When {\tt minStackSize} is absent, the default is to use the system default
+!   When {\tt pthreadMinStackSize}
+!   is absent, the default is to use the system default
 !   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
 !   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
 !   {\em unlimited}, or any setting below the ESMF implemented minimum,
 !   will result in setting the stack size to 20MiB (the ESMF minimum).
 !   Depending on how much private data is used by the user code under
-!   the master thread, the default might be too small, and {\tt minStackSize}
-!   must be used to allocate sufficient stack space.
-! \item[{[forceEachChildPetOwnPthread]}] 
+!   the master thread, the default might be too small, and
+!   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
+! \item[{[forceChildPthreads]}] 
 !   For {\tt .true.}, force each child PET to execute in its own Pthread.
 !   By default, {\tt .false.}, single PETs spawned from a parent PET
 !   execute in the same thread (or MPI process) as the parent PET. Multiple
@@ -3319,8 +3337,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMinThreads(gridcomp%compp, maxPeCountPerPet, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, minStackSize, &
-      forceEachChildPetOwnPthread, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, pthreadMinStackSize, &
+      forceChildPthreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
