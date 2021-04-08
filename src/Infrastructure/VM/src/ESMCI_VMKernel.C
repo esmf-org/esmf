@@ -728,6 +728,44 @@ void VMK::abort(){
 }
 
 
+void VMK::setAffinities(void *ssarg){
+  SpawnArg *sarg = (SpawnArg *)ssarg;
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+  // set thread affinity
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  for (int i=0; i<ncpet[mypet]; i++)
+    CPU_SET(ssipe[cid[mypet][i]], &cpuset);
+  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#ifndef ESMF_NO_OPENMP
+  // OpenMP handling according to sarg->openmphandling
+  if (sarg->openmphandling>0){
+    // Set the number of OpenMP threads
+    int numthreads = ncpet[mypet]; // default
+    if (sarg->openmpnumthreads>=0)
+      numthreads = sarg->openmpnumthreads;
+    omp_set_num_threads(numthreads);
+    if (sarg->openmphandling>1){
+#pragma omp parallel
+      {
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        int cIndex = omp_get_thread_num()%ncpet[mypet];
+        CPU_SET(ssipe[cid[mypet][cIndex]], &cpuset);
+        if (sarg->openmphandling>2){
+          // set affinity on all OpenMP threads
+          pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+        }
+      }
+    }
+  }
+#endif
+#endif
+#endif
+}
+
+
 void VMK::construct(void *ssarg){
   SpawnArg *sarg = (SpawnArg *)ssarg;
   // fill an already existing VMK object with info
@@ -798,40 +836,11 @@ void VMK::construct(void *ssarg){
   mpi_c = sarg->mpi_c;
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
   mpi_c_ssi = sarg->mpi_c_ssi;
-#endif  
-#ifndef ESMF_NO_PTHREADS
-#ifndef PARCH_darwin
-  // set thread affinity
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  for (int i=0; i<ncpet[mypet]; i++)
-    CPU_SET(ssipe[cid[mypet][i]], &cpuset);
-  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
-#ifndef ESMF_NO_OPENMP
-  // OpenMP handling according to sarg->openmphandling
-  if (sarg->openmphandling>0){
-    // Set the number of OpenMP threads
-    int numthreads = ncpet[mypet]; // default
-    if (sarg->openmpnumthreads>=0)
-      numthreads = sarg->openmpnumthreads;
-    omp_set_num_threads(numthreads);
-    if (sarg->openmphandling>1){
-#pragma omp parallel
-      {
-        cpu_set_t cpuset;
-        CPU_ZERO(&cpuset);
-        int cIndex = omp_get_thread_num()%ncpet[mypet];
-        CPU_SET(ssipe[cid[mypet][cIndex]], &cpuset);
-        if (sarg->openmphandling>2){
-          // set affinity on all OpenMP threads
-          pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
-        }
-      }
-    }
-  }
 #endif
-#endif
-#endif
+
+  // Set thread affinities, including OpenMP if VM set to handle
+  setAffinities(sarg);
+
   // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
   pth_mutex = sarg->pth_mutex;
@@ -1064,6 +1073,8 @@ static void enter_callback(SpawnArg *sarg){
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
+
+  vm->setAffinities((void *)sarg);
 
   // call the function pointer with the new VMK as its argument
   // this is where we finally enter the user code again...

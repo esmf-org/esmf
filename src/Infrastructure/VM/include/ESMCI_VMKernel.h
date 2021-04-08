@@ -340,6 +340,9 @@ class VMK{
     void abort();
       // abort default (all MPI) virtual machine
 
+    void setAffinities(void *ssarg);
+      // set thread affinities, including OpenMP handling if configured
+
     void construct(void *sarg);
       // fill an already existing VMK object with info
     void destruct();
