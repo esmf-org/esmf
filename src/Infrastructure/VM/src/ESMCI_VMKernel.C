@@ -198,7 +198,8 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
     pthread_attr_getstacksize(&pthreadAttrs, &stack_size);
     std::stringstream msg;
     msg << "vmkt_create()#" << __LINE__
-      << " service=" << service << " (0: actual PET, 1: service thread) -"
+      << " Pthread: service=" << service
+      << " (0: actual PET, 1: service thread) -"
       << " PTHREAD_STACK_MIN: " << PTHREAD_STACK_MIN << " bytes"
       << " stack_size: " << stack_size << " bytes";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
@@ -1231,7 +1232,8 @@ static void *vmk_spawn(void *arg){
 #endif
   }
   // wrap-up...
-  vm->destruct();
+  vm->epochFinal();  // close down epoch handling
+  vm->destruct();    // destroy this vm instance
   // when returning from this procedure this pet will terminate
   return NULL;
 }
@@ -3617,10 +3619,19 @@ bool VMK::cancelled(status *status){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void VMK::epochInit(){epoch=epochNone;epochSetFirst();}
+void VMK::epochInit(){
+#ifdef VM_EPOCHLOG_on
+  ESMC_LogDefault.Write("epochInit", ESMC_LOGMSG_DEBUG);
+#endif
+  epoch=epochNone;
+  epochSetFirst();
+}
 
 void VMK::epochFinal(){
   // loop over the sendMap and wait for outstanding comms
+#ifdef VM_EPOCHLOG_on
+  ESMC_LogDefault.Write("epochFinal", ESMC_LOGMSG_DEBUG);
+#endif
   std::map<int, sendBuffer>:: iterator its;
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
     sendBuffer *sm = &(its->second);
