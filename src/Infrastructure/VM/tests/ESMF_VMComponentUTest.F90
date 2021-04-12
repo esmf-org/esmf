@@ -220,11 +220,11 @@ program ESMF_VMComponentUTest
   call ESMF_VMGetGlobal(vm, rc=rc)
   call ESMF_VMPrint(vm)
   
-  ! Prepare for non-exhaustive test section
+  ! Prepare for loop testing
   loop_rc=ESMF_SUCCESS 
 
-  do j=1, 2
-    do i=1, 100
+  do j=1, 1
+    do i=1, 2
 
       gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
@@ -238,7 +238,7 @@ program ESMF_VMComponentUTest
       if (loop_rc /= ESMF_SUCCESS) goto 10
 
     enddo
-    do i=1, 100
+    do i=1, 2
 
       call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
@@ -254,8 +254,11 @@ program ESMF_VMComponentUTest
   write(failMsg, *) "Failure codes returned!"
   call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-  do j=1, 2
-    do i=1, 100
+  ! Prepare for loop testing
+  loop_rc=ESMF_SUCCESS 
+
+  do j=1, 1
+    do i=1, 2
 
       gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 15
@@ -269,7 +272,7 @@ program ESMF_VMComponentUTest
       if (loop_rc /= ESMF_SUCCESS) goto 15
 
     enddo
-    do i=1, 100
+    do i=1, 2
 
       call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 15
@@ -350,7 +353,7 @@ program ESMF_VMComponentUTest
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
-  ! Prepare for exhaustive test section
+  ! Prepare for loop testing
   loop_rc=ESMF_SUCCESS 
 
   do j=1, 20
@@ -360,7 +363,7 @@ program ESMF_VMComponentUTest
       if (loop_rc /= ESMF_SUCCESS) goto 20
   
       call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvm, rc=loop_rc)
-      if (loop_rc /= ESMF_SUCCESS) goto 10
+      if (loop_rc /= ESMF_SUCCESS) goto 20
 
       call ESMF_GridCompSetServices(gcomp(i), userRoutine=mygcomp_register_exh, &
         rc=loop_rc)
@@ -380,6 +383,39 @@ program ESMF_VMComponentUTest
   !Verify loop test results
   !EX_UTest
   write(name, *) "Exhaustive Component Create/SetServices/Destroy Test"
+  write(failMsg, *) "Failure codes returned!"
+  call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  ! Prepare for loop testing
+  loop_rc=ESMF_SUCCESS 
+
+  do j=1, 20
+    do i=1, 200
+
+      gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 25
+  
+      call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvmForcePthreads, rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 25
+
+      call ESMF_GridCompSetServices(gcomp(i), userRoutine=mygcomp_register_exh, &
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 25
+
+    enddo
+    do i=1, 200
+
+      call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 25
+      
+    enddo
+  enddo
+  
+25 continue
+  !----------------------------------------------------------------
+  !Verify loop test results
+  !EX_UTest
+  write(name, *) "Exhaustive Component Create/SetServices/Destroy ForcePthreads Test"
   write(failMsg, *) "Failure codes returned!"
   call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
