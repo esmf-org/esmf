@@ -1061,15 +1061,18 @@ void VMK::destruct(){
 }
 
 
-static void enter_callback(SpawnArg *sarg){
+static void enter_callback(SpawnArg *sarg, void *mutex){
   vmkt_t *vmkt = &(sarg->vmkt);
   VMK *vm = sarg->myvm;
+#ifndef ESMF_NO_PTHREADS
+  esmf_pthread_mutex_t *pmutex = (esmf_pthread_mutex_t *)mutex;
+#endif
 
 #ifdef VM_PETMANAGEMENTLOG_on
   {
     std::stringstream msg;
     msg << "enter_callback()#" << __LINE__
-      << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+      << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
       << " just before user code callback, pid=" << getpid();
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
@@ -1089,7 +1092,7 @@ static void enter_callback(SpawnArg *sarg){
   {
     std::stringstream msg;
     msg << "enter_callback()#" << __LINE__
-      << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+      << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
       << " has returned from user code callback, pid=" << getpid();
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
@@ -1102,7 +1105,7 @@ static void enter_callback(SpawnArg *sarg){
     {
       std::stringstream msg;
       msg << "enter_callback()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " sending kill(VM_SIG1) to PID="
         << sarg->contributors[i].pid;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
@@ -1117,7 +1120,7 @@ static void enter_callback(SpawnArg *sarg){
     {
       std::stringstream msg;
       msg << "enter_callback()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " done sending kill(VM_SIG1) to PID="
         << sarg->contributors[i].pid;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
@@ -1126,14 +1129,14 @@ static void enter_callback(SpawnArg *sarg){
     // which ever thread of the other process woke up will try to receive tid
 #ifndef ESMF_NO_PTHREADS
     if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
-      pthread_mutex_lock(&(vmkt->mut0));
+      pthread_mutex_lock(pmutex);
 #endif
     MPI_Send(&(sarg->contributors[i].blocker_vmkt),
       sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[i].mpi_pid,
       VM_TID_MPI_TAG, vm->default_mpi_c);
 #ifndef ESMF_NO_PTHREADS
     if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
-      pthread_mutex_unlock(&(vmkt->mut0));
+      pthread_mutex_unlock(pmutex);
 #endif
   }
 }
@@ -1148,7 +1151,7 @@ static void *vmk_spawn(void *arg){
   {
     std::stringstream msg;
     msg << "vmk_spawn()#" << __LINE__
-      << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+      << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
       << " pid=" << getpid() << " starting prologue negotiation.";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
@@ -1185,7 +1188,7 @@ static void *vmk_spawn(void *arg){
   {
     std::stringstream msg;
     msg << "vmk_spawn()#" << __LINE__
-      << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+      << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
       << " pid=" << getpid() << " finished prologue negotiation.";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
   }
@@ -1199,7 +1202,7 @@ static void *vmk_spawn(void *arg){
     {
       std::stringstream msg;
       msg << "vmk_spawn()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " going to wait for release, pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1211,7 +1214,7 @@ static void *vmk_spawn(void *arg){
     {
       std::stringstream msg;
       msg << "vmk_spawn()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " was released, pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1222,7 +1225,7 @@ static void *vmk_spawn(void *arg){
     //vm.barrier();
 
     // call back into user code, and return PEs to their contributing PETs
-    enter_callback(sarg);
+    enter_callback(sarg, &(vmkt->mut0));
 
     // now signal to parent thread that child is done with its work
 #ifndef ESMF_NO_PTHREADS
@@ -1308,7 +1311,7 @@ static void *vmk_sigcatcher(void *arg){
     {
       std::stringstream msg;
       msg << "vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " going to wait for release, pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1320,7 +1323,7 @@ static void *vmk_sigcatcher(void *arg){
     {
       std::stringstream msg;
       msg << "vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " was released, pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1340,7 +1343,7 @@ static void *vmk_sigcatcher(void *arg){
     {
       std::stringstream msg;
       msg << "vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " going to sleep in sigwait(), pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1354,7 +1357,7 @@ static void *vmk_sigcatcher(void *arg){
     {
       std::stringstream msg;
       msg << "vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " pid=" << getpid() << " was woken up by signal: " << caught;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1366,7 +1369,7 @@ static void *vmk_sigcatcher(void *arg){
     {
       std::stringstream msg;
       msg << "vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " pid=" << getpid() << " now calling MPI_Recv() for MPI_ANY_SOURCE.";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1377,7 +1380,7 @@ static void *vmk_sigcatcher(void *arg){
     {
       std::stringstream msg;
       msg << "vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " pid=" << getpid() << " returned from MPI_Recv() for MPI_ANY_SOURCE.";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1389,7 +1392,7 @@ static void *vmk_sigcatcher(void *arg){
     {
       std::stringstream msg;
       msg << "vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " pid=" << getpid() << " waking up blocker thread.";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1403,7 +1406,7 @@ static void *vmk_sigcatcher(void *arg){
     {
       std::stringstream msg;
       msg << "vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": pthread=" << pthread_self()
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " pid=" << getpid() << " done waking up blocker thread.";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1462,14 +1465,14 @@ static void *vmk_block(void *arg){
     //sleep(2); // put this in the code to verify that earlier received signals
     // will be pending on a per thread basis...
 #if (VERBOSITY > 5)
-    fprintf(stderr,"vmk_block: thread %d: %d going to wait for release, pid: %d\n",
+    fprintf(stderr,"vmk_block: tid=%d: %d going to wait for release, pid: %d\n",
       vmkt->tid, pthread_self(), getpid());
 #endif
 #ifndef ESMF_NO_PTHREADS
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
 #endif
 #if (VERBOSITY > 5)
-    fprintf(stderr,"vmk_block: thread %d: %d was released, pid:%d\n", vmkt->tid,
+    fprintf(stderr,"vmk_block: tid=%d: %d was released, pid:%d\n", vmkt->tid,
       pthread_self(), getpid());
 #endif
     
@@ -2352,7 +2355,8 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
       if (vmp->spawnflag[mypet]==1){
         // call back into user code, and return PEs to their contributing PETs
         (sarg->vmkt).arg = argvmkt;
-        enter_callback(sarg);
+        (sarg->vmkt).tid = 0; // mark as an invalid tid
+        enter_callback(sarg, pth_mutex);
       }else if (vmp->spawnflag[mypet]==0){
         // not a spawning PET -> NoOp
       }else{
