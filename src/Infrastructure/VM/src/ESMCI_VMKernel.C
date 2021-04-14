@@ -2644,7 +2644,7 @@ VMKPlan::VMKPlan(){
   // native constructor
   nothreadflag = 1; // by default use non-threaded VMs
   parentVMflag = 0; // default is to create a new VM for every child
-  openmphandling = 3; // default to pin OpenMP threads
+  openmphandling = 0; // default to no OpenMP handling if not explicitly set
   openmpnumthreads = -1; // default to local peCount
   // invalidate the arrays
   spawnflag = NULL;

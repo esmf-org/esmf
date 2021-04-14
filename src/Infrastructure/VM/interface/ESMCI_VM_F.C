@@ -1247,6 +1247,7 @@ extern "C" {
       (*ptr)->vmkplan_mpi_c_part(**vm);
     }
     // set the nothreadflag because this is the default for new VMs
+    (*ptr)->openmphandling = 0; // override what vmkplan_minthreads() above set
     (*ptr)->nothreadflag = 1; // override what vmkplan_minthreads() above set
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMCI::VM instances as this PET will spawn 
