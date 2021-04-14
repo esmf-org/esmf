@@ -571,6 +571,8 @@ void VMK::init(MPI_Comm mpiCommunicator){
       ++j;
     }
   }
+  
+#if 0
 #ifndef ESMF_NO_PTHREADS
 #ifndef PARCH_darwin
   // set thread affinity
@@ -580,6 +582,8 @@ void VMK::init(MPI_Comm mpiCommunicator){
   pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
 #endif
 #endif
+#endif
+  
 #endif
   // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];
@@ -797,6 +801,8 @@ void VMK::construct(void *ssarg){
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
   mpi_c_ssi = sarg->mpi_c_ssi;
 #endif  
+  
+#if 0
 #ifndef ESMF_NO_PTHREADS
 #ifndef PARCH_darwin
   // set thread affinity
@@ -827,6 +833,7 @@ void VMK::construct(void *ssarg){
       }
     }
   }
+#endif
 #endif
 #endif
 #endif
