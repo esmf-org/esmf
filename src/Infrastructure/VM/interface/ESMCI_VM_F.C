@@ -1249,6 +1249,7 @@ extern "C" {
     }
     // reset the supportContributors flag to default for new VMs
     (*ptr)->supportContributors = false; // override vmkplan_minthreads() setting
+    (*ptr)->openmphandling = 0; // override what vmkplan_minthreads() above set
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMCI::VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMCI::VMPlan
