@@ -573,6 +573,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   }
   
 #if 0
+  // setting affinity on this level might interfer with user level pinning
 #ifndef ESMF_NO_PTHREADS
 #ifndef PARCH_darwin
   // set thread affinity
@@ -801,42 +802,43 @@ void VMK::construct(void *ssarg){
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
   mpi_c_ssi = sarg->mpi_c_ssi;
 #endif  
-  
-#if 0
+
+  if (!sarg->nothreadsflag){
 #ifndef ESMF_NO_PTHREADS
 #ifndef PARCH_darwin
-  // set thread affinity
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  for (int i=0; i<ncpet[mypet]; i++)
-    CPU_SET(ssipe[cid[mypet][i]], &cpuset);
-  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+    // set thread affinity
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    for (int i=0; i<ncpet[mypet]; i++)
+      CPU_SET(ssipe[cid[mypet][i]], &cpuset);
+    pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
 #ifndef ESMF_NO_OPENMP
-  // OpenMP handling according to sarg->openmphandling
-  if (sarg->openmphandling>0){
-    // Set the number of OpenMP threads
-    int numthreads = ncpet[mypet]; // default
-    if (sarg->openmpnumthreads>=0)
-      numthreads = sarg->openmpnumthreads;
-    omp_set_num_threads(numthreads);
-    if (sarg->openmphandling>1){
+    // OpenMP handling according to sarg->openmphandling
+    if (sarg->openmphandling>0){
+      // Set the number of OpenMP threads
+      int numthreads = ncpet[mypet]; // default
+      if (sarg->openmpnumthreads>=0)
+        numthreads = sarg->openmpnumthreads;
+      omp_set_num_threads(numthreads);
+      if (sarg->openmphandling>1){
 #pragma omp parallel
-      {
-        cpu_set_t cpuset;
-        CPU_ZERO(&cpuset);
-        int cIndex = omp_get_thread_num()%ncpet[mypet];
-        CPU_SET(ssipe[cid[mypet][cIndex]], &cpuset);
-        if (sarg->openmphandling>2){
-          // set affinity on all OpenMP threads
-          pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+        {
+          cpu_set_t cpuset;
+          CPU_ZERO(&cpuset);
+          int cIndex = omp_get_thread_num()%ncpet[mypet];
+          CPU_SET(ssipe[cid[mypet][cIndex]], &cpuset);
+          if (sarg->openmphandling>2){
+            // set affinity on all OpenMP threads
+            pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+          }
         }
       }
     }
+#endif
+#endif
+#endif
   }
-#endif
-#endif
-#endif
-#endif
+
   // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
   pth_mutex = sarg->pth_mutex;
