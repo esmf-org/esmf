@@ -574,6 +574,8 @@ void VMK::init(MPI_Comm mpiCommunicator){
       ++j;
     }
   }
+#if 0
+  // setting affinity on this level might interfer with user level pinning
 #ifndef ESMF_NO_PTHREADS
 #ifndef PARCH_darwin
   // set thread affinity
@@ -581,6 +583,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   CPU_ZERO(&cpuset);
   CPU_SET(ssipe[mypet], &cpuset);
   pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#endif
 #endif
 #endif
 #endif
@@ -838,9 +841,6 @@ void VMK::construct(void *ssarg){
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
   mpi_c_ssi = sarg->mpi_c_ssi;
 #endif
-
-  // Set thread affinities, including OpenMP if VM set to handle
-  setAffinities(sarg);
 
   // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
