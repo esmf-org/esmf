@@ -3372,6 +3372,29 @@ program ESMF_AlarmTest
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
       if (.not. testPass) print *, 'bad return codes discovered'
       call ESMF_Test (testPass, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      write(failMsg, *) " Alarms with ring intervals equal to clock interval, incorrect behavior "
+      write(name, *) "Test running an alarms forward-reverse-forward with ring interval equal to clock interval "
+      rc = ESMF_SUCCESS
+      testPass = .true.
+      call Test_AlarmAdvRewind(testPass, rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+      if (.not. testPass) print *, 'bad return codes discovered'
+      call ESMF_Test (testPass, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      write(failMsg, *) " Alarms reverse with sticky set... "
+      write(name, *) "Test running an alarm reverse with sticky bit set "
+      rc = ESMF_SUCCESS
+      testPass = .true.
+      call Test_RevAlarmSticky(60._ESMF_KIND_R8, testPass, rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+      if (.not. testPass) print *, 'bad return codes discovered'
+      call ESMF_Test (testPass, name, failMsg, result, ESMF_SRCLINE)
+
 #endif
 
       ! destroy calendars
@@ -3605,5 +3628,174 @@ subroutine Test_AlarmHang(testPass, rc)
     testPass = .true.
    
 end subroutine Test_AlarmHang
+
+subroutine Test_AlarmAdvRewind(testPass, rc)
+  logical, intent(out) :: testPass
+  integer :: rc
+
+   type(ESMF_TimeInterval) :: dt
+   type(ESMF_Time) :: start_time, clock_start, clock_end
+   type(ESMF_Clock) :: clock
+
+   type(ESMF_TimeInterval) :: tint
+
+   integer :: status,i,j,nstep
+
+   logical :: esmf_ring
+   character(len=ESMF_MAXSTR) :: alarm_name
+   integer :: nalarms
+   type(ESMF_Alarm), allocatable :: alarm_list(:)
+   type(ESMF_Time) :: time
+   type(ESMF_Alarm) :: esmfalarm
+   type(ESMF_CalKind_Flag) :: calkindflag
+
+   rc = ESMF_SUCCESS
+
+   !call ESMF_CalendarGet(calkindflag=calkindflag, rc=status)
+   !call verify_(status)
+   call ESMF_CalendarSetDefault ( ESMF_CALKIND_GREGORIAN, rc=status )
+   call verify_(status)
+   call ESMF_TimeSet(clock_start,yy=2000,mm=1,dd=1,h=21,m=0,s=0,rc=status)
+   call verify_(status)
+   call ESMF_TimeSet(clock_end,yy=2000,mm=12,dd=1,h=21,m=0,s=0,rc=status)
+   call verify_(status)
+   call ESMF_TimeSet(start_time,yy=2000,mm=10,dd=1,h=21,m=0,s=0,rc=status)
+   call verify_(status)
+   call ESMF_TimeIntervalSet(dt,S=900, sN=0, sD=1,rc=status)
+   call verify_(status)
+   clock= ESMF_ClockCreate(timeStep=dt,startTime=clock_start,stopTime=clock_end,rc=status)
+   call verify_(status)
+   call ESMF_ClockSet(clock,currTime=start_time,rc=status)
+   call verify_(status)
+
+   ! fails if s=900
+   call ESMF_TimeIntervalSet(tint,s=900)
+   esmfalarm = ESMF_AlarmCreate(clock=clock,ringInterval=tint,ringTime=start_time,sticky=.false.,name='alarm_900',rc=status)
+   call verify_(status)
+   ! works if s=1800
+   call ESMF_TimeIntervalSet(tint,s=1800)
+   esmfalarm = ESMF_AlarmCreate(clock=clock,ringInterval=tint,ringTime=start_time,sticky=.false.,name='alarm_1800',rc=status)
+   call verify_(status)
+
+
+   nstep=12
+   call ESMF_ClockGet(clock,currtime=start_time,alarmCount=nalarms,rc=status)
+   allocate(alarm_list(nalarms))
+   call ESMF_ClockGetAlarmList(clock, alarmListFlag=ESMF_ALARMLIST_ALL, alarmList=alarm_list)
+   
+   do i=1,nstep
+      call ESMF_ClockGet(clock,currTime=time)
+      do j = 1,nalarms
+         call ESMF_AlarmGet(alarm_list(j),name=alarm_name)
+         esmf_ring = ESMF_AlarmIsRinging(alarm_list(j),rc=status)
+         call verify_(status)
+         if ( esmf_ring) then
+            write(*,*)trim(alarm_name)//' is ringing'
+            call ESMF_TimePrint(time,options='string')
+         end if
+      end do
+      call ESMF_ClockAdvance(clock)
+   enddo
+   call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_REVERSE, rc=status)
+   call verify_(status)
+   write(*,*)"*************** start rewind *********************"
+   do
+      call ESMF_ClockAdvance(clock,rc=status)
+      call verify_(status)
+      call ESMF_ClockGet(clock,currTime=time)
+      do j=1,nalarms
+         call ESMF_AlarmGet(alarm_list(j),name=alarm_name)
+         if (ESMF_AlarmIsRinging(alarm_list(j))) then
+            write(*,*)trim(alarm_name)//' is ringing'
+            call ESMF_TimePrint(time,options='string')
+         end if
+      end do
+      
+      if (time == start_time) exit
+   enddo
+   call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_FORWARD, rc=status)
+   call verify_(status)
+   write(*,*)"*************** end rewind *********************"
+   do i=1,nstep*2
+      call ESMF_ClockGet(clock,currTime=time)
+      do j = 1,nalarms
+         call ESMF_AlarmGet(alarm_list(j),name=alarm_name)
+         esmf_ring = ESMF_AlarmIsRinging(alarm_list(j),rc=status)
+         call verify_(status)
+         if ( esmf_ring) then
+            write(*,*)trim(alarm_name)//' is ringing'
+            call ESMF_TimePrint(time,options='string')
+         end if
+      end do
+      call ESMF_ClockAdvance(clock)
+   enddo
+
+  testPass = .false.
+     
+end subroutine Test_AlarmAdvRewind
+
+subroutine Test_RevAlarmSticky(dt, testPass, rc)
+#define CONTEXT line=__LINE__,file=__FILE__
+#define CHECKRC if(ESMF_LogFoundError(rcToCheck=rc,msg=ESMF_LOGERR_PASSTHRU,CONTEXT,rcToReturn=rc))then;write(0,*)'app abort: ',__FILE__,__LINE__;return;endif
+  logical, intent(out) :: testPass
+  integer, parameter :: r8 = SELECTED_REAL_KIND(12)   ! real r8
+  real(kind=r8), intent(in) :: dt
+  integer :: rc
+  
+  type(ESMF_Clock)         :: clock
+  type(ESMF_Alarm)         :: alarm
+  type(ESMF_TimeInterval)  :: esmf_ival
+  type(ESMF_Time)          :: time, initial, finish, ring_time
+  real(kind=r8)            :: secs
+  logical                  :: reverse_clock, sticky_alarm
+
+  rc = ESMF_SUCCESS
+  
+  call ESMF_Initialize( defaultcalkind=ESMF_CALKIND_GREGORIAN, rc=rc )         ; CHECKRC
+  call ESMF_TimeSet(time, yy=2021, mm=4, dd=6, rc=rc)                          ; CHECKRC
+  
+  secs = 0
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)                         ; CHECKRC
+  initial = time + esmf_ival
+  
+  secs = dt*100
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)                         ; CHECKRC
+  finish = time + esmf_ival
+  
+  secs = dt
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)                         ; CHECKRC
+  
+  clock = ESMF_Clockcreate(timeStep=esmf_ival   &
+          ,startTime=initial,stopTime=finish    &
+          ,refTime=time, rc=rc                  )      ; CHECKRC
+  
+  call ESMF_ClockSet(clock,direction=ESMF_DIRECTION_REVERSE, rc=rc)    ; CHECKRC
+
+  reverse_clock = ESMF_ClockIsReverse(clock, rc=rc)                      ; CHECKRC
+  sticky_alarm  = .not.reverse_clock
+  
+  write(0,'("reverse =",x,l)') reverse_clock
+  write(0,'("sticky  =",x,l)') sticky_alarm
+  
+  secs = dt*50
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)  ; CHECKRC
+  ring_time = initial + esmf_ival
+
+#if 1
+  alarm = ESMF_AlarmCreate(clock, ringTime=ring_time, sticky=sticky_alarm,  &
+                           ringTimeStepCount=1, rc=rc) ; CHECKRC
+#else
+  alarm = ESMF_AlarmCreate(clock, ringTime=ring_time, sticky=.false.,  &
+                           ringTimeStepCount=1, rc=rc) ; CHECKRC
+#endif
+  
+  call ESMF_alarmPrint(alarm,options='sticky')
+
+  testPass = .false. ! Because the C++ runtime failure cannot be caught reliably, set this to false.
+
+#undef CONTEXT
+#undef CHECKRC
+end subroutine Test_RevAlarmSticky
+
 
       end program ESMF_AlarmTest
