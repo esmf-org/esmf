@@ -18,6 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMCI_VM.h"
+#include "ESMCI_VMKernel.h"
 
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Macros.h"
@@ -1246,8 +1247,9 @@ extern "C" {
       (*ptr)->vmkplan_minthreads(**vm, 1);
       (*ptr)->vmkplan_mpi_c_part(**vm);
     }
-    // set the nothreadflag because this is the default for new VMs
-    (*ptr)->nothreadflag = 1; // override what vmkplan_minthreads() above set
+    // reset the supportContributors flag to default for new VMs
+    (*ptr)->supportContributors = false; // override vmkplan_minthreads() setting
+    (*ptr)->openmphandling = 0; // override what vmkplan_minthreads() above set
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMCI::VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMCI::VMPlan
@@ -1337,7 +1339,8 @@ extern "C" {
    
   void FTN_X(c_esmc_vmplanmaxpes)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
-    int *npetlist, int *petlist, int *rc){
+    int *npetlist, int *petlist, ESMC_Logical *forceEachChildPetOwnPthread,
+      int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanmaxpes()"
     // Initialize return code; assume routine not implemented
@@ -1371,9 +1374,15 @@ extern "C" {
       delete (*ptr)->myvms[i];
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
+    // convert ESMC_Logical->bool
+    bool forceEachChildPetOwnPthreadBool = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(forceEachChildPetOwnPthread) != ESMC_NULL_POINTER)
+      if (*forceEachChildPetOwnPthread == ESMF_TRUE)
+        forceEachChildPetOwnPthreadBool = true;
     // Now define a new vmplan
     localrc = (*ptr)->vmkplan_maxcores(**vm, maxx, (int*)petlist,
-      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi,
+      forceEachChildPetOwnPthreadBool);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
     if (ESMC_LogDefault.MsgFoundError(localrc,"- this ESMF library"
@@ -1396,7 +1405,8 @@ extern "C" {
        
   void FTN_X(c_esmc_vmplanmaxthreads)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
-    int *npetlist, int *petlist, int *rc){
+    int *npetlist, int *petlist, ESMC_Logical *forceEachChildPetOwnPthread,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanmaxthreads()"
     // Initialize return code; assume routine not implemented
@@ -1430,9 +1440,15 @@ extern "C" {
       delete (*ptr)->myvms[i];
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
+    // convert ESMC_Logical->bool
+    bool forceEachChildPetOwnPthreadBool = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(forceEachChildPetOwnPthread) != ESMC_NULL_POINTER)
+      if (*forceEachChildPetOwnPthread == ESMF_TRUE)
+        forceEachChildPetOwnPthreadBool = true;
     // Now define a new vmplan
     localrc = (*ptr)->vmkplan_maxthreads(**vm, maxx, (int*)petlist,
-      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi,
+      forceEachChildPetOwnPthreadBool);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
     if (ESMC_LogDefault.MsgFoundError(localrc,"- this ESMF library"
@@ -1455,7 +1471,8 @@ extern "C" {
   
   void FTN_X(c_esmc_vmplanminthreads)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
-    int *npetlist, int *petlist, int *rc){
+    int *npetlist, int *petlist, ESMC_Logical *forceEachChildPetOwnPthread,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanminthreads()"
     // Initialize return code; assume routine not implemented
@@ -1489,9 +1506,15 @@ extern "C" {
       delete (*ptr)->myvms[i];
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
+    // convert ESMC_Logical->bool
+    bool forceEachChildPetOwnPthreadBool = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(forceEachChildPetOwnPthread) != ESMC_NULL_POINTER)
+      if (*forceEachChildPetOwnPthread == ESMF_TRUE)
+        forceEachChildPetOwnPthreadBool = true;
     // Now define a new vmplan
     localrc = (*ptr)->vmkplan_minthreads(**vm, maxx, (int*)petlist,
-      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi,
+      forceEachChildPetOwnPthreadBool);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
     if (ESMC_LogDefault.MsgFoundError(localrc,"- this ESMF library"
