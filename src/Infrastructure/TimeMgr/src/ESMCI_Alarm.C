@@ -1356,6 +1356,10 @@ int Alarm::count=0;
             ringTimeEnd = ringBegin + ringDuration; 
           // ... otherwise use ringTimeStepCount
           } else if (ringTimeStepCount >= 1) {
+            // If ringBegin hasn't been initialized, set ringBegin to clock's startTime
+            if(ringBegin.getCalendar() == NULL){
+              ringBegin = clock->startTime;
+            }
             ringTimeEnd = ringBegin + ringTimeStepCount * clock->timeStep;
           } // TODO: else error, ringTimeStepCount <= 0 (ringing counter is
             // always positive) Validate() ?
