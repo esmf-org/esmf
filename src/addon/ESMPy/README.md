@@ -2,9 +2,9 @@
 
 > Copyright 2002-2021, University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. Licensed under the University of Illinois-NCSA License.
 
- * [ESMPy Documentation](http://earthsystemmodeling.org/docs/release/latest/html/)
-   * [Installation](http://earthsystemmodeling.org/docs/release/latest/html/install.html)
-   * [Tutorials](http://earthsystemmodeling.org/docs/release/latest/esmpy_doc/html/examples.html)
+ * [ESMPy Documentation](http://earthsystemmodeling.org/esmpy_doc/release/latest/html/)
+   * [Installation](http://earthsystemmodeling.org/esmpy_doc/release/latest/html/install.html)
+   * [Tutorials](http://earthsystemmodeling.org/esmpy_doc/release/latest/html/examples.html)
  * Please contact <esmf_support@ucar.edu> with any questions or problems.
 
 ## Software Overview
