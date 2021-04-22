@@ -2048,8 +2048,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMaxPEs(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, minStackSize, openMpHandling, &
-    openMpNumThreads, rc)
+    pref_intra_ssi, pref_inter_ssi, pthreadMinStackSize, openMpHandling, &
+    openMpNumThreads, forceChildPthreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2057,9 +2057,10 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     integer,              intent(in),  optional :: pref_intra_process
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
-    integer,              intent(in),  optional :: minStackSize
+    integer,              intent(in),  optional :: pthreadMinStackSize
     character(*),         intent(in),  optional :: openMpHandling
     integer,              intent(in),  optional :: openMpNumThreads
+    logical,              intent(in),  optional :: forceChildPthreads
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2077,14 +2078,20 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 !          Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
-!     \item[{[minStackSize]}] 
-!          Minimum stack size for Pthreads created to execute user code.
+!     \item[{[pthreadMinStackSize]}] 
+!          Minimum stack size for child PETs executing as Pthreads.
 !     \item[{[openMpHandling]}] 
 !          Handling of OpenMP threads. Supported: "none", "set", "init", "pin"
 !          (default).
 !     \item[{[openMpNumThreads]}] 
 !          Number of OpenMP threads under each PET. By default each PET uses
 !          its local peCount.
+!     \item[{[forceChildPthreads]}] 
+!          For {\tt .true.}, force each child PET to execute in its own Pthread.
+!          By default, {\tt .false.}, single PETs spawned from a parent PET
+!          execute in the same thread (or MPI process) as the parent PET. Multiple
+!          child PETs spawned by the same parent PET always execute as their own
+!          Pthreads.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2129,13 +2136,14 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     ! call CompClass method
     call ESMF_VMPlanMaxPEs(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      compp%npetlist, compp%petlist, rc=localrc)
+      compp%npetlist, compp%petlist, forceChildPthreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! set minStackSize
-    call ESMF_VMPlanSetMinStackSize(compp%vmplan, minStackSize, rc=localrc)
+    ! set pthreadMinStackSize
+    call ESMF_VMPlanSetMinStackSize(compp%vmplan, pthreadMinStackSize, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2187,7 +2195,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMaxThreads(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, minStackSize, rc)
+    pref_intra_ssi, pref_inter_ssi, pthreadMinStackSize, forceChildPthreads, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2195,7 +2204,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     integer,              intent(in),  optional :: pref_intra_process
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
-    integer,              intent(in),  optional :: minStackSize
+    integer,              intent(in),  optional :: pthreadMinStackSize
+    logical,              intent(in),  optional :: forceChildPthreads
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2213,8 +2223,14 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 !          Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
-!     \item[{[minStackSize]}] 
-!          Minimum stack size for Pthreads created to execute user code.
+!     \item[{[pthreadMinStackSize]}] 
+!          Minimum stack size for child PETs executing as Pthreads.
+!     \item[{[forceChildPthreads]}] 
+!          For {\tt .true.}, force each child PET to execute in its own Pthread.
+!          By default, {\tt .false.}, single PETs spawned from a parent PET
+!          execute in the same thread (or MPI process) as the parent PET. Multiple
+!          child PETs spawned by the same parent PET always execute as their own
+!          Pthreads.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2257,13 +2273,13 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     ! call CompClass method
     call ESMF_VMPlanMaxThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      compp%npetlist, compp%petlist, rc=localrc)
+      compp%npetlist, compp%petlist, forceChildPthreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set MinStackSize
-    call ESMF_VMPlanSetMinStackSize(compp%vmplan, minStackSize, rc=localrc)
+    call ESMF_VMPlanSetMinStackSize(compp%vmplan, pthreadMinStackSize, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2283,7 +2299,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMinThreads(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, minStackSize, rc)
+    pref_intra_ssi, pref_inter_ssi, pthreadMinStackSize, forceChildPthreads, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2291,7 +2308,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     integer,              intent(in),  optional :: pref_intra_process
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
-    integer,              intent(in),  optional :: minStackSize
+    integer,              intent(in),  optional :: pthreadMinStackSize
+    logical,              intent(in),  optional :: forceChildPthreads
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2309,8 +2327,14 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 !          Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
-!     \item[{[minStackSize]}] 
-!          Minimum stack size for Pthreads created to execute user code.
+!     \item[{[pthreadMinStackSize]}] 
+!          Minimum stack size for child PETs executing as Pthreads.
+!     \item[{[forceChildPthreads]}] 
+!          For {\tt .true.}, force each child PET to execute in its own Pthread.
+!          By default, {\tt .false.}, single PETs spawned from a parent PET
+!          execute in the same thread (or MPI process) as the parent PET. Multiple
+!          child PETs spawned by the same parent PET always execute as their own
+!          Pthreads.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2353,13 +2377,13 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     ! call CompClass method
     call ESMF_VMPlanMinThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      compp%npetlist, compp%petlist, rc=localrc)
+      compp%npetlist, compp%petlist, forceChildPthreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set MinStackSize
-    call ESMF_VMPlanSetMinStackSize(compp%vmplan, minStackSize, rc=localrc)
+    call ESMF_VMPlanSetMinStackSize(compp%vmplan, pthreadMinStackSize, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

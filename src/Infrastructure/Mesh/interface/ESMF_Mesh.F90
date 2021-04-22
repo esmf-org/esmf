@@ -4787,7 +4787,7 @@ end function ESMF_MeshEmptyCreate
 
 !------------------------------------------------------------------------------
 
-! -----------------------------------------------------------------------------
+!-----------------------------------------------------------------------------
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshGet"
 !BOP
@@ -5467,8 +5467,65 @@ end function ESMF_MeshEmptyCreate
     if (present(rc)) rc = localrc
 
     end subroutine ESMF_MeshGet
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetMOAB()"
+!BOP
+! !IROUTINE: ESMF_MeshGetMOAB -- Check on status of using MOAB library internally.
+!
+! !INTERFACE:
+   subroutine ESMF_MeshGetMOAB(moabOn, rc)
+!
+! !ARGUMENTS:
+    logical, intent(out)                      :: moabOn
+    integer, intent(out), optional            :: rc
+!
+! !DESCRIPTION:
+!   This method is only temporary. It was created to enable testing during the stage in ESMF development while
+!   we have two internal mesh implementations. At some point it will be removed.
+!
+!   This method can be used to check whether the MOAB library is being used
+!   to hold the internal structure of the Mesh. When set to .true. the following
+!   Mesh create calls create a Mesh using MOAB internally. When set to .false. the following
+!   Mesh create calls use the ESMF native internal mesh respresentation. Note that ESMF Meshes
+!   created on MOAB are only supported in a limited set of operations and should be used
+!   with caution as they haven't yet been tested as thoroughly as the native version.
+!   Also, operations that use a pair of Meshes (e.g. regrid weight generation) are only supported between
+!   meshes of the same type (e.g. you can regrid between two MOAB meshes, but not between a MOAB and
+!   a native mesh).
+!
+!   \begin{description}
+!   \item [moabOn]
+!         Output variable which indicates current state of MOAB.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc
+    integer :: intMoabOn
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+
+    ! Get status from C
+    call c_esmc_meshgetMOAB(intMoabOn, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Translate to logical
+    moabOn=.false.
+    if (intMoabOn .eq. 1) moabOn=.true.
+    
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshGetMOAB
+!-----------------------------------------------------------------------------
+
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
@@ -6186,63 +6243,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_MeshSetMOAB
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshGetMOAB()"
-!BOP
-! !IROUTINE: ESMF_MeshGetMOAB -- Check on status of using MOAB library internally.
-!
-! !INTERFACE:
-   subroutine ESMF_MeshGetMOAB(moabOn, rc)
-!
-! !ARGUMENTS:
-    logical, intent(out)                      :: moabOn
-    integer, intent(out), optional            :: rc
-!
-! !DESCRIPTION:
-!   This method is only temporary. It was created to enable testing during the stage in ESMF development while
-!   we have two internal mesh implementations. At some point it will be removed.
-!
-!   This method can be used to check whether the MOAB library is being used
-!   to hold the internal structure of the Mesh. When set to .true. the following
-!   Mesh create calls create a Mesh using MOAB internally. When set to .false. the following
-!   Mesh create calls use the ESMF native internal mesh respresentation. Note that ESMF Meshes
-!   created on MOAB are only supported in a limited set of operations and should be used
-!   with caution as they haven't yet been tested as thoroughly as the native version.
-!   Also, operations that use a pair of Meshes (e.g. regrid weight generation) are only supported between
-!   meshes of the same type (e.g. you can regrid between two MOAB meshes, but not between a MOAB and
-!   a native mesh).
-!
-!   \begin{description}
-!   \item [moabOn]
-!         Output variable which indicates current state of MOAB.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer :: localrc
-    integer :: intMoabOn
-
-    ! Init localrc
-    localrc = ESMF_SUCCESS
-
-    ! Get status from C
-    call c_esmc_meshgetMOAB(intMoabOn, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Translate to logical
-    moabOn=.false.
-    if (intMoabOn .eq. 1) moabOn=.true.
-    
-    ! Return success
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    end subroutine ESMF_MeshGetMOAB
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshSetIsCMeshFreed()"
