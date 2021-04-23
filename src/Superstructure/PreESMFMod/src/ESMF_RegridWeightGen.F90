@@ -3998,9 +3998,10 @@ real(ESMF_KIND_R8), intent(inout) :: B(:)
 ! LOCAL VARIABLES
 integer :: left, right
 real(ESMF_KIND_R8) :: random, tempR
-real(ESMF_KIND_I4) :: tempI(2), pivot
+integer(ESMF_KIND_I4) :: tempI(2), pivot
 integer :: marker
 
+    ! If there's more than one entry in the array, then sort
     if (nA > 1) then
 
         call random_number(random)
