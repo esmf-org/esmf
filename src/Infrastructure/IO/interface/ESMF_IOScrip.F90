@@ -1211,8 +1211,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            rc)) return
 
          ! Output version information
-#ifdef ESMFVERSIONGIT 
-         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "ESMF_version", ESMFVERSIONGIT)
+#ifdef ESMF_VERSION_STRING_GIT 
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "ESMF_version", ESMF_VERSION_STRING_GIT)
 #else
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "ESMF_version", "(No version information available.)")
 #endif

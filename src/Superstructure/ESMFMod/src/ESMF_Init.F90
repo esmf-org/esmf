@@ -567,9 +567,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Write our version number, build location, and other details to the log
-#ifdef ESMFVERSIONGIT
+#ifdef ESMF_VERSION_STRING_GIT
       call ESMF_LogWrite(&
-           "Running with ESMF Version   : " // ESMFVERSIONGIT, &
+           "Running with ESMF Version   : " // ESMF_VERSION_STRING_GIT, &
            ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
