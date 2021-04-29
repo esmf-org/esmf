@@ -2377,6 +2377,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (versionFlag)) then
       if (versionFlag) then
         print *, "  ESMF_VERSION_STRING:       ", ESMF_VERSION_STRING
+#ifdef ESMF_VERSION_STRING_GIT
+        print *, "  ESMF_VERSION_STRING_GIT:   ", ESMF_VERSION_STRING_GIT
+#else
+        print *, "  ESMF_VERSION_STRING_GIT:   ", "(not available)"
+#endif
         print *, "  ESMF_VERSION_MAJOR:        ", ESMF_VERSION_MAJOR
         print *, "  ESMF_VERSION_MINOR:        ", ESMF_VERSION_MINOR
         print *, "  ESMF_VERSION_REVISION:     ", ESMF_VERSION_REVISION

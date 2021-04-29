@@ -707,7 +707,7 @@ export ESMF_VERSION_STRING_GIT := $(shell $(ESMF_DIR)/scripts/esmfversiongit)
 endif
 
 ifdef ESMF_VERSION_STRING_GIT
-ESMF_CPPFLAGS += -DESMFVERSIONGIT='"$(ESMF_VERSION_STRING_GIT)"'
+ESMF_CPPFLAGS += -DESMF_VERSION_STRING_GIT='"$(ESMF_VERSION_STRING_GIT)"'
 endif
 
 #-------------------------------------------------------------------------------

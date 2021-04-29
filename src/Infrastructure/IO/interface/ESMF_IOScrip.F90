@@ -1210,7 +1210,12 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            errmsg,&
            rc)) return
 
-         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "CVS_revision", ESMF_VERSION_STRING)
+         ! Output version information
+#ifdef ESMF_VERSION_STRING_GIT 
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "ESMF_version", ESMF_VERSION_STRING_GIT)
+#else
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "ESMF_version", "(No version information available.)")
+#endif
          errmsg = "Attribute CVS_revision in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
