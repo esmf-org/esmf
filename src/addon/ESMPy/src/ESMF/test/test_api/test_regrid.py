@@ -313,7 +313,7 @@ class TestRegrid(TestBase):
                 os.remove(path)
 
     @attr('parallel')
-    def test_field_regrid_file3(self):
+    def test_field_regrid_file_withaux(self):
         import os
         DD = os.path.join(os.getcwd(), "test/data")
         if not os.path.isdir(DD):
@@ -323,7 +323,7 @@ class TestRegrid(TestBase):
         cache_data_file(os.path.join(DD, "T42_grid.nc"))
 
         mgr = Manager()
-        filename = 'esmpy_test_field_regrid_file3.nc'
+        filename = 'esmpy_test_field_regrid_withaux.nc'
         if local_pet() == 0:
             path = os.path.join(os.getcwd(), filename)
             if os.path.isfile(path):
@@ -331,10 +331,10 @@ class TestRegrid(TestBase):
         mgr.barrier()
 
         grid1 = "test/data/ll2.5deg_grid.nc"
-        srcgrid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
+        srcgrid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP, add_corner_stagger=True)
 
         grid2 = "test/data/T42_grid.nc"
-        dstgrid = ESMF.Grid(filename=grid2, filetype=ESMF.FileFormat.SCRIP)
+        dstgrid = ESMF.Grid(filename=grid2, filetype=ESMF.FileFormat.SCRIP, add_corner_stagger=True)
 
         srcfield = ESMF.Field(srcgrid)
         dstfield = ESMF.Field(dstgrid)
