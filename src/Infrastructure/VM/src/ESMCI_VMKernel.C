@@ -2472,7 +2472,7 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
       // thread-based VM pets must be joined
       vmkt_join(&(sarg[i].vmkt));
     }
-    // free arrays in sarg[i[ 
+    // free arrays in sarg[i]
     delete [] sarg[i].lpid;
     delete [] sarg[i].pid;
     delete [] sarg[i].tid;
