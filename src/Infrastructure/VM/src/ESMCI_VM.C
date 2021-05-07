@@ -465,7 +465,7 @@ void VMId::log(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   char digits[64];
-  char msg[256];
+  char msg[800];
   std::stringstream info;
   info << "  vmKeyWidth (bytes) = " << vmKeyWidth
     <<" vmKeyOff (invalid bits end of last byte) = " << vmKeyOff;
@@ -886,11 +886,10 @@ void *VM::startup(
     //TODO: a multi-threaded child component out of a single-threaded
     //TODO: parent component.
 
-    // The VMId is that same for all PETs spawned by local PET
+    // The VMId is the same for all PETs spawned by local PET
     VMId vmID = VMIdCreate(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc))
-      return NULL;  // bail out on error
+      rc)) return NULL;  // bail out on error
     // vmKey part of the vmID gets set to the appropriate bit pattern:
     // ->  set the bit in vmKey for each VAS in which this VM exists <-
     for (int i=0; i<vmp->myvms[0]->getNpets(); i++){
@@ -900,7 +899,7 @@ void *VM::startup(
       int n = vas % 8;
       vmID.vmKey[m] |= 0x80>>n;  // set the bits
     }
-    vmID.localID = 0;  // reset localID
+    vmID.localID = -1;  // set localID to start at zero (see ++ below)
     // Search through the valid entries in the matchTable,
     // consider the localIDs of all entries with the same vmKey
     // and determine a localID for the current VM that uniquely identifies it.
@@ -950,8 +949,7 @@ void *VM::startup(
       matchTable_vm[index]   = vmp->myvms[j];               // ptr to this VM
       matchTable_vmID[index] = VMIdCreate(&localrc);        // vmID
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, rc))
-        return NULL;  // bail out on error
+        ESMC_CONTEXT, rc)) return NULL;  // bail out on error
       matchTable_BaseIDCount[index] = 0;                    // reset
       matchTable_Objects[index].reserve(1000);              // start w/ 1000 obj
       matchTable_FObjects[index].reserve(1000);             // start w/ 1000 obj
@@ -960,8 +958,7 @@ void *VM::startup(
     delete [] emptyList;
     VMIdDestroy(&vmID, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc))
-      return NULL;  // bail out on error
+      rc)) return NULL;  // bail out on error
   }
 
   // return successfully
@@ -1315,7 +1312,7 @@ VMId *VM::getVMId(
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int i = matchTableIndex;
+  int i;
   for (i=0; i<matchTableBound; i++)
     if (matchTable_vm[i] == this) break;
   if (i == matchTableBound){
@@ -2294,7 +2291,7 @@ void VM::logGarbageInfo(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;   // final return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   esmf_pthread_t mytid;
 #ifndef ESMF_NO_PTHREADS
@@ -2304,6 +2301,7 @@ void VM::logGarbageInfo(
 #endif
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
+    // dealing with VM that uses its own Pthreads for PETs -> search for match
     for (i=0; i<matchTableBound; i++)
       if (matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
@@ -2312,54 +2310,76 @@ void VM::logGarbageInfo(
       throw rc;
     }
   }
-  // found the current VM
-  
+  // found the current VM, i pointing to the associated entry in the matchTable
+
+  char msg[800];
+
+  // Set the bounds for the VM levels to output
   int ic=i;
   int lb=0;
   int ub=matchTableBound;
   if (current){
+    // only output the current VM level
     lb = ic;
     ub = ic+1;
+  }else{
+    sprintf(msg, "%s - GarbInfo: size of matchTable: %i"
+      " #############################################################",
+      prefix.c_str(), matchTableBound);
+    ESMC_LogDefault.Write(msg, msgType);
   }
 
-  char msg[512];
   for (int i=lb; i<ub; i++){
     if (i==ic)
       sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i"
         " ***current VM context****", prefix.c_str(), i);
     else
-      sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i", prefix.c_str(), i);
+      sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i"
+        " *************************", prefix.c_str(), i);
     ESMC_LogDefault.Write(msg, msgType);
-    sprintf(msg, "%s - GarbInfo: Fortran objs=%lu", prefix.c_str(),
-      matchTable_FObjects[i].size());
-    ESMC_LogDefault.Write(msg, msgType);
-    for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
-      void *basePtr = NULL;
-      if (matchTable_FObjects[i][j].objectID != ESMC_ID_GEOMBASE.objectID)
-        basePtr = **(void ***)(&matchTable_FObjects[i][j].fobject);
-      sprintf(msg, "%s - GarbInfo: fortran objs[%d]: %s %p - %p",
-        prefix.c_str(), j,
-        ESMC_ObjectID_Name(matchTable_FObjects[i][j].objectID),
-        *(void **)(&matchTable_FObjects[i][j].fobject), basePtr);
+    if (matchTable_vm[i]==NULL){
+      sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i"
+        " INVALID - garbage collected", prefix.c_str(), i);
       ESMC_LogDefault.Write(msg, msgType);
-    }
-    sprintf(msg, "%s - GarbInfo: Base objs=%lu", prefix.c_str(),
-      matchTable_Objects[i].size());
-    ESMC_LogDefault.Write(msg, msgType);
-    for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
-      const char *proxyString;
-      proxyString="actual object";
-      if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
-        proxyString="proxy object";
-      sprintf(msg, "%s - GarbInfo: base objs[%d]: %s : %p : %s : %d ; %s",
-        prefix.c_str(), j, matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
-        matchTable_Objects[i][j],
-        matchTable_Objects[i][j]->ESMC_BaseGetName(),
-        matchTable_Objects[i][j]->ESMC_BaseGetID(), proxyString);
+    }else{
+      // valid matchTable entry
+      sprintf(msg, "%s - GarbInfo: VM: %p", prefix.c_str(), matchTable_vm[i]);
       ESMC_LogDefault.Write(msg, msgType);
+      matchTable_vmID[i].log(prefix+" - GarbInfo:", ESMC_LOGMSG_DEBUG);
+      // Fortran objects
+      sprintf(msg, "%s - GarbInfo: Fortran objs=%lu", prefix.c_str(),
+        matchTable_FObjects[i].size());
+      ESMC_LogDefault.Write(msg, msgType);
+      for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
+        void *basePtr = NULL;
+        if (matchTable_FObjects[i][j].objectID != ESMC_ID_GEOMBASE.objectID)
+          basePtr = **(void ***)(&matchTable_FObjects[i][j].fobject);
+        sprintf(msg, "%s - GarbInfo: fortran objs[%04d]: %20s %p - %p",
+          prefix.c_str(), j,
+          ESMC_ObjectID_Name(matchTable_FObjects[i][j].objectID),
+          *(void **)(&matchTable_FObjects[i][j].fobject), basePtr);
+        ESMC_LogDefault.Write(msg, msgType);
+      }
+      // C++ objects
+      sprintf(msg, "%s - GarbInfo: C++Base objs=%lu", prefix.c_str(),
+        matchTable_Objects[i].size());
+      ESMC_LogDefault.Write(msg, msgType);
+      for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
+        const char *proxyString;
+        proxyString="actual";
+        if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
+          proxyString="proxy";
+        sprintf(msg, "%s - GarbInfo: c++base objs[%04d]: "
+          "%20s %p - %6s : %04d : VM=%p : %s",
+          prefix.c_str(), j, matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
+          matchTable_Objects[i][j], proxyString,
+          matchTable_Objects[i][j]->ESMC_BaseGetID(),
+          matchTable_Objects[i][j]->ESMC_BaseGetVM(),
+          matchTable_Objects[i][j]->ESMC_BaseGetName());
+        ESMC_LogDefault.Write(msg, msgType);
+      }
     }
   }
-
   // return successfully
 }
 //-----------------------------------------------------------------------------
@@ -2489,7 +2509,7 @@ void VM::logMemInfo(
   // access /proc/self
   FILE* file = fopen("/proc/self/status", "r");
   char line[128];
-  char msg[256];
+  char msg[800];
   while (fgets(line, 128, file) != NULL){
     if (strncmp(line, "Vm", 2) == 0){
       int len = strlen(line);
@@ -2583,7 +2603,7 @@ void VM::logMemInfo(
   vm->lock();
 
   // string storage
-  char msg[256];
+  char msg[800];
 
   // Get memory
   task_vm_info_data_t mem_info;
