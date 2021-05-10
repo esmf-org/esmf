@@ -68,6 +68,7 @@
 #include "ESMCI_TimeInterval.h"
 #include "ESMCI_Time.h"
 #include "ESMCI_Alarm.h"
+#include "ESMCI_NewAlarm.h"
 
 namespace ESMCI{
 
@@ -244,12 +245,18 @@ namespace ESMCI{
                                  Time*, TimeInterval*, Time*, 
                                  TimeInterval*, int*, Time*, bool*,
                                  bool*, int*);
+    friend NewAlarm *ESMCI_newalarmCreate(int, const char*, Clock*,
+                                 Time*, TimeInterval*, Time*,
+                                 TimeInterval*, int*, Time*, bool*,
+                                 bool*, int*);
 
     // friend function to copy an alarm
     friend Alarm *ESMCI_alarmCreate(Alarm*, int*);
+    friend NewAlarm *ESMCI_newalarmCreate(NewAlarm*, int*);
 
     // friend to de-allocate alarm
     friend int ESMCI_alarmDestroy(Alarm **);
+    friend int ESMCI_newalarmDestroy(NewAlarm **);
 
 // !PRIVATE MEMBER FUNCTIONS:
 //
@@ -262,6 +269,10 @@ namespace ESMCI{
     int removeAlarm(Alarm *alarm); // alarmDestroy(), alarmSet()
 
     friend class Alarm;
+
+    int addNewAlarm(NewAlarm *newalarm);    // alarmCreate(), alarmSet() (TMG 4.1, 4.2)
+    int removeNewAlarm(NewAlarm *newalarm); // alarmDestroy(), alarmSet()
+    friend class NewAlarm;
 
 //
 //EOP

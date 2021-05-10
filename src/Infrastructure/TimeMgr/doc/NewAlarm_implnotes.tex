@@ -1,0 +1,23 @@
+% $Id$
+
+\subsection{Design and Implementation Notes}
+
+The NewAlarm class is designed as a deep, dynamically allocatable class,
+based on a pointer type.  This allows for both indirect and direct
+manipulation of newalarms.  Indirect newalarm manipulation is where ESMF\_NewAlarm API
+methods, such as ESMF\_NewAlarmRingerOff(), are invoked on newalarm references
+(pointers) returned from ESMF\_Clock queries such as "return ringing newalarms."
+Since the method is performed on an newalarm reference, the actual newalarm held
+by the clock is affected, not just a user's local copy.  Direct newalarm
+manipulation is the more common case where newalarm API methods are invoked on
+the original newalarm objects created by the user.
+
+For consistency, the ESMF\_Clock class is also designed as a deep, dynamically
+allocatable class. 
+
+An additional benefit from this approach is that Clocks and NewAlarms can be
+created and used from anywhere in a user's code without regard to the scope
+in which they were created.  In contrast, statically created NewAlarms and
+Clocks would disappear if created within a user's routine that returns,
+whereas dynamically allocated NewAlarms and Clocks will persist until explicitly
+destroyed by the user.

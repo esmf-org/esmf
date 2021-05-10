@@ -301,6 +301,58 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_Alarm_fapi}
 #endif
 
+% -----------
+% NewAlarm Class
+% -----------
+\newpage
+\section{NewAlarm Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{NewAlarm_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/NewAlarm_desc}
+#endif
+
+\subsection{Constants}
+#ifdef STANDALONE
+\input{NewAlarm_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/NewAlarm_options}
+#endif
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{NewAlarm_usage}
+\input{ESMF_NewAlarmEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/NewAlarm_usage}
+\input{../Infrastructure/TimeMgr/doc/ESMF_NewAlarmEx_fapi}
+#endif
+
+\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{NewAlarm_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/NewAlarm_rest}
+#endif
+
+%\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{NewAlarm_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/NewAlarm_implnotes}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+\input{ESMF_NewAlarm_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/ESMF_NewAlarm_fapi}
+#endif
+
+%---------------------------------
+
 %#ifdef STANDALONE
 %\section{Review Status}
 %\input{TimeMgr_desrev}

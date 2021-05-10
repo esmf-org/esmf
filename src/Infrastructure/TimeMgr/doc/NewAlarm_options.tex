@@ -1,0 +1,30 @@
+% $Id$
+
+\subsubsection{ESMF\_NEWALARMLIST}
+\label{const:newalarmlist}
+
+{\sf DESCRIPTION:\\}
+Specifies the characteristics of NewAlarms that populate
+a retrieved NewAlarm list.
+
+The type of this flag is:
+
+{\tt type(ESMF\_NewAlarmList\_Flag)}
+
+The valid values are:
+\begin{description}
+
+\item [ESMF\_NEWALARMLIST\_ALL] 
+      All newalarms.
+
+\item [ESMF\_NEWALARMLIST\_NEXTRINGING] 
+      NewAlarms that will ring before or at the next timestep.
+
+\item [ESMF\_NEWALARMLIST\_PREVRINGING] 
+      NewAlarms that rang at or since the last timestep.
+
+\item [ESMF\_NEWALARMLIST\_RINGING] 
+      Only ringing newalarms.
+
+\end{description}
+
