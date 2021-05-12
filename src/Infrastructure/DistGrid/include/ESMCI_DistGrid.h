@@ -190,6 +190,11 @@ namespace ESMCI {
     int const *getMaxIndexPDimPDe() const {return maxIndexPDimPDe;}
     int const *getMaxIndexPDimPDe(int de, int *rc) const;
     ESMC_I8 const *getElementCountPDe() const {return elementCountPDe;}
+    // name accessors
+    const char *getName()               const {return ESMC_BaseGetName();}
+    int setName(const char* name){return ESMC_BaseSetName(name, "DistGrid");}
+    int setName(const std::string &name){return ESMC_BaseSetName(name.c_str(),
+      "DistGrid");}
     // misc. get
     ESMC_I8 getElementCountPDe(int de, int *rc) const;
     int const *getTileListPDe() const {return tileListPDe;}

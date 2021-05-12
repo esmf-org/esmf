@@ -1049,7 +1049,7 @@ void VM::shutdown(
 //gjt: be better implemented via a protection against accessing GeomBase from
 //gjt: FieldDestruct() in that case. But then it is important that all of the
 //gjt: Geom types correctly implement their destructor. Right now the Mesh
-//gjt: destructur is not doing all that is needed, and so the Mesh cleanup
+//gjt: destructor is not doing all that is needed, and so the Mesh cleanup
 //ght: actually does depend on the Field garbage collection.
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_GEOMBASE.objectID){
@@ -2370,9 +2370,10 @@ void VM::logGarbageInfo(
         if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
           proxyString="proxy";
         sprintf(msg, "%s - GarbInfo: c++base objs[%04d]: "
-          "%20s %p - %6s : %04d : VM=%p : %s",
+          "%20s %p - %6s - %7s : %04d : VM=%p : %10s",
           prefix.c_str(), j, matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
           matchTable_Objects[i][j], proxyString,
+          ESMC_StatusString(matchTable_Objects[i][j]->ESMC_BaseGetStatus()),
           matchTable_Objects[i][j]->ESMC_BaseGetID(),
           matchTable_Objects[i][j]->ESMC_BaseGetVM(),
           matchTable_Objects[i][j]->ESMC_BaseGetName());
@@ -3338,7 +3339,7 @@ void VM::finalize(
 //gjt: be better implemented via a protection against accessing GeomBase from
 //gjt: FieldDestruct() in that case. But then it is important that all of the
 //gjt: Geom types correctly implement their destructor. Right now the Mesh
-//gjt: destructur is not doing all that is needed, and so the Mesh cleanup
+//gjt: destructor is not doing all that is needed, and so the Mesh cleanup
 //ght: actually does depend on the Field garbage collection.
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_GEOMBASE.objectID){

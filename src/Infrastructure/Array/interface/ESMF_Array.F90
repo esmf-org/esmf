@@ -424,8 +424,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [array]
 !       {\tt ESMF\_Array} object for which to set properties.
-!     \item [{[name]}]
-!       The Array name.
 !     \item[{[computationalLWidth]}] 
 !       \begin{sloppypar}
 !       This argument must have of size {\tt (dimCount, localDeCount)}.
@@ -440,6 +438,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       computational region with respect to the upper corner of the exclusive
 !       region for all local DEs.
 !       \end{sloppypar}
+!     \item [{[name]}]
+!       The Array name.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
