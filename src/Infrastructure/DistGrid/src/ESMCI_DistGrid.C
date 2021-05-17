@@ -344,7 +344,7 @@ DistGrid *DistGrid::create(
       localrc = Array::redist(srcArbSeqArray, dstArbSeqArray, &rh);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
-      localrc = Array::redistRelease(rh);
+      localrc = RouteHandle::destroy(rh, true);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       // restore the arbitrary sequence indices on the incoming DG
@@ -3525,6 +3525,8 @@ template<typename T> int DistGrid::fillSeqIndexList(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -3588,6 +3590,8 @@ template<typename T> int DistGrid::fillSeqIndexList(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -3788,6 +3792,8 @@ int DistGrid::fillIndexListPDimPDe(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -3888,6 +3894,11 @@ DistGridMatch_Flag DistGrid::match(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (distgrid1->ESMC_BaseGetStatus()!=ESMF_STATUS_READY)
+    throw ESMC_RC_OBJ_DELETED;
+  if (distgrid2->ESMC_BaseGetStatus()!=ESMF_STATUS_READY)
+    throw ESMC_RC_OBJ_DELETED;
+
 #undef DEBUGLOG
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -4408,6 +4419,8 @@ int DistGrid::print()const{
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -4544,6 +4557,8 @@ int DistGrid::validate()const{
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
@@ -4587,6 +4602,8 @@ bool DistGrid::isLocalDeOnEdgeL(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
@@ -4707,6 +4724,8 @@ bool DistGrid::isLocalDeOnEdgeU(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
@@ -4834,6 +4853,8 @@ int DistGrid::getContigFlagPDimPDe(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
@@ -4880,6 +4901,8 @@ ESMC_I8 DistGrid::getElementCountPDe(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
@@ -4938,6 +4961,8 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -5091,6 +5116,8 @@ template<typename T> int DistGrid::getSequenceIndexTileRelative(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -5169,6 +5196,8 @@ template<typename T> int DistGrid::getSequenceIndexTile(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -5301,6 +5330,8 @@ template<typename T> int DistGrid::getSequenceIndexTileRecursive(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -5531,6 +5562,8 @@ int DistGrid::getIndexTupleFromSeqIndex(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -5594,6 +5627,8 @@ const int *DistGrid::getMinIndexPDimPTile(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
@@ -5634,6 +5669,8 @@ const int *DistGrid::getMaxIndexPDimPTile(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
@@ -5674,6 +5711,8 @@ const int *DistGrid::getMinIndexPDimPDe(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
@@ -5714,6 +5753,8 @@ const int *DistGrid::getMaxIndexPDimPDe(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
@@ -5755,6 +5796,8 @@ const int *DistGrid::getIndexListPDimPLocalDe(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
@@ -5802,6 +5845,8 @@ void const *DistGrid::getArbSeqIndexList(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
@@ -5861,6 +5906,8 @@ int DistGrid::serialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -6332,6 +6379,8 @@ int DistGrid::setCollocationPDim(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -6452,6 +6501,8 @@ template<typename T> int DistGrid::setArbSeqIndex(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -6502,6 +6553,8 @@ template<typename T> int DistGrid::setArbSeqIndex(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -6643,6 +6696,8 @@ int DistGrid::setArbSeqIndex(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code

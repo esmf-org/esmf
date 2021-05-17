@@ -175,40 +175,108 @@ namespace ESMCI {
     bool isLocalDeOnEdgeL(int localDe, int dim, int *rc) const;
     bool isLocalDeOnEdgeU(int localDe, int dim, int *rc) const;
     // get() and set()
-    int getDimCount() const {return dimCount;}
-    int getTileCount() const {return tileCount;}
-    ESMC_IndexFlag getIndexflag() const  {return indexflag;}
-    ESMC_TypeKind_Flag getIndexTK() const {return indexTK;}
-    int getDiffCollocationCount() const {return diffCollocationCount;}
-    int const *getMinIndexPDimPTile() const {return minIndexPDimPTile;}
+    int getDimCount() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return dimCount;
+    }
+    int getTileCount() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return tileCount;
+    }
+    ESMC_IndexFlag getIndexflag() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return indexflag;
+    }
+    ESMC_TypeKind_Flag getIndexTK() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return indexTK;
+    }
+    int getDiffCollocationCount() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return diffCollocationCount;
+    }
+    int const *getMinIndexPDimPTile() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return minIndexPDimPTile;
+    }
     int const *getMinIndexPDimPTile(int tile, int *rc) const;
-    int const *getMaxIndexPDimPTile() const {return maxIndexPDimPTile;}
+    int const *getMaxIndexPDimPTile() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return maxIndexPDimPTile;
+    }
     int const *getMaxIndexPDimPTile(int tile, int *rc) const;
-    ESMC_I8 const *getElementCountPTile() const {return elementCountPTile;}
-    int const *getMinIndexPDimPDe() const {return minIndexPDimPDe;}
+    ESMC_I8 const *getElementCountPTile() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return elementCountPTile;
+    }
+    int const *getMinIndexPDimPDe() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return minIndexPDimPDe;
+    }
     int const *getMinIndexPDimPDe(int de, int *rc) const;
-    int const *getMaxIndexPDimPDe() const {return maxIndexPDimPDe;}
+    int const *getMaxIndexPDimPDe() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return maxIndexPDimPDe;
+    }
     int const *getMaxIndexPDimPDe(int de, int *rc) const;
-    ESMC_I8 const *getElementCountPDe() const {return elementCountPDe;}
+    ESMC_I8 const *getElementCountPDe() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return elementCountPDe;
+    }
     // name accessors
-    const char *getName()               const {return ESMC_BaseGetName();}
-    int setName(const char* name){return ESMC_BaseSetName(name, "DistGrid");}
-    int setName(const std::string &name){return ESMC_BaseSetName(name.c_str(),
-      "DistGrid");}
+    const char *getName() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return ESMC_BaseGetName();
+    }
+    int setName(const char* name) {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return ESMC_BaseSetName(name, "DistGrid");
+    }
+    int setName(const std::string &name) {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return ESMC_BaseSetName(name.c_str(), "DistGrid");
+    }
     // misc. get
     ESMC_I8 getElementCountPDe(int de, int *rc) const;
-    int const *getTileListPDe() const {return tileListPDe;}
-    int const *getContigFlagPDimPDe() const {return contigFlagPDimPDe;}
+    int const *getTileListPDe() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return tileListPDe;
+    }
+    int const *getContigFlagPDimPDe() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return contigFlagPDimPDe;
+    }
     int getContigFlagPDimPDe(int de, int dim, int *rc) const;
-    int const *getIndexCountPDimPDe() const {return indexCountPDimPDe;}
+    int const *getIndexCountPDimPDe() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return indexCountPDimPDe;
+    }
     int const *getIndexListPDimPLocalDe(int localDe, int dim, int *rc=NULL)
       const;
-    int getConnectionCount() const {return connectionCount;}
-    int *const *getConnectionList() const {return connectionList;}
-    int const *getCollocationPDim() const {return collocationPDim;}
-    int const *getCollocationTable() const {return collocationTable;}
-    DELayout *getDELayout() const {return delayout;}
-    int const *getRegDecomp() const {return regDecomp;}
+    int getConnectionCount() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return connectionCount;
+    }
+    int *const *getConnectionList() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return connectionList;
+    }
+    int const *getCollocationPDim() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return collocationPDim;
+    }
+    int const *getCollocationTable() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return collocationTable;
+    }
+    DELayout *getDELayout() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return delayout;
+    }
+    int const *getRegDecomp() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return regDecomp;
+    }
     // topology discovery
     template<typename T> int getSequenceIndexLocalDe(int localDe, 
       int const *index, std::vector<T> &seqIndex, bool recursive=true,
@@ -225,8 +293,10 @@ namespace ESMCI {
     int getIndexTupleFromSeqIndex(int seqIndex, std::vector<int> &indexTuple,
       int &tile) const;
     // get/set arb sequence indices
-    int *const *getElementCountPCollPLocalDe()
-      const {return elementCountPCollPLocalDe;}
+    int *const *getElementCountPCollPLocalDe() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return elementCountPCollPLocalDe;
+    }
     void const *getArbSeqIndexList(int localDe, int collocation=1, int *rc=NULL)
       const;
     template<typename T> int setArbSeqIndex(std::vector<T> &arbSeqIndex, 
