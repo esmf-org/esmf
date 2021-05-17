@@ -3890,13 +3890,19 @@ module NUOPC_Base
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     enddo
-    
+
     ! Finally replace the advertised Field with the realizing Field
-      
+
     call ESMF_StateReplace(state, (/field/), rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    
+
+    ! Destroy the originally advertised Field that has just been released
+
+    call ESMF_FieldDestroy(advertisedField, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
 
