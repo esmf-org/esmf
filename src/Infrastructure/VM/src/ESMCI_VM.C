@@ -2345,7 +2345,7 @@ void VM::logGarbageInfo(
       // valid matchTable entry
       sprintf(msg, "%s - GarbInfo: VM: %p", prefix.c_str(), matchTable_vm[i]);
       ESMC_LogDefault.Write(msg, msgType);
-      matchTable_vmID[i].log(prefix+" - GarbInfo:", ESMC_LOGMSG_DEBUG);
+      matchTable_vmID[i].log(prefix+" - GarbInfo:", msgType);
       // Fortran objects
       sprintf(msg, "%s - GarbInfo: Fortran objs=%lu", prefix.c_str(),
         matchTable_FObjects[i].size());
@@ -2370,10 +2370,12 @@ void VM::logGarbageInfo(
         if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
           proxyString="proxy";
         sprintf(msg, "%s - GarbInfo: c++base objs[%04d]: "
-          "%20s %p - %6s - %7s : %04d : VM=%p : %10s",
+          "%20s %p - %6s - %7s - %7s : %04d : VM=%p : %10s",
           prefix.c_str(), j, matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
           matchTable_Objects[i][j], proxyString,
           ESMC_StatusString(matchTable_Objects[i][j]->ESMC_BaseGetStatus()),
+          matchTable_Objects[i][j]->ESMC_BaseGetPersist() ?
+            "persist" : "noperst",
           matchTable_Objects[i][j]->ESMC_BaseGetID(),
           matchTable_Objects[i][j]->ESMC_BaseGetVM(),
           matchTable_Objects[i][j]->ESMC_BaseGetName());
