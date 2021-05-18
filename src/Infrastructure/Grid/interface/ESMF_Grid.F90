@@ -3094,9 +3094,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
        enddo
 
-       srcAB = ESMF_ArrayBundleCreate(arrayList=srcA2D(1:nStaggers), multiflag=.true., rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+!       srcAB = ESMF_ArrayBundleCreate(arrayList=srcA2D(1:nStaggers), multiflag=.true., rc=localrc)
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rcToReturn=rc)) return
 
 
        ! Create dst Arraybundle
@@ -3135,9 +3135,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
        enddo
 
-       dstAB = ESMF_ArrayBundleCreate(arrayList=dstA2D(1:nStaggers), multiflag=.true., rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+!       dstAB = ESMF_ArrayBundleCreate(arrayList=dstA2D(1:nStaggers), multiflag=.true., rc=localrc)
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if 0
         call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG before coord RedistStore()",&
@@ -3228,12 +3228,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
 !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !            ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayBundleDestroy(srcAB, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayBundleDestroy(dstAB, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+!       call ESMF_ArrayBundleDestroy(srcAB, noGarbage=.true., rc=localrc)
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rcToReturn=rc)) return
+!       call ESMF_ArrayBundleDestroy(dstAB, noGarbage=.true., rc=localrc)
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rcToReturn=rc)) return
 
 
 #if 1
