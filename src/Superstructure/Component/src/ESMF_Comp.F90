@@ -928,6 +928,15 @@ contains
 
         if (compp%vm_info /= ESMF_NULL_POINTER) then
           ! shut down this component's VM
+#if 1
+  block
+    character(160):: msg, compName
+    call ESMF_GetName(compp%base, compName, rc=localrc)
+    write(msg,*) "ESMF_CompDestruct() calling ESMF_VMShutdown() for: ",&
+      trim(compName)
+    call ESMF_LogWrite(msg, logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+  end block
+#endif
           call ESMF_VMShutdown(vm=compp%vm_parent, vmplan=compp%vmplan, &
             vm_info=compp%vm_info, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
