@@ -11,7 +11,7 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_VM.C"
 //==============================================================================
-#define GARBAGE_COLLECTION_LOG_off
+#define GARBAGE_COLLECTION_LOG_on
 #define TRANSLATE_VMID_LOG_off
 //==============================================================================
 //
@@ -1023,10 +1023,15 @@ void VM::shutdown(
           // The following loop deallocates deep Fortran ESMF objects
           for (int k=matchTable_FObjects[i].size()-1; k>=0; k--){
 #ifdef GARBAGE_COLLECTION_LOG_on
-            std::stringstream debugmsg;
-            debugmsg << "ESMF Automatic Garbage Collection: FObject delete: "
-              << *(void **)&(matchTable_FObjects[i][k].fobject);
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+            char msg[800];
+            void *basePtr = NULL;
+            if (matchTable_FObjects[i][k].objectID != ESMC_ID_GEOMBASE.objectID)
+              basePtr = **(void ***)(&matchTable_FObjects[i][k].fobject);
+            sprintf(msg, "ESMF Automatic Garbage Collection: fortran obj delete: "
+              "%20s %p - %p",
+              ESMC_ObjectID_Name(matchTable_FObjects[i][k].objectID),
+              *(void **)(&matchTable_FObjects[i][k].fobject), basePtr);
+            ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
             if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
               FTN_X(f_esmf_fieldcollectgarbage)
@@ -1120,12 +1125,22 @@ void VM::shutdown(
           // Base class. For deep Fortran classes it deletes the Base member.
           for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
 #ifdef GARBAGE_COLLECTION_LOG_on
-            std::stringstream debugmsg;
-            debugmsg << "ESMF Automatic Garbage Collection: delete: "
-              << matchTable_Objects[i][k]->ESMC_BaseGetClassName() << " : "
-              << matchTable_Objects[i][k]->ESMC_BaseGetName() << " : "
-              << matchTable_Objects[i][k];
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+            char msg[800];
+            const char *proxyString;
+            proxyString="actual";
+            if (matchTable_Objects[i][k]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
+              proxyString="proxy";
+            sprintf(msg, "ESMF Automatic Garbage Collection: c++base obj delete: "
+              "%20s %p - %6s - %7s - %7s : %04d : VM=%p : %10s",
+              matchTable_Objects[i][k]->ESMC_BaseGetClassName(),
+              matchTable_Objects[i][k], proxyString,
+              ESMC_StatusString(matchTable_Objects[i][k]->ESMC_BaseGetStatus()),
+              matchTable_Objects[i][k]->ESMC_BaseGetPersist() ?
+                "persist" : "noperst",
+              matchTable_Objects[i][k]->ESMC_BaseGetID(),
+              matchTable_Objects[i][k]->ESMC_BaseGetVM(),
+              matchTable_Objects[i][k]->ESMC_BaseGetName());
+            ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
             delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
             matchTable_Objects[i].pop_back();
@@ -2339,7 +2354,7 @@ void VM::logGarbageInfo(
     ESMC_LogDefault.Write(msg, msgType);
     if (matchTable_vm[i]==NULL){
       sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i"
-        " INVALID - garbage collected", prefix.c_str(), i);
+        " INVALID - garbage has been collected", prefix.c_str(), i);
       ESMC_LogDefault.Write(msg, msgType);
     }else{
       // valid matchTable entry
@@ -3321,6 +3336,17 @@ void VM::finalize(
     }
     // The following loop deallocates deep Fortran ESMF objects
     for (int k=matchTable_FObjects[0].size()-1; k>=0; k--){
+#ifdef GARBAGE_COLLECTION_LOG_on
+      char msg[800];
+      void *basePtr = NULL;
+      if (matchTable_FObjects[0][k].objectID != ESMC_ID_GEOMBASE.objectID)
+        basePtr = **(void ***)(&matchTable_FObjects[0][k].fobject);
+      sprintf(msg, "ESMF Automatic Garbage Collection: fortran obj delete: "
+        "%20s %p - %p",
+        ESMC_ObjectID_Name(matchTable_FObjects[0][k].objectID),
+        *(void **)(&matchTable_FObjects[0][k].fobject), basePtr);
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+#endif
       if (matchTable_FObjects[0][k].objectID == ESMC_ID_FIELD.objectID){
         FTN_X(f_esmf_fieldcollectgarbage)(&(matchTable_FObjects[0][k].fobject),
           &localrc);
@@ -3412,12 +3438,22 @@ void VM::finalize(
     // Base class. For deep Fortran classes it deletes the Base member.
     for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
 #ifdef GARBAGE_COLLECTION_LOG_on
-      std::stringstream debugmsg;
-      debugmsg << "ESMF Automatic Garbage Collection: delete: "
-        << matchTable_Objects[0][k]->ESMC_BaseGetClassName() << " : "
-        << matchTable_Objects[0][k]->ESMC_BaseGetName() << " : "
-        << matchTable_Objects[0][k];
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+      char msg[800];
+      const char *proxyString;
+      proxyString="actual";
+      if (matchTable_Objects[0][k]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
+        proxyString="proxy";
+      sprintf(msg, "ESMF Automatic Garbage Collection: c++base obj delete: "
+        "%20s %p - %6s - %7s - %7s : %04d : VM=%p : %10s",
+        matchTable_Objects[0][k]->ESMC_BaseGetClassName(),
+        matchTable_Objects[0][k], proxyString,
+        ESMC_StatusString(matchTable_Objects[0][k]->ESMC_BaseGetStatus()),
+        matchTable_Objects[0][k]->ESMC_BaseGetPersist() ?
+          "persist" : "noperst",
+        matchTable_Objects[0][k]->ESMC_BaseGetID(),
+        matchTable_Objects[0][k]->ESMC_BaseGetVM(),
+        matchTable_Objects[0][k]->ESMC_BaseGetName());
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
       delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
       matchTable_Objects[0].pop_back();
