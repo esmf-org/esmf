@@ -929,7 +929,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call C_ESMC_MeshGetDimensions(mesh%this, sdim, pdim, localrc);
+    call C_ESMC_MeshGetDimensions(mesh%this, sdim, pdim, ESMF_NULL_POINTER, localrc);
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(xgtype%area(localElemCount), xgtype%centroid(localElemCount, sdim), stat=localrc)

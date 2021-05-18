@@ -1034,7 +1034,8 @@ class MBT {
 
       // get dimensions
       int local_pdim, local_sdim;
-      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, &localrc);
+      ESMC_CoordSys_Flag local_coordsys;
+      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, &local_coordsys, &localrc);
       ESMC_CHECK_THROW(localrc);
 
       if (local_pdim != pdim) {
@@ -1051,10 +1052,18 @@ class MBT {
         correct = false;
       }
 
+      if (local_coordsys != coord_sys) {
+        std::cout << localPet << "# " << name  << " - "
+                  << "coordsys = " << local_coordsys
+                  << " (correct = " << coord_sys << ")" << std::endl;
+        correct = false;
+      }
+
       if (verbosity >= 2) {
         std::cout << localPet << "# " << name  << " - "
                   << "pdim = " << pdim
-                  << " sdim = " << sdim << std::endl;
+                  << " sdim = " << sdim
+                  << " coordsys = " << local_coordsys << std::endl;
       }
 
       int nodeCount;
@@ -1204,7 +1213,7 @@ class MBT {
 
       // get dimensions
       int local_pdim, local_sdim;
-      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, &localrc);
+      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
 
       // /////////////////// node create info ////////////////////////////
@@ -1338,7 +1347,7 @@ class MBT {
 
       // get dimensions
       int local_pdim, local_sdim;
-      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, &localrc);
+      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
 
       /////////////////// elem create info ////////////////////////////
@@ -1508,7 +1517,7 @@ class MBT {
 
       // get dimensions
       int local_pdim, local_sdim;
-      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, &localrc);
+      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
 
       /////////////////// elem create info ////////////////////////////

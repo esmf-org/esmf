@@ -553,7 +553,7 @@ integer,              intent(out), optional :: rc
              ESMF_CONTEXT, rcToReturn=rc)
           return
       endif    
-      call C_ESMC_MeshGetDimensions(xgtypep%mesh%this, dimCount, pdim, localrc);
+      call C_ESMC_MeshGetDimensions(xgtypep%mesh%this, dimCount, pdim, ESMF_NULL_POINTER, localrc);
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif

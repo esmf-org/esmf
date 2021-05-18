@@ -101,6 +101,8 @@ void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc);
 void ESMCI_MeshGetNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
 void ESMCI_MeshGetElemCount(Mesh *meshpp, int *elemCount, int *rc);
 void ESMCI_MeshGetElemConnCount(Mesh *meshpp, int *elemConnCount, int *rc);
+void ESMCI_MeshGetOwnedNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
+void ESMCI_MeshGetOwnedElemCount(Mesh *meshpp, int *elemCount, int *rc);
 
 void ESMCI_MeshGetElemInfoPresence(Mesh *mesh, 
                                    int *elemMaskIsPresent,

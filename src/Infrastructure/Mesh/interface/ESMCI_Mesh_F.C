@@ -150,6 +150,16 @@ extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
 
 } // meshcreate
 
+extern "C" void FTN_X(c_esmc_meshcreateempty)(MeshCap **mesh, int *rc) {
+
+  if (Moab_on)
+    *mesh=MeshCap::meshcreateempty(false, rc);
+  else
+    *mesh=MeshCap::meshcreateempty(true, rc);
+  
+  if (rc) *rc=ESMF_SUCCESS;
+}
+
 
 extern "C" void FTN_X(c_esmc_meshaddnodes)(MeshCap **meshpp, int *num_nodes, int *nodeId,
                                            double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
@@ -291,12 +301,6 @@ extern "C" void FTN_X(c_esmc_meshfreememory)(MeshCap **meshpp, int *rc) {
 }
 
 
-extern "C" void FTN_X(c_esmc_meshget)(MeshCap **meshpp, int *num_nodes, int *num_elements, int *rc){
-
-  (*meshpp)->meshget(num_nodes, num_elements, rc);
-}
-
-
 extern "C" void FTN_X(c_esmc_meshgetnodecount)(MeshCap **meshpp, int *nodeCount, int *rc){
 
   (*meshpp)->getNodeCount(nodeCount, rc);
@@ -311,6 +315,23 @@ extern "C" void FTN_X(c_esmc_meshgetelemcount)(MeshCap **meshpp, int *elemCount,
 extern "C" void FTN_X(c_esmc_meshgetelemconncount)(MeshCap **meshpp, int *elemConnCount, int *rc){
 
   (*meshpp)->getElemConnCount(elemConnCount, rc);
+}
+
+extern "C" void FTN_X(c_esmc_meshgetownednodecount)(MeshCap **meshpp, int *nodeCount, int *rc){
+
+  *nodeCount = (*meshpp)->getOwnedNodeCount();
+
+  // return success
+  if (rc) *rc=ESMF_SUCCESS;
+}
+
+
+extern "C" void FTN_X(c_esmc_meshgetownedelemcount)(MeshCap **meshpp, int *elemCount, int *rc){
+
+  *elemCount = (*meshpp)->getOwnedElemCount();
+
+  // return success
+  if (rc) *rc=ESMF_SUCCESS;
 }
 
 extern "C" void FTN_X(c_esmc_meshgeteleminfopresence)(MeshCap **meshpp, 
@@ -485,9 +506,13 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(MeshCap **meshpp, int *num_elem, doubl
   (*meshpp)->meshgetarea(num_elem, elem_areas, rc);
 }
 
-extern "C" void FTN_X(c_esmc_meshgetdimensions)(MeshCap **meshpp, int *sdim, int *pdim, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetdimensions)(MeshCap **meshpp, int *sdim, int *pdim,
+  ESMC_CoordSys_Flag *coordsys, int *rc) {
 
-  (*meshpp)->meshgetdimensions(sdim, pdim, rc);
+  (*meshpp)->meshgetdimensions(sdim, pdim, coordsys, rc);
+
+  // return success
+  if (rc) *rc=ESMF_SUCCESS;
 }
 
 extern "C" void FTN_X(c_esmc_meshgetcentroid)(MeshCap **meshpp, int *num_elem, double *elem_centroid, int *rc) {
@@ -585,12 +610,6 @@ extern "C" void FTN_X(c_esmc_meshcreateredist)(MeshCap **src_meshpp, int *num_no
                                   num_elem_gids, elem_gids, rc);
 }
 
-
-extern "C" void FTN_X(c_esmc_meshcreatebase)(MeshCap **mesh, int *rc) {
-
-  *mesh=new MeshCap();
-  if (rc) *rc=ESMF_SUCCESS;
-}
 
 // This method verifies that nodes in node_gids array are the same as the local nodes in meshpp, otherwise
 // it returns an error (used to test MeshRedist()).

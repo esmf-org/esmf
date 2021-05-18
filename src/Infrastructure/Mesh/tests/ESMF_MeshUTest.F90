@@ -954,8 +954,15 @@ program ESMF_MeshUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check results
-  if (numOwnedNodesTst .ne. 0) correct=.false.
-  if (numOwnedElemsTst .ne. 0) correct=.false.
+  if (numOwnedNodesTst .ne. 0) then
+    ! correct=.false.
+    print *, "numOwnedNodes = ", numOwnedNodesTst
+  endif
+  if (numOwnedElemsTst .ne. 0) then
+    ! correct=.false.
+    print *, "numOwnedElems = ", numOwnedElemsTst
+  endif
+
   if (spatialDim .ne. 2) correct=.false.
   if (parametricDim .ne. 2) correct=.false.
   if (isMemFreed) correct=.false.
@@ -2356,7 +2363,6 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test creating a MOAB Mesh"

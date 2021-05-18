@@ -1930,6 +1930,47 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
+void ESMCI_MeshGetOwnedNodeCount(Mesh *mesh, int *nodeCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetOwnedNodeCount()"
+
+  int nodeCountLocal = 0;
+  Mesh::iterator ni = mesh->node_begin(), ne = mesh->node_end();
+  for (; ni != ne; ++ni) {
+      MeshObj &node = *ni;
+
+      if (!GetAttr(node).is_locally_owned()) continue;
+
+      nodeCountLocal++;
+  }
+
+  if(nodeCount) *nodeCount = nodeCountLocal;
+
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+void ESMCI_MeshGetOwnedElemCount(Mesh *mesh, int *elemCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_MeshGetOwnedElemCount()"
+
+  int elemCountLocal=0;
+  Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+  for (; ei != ee; ++ei) {
+    MeshObj &elem = *ei;
+
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Add number of nodes for this elem to connection count
+    elemCountLocal++;
+  }
+
+  if(elemCount) *elemCount = elemCountLocal;
+  
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
 // Convert the parametric dim and the number of nodes to a element type
 static int _num_nodes_to_elem_type(int pdim, int num_nodes) {
 #undef  ESMC_METHOD

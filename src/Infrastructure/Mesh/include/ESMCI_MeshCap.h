@@ -34,12 +34,34 @@ namespace ESMCI {
 
   public:
     MeshCap();
-    bool is_esmf_mesh;
-    Mesh *mesh;     // Make 1 void pointer here for both
-    MBMesh *mbmesh;
 
+    bool is_esmf_mesh;
     // NOT NEEDED RIGHT NOW
     //    bool is_internal_mesh_esmf() {return is_esmf_mesh;}
+
+    Mesh *mesh;     // Make 1 void pointer here for both
+    MBMesh *mbmesh;
+    
+    // bool isCMeshFreed;
+    // status flag type not yet implemented
+    // ESMC_MeshStatus_Flag status;
+
+    ESMC_CoordSys_Flag coordsys_mc;
+    int sdim_mc;
+    int pdim_mc;
+    int num_owned_node_mc;
+    int num_owned_elem_mc;
+    
+    // bool nodal_distgrid_set;
+    // ESMCI_DistGrid nodal_distgrid;
+    // ESMCI_DistGrid element_distgrid;
+    // 
+    // bool hasSplitElem;
+    // int splitElemStart;
+    // int splitElemCount;
+    // int *splitElemMap;
+    // int origElemStart;
+    // int origElemCount;
 
     MeshCap(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
       is_esmf_mesh = false;
@@ -48,6 +70,10 @@ namespace ESMCI {
       ESMC_BaseSetName(NULL, "Mesh");
     }
 
+    void finalize_ptr(int is_esmf_mesh, Mesh *mesh, MBMesh *mbmesh);
+    void finalize_dims(int sdim, int pdim, ESMC_CoordSys_Flag coordsys);
+    void finalize_counts(int *rc);
+    
     void *get_internal_mesh_ptr() {
       if (is_esmf_mesh) {
         return (void *)mesh;
@@ -65,9 +91,10 @@ namespace ESMCI {
     static MeshCap *create_from_ptr(void **_mesh,
                                     bool _is_esmf_mesh, int *rc);
 
-
+    static MeshCap *meshcreateempty(bool _is_esmf_mesh, int *rc);
+    
     static MeshCap *meshcreate(int *pdim, int *sdim,
-                               ESMC_CoordSys_Flag *coordSys,
+                               ESMC_CoordSys_Flag *coordsys,
                                bool _is_esmf_mesh, int *rc);
 
     static MeshCap *meshcreate_easy_elems(int *pdim,
@@ -82,7 +109,7 @@ namespace ESMCI {
                                           double *elemArea,
                                           int *has_elemCoords,
                                           double *elemCoords,
-                                          ESMC_CoordSys_Flag *coordSys,
+                                          ESMC_CoordSys_Flag *coordsys,
                                           bool _is_esmf_mesh, int *rc);
 
     static MeshCap *meshcreate_from_grid(Grid **gridpp,
@@ -119,9 +146,6 @@ namespace ESMCI {
     ~MeshCap();
 
     void meshfreememory(int *rc);
-
-    void meshget(int *num_nodes, int *num_elements, int *rc);
-
 
     void meshcreatenodedistgrid(int *ngrid, int *num_lnodes, int *rc);
 
@@ -171,7 +195,8 @@ namespace ESMCI {
 
     void meshgetarea(int *num_elem, double *elem_areas, int *rc);
 
-    void meshgetdimensions(int *sdim, int *pdim, int *rc);
+    void meshgetdimensions(int *sdim, int *pdim, ESMC_CoordSys_Flag *coordsys, 
+      int *rc);
 
     void meshgetcentroid(int *num_elem, double *elem_centroid, int *rc);
 
@@ -281,6 +306,9 @@ namespace ESMCI {
      void getNodeCount(int *nodeCount, int *rc);
      void getElemCount(int *elemCount, int *rc);
      void getElemConnCount(int *elemConnCount, int *rc);
+
+     int getOwnedNodeCount(){return num_owned_node_mc;};
+     int getOwnedElemCount(){return num_owned_elem_mc;};
 
      void getElemInfoPresence(int *elemMaskIsPresent,
                               int *elemAreaIsPresent,

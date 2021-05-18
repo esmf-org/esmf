@@ -97,7 +97,8 @@ void MBMesh_getarea(MBMesh **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
 void MBMesh_GetCentroid(MBMesh *meshp, int *num_elem, double *elem_centroid, int *rc);
 
-void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, int *rc);
+void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, 
+                          ESMC_CoordSys_Flag *coordsys, int *rc);
 
 void MBMesh_GetElemCount(MBMesh *meshp, int *elemCount, int *rc);
 

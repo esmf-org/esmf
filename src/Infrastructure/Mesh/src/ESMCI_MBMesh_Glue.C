@@ -2241,15 +2241,19 @@ void MBMesh_FitOnVM(MBMesh **meshpp, VM **new_vm, int *rc)
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 } // ESMCI_MeshFitOnVM
 
-void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, int *rc) {
+void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, 
+                          ESMC_CoordSys_Flag *coordsys, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetDimensions()"
   try {
-    if (sdim)
+    if (sdim != nullptr)
       *sdim = meshp->orig_sdim;
 
-    if (pdim)
+    if (pdim != nullptr)
       *pdim = meshp->pdim;
+      
+    if (coordsys != nullptr)
+      *coordsys = meshp->coordsys;
   }
   CATCH_MBMESH_RETURN(rc);
   
