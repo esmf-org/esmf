@@ -479,7 +479,7 @@ end interface
      ESMF_GeomBaseCreateGrid%gbcp=>gbcp
 
     ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateGrid, ESMF_ID_GEOMBASE%objectID)
+!    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateGrid, ESMF_ID_GEOMBASE%objectID)
 
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateGrid)
@@ -626,7 +626,7 @@ end interface
      ESMF_GeomBaseCreateMesh%gbcp=>gbcp
 
     ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateMesh, ESMF_ID_GEOMBASE%objectID)
+!    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateMesh, ESMF_ID_GEOMBASE%objectID)
 
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateMesh)
@@ -694,7 +694,7 @@ end interface
      ESMF_GeomBaseCreateLocStream%gbcp=>gbcp
 
     ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateLocStream, ESMF_ID_GEOMBASE%objectID)
+!    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateLocStream, ESMF_ID_GEOMBASE%objectID)
 
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateLocStream)
@@ -786,7 +786,7 @@ end interface
     ESMF_GeomBaseCreateXGrid%gbcp=>gbcp
 
     ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateXGrid, ESMF_ID_GEOMBASE%objectID)
+!    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateXGrid, ESMF_ID_GEOMBASE%objectID)
 
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateXGrid)
@@ -852,6 +852,7 @@ end interface
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit, geombase, rc)
 
+#if 0
     ! Set default flags
     opt_noGarbage = .false.
     if (present(noGarbage)) opt_noGarbage = noGarbage
@@ -866,6 +867,13 @@ end interface
         msg="Deallocating GeomBase type object", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+#else
+    ! deallocate GeomBase type
+    deallocate(geombase%gbcp, stat=localrc)
+    if (ESMF_LogFoundDeallocError(localrc, &
+      msg="Deallocating GeomBase type object", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
 
     ! Set init code
     ESMF_INIT_SET_DELETED(geombase)
@@ -1060,6 +1068,9 @@ end interface
                                    ESMF_CONTEXT, rcToReturn=rc)) return
 
          case (ESMF_GEOMTYPE_MESH%type) ! Mesh
+         
+!call ESMF_PointerLog(gbcp%mesh%this, prefix="ESMF_GeomBaseGet() mesh:", logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+         
             ! Get distgrid
             if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
                call ESMF_MeshGet(mesh=gbcp%mesh, &
@@ -1081,6 +1092,7 @@ end interface
                     ESMF_CONTEXT, rcToReturn=rc)) return
             endif
 
+!call c_esmc_vmlogpointer(localDistgrid, "ESMF_GeomBaseGet() distgrid:", ESMF_LOGMSG_DEBUG)
 
             if (present(dimCount)) then
                call ESMF_DistGridGet(localDistgrid, &
@@ -1682,7 +1694,7 @@ end subroutine ESMF_GeomBaseGet
     ESMF_GeomBaseDeserialize%gbcp=>gbcp
 
     ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(ESMF_GeomBaseDeserialize, ESMF_ID_GEOMBASE%objectID)
+!    call c_ESMC_VMAddFObject(ESMF_GeomBaseDeserialize, ESMF_ID_GEOMBASE%objectID)
 
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseDeserialize)
