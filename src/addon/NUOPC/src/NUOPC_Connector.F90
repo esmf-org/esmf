@@ -2705,17 +2705,21 @@ module NUOPC_Connector
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
 call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-import:", &
   ESMF_LOGMSG_DEBUG, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
 call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-export:", &
   ESMF_LOGMSG_DEBUG, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     if (btest(profiling,2)) then
       call ESMF_TraceRegionExit("Reconcile", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3807,17 +3811,21 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
 call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-import:", &
   ESMF_LOGMSG_DEBUG, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
 call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-export:", &
   ESMF_LOGMSG_DEBUG, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     if (btest(profiling,2)) then
       call ESMF_TraceRegionExit("Reconcile", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4864,17 +4872,21 @@ call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
 call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-import:", &
   ESMF_LOGMSG_DEBUG, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
 call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-export:", &
   ESMF_LOGMSG_DEBUG, rc=rc)
 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     if (btest(profiling,2)) then
       call ESMF_TraceRegionExit("Reconcile", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
