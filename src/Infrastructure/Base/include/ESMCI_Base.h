@@ -204,7 +204,8 @@ class ESMC_Base
 
     // constructors/destructor
     ESMC_Base(ESMCI::VM *vm=NULL);  // default constructor
-    ESMC_Base(int id);  // explicit id, don't modify Base id counting
+    ESMC_Base(int id, bool woGarbage=false); // explicit id, don't modify Base
+      // id counting. Also allow to not connect to garbage collection
     ESMC_Base(const char *superclass, const char *name, int nattrs,
       ESMCI::VM *vm=NULL);
     virtual ~ESMC_Base(void);
