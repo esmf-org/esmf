@@ -1964,9 +1964,11 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
   // Dereference meshcap
   MeshCap *mcp=*mcpp;
 
+#if 1
   std::stringstream msg;
-  msg << "Entering MeshCap::destroy() with mcp = " << mcp << "\n";
+  msg << "Entering MeshCap::destroy() with mcp = " << mcp;
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
 
   // check if this Mesh object has the persist flag set
   if (mcp->ESMC_BaseGetPersist()){
