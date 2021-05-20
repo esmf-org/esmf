@@ -5139,8 +5139,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
 
           ! proxy or not, the GeomBase needs to be destroyed
-          call ESMF_GeomBaseDestroy(ftype%geombase, noGarbage=noGarbage, &
-            rc=localrc)
+          call ESMF_GeomBaseDestroy(ftype%geombase, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

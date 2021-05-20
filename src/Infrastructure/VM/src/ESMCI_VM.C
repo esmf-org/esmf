@@ -80,7 +80,6 @@ extern "C" {
   void FTN_X(f_esmf_fortranudtpointercompare)(void *ptr1, void *ptr2, int *flag);
   void FTN_X(f_esmf_fieldcollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_fbundlecollectgarbage)(void *fobject, int *localrc);
-  void FTN_X(f_esmf_geombasecollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_xgridgeombasecolgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_locstreamcollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_statecollectgarbage)(void *fobject, int *localrc);
@@ -1019,9 +1018,7 @@ void VM::shutdown(
           for (int k=matchTable_FObjects[i].size()-1; k>=0; k--){
 #ifdef GARBAGE_COLLECTION_LOG_on
             char msg[800];
-            void *basePtr = NULL;
-            if (matchTable_FObjects[i][k].objectID != ESMC_ID_GEOMBASE.objectID)
-              basePtr = **(void ***)(&matchTable_FObjects[i][k].fobject);
+            void *basePtr = **(void ***)(&matchTable_FObjects[i][k].fobject);
             sprintf(msg, "ESMF Automatic Garbage Collection: fortran obj delete: "
               "%20s %p - %p",
               ESMC_ObjectID_Name(matchTable_FObjects[i][k].objectID),
@@ -1041,24 +1038,6 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
-#if 0
-//gjt: Disable cleaning up GeomBase from the garbage collection level because
-//gjt: each Field actually owns its own instance of the GeomBase. The way
-//gjt: FieldDestruct() currently works, it looks at the GeomBase, and if that
-//gjt: were already destroyed, it causes issues. In the long run this might
-//gjt: be better implemented via a protection against accessing GeomBase from
-//gjt: FieldDestruct() in that case. But then it is important that all of the
-//gjt: Geom types correctly implement their destructor. Right now the Mesh
-//gjt: destructor is not doing all that is needed, and so the Mesh cleanup
-//ght: actually does depend on the Field garbage collection.
-            }else if (matchTable_FObjects[i][k].objectID ==
-              ESMC_ID_GEOMBASE.objectID){
-              FTN_X(f_esmf_geombasecollectgarbage)(
-                &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                ESMC_CONTEXT, rc))
-                return;
-#endif
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_XGRIDGEOMBASE.objectID){
               FTN_X(f_esmf_xgridgeombasecolgarbage)(
@@ -2377,12 +2356,8 @@ void VM::logGarbageInfo(
       matchTable_FObjects[i].size());
     ESMC_LogDefault.Write(msg, msgType);
     for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
-      void *basePtr = NULL;
-      if (matchTable_FObjects[i][j].objectID != ESMC_ID_GEOMBASE.objectID){
-        basePtr = *(void **)(&matchTable_FObjects[i][j].fobject);
-        if (basePtr)
-          basePtr = **(void ***)(&matchTable_FObjects[i][j].fobject);
-      }
+      void *basePtr = *(void **)(&matchTable_FObjects[i][j].fobject);
+      if (basePtr) basePtr = **(void ***)(&matchTable_FObjects[i][j].fobject);
       sprintf(msg, "%s - GarbInfo: fortran objs[%04d]: %20s %p - %p",
         prefix.c_str(), j,
         ESMC_ObjectID_Name(matchTable_FObjects[i][j].objectID),
@@ -3349,9 +3324,7 @@ void VM::finalize(
     for (int k=matchTable_FObjects[0].size()-1; k>=0; k--){
 #ifdef GARBAGE_COLLECTION_LOG_on
       char msg[800];
-      void *basePtr = NULL;
-      if (matchTable_FObjects[0][k].objectID != ESMC_ID_GEOMBASE.objectID)
-        basePtr = **(void ***)(&matchTable_FObjects[0][k].fobject);
+      void *basePtr = **(void ***)(&matchTable_FObjects[0][k].fobject);
       sprintf(msg, "ESMF Automatic Garbage Collection: fortran obj delete: "
         "%20s %p - %p",
         ESMC_ObjectID_Name(matchTable_FObjects[0][k].objectID),
@@ -3370,24 +3343,6 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
-#if 0
-//gjt: Disable cleaning up GeomBase from the garbage collection level because
-//gjt: each Field actually owns its own instance of the GeomBase. The way
-//gjt: FieldDestruct() currently works, it looks at the GeomBase, and if that
-//gjt: were already destroyed, it causes issues. In the long run this might
-//gjt: be better implemented via a protection against accessing GeomBase from
-//gjt: FieldDestruct() in that case. But then it is important that all of the
-//gjt: Geom types correctly implement their destructor. Right now the Mesh
-//gjt: destructor is not doing all that is needed, and so the Mesh cleanup
-//ght: actually does depend on the Field garbage collection.
-      }else if (matchTable_FObjects[0][k].objectID ==
-        ESMC_ID_GEOMBASE.objectID){
-        FTN_X(f_esmf_geombasecollectgarbage)(
-          &(matchTable_FObjects[0][k].fobject), &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, rc))
-          return;
-#endif
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_XGRIDGEOMBASE.objectID){
         FTN_X(f_esmf_xgridgeombasecolgarbage)(
