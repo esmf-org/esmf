@@ -331,6 +331,19 @@ Array::Array(
   // Auxiliary
   localDeCountAux = localDeCount; // TODO: auxiliary for garb until ref. counting
 
+  // Internal VM object
+  vmAux = vm;
+  if (vmAux == NULL){
+    // a valid VM was not provided -> get the current VM
+    vmAux = VM::getCurrent(&localrc);  // get current VM for default
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)){
+      ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+      return;
+    }
+  }
+
+  // I/O RouteHandle
   ioRH = NULL; // invalidate
 
   // invalidate the name for this Array object in the Base class
@@ -384,8 +397,7 @@ void Array::destruct(bool followCreator, bool noGarbage){
     // free shared memory handle if it is present and Array responsible for it
     if ((mh != NULL) && mhCreator){
       int localrc;
-      VM *vm = delayout->getVM();      
-      localrc = vm->ssishmFree(mh);
+      localrc = vmAux->ssishmFree(mh);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
       delete mh;
@@ -546,7 +558,7 @@ Array *Array::create(
   Array *array;
   try{
 
-  // check the input and get the information together to call construct()
+  // check the input and get the information together to call constructor
   // larrayListArg -> typekind/rank
   if (larrayListArg == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -1309,7 +1321,7 @@ Array *Array::create(
   Array *array;
   try{
 
-  // check the input and get the information together to call construct()
+  // check the input and get the information together to call constructor
   // arrayspec -> typekind/rank
   if (arrayspec == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -2331,6 +2343,8 @@ Array *Array::create(
     arrayOut->localDeCountAux =
       arrayOut->delayout->getLocalDeCount(); // TODO: auxilary for garb
                                              // TODO: until ref. counting
+
+    arrayOut->vmAux = arrayIn->vmAux;  // simple copy
     arrayOut->ioRH = NULL; // invalidate
 
     if (i2jMap) delete [] i2jMap;
@@ -2547,7 +2561,8 @@ Array *Array::create(
     arrayOut->localDeCountAux =
       arrayOut->delayout->getLocalDeCount(); // TODO: auxilary for garb
                                              // TODO: until ref. counting
-                                        
+
+    arrayOut->vmAux = arrayIn->vmAux;  // simple copy
     arrayOut->ioRH = NULL; // invalidate
 
   }catch(int catchrc){
@@ -4170,8 +4185,7 @@ int Array::sync(){
   // see if the array holds a valid memhandle, optionally call sync
   if (mh != NULL){
     int localrc;
-    VM *vm = delayout->getVM();      
-    localrc = vm->ssishmSync(*mh);
+    localrc = vmAux->ssishmSync(*mh);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
   }
@@ -4527,7 +4541,8 @@ int Array::deserialize(
   localDeCountAux = delayout->getLocalDeCount(); // TODO: auxilary for garb
                                                  // TODO: until ref. counting
 
-  ioRH = NULL;  // invalidate
+  vmAux = NULL;  // invalidate
+  ioRH = NULL;   // invalidate
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
