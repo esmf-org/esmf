@@ -4059,8 +4059,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),  intent(inout)           :: distgrid
-    integer,              intent(in),  optional   :: collocationPDim(:)
-    character(len = *),   intent(in),  optional   :: name
+    integer,              intent(in),   optional  :: collocationPDim(:)
+    character(len = *),   intent(in),   optional  :: name
     integer,              intent(out),  optional  :: rc  
 !
 ! !DESCRIPTION:
@@ -4078,6 +4078,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt collocationPDim} argument are collocated within the same
 !          sequence index space. Dimensions with different entries are located
 !          in orthogonal sequence index spaces.
+!     \item [{[name]}]
+!          The DistGrid name.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

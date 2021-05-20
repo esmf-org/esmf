@@ -1964,23 +1964,23 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
   // Dereference meshcap
   MeshCap *mcp=*mcpp;
 
-#if 1
+#if 0
   std::stringstream msg;
-  msg << "Entering MeshCap::destroy() with mcp = " << mcp;
+  msg << "Entering MeshCap::destroy() with mcp = " << mcp << "\n";
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
 
   // check if this Mesh object has the persist flag set
   if (mcp->ESMC_BaseGetPersist()){
-    ESMC_LogDefault.Write("bailing out of MeshCap::destroy() due to persist\n",
-      ESMC_LOGMSG_DEBUG);
+//    ESMC_LogDefault.Write("bailing out of MeshCap::destroy() due to persist\n",
+//      ESMC_LOGMSG_DEBUG);
     return ESMF_SUCCESS;  // nothing to be done here, return successfully
   }
   
   // check if this Mesh object still has a valid entry in the garbage collection
   if (!VM::validObject(mcp)){
-    ESMC_LogDefault.Write("bailing out of MeshCap::destroy() due to invalid\n",
-      ESMC_LOGMSG_DEBUG);
+//    ESMC_LogDefault.Write("bailing out of MeshCap::destroy() due to invalid\n",
+//      ESMC_LOGMSG_DEBUG);
     return ESMF_SUCCESS;  // nothing to be done here, return successfully
   }
 

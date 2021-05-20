@@ -928,7 +928,7 @@ contains
 
         if (compp%vm_info /= ESMF_NULL_POINTER) then
           ! shut down this component's VM
-#if 1
+#if 0
   block
     character(160):: msg, compName
     call ESMF_GetName(compp%base, compName, rc=localrc)

@@ -4614,11 +4614,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       opt_noGarbage = ESMF_FALSE
       if (present(noGarbage)) opt_noGarbage = noGarbage
 
+#if 0
   block 
     character(80):: msg
     write(msg,*) "Entering ESMF_MeshDestroy with isCMeshFreed=", mesh%isCMeshFreed
     call ESMF_PointerLog(mesh%this, prefix=msg, logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
   end block
+#endif
 
       ! If not already freed then free the c side
       if (.not. mesh%isCMeshFreed) then
