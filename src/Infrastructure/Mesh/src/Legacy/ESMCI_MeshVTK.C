@@ -269,7 +269,7 @@ void append_data_from_Array<ESMC_R8>(Mesh::const_iterator ni, Mesh::const_iterat
     localArray->getDataInternal(&index, &d);
 
     // It seems to irritate visit if we have a number < 1.0E-300, so round down to 0.0
-    if (d < 1.0E-300) d=0.0;
+    if (std::abs(d) < 1.0E-300) d=0.0;
 
     // Write data
     out << d << " ";
@@ -318,7 +318,7 @@ void append_data<double>(Mesh::const_iterator ni, Mesh::const_iterator ne, const
   for (; ni != ne; ++ni) {
     if (llf.OnObj(*ni)) {
       // It seems to irritate visit if a value is <1.0E-300, so round down if that's the case
-      if (((double *)llf.data(*ni))[d] > 1.0E-300) {
+      if (std::abs(((double *)llf.data(*ni))[d]) > 1.0E-300) {
         out << ((double *)llf.data(*ni))[d] << " ";
       } else {
         out << "0 ";
