@@ -1926,4 +1926,10 @@ namespace ESMCI{
 
  }  // end Time::getDayOfYear
 
+ // Accessor method to retrieve calendar pointer
+ Calendar * Time::getCalendar(void) const
+ {
+   return calendar;
+ }
+
 }   // namespace ESMCI
