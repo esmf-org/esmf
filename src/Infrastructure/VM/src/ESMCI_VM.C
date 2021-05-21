@@ -3028,38 +3028,6 @@ bool VM::validObject(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VM::printMatchTable()"
-//BOPI
-// !IROUTINE:  ESMCI::VM::printMatchTable - Print the current match table
-//
-// !INTERFACE:
-void VM::printMatchTable(
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-//
-  void){
-//
-// !DESCRIPTION:
-//    Print the current match table.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  printf("--- ESMCI::VM::printMatchTable() start ---\n");
-  printf("matchTableBound = %d\n", matchTableBound);
-  for (int i=0; i<matchTableBound; i++) {
-    printf("matchTable_tid[%d] = %lu\n", i, matchTable_tid[i]);
-    (&matchTable_vmID[i])->print();
-  }
-  printf("--- ESMCI::VM::printMatchTable() end ---\n");
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VM::getenv()"
 //BOPI
 // !IROUTINE:  ESMCI::VM::getenv - get environment variable

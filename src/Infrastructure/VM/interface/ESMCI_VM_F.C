@@ -711,19 +711,6 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmprintmatchtable)(ESMCI::VM **vm){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmprintmatchtable()"
-    int localrc = ESMC_RC_NOT_IMPL;
-    int *rc = &localrc;
-    // test for NULL pointer via macro before calling any class methods
-    ESMCI_NULL_CHECK_PRC(vm, rc)
-    ESMCI_NULL_CHECK_PRC(*vm, rc)
-    (*vm)->printMatchTable();
-    // Flush before crossing language interface to ensure correct output order
-    fflush(stdout);
-  }
-
   void FTN_X(c_esmc_vmvalidate)(ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmvalidate()"
