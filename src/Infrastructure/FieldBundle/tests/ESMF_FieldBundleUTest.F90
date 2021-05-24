@@ -81,7 +81,7 @@
       integer :: offset, offset_inq
 
       type(ESMF_Grid)             :: gridxy
-      type(ESMF_FieldBundle)      :: packedFB
+      type(ESMF_FieldBundle)      :: packedFB, packedFBDeserialized
       !real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:,:) !fieldIdx,t,z,y,x
       real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:)
       real(ESMF_KIND_R8), pointer :: packedPtr3D(:,:,:)
@@ -2393,7 +2393,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      fieldcount = 5
+      fieldcount = 15
       allocate(fieldNameListAlloc(fieldcount))
       do i = 1, fieldcount
         fieldNameListAlloc(i) = 'ThisReallyIsASuperLongFieldNameThatYouCanUseInESMF'
@@ -2406,11 +2406,81 @@
       write(name, *) "Create packed FieldBundle with variable many long Field names"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      do i = 1, fieldcount
+        fieldNameListAlloc(i) = ''
+      enddo
+      call ESMF_FieldBundleGet(packedFB, fieldNameList=fieldNameListAlloc, rc=rc)
+      write(failMsg, *) "Get fieldNameList from packed FieldBundle"
+      write(name, *) "Get fieldNameList from packed FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! Serialization and deserialization - these are internal methods that are
+      ! NOT part of the ESMF API.
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Serialization test, inquire only
+      allocate (buffer(1))
+      buffer_len = 1
+      offset_inq = 0
+      call ESMF_FieldBundleSerialize (packedFB,  &
+          buffer, buffer_len, offset_inq,  &
+          ESMF_ATTRECONCILE_ON, ESMF_INQUIREONLY,  &
+          rc=rc)
+      write(name, *) "Test serialization, inquire only"
+      write(failMsg, *) "Serialization inquiry failed"
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Serialization test
+      deallocate (buffer)
+      allocate (buffer(offset_inq))
+      buffer_len = offset_inq
+      offset = 0
+      call ESMF_FieldBundleSerialize (packedFB,  &
+          buffer, buffer_len, offset,  &
+          ESMF_ATTRECONCILE_ON, ESMF_NOINQUIRE,  &
+          rc=rc)
+      write(name, *) "Test serialization for real"
+      write(failMsg, *) "Serialization failed"
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      print *, 'offset_inq, offset =', offset_inq, offset
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! DeSerialization test
+      buffer_len = offset_inq
+      offset = 0
+      packedFBDeserialized = ESMF_FieldBundleDeserialize ( &
+          buffer, offset,  &
+          ESMF_ATTRECONCILE_ON, &
+          rc=rc)
+      write(name, *) "Test deserialization"
+      write(failMsg, *) "DeSerialization failed"
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+     
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      do i = 1, fieldcount
+        fieldNameListAlloc(i) = ''
+      enddo
+      call ESMF_FieldBundleGet(packedFBDeserialized, fieldNameList=fieldNameListAlloc, rc=rc)
+      write(failMsg, *) "Get fieldNameList from deserializated packed FieldBundle"
+      write(name, *) "Get fieldNameList from deserializated packed FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! Release resources used for the packed FB tests
       deallocate(packedPtr3D)
       deallocate(fieldNameListAlloc)
       call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-     
+      call ESMF_FieldBundleDestroy(packedFBDeserialized, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
       endif ! Petcount = 4
 
       ! Destroy MeshTst1
