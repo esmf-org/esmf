@@ -134,22 +134,16 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *nodeMask,
                                  int *rc);
 
-void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc);
+void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid *dg, int *rc);
 
-void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, int *rc);
+void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid *dg, int *rc);
 
 void ESMCI_meshinfoserialize(int *intMeshFreed,
-                             int *spatialDim, int *parametricDim,
-                             int *intIsPresentNDG, int *intIsPresentEDG,
-                             int *coordSys, 
                              char *buffer, int *length, int *offset,
                              ESMC_InquireFlag *inquireflag, int *rc,
                              ESMCI_FortranStrLenArg buffer_l);
 
 void ESMCI_meshinfodeserialize(int *intMeshFreed,
-                               int *spatialDim, int *parametricDim,
-                               int *intIsPresentNDG, int *intIsPresentEDG,
-                               int *coordSys, 
                                char *buffer, int *offset, int *rc,
                                ESMCI_FortranStrLenArg buffer_l);
 

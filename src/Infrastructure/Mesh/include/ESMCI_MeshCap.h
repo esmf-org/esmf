@@ -52,10 +52,10 @@ namespace ESMCI {
     int num_owned_node_mc;
     int num_owned_elem_mc;
     
-    // bool nodal_distgrid_set;
-    // ESMCI_DistGrid nodal_distgrid;
-    // ESMCI_DistGrid element_distgrid;
-    // 
+    bool node_distgrid_set;
+    DistGrid *node_distgrid;
+    DistGrid *elem_distgrid;
+
     // bool hasSplitElem;
     // int splitElemStart;
     // int splitElemCount;
@@ -68,6 +68,15 @@ namespace ESMCI {
       mesh = NULL;
       mbmesh = NULL;
       ESMC_BaseSetName(NULL, "Mesh");
+      
+      sdim_mc = 0;
+      pdim_mc = 0;
+      num_owned_node_mc = 0;
+      num_owned_elem_mc = 0;
+      
+      node_distgrid_set =  false;
+      node_distgrid = nullptr;
+      elem_distgrid = nullptr;
     }
 
     void finalize_ptr(int is_esmf_mesh, Mesh *mesh, MBMesh *mbmesh);
@@ -147,25 +156,21 @@ namespace ESMCI {
 
     void meshfreememory(int *rc);
 
-    void meshcreatenodedistgrid(int *ngrid, int *num_lnodes, int *rc);
+    void meshcreatenodedistgrid(int *rc);
+    void meshcreateelemdistgrid(int *rc);
+    
+    DistGrid *meshgetnodedistgrid(){return node_distgrid;};
+    DistGrid *meshgetelemdistgrid(){return elem_distgrid;};
+    void meshsetnodedistgrid(DistGrid *dg) {if(node_distgrid_set == false) {node_distgrid = dg; node_distgrid_set = true;}};
+    void meshsetelemdistgrid(DistGrid *dg) {elem_distgrid = dg;};
 
-
-    void meshcreateelemdistgrid(int *egrid, int *num_lelems, int *rc);
-
-
-    static void meshinfoserialize(int *intMeshFreed,
-                                  int *spatialDim, int *parametricDim,
-                                  int *intIsPresentNDG, int *intIsPresentEDG,
-                                  int *coordSys, 
+    static void meshinfoserialize(int *intMeshFreed, 
                                   char *buffer, int *length, int *offset,
                                   ESMC_InquireFlag *inquireflag, int *rc,
                                   ESMCI_FortranStrLenArg buffer_l);
 
 
     static void meshinfodeserialize(int *intMeshFreed,
-                                    int *spatialDim, int *parametricDim,
-                                    int *intIsPresentNDG, int *intIsPresentEDG,
-                                    int *coordSys, 
                                     char *buffer, int *offset, int *rc,
                                     ESMCI_FortranStrLenArg buffer_l);
 

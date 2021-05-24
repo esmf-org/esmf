@@ -71,9 +71,9 @@ void MBMesh_write(MBMesh **mbmpp, char *fname, int *rc,
                   ESMCI_FortranStrLenArg nlen);
 
 
-void MBMesh_createnodedistgrid(MBMesh **meshpp, int *ngrid, int *num_lnodes, int *rc);
+void MBMesh_createnodedistgrid(MBMesh **meshpp, DistGrid *dg, int *rc);
 
-void MBMesh_createelemdistgrid(MBMesh **meshpp, int *egrid, int *num_lelems, int *rc);
+void MBMesh_createelemdistgrid(MBMesh **meshpp, DistGrid *dg, int *rc);
 
 void MBMesh_createredistelems(MBMesh **src_meshpp, int *num_elem_gids, int *elem_gids,
                               MBMesh **output_meshpp, int *rc);

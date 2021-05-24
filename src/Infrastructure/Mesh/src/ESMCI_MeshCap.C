@@ -68,6 +68,10 @@
     pdim_mc = 0;
     num_owned_node_mc = 0;
     num_owned_elem_mc = 0;
+    
+    node_distgrid_set = false;
+    node_distgrid = nullptr;
+    elem_distgrid = nullptr;
   }
 
 void MeshCap::finalize_ptr(int is_esmf_mesh, Mesh *mesh, MBMesh *mbmesh){
@@ -1515,45 +1519,71 @@ void MeshCap::meshvtkbody(char *filename, int *nodeId, double *nodeCoord,
 
 
 
-void MeshCap::meshcreatenodedistgrid(int *ngrid, int *num_lnodes, int *rc) {
+void MeshCap::meshcreatenodedistgrid(int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreatenodedistgrid()"
 
-  // Call into func. depending on mesh type
-  if (is_esmf_mesh) {
-    ESMCI_meshcreatenodedistgrid(&mesh, ngrid, num_lnodes, rc);
-  } else {
+  int localrc;
+  DistGrid *dg;
+  
+  // this is necessary because the fortran interface creates  
+  // the distgrid at multiple points
+  if (node_distgrid_set == false) {
+    // Call into func. depending on mesh type
+    if (is_esmf_mesh) {
+      ESMCI_meshcreatenodedistgrid(&mesh, dg, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, rc)) return;
+    } else {
 #if defined ESMF_MOAB
-    MBMesh_createnodedistgrid(&mbmesh, ngrid, num_lnodes, rc);
+      MBMesh_createnodedistgrid(&mbmesh, dg, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, rc)) return;
 #else
-   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+        "This functionality requires ESMF to be built with the MOAB   library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
+    }
+    // Set member variables
+    this->node_distgrid = dg;
+
+  } else {
+      ESMC_LogDefault.Write("Node DistGrid has already been set", ESMC_LOGMSG_WARN);
   }
 }
 
 
-void MeshCap::meshcreateelemdistgrid(int *egrid, int *num_lelems, int *rc) {
+void MeshCap::meshcreateelemdistgrid(int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreateelemdistgrid()"
 
+  int localrc;
+  DistGrid *dg;
+
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_meshcreateelemdistgrid(&mesh, egrid, num_lelems, rc);
+    ESMCI_meshcreateelemdistgrid(&mesh, dg, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+
   } else {
 #if defined ESMF_MOAB
-    MBMesh_createelemdistgrid(&mbmesh, egrid, num_lelems, rc);
+    MBMesh_createelemdistgrid(&mbmesh, dg, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
   }
+  
+  // Set member variables
+  this->elem_distgrid = dg;
 }
 
+
 void MeshCap::meshinfoserialize(int *intMeshFreed,
-                                int *spatialDim, int *parametricDim,
-                                int *intIsPresentNDG, int *intIsPresentEDG,
-                                int *coordSys, 
                                 char *buffer, int *length, int *offset,
                                 ESMC_InquireFlag *inquireflag, int *rc,
                                 ESMCI_FortranStrLenArg buffer_l){
@@ -1564,18 +1594,12 @@ void MeshCap::meshinfoserialize(int *intMeshFreed,
   // Check if need, and if so
   // eventually put into something separate from both Mesh and MOAB
   ESMCI_meshinfoserialize(intMeshFreed,
-                          spatialDim, parametricDim,
-                          intIsPresentNDG, intIsPresentEDG,
-                          coordSys, 
                           buffer, length, offset,
                           inquireflag, rc, buffer_l);
 }
 
 
-void MeshCap::meshinfodeserialize(int *intMeshFreed,
-                                  int *spatialDim, int *parametricDim,
-                                  int *intIsPresentNDG, int *intIsPresentEDG,
-                                  int *coordSys, 
+void MeshCap::meshinfodeserialize(int *intMeshFreed, 
                                   char *buffer, int *offset, int *rc,
                                   ESMCI_FortranStrLenArg buffer_l){
 #undef ESMC_METHOD
@@ -1584,10 +1608,7 @@ void MeshCap::meshinfodeserialize(int *intMeshFreed,
   // Static, so can't use is_esmf_mesh
   // Check if need, and if so
   // eventually put into something separate from both Mesh and MOAB
-  ESMCI_meshinfodeserialize(intMeshFreed,
-                            spatialDim, parametricDim,
-                            intIsPresentNDG, intIsPresentEDG,
-                            coordSys, 
+  ESMCI_meshinfodeserialize(intMeshFreed, 
                             buffer, offset, rc,
                             buffer_l);
 }
@@ -1608,9 +1629,11 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
   // Calc Size
   int size;
   if (is_esmf_mesh)
-    size = 5*sizeof(int)+sizeof(ESMC_CoordSys_Flag)+sizeof(Mesh);
+    size = 5*sizeof(int)+sizeof(ESMC_CoordSys_Flag) +
+           2*sizeof(DistGrid) + sizeof(Mesh);
   else
-    size = 5*sizeof(int)+sizeof(ESMC_CoordSys_Flag)+sizeof(MBMesh);
+    size = 5*sizeof(int)+sizeof(ESMC_CoordSys_Flag) +
+           2*sizeof(DistGrid) + sizeof(MBMesh);
 
   // TODO: verify length > vars.
   if (*inquireflag != ESMF_INQUIREONLY) {
@@ -1630,6 +1653,8 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
     *ip++ = num_owned_node_mc;
     *ip++ = num_owned_elem_mc;
   }
+  
+  
 
   // Adjust offset
   *offset += sizeof(int)*5;
@@ -1643,13 +1668,14 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
   // Adjust offset
   *offset += sizeof(ESMC_CoordSys_Flag);
 
-  // printf("is_esmf_mesh = %d\n", is_esmf_mesh);
-  // printf("sdim_mc = %d\n", sdim_mc);
-  // printf("pdim_mc = %d\n", pdim_mc);
-  // printf("num_owned_node_mc = %d\n", num_owned_node_mc);
-  // printf("num_owned_elem_mc = %d\n", num_owned_elem_mc);
-  // printf("coordsys_mc = %d\n", coordsys_mc);
-
+  // save the DistGrids
+  localrc = node_distgrid->serialize(buffer, length, offset, *inquireflag);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;
+  localrc = elem_distgrid->serialize(buffer, length, offset, *inquireflag);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;
+    
   // Serialize the Base class,
   localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset, attreconflag,
     *inquireflag);
@@ -1719,6 +1745,10 @@ void MeshCap::meshdeserialize(char *buffer, int *offset,
   // printf("num_owned_node_mc = %d\n", num_owned_node_mc);
   // printf("num_owned_elem_mc = %d\n", num_owned_elem_mc);
   // printf("coordsys_mc = %d\n", coordsys_mc);
+
+  // get the DistGrids
+  node_distgrid = DistGrid::deserialize(buffer, offset);
+  elem_distgrid = DistGrid::deserialize(buffer, offset);
 
   // Deserialize the Base class
   localrc = ESMC_Base::ESMC_Deserialize(buffer, offset, attreconflag);

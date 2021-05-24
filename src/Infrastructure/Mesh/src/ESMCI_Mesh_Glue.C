@@ -58,7 +58,7 @@ using namespace ESMCI;
 // #define DEBUG_OWNED
 
 
-extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
+extern "C" void FTN_X(f_esmf_getmeshdistgrid)(DistGrid*, int*, int*, int*);
 
 
 
@@ -2840,7 +2840,7 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
 
 
-void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc) {
+void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid *ngrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreatenodedistgrid()"
 
@@ -2891,7 +2891,7 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, in
 
   // Create the distgrids
   {
-    int nsize = *num_lnodes = ngids.size();
+    int nsize = ngids.size();
     int rc1;
 
     int *indices = (nsize==0)?NULL:&ngids[0];
@@ -2909,7 +2909,7 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, in
 }
 
 
-void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, int *rc) {
+void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid *egrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreateelemdistgrid()"
 
@@ -2957,7 +2957,7 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, in
   }
 
   {
-    int esize = *num_lelems = egids.size();
+    int esize = egids.size();
     int rc1;
 
     int *indices = (esize==0)?NULL:&egids[0];
@@ -2976,10 +2976,7 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, in
 }
 
 
-void ESMCI_meshinfoserialize(int *intMeshFreed,
-                             int *spatialDim, int *parametricDim,
-                             int *intIsPresentNDG, int *intIsPresentEDG,
-                             int *coordSys, 
+void ESMCI_meshinfoserialize(int *intMeshFreed, 
                              char *buffer, int *length, int *offset,
                              ESMC_InquireFlag *inquireflag, int *localrc,
                              ESMCI_FortranStrLenArg buffer_l){
@@ -2993,7 +2990,7 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
     // TODO: verify length > vars.
-    int size = 6*sizeof(int);
+    int size = 1*sizeof(int);
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < size) {
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -3006,18 +3003,10 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
     ip= (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
       *ip++ = *intMeshFreed;
-      *ip++ = *spatialDim;
-      *ip++ = *parametricDim;
-      *ip++ = *intIsPresentNDG;
-      *ip++ = *intIsPresentEDG;
-      *ip++ = *coordSys;
     }
 
      // Adjust offset
     *offset += size;
-
-// printf("infoserialize offset = %d ispresentNDG = %d ispresent EDG = %d\n", 
-  // *offset, *intIsPresentNDG, *intIsPresentEDG);
 
     // return success
     if (localrc) *localrc = ESMF_SUCCESS;
@@ -3027,9 +3016,6 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
 
 
 void ESMCI_meshinfodeserialize(int *intMeshFreed,
-                               int *spatialDim, int *parametricDim,
-                               int *intIsPresentNDG, int *intIsPresentEDG,
-                               int *coordSys, 
                                char *buffer, int *offset, int *localrc,
                                ESMCI_FortranStrLenArg buffer_l){
 
@@ -3046,17 +3032,9 @@ void ESMCI_meshinfodeserialize(int *intMeshFreed,
 
     // Get values
     *intMeshFreed=*ip++;
-    *spatialDim=*ip++;
-    *parametricDim=*ip++;
-    *intIsPresentNDG=*ip++;
-    *intIsPresentEDG=*ip++;
-    *coordSys=*ip++;
 
     // Adjust offset
-    *offset += 6*sizeof(int);
-
-// printf("infoDEserialize offset = %d ispresentNDG = %d ispresent EDG = %d\n", 
-  // *offset, *intIsPresentNDG, *intIsPresentEDG);
+    *offset += 1*sizeof(int);
 
     // return success
     if (localrc) *localrc = ESMF_SUCCESS;

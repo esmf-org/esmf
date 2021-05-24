@@ -709,16 +709,16 @@ program ESMF_MeshUTest
   call ESMF_DistGridValidate(elemDistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
   
-  ! ! Free memory
-  ! call ESMF_MeshFreeMemory(mesh, rc=localrc)
-  ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  ! 
-  ! ! Test isMemFreed flag
-  ! call ESMF_MeshGet(mesh, isMemFreed=isMemFreed, rc=localrc)
-  ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  ! 
-  ! ! now it should indicate freed memory
-  ! if (.not. isMemFreed) correct=.false. ! Has been freed
+  ! Free memory
+  call ESMF_MeshFreeMemory(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! Test isMemFreed flag
+  call ESMF_MeshGet(mesh, isMemFreed=isMemFreed, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! now it should indicate freed memory
+  if (.not. isMemFreed) correct=.false. ! Has been freed
   
   !! Write mesh for debugging
   !! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
@@ -1765,18 +1765,16 @@ endif
 
   ! Create elem Distgrid
   elemdistgrid=ESMF_DistGridCreate(minIndex=(/1,1/), &
-                                    maxIndex=(/3,3/), &
+                                   maxIndex=(/3,3/), &
                                    regDecomp=(/2,2/),&
                                    indexflag=ESMF_INDEX_GLOBAL, &
                                    rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-
   ! Create redisted mesh
   mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
      elementDistgrid=elemdistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
 
   ! Test creating field
   nodeField = ESMF_FieldCreate(mesh2, typekind=ESMF_TYPEKIND_R8, &
@@ -2492,6 +2490,7 @@ endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+#if 0
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test get of element mask and area info"
@@ -2725,7 +2724,7 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
+#endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
