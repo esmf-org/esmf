@@ -2514,11 +2514,11 @@ void VM::logMemInfo(
   // must lock/unlock for thread-safety
   VM *vm = getCurrent();
   vm->lock();
+  char msg[800];
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
   // access /proc/self
-  FILE* file = fopen("/proc/self/status", "r");
   char line[128];
-  char msg[800];
+  FILE* file = fopen("/proc/self/status", "r");
   while (fgets(line, 128, file) != NULL){
     if (strncmp(line, "Vm", 2) == 0){
       int len = strlen(line);
@@ -2568,18 +2568,21 @@ void VM::logMemInfo(
   sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
   // access through malloc_stats()
-  FILE *stderrOrig = stderr;
-  char *buf;
+  fflush(stderr);
+  FILE *stderrOrig = stderr;  // keep for restoring later
+  char *buf = NULL;
   size_t len;
-  stderr = open_memstream(&buf, &len);
+  FILE *fp = stderr = open_memstream(&buf, &len); // redirect stderr
   malloc_stats();
   fflush(stderr);
+  stderr = stderrOrig;  // restore original stderr
+  fflush(fp);
+  fclose(fp); // must close before free(buf), b/c buf may re-alloc!
   std::string malloc_stats_output;
   if (buf){
     malloc_stats_output = string(buf, buf+len);
     free(buf);
   }
-  stderr = stderrOrig;
   size_t pos = malloc_stats_output.rfind("system bytes     =");
   pos += 18;
   long system = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
@@ -2597,8 +2600,6 @@ void VM::logMemInfo(
   sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
 #else if (defined ESMF_OS_Darwin)
-  // string storage
-  char msg[800];
   // Get memory
   task_vm_info_data_t mem_info;
   mach_msg_type_number_t size = TASK_VM_INFO_COUNT;
