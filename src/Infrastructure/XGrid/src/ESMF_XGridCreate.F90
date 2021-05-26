@@ -367,7 +367,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     type(ESMF_INDEX_FLAG)         :: indexflag
     type(ESMF_DistGrid)           :: distgridTmp
     !real(ESMF_KIND_R8), pointer   :: fracFptr(:,:)
-    integer                       :: localElemCount, sdim, pdim
+    integer                       :: localElemCount, sdim, pdim, sdim2
     type(ESMF_XGridGeomType_Flag), allocatable :: xggt_a(:), xggt_b(:)
     integer :: tileCount
     integer :: side
@@ -929,9 +929,17 @@ function ESMF_XGridCreate(keywordEnforcer, &
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call C_ESMC_MeshGetDimensions(mesh%this, sdim, pdim, ESMF_NULL_POINTER, localrc);
+        
+    call C_ESMC_MeshGetDimensions(mesh%this, sdim2, pdim, ESMF_NULL_POINTER, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if(sdim /= sdim2) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_OUTOFRANGE, &
+         msg="spatial dim mismatch", ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
+    
     allocate(xgtype%area(localElemCount), xgtype%centroid(localElemCount, sdim), stat=localrc)
     if(localrc /= 0) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
