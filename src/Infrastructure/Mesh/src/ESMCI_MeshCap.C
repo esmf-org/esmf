@@ -1039,6 +1039,14 @@ MeshCap *MeshCap::merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp,
     return NULL;
   }
 
+  if ((*srcmeshpp)->coordsys_mc != (*dstmeshpp)->coordsys_mc) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- can't do this operation with meshes on different coordinate systems",
+                                  ESMC_CONTEXT, rc);
+    return NULL;
+
+  }
+
   // Get mesh type
   bool is_esmf_mesh=(*srcmeshpp)->is_esmf_mesh;
 
