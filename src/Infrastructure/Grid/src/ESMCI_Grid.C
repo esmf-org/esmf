@@ -893,18 +893,23 @@ int Grid::addCoordArray(
                           (InterArray<int> *)ESMC_NULL_POINTER,
                           (InterArray<int> *)ESMC_NULL_POINTER,
                           (InterArray<int> *)ESMC_NULL_POINTER,
-                          &indexflag, NULL, staggerMemLBoundIntInt, 
+                          &indexflag, NULL, staggerMemLBoundIntInt,
                           (InterArray<int> *)ESMC_NULL_POINTER,
-                          (InterArray<int> *)ESMC_NULL_POINTER, 
+                          (InterArray<int> *)ESMC_NULL_POINTER,
                           &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
+
+    // name the Array
+    std::stringstream aName;
+    aName << "Array-" << std::string(getName()) << "-sloc:" << staggerloc << "-coord:" << coord;
+    array->setName(aName.str());
 
     // Set newly created Array into Grid
     localrc=this->setCoordArrayInternal(staggerloc, coord, array, true);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
-    
+
   } // end of coord loop
 
 
@@ -1040,6 +1045,11 @@ int Grid::addCoordArrayArb(
             &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
+
+    // name the Array
+    std::stringstream aName;
+    aName << "Array-" << std::string(getName()) << "-sloc:" << staggerloc << "-coord:" << coord;
+    array->setName(aName.str());
 
     // Set newly created Array into Grid
     localrc=this->setCoordArrayInternal(staggerloc, coord, array, true);
@@ -1328,6 +1338,11 @@ int Grid::addItemArray(
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
 
 
+    // name the Array
+    std::stringstream aName;
+    aName << "Array-" << std::string(getName()) << "-sloc:" << staggerloc << "-coord";
+    array->setName(aName.str());
+
    // Set newly created Array into Grid
    localrc=this->setItemArrayInternal(staggerloc, item, array, true);
    if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -1489,6 +1504,11 @@ int Grid::addItemArrayArb(
 
    if (ESMC_LogDefault.MsgFoundError(localrc,
        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
+
+    // name the Array
+    std::stringstream aName;
+    aName << "Array-" << std::string(getName()) << "-sloc:" << staggerloc << "-coord";
+    array->setName(aName.str());
 
    // Set newly created Array into Grid
    localrc=this->setItemArrayInternal(staggerloc, item, array, true);
@@ -5383,7 +5403,12 @@ int Grid::getStaggerDistgrid(
                                                          &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                           &rc)) return rc;
-        
+
+        // name the DistGrid
+        std::stringstream dgName;
+        dgName << "DG-" << std::string(getName()) << "-sloc:" << staggerloc;
+        staggerDistgridList[staggerloc]->setName(dgName.str());
+
         // Get rid of Interface ints
         delete staggerEdgeLWidthIntInt;
         delete [] staggerEdgeLWidthIntIntArray;
@@ -5463,6 +5488,12 @@ int Grid::getStaggerDistgrid(
                                                            &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
+
+          // name the DistGrid
+          std::stringstream dgName;
+          dgName << "DG-" << std::string(getName()) << "-sloc:" << staggerloc;
+          staggerDistgridList[staggerloc]->setName(dgName.str());
+
           // Get rid of connections
           delete emptyConnListII;
 
@@ -5477,6 +5508,11 @@ int Grid::getStaggerDistgrid(
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
  
+          // name the DistGrid
+          std::stringstream dgName;
+          dgName << "DG-" << std::string(getName()) << "-sloc:" << staggerloc;
+          staggerDistgridList[staggerloc]->setName(dgName.str());
+
         }
 
         // Get rid of Interface ints
@@ -10420,7 +10456,13 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
                                       (ESMC_IndexFlag *)NULL, (InterArray<int> *)NULL, false,
                                       NULL, NULL, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-       rc)) return; 
+       rc)) return;
+
+    // name the DistGrid
+    std::stringstream dgName;
+    dgName << "DG-" << std::string(distgrid->getName()) << "-nopole";
+    (*distgrid_nopole)->setName(dgName.str());
+
     return;
   }
 
@@ -10440,6 +10482,11 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
                                    NULL, NULL, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       rc)) return; 
+
+    // name the DistGrid
+    std::stringstream dgName;
+    dgName << "DG-" << std::string(distgrid->getName()) << "-nopole";
+    (*distgrid_nopole)->setName(dgName.str());
 
     return;
   }
@@ -10505,6 +10552,11 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
                                    NULL, NULL, true, &localrc);
  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
      rc)) return; 
+
+  // name the DistGrid
+  std::stringstream dgName;
+  dgName << "DG-" << std::string(distgrid->getName()) << "-nopole";
+  (*distgrid_nopole)->setName(dgName.str());
 
 #if 0
  int tstconnCount=(*distgrid_nopole)->getConnectionCount();

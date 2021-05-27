@@ -25847,7 +25847,7 @@ write(*,*) "LOCALRC=",localrc
   enddo    ! lDE
 
   ! Get start time
- !  call ESMF_VMWtime(beg_time)
+  ! call ESMF_VMWtime(beg_time)
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -25855,7 +25855,6 @@ write(*,*) "LOCALRC=",localrc
           srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           lineType=ESMF_LINETYPE_GREAT_CIRCLE, &
           rc=localrc)
@@ -25872,7 +25871,7 @@ write(*,*) "LOCALRC=",localrc
   ! output info
 !  write(*,*) "Src dims=",src_nx,src_ny
 !  write(*,*) "Dst dims=",dst_nx,dst_ny
-!  write(*,*) "Store time = ",end_time-beg_time
+!   write(*,*) "Store time = ",end_time-beg_time
 
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)

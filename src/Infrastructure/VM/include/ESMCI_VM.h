@@ -144,7 +144,6 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void addFObject(void **fobject, int objectID, VMId *vmID);
     static void rmFObject(void **fobject);
     static bool validObject(ESMC_Base *);
-    static void printMatchTable(void);
     static char const *getenv(char const *name);
     // misc.
     int print() const;

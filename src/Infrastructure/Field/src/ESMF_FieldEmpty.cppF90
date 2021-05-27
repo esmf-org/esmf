@@ -247,6 +247,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomType_Flag)       :: geomtype
     type(ESMF_Grid)           :: grid
     type(ESMF_FieldStatus_Flag)    :: status
+    character(len=ESMF_MAXSTR)     :: fieldName
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -257,7 +258,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
-    call ESMF_FieldGet(field, status=status, rc=localrc)
+    call ESMF_FieldGet(field, status=status, name=fieldName, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -337,7 +338,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                             gridToFieldMap=gridToFieldMap, &
                             ungriddedLBound=ungriddedLBound, &
                             ungriddedUBound=ungriddedUBound, &
-                            hasBase=.true., &
+                            hasBase=.true., name=fieldName, &
                             pinflag=pinflag, rc=localrc)
 
      if (ESMF_LogFoundError(localrc, &
@@ -681,7 +682,7 @@ end subroutine ESMF_FieldEmptyCompTK
     type(ESMF_GeomType_Flag) :: geomtype
     type(ESMF_Grid) :: grid
     integer :: arbdim
-
+    character(len=ESMF_MAXSTR)     :: fieldName
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -697,6 +698,11 @@ end subroutine ESMF_FieldEmptyCompTK
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
+
+    call ESMF_FieldGet(field, name=fieldName, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Check if geombase is a grid, if so, check if it is arbitrary
     decompType = ESMF_GRID_NONARBITRARY
@@ -908,7 +914,7 @@ end subroutine ESMF_FieldEmptyCompTK
                                 localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                                 ungriddedUBound, localMaxHaloLWidth(1:gridDimCount_norep), &
                                 localMaxHaloUWidth(1:gridDimCount_norep), &
-                                hasBase=.true., &
+                                hasBase=.true., name=fieldName, &
                                 pinflag=pinflag, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
@@ -917,7 +923,7 @@ end subroutine ESMF_FieldEmptyCompTK
        call ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
                               localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                               ungriddedUBound, &
-                              hasBase=.true., &
+                              hasBase=.true., name=fieldName, &
                               pinflag=pinflag, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
@@ -3341,6 +3347,7 @@ subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, &
   type(ESMF_GeomType_Flag)       :: geomtype @\
   type(ESMF_Grid)                :: grid @\
   integer                        :: distgridDimCount, distgridDimCount_norep, arbdim @\
+  character(len=ESMF_MAXSTR)     :: fieldName @\
 @\
   if (present(rc)) then @\
     rc = ESMF_RC_NOT_IMPL @\
@@ -3350,6 +3357,12 @@ subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, &
   ! make sure field, grid, farray are properly initialized @\
   ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
   ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc) @\
+@\
+  ! get the fieldName @\
+  call ESMF_FieldGet(field, name=fieldName, rc=localrc) @\
+  if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
   ! Get number of grid dimensions, number @\
   ! of distributed grid dimensions, distgrid, @\
@@ -3680,7 +3693,7 @@ endif @\
               undistUBound=undistUBound(1:fieldUndistDimCount), & @\
               totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
               totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
-              rc=localrc) @\
+              name=fieldName, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
              ESMF_ERR_PASSTHRU, & @\
              ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -3690,7 +3703,7 @@ endif @\
               distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
               undistLBound=undistLBound(1:fieldUndistDimCount), & @\
               undistUBound=undistUBound(1:fieldUndistDimCount), & @\
-              rc=localrc) @\
+              name=fieldName, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
              ESMF_ERR_PASSTHRU, & @\
              ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -3868,6 +3881,7 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
   type(ESMF_GeomType_Flag)       :: geomtype @\
   type(ESMF_Grid)                :: grid @\
   integer                        :: distgridDimCount, distgridDimCount_norep, arbdim @\
+  character(len=ESMF_MAXSTR)     :: fieldName @\
 @\
   if (present(rc)) then @\
     rc = ESMF_RC_NOT_IMPL @\
@@ -3877,6 +3891,12 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
   ! make sure field, grid, farrayPtr are properly initialized @\
   ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit,field,rc) @\
   ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit,geombase,rc) @\
+@\
+  ! get the fieldName @\
+  call ESMF_FieldGet(field, name=fieldName, rc=localrc) @\
+  if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
   ! Get number of grid dimensions, number @\
   ! of distributed grid dimensions, distgrid, @\
@@ -4132,14 +4152,14 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
               distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
               totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
               totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
-              rc=localrc) @\
+              name=fieldName, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
              ESMF_ERR_PASSTHRU, & @\
              ESMF_CONTEXT, rcToReturn=rc)) return @\
   else @\
       array = ESMF_ArrayCreate(distgrid, farrayPtr, datacopyflag=datacopyflag, & @\
               distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
-              rc=localrc) @\
+              name=fieldName, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
              ESMF_ERR_PASSTHRU, & @\
              ESMF_CONTEXT, rcToReturn=rc)) return @\

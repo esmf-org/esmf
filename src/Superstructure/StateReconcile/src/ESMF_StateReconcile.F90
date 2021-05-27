@@ -1461,8 +1461,8 @@ contains
     ! Update local Base
     do, i=0, npets-1
       if (i /= mypet) then
-        base_temp = ESMF_BaseDeserialize (buffer_recv, offset=recv_offsets(i),  &
-            attreconflag=ESMF_ATTRECONCILE_ON, rc=localrc)
+        base_temp = ESMF_BaseDeserializeWoGarbage(buffer_recv, &
+          offset=recv_offsets(i), attreconflag=ESMF_ATTRECONCILE_ON, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1488,7 +1488,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_BaseDestroy(base_temp, noGarbage=.True., rc=localrc)
+        call ESMF_BaseDestroyWoGarbage(base_temp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3238,6 +3238,7 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
       if (ESMF_LogFoundDeallocError(memstat, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+      stypep%zapList => null()
     end if
 
     if (associated (zapFlag)) then

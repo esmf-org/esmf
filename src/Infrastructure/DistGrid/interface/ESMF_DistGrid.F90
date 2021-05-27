@@ -4051,15 +4051,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridSetDefault()"
 !BOPI
-! !IROUTINE: ESMF_DistGridSet - Set DistGrid sequence index collocation labels
+! !IROUTINE: ESMF_DistGridSet - Set DistGrid internals
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridSet()
-  subroutine ESMF_DistGridSetDefault(distgrid, collocationPDim, rc)
+  subroutine ESMF_DistGridSetDefault(distgrid, collocationPDim, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),  intent(inout)           :: distgrid
-    integer,              intent(in)              :: collocationPDim(:)
+    integer,              intent(in),   optional  :: collocationPDim(:)
+    character(len = *),   intent(in),   optional  :: name
     integer,              intent(out),  optional  :: rc  
 !
 ! !DESCRIPTION:
@@ -4070,13 +4071,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[distgrid] 
 !          Specified {\tt ESMF\_DistGrid} object.
-!     \item[collocationPDim] 
+!     \item[{[collocationPDim]}] 
 !          List of size {\tt dimCount} specifying which dimensions are
 !          covered by which sequence index. Each entry is associated with the
 !          corresponding dimension. Dimensions with identical entries in the
 !          {\tt collocationPDim} argument are collocated within the same
 !          sequence index space. Dimensions with different entries are located
 !          in orthogonal sequence index spaces.
+!     \item [{[name]}]
+!          The DistGrid name.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4089,24 +4092,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
-    
-    collocationPDimAux = &
-      ESMF_InterArrayCreate(collocationPDim, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DistGridSet(distgrid, collocationPDimAux, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Set the name in Base object
+    if (present(name)) then
+      call c_ESMC_SetName(distgrid, "DistGrid", name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-    ! garbage collection
-    call ESMF_InterArrayDestroy(collocationPDimAux, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Set collocationPDim
+    if (present(collocationPDim)) then
+      collocationPDimAux = ESMF_InterArrayCreate(collocationPDim, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_DistGridSet(distgrid, collocationPDimAux, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! garbage collection
+      call ESMF_InterArrayDestroy(collocationPDimAux, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

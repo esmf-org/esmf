@@ -4559,6 +4559,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
       integer  :: localrc
       type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
+      logical  :: isCreated
 
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
@@ -4566,33 +4567,61 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       opt_noGarbage = ESMF_FALSE
       if (present(noGarbage)) opt_noGarbage = noGarbage
 
+#if 0
+  block 
+    character(80):: msg
+    write(msg,*) "Entering ESMF_MeshDestroy with isCMeshFreed=", mesh%isCMeshFreed
+    call ESMF_PointerLog(mesh%this, prefix=msg, logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+  end block
+#endif
+
       ! If not already freed then free the c side
       if (.not. mesh%isCMeshFreed) then
+        ! This will also set the Base Status to INVALID
         call C_ESMC_MeshDestroy(mesh%this, opt_noGarbage, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Set this for consistancies sake
          mesh%isCMeshFreed=.true.
+      else
+        ! Even when there is no CMesh part, there is a Base, and it needs to
+        ! be set to INVALID for correct garbage collection behavior
+        call c_ESMC_BaseSetStatus(mesh, ESMF_STATUS_INVALID, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
 
-      ! TODO: destroy distgrids here
+      ! Destroy distgrids here
       if (mesh%status .eq. ESMF_MESHSTATUS_COMPLETE) then
-         ! destroy node distgrid
-         call ESMF_DistgridDestroy(mesh%nodal_distgrid, rc=localrc)
-         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
 
-         ! destroy element distgrid
-         call ESMF_DistgridDestroy(mesh%element_distgrid, rc=localrc)
-         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
+        ! destroy node distgrid
+        isCreated = ESMF_DistGridIsCreated(mesh%nodal_distgrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        if (isCreated) then
+          call ESMF_DistgridDestroy(mesh%nodal_distgrid, noGarbage=noGarbage, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
 
-         ! Get rid of split element map
-         if (mesh%hasSplitElem) then
-            deallocate(mesh%splitElemMap)
-         endif
+        ! destroy element distgrid
+        isCreated = ESMF_DistGridIsCreated(mesh%element_distgrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        if (isCreated) then
+          call ESMF_DistgridDestroy(mesh%element_distgrid, noGarbage=noGarbage, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        ! Get rid of split element map
+        if (mesh%hasSplitElem) then
+          deallocate(mesh%splitElemMap)
+        endif
       endif
 
       ! Set status
@@ -8450,8 +8479,13 @@ offset = 0
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_ArrayDestroy(nodeCoordArray)
-    call ESMF_DistGridDestroy(nodeDistGrid)
+    call ESMF_ArrayDestroy(nodeCoordArray, noGarbage=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_DistGridDestroy(nodeDistGrid, noGarbage=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Need to calculate the total number of ESMF_MESH objects and the start element ID
     ! Do a global gather to get all the local TotalElements
