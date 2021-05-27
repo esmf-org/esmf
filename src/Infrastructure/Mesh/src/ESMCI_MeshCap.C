@@ -1652,9 +1652,9 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
   // Calc Size
   int size;
   if (is_esmf_mesh)
-    size = 5*sizeof(int)+sizeof(ESMC_CoordSys_Flag)+sizeof(Mesh);
+    size = 5*sizeof(int)+sizeof(ESMC_CoordSys_Flag);
   else
-    size = 5*sizeof(int)+sizeof(ESMC_CoordSys_Flag)+sizeof(MBMesh);
+    size = 5*sizeof(int)+sizeof(ESMC_CoordSys_Flag);
 
   // TODO: verify length > vars.
   if (*inquireflag != ESMF_INQUIREONLY) {
