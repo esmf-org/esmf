@@ -949,10 +949,10 @@ function ESMF_XGridCreate(keywordEnforcer, &
     endif
 
     if(localElemCount .gt. 0) then
-      call C_ESMC_MeshGetArea(mesh%this, localElemCount, xgtype%area, localrc);
+      call C_ESMC_MeshGetArea(mesh%this, localElemCount, xgtype%area, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      call C_ESMC_MeshGetCentroid(mesh%this, localElemCount, xgtype%centroid, localrc);
+      call C_ESMC_MeshGetCentroid(mesh%this, localElemCount, xgtype%centroid, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
