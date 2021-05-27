@@ -400,9 +400,15 @@ MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
 
   // Set member variables
   ESMC_CoordSys_Flag cs = grid.getCoordSys();
+  
+  int sdim_twk = 0;
+  if ((cs == ESMC_COORDSYS_SPH_DEG) || (cs == ESMC_COORDSYS_SPH_RAD)) {
+    if (sdim == 3) sdim_twk = 2;
+    else sdim_twk = sdim;
+  }
 
   mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
-  mc->finalize_dims(sdim, pdim, cs);
+  mc->finalize_dims(sdim_twk, pdim, cs);
   mc->finalize_counts(&localrc);
 
   // Output new MeshCap

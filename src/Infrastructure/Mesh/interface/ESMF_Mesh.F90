@@ -5269,7 +5269,7 @@ end function ESMF_MeshEmptyCreate
        ! Check array size
        if (size(ownedElemCoords)<numElem*sdim) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-                msg="- owndedElemCoords too small to hold coordinates", &
+                msg="- ownedElemCoords too small to hold coordinates", &
                 ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
