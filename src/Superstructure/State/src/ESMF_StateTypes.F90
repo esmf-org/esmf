@@ -46,6 +46,7 @@
       use ESMF_InitMacrosMod
       use ESMF_StateItemMod
       use ESMF_StateContainerMod
+      use ESMF_AbstractStateItemMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -75,6 +76,7 @@
         ESMF_STATEITEM_FIELD, ESMF_STATEITEM_FIELDBUNDLE, &
         ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_ARRAYBUNDLE, &
         ESMF_STATEITEM_ROUTEHANDLE, ESMF_STATEITEM_STATE, &
+        ESMF_STATEITEM_ABSTRACTITEM, &
 #if 0
         ESMF_STATEITEM_NAME, &
 #endif

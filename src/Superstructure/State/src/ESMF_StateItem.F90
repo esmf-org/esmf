@@ -38,6 +38,7 @@
       use ESMF_InitMacrosMod
       use ESMF_IOUtilMod
       use ESMF_ContainerMod
+      use ESMF_AbstractStateItemMod, only: ESMF_AbstractStateItem, ESMF_AbstractStateItemGet
       implicit none
 
 !------------------------------------------------------------------------------
@@ -65,12 +66,13 @@
                 ESMF_STATEITEM_ARRAYBUNDLE  = ESMF_StateItem_Flag(104), &
                 ESMF_STATEITEM_ROUTEHANDLE  = ESMF_StateItem_Flag(105), &
                 ESMF_STATEITEM_STATE        = ESMF_StateItem_Flag(106), &
+                ESMF_STATEITEM_ABSTRACTITEM = ESMF_StateItem_Flag(107), &
 #if 0
-                ESMF_STATEITEM_NAME         = ESMF_StateItem_Flag(107), &
-                ESMF_STATEITEM_INDIRECT     = ESMF_StateItem_Flag(108), &
+                ESMF_STATEITEM_NAME         = ESMF_StateItem_Flag(108), &
+                ESMF_STATEITEM_INDIRECT     = ESMF_StateItem_Flag(109), &
 #endif
-                ESMF_STATEITEM_UNKNOWN      = ESMF_StateItem_Flag(109), &
-                ESMF_STATEITEM_NOTFOUND     = ESMF_StateItem_Flag(110)
+                ESMF_STATEITEM_UNKNOWN      = ESMF_StateItem_Flag(110), &
+                ESMF_STATEITEM_NOTFOUND     = ESMF_StateItem_Flag(111)
 
 #if 0
 !------------------------------------------------------------------------------
@@ -162,6 +164,7 @@
           type(ESMF_Array)        :: ap
           type(ESMF_ArrayBundle)  :: abp
           type(ESMF_RouteHandle)  :: rp
+          type(ESMF_AbstractStateItem) :: asip
           type(ESMF_StateClass), pointer  :: spp
           ESMF_INIT_DECLARE
       end type
@@ -179,7 +182,7 @@
 #endif
 #endif
       !private
-        type(ESMF_DataHolder) :: datap
+      type(ESMF_DataHolder) :: datap
         type(ESMF_StateItem_Flag) :: otype
 #if 0
         type(ESMF_NeededFlag) :: needed 
@@ -270,6 +273,7 @@
         ESMF_STATEITEM_FIELD, ESMF_STATEITEM_FIELDBUNDLE, &
         ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_ARRAYBUNDLE, &
         ESMF_STATEITEM_ROUTEHANDLE, ESMF_STATEITEM_STATE, &
+        ESMF_STATEITEM_ABSTRACTITEM, &
 #if 0
         ESMF_STATEITEM_NAME, &
 #endif
@@ -439,6 +443,12 @@ contains
         return
     case (ESMF_STATEITEM_ROUTEHANDLE%ot)
       call ESMF_RouteHandleGet(stateItem%datap%rp, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        return
+    case (ESMF_STATEITEM_ABSTRACTITEM%ot)
+      call ESMF_AbstractStateItemGet(stateItem%datap%asip, name=name, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
