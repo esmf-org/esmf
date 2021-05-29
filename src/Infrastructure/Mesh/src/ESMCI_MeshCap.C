@@ -201,16 +201,15 @@ MeshCap *MeshCap::create_from_ptr(void **_mesh,
     // ESMC_LogDefault.Write("create_from_ptr: creating with NATIVE", ESMC_LOGMSG_DEBUG);
     mc->mesh=(Mesh *)(*_mesh);
     
-    sdim = (static_cast<Mesh*>(*_mesh))->spatial_dim();
+    sdim = (static_cast<Mesh*>(*_mesh))->orig_spatial_dim;
     pdim = (static_cast<Mesh*>(*_mesh))->parametric_dim();
-    // Workaround for now, no way to get coordsys from native mesh
-    // this will fail for ESMC_COORDSYS_SPH_RAD
+    cs = (static_cast<Mesh*>(*_mesh))->coordsys;
     if (sdim == pdim) cs = ESMC_COORDSYS_CART;
   } else {
 #if defined ESMF_MOAB
     // ESMC_LogDefault.Write("create_from_ptr: creating with MOAB", ESMC_LOGMSG_DEBUG);
    mc->mbmesh=static_cast<MBMesh*>(*_mesh);
-   sdim = (static_cast<MBMesh*>(*_mesh))->sdim;
+   sdim = (static_cast<MBMesh*>(*_mesh))->orig_sdim;
    pdim = (static_cast<MBMesh*>(*_mesh))->pdim;
    cs = (static_cast<MBMesh*>(*_mesh))->coordsys;
 #else
@@ -376,7 +375,7 @@ MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                        ESMC_CONTEXT, rc)) return NULL;
     
-    sdim = mesh->spatial_dim();
+    sdim = mesh->orig_spatial_dim;
     pdim = mesh->parametric_dim();
   } else {
 #if defined ESMF_MOAB
@@ -387,7 +386,7 @@ MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
                           &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
-    sdim = mbmesh->sdim;
+    sdim = mbmesh->orig_sdim;
     pdim = mbmesh->pdim;
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
@@ -401,14 +400,14 @@ MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
   // Set member variables
   ESMC_CoordSys_Flag cs = grid.getCoordSys();
   
-  int sdim_twk = 0;
-  if ((cs == ESMC_COORDSYS_SPH_DEG) || (cs == ESMC_COORDSYS_SPH_RAD)) {
-    if (sdim == 3) sdim_twk = 2;
-    else sdim_twk = sdim;
-  }
+  // int sdim_twk = 0;
+  // if ((cs == ESMC_COORDSYS_SPH_DEG) || (cs == ESMC_COORDSYS_SPH_RAD)) {
+  //   if (sdim == 3) sdim_twk = 2;
+  //   else sdim_twk = sdim;
+  // }
 
   mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
-  mc->finalize_dims(sdim_twk, pdim, cs);
+  mc->finalize_dims(sdim, pdim, cs);
   mc->finalize_counts(&localrc);
 
   // Output new MeshCap
@@ -1169,6 +1168,7 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
   
   int sdim = 0;
   int pdim = 0;
+  ESMC_CoordSys_Flag cs = ESMC_COORDSYS_SPH_DEG;
   if (_is_esmf_mesh) {
     // ESMC_LogDefault.Write("GridToMesh:creating with NATIVE", ESMC_LOGMSG_DEBUG);
     ESMCI_GridToMesh(grid_, staggerLoc,
@@ -1177,8 +1177,9 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
                      regridConserve, &mesh, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
-    sdim = mesh->spatial_dim();
+    sdim = mesh->orig_spatial_dim;
     pdim = mesh->parametric_dim();
+    cs = mesh->coordsys;
   } else {
     // ESMC_LogDefault.Write("GridToMesh:creating with MOAB", ESMC_LOGMSG_DEBUG);
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
@@ -1186,7 +1187,7 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
                                   ESMC_CONTEXT, rc);
     return NULL;
     // this will be required if the method is implemented
-    // sdim = mbmesh->sdim;
+    // sdim = mbmesh->orig_sdim;
     // pdim = mbmesh->pdim;
   }
 
@@ -1194,9 +1195,6 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
   MeshCap *mc=new MeshCap();
 
   // // Set member variables
-  Grid &grid = const_cast<Grid&> (grid_);
-  ESMC_CoordSys_Flag cs = grid.getCoordSys();
-  
   mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
   mc->finalize_dims(sdim, pdim, cs);
   mc->finalize_counts(&localrc);
@@ -1229,6 +1227,7 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
 
   int sdim = 0;
   int pdim = 0;
+  ESMC_CoordSys_Flag cs = ESMC_COORDSYS_SPH_DEG;
   if (_is_esmf_mesh) {
     // ESMC_LogDefault.Write("GridToMeshCell:creating with NATIVE", ESMC_LOGMSG_DEBUG);
     ESMCI_GridToMeshCell(grid_,
@@ -1236,8 +1235,9 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
                          &mesh, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
-    sdim = mesh->spatial_dim();
+    sdim = mesh->orig_spatial_dim;
     pdim = mesh->parametric_dim();
+    cs = mesh->coordsys;
   } else {
 #if defined ESMF_MOAB
     // ESMC_LogDefault.Write("GridToMeshCell:creating with MOAB", ESMC_LOGMSG_DEBUG);
@@ -1247,8 +1247,9 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
                           &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
-    sdim = mbmesh->sdim;
+    sdim = mbmesh->orig_sdim;
     pdim = mbmesh->pdim;
+    cs = mbmesh->coordsys;
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return NULL;
@@ -1259,9 +1260,6 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  Grid &grid = const_cast<Grid&> (grid_);
-  ESMC_CoordSys_Flag cs = grid.getCoordSys();
-  
   mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
   mc->finalize_dims(sdim, pdim, cs);
   mc->finalize_counts(&localrc);

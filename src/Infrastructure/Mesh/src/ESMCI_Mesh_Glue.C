@@ -117,6 +117,8 @@ void ESMCI_meshcreate(Mesh **meshpp,
 
     // Save original dimension
     (*meshpp)->orig_spatial_dim=*sdim;
+    (*meshpp)->coordsys=*coordSys;
+    
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -3131,7 +3133,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
 
 
     // Calc Size
-    int size = 6*sizeof(int)+
+    int size = 7*sizeof(int)+
                ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
                2*numSets*sizeof(UInt);
 
@@ -3161,6 +3163,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
       *ip++ = mesh.spatial_dim();
       *ip++ = mesh.parametric_dim();
       *ip++ = mesh.orig_spatial_dim;
+      *ip++ = static_cast<int> (mesh.coordsys);      
       *ip++ = numSets;
 
       for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
@@ -3274,6 +3277,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     int spatial_dim=*ip++;
     int parametric_dim=*ip++;
     int orig_spatial_dim=*ip++;
+    ESMC_CoordSys_Flag coordsys=static_cast<ESMC_CoordSys_Flag> (*ip++);
 
 
     // Get Some Mesh info
@@ -3339,7 +3343,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
       }
 
     // Adjust offset
-      *offset += 6*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
+      *offset += 7*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
       nvalSetSizes.size()*sizeof(UInt)+nvalSetVals.size()*sizeof(UInt)+
       nvalSetObjSizes.size()*sizeof(UInt)+nvalSetObjVals.size()*sizeof(UInt);
 
@@ -3351,6 +3355,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     meshp->set_spatial_dimension(spatial_dim);
     meshp->set_parametric_dimension(parametric_dim);
     meshp->orig_spatial_dim=orig_spatial_dim;
+    meshp->coordsys=coordsys;
 
     // Stuff for split meshes
     if (is_split==1) meshp->is_split=true;
@@ -4347,6 +4352,7 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
     // Get dimensions
     int sdim=mesh.spatial_dim();
     int pdim=mesh.parametric_dim();
+    printf("MeshGlue::getcentroid sdim = %d, pdim = %d, orig_sdim = %d\n", sdim, pdim, mesh.orig_spatial_dim);
 
 
     // Declare id vector
