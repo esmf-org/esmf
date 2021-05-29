@@ -2986,13 +2986,13 @@ end function ESMF_MeshCreateFromScrip
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromPointer)
 
-    call C_ESMC_MeshGetElemCount(ESMF_MeshCreateFromPointer%this, &
-                                 numElem, localrc)
+    call C_ESMC_MeshGetOwnedElemCount(ESMF_MeshCreateFromPointer%this, &
+                                      numElem, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
-    call C_ESMC_MeshGetNodeCount(ESMF_MeshCreateFromPointer%this, &
-                                 numNode, localrc)
+    call C_ESMC_MeshGetOwnedNodeCount(ESMF_MeshCreateFromPointer%this, &
+                                      numNode, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3075,15 +3075,15 @@ end function ESMF_MeshCreateFromScrip
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromIntPtr)
 
-    ! call C_ESMC_MeshGetElemCount(ESMF_MeshCreateFromIntPtr%this, &
-    !                              numElem, localrc)
-    ! if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    !     ESMF_CONTEXT, rcToReturn=rc)) return
-    ! 
-    ! call C_ESMC_MeshGetNodeCount(ESMF_MeshCreateFromIntPtr%this, &
-    !                              numNode, localrc)
-    ! if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    !     ESMF_CONTEXT, rcToReturn=rc)) return
+    call C_ESMC_MeshGetOwnedElemCount(ESMF_MeshCreateFromIntPtr%this, &
+                                      numElem, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    call C_ESMC_MeshGetOwnedNodeCount(ESMF_MeshCreateFromIntPtr%this, &
+                                      numNode, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create two distgrids, one for nodes and one for elements
     call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromIntPtr%this, &
