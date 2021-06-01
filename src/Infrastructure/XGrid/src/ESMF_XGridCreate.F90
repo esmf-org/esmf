@@ -221,6 +221,199 @@ contains
 !------------------------------------------------------------------------------
 
 
+! Make sure coordsys is consistent between input Grids and Meshes
+#undef  ESMF_METHOD
+#define ESMF_METHOD "error_check_coordsys"
+subroutine error_check_coordsys(sideAGrid, sideAMesh, sideBGrid, sideBMesh, rc)
+  type(ESMF_Grid),      intent(in), optional :: sideAGrid(:)
+  type(ESMF_Mesh),      intent(in), optional :: sideAMesh(:)
+  type(ESMF_Grid),      intent(in), optional :: sideBGrid(:)
+  type(ESMF_Mesh),      intent(in), optional :: sideBMesh(:)
+  integer,              intent(out),optional :: rc
+
+  type(ESMF_CoordSys_Flag) :: coordSys
+  integer :: localrc,i
+  logical :: isSphere, isCart
+
+  ! Init both to false
+  isSphere=.false.
+  isCart=.false.
+  
+  ! SideAGrid coordSys
+  if(present(sideAGrid)) then
+     do i = 1, size(sideAGrid, 1)
+        call ESMF_GridGet(sideAGrid(i), coordSys=coordSys, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ! Check coordSys
+        if (coordSys==ESMF_COORDSYS_SPH_DEG) isSphere=.true.
+        if (coordSys==ESMF_COORDSYS_SPH_RAD) isSphere=.true.
+        if (coordSys==ESMF_COORDSYS_CART) isCart=.true.
+     enddo
+  endif
+
+  ! SideAMesh coordSys
+  if(present(sideAMesh)) then
+     do i = 1, size(sideAMesh, 1)
+        call ESMF_MeshGet(sideAMesh(i), coordSys=coordSys, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ! Check coordSys
+        if (coordSys==ESMF_COORDSYS_SPH_DEG) isSphere=.true.
+        if (coordSys==ESMF_COORDSYS_SPH_RAD) isSphere=.true.
+        if (coordSys==ESMF_COORDSYS_CART) isCart=.true.
+     enddo
+  endif
+
+  ! SideAGrid coordSys
+  if(present(sideBGrid)) then
+     do i = 1, size(sideBGrid, 1)
+        call ESMF_GridGet(sideBGrid(i), coordSys=coordSys, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ! Check coordSys
+        if (coordSys==ESMF_COORDSYS_SPH_DEG) isSphere=.true.
+        if (coordSys==ESMF_COORDSYS_SPH_RAD) isSphere=.true.
+        if (coordSys==ESMF_COORDSYS_CART) isCart=.true.
+     enddo
+  endif
+
+  ! SideAMesh coordSys
+  if(present(sideBMesh)) then
+     do i = 1, size(sideBMesh, 1)
+        call ESMF_MeshGet(sideBMesh(i), coordSys=coordSys, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ! Check coordSys
+        if (coordSys==ESMF_COORDSYS_SPH_DEG) isSphere=.true.
+        if (coordSys==ESMF_COORDSYS_SPH_RAD) isSphere=.true.
+        if (coordSys==ESMF_COORDSYS_CART) isCart=.true.
+     enddo
+  endif
+
+  ! Shouldn't have both 
+  if (isSphere .and. isCart) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg=" A mix of Cartesian and spherical Grids and Meshes can not be used in XGrid creation.", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+  endif
+
+  ! Return success
+  if (present(rc)) rc=ESMF_SUCCESS
+
+end subroutine error_check_coordsys
+
+! Choose a default coordSys
+#undef  ESMF_METHOD
+#define ESMF_METHOD "choose_default_coordsys"
+subroutine choose_default_coordsys(sideAGrid, sideAMesh, sideBGrid, sideBMesh, defaultCoordSys, rc)
+  type(ESMF_Grid),      intent(in), optional :: sideAGrid(:)
+  type(ESMF_Mesh),      intent(in), optional :: sideAMesh(:)
+  type(ESMF_Grid),      intent(in), optional :: sideBGrid(:)
+  type(ESMF_Mesh),      intent(in), optional :: sideBMesh(:)
+  type(ESMF_CoordSys_Flag), intent(out)  :: defaultCoordSys
+  integer,              intent(out),optional :: rc
+
+  type(ESMF_CoordSys_Flag) :: coordSys
+  integer :: localrc,i
+  integer :: numSphDeg
+  integer :: numSphRad
+  integer :: numCart
+
+  ! Init all to 0
+  numSphDeg=0
+  numSphRad=0
+  numCart=0
+  
+  ! SideAGrid coordSys
+  if(present(sideAGrid)) then
+     do i = 1, size(sideAGrid, 1)
+        call ESMF_GridGet(sideAGrid(i), coordSys=coordSys, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ! Check coordSys
+        if (coordSys==ESMF_COORDSYS_SPH_DEG) numSphDeg=numSphDeg+1
+        if (coordSys==ESMF_COORDSYS_SPH_RAD) numSphRad=numSphRad+1
+        if (coordSys==ESMF_COORDSYS_CART) numCart=numCart+1
+     enddo
+  endif
+
+  ! SideAMesh coordSys
+  if(present(sideAMesh)) then
+     do i = 1, size(sideAMesh, 1)
+        call ESMF_MeshGet(sideAMesh(i), coordSys=coordSys, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ! Check coordSys
+        if (coordSys==ESMF_COORDSYS_SPH_DEG) numSphDeg=numSphDeg+1
+        if (coordSys==ESMF_COORDSYS_SPH_RAD) numSphRad=numSphRad+1
+        if (coordSys==ESMF_COORDSYS_CART) numCart=numCart+1
+
+     enddo
+  endif
+
+  ! SideAGrid coordSys
+  if(present(sideBGrid)) then
+     do i = 1, size(sideBGrid, 1)
+        call ESMF_GridGet(sideBGrid(i), coordSys=coordSys, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Check coordSys
+        if (coordSys==ESMF_COORDSYS_SPH_DEG) numSphDeg=numSphDeg+1
+        if (coordSys==ESMF_COORDSYS_SPH_RAD) numSphRad=numSphRad+1
+        if (coordSys==ESMF_COORDSYS_CART) numCart=numCart+1
+        
+     enddo
+  endif
+
+  ! SideAMesh coordSys
+  if(present(sideBMesh)) then
+     do i = 1, size(sideBMesh, 1)
+        call ESMF_MeshGet(sideBMesh(i), coordSys=coordSys, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ! Check coordSys
+        if (coordSys==ESMF_COORDSYS_SPH_DEG) numSphDeg=numSphDeg+1
+        if (coordSys==ESMF_COORDSYS_SPH_RAD) numSphRad=numSphRad+1
+        if (coordSys==ESMF_COORDSYS_CART) numCart=numCart+1
+     enddo
+  endif
+
+
+  ! Determine default
+  if (numCart > 0) then
+     ! Shouldn't have Cart and Sph
+     if ((numSphDeg>0)  .or. (numSphRad >0)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+             msg=" A mix of Cartesian and spherical Grids and Meshes can not be used in XGrid creation.", &
+             ESMF_CONTEXT, rcToReturn=rc) 
+        return
+     endif
+
+     ! Set to Cart
+     defaultCoordSys=ESMF_COORDSYS_CART
+  else if (numSphRad > numSphDeg) then
+     defaultCoordSys=ESMF_COORDSYS_SPH_RAD
+  else 
+     defaultCoordSys=ESMF_COORDSYS_SPH_DEG
+  endif
+
+  ! Return success
+  if (present(rc)) rc=ESMF_SUCCESS
+
+end subroutine choose_default_coordsys
+
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridCreate()"
@@ -496,6 +689,13 @@ function ESMF_XGridCreate(keywordEnforcer, &
       return
     endif
 
+    ! Make sure that the input objects have a consisent coordSys
+    call error_check_coordsys(sideAGrid, sideAMesh, sideBGrid, sideBMesh, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    
     ! Output Mask Values for debugging
 #if 0
     if (present(sideAMaskValues)) then
@@ -586,6 +786,15 @@ function ESMF_XGridCreate(keywordEnforcer, &
                                 msg="Constructing xgtype base object ", &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
     
+
+    ! Choose a default coordSys for XGrid
+    ! TODO: eventually also allow a user to pass one in
+    call choose_default_coordsys(sideAGrid, sideAMesh, sideBGrid, sideBMesh, xgtype%coordSys, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
     allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
         msg="- Allocating xgtype%sideA or xgtype%sideB ", &
@@ -1499,6 +1708,13 @@ integer,              intent(out),optional :: rc
       return
     endif
 
+    ! Make sure that the input objects have a consisent coordSys
+    call error_check_coordsys(sideAGrid, sideAMesh, sideBGrid, sideBMesh, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
     ! At this point the inputs are consistently sized.
     ! Take care of ordering
     ngrid_a = 0
@@ -1586,6 +1802,13 @@ integer,              intent(out),optional :: rc
     if (ESMF_LogFoundAllocError(localrc, &
       msg="Constructing xgtype base object ", &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Choose a default coordSys for XGrid
+    ! TODO: eventually also allow a user to pass one in
+    call choose_default_coordsys(sideAGrid, sideAMesh, sideBGrid, sideBMesh, xgtype%coordSys, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
