@@ -1088,6 +1088,7 @@ void MeshCap::xgridregrid_create(MeshCap **meshsrcpp, MeshCap **meshdstpp,
                                  int *compute_midmesh,
                                  int *regridMethod,
                                  int *unmappedaction,
+                                 ESMC_CoordSys_Flag *coordSys,
                                  int *nentries, ESMCI::TempWeights **tweights,
                                  int*rc) {
 #undef ESMC_METHOD
@@ -1117,6 +1118,7 @@ void MeshCap::xgridregrid_create(MeshCap **meshsrcpp, MeshCap **meshdstpp,
                              compute_midmesh,
                              regridMethod,
                              unmappedaction,
+                             coordSys, 
                              nentries, tweights,
                              &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -1132,11 +1134,11 @@ void MeshCap::xgridregrid_create(MeshCap **meshsrcpp, MeshCap **meshdstpp,
   if (*compute_midmesh == 1) {
     // Create MeshCap
     MeshCap *mc=new MeshCap();
-  
+
     // Set member variables
     mc->finalize_ptr(is_esmf_mesh, mesh, nullptr);
-    mc->finalize_dims((*meshsrcpp)->sdim_mc, (*meshsrcpp)->pdim_mc,
-                      (*meshsrcpp)->coordsys_mc);
+    mc->finalize_dims(mesh->orig_spatial_dim, mesh->parametric_dim(),
+                      mesh->coordsys);
     // segfault in XGrid due to mesh not being fully created
     mc->finalize_counts(&localrc);
     

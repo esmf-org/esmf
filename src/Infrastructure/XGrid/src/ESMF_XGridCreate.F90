@@ -1122,6 +1122,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       meshp, compute_midmesh, &
       ESMF_REGRIDMETHOD_CONSERVE, &
       ESMF_UNMAPPEDACTION_IGNORE, &
+      xgtype%coordSys, &
       nentries, tweights, &
       localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1269,6 +1270,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
+        xgtype%coordSys, &
         nentries, tweights, &
         localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1301,6 +1303,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
+        xgtype%coordSys, &
         nentries, tweights, &
         localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1336,6 +1339,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
+        xgtype%coordSys, &
         nentries, tweights, &
         localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1362,13 +1366,14 @@ function ESMF_XGridCreate(keywordEnforcer, &
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-    
+   
       ! Now the reverse direction
 #ifndef BOB_XGRID_DEBUG
       call c_esmc_xgridregrid_createP(mesh, meshBt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
+        xgtype%coordSys, &
         nentries, tweights, &
         localrc)
       if (ESMF_LogFoundError(localrc, &

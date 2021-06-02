@@ -1453,6 +1453,23 @@ void convert_cart_to_sph(double x, double y, double z,
   *lat=acos(z/(*r));
 }
 
+// calculates spherical coords in radians
+// lon -> (-pi to pi)
+// lat -> (-pi/2  to pi/2)
+void convert_cart_to_sph_rad(double x, double y, double z,
+                             double *lon, double *lat, double *r) {
+
+  const double half_pi=0.5*M_PI;
+  double lon_r,lat_r;
+
+  convert_cart_to_sph(x, y, z,
+                      lon, lat, r);
+
+  // Make lat range -pi/2 to pi/2
+  *lat=half_pi-*lat;
+}
+
+
 
 // calculates spherical coords in degs
 // lon -> (-180 to 180)
@@ -1469,6 +1486,7 @@ void convert_cart_to_sph_deg(double x, double y, double z,
   *lon=lon_r*RAD2DEG;
   *lat=90.0-(lat_r*RAD2DEG);
 }
+
 
 
 // Assumes pnt1, pnt2, pnt3 are of size 3

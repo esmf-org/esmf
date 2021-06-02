@@ -297,6 +297,7 @@ namespace ESMCI {
                                     int *compute_midmesh,
                                     int *regridMethod,
                                     int *unmappedaction,
+                                    ESMC_CoordSys_Flag *coordSys,
                                     int *nentries, ESMCI::TempWeights **tweights,
                                     int*rc);
 
