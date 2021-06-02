@@ -4480,7 +4480,7 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
       // Only put it in if it's locally owned
       if (!GetAttr(elem).is_locally_owned()) continue;
 
-      // Compute centroid depending on dimensions
+      // Get polygon depending on dimensions
       polygon res_poly;
       if (pdim==2) {
         if (sdim==2) {

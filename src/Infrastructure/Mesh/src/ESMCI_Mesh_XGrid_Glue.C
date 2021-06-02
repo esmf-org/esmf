@@ -81,6 +81,7 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
     // Check that meshes dimensions match
     if ((pdim != dstmesh.parametric_dim()) ||
         (sdim != dstmesh.spatial_dim())) {
+      // printf("spdim=%d ssdim=%d dpdim=%d dsdim=%d\n",pdim,sdim,dstmesh.parametric_dim(),dstmesh.spatial_dim());
       Throw() <<"Source and destination dimensions must match when creating an XGrid";
     }
 
