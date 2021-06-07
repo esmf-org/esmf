@@ -230,14 +230,14 @@
       
  
       ld = ESMF_DistGridCreate(indicesLocal, rc=localrc)
-      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(indicesLocal)
           return
       endif
            
       call ESMF_DistGridGetThis(ld, ldthis, rc=localrc)
-      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(indicesLocal)
           return
@@ -246,6 +246,9 @@
       dgrid = ldthis
       
       deallocate(indicesLocal)
+      
+      ! Return success
+      rc = ESMF_SUCCESS
  
     end subroutine f_esmf_getmeshdistgrid
 

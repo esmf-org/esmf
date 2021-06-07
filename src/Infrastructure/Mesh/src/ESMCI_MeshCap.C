@@ -1585,8 +1585,6 @@ void MeshCap::meshcreatenodedistgrid(int *rc) {
   int localrc;
   DistGrid *dg;
   
-  printf("MeshCap::meshcreatenodedistgrid() - \n");
-  
   // this is necessary because the fortran interface creates  
   // the distgrid at multiple points
   if (node_distgrid_set == false) {
@@ -1602,7 +1600,7 @@ void MeshCap::meshcreatenodedistgrid(int *rc) {
                                         ESMC_CONTEXT, rc)) return;
 #else
      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-        "This functionality requires ESMF to be built with the MOAB   library enabled" , ESMC_CONTEXT, rc)) return;
+        "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
     }
     // Set member 
@@ -1612,7 +1610,6 @@ void MeshCap::meshcreatenodedistgrid(int *rc) {
   } else {
       ESMC_LogDefault.Write("Node DistGrid has already been set", ESMC_LOGMSG_WARN);
   }
-  printf("  createnodedistgrid finished.\n");
 }
 
 
@@ -1622,8 +1619,6 @@ void MeshCap::meshcreateelemdistgrid(int *rc) {
 
   int localrc;
   DistGrid *dg;
-
-  printf("MeshCap::meshcreateelemdistgrid() - \n");
 
   // this is necessary because the fortran interface creates  
   // the distgrid at multiple points
@@ -1653,38 +1648,27 @@ void MeshCap::meshcreateelemdistgrid(int *rc) {
   } else {
     ESMC_LogDefault.Write("Elem DistGrid has already been set", ESMC_LOGMSG_WARN);
   }
-  printf("  createelemdistgrid finished.\n");
 }
 
 DistGrid *MeshCap::meshgetnodedistgrid() {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshgetnodedistgrid()"
 
-  printf("MeshCap::meshgetnodedistgrid() - \n");
-
   if (node_distgrid_set == false) return NULL;
   else return this->node_distgrid;
-
-  printf("  getnodedistgrid finished.\n");
 }
 
 DistGrid *MeshCap::meshgetelemdistgrid() {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshgetelemdistgrid()"
 
-  printf("MeshCap::meshgetelemdistgrid() - \n");
-
   if (elem_distgrid_set == false) return NULL;
   else return this->elem_distgrid;
-
-  printf("  getelemdistgrid finished.\n");
 }
 
 void MeshCap::meshsetnodedistgrid(DistGrid *dg) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshsetnodedistgrid()"
-
-  printf("MeshCap::meshsetnodedistgrid() - \n");
 
   if (node_distgrid_set == true) {
     ESMC_LogDefault.Write("Node DistGrid has already been set", ESMC_LOGMSG_WARN);
@@ -1693,15 +1677,11 @@ void MeshCap::meshsetnodedistgrid(DistGrid *dg) {
     node_distgrid = dg; 
     node_distgrid_set = true;
   }
-  
-  printf("  setnodedistgrid finished.\n");
 }
 
 void MeshCap::meshsetelemdistgrid(DistGrid *dg) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshsetelemdistgrid()"
-
-  printf("MeshCap::meshsetelemdistgrid() - \n");
 
   if (elem_distgrid_set == true) {
     ESMC_LogDefault.Write("Elem DistGrid has already been set", ESMC_LOGMSG_WARN);
@@ -1710,8 +1690,6 @@ void MeshCap::meshsetelemdistgrid(DistGrid *dg) {
     elem_distgrid = dg; 
     elem_distgrid_set = true;
   }
-  
-  printf("  setelemdistgrid finished.\n");
 }
 
 void MeshCap::meshinfoserialize(int *intMeshFreed,
@@ -1781,15 +1759,15 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
     *ip++ = static_cast<int> (elem_distgrid_set);
   }
   
-  printf("serialize - is_esmf_mesh = %d\n", is_esmf_mesh);
+  // printf("serialize - is_esmf_mesh = %d\n", is_esmf_mesh);
   // printf("serialize - sdim_mc = %d\n", sdim_mc);
   // printf("serialize - pdim_mc = %d\n", pdim_mc);
   // printf("serialize - coordsys_mc = %d\n", coordsys_mc);
   // printf("serialize - num_owned_node_mc = %d\n", num_owned_node_mc);
   // printf("serialize - num_owned_elem_mc = %d\n", num_owned_elem_mc);
-  printf("serialize - node_distgrid_set = %d\n", node_distgrid_set);
-  printf("serialize - elem_distgrid_set = %d\n", elem_distgrid_set);
-  printf("serialize - baseOnly = %d\n", baseOnly);
+  // printf("serialize - node_distgrid_set = %d\n", node_distgrid_set);
+  // printf("serialize - elem_distgrid_set = %d\n", elem_distgrid_set);
+  // printf("serialize - baseOnly = %d\n", baseOnly);
 
 
   // Adjust offset
@@ -1883,15 +1861,15 @@ void MeshCap::meshdeserialize(char *buffer, int *offset,
   coordsys_mc=*ip2++;
   *offset += sizeof(ESMC_CoordSys_Flag);
 
-  printf("deserialize - local_is_esmf_mesh = %d\n", local_is_esmf_mesh);
+  // printf("deserialize - local_is_esmf_mesh = %d\n", local_is_esmf_mesh);
   // printf("deserialize - sdim_mc = %d\n", sdim_mc);
   // printf("deserialize - pdim_mc = %d\n", pdim_mc);
   // printf("deserialize - coordsys_mc = %d\n", coordsys_mc);
   // printf("deserialize - num_owned_node_mc = %d\n", num_owned_node_mc);
   // printf("deserialize - num_owned_elem_mc = %d\n", num_owned_elem_mc);
-  printf("deserialize - local_node_distgrid_set = %d\n", local_node_distgrid_set);
-  printf("deserialize - local_elem_distgrid_set = %d\n", local_elem_distgrid_set);
-  printf("deserialize - baseOnly = %d\n", baseOnly);
+  // printf("deserialize - local_node_distgrid_set = %d\n", local_node_distgrid_set);
+  // printf("deserialize - local_elem_distgrid_set = %d\n", local_elem_distgrid_set);
+  // printf("deserialize - baseOnly = %d\n", baseOnly);
 
   // get the DistGrids
   if (local_node_distgrid_set)

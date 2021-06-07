@@ -211,7 +211,7 @@ extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(MeshCap **meshpp, int *rc) 
       return; // bail out
     }
     
-    (*meshpp)->meshcreatenodedistgrid(rc);
+    (*meshpp)->meshcreatenodedistgrid(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc)))
       return;
@@ -236,7 +236,7 @@ extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(MeshCap **meshpp, int *rc) 
       return; // bail out
     }
     
-    (*meshpp)->meshcreateelemdistgrid(rc);
+    (*meshpp)->meshcreateelemdistgrid(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc)))
       return;
