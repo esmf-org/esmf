@@ -5204,7 +5204,15 @@ end function ESMF_MeshEmptyCreate
         call c_ESMC_MeshGetNodeDistGrid(mesh%this, nodeDistGrid, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-            
+
+        ! Set init code for deep C++ DistGrid object
+        call ESMF_DistGridSetInitCreated(nodeDistGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+!TODO: This is a pointless check... needs to move to C++ side which actually
+!TODO: knows whether the nodal DG is present or not.
+
         ! Get is created state of nodal distgrid
         isCreated=ESMF_DistGridIsCreated(nodeDistGrid,rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5220,7 +5228,15 @@ end function ESMF_MeshEmptyCreate
         call c_ESMC_MeshGetNodeDistGrid(mesh%this, nodeDistGrid, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-            
+
+        ! Set init code for deep C++ DistGrid object
+        call ESMF_DistGridSetInitCreated(nodeDistGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+!TODO: This is a pointless check... needs to move to C++ side which actually
+!TODO: knows whether the nodal DG is present or not.
+
         ! Get is created state of nodal distgrid
         isCreated=ESMF_DistGridIsCreated(nodeDistGrid,rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5238,13 +5254,21 @@ end function ESMF_MeshEmptyCreate
         nodalDistgrid = nodeDistGrid
     endif
 
-    ! Get nodal Distgrid presence
+    ! Get element Distgrid presence
     if (present(elementDistgridIsPresent)) then
 
         call c_ESMC_MeshGetElemDistGrid(mesh%this, elemDistGrid, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        
+
+        ! Set init code for deep C++ DistGrid object
+        call ESMF_DistGridSetInitCreated(elemDistGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+!TODO: This is a pointless check... needs to move to C++ side which actually
+!TODO: knows whether the nodal DG is present or not.
+
         ! Get is created state of nodal distgrid
         isCreated=ESMF_DistGridIsCreated(elemDistGrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5260,11 +5284,19 @@ end function ESMF_MeshEmptyCreate
         call c_ESMC_MeshGetElemDistGrid(mesh%this, elemDistGrid, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        
+
+        ! Set init code for deep C++ DistGrid object
+        call ESMF_DistGridSetInitCreated(elemDistGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
         ! Get is created state of nodal distgrid
         isCreated=ESMF_DistGridIsCreated(elemDistGrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
+
+!TODO: This is a pointless check... needs to move to C++ side which actually
+!TODO: knows whether the nodal DG is present or not.
 
         ! Make sure mesh contains element distgrid
         if (.not. isCreated) then
