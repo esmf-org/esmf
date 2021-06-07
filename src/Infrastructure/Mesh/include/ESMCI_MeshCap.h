@@ -53,6 +53,7 @@ namespace ESMCI {
     int num_owned_elem_mc;
     
     bool node_distgrid_set;
+    bool elem_distgrid_set;
     DistGrid *node_distgrid;
     DistGrid *elem_distgrid;
 
@@ -75,6 +76,7 @@ namespace ESMCI {
       num_owned_elem_mc = 0;
       
       node_distgrid_set =  false;
+      elem_distgrid_set =  false;
       node_distgrid = nullptr;
       elem_distgrid = nullptr;
     }
@@ -159,10 +161,11 @@ namespace ESMCI {
     void meshcreatenodedistgrid(int *rc);
     void meshcreateelemdistgrid(int *rc);
     
-    DistGrid *meshgetnodedistgrid(){return node_distgrid;};
-    DistGrid *meshgetelemdistgrid(){return elem_distgrid;};
-    void meshsetnodedistgrid(DistGrid *dg) {if(node_distgrid_set == false) {node_distgrid = dg; node_distgrid_set = true;}};
-    void meshsetelemdistgrid(DistGrid *dg) {elem_distgrid = dg;};
+    DistGrid *meshgetnodedistgrid();
+    DistGrid *meshgetelemdistgrid();
+
+    void meshsetnodedistgrid(DistGrid *dg);
+    void meshsetelemdistgrid(DistGrid *dg);
 
     static void meshinfoserialize(int *intMeshFreed, 
                                   char *buffer, int *length, int *offset,
@@ -302,6 +305,7 @@ namespace ESMCI {
                                     int *compute_midmesh,
                                     int *regridMethod,
                                     int *unmappedaction,
+                                    ESMC_CoordSys_Flag *coordSys,
                                     int *nentries, ESMCI::TempWeights **tweights,
                                     int*rc);
 

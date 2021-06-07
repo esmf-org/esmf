@@ -198,33 +198,54 @@
 
    end subroutine f_esmf_meshcreatefromfile
 
-   subroutine f_esmf_getmeshdistgrid(dgrid, count, indices, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_DistGridMod
-
-     implicit none
-
-     type(ESMF_DistGrid), intent(inout) :: dgrid
-     integer, intent(in)               :: count
-     integer, intent(inout)            :: indices(count)
-     integer, intent(out)              :: rc
-
-     integer, allocatable :: indicesLocal(:)
-
-   ! initialize return code; assume routine not implemented
-     rc = ESMF_RC_NOT_IMPL
-
-     allocate(indicesLocal(count))
-
-
-     if (count > 0) then
-       indicesLocal(1:count) = indices(1:count)
-     endif
-
-     dgrid = ESMF_DistGridCreate(indicesLocal, rc=rc)
-
-     deallocate(indicesLocal)
-
-   end subroutine f_esmf_getmeshdistgrid
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_getmeshdistgrid"
+    subroutine f_esmf_getmeshdistgrid(dgrid, count, indices, rc)
+      use ESMF_UtilTypesMod
+      use ESMF_LogErrMod
+      use ESMF_BaseMod
+      use ESMF_DistGridMod
+ 
+      implicit none
+ 
+      type(ESMF_Pointer)     :: dgrid
+      integer, intent(in)    :: count
+      integer, intent(inout) :: indices(count)
+      integer, intent(out)   :: rc
+ 
+      integer :: localrc
+      integer, allocatable :: indicesLocal(:)
+      type(ESMF_DistGrid) :: ld
+      type(ESMF_Pointer) :: ldthis
+ 
+      ! initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
+ 
+      allocate(indicesLocal(count))
+ 
+ 
+      if (count > 0) then
+        indicesLocal(1:count) = indices(1:count)
+      endif
+      
+ 
+      ld = ESMF_DistGridCreate(indicesLocal, rc=localrc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) then
+          deallocate(indicesLocal)
+          return
+      endif
+           
+      call ESMF_DistGridGetThis(ld, ldthis, rc=localrc)
+      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) then
+          deallocate(indicesLocal)
+          return
+      endif
+      
+      dgrid = ldthis
+      
+      deallocate(indicesLocal)
+ 
+    end subroutine f_esmf_getmeshdistgrid
 

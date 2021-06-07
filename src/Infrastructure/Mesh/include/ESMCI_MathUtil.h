@@ -66,6 +66,10 @@ namespace ESMCI {
   void write_3D_poly_to_vtk(const char *filename, int id, int num_p, double *p);
   void write_3D_poly_woid_to_vtk(const char *filename, int num_p, double *p);
 
+  void write_3D_hex_woid_to_vtk(const char *filename, double *hex);
+
+  void write_3D_pnt_woid_to_vtk(const char *filename, double *pnt);
+
 
   void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn);
 
@@ -79,6 +83,9 @@ namespace ESMCI {
   void convert_cart_to_sph_deg(double x, double y, double z,
                                double *lon, double *lat, double *r);
 
+
+  void convert_cart_to_sph_rad(double x, double y, double z,
+                               double *lon, double *lat, double *r);
 
   bool is_smashed_quad2D(int num_p, double *p);
 

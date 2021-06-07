@@ -1713,7 +1713,7 @@ void MBMesh_serialize(MBMesh **mbmpp, char *buffer, int *length,
     Interface *mesh=mbmp->mesh;
 
     // Calc Size
-    int size = 0;
+    int size = 13*sizeof(int);
 
     // TODO: verify length > vars.
     if (*inquireflag != ESMF_INQUIREONLY) {
@@ -1756,7 +1756,7 @@ void MBMesh_serialize(MBMesh **mbmpp, char *buffer, int *length,
     }
 
     // Adjust offset
-    *offset += size * sizeof(int);
+    *offset += 13*sizeof(int);
 
   } 
   CATCH_MBMESH_RETURN(rc);

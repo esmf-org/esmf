@@ -239,6 +239,8 @@ namespace ESMCI {
                           // TODO: reference counting scheme is implemented
                           // TODO: and DELayout cannot be pulled from under
                           // TODO: DistGrid and Array until they are destroyed.
+    VM *vmAux;            // need this b/c DELayout may not be available
+                          // during destroy (potentially destroyed before Array)
     RouteHandle *ioRH;    // RouteHandle to store redist if needed during IO
 
    public:
@@ -278,6 +280,7 @@ namespace ESMCI {
       rimLinIndex.resize(0);
       rimElementCount.resize(0);
       localDeCountAux = 0;  // auxiliary variable for garbage collection
+      vmAux = vm;
       ioRH = NULL;
     }
     Array(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
@@ -315,6 +318,7 @@ namespace ESMCI {
       rimLinIndex.resize(0);
       rimElementCount.resize(0);
       localDeCountAux = 0;  // auxiliary variable for garbage collection
+      vmAux = NULL;
       ioRH = NULL;
     }
    private:

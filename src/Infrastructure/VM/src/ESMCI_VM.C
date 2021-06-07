@@ -80,7 +80,6 @@ extern "C" {
   void FTN_X(f_esmf_fortranudtpointercompare)(void *ptr1, void *ptr2, int *flag);
   void FTN_X(f_esmf_fieldcollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_fbundlecollectgarbage)(void *fobject, int *localrc);
-  void FTN_X(f_esmf_geombasecollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_xgridgeombasecolgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_locstreamcollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_statecollectgarbage)(void *fobject, int *localrc);
@@ -465,7 +464,7 @@ void VMId::log(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   char digits[64];
-  char msg[256];
+  char msg[800];
   std::stringstream info;
   info << "  vmKeyWidth (bytes) = " << vmKeyWidth
     <<" vmKeyOff (invalid bits end of last byte) = " << vmKeyOff;
@@ -886,11 +885,10 @@ void *VM::startup(
     //TODO: a multi-threaded child component out of a single-threaded
     //TODO: parent component.
 
-    // The VMId is that same for all PETs spawned by local PET
+    // The VMId is the same for all PETs spawned by local PET
     VMId vmID = VMIdCreate(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc))
-      return NULL;  // bail out on error
+      rc)) return NULL;  // bail out on error
     // vmKey part of the vmID gets set to the appropriate bit pattern:
     // ->  set the bit in vmKey for each VAS in which this VM exists <-
     for (int i=0; i<vmp->myvms[0]->getNpets(); i++){
@@ -900,7 +898,7 @@ void *VM::startup(
       int n = vas % 8;
       vmID.vmKey[m] |= 0x80>>n;  // set the bits
     }
-    vmID.localID = 0;  // reset localID
+    vmID.localID = -1;  // set localID to start at zero (see ++ below)
     // Search through the valid entries in the matchTable,
     // consider the localIDs of all entries with the same vmKey
     // and determine a localID for the current VM that uniquely identifies it.
@@ -950,8 +948,7 @@ void *VM::startup(
       matchTable_vm[index]   = vmp->myvms[j];               // ptr to this VM
       matchTable_vmID[index] = VMIdCreate(&localrc);        // vmID
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, rc))
-        return NULL;  // bail out on error
+        ESMC_CONTEXT, rc)) return NULL;  // bail out on error
       matchTable_BaseIDCount[index] = 0;                    // reset
       matchTable_Objects[index].reserve(1000);              // start w/ 1000 obj
       matchTable_FObjects[index].reserve(1000);             // start w/ 1000 obj
@@ -960,8 +957,7 @@ void *VM::startup(
     delete [] emptyList;
     VMIdDestroy(&vmID, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc))
-      return NULL;  // bail out on error
+      rc)) return NULL;  // bail out on error
   }
 
   // return successfully
@@ -1016,20 +1012,18 @@ void VM::shutdown(
         if (matchTable_vm[i]==vmp->myvms[j]) break;
       if (i < matchTableBound){
         // found matching entry in the matchTable
-        matchTable_vm[i] = NULL;  // mark this entry invalid
-        // destroy VMId object
-        VMIdDestroy(&(matchTable_vmID[i]), &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, rc)) return;
         // automatic garbage collection of ESMF objects
         try{
           // The following loop deallocates deep Fortran ESMF objects
           for (int k=matchTable_FObjects[i].size()-1; k>=0; k--){
 #ifdef GARBAGE_COLLECTION_LOG_on
-            std::stringstream debugmsg;
-            debugmsg << "ESMF Automatic Garbage Collection: FObject delete: "
-              << *(void **)&(matchTable_FObjects[i][k].fobject);
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+            char msg[800];
+            void *basePtr = **(void ***)(&matchTable_FObjects[i][k].fobject);
+            sprintf(msg, "ESMF Automatic Garbage Collection: fortran obj delete: "
+              "%20s %p - %p",
+              ESMC_ObjectID_Name(matchTable_FObjects[i][k].objectID),
+              *(void **)(&matchTable_FObjects[i][k].fobject), basePtr);
+            ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
             if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
               FTN_X(f_esmf_fieldcollectgarbage)
@@ -1044,24 +1038,6 @@ void VM::shutdown(
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                 ESMC_CONTEXT, rc))
                 return;
-#if 0
-//gjt: Disable cleaning up GeomBase from the garbage collection level because
-//gjt: each Field actually owns its own instance of the GeomBase. The way
-//gjt: FieldDestruct() currently works, it looks at the GeomBase, and if that
-//gjt: were already destroyed, it causes issues. In the long run this might
-//gjt: be better implemented via a protection against accessing GeomBase from
-//gjt: FieldDestruct() in that case. But then it is important that all of the
-//gjt: Geom types correctly implement their destructor. Right now the Mesh
-//gjt: destructur is not doing all that is needed, and so the Mesh cleanup
-//ght: actually does depend on the Field garbage collection.
-            }else if (matchTable_FObjects[i][k].objectID ==
-              ESMC_ID_GEOMBASE.objectID){
-              FTN_X(f_esmf_geombasecollectgarbage)(
-                &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                ESMC_CONTEXT, rc))
-                return;
-#endif
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_XGRIDGEOMBASE.objectID){
               FTN_X(f_esmf_xgridgeombasecolgarbage)(
@@ -1112,32 +1088,56 @@ void VM::shutdown(
                 ESMC_CONTEXT, rc))
                 return;
             }
-            matchTable_FObjects[i].pop_back();
+// gjt: no longer remove remnant from garbage collection for safety
+//            matchTable_FObjects[i].pop_back();
           }
+#if 0
+// gjt: no take down garbage collection table for safety
           if (matchTable_FObjects[i].size() > 0)
             std::cout << "Failure in ESMF Automatic Garbage Collection line: "
               << __LINE__ << std::endl;
           // swap() trick with a temporary to free vector's memory
           std::vector<FortranObject>().swap(matchTable_FObjects[i]);
+#endif
           // The following loop deletes deep C++ ESMF objects derived from
           // Base class. For deep Fortran classes it deletes the Base member.
           for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
 #ifdef GARBAGE_COLLECTION_LOG_on
-            std::stringstream debugmsg;
-            debugmsg << "ESMF Automatic Garbage Collection: delete: "
-              << matchTable_Objects[i][k]->ESMC_BaseGetClassName() << " : "
-              << matchTable_Objects[i][k]->ESMC_BaseGetName() << " : "
-              << matchTable_Objects[i][k];
-            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+            char msg[800];
+            const char *proxyString;
+            proxyString="actual";
+            if (matchTable_Objects[i][k]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
+              proxyString="proxy";
+            sprintf(msg, "ESMF Automatic Garbage Collection: c++base obj delete: "
+              "%20s %p - %6s - %7s - %7s : %04d : VM=%p : %10s",
+              matchTable_Objects[i][k]->ESMC_BaseGetClassName(),
+              matchTable_Objects[i][k], proxyString,
+              ESMC_StatusString(matchTable_Objects[i][k]->ESMC_BaseGetStatus()),
+              matchTable_Objects[i][k]->ESMC_BaseGetPersist() ?
+                "persist" : "noperst",
+              matchTable_Objects[i][k]->ESMC_BaseGetID(),
+              matchTable_Objects[i][k]->ESMC_BaseGetVM(),
+              matchTable_Objects[i][k]->ESMC_BaseGetName());
+            ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-            delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
-            matchTable_Objects[i].pop_back();
+// gjt: no longer remove remnant from garbage collection for safety
+//            delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
+//            matchTable_Objects[i].pop_back();
           }
+#if 0
+// gjt: no take down garbage collection table for safety
           if (matchTable_Objects[i].size() > 0)
             std::cout << "Failure in ESMF Automatic Garbage Collection line: "
               << __LINE__ << std::endl;
           // swap() trick with a temporary to free vector's memory
           std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
+#endif
+          // mark match table context as garbage collected, also VM will be gone
+          matchTable_vm[i] = NULL;  
+          // destroy VMId object
+          VMIdDestroy(&(matchTable_vmID[i]), &localrc);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, rc)) return;
         }catch(int catchrc){
           // catch standard ESMF return code
           ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
@@ -1157,6 +1157,7 @@ void VM::shutdown(
     }
   }
 
+  // shut down the actual VMKernel object
   VMK::shutdown(static_cast<VMKPlan *>(vmp), info);
 
   // return successfully
@@ -1315,7 +1316,7 @@ VMId *VM::getVMId(
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int i = matchTableIndex;
+  int i;
   for (i=0; i<matchTableBound; i++)
     if (matchTable_vm[i] == this) break;
   if (i == matchTableBound){
@@ -2294,7 +2295,7 @@ void VM::logGarbageInfo(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int rc = ESMC_RC_NOT_IMPL;   // final return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   esmf_pthread_t mytid;
 #ifndef ESMF_NO_PTHREADS
@@ -2304,6 +2305,7 @@ void VM::logGarbageInfo(
 #endif
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
+    // dealing with VM that uses its own Pthreads for PETs -> search for match
     for (i=0; i<matchTableBound; i++)
       if (matchTable_tid[i] == mytid) break;
     if (i == matchTableBound){
@@ -2312,54 +2314,78 @@ void VM::logGarbageInfo(
       throw rc;
     }
   }
-  // found the current VM
-  
+  // found the current VM, i pointing to the associated entry in the matchTable
+
+  char msg[800];
+
+  // Set the bounds for the VM levels to output
   int ic=i;
   int lb=0;
   int ub=matchTableBound;
   if (current){
+    // only output the current VM level
     lb = ic;
     ub = ic+1;
+  }else{
+    sprintf(msg, "%s - GarbInfo: size of matchTable: %i"
+      " #############################################################",
+      prefix.c_str(), matchTableBound);
+    ESMC_LogDefault.Write(msg, msgType);
   }
 
-  char msg[512];
   for (int i=lb; i<ub; i++){
     if (i==ic)
       sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i"
         " ***current VM context****", prefix.c_str(), i);
     else
-      sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i", prefix.c_str(), i);
+      sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i"
+        " *************************", prefix.c_str(), i);
     ESMC_LogDefault.Write(msg, msgType);
+    if (matchTable_vm[i]==NULL){
+      sprintf(msg, "%s - GarbInfo: VM matchTableIndex=%i"
+        " INVALID VM - garbage has been collected", prefix.c_str(), i);
+      ESMC_LogDefault.Write(msg, msgType);
+    }else{
+      // valid matchTable entry
+      sprintf(msg, "%s - GarbInfo: VM: %p", prefix.c_str(), matchTable_vm[i]);
+      ESMC_LogDefault.Write(msg, msgType);
+      matchTable_vmID[i].log(prefix+" - GarbInfo:", msgType);
+    }
+    // Fortran objects
     sprintf(msg, "%s - GarbInfo: Fortran objs=%lu", prefix.c_str(),
       matchTable_FObjects[i].size());
     ESMC_LogDefault.Write(msg, msgType);
     for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
-      void *basePtr = NULL;
-      if (matchTable_FObjects[i][j].objectID != ESMC_ID_GEOMBASE.objectID)
-        basePtr = **(void ***)(&matchTable_FObjects[i][j].fobject);
-      sprintf(msg, "%s - GarbInfo: fortran objs[%d]: %s %p - %p",
+      void *basePtr = *(void **)(&matchTable_FObjects[i][j].fobject);
+      if (basePtr) basePtr = **(void ***)(&matchTable_FObjects[i][j].fobject);
+      sprintf(msg, "%s - GarbInfo: fortran objs[%04d]: %20s %p - %p",
         prefix.c_str(), j,
         ESMC_ObjectID_Name(matchTable_FObjects[i][j].objectID),
         *(void **)(&matchTable_FObjects[i][j].fobject), basePtr);
       ESMC_LogDefault.Write(msg, msgType);
     }
-    sprintf(msg, "%s - GarbInfo: Base objs=%lu", prefix.c_str(),
+    // C++ objects
+    sprintf(msg, "%s - GarbInfo: C++Base objs=%lu", prefix.c_str(),
       matchTable_Objects[i].size());
     ESMC_LogDefault.Write(msg, msgType);
     for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
       const char *proxyString;
-      proxyString="actual object";
+      proxyString="actual";
       if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
-        proxyString="proxy object";
-      sprintf(msg, "%s - GarbInfo: base objs[%d]: %s : %p : %s : %d ; %s",
+        proxyString="proxy";
+      sprintf(msg, "%s - GarbInfo: c++base objs[%04d]: "
+        "%20s %p - %6s - %7s - %7s : %04d : VM=%p : %10s",
         prefix.c_str(), j, matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
-        matchTable_Objects[i][j],
-        matchTable_Objects[i][j]->ESMC_BaseGetName(),
-        matchTable_Objects[i][j]->ESMC_BaseGetID(), proxyString);
+        matchTable_Objects[i][j], proxyString,
+        ESMC_StatusString(matchTable_Objects[i][j]->ESMC_BaseGetStatus()),
+        matchTable_Objects[i][j]->ESMC_BaseGetPersist() ?
+          "persist" : "noperst",
+        matchTable_Objects[i][j]->ESMC_BaseGetID(),
+        matchTable_Objects[i][j]->ESMC_BaseGetVM(),
+        matchTable_Objects[i][j]->ESMC_BaseGetName());
       ESMC_LogDefault.Write(msg, msgType);
     }
   }
-
   // return successfully
 }
 //-----------------------------------------------------------------------------
@@ -2489,7 +2515,7 @@ void VM::logMemInfo(
   // access /proc/self
   FILE* file = fopen("/proc/self/status", "r");
   char line[128];
-  char msg[256];
+  char msg[800];
   while (fgets(line, 128, file) != NULL){
     if (strncmp(line, "Vm", 2) == 0){
       int len = strlen(line);
@@ -2583,7 +2609,7 @@ void VM::logMemInfo(
   vm->lock();
 
   // string storage
-  char msg[256];
+  char msg[800];
 
   // Get memory
   task_vm_info_data_t mem_info;
@@ -2724,9 +2750,10 @@ void VM::addObject(
 
 #ifdef GARBAGE_COLLECTION_LOG_on
   std::stringstream msg;
-  msg << "VM::addObject() object added: " << object;
+  msg << "VM::addObject() object added to context #" << i << ": " << object;
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-  //logBacktrace("VM::addObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
+  vmID->log("VM::addObject(): ", ESMC_LOGMSG_DEBUG);
+//  logBacktrace("VM::addObject(): ", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
 #endif
 
   vm->unlock();
@@ -2796,7 +2823,7 @@ void VM::rmObject(
     std::stringstream msg;
     msg << "VM::rmObject() object removed: " << object;
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-    //logBacktrace("VM::rmObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
+//    logBacktrace("VM::rmObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
 #endif
       break;
     }
@@ -2860,11 +2887,12 @@ void VM::addFObject(
   
 #ifdef GARBAGE_COLLECTION_LOG_on
   std::stringstream msg;
-  msg << "VM::addFObject() object added: " <<
+  msg << "VM::addFObject() object added to context #" << i << ": " <<
     string(ESMC_ObjectID_Name(objectID)) << " " << *(void **)fobject << " - " <<
     **(void ***)fobject;
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-  //logBacktrace("VM::addFObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
+  vmID->log("VM::addFObject(): ", ESMC_LOGMSG_DEBUG);
+//  logBacktrace("VM::addFObject(): ", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
 #endif
 
   vm->unlock();
@@ -2935,13 +2963,14 @@ void VM::rmFObject(
     FTN_X(f_esmf_fortranudtpointercompare)(fobjectElement, (void *)fobject, &flag);
 
     if (flag){
+      void *cBase = **(void ***)fobject;
       matchTable_FObjects[i].erase(it);  // erase the object entry
 #ifdef GARBAGE_COLLECTION_LOG_on
       std::stringstream msg;
       msg << "VM::rmFObject() object removed: " << *(void **)fobject << " - " <<
-        **(void ***)fobject;
+        cBase;
       ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
-      //logBacktrace("VM::rmFObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
+//      logBacktrace("VM::rmFObject()", ESMC_LOGMSG_DEBUG);  // enable to pin down specific caller
 #endif
       break;
     }
@@ -2993,38 +3022,6 @@ bool VM::validObject(
   }
   vm->unlock();
   return valid;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VM::printMatchTable()"
-//BOPI
-// !IROUTINE:  ESMCI::VM::printMatchTable - Print the current match table
-//
-// !INTERFACE:
-void VM::printMatchTable(
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-//
-  void){
-//
-// !DESCRIPTION:
-//    Print the current match table.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  printf("--- ESMCI::VM::printMatchTable() start ---\n");
-  printf("matchTableBound = %d\n", matchTableBound);
-  for (int i=0; i<matchTableBound; i++) {
-    printf("matchTable_tid[%d] = %lu\n", i, matchTable_tid[i]);
-    (&matchTable_vmID[i])->print();
-  }
-  printf("--- ESMCI::VM::printMatchTable() end ---\n");
 }
 //-----------------------------------------------------------------------------
 
@@ -3280,11 +3277,6 @@ void VM::finalize(
     return;
   }
 
-  // delete the VM association table
-  VMIdDestroy(&(matchTable_vmID[0]), &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    rc))
-    return;
   // automatic garbage collection of ESMF objects
   try{
     // We need to make sure any open files and streams are closed.
@@ -3298,6 +3290,15 @@ void VM::finalize(
     }
     // The following loop deallocates deep Fortran ESMF objects
     for (int k=matchTable_FObjects[0].size()-1; k>=0; k--){
+#ifdef GARBAGE_COLLECTION_LOG_on
+      char msg[800];
+      void *basePtr = **(void ***)(&matchTable_FObjects[0][k].fobject);
+      sprintf(msg, "ESMF Automatic Garbage Collection: fortran obj delete: "
+        "%20s %p - %p",
+        ESMC_ObjectID_Name(matchTable_FObjects[0][k].objectID),
+        *(void **)(&matchTable_FObjects[0][k].fobject), basePtr);
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
+#endif
       if (matchTable_FObjects[0][k].objectID == ESMC_ID_FIELD.objectID){
         FTN_X(f_esmf_fieldcollectgarbage)(&(matchTable_FObjects[0][k].fobject),
           &localrc);
@@ -3310,24 +3311,6 @@ void VM::finalize(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc))
           return;
-#if 0
-//gjt: Disable cleaning up GeomBase from the garbage collection level because
-//gjt: each Field actually owns its own instance of the GeomBase. The way
-//gjt: FieldDestruct() currently works, it looks at the GeomBase, and if that
-//gjt: were already destroyed, it causes issues. In the long run this might
-//gjt: be better implemented via a protection against accessing GeomBase from
-//gjt: FieldDestruct() in that case. But then it is important that all of the
-//gjt: Geom types correctly implement their destructor. Right now the Mesh
-//gjt: destructur is not doing all that is needed, and so the Mesh cleanup
-//ght: actually does depend on the Field garbage collection.
-      }else if (matchTable_FObjects[0][k].objectID ==
-        ESMC_ID_GEOMBASE.objectID){
-        FTN_X(f_esmf_geombasecollectgarbage)(
-          &(matchTable_FObjects[0][k].fobject), &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, rc))
-          return;
-#endif
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_XGRIDGEOMBASE.objectID){
         FTN_X(f_esmf_xgridgeombasecolgarbage)(
@@ -3378,32 +3361,54 @@ void VM::finalize(
           ESMC_CONTEXT, rc))
           return;
       }
-      matchTable_FObjects[0].pop_back();
+// gjt: no longer remove remnant from garbage collection for safety
+//      matchTable_FObjects[0].pop_back();
     }
+#if 0
+// gjt: no take down garbage collection table for safety
     if (matchTable_FObjects[0].size() > 0)
       std::cout << "Failure in ESMF Automatic Garbage Collection line: "
         << __LINE__ << std::endl;
     // swap() trick with a temporary to free vector's memory
     std::vector<FortranObject>().swap(matchTable_FObjects[0]);
+#endif
     // The following loop deletes deep C++ ESMF objects derived from
     // Base class. For deep Fortran classes it deletes the Base member.
     for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
 #ifdef GARBAGE_COLLECTION_LOG_on
-      std::stringstream debugmsg;
-      debugmsg << "ESMF Automatic Garbage Collection: delete: "
-        << matchTable_Objects[0][k]->ESMC_BaseGetClassName() << " : "
-        << matchTable_Objects[0][k]->ESMC_BaseGetName() << " : "
-        << matchTable_Objects[0][k];
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+      char msg[800];
+      const char *proxyString;
+      proxyString="actual";
+      if (matchTable_Objects[0][k]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
+        proxyString="proxy";
+      sprintf(msg, "ESMF Automatic Garbage Collection: c++base obj delete: "
+        "%20s %p - %6s - %7s - %7s : %04d : VM=%p : %10s",
+        matchTable_Objects[0][k]->ESMC_BaseGetClassName(),
+        matchTable_Objects[0][k], proxyString,
+        ESMC_StatusString(matchTable_Objects[0][k]->ESMC_BaseGetStatus()),
+        matchTable_Objects[0][k]->ESMC_BaseGetPersist() ?
+          "persist" : "noperst",
+        matchTable_Objects[0][k]->ESMC_BaseGetID(),
+        matchTable_Objects[0][k]->ESMC_BaseGetVM(),
+        matchTable_Objects[0][k]->ESMC_BaseGetName());
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-      delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
-      matchTable_Objects[0].pop_back();
+// gjt: no longer remove remnant from garbage collection for safety
+//      delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
+//      matchTable_Objects[0].pop_back();
     }
+#if 0
+// gjt: no take down garbage collection table for safety
     if (matchTable_Objects[0].size() > 0)
       std::cout << "Failure in ESMF Automatic Garbage Collection line: "
         << __LINE__ << std::endl;
     // swap() trick with a temporary to free vector's memory
     std::vector<ESMC_Base *>().swap(matchTable_Objects[0]);
+#endif
+    // destroy VMId object
+    VMIdDestroy(&(matchTable_vmID[0]), &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
   }catch(int catchrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
@@ -3422,6 +3427,7 @@ void VM::finalize(
 //gjtNotYet  delete [] matchTable_vm;
 //gjtNotYet  delete [] matchTable_vmID;
 
+  // shut down the actual VMKernel object
   int finalizeMpi = 1;  // set
   if (keepMpiFlag){
     if (*keepMpiFlag==ESMF_TRUE) finalizeMpi = 0; // reset

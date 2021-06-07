@@ -197,6 +197,8 @@ extern "C" void FTN_X(c_esmc_meshsetelemdistgrid)(MeshCap **meshpp, DistGrid **d
 
 
 extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(MeshCap **meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreatenodedistgrid()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -210,6 +212,9 @@ extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(MeshCap **meshpp, int *rc) 
     }
     
     (*meshpp)->meshcreatenodedistgrid(rc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc)))
+      return;
 
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -217,6 +222,8 @@ extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(MeshCap **meshpp, int *rc) 
 
 
 extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(MeshCap **meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreateelemdistgrid()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -230,6 +237,9 @@ extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(MeshCap **meshpp, int *rc) 
     }
     
     (*meshpp)->meshcreateelemdistgrid(rc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc)))
+      return;
 
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -574,7 +584,6 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(MeshCap **meshpp,
                              char *buffer, int *offset,
                              ESMC_AttReconcileFlag *attreconflag, int *rc,
                              ESMCI_FortranStrLenArg buffer_l){
-
   // Create MeshCap
   *meshpp=new MeshCap(-1);   // prevent baseID counter increment
 

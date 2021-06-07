@@ -118,6 +118,7 @@ contains
 
 subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
     sideAGridCount, sideBGridCount, sideAMeshCount, sideBMeshCount, &
+    coordSys, &
     dimCount, elementCount, &
     sideAGrid, sideBGrid, sideAMesh, sideBMesh, &
     mesh, &
@@ -133,6 +134,7 @@ type(ESMF_XGrid),     intent(in)            :: xgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 integer,              intent(out), optional :: sideAGridCount, sideBGridCount
 integer,              intent(out), optional :: sideAMeshCount, sideBMeshCount
+type(ESMF_CoordSys_Flag), intent(out), optional :: coordSys
 integer,              intent(out), optional :: dimCount
 integer,              intent(out), optional :: elementCount
 type(ESMF_Grid),      intent(out), optional :: sideAGrid(:), sideBGrid(:)
@@ -165,6 +167,8 @@ integer,              intent(out), optional :: rc
 !           Total Number of Meshes on the A side.
 !     \item [{[sideBMeshCount]}]
 !           Total Number of Meshes on the B side.
+!     \item[{[coordSys]}]
+!           The coordinate system of the XGrid's coordinate data.
 !     \item [{[dimCount]}]
 !           Number of dimension of the xgrid.
 !     \item [{[elementCount]}]
@@ -544,6 +548,11 @@ integer,              intent(out), optional :: rc
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Get coordSys
+    if(present(coordSys)) then
+       coordSys=xgtypep%coordSys
     endif
 
     if(present(dimCount)) then

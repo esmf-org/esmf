@@ -2499,7 +2499,7 @@ module NUOPC_Connector
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
 
     ! create the State member
-    is%wrap%state = ESMF_StateCreate(rc=rc)
+    is%wrap%state = ESMF_StateCreate(name=trim(name)//"-State", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2705,9 +2705,21 @@ module NUOPC_Connector
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-import:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-export:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     if (btest(profiling,2)) then
       call ESMF_TraceRegionExit("Reconcile", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3799,9 +3811,21 @@ module NUOPC_Connector
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-import:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-export:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     if (btest(profiling,2)) then
       call ESMF_TraceRegionExit("Reconcile", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4397,12 +4421,26 @@ module NUOPC_Connector
     do while (associated(gridList))
       gridListE=>gridList
       gridList=>gridList%prev
+#define CLEAN_OUT_OLD_ACCEPTOR_GRID
+#ifdef CLEAN_OUT_OLD_ACCEPTOR_GRID
+      call ESMF_GridDestroy(gridListE%keyGrid, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
       deallocate(gridListE)
     enddo
     ! take down meshList
     do while (associated(meshList))
       meshListE=>meshList
       meshList=>meshList%prev
+#define CLEAN_OUT_OLD_ACCEPTOR_MESH
+#ifdef CLEAN_OUT_OLD_ACCEPTOR_MESH
+call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+      call ESMF_MeshDestroy(meshListE%keyMesh, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
       deallocate(meshListE)
     enddo
 
@@ -4533,7 +4571,8 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
 
     ! create a helper state needed for reconciliation across Connector VM
-    state = ESMF_StateCreate(rc=rc)
+    state = ESMF_StateCreate(name=trim(name)//"-ShareFieldWithGrid-Temp-State",&
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
 
@@ -4676,7 +4715,8 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
 
     ! create a helper state needed for reconciliation across Connector VM
-    state = ESMF_StateCreate(rc=rc)
+    state = ESMF_StateCreate(name=trim(name)//"-ShareFieldWithMesh-Temp-State",&
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
 
@@ -4832,9 +4872,21 @@ module NUOPC_Connector
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-import:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-export:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     if (btest(profiling,2)) then
       call ESMF_TraceRegionExit("Reconcile", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6468,7 +6520,8 @@ module NUOPC_Connector
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (routeHandleIsCreated) then
-            call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, rc=rc)
+            call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, &
+              noGarbage=.true., rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -6478,7 +6531,8 @@ module NUOPC_Connector
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         if (routeHandleIsCreated) then
-          call ESMF_FieldBundleRegridRelease(is%wrap%rh, rc=rc)
+          call ESMF_FieldBundleRegridRelease(is%wrap%rh, noGarbage=.true., &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif

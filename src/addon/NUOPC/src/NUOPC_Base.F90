@@ -2915,8 +2915,7 @@ module NUOPC_Base
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     if (btest(verbosity,2)) then
-      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
-        rc=rc)
+      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" intro:", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -2984,8 +2983,7 @@ module NUOPC_Base
     ! local variables
     integer :: indentCount
     if (btest(verbosity,2)) then
-      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
-        rc=rc)
+      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" extro:", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -3892,13 +3890,19 @@ module NUOPC_Base
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     enddo
-    
+
     ! Finally replace the advertised Field with the realizing Field
-      
+
     call ESMF_StateReplace(state, (/field/), rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    
+
+    ! Destroy the originally advertised Field that has just been released
+
+    call ESMF_FieldDestroy(advertisedField, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
 

@@ -725,7 +725,7 @@ end subroutine
     num_elems = size(elementIds)
     num_elementConn = size(elementConn)
 
-    call c_esmc_meshgetdimensions(mesh%this, sdim, pdim, coordSys, localrc)
+    call C_ESMC_MeshGetDimensions(mesh%this, sdim, pdim, coordSys, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -826,6 +826,8 @@ end subroutine
 
     ! Init split
     mesh%hasSplitElem=.false.
+
+    print *, "completed ESMF_MeshAddElements"
 
     if (present (rc)) rc = localrc
 
@@ -939,7 +941,7 @@ end subroutine
        return
     endif
 
-    call c_esmc_meshgetdimensions(mesh%this, sdim, pdim, coordSys, localrc)
+    call C_ESMC_MeshGetDimensions(mesh%this, sdim, pdim, coordSys, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -971,6 +973,8 @@ end subroutine
 
     ! Change status
     mesh%status=ESMF_MESHSTATUS_NODESADDED
+
+    print *, "completed ESMF_MeshAddNodes"
 
     if (present (rc)) rc = localrc
 
@@ -1632,6 +1636,7 @@ end function ESMF_MeshCreateFromDG
     ! The C side has been created
     ESMF_MeshCreateFromGrid%isCMeshFreed=.false.
 
+    ! these should be set inside MeshCap
     ! Create nodal distgrid
     call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromGrid%this, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1862,6 +1867,7 @@ end function ESMF_MeshCreateFromGrid
     ! The C side has been created
     ESMF_MeshCreateFromMeshes%isCMeshFreed=.false.
 
+    ! these should be set inside MeshCap
     ! Create two distgrids, one for nodes and one for elements
     call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromMeshes%this, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3023,7 +3029,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! Create internal structure and Set pointer
     call C_ESMC_MeshCreateFromIntPtr(ESMF_MeshCreateFromIntPtr%this,  &
-                                  mesh_pointer, localrc)
+                                     mesh_pointer, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3596,6 +3602,7 @@ end function ESMF_MeshCreateRedist
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! these should be set inside MeshCap
     ! Create node distgrid and get number of nodes
     call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateDual%this, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4465,6 +4472,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
       integer  :: localrc
       type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
+      logical  :: isCreated
 
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
@@ -4472,14 +4480,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       opt_noGarbage = ESMF_FALSE
       if (present(noGarbage)) opt_noGarbage = noGarbage
 
+#if 0
+  block 
+    character(80):: msg
+    write(msg,*) "Entering ESMF_MeshDestroy with isCMeshFreed=", mesh%isCMeshFreed
+    call ESMF_PointerLog(mesh%this, prefix=msg, logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+  end block
+#endif
+
       ! If not already freed then free the c side
       if (.not. mesh%isCMeshFreed) then
+        ! This will also set the Base Status to INVALID
         call C_ESMC_MeshDestroy(mesh%this, opt_noGarbage, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Set this for consistancies sake
          mesh%isCMeshFreed=.true.
+      else
+        ! Even when there is no CMesh part, there is a Base, and it needs to
+        ! be set to INVALID for correct garbage collection behavior
+        call c_ESMC_BaseSetStatus(mesh, ESMF_STATUS_INVALID, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (mesh%status .eq. ESMF_MESHSTATUS_COMPLETE) then
@@ -4897,6 +4920,30 @@ end function ESMF_MeshEmptyCreate
 
     !!!!!!!! Get Node info from Mesh !!!!!!!!
 
+    call C_ESMC_MeshGetDimensions(mesh, sdim, pdim, coordSysIn, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    call C_ESMC_MeshGetOwnedNodeCount(mesh, numNode, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call C_ESMC_MeshGetOwnedElemCount(mesh, numElem, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get parametric dim
+    if (present(parametricDim)) parametricDim=pdim
+
+    ! Get spatial dim
+    if (present(spatialDim)) spatialDim=sdim
+
+    ! Get number owned nodes
+    if (present(numOwnedNodes)) numOwnedNodes = numNode
+
+    ! Get number owned elements
+    if (present(numOwnedElements)) numOwnedElements = numElem
+
     ! Get Node Count
     if (present(nodeCount)) then
        ! Make call to get info
@@ -4905,7 +4952,6 @@ end function ESMF_MeshEmptyCreate
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-
 
     ! Get information about whether various node information is present
     if (present(nodeMaskIsPresent)) then
@@ -4984,8 +5030,7 @@ end function ESMF_MeshEmptyCreate
     ! Get Element Count
     if (present(elementCount)) then
        ! Make call to get info
-       call C_ESMC_MeshGetElemCount(mesh, &
-            elementCount, localrc)
+       call C_ESMC_MeshGetElemCount(mesh, elementCount, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -4993,8 +5038,7 @@ end function ESMF_MeshEmptyCreate
     ! Get Element Connection Count
     if (present(elementConnCount)) then
        ! Make call to get info
-       call C_ESMC_MeshGetElemConnCount(mesh, &
-            elementConnCount, localrc)
+       call C_ESMC_MeshGetElemConnCount(mesh, elementConnCount, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -5105,17 +5149,6 @@ end function ESMF_MeshEmptyCreate
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
-    call c_esmc_meshgetdimensions(mesh, sdim, pdim, coordSysIn, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    call c_esmc_meshgetownednodecount(mesh, numNode, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call c_esmc_meshgetownedelemcount(mesh, numElem, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get node coords
     if (present(ownedNodeCoords)) then
@@ -5154,7 +5187,7 @@ end function ESMF_MeshEmptyCreate
        ! Check array size
        if (size(ownedElemCoords)<numElem*sdim) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-                msg="- owndedElemCoords too small to hold coordinates", &
+                msg="- ownedElemCoords too small to hold coordinates", &
                 ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
@@ -5164,12 +5197,6 @@ end function ESMF_MeshEmptyCreate
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-
-    ! Get parametric dim
-    if (present(parametricDim)) parametricDim=pdim
-
-    ! Get spatial dim
-    if (present(spatialDim)) spatialDim=sdim
 
     ! Get nodal Distgrid presence
     if (present(nodalDistgridIsPresent)) then
@@ -5250,12 +5277,6 @@ end function ESMF_MeshEmptyCreate
        ! Output distgrid
        elementDistgrid = elemDistGrid
     endif
-
-    ! Get number owned nodes
-    if (present(numOwnedNodes)) numOwnedNodes = numNode
-
-    ! Get number owned elements
-    if (present(numOwnedElements)) numOwnedElements = numElem
 
     ! Init number of elem arrays for which user is asking
     numElemArrays=0
@@ -5512,29 +5533,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        return
     endif
 
-    call c_esmc_meshgetdimensions(mesh1%this, mesh1sdim, mesh1pdim, &
+    call C_ESMC_MeshGetDimensions(mesh1%this, mesh1sdim, mesh1pdim, &
                                   mesh1coordSys, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
-    call c_esmc_meshgetdimensions(mesh2%this, mesh2sdim, mesh2pdim, &
+    call C_ESMC_MeshGetDimensions(mesh2%this, mesh2sdim, mesh2pdim, &
                                   mesh2coordSys, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
-    call c_esmc_meshgetownednodecount(mesh1%this, mesh1numNode, localrc)
+    call C_ESMC_MeshGetOwnedNodeCount(mesh1%this, mesh1numNode, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call c_esmc_meshgetownedelemcount(mesh1%this, mesh1numElem, localrc)
+    call C_ESMC_MeshGetOwnedElemCount(mesh1%this, mesh1numElem, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call c_esmc_meshgetownednodecount(mesh2%this, mesh2numNode, localrc)
+    call C_ESMC_MeshGetOwnedNodeCount(mesh2%this, mesh2numNode, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call c_esmc_meshgetownedelemcount(mesh2%this, mesh2numElem, localrc)
+    call C_ESMC_MeshGetOwnedElemCount(mesh2%this, mesh2numElem, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5759,12 +5780,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         intMeshFreed=0
       endif
 
-      call c_esmc_meshgetdimensions(mesh%this, sdim, pdim, coordSys, localrc)
+      call C_ESMC_MeshGetDimensions(mesh%this, sdim, pdim, coordSys, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Serialize Mesh info items
-      call c_ESMC_MeshInfoSerialize(intMeshFreed, buffer, length, offset,linquireflag, localrc)
+      call c_ESMC_MeshInfoSerialize(intMeshFreed, buffer, &
+                                    length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5843,7 +5865,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if  (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+      
       ! deal with optional attreconflag
       if (present(attreconflag)) then
         lattreconflag = attreconflag
@@ -5852,8 +5874,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Deserialize Mesh info items
-      call c_ESMC_MeshInfoDeserialize(intMeshFreed, coordSys, &
-           buffer, offset, localrc)
+      call c_ESMC_MeshInfoDeserialize(intMeshFreed, buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -8308,8 +8329,13 @@ offset = 0
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_ArrayDestroy(nodeCoordArray)
-    call ESMF_DistGridDestroy(nodeDistGrid)
+    call ESMF_ArrayDestroy(nodeCoordArray, noGarbage=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_DistGridDestroy(nodeDistGrid, noGarbage=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Need to calculate the total number of ESMF_MESH objects and the start element ID
     ! Do a global gather to get all the local TotalElements

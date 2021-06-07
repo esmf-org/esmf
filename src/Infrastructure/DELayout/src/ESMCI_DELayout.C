@@ -1034,6 +1034,8 @@ int DELayout::getDEMatchDE(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
@@ -1099,6 +1101,8 @@ int DELayout::getDEMatchPET(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
@@ -1167,6 +1171,8 @@ int DELayout::getDeprecated(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
@@ -1272,6 +1278,8 @@ int DELayout::getDELocalInfo(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
@@ -1334,6 +1342,8 @@ int DELayout::print()const{
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
@@ -1426,6 +1436,8 @@ int DELayout::validate()const{
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
@@ -1468,6 +1480,8 @@ int DELayout::serialize(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -1731,6 +1745,8 @@ ServiceReply DELayout::serviceOffer(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
@@ -1818,6 +1834,8 @@ int DELayout::serviceComplete(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 

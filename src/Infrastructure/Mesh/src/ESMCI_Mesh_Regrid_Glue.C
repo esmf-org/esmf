@@ -520,23 +520,23 @@ void ESMCI_regrid_create(
     *_num_udl=0;
     *_tudl=NULL;
     if (*has_udl) {
-      ESMCI::TempUDL *tudl = new ESMCI::TempUDL;
-
       // Get number of unmapped points
       int num_udl=unmappedDstList.size();
 
-      // Allocate and fill udl list in struct
-      tudl->udl = NULL;
-       if (num_udl > 0) {
-         tudl->udl = new int[num_udl];
-         for (int i=0; i<num_udl; i++) {
-           tudl->udl[i]=unmappedDstList[i];
-         }
-       }
+      // If list entries exist, allocate and fill udl struct
+      ESMCI::TempUDL *tudl = NULL;
+      if (num_udl > 0) {
+        tudl = new ESMCI::TempUDL;
+        tudl->udl = NULL;
+        tudl->udl = new int[num_udl];
+        for (int i=0; i<num_udl; i++) {
+          tudl->udl[i]=unmappedDstList[i];
+        }
+      }
 
-       // Output information
-       *_num_udl=num_udl;
-       *_tudl=tudl;
+      // Output information
+      *_num_udl=num_udl;
+      *_tudl=tudl;
     }
 
   } catch(std::exception &x) {

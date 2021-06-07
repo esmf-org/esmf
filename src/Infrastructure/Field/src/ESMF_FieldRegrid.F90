@@ -1525,7 +1525,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Clean up Meshes
         if (srcgeomtype .eq. ESMF_GEOMTYPE_GRID) then
           if (.not. src_pl_used) then
-            call ESMF_MeshDestroy(srcMesh,rc=localrc)
+            call ESMF_MeshDestroy(srcMesh, noGarbage=.true., rc=localrc)
             if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1553,7 +1553,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
            ! Get rid of dual mesh
            if (srcDual) then
-              call ESMF_MeshDestroy(srcMeshDual,rc=localrc)
+              call ESMF_MeshDestroy(srcMeshDual, noGarbage=.true., rc=localrc)
               if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1562,7 +1562,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
            if (.not. dst_pl_used) then
-             call ESMF_MeshDestroy(dstMesh,rc=localrc)
+             call ESMF_MeshDestroy(dstMesh, noGarbage=.true., rc=localrc)
              if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1570,7 +1570,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ! If we're doing creep fill, then also made mesh
               if ((localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) .or. &
                    (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP_NRST_D)) then 
-                 call ESMF_MeshDestroy(dstMesh,rc=localrc)
+                 call ESMF_MeshDestroy(dstMesh, noGarbage=.true., rc=localrc)
                  if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1597,7 +1597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               if (dstDual .and. &
                    ((localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) .or. &
                    (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP_NRST_D))) then 
-                 call ESMF_MeshDestroy(dstMesh,rc=localrc)
+                 call ESMF_MeshDestroy(dstMesh, noGarbage=.true., rc=localrc)
                  if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1743,7 +1743,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  ESMF_CONTEXT, rcToReturn=rc)) return            
 
             ! Get rid of temporary Mesh
-            call ESMF_MeshDestroy(tmpMesh, rc=localrc)
+            call ESMF_MeshDestroy(tmpMesh, noGarbage=.true.,  rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rcToReturn=rc)) return            
          else 
@@ -2664,7 +2664,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! destroy Mesh, if they were created here
         if (geomtype .ne. ESMF_GEOMTYPE_MESH) then
-        call ESMF_MeshDestroy(Mesh,rc=localrc)
+        call ESMF_MeshDestroy(Mesh, noGarbage=.true., rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2779,7 +2779,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! destroy Mesh, if they were created here
         if (geomtype .ne. ESMF_GEOMTYPE_MESH) then
-        call ESMF_MeshDestroy(Mesh,rc=localrc)
+        call ESMF_MeshDestroy(Mesh, noGarbage=.true., rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

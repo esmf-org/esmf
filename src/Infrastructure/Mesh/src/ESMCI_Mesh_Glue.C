@@ -117,6 +117,8 @@ void ESMCI_meshcreate(Mesh **meshpp,
 
     // Save original dimension
     (*meshpp)->orig_spatial_dim=*sdim;
+    (*meshpp)->coordsys=*coordSys;
+    
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -2895,7 +2897,7 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid *ngrid, int *rc) {
     int rc1;
 
     int *indices = (nsize==0)?NULL:&ngids[0];
-
+    
      FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
 
     if (ESMC_LogDefault.MsgFoundError(rc1,
@@ -3007,6 +3009,7 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
 
      // Adjust offset
     *offset += size;
+    printf("serialize: intmeshfreed = %d\n", *intMeshFreed);
 
     // return success
     if (localrc) *localrc = ESMF_SUCCESS;
@@ -3033,6 +3036,7 @@ void ESMCI_meshinfodeserialize(int *intMeshFreed,
     // Get values
     *intMeshFreed=*ip++;
 
+    printf("deserialize: intmeshfreed = %d\n", *intMeshFreed);
     // Adjust offset
     *offset += 1*sizeof(int);
 
@@ -3109,7 +3113,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
 
 
     // Calc Size
-    int size = 6*sizeof(int)+
+    int size = 7*sizeof(int)+
                ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
                2*numSets*sizeof(UInt);
 
@@ -3139,6 +3143,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
       *ip++ = mesh.spatial_dim();
       *ip++ = mesh.parametric_dim();
       *ip++ = mesh.orig_spatial_dim;
+      *ip++ = static_cast<int> (mesh.coordsys);      
       *ip++ = numSets;
 
       for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
@@ -3252,6 +3257,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     int spatial_dim=*ip++;
     int parametric_dim=*ip++;
     int orig_spatial_dim=*ip++;
+    ESMC_CoordSys_Flag coordsys=static_cast<ESMC_CoordSys_Flag> (*ip++);
 
 
     // Get Some Mesh info
@@ -3317,7 +3323,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
       }
 
     // Adjust offset
-      *offset += 6*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
+      *offset += 7*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
       nvalSetSizes.size()*sizeof(UInt)+nvalSetVals.size()*sizeof(UInt)+
       nvalSetObjSizes.size()*sizeof(UInt)+nvalSetObjVals.size()*sizeof(UInt);
 
@@ -3329,6 +3335,7 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     meshp->set_spatial_dimension(spatial_dim);
     meshp->set_parametric_dimension(parametric_dim);
     meshp->orig_spatial_dim=orig_spatial_dim;
+    meshp->coordsys=coordsys;
 
     // Stuff for split meshes
     if (is_split==1) meshp->is_split=true;
@@ -4293,6 +4300,50 @@ void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *rc) {
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
+void _convert_cart_coords_to_orig_coordsys(ESMC_CoordSys_Flag orig_coordsys, int orig_sdim,
+                                           double *cart_coords, double *orig_coords) {
+
+  // Make sure original spatila dim is either 2 or 3
+  if ((orig_sdim != 2) && (orig_sdim != 3)) Throw() << "Original spatial dimension must be either 2 or 3"; 
+
+  // If cart just copy
+  if (orig_coordsys == ESMC_COORDSYS_CART) {
+
+    // Copy
+    orig_coords[0]=cart_coords[0];
+    orig_coords[1]=cart_coords[1];
+    if (orig_sdim > 2) orig_coords[2]=cart_coords[2];
+
+  } else if (orig_coordsys == ESMC_COORDSYS_SPH_DEG) {
+
+    // Get spherical deg
+    double lon, lat, rad;
+    convert_cart_to_sph_deg(cart_coords[0], cart_coords[1], cart_coords[2],
+                            &lon, &lat, &rad);
+
+    // Copy
+    orig_coords[0]=lon;
+    orig_coords[1]=lat;
+    if (orig_sdim > 2) orig_coords[2]=rad;
+
+  } else if (orig_coordsys == ESMC_COORDSYS_SPH_RAD) {
+
+    // Get spherical rad
+    double lon, lat, rad;
+    convert_cart_to_sph_rad(cart_coords[0], cart_coords[1], cart_coords[2],
+                            &lon, &lat, &rad);
+
+    // Copy
+    orig_coords[0]=lon;
+    orig_coords[1]=lat;
+    if (orig_sdim > 2) orig_coords[2]=rad;
+
+  } else {
+    Throw() << "unknown coordsys";
+  }
+
+}
+
 void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshgetcentroid()"
@@ -4325,6 +4376,10 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
     // Get dimensions
     int sdim=mesh.spatial_dim();
     int pdim=mesh.parametric_dim();
+    int orig_sdim=mesh.orig_spatial_dim;
+    ESMC_CoordSys_Flag coordsys=mesh.coordsys;
+
+    //    printf("MeshGlue::getcentroid sdim = %d, pdim = %d, orig_sdim = %d\n", sdim, pdim, orig_sdim);
 
 
     // Declare id vector
@@ -4367,10 +4422,14 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
         if (!GetAttr(elem).is_locally_owned()) continue;
 
         // Get centroid from field
-        double *centroid=centroid_field->data(elem);
+        double *cart_centroid=centroid_field->data(elem);
 
-        // Put centroid into centroid array
-        std::memcpy(elem_centroid+i*sdim, centroid, sdim*sizeof(double));
+        // Location to put original coordsys centroid
+        double *orig_centroid=elem_centroid+i*orig_sdim;
+
+        // Convert to original coordsys
+        _convert_cart_coords_to_orig_coordsys(coordsys, orig_sdim,
+                                      cart_centroid, orig_centroid);
       }
 
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -4401,27 +4460,23 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
       // Only put it in if it's locally owned
       if (!GetAttr(elem).is_locally_owned()) continue;
 
-      // Compute centroid depending on dimensions
-      double *centroid;
+      // Get polygon depending on dimensions
+      polygon res_poly;
       if (pdim==2) {
         if (sdim==2) {
           // get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
           get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
           remove_0len_edges2D(&num_poly_nodes, poly_coords);
-          polygon res_poly;
           coords_to_polygon(num_poly_nodes, poly_coords, sdim, res_poly);
-          std::memcpy(elem_centroid+i*sdim, res_poly.centroid(sdim).c, sdim*sizeof(double));
         } else if (sdim==3) {
           //get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
           get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
           remove_0len_edges3D(&num_poly_nodes, poly_coords);
-          polygon res_poly;
           coords_to_polygon(num_poly_nodes, poly_coords, sdim, res_poly);
-          std::memcpy(elem_centroid+i*sdim, res_poly.centroid(sdim).c, sdim*sizeof(double));
         }
       } else if (pdim==3) {
         if (sdim==3) {
-          Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
+          //Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
           Throw() << "Meshes with parametric dimension == 3, spatial dim = 3 not supported for computing centroid yet";
         } else {
           Throw() << "Meshes with parametric dimension == 3, but spatial dim != 3 not supported for computing centroid";
@@ -4430,6 +4485,12 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
         Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing centroid";
       }
 
+      // Location to put original coordsys centroid
+      double *orig_centroid=elem_centroid+i*orig_sdim;
+
+      // Calc. centroid from polygon and convert to original coordsys
+      _convert_cart_coords_to_orig_coordsys(coordsys, orig_sdim,
+                                            res_poly.centroid(sdim).c, orig_centroid);
     }
 
   } catch(std::exception &x) {
