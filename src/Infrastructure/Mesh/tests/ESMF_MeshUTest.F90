@@ -651,83 +651,82 @@ program ESMF_MeshUTest
          rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+
   ! Allocate space for coords
   allocate(ownedNodeCoords(2*numOwnedNodes))
   allocate(ownedElemCoords(2*numElems))
 
-  ! commented out because test doesn't return immediately for failure
+  ! Test Mesh Get
+  call ESMF_MeshGet(mesh, parametricDim=parametricDim, spatialDim=spatialDim, &
+                   nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
+                   numOwnedNodes=numOwnedNodesTst, ownedNodeCoords=ownedNodeCoords, &
+                   numOwnedElements=numOwnedElemsTst, &
+                   ownedElemCoords=ownedElemCoords, &
+                   isMemFreed=isMemFreed, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  ! ! Test Mesh Get
-  ! call ESMF_MeshGet(mesh, parametricDim=parametricDim, spatialDim=spatialDim, &
-  !                  nodalDistgrid=nodeDistgrid, elementDistgrid=elemDistgrid, &
-  !                  numOwnedNodes=numOwnedNodesTst, ownedNodeCoords=ownedNodeCoords, &
-  !                  numOwnedElements=numOwnedElemsTst, &
-  !                  ownedElemCoords=ownedElemCoords, &
-  !                  isMemFreed=isMemFreed, rc=localrc)
-  ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  !
-  ! ! check results
-  ! if (spatialDim .ne. 2) correct=.false.
-  ! if (parametricDim .ne. 2) correct=.false.
-  ! if (numOwnedNodesTst .ne. numOwnedNodes) correct=.false.
-  ! if (numOwnedElemsTst .ne. numElems) correct=.false. ! all elements are owned
-  ! if (isMemFreed) correct=.false. ! Hasn't been freed yet
-  ! 
-  ! ! check coords
-  ! j=1
-  ! do i=1,numNodes
-  !    if (nodeOwners(i) .eq. localPet) then
-  !        if (nodeCoords(2*i-1) .ne. ownedNodeCoords(2*j-1)) correct=.false.
-  !        if (nodeCoords(2*i) .ne. ownedNodeCoords(2*j)) correct=.false.
-  !        j=j+1
-  !    endif
-  ! enddo
-  ! do i=1,numElems
-  !    if (elemCoords(2*i-1) .ne. ownedElemCoords(2*i-1)) correct=.false.
-  !    if (elemCoords(2*i) .ne. ownedElemCoords(2*i)) correct=.false.
-  ! enddo
-  ! 
-  ! ! deallocate node data
-  ! deallocate(nodeIds)
-  ! deallocate(nodeCoords)
-  ! deallocate(nodeOwners)
-  ! deallocate(elemCoords)
-  ! 
-  ! ! deallocate elem data
-  ! deallocate(elemIds)
-  ! deallocate(elemTypes)
-  ! deallocate(elemConn)
-  ! 
-  ! ! deallocate owned node coords
-  ! deallocate(ownedNodeCoords)
-  ! deallocate(ownedElemCoords)
-  ! 
-  ! ! Make sure node distgrid is ok
-  ! call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)
-  ! if (localrc .ne. ESMF_SUCCESS) correct=.false.
-  ! 
-  ! ! Make sure element distgrid is ok
-  ! call ESMF_DistGridValidate(elemDistgrid, rc=localrc)
-  ! if (localrc .ne. ESMF_SUCCESS) correct=.false.
-  ! 
-  ! ! Free memory
-  ! call ESMF_MeshFreeMemory(mesh, rc=localrc)
-  ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  ! 
-  ! ! Test isMemFreed flag
-  ! call ESMF_MeshGet(mesh, isMemFreed=isMemFreed, rc=localrc)
-  ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  ! 
-  ! ! now it should indicate freed memory
-  ! if (.not. isMemFreed) correct=.false. ! Has been freed
-  ! 
-  ! !! Write mesh for debugging
-  ! !! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
-  ! !! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  ! 
-  ! ! Get rid of Mesh
-  ! call ESMF_MeshDestroy(mesh, rc=localrc)
-  ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  ! check results
+  if (spatialDim .ne. 2) correct=.false.
+  if (parametricDim .ne. 2) correct=.false.
+  if (numOwnedNodesTst .ne. numOwnedNodes) correct=.false.
+  if (numOwnedElemsTst .ne. numElems) correct=.false. ! all elements are owned
+  if (isMemFreed) correct=.false. ! Hasn't been freed yet
+
+  ! check coords
+  j=1
+  do i=1,numNodes
+     if (nodeOwners(i) .eq. localPet) then
+         if (nodeCoords(2*i-1) .ne. ownedNodeCoords(2*j-1)) correct=.false.
+         if (nodeCoords(2*i) .ne. ownedNodeCoords(2*j)) correct=.false.
+         j=j+1
+     endif
+  enddo
+  do i=1,numElems
+     if (elemCoords(2*i-1) .ne. ownedElemCoords(2*i-1)) correct=.false.
+     if (elemCoords(2*i) .ne. ownedElemCoords(2*i)) correct=.false.
+  enddo
+
+  ! deallocate node data
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+  deallocate(nodeOwners)
+  deallocate(elemCoords)
+
+  ! deallocate elem data
+  deallocate(elemIds)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+
+  ! deallocate owned node coords
+  deallocate(ownedNodeCoords)
+  deallocate(ownedElemCoords)
+
+  ! Make sure node distgrid is ok
+  call ESMF_DistGridValidate(nodeDistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+  
+  ! Make sure element distgrid is ok
+  call ESMF_DistGridValidate(elemDistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) correct=.false.
+  
+  ! Free memory
+  call ESMF_MeshFreeMemory(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! Test isMemFreed flag
+  call ESMF_MeshGet(mesh, isMemFreed=isMemFreed, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! now it should indicate freed memory
+  if (.not. isMemFreed) correct=.false. ! Has been freed
+  
+  !! Write mesh for debugging
+  !! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
+  !! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! endif for skip for != 4 procs
   endif

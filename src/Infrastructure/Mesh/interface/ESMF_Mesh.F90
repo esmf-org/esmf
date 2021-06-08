@@ -4826,7 +4826,7 @@ end function ESMF_MeshEmptyCreate
     integer :: sdim, pdim
     integer :: numNode, numElem
     type(ESMF_CoordSys_Flag) :: coordSysIn
-    logical  :: isCreated
+    logical  :: isPresent
     integer, parameter :: maxElemArrays=2
     integer            :: numElemArrays
     type(ESMF_Pointer) :: elemArrays(maxElemArrays)
@@ -5198,116 +5198,86 @@ end function ESMF_MeshEmptyCreate
            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    isPresent = .false.
     ! Get nodal Distgrid presence
     if (present(nodalDistgridIsPresent)) then
 
-        call c_ESMC_MeshGetNodeDistGrid(mesh%this, nodeDistGrid, localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! Set init code for deep C++ DistGrid object
-        call ESMF_DistGridSetInitCreated(nodeDistGrid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-!TODO: This is a pointless check... needs to move to C++ side which actually
-!TODO: knows whether the nodal DG is present or not.
-
-        ! Get is created state of nodal distgrid
-        isCreated=ESMF_DistGridIsCreated(nodeDistGrid,rc=localrc)
+        call c_ESMC_MeshGetNodeDistGridPresent(mesh%this, isPresent, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Output state
-       nodalDistgridIsPresent=isCreated
+       nodalDistgridIsPresent=isPresent
     endif
 
+    isPresent = .false.
     ! Get nodal Distgrid
     if (present(nodalDistgrid)) then
 
-        call c_ESMC_MeshGetNodeDistGrid(mesh%this, nodeDistGrid, localrc)
+        call c_ESMC_MeshGetNodeDistGridPresent(mesh%this, isPresent, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Set init code for deep C++ DistGrid object
-        call ESMF_DistGridSetInitCreated(nodeDistGrid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        if (isPresent .eqv. .true.) then
+            
+            call c_ESMC_MeshGetNodeDistGrid(mesh%this, nodeDistGrid, localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+    
+            ! Set init code for deep C++ DistGrid object
+            call ESMF_DistGridSetInitCreated(nodeDistGrid, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
-!TODO: This is a pointless check... needs to move to C++ side which actually
-!TODO: knows whether the nodal DG is present or not.
-
-        ! Get is created state of nodal distgrid
-        isCreated=ESMF_DistGridIsCreated(nodeDistGrid,rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! Make sure mesh contains nodal distgrid
-        if (.not. isCreated) then
-           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
-                msg="- this mesh doesn't contain a valid nodal distgrid", &
-                ESMF_CONTEXT, rcToReturn=rc)
-           return
+            ! Output distgrid
+            nodalDistgrid = nodeDistGrid
+        else
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_NOT_CREATED, &
+                          msg="- this mesh doesn't contain a nodal distgrid", &
+                          ESMF_CONTEXT, rcToReturn=rc)
+            return
         endif
-
-        ! Output distgrid
-        nodalDistgrid = nodeDistGrid
     endif
 
+    isPresent = .false.
     ! Get element Distgrid presence
     if (present(elementDistgridIsPresent)) then
 
-        call c_ESMC_MeshGetElemDistGrid(mesh%this, elemDistGrid, localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! Set init code for deep C++ DistGrid object
-        call ESMF_DistGridSetInitCreated(elemDistGrid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-!TODO: This is a pointless check... needs to move to C++ side which actually
-!TODO: knows whether the nodal DG is present or not.
-
-        ! Get is created state of nodal distgrid
-        isCreated=ESMF_DistGridIsCreated(elemDistGrid, rc=localrc)
+        call c_ESMC_MeshGetElemDistGridPresent(mesh%this, isPresent, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Output state
-        elementDistgridIsPresent=isCreated
+        elementDistgridIsPresent=isPresent
     endif
 
+    isPresent = .false.
     ! Get element Distgrid
     if (present(elementDistgrid)) then
 
-        call c_ESMC_MeshGetElemDistGrid(mesh%this, elemDistGrid, localrc)
+        call c_ESMC_MeshGetElemDistGridPresent(mesh%this, isPresent, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Set init code for deep C++ DistGrid object
-        call ESMF_DistGridSetInitCreated(elemDistGrid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        if (isPresent .eqv. .true.) then
 
-        ! Get is created state of nodal distgrid
-        isCreated=ESMF_DistGridIsCreated(elemDistGrid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
+            call c_ESMC_MeshGetElemDistGrid(mesh%this, elemDistGrid, localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+    
+            ! Set init code for deep C++ DistGrid object
+            call ESMF_DistGridSetInitCreated(elemDistGrid, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
-!TODO: This is a pointless check... needs to move to C++ side which actually
-!TODO: knows whether the nodal DG is present or not.
-
-        ! Make sure mesh contains element distgrid
-        if (.not. isCreated) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
-               msg="- this mesh doesn't contain a valid element distgrid", &
-               ESMF_CONTEXT, rcToReturn=rc)
-          return
+            ! Output distgrid
+            elementDistgrid = elemDistGrid
+        else
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_NOT_CREATED, &
+                          msg="- this mesh doesn't contain an elemental distgrid", &
+                          ESMF_CONTEXT, rcToReturn=rc)
+            return
         endif
-
-       ! Output distgrid
-       elementDistgrid = elemDistGrid
     endif
 
     ! Init number of elem arrays for which user is asking

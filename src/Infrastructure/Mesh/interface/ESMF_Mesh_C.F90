@@ -244,6 +244,12 @@
       endif
       
       dgrid = ldthis
+      call ESMF_DistGridValidate(ld, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) then
+          deallocate(indicesLocal)
+          return
+      endif
       
       deallocate(indicesLocal)
       

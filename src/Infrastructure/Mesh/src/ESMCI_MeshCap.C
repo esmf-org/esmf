@@ -561,6 +561,7 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
 #define ESMC_METHOD "MeshCap::destroy()"
 
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  int localrc;
 
     // Dereference meshcap
   MeshCap *mcp=*mcpp;
@@ -582,7 +583,6 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
     if (is_esmf_mesh) {
       // Only do if mesh is present
       if (mcp->mesh != NULL) {
-        int localrc;
         ESMCI_meshdestroy(&(mcp->mesh), &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, &rc)) return rc;
@@ -591,7 +591,6 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
 #if defined ESMF_MOAB
       // Only do if mbmesh is present
       if (mcp->mbmesh != NULL) {
-        int localrc;
         MBMesh_destroy(&(mcp->mbmesh), &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, &rc)) return rc;
@@ -603,6 +602,19 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
 #endif
     }
   }
+
+  if (mcp->node_distgrid_set) {
+    localrc = DistGrid::destroy(&(mcp->node_distgrid), noGarbage);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                    ESMC_CONTEXT, &rc)) return rc;
+  }
+  
+  if (mcp->elem_distgrid_set) {
+    localrc = DistGrid::destroy(&(mcp->elem_distgrid), noGarbage);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                    ESMC_CONTEXT, &rc)) return rc;
+  }
+
 
   // mark as invalid object
   mcp->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
