@@ -85,26 +85,28 @@ extern "C" void FTN_X(c_esmc_meshgetmoab)(int *_moabOn, int *rc) {
 }
 
 // Accessors to MeshCap member variables
-extern "C" void FTN_X(c_esmc_meshgetnodedistgridpresent)(MeshCap **meshpp, bool *ispresent, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetnodedistgridpresent)(MeshCap **meshpp, 
+  ESMC_Logical *ispresent, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshgetnodedistgridpresent()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
-    *ispresent = (*meshpp)->node_distgrid_set;
-    
+    *ispresent = ((*meshpp)->node_distgrid_set) ? ESMF_TRUE : ESMF_FALSE;
+
     if (rc!=NULL) *rc = ESMF_SUCCESS; 
 }
 
 // Accessors to MeshCap member variables
-extern "C" void FTN_X(c_esmc_meshgetelemdistgridpresent)(MeshCap **meshpp, bool *ispresent, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetelemdistgridpresent)(MeshCap **meshpp, 
+  ESMC_Logical *ispresent, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshgetelemdistgridpresent()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
-    *ispresent = (*meshpp)->elem_distgrid_set;
-    
+    *ispresent = ((*meshpp)->elem_distgrid_set) ? ESMF_TRUE : ESMF_FALSE;
+
     if (rc!=NULL) *rc = ESMF_SUCCESS; 
 }
 

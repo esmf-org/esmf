@@ -4827,6 +4827,7 @@ end function ESMF_MeshEmptyCreate
     integer :: numNode, numElem
     type(ESMF_CoordSys_Flag) :: coordSysIn
     logical  :: isPresent
+    type(ESMF_Logical) :: isPresentAux
     integer, parameter :: maxElemArrays=2
     integer            :: numElemArrays
     type(ESMF_Pointer) :: elemArrays(maxElemArrays)
@@ -5202,28 +5203,28 @@ end function ESMF_MeshEmptyCreate
     ! Get nodal Distgrid presence
     if (present(nodalDistgridIsPresent)) then
 
-        call c_ESMC_MeshGetNodeDistGridPresent(mesh%this, isPresent, localrc)
+        call c_ESMC_MeshGetNodeDistGridPresent(mesh%this, isPresentAux, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Output state
-       nodalDistgridIsPresent=isPresent
+       nodalDistgridIsPresent=isPresentAux
     endif
 
     isPresent = .false.
     ! Get nodal Distgrid
     if (present(nodalDistgrid)) then
 
-        call c_ESMC_MeshGetNodeDistGridPresent(mesh%this, isPresent, localrc)
+        call c_ESMC_MeshGetNodeDistGridPresent(mesh%this, isPresentAux, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (isPresent .eqv. .true.) then
-            
+        if (isPresentAux==ESMF_TRUE) then
+
             call c_ESMC_MeshGetNodeDistGrid(mesh%this, nodeDistGrid, localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
             ! Set init code for deep C++ DistGrid object
             call ESMF_DistGridSetInitCreated(nodeDistGrid, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5243,28 +5244,28 @@ end function ESMF_MeshEmptyCreate
     ! Get element Distgrid presence
     if (present(elementDistgridIsPresent)) then
 
-        call c_ESMC_MeshGetElemDistGridPresent(mesh%this, isPresent, localrc)
+        call c_ESMC_MeshGetElemDistGridPresent(mesh%this, isPresentAux, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Output state
-        elementDistgridIsPresent=isPresent
+        elementDistgridIsPresent=isPresentAux
     endif
 
     isPresent = .false.
     ! Get element Distgrid
     if (present(elementDistgrid)) then
 
-        call c_ESMC_MeshGetElemDistGridPresent(mesh%this, isPresent, localrc)
+        call c_ESMC_MeshGetElemDistGridPresent(mesh%this, isPresentAux, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (isPresent .eqv. .true.) then
+        if (isPresentAux==ESMF_TRUE) then
 
             call c_ESMC_MeshGetElemDistGrid(mesh%this, elemDistGrid, localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
             ! Set init code for deep C++ DistGrid object
             call ESMF_DistGridSetInitCreated(elemDistGrid, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

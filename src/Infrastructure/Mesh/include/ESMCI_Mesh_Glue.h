@@ -134,9 +134,9 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *nodeMask,
                                  int *rc);
 
-void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid *dg, int *rc);
+void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **dg, int *rc);
 
-void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid *dg, int *rc);
+void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **dg, int *rc);
 
 void ESMCI_meshinfoserialize(int *intMeshFreed,
                              char *buffer, int *length, int *offset,

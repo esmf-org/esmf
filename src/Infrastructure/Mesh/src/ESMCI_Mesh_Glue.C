@@ -58,7 +58,7 @@ using namespace ESMCI;
 // #define DEBUG_OWNED
 
 
-extern "C" void FTN_X(f_esmf_getmeshdistgrid)(DistGrid*, int*, int*, int*);
+extern "C" void FTN_X(f_esmf_getmeshdistgrid)(DistGrid**, int*, int*, int*);
 
 
 
@@ -2842,7 +2842,7 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
 
 
 
-void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid *ngrid, int *rc) {
+void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **ngrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreatenodedistgrid()"
 
@@ -2911,7 +2911,7 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid *ngrid, int *rc) {
 }
 
 
-void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid *egrid, int *rc) {
+void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **egrid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreateelemdistgrid()"
 

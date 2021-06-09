@@ -205,56 +205,37 @@
       use ESMF_LogErrMod
       use ESMF_BaseMod
       use ESMF_DistGridMod
- 
+
       implicit none
- 
-      type(ESMF_Pointer)     :: dgrid
+
+      type(ESMF_DistGrid)    :: dgrid
       integer, intent(in)    :: count
       integer, intent(inout) :: indices(count)
       integer, intent(out)   :: rc
- 
+
       integer :: localrc
       integer, allocatable :: indicesLocal(:)
-      type(ESMF_DistGrid) :: ld
-      type(ESMF_Pointer) :: ldthis
- 
+
       ! initialize return code; assume routine not implemented
       rc = ESMF_RC_NOT_IMPL
- 
+
       allocate(indicesLocal(count))
- 
- 
+
       if (count > 0) then
         indicesLocal(1:count) = indices(1:count)
       endif
-      
  
-      ld = ESMF_DistGridCreate(indicesLocal, rc=localrc)
+      dgrid = ESMF_DistGridCreate(indicesLocal, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(indicesLocal)
           return
       endif
-           
-      call ESMF_DistGridGetThis(ld, ldthis, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) then
-          deallocate(indicesLocal)
-          return
-      endif
-      
-      dgrid = ldthis
-      call ESMF_DistGridValidate(ld, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) then
-          deallocate(indicesLocal)
-          return
-      endif
-      
+
       deallocate(indicesLocal)
-      
+
       ! Return success
       rc = ESMF_SUCCESS
- 
+
     end subroutine f_esmf_getmeshdistgrid
 
