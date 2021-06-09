@@ -63,6 +63,9 @@
     
     ESMC_BaseSetName(NULL, "Mesh");
     
+    isfree = false;
+    status = ESMC_MESHSTATUS_UNINIT;
+
     coordsys_mc = ESMC_COORDSYS_SPH_DEG;
     sdim_mc = 0;
     pdim_mc = 0;
@@ -278,6 +281,10 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   mc->finalize_dims((*src_meshpp)->sdim_mc, (*src_meshpp)->pdim_mc,
                     (*src_meshpp)->coordsys_mc);
   mc->finalize_counts(&localrc);
+
+  // These were migrated from the Fortran level, values should mirror original
+  mc->isfree = (*src_meshpp)->isfree;
+  mc->status = (*src_meshpp)->status;
 
   // Output new MeshCap
   return mc;
@@ -615,6 +622,7 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
                                     ESMC_CONTEXT, &rc)) return rc;
   }
 
+  mcp->isfree = true;
 
   // mark as invalid object
   mcp->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
@@ -649,6 +657,11 @@ void MeshCap::meshfreememory(int *rc) {
                                   ESMC_CONTEXT, rc);
     return;
   }
+  
+  isfree = true;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
 }
 
 void MeshCap::meshgetdimensions(int *sdim, int *pdim, 
@@ -1704,36 +1717,6 @@ void MeshCap::meshsetelemdistgrid(DistGrid *dg) {
   }
 }
 
-void MeshCap::meshinfoserialize(int *intMeshFreed,
-                                char *buffer, int *length, int *offset,
-                                ESMC_InquireFlag *inquireflag, int *rc,
-                                ESMCI_FortranStrLenArg buffer_l){
-#undef ESMC_METHOD
-#define ESMC_METHOD "MeshCap::meshinfoserialize()"
-
-  // Static, so can't use is_esmf_mesh
-  // Check if need, and if so
-  // eventually put into something separate from both Mesh and MOAB
-  ESMCI_meshinfoserialize(intMeshFreed,
-                          buffer, length, offset,
-                          inquireflag, rc, buffer_l);
-}
-
-
-void MeshCap::meshinfodeserialize(int *intMeshFreed, 
-                                  char *buffer, int *offset, int *rc,
-                                  ESMCI_FortranStrLenArg buffer_l){
-#undef ESMC_METHOD
-#define ESMC_METHOD "MeshCap::meshinfodeserialize()"
-
-  // Static, so can't use is_esmf_mesh
-  // Check if need, and if so
-  // eventually put into something separate from both Mesh and MOAB
-  ESMCI_meshinfodeserialize(intMeshFreed, 
-                            buffer, offset, rc,
-                            buffer_l);
-}
-
 void MeshCap::meshserialize(char *buffer, int *length, int *offset,
                             const ESMC_AttReconcileFlag &attreconflag,
                             ESMC_InquireFlag *inquireflag, bool baseOnly,
@@ -2137,6 +2120,10 @@ MeshCap *MeshCap::meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids
                     (*src_meshpp)->coordsys_mc);
   mc->finalize_counts(&localrc);
 
+  // These were migrated from the Fortran level, values should mirror original
+  mc->isfree = (*src_meshpp)->isfree;
+  mc->status = (*src_meshpp)->status;
+
   // Output new MeshCap
   return mc;
 }
@@ -2189,6 +2176,10 @@ MeshCap *MeshCap::meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids,
                     (*src_meshpp)->coordsys_mc);
   mc->finalize_counts(&localrc);
 
+  // These were migrated from the Fortran level, values should mirror original
+  mc->isfree = (*src_meshpp)->isfree;
+  mc->status = (*src_meshpp)->status;
+
   // Output new MeshCap
   return mc;
 }
@@ -2240,6 +2231,10 @@ MeshCap *MeshCap::meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int
   mc->finalize_dims((*src_meshpp)->sdim_mc,(*src_meshpp)->pdim_mc,
                     (*src_meshpp)->coordsys_mc);
   mc->finalize_counts(&localrc);
+
+  // These were migrated from the Fortran level, values should mirror original
+  mc->isfree = (*src_meshpp)->isfree;
+  mc->status = (*src_meshpp)->status;
 
   // Output new MeshCap
   return mc;

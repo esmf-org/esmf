@@ -42,9 +42,8 @@ namespace ESMCI {
     Mesh *mesh;     // Make 1 void pointer here for both
     MBMesh *mbmesh;
     
-    // bool isCMeshFreed;
-    // status flag type not yet implemented
-    // ESMC_MeshStatus_Flag status;
+    bool isfree;
+    ESMC_MeshStatus_Flag status;
 
     ESMC_CoordSys_Flag coordsys_mc;
     int sdim_mc;
@@ -69,6 +68,9 @@ namespace ESMCI {
       mesh = NULL;
       mbmesh = NULL;
       ESMC_BaseSetName(NULL, "Mesh");
+      
+      isfree = false;
+      status = ESMC_MESHSTATUS_UNINIT;
       
       sdim_mc = 0;
       pdim_mc = 0;
@@ -166,16 +168,6 @@ namespace ESMCI {
 
     void meshsetnodedistgrid(DistGrid *dg);
     void meshsetelemdistgrid(DistGrid *dg);
-
-    static void meshinfoserialize(int *intMeshFreed, 
-                                  char *buffer, int *length, int *offset,
-                                  ESMC_InquireFlag *inquireflag, int *rc,
-                                  ESMCI_FortranStrLenArg buffer_l);
-
-
-    static void meshinfodeserialize(int *intMeshFreed,
-                                    char *buffer, int *offset, int *rc,
-                                    ESMCI_FortranStrLenArg buffer_l);
 
     void meshserialize(char *buffer, int *length, int *offset,
                        const ESMC_AttReconcileFlag &attreconflag,

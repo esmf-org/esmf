@@ -63,6 +63,17 @@ using namespace ESMCI;
 bool Moab_on=false;
 
 // This method turns on MOAB
+extern "C" void FTN_X(c_esmc_meshgetmoab)(int *_moabOn, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetmoab()"
+
+  *_moabOn=0;
+  if (Moab_on) *_moabOn=1; 
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+// This method turns on MOAB
 extern "C" void FTN_X(c_esmc_meshsetmoab)(int *_moabOn, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshsetmoab()"
@@ -73,15 +84,32 @@ extern "C" void FTN_X(c_esmc_meshsetmoab)(int *_moabOn, int *rc) {
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
-// This method turns on MOAB
-extern "C" void FTN_X(c_esmc_meshgetmoab)(int *_moabOn, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetisfree)(MeshCap **meshpp, bool *isfree) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshsetmoab()"
+#define ESMC_METHOD "c_esmc_meshgetisfree()"
 
-  *_moabOn=0;
-  if (Moab_on) *_moabOn=1; 
+  *isfree = (*meshpp)->isfree;
+}
 
-  if (rc!=NULL) *rc=ESMF_SUCCESS;
+extern "C" void FTN_X(c_esmc_meshsetisfree)(MeshCap **meshpp) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetisfree()"
+
+  (*meshpp)->isfree = true;
+}
+
+extern "C" void FTN_X(c_esmc_meshgetstatus)(MeshCap **meshpp, ESMC_MeshStatus_Flag *status) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetstatus()"
+
+  *status = (*meshpp)->status;
+}
+
+extern "C" void FTN_X(c_esmc_meshsetstatus)(MeshCap **meshpp, ESMC_MeshStatus_Flag status) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetstatus()"
+
+  (*meshpp)->status = status;
 }
 
 // Accessors to MeshCap member variables
@@ -559,30 +587,6 @@ extern "C" void FTN_X(c_esmc_meshgetnodecreateinfo)(MeshCap **meshpp,
                                                     int *rc){
 
   (*meshpp)->getNodeCreateInfo(nodeIds, nodeCoords, nodeOwners, nodeMask, rc);
-}
-
-
-extern "C" void FTN_X(c_esmc_meshinfoserialize)(int *intMeshFreed,
-                                                char *buffer, int *length, int *offset,
-                                                ESMC_InquireFlag *inquireflag, int *rc,
-                                                ESMCI_FortranStrLenArg buffer_l){
-
-  MeshCap::meshinfoserialize(intMeshFreed, 
-                             buffer, length, offset,
-                             inquireflag, rc,
-                             buffer_l);
-
-}
-
-
-extern "C" void FTN_X(c_esmc_meshinfodeserialize)(int *intMeshFreed,
-                                                  char *buffer, int *offset,
-                                                  int *rc,
-                                                  ESMCI_FortranStrLenArg buffer_l){
-
-  MeshCap::meshinfodeserialize(intMeshFreed,
-                               buffer, offset, rc,
-                               buffer_l);
 }
 
 

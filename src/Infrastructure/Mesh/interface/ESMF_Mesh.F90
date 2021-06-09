@@ -103,8 +103,8 @@ module ESMF_MeshMod
                                          ! Eventually may need to also put lower in C++ Mesh???
                                          ! If connect this via MeshCXX then move this there.
 
-    type(ESMF_MeshStatus_Flag) :: status ! The creation status of this Mesh structure
-    logical :: isCMeshFreed   ! Has the mesh memory been release?
+    ! type(ESMF_MeshStatus_Flag) :: status ! The creation status of this Mesh structure
+    ! logical :: isCMeshFreed   ! Has the mesh memory been release?
 
     ! Info about Split elements if created from a file
     ! Eventually may allow this even if not created
@@ -219,7 +219,6 @@ module ESMF_MeshMod
   public ESMF_MeshSet
   public ESMF_MeshSetMOAB
   public ESMF_MeshGetMOAB
-  public ESMF_MeshSetIsCMeshFreed
   public ESMF_MeshGetIntPtr
   public ESMF_MeshCreateFromIntPtr
   public ESMF_MeshCreateCubedSphere
@@ -669,6 +668,8 @@ end subroutine
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
     integer :: sdim, pdim
     integer :: numNode, numElem
     type(ESMF_CoordSys_Flag):: coordSys
@@ -680,7 +681,6 @@ end subroutine
     real(ESMF_KIND_R8) :: tmpCoords(2)
     integer :: coordsPresent
 
-
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -689,8 +689,8 @@ end subroutine
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, elementDistgrid, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -714,7 +714,8 @@ end subroutine
 !    endif
 
     ! If we're at the wrong stage then complain
-    if (mesh%status .ne. ESMF_MESHSTATUS_NODESADDED) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_NODESADDED) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- MeshAddNodes() should be called before this", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -822,12 +823,10 @@ end subroutine
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Change status
-    mesh%status=ESMF_MESHSTATUS_COMPLETE
+    call C_ESMC_MeshSetStatus(mesh%this, ESMF_MESHSTATUS_COMPLETE)
 
     ! Init split
     mesh%hasSplitElem=.false.
-
-    print *, "completed ESMF_MeshAddElements"
 
     if (present (rc)) rc = localrc
 
@@ -912,6 +911,8 @@ end subroutine
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
     integer :: num_nodes
     integer :: sdim, pdim, numNode
     type(ESMF_CoordSys_Flag):: coordSys
@@ -925,8 +926,8 @@ end subroutine
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, nodalDistgrid, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -934,7 +935,8 @@ end subroutine
     endif
 
     ! If we're at the wrong stage then complain
-    if (mesh%status .ne. ESMF_MESHSTATUS_STRUCTCREATED) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_STRUCTCREATED) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- MeshCreate() should be called before this", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -972,9 +974,7 @@ end subroutine
     endif
 
     ! Change status
-    mesh%status=ESMF_MESHSTATUS_NODESADDED
-
-    print *, "completed ESMF_MeshAddNodes"
+    call C_ESMC_MeshSetStatus(mesh%this, ESMF_MESHSTATUS_NODESADDED)
 
     if (present (rc)) rc = localrc
 
@@ -1051,22 +1051,19 @@ end subroutine
 
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
-      call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
+      call C_ESMC_MeshCreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
                            coordSysLocal, name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else 
-      call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
+      call C_ESMC_MeshCreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
                            coordSysLocal, "", localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    ! The C side has been created
-    ESMF_MeshCreate3Part%isCMeshFreed=.false.
-
     ! Go to next stage
-    ESMF_MeshCreate3Part%status=ESMF_MESHSTATUS_STRUCTCREATED
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreate3Part%this, ESMF_MESHSTATUS_STRUCTCREATED)
 
     ! Set init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate3Part)
@@ -1303,12 +1300,12 @@ end subroutine
     ! Create C++ Mesh
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
-      call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
+      call C_ESMC_MeshCreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
                              coordSyslocal, name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
+      call C_ESMC_MeshCreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
                              coordSyslocal, "", localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1458,11 +1455,8 @@ num_elems, &
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! The C side has been created
-    ESMF_MeshCreate1Part%isCMeshFreed=.false.
-
     ! Set Status
-    ESMF_MeshCreate1Part%status=ESMF_MESHSTATUS_COMPLETE
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreate1Part%this, ESMF_MESHSTATUS_COMPLETE)
 
     ! Can't happen here
     ESMF_MeshCreate1Part%hasSplitElem=.false.
@@ -1525,7 +1519,8 @@ num_elems, &
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer::  localrc, l_pdim, l_sdim
+    integer :: localrc
+    integer ::l_pdim, l_sdim
     type(ESMF_CoordSys_Flag) :: coordSysLocal
 
     l_pdim = 2
@@ -1540,7 +1535,6 @@ num_elems, &
        coordSysLocal=ESMF_COORDSYS_SPH_DEG
     endif
     
-    print *, "MeshCreateFromDistGrid"
     ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, &
                            coordSysLocal, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1550,25 +1544,22 @@ num_elems, &
     call c_ESMC_MeshSetElemDistGrid(ESMF_MeshCreateFromDG%this, distgrid, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-    print *, "set elem distgrid"
 
     if (present(nodalDistgrid)) then
        call c_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreateFromDG%this, nodalDistgrid, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        print *, "set node distgrid"
     else
        call c_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreateFromDG%this, distgrid, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        print *, "set node distgrid"
     endif
 
     ! Set Status
-    ESMF_MeshCreateFromDG%status=ESMF_MESHSTATUS_COMPLETE
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreateFromDG%this, ESMF_MESHSTATUS_COMPLETE)
 
-    ! Set Cmesh status
-    ESMF_MeshCreateFromDG%isCMeshFreed = .true.
+    ! Set MeshCap::isfree
+    call C_ESMC_MeshSetIsFree(ESMF_MeshCreateFromDG%this)
 
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromDG)
 
@@ -1633,9 +1624,6 @@ end function ESMF_MeshCreateFromDG
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    ! The C side has been created
-    ESMF_MeshCreateFromGrid%isCMeshFreed=.false.
-
     ! these should be set inside MeshCap
     ! Create nodal distgrid
     call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromGrid%this, localrc)
@@ -1651,7 +1639,7 @@ end function ESMF_MeshCreateFromDG
     ESMF_MeshCreateFromGrid%hasSplitElem=.false.
 
     ! Set Status
-    ESMF_MeshCreateFromGrid%status=ESMF_MESHSTATUS_COMPLETE
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreateFromGrid%this, ESMF_MESHSTATUS_COMPLETE)
 
     ! Set init status of mesh
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromGrid)
@@ -1717,9 +1705,6 @@ end function ESMF_MeshCreateFromGrid
 !      MeshOp, l_threshold, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !         ESMF_CONTEXT, rcToReturn=rc)) return
-!
-!    ! The C side has been created
-!    ESMF_MeshCreateFromMeshesR4%isCMeshFreed=.false.
 !
 !    ! Set as fully created
 !    ESMF_MeshCreateFromMeshesR4%hasSplitElem=.false.
@@ -1788,10 +1773,7 @@ end function ESMF_MeshCreateFromGrid
 !      MeshOp, l_threshold, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !         ESMF_CONTEXT, rcToReturn=rc)) return
-!
-!    ! The C side has been created
-!    ESMF_MeshCreateFromMeshesR8%isCMeshFreed=.false.
-!
+
 !    ! Set as fully created
 !    ESMF_MeshCreateFromMeshesR8%hasSplitElem=.false.
 !
@@ -1864,9 +1846,6 @@ end function ESMF_MeshCreateFromGrid
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! The C side has been created
-    ESMF_MeshCreateFromMeshes%isCMeshFreed=.false.
-
     ! these should be set inside MeshCap
     ! Create two distgrids, one for nodes and one for elements
     call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromMeshes%this, localrc)
@@ -1881,7 +1860,7 @@ end function ESMF_MeshCreateFromGrid
     ESMF_MeshCreateFromMeshes%hasSplitElem=.false.
 
     ! Set Status
-    ESMF_MeshCreateFromMeshes%status=ESMF_MESHSTATUS_COMPLETE
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreateFromMeshes%this, ESMF_MESHSTATUS_COMPLETE)
 
     ! Set the name in Base object
     if (present(name)) then
@@ -2951,7 +2930,7 @@ end function ESMF_MeshCreateFromScrip
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc      ! local return code
+    integer :: localrc
     integer :: numNode, numElem
 
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2972,14 +2951,11 @@ end function ESMF_MeshCreateFromScrip
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! The C side has been created
-    ESMF_MeshCreateFromPointer%isCMeshFreed=.false.
-
     ! Init split status
     ESMF_MeshCreateFromPointer%hasSplitElem=.false.
 
     ! Set as fully created
-    ESMF_MeshCreateFromPointer%status=ESMF_MESHSTATUS_COMPLETE
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreateFromPointer%this, ESMF_MESHSTATUS_COMPLETE)
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -3021,7 +2997,7 @@ end function ESMF_MeshCreateFromScrip
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc      ! local return code
+    integer :: localrc
     integer :: numNode, numElem
 
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3045,14 +3021,11 @@ end function ESMF_MeshCreateFromScrip
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! The C side has been created
-    ESMF_MeshCreateFromIntPtr%isCMeshFreed=.false.
-
     ! Init split status
     ESMF_MeshCreateFromIntPtr%hasSplitElem=.false.
 
     ! Set as fully created
-    ESMF_MeshCreateFromIntPtr%status=ESMF_MESHSTATUS_COMPLETE
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreateFromIntPtr%this, ESMF_MESHSTATUS_COMPLETE)
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -3236,6 +3209,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
     integer :: numNode, numElem
     integer :: numNodeIds, numElemIds
     integer, allocatable :: nodeIds(:), elemIds(:)
@@ -3245,7 +3220,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     type(ESMF_VM) :: lvm
     integer :: localPet
-
+    
     ! Init localrc
     localrc = ESMF_SUCCESS
 
@@ -3264,7 +3239,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, elementDistgrid, rc)
 
     ! If mesh has not been fully created
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -3284,14 +3260,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     !! Fill in information available in input mesh
 
-    ! Will have same freed status as input mesh
-    ESMF_MeshCreateRedist%isCMeshFreed=mesh%isCMeshFreed
-
     ! Will have same split status as input mesh
     ESMF_MeshCreateRedist%hasSplitElem=mesh%hasSplitElem
 
-    ! Will have same created status as input mesh
-    ESMF_MeshCreateRedist%status=mesh%status
 
     !!! OPERATE BASED ON PRESENCE OF DISTGRIDS  !!!
     if (present(nodalDistgrid)) then
@@ -3311,9 +3282,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! If the C side doesn't exist, then don't need to redist, so exit
-          if (mesh%isCMeshFreed) then
+          call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+          if (isfree) then
              ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
-
              if (present(rc)) rc=ESMF_SUCCESS
              return
           endif
@@ -3356,10 +3327,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! If the C side doesn't exist, then return an error
           ! because I don't know how to distribute nodes without elem info
-          if (mesh%isCMeshFreed) then
+          call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+          if (isfree) then
              call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
-   msg="- method does not work if the input Mesh has no " // &
-       "C Mesh attached and just the nodeDistgrid is specified", &
+             msg="- method does not work if the input Mesh has no " // &
+             "C Mesh attached and just the nodeDistgrid is specified", &
                   ESMF_CONTEXT, rcToReturn=rc)
              return
           endif
@@ -3400,7 +3372,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! If the C side doesn't exist, then return an error
           ! because I don't know how to distribute nodes without elem info
-          if (mesh%isCMeshFreed) then
+          call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+          if (isfree) then
              call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
    msg="- method does not work if the input Mesh has no " // &
        "C Mesh attached and just the elemDistgrid is specified", &
@@ -3456,7 +3429,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! If the C side doesn't exist, then don't need to redist, so exit
-          if (mesh%isCMeshFreed) then
+          call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+          if (isfree) then
              ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
 
              if (present(rc)) rc=ESMF_SUCCESS
@@ -3560,6 +3534,7 @@ end function ESMF_MeshCreateRedist
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc
+    type(ESMF_MeshStatus_Flag) :: status
     integer :: numNode, numElem
 
     ! Init localrc
@@ -3569,7 +3544,8 @@ end function ESMF_MeshCreateRedist
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
     ! If mesh has not been fully created
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -3582,20 +3558,15 @@ end function ESMF_MeshCreateRedist
     ! TODO: Will need to do this before CESM uses with HOMME grid
     if (mesh%hasSplitElem) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
-               msg="- meshes with split elements can not be redisted right now", &
+               msg="- meshes with split elements can not be used for a dual mesh right now", &
                ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
     !! Fill in information available in input mesh
-    ! Will have same freed status as input mesh
-    ESMF_MeshCreateDual%isCMeshFreed=mesh%isCMeshFreed
 
     ! Will have same split status as input mesh
     ESMF_MeshCreateDual%hasSplitElem=mesh%hasSplitElem
-
-    ! Will have same created status as input mesh
-    ESMF_MeshCreateDual%status=mesh%status
 
     ! Call into C
     call C_ESMC_MeshCreateDual(mesh, ESMF_MeshCreateDual, localrc)
@@ -4023,14 +3994,11 @@ end function ESMF_MeshCreateDual
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! The C side has been created
-    ESMF_MeshCreateEasyElemsGen%isCMeshFreed=.false.
-
     ! Can't happen here
     ESMF_MeshCreateEasyElemsGen%hasSplitElem=.false.
 
     ! Set as fully created
-    ESMF_MeshCreateEasyElemsGen%status=ESMF_MESHSTATUS_COMPLETE
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreateEasyElemsGen%this, ESMF_MESHSTATUS_COMPLETE)
 
     ! Set init status of mesh
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateEasyElemsGen)
@@ -4470,8 +4438,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{description}
 !
 !EOP
-      integer  :: localrc
-      type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
+      integer :: localrc
+      logical :: isfree
+      type(ESMF_MeshStatus_Flag) :: status
+      type(ESMF_Logical) :: opt_noGarbage
       logical  :: isCreated
 
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
@@ -4483,20 +4453,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #if 0
   block 
     character(80):: msg
-    write(msg,*) "Entering ESMF_MeshDestroy with isCMeshFreed=", mesh%isCMeshFreed
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    write(msg,*) "Entering ESMF_MeshDestroy with isfree=", isfree
     call ESMF_PointerLog(mesh%this, prefix=msg, logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
   end block
 #endif
 
-      ! If not already freed then free the c side
-      if (.not. mesh%isCMeshFreed) then
+      ! TODO: required for split handling below, remove when moved to C
+      call C_ESMC_MeshGetStatus(mesh%this, status)
+
+      call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+      if (.not. isfree) then
         ! This will also set the Base Status to INVALID
         call C_ESMC_MeshDestroy(mesh%this, opt_noGarbage, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! Set this for consistancies sake
-         mesh%isCMeshFreed=.true.
       else
         ! Even when there is no CMesh part, there is a Base, and it needs to
         ! be set to INVALID for correct garbage collection behavior
@@ -4505,15 +4476,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      if (mesh%status .eq. ESMF_MESHSTATUS_COMPLETE) then
+      
+      if (status .eq. ESMF_MESHSTATUS_COMPLETE) then
          ! Get rid of split element map
          if (mesh%hasSplitElem) then
             deallocate(mesh%splitElemMap)
          endif
       endif
-
-      ! Set status
-      mesh%status=ESMF_MESHSTATUS_UNINIT
 
       ! Mark as deleted
       ESMF_INIT_SET_DELETED(mesh)
@@ -4565,19 +4534,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
     integer  :: localrc
-
-    ! Mark that there isn't a C mesh underneath
-    ESMF_MeshEmptyCreate%isCMeshFreed = .true. ! helps problems in reconcile
-
-    ! This is only a vehical for carrying distgrids, so it's not fully
-    ! created yet. It should error out of most calls, except a specific set
-    ! of MeshGet() queries.
-    ESMF_MeshEmptyCreate%status=ESMF_MESHSTATUS_EMPTY
+    
 
     ! ensure that Base is okay to be queried
     call c_ESMC_MeshCreateEmpty(ESMF_MeshEmptyCreate, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Mark that there isn't a C mesh underneath
+    call C_ESMC_MeshSetIsFree(ESMF_MeshEmptyCreate)
+
+    ! This is only a vehical for carrying distgrids, so it's not fully
+    ! created yet. It should error out of most calls, except a specific set
+    ! of MeshGet() queries.
+    call C_ESMC_MeshSetStatus(ESMF_MeshEmptyCreate%this, ESMF_MESHSTATUS_EMPTY)
 
     ! Set the name in Base object
     if (present(name)) then
@@ -4626,11 +4596,13 @@ end function ESMF_MeshEmptyCreate
 !
 !EOP
       integer  :: localrc
-
+      logical :: isfree
+      
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
       ! If already free, fine just return
-      if (mesh%isCMeshFreed) then
+      call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+      if (isfree) then
         if (present (rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -4639,7 +4611,7 @@ end function ESMF_MeshEmptyCreate
       call C_ESMC_MeshFreeMemory(mesh,localrc)
 
       ! Set Freed status
-      mesh%isCMeshFreed = .true.
+      call C_ESMC_MeshSetIsFree(mesh)
 
       if (present (rc)) rc = localrc
 
@@ -4822,7 +4794,9 @@ end function ESMF_MeshEmptyCreate
 ! \end{description}
 !
 !EOP
-    integer  :: localrc
+    integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: local_status
     integer :: sdim, pdim
     integer :: numNode, numElem
     type(ESMF_CoordSys_Flag) :: coordSysIn
@@ -4859,7 +4833,8 @@ end function ESMF_MeshEmptyCreate
 
     ! If mesh has not been fully created, make sure that the user
     ! isn't asking for something that requires a fully created mesh
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, local_status)
+    if (local_status .ne. ESMF_MESHSTATUS_COMPLETE) then
 
        ! Check one set of variables
        if (present(parametricDim) .or. &
@@ -5152,8 +5127,8 @@ end function ESMF_MeshEmptyCreate
 
     ! Get node coords
     if (present(ownedNodeCoords)) then
-       ! If mesh has been freed then exit
-       if (mesh%isCMeshFreed) then
+       call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+       if (isfree) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                 msg="- the mesh internals have been freed", &
                 ESMF_CONTEXT, rcToReturn=rc)
@@ -5161,7 +5136,6 @@ end function ESMF_MeshEmptyCreate
        endif
 
        ! Check array size
-       print *, "sdim = ", sdim, " numNode = ", numNode, "size = ", size(ownedNodeCoords)
        if (size(ownedNodeCoords)<numNode*sdim) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                 msg="- ownedNodeCoords too small to hold coordinates", &
@@ -5176,8 +5150,8 @@ end function ESMF_MeshEmptyCreate
     endif
 
     if (present(ownedElemCoords)) then
-       ! If mesh has been freed then exit
-       if (mesh%isCMeshFreed) then
+       call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+       if (isfree) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                 msg="- the mesh internals have been freed", &
                 ESMF_CONTEXT, rcToReturn=rc)
@@ -5341,14 +5315,15 @@ end function ESMF_MeshEmptyCreate
 
     ! Get freed status
     if (present(isMemFreed)) then
-       isMemFreed=mesh%isCMeshFreed
+      call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+      isMemFreed=isfree
     endif
 
     ! Get coord system
     if (present(coordSys)) coordSys = coordSysIn
 
     ! Get status
-    if (present(status)) status=mesh%status
+    if (present(status)) status=local_status
 
     ! Special call to get name out of Base class
     if (present(name)) then
@@ -5497,6 +5472,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer :: i, localrc
+    type(ESMF_MeshStatus_Flag) :: status1, status2
     integer :: mesh1sdim, mesh1pdim, mesh2sdim, mesh2pdim
     integer :: mesh1numNode, mesh1numElem, mesh2numNode, mesh2numElem
     type(ESMF_CoordSys_Flag) :: mesh1coordSys, mesh2coordSys
@@ -5521,14 +5497,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh2, rc)
 
     ! If meshes have not been fully created
-    if (mesh1%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh1%this, status1)
+    if (status1 .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    if (mesh2%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh2%this, status2)
+    if (status2 .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -5747,11 +5725,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
       integer :: i, localrc
+      logical :: isfree
       integer :: sdim, pdim
       type(ESMF_CoordSys_Flag) :: coordSys
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_InquireFlag) :: linquireflag
-      integer :: intMeshFreed,intFullyCreated
+      integer :: intFullyCreated
       logical :: isPresentNDG, isPresentEDG
       integer :: intIsPresentNDG, intIsPresentEDG
 
@@ -5775,26 +5754,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         linquireflag = ESMF_NOINQUIRE
       end if
 
-      ! Convert logicals to ints
-      if (mesh%isCMeshFreed) then
-        intMeshFreed=1
-      else
-        intMeshFreed=0
-      endif
-
       call C_ESMC_MeshGetDimensions(mesh%this, sdim, pdim, coordSys, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! Serialize Mesh info items
-      call c_ESMC_MeshInfoSerialize(intMeshFreed, buffer, &
-                                    length, offset, linquireflag, localrc)
-      if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
       ! If exists serialize mesh
-      if (.not. mesh%isCMeshFreed) then
+      call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+      if (.not. isfree) then
          call c_ESMC_MeshSerialize(mesh%this, buffer, length, offset, &
                                    lattreconflag, linquireflag, localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5858,9 +5824,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
       integer :: localrc
+      logical :: isfree
       integer :: i
       type(ESMF_AttReconcileFlag) :: lattreconflag
-      integer :: intMeshFreed, spatialDim, parametricDim
+      integer :: spatialDim, parametricDim
       integer :: intIsPresentNDG, intIsPresentEDG
       type(ESMF_CoordSys_Flag) :: coordSys
 
@@ -5875,26 +5842,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         lattreconflag = ESMF_ATTRECONCILE_OFF
       endif
 
-      ! Deserialize Mesh info items
-      call c_ESMC_MeshInfoDeserialize(intMeshFreed, buffer, offset, localrc)
-      if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Convert ints to logicals
-      if (intMeshFreed .eq. 1) then
-         ESMF_MeshDeserialize%isCMeshFreed=.true.
-      else
-         ESMF_MeshDeserialize%isCMeshFreed=.false.
-      endif
-
       ! Set values who's values are implied by the fact
       ! that this is a proxy mesh
       ESMF_MeshDeserialize%hasSplitElem=.false.
-      ESMF_MeshDeserialize%status=ESMF_MESHSTATUS_COMPLETE
+      call C_ESMC_MeshSetStatus(ESMF_MeshDeserialize%this, ESMF_MESHSTATUS_COMPLETE)
 
       ! If exists serialize mesh
-      if (.not. ESMF_MeshDeserialize%isCMeshFreed) then
+      call C_ESMC_MeshGetIsFree(ESMF_MeshDeserialize%this, isfree)
+      if (.not. isfree) then
          call c_ESMC_MeshDeserialize(ESMF_MeshDeserialize%this, buffer, &
                                      offset, lattreconflag, localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5954,6 +5909,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
     integer  :: localrc
+    type(ESMF_MeshStatus_Flag) :: status
     type(ESMF_InterArray) :: elementMaskIA
     type(ESMF_InterArray) :: elementAreaIA
 
@@ -5967,7 +5923,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has not been fully created, make sure that the user
     ! isn't asking for something that requires a fully created mesh
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
 
 
 
@@ -6121,37 +6078,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_MeshSetMOAB
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MeshSetIsCMeshFreed()"
-!BOPI
-! !IROUTINE: ESMF_MeshSetIsCMeshFreed
-!
-! !INTERFACE:
-   subroutine ESMF_MeshSetIsCMeshFreed(mesh, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)             :: mesh
-    integer, intent(out) , optional            :: rc
-!
-! !DESCRIPTION:
-!   Set the isCMeshFreed to true
-!
-!   \begin{description}
-!   \item [mesh]
-!         The mesh.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-
-    mesh%isCMeshFreed=.true.
-
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_MeshSetIsCMeshFreed
-!------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshWrite()"
@@ -6181,7 +6107,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -6190,16 +6118,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6260,8 +6188,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
+    integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
+    
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -6269,16 +6199,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6346,7 +6276,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
     type(ESMF_UnmappedAction_Flag) :: localunmappedaction
 
     ! initialize return code; assume routine not implemented
@@ -6356,16 +6288,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6424,7 +6356,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -6433,16 +6367,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6493,9 +6427,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                             :: localrc      ! local return code
-    real(ESMF_KIND_R8), pointer         :: splitAreaList(:)
-    integer                             :: i,m
+    integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
+    real(ESMF_KIND_R8), pointer :: splitAreaList(:)
+    integer :: i,m
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -6504,16 +6440,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6594,7 +6530,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -6603,16 +6541,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6660,8 +6598,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
+    integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
+    
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -6669,16 +6609,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6730,7 +6670,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                             :: localrc      ! local return code
+    integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
+    
     real(ESMF_KIND_R8), pointer         :: splitAreaList(:)
     real(ESMF_KIND_R8), pointer         :: origAreaList(:)
     integer                             :: i,m
@@ -6742,16 +6685,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6862,12 +6805,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
       integer  :: localrc
+      type(ESMF_MeshStatus_Flag) :: status
+      
       localrc = ESMF_SUCCESS
 
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
     ! If mesh has not been fully created
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -6940,10 +6886,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer  :: localrc      ! local return code
-    integer  :: indCount
-    integer  :: i,m
-    integer  :: localPet, petCount
+    integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
+    integer :: indCount
+    integer :: i,m
+    integer :: localPet, petCount
     type(ESMF_VM) :: vm
     integer (ESMF_KIND_I4) :: localCount(1)
     integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
@@ -6957,16 +6905,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -7078,6 +7026,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc
+    logical :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
     integer :: numElem
     integer :: indCount
     integer :: i,m, split_dst_id, orig_dst_id
@@ -7093,16 +7043,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
 
-    ! If mesh has been freed then exit
-    if (mesh%isCMeshFreed) then
+    call C_ESMC_MeshGetIsFree(mesh%this, isfree)
+    if (isfree) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh internals have been freed", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-    ! If mesh has been freed then exit
-    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
+    call C_ESMC_MeshGetStatus(mesh%this, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
@@ -7119,7 +7069,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Get size of list
     indCount=size(factorIndexList,2)
 
-    call c_esmc_meshgetelemcount(mesh%this, numElem, localrc)
+    call C_ESMC_MeshGetElemCount(mesh%this, numElem, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7439,7 +7389,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshLocEqual"
 !BOPI
-! !IROUTINE: ESMF_MeshLocEqual - Equality of MeshLoc statuses
+! !IROUTINE: ESMF_MeshLocEqual - Equality of MeshLocs
 !
 ! !INTERFACE:
       function ESMF_MeshLocEqual(MeshLoc1, MeshLoc2)
@@ -7450,17 +7400,17 @@ end subroutine ESMF_MeshMergeSplitDstInd
 ! !ARGUMENTS:
 
       type (ESMF_MeshLoc), intent(in) :: &
-         MeshLoc1,      &! Two igrid statuses to compare for
+         MeshLoc1,      &! Two igrid MeshLocs to compare for
          MeshLoc2        ! equality
 
 ! !DESCRIPTION:
-!     This routine compares two ESMF MeshLoc statuses to see if
+!     This routine compares two MeshLocs to see if
 !     they are equivalent.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[MeshLoc1, MeshLoc2]
-!          Two igrid statuses to compare for equality
+!          Two igrid MeshLocs to compare for equality
 !     \end{description}
 !
 !EOPI
@@ -7473,7 +7423,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshLocNotEqual"
 !BOPI
-! !IROUTINE: ESMF_MeshLocNotEqual - Non-equality of MeshLoc statuses
+! !IROUTINE: ESMF_MeshLocNotEqual - Non-equality of MeshLocs
 !
 ! !INTERFACE:
       function ESMF_MeshLocNotEqual(MeshLoc1, MeshLoc2)
@@ -7484,17 +7434,17 @@ end subroutine ESMF_MeshMergeSplitDstInd
 ! !ARGUMENTS:
 
       type (ESMF_MeshLoc), intent(in) :: &
-         MeshLoc1,      &! Two MeshLoc Statuses to compare for
+         MeshLoc1,      &! Two MeshLocs to compare for
          MeshLoc2        ! inequality
 
 ! !DESCRIPTION:
-!     This routine compares two ESMF MeshLoc statuses to see if
+!     This routine compares two MeshLocs to see if
 !     they are unequal.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[MeshLoc1, MeshLoc2]
-!          Two statuses of MeshLocs to compare for inequality
+!          Two MeshLocs to compare for inequality
 !     \end{description}
 !
 !EOPI
