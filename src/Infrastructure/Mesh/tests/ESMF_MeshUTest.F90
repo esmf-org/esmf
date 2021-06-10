@@ -930,7 +930,7 @@ program ESMF_MeshUTest
 
   deallocate (buf)
   bufCount=2*offset ! a little more room
-  print *, 'ESMF_MeshUTest: serialization buffer size =', bufCount
+  ! print *, 'ESMF_MeshUTest: serialization buffer size =', bufCount
   allocate(buf(bufCount))
 
   ! Serialize
@@ -938,7 +938,7 @@ program ESMF_MeshUTest
    call ESMF_MeshSerialize(mesh, buf, bufCount, offset, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  print *, 'ESMF_MeshUTest: serialized buffer size =', offset
+  ! print *, 'ESMF_MeshUTest: serialized buffer size =', offset
 
   ! Deserialize
   offset=0
@@ -953,15 +953,16 @@ program ESMF_MeshUTest
                    isMemFreed=isMemFreed,  coordSys=coordSys, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  ! check results
-  if (numOwnedNodesTst .ne. 0) then
-    ! correct=.false.
-    print *, "numOwnedNodes = ", numOwnedNodesTst
-  endif
-  if (numOwnedElemsTst .ne. 0) then
-    ! correct=.false.
-    print *, "numOwnedElems = ", numOwnedElemsTst
-  endif
+  ! removed this check because no longer correct after counts migrated to C
+  ! ! check results
+  ! if (numOwnedNodesTst .ne. 0) then
+  !   ! correct=.false.
+  !   print *, "numOwnedNodes = ", numOwnedNodesTst
+  ! endif
+  ! if (numOwnedElemsTst .ne. 0) then
+  !   ! correct=.false.
+  !   print *, "numOwnedElems = ", numOwnedElemsTst
+  ! endif
 
   if (spatialDim .ne. 2) correct=.false.
   if (parametricDim .ne. 2) correct=.false.
@@ -2346,7 +2347,7 @@ endif
   if (nodalIsPresent .or. elementIsPresent) then
      correct=.false.
   endif
-
+  
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2490,7 +2491,7 @@ endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
-#if 0
+#if 1
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test get of element mask and area info"
@@ -2871,7 +2872,7 @@ endif
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
   !  to be called until then".
-  !UTest
+  !NEX_deactivate_UTest
   !write(name, *) "MeshWrite Test"
   !write(failMsg, *) "Did not return ESMF_SUCCESS"
   !  call ESMF_MeshWrite(meshSrc, filename="mesh_out", rc=rc)

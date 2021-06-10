@@ -62,7 +62,7 @@ using namespace ESMCI;
 // #define DEBUG_OWNED
 
 
-extern "C" void FTN_X(f_esmf_getmeshdistgrid)(DistGrid*, int*, int*, int*);
+extern "C" void FTN_X(f_esmf_getmeshdistgrid)(DistGrid**, int*, int*, int*);
 
 void MBMesh_create(MBMesh **mbmpp, int *pdim, int *sdim,
                    ESMC_CoordSys_Flag *coordSys, int *rc)
@@ -864,7 +864,7 @@ void MBMesh_write(MBMesh **mbmpp, char *fname, int *rc,
 }
 
 
-void MBMesh_createnodedistgrid(MBMesh **mbmpp, DistGrid *dg, int *rc) {
+void MBMesh_createnodedistgrid(MBMesh **mbmpp, DistGrid **dg, int *rc) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createnodedistgrid()"
@@ -1008,7 +1008,7 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
 }
 
 
-void MBMesh_createelemdistgrid(MBMesh **mbmpp, DistGrid *dg, int *rc) {
+void MBMesh_createelemdistgrid(MBMesh **mbmpp, DistGrid **dg, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createelemdistgrid()"
 

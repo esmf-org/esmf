@@ -801,13 +801,13 @@ end subroutine
     endif
 
     ! create node distgrid if it hasn't been set in ESMF_MeshAddNodes()
-    call C_ESMC_MeshCreateNodeDistGrid(mesh%this, localrc)
+    call C_ESMC_MeshCreateNodeDistGrid(mesh, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set Element Distgrid
     if (.not. present(elementDistgrid)) then
-       call C_ESMC_MeshCreateElemDistGrid(mesh%this, localrc)
+       call C_ESMC_MeshCreateElemDistGrid(mesh, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
@@ -826,8 +826,6 @@ end subroutine
 
     ! Init split
     mesh%hasSplitElem=.false.
-
-    print *, "completed ESMF_MeshAddElements"
 
     if (present (rc)) rc = localrc
 
@@ -966,15 +964,13 @@ end subroutine
     
     ! Set distgrid if was passed in
     if (present(nodalDistgrid)) then
-       call c_ESMC_MeshSetNodeDistGrid(mesh%this, nodalDistgrid, localrc)
+       call c_ESMC_MeshSetNodeDistGrid(mesh, nodalDistgrid, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Change status
     mesh%status=ESMF_MESHSTATUS_NODESADDED
-
-    print *, "completed ESMF_MeshAddNodes"
 
     if (present (rc)) rc = localrc
 
@@ -1434,21 +1430,21 @@ num_elems, &
 
     ! Create two distgrids, one for nodes and one for elements
     if (present(nodalDistgrid)) then
-      call c_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreate1Part%this, nodalDistgrid, localrc)
+      call c_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreate1Part, nodalDistgrid, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreate1Part%this, localrc)
+      call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreate1Part, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(elementDistgrid)) then
-      call c_ESMC_MeshSetElemDistGrid(ESMF_MeshCreate1Part%this, elementDistgrid, localrc)
+      call c_ESMC_MeshSetElemDistGrid(ESMF_MeshCreate1Part, elementDistgrid, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreate1Part%this, localrc)
+      call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreate1Part, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1540,28 +1536,24 @@ num_elems, &
        coordSysLocal=ESMF_COORDSYS_SPH_DEG
     endif
     
-    print *, "MeshCreateFromDistGrid"
     ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, &
                            coordSysLocal, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set information
-    call c_ESMC_MeshSetElemDistGrid(ESMF_MeshCreateFromDG%this, distgrid, localrc)
+    call c_ESMC_MeshSetElemDistGrid(ESMF_MeshCreateFromDG, distgrid, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-    print *, "set elem distgrid"
 
     if (present(nodalDistgrid)) then
-       call c_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreateFromDG%this, nodalDistgrid, localrc)
+       call c_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreateFromDG, nodalDistgrid, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        print *, "set node distgrid"
     else
-       call c_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreateFromDG%this, distgrid, localrc)
+       call c_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreateFromDG, distgrid, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        print *, "set node distgrid"
     endif
 
     ! Set Status
@@ -1638,12 +1630,12 @@ end function ESMF_MeshCreateFromDG
 
     ! these should be set inside MeshCap
     ! Create nodal distgrid
-    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromGrid%this, localrc)
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromGrid, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create element distgrid
-    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromGrid%this, localrc)
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromGrid, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1869,11 +1861,11 @@ end function ESMF_MeshCreateFromGrid
 
     ! these should be set inside MeshCap
     ! Create two distgrids, one for nodes and one for elements
-    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromMeshes%this, localrc)
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromMeshes, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromMeshes%this, localrc)
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromMeshes, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2964,11 +2956,11 @@ end function ESMF_MeshCreateFromScrip
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromPointer)
 
     ! Create two distgrids, one for nodes and one for elements
-    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromPointer%this, localrc)
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromPointer, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromPointer%this, localrc)
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromPointer, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3037,11 +3029,11 @@ end function ESMF_MeshCreateFromScrip
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromIntPtr)
 
     ! Create two distgrids, one for nodes and one for elements
-    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromIntPtr%this, localrc)
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromIntPtr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromIntPtr%this, localrc)
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromIntPtr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3349,6 +3341,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! Deallocate gid arrays
           deallocate(nodeIds)
           deallocate(elemIds)
+
+          call C_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreateRedist, nodalDistgrid, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          
+          call C_ESMC_MeshSetElemDistGrid(ESMF_MeshCreateRedist, elementDistgrid, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
       else  !! JUST NODE DISTGRID PRESENT !!
           call ESMF_DistGridGetNumIds(nodalDistgrid, numNodeIds, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3382,11 +3383,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
+          call C_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreateRedist, nodalDistgrid, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          
           ! Deallocate gid arrays
           deallocate(nodeIds)
 
            ! Create elem distgrid
-          call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateRedist%this, localrc)
+          call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateRedist, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
@@ -3417,7 +3422,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
-
           ! Call into C
           call C_ESMC_MeshCreateRedistElems(mesh,                  &
                numElemIds, elemIds,   &
@@ -3429,8 +3433,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! Deallocate gid arrays
           deallocate(elemIds)
 
+          call C_ESMC_MeshSetElemDistGrid(ESMF_MeshCreateRedist, elementDistgrid, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            ! Create node distgrid and get number of nodes
-          call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateRedist%this, localrc)
+          call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateRedist, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3440,11 +3448,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call c_ESMC_MeshGetNodeDistGrid(mesh%this, nodeDistGrid, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-               
+          
+          ! Set init code for deep C++ DistGrid object
+          call ESMF_DistGridSetInitCreated(nodeDistGrid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+            
           call c_ESMC_MeshGetElemDistGrid(mesh%this, elemDistGrid, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-               
+          
+          ! Set init code for deep C++ DistGrid object
+          call ESMF_DistGridSetInitCreated(elemDistGrid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+            
           ! Get number of node Ids
           call ESMF_DistGridGetNumIds(nodeDistGrid, numNodeIds, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3494,12 +3512,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           deallocate(elemIds)
 
            ! Create node distgrid and get number of nodes
-          call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateRedist%this, localrc)
+          call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateRedist, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
            ! Create elem distgrid and get number of elems
-          call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateRedist%this, localrc)
+          call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateRedist, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
        endif
@@ -3604,11 +3622,11 @@ end function ESMF_MeshCreateRedist
 
     ! these should be set inside MeshCap
     ! Create node distgrid and get number of nodes
-    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateDual%this, localrc)
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateDual, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateDual%this, localrc)
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateDual, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4002,14 +4020,14 @@ end function ESMF_MeshCreateDual
     endif
 
     ! Create nodal distgrid
-    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateEasyElemsGen%this, localrc)
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateEasyElemsGen, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Create a distgrid if it isn't passed in
     if (.not. present(elementDistgrid)) then
-        call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateEasyElemsGen%this, localrc)
+        call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateEasyElemsGen, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -4578,6 +4596,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_ESMC_MeshCreateEmpty(ESMF_MeshEmptyCreate, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(nodalDistgrid)) then
+      call C_ESMC_MeshSetNodeDistGrid(ESMF_MeshEmptyCreate, nodalDistgrid, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    if (present(elementdistgrid)) then
+      call C_ESMC_MeshSetElemDistGrid(ESMF_MeshEmptyCreate, elementdistgrid, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif    
 
     ! Set the name in Base object
     if (present(name)) then
@@ -5162,7 +5192,6 @@ end function ESMF_MeshEmptyCreate
        endif
 
        ! Check array size
-       print *, "sdim = ", sdim, " numNode = ", numNode, "size = ", size(ownedNodeCoords)
        if (size(ownedNodeCoords)<numNode*sdim) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                 msg="- ownedNodeCoords too small to hold coordinates", &
@@ -5566,18 +5595,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Set init code for deep C++ DistGrid object
+    call ESMF_DistGridSetInitCreated(nodeDistGrid1, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
     call c_ESMC_MeshGetNodeDistGrid(mesh2%this, nodeDistGrid2, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Set init code for deep C++ DistGrid object
+    call ESMF_DistGridSetInitCreated(nodeDistGrid2, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
     call c_ESMC_MeshGetElemDistGrid(mesh1%this, elemDistGrid1, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Set init code for deep C++ DistGrid object
+    call ESMF_DistGridSetInitCreated(elemDistGrid1, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
     call c_ESMC_MeshGetElemDistGrid(mesh2%this, elemDistGrid2, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! Set init code for deep C++ DistGrid object
+    call ESMF_DistGridSetInitCreated(elemDistGrid2, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! For now just make match to mean that the Mesh's have the same distgrids because that's
     ! all the fields care about

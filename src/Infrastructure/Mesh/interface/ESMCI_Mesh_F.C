@@ -120,7 +120,7 @@ extern "C" void FTN_X(c_esmc_meshgetnodedistgrid)(MeshCap **meshpp, DistGrid **d
     // ensure 'meshpp' argument is valid to be dereferenced
     if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "The 'dg' argument must not be a NULL pointer",
+        "The 'meshpp' argument must not be a NULL pointer",
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
@@ -140,7 +140,7 @@ extern "C" void FTN_X(c_esmc_meshgetelemdistgrid)(MeshCap **meshpp, DistGrid **d
     // ensure 'meshpp' argument is valid to be dereferenced
     if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "The 'dg' argument must not be a NULL pointer",
+        "The 'meshpp' argument must not be a NULL pointer",
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
@@ -160,7 +160,7 @@ extern "C" void FTN_X(c_esmc_meshsetnodedistgrid)(MeshCap **meshpp, DistGrid **d
     // ensure 'meshpp' argument is valid to be dereferenced
     if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "The 'dg' argument must not be a NULL pointer",
+        "The 'meshpp' argument must not be a NULL pointer",
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
@@ -171,9 +171,6 @@ extern "C" void FTN_X(c_esmc_meshsetnodedistgrid)(MeshCap **meshpp, DistGrid **d
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
-
-    printf("c_esmc_meshsetnodedistgrid: distgrid dimcount = %d\n", 
-            (*dg)->getDimCount());
 
     ESMCI_NULL_CHECK_PRC(dg, rc)
     (*meshpp)->meshsetnodedistgrid(*dg);
@@ -192,7 +189,7 @@ extern "C" void FTN_X(c_esmc_meshsetelemdistgrid)(MeshCap **meshpp, DistGrid **d
     // ensure 'meshpp' argument is valid to be dereferenced
     if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "The 'dg' argument must not be a NULL pointer",
+        "The 'meshpp' argument must not be a NULL pointer",
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
@@ -204,9 +201,6 @@ extern "C" void FTN_X(c_esmc_meshsetelemdistgrid)(MeshCap **meshpp, DistGrid **d
       return; // bail out
     }
     
-    printf("c_esmc_meshsetelemdistgrid: distgrid dimcount = %d\n", 
-            (*dg)->getDimCount());
-
     ESMCI_NULL_CHECK_PRC(dg, rc)
     (*meshpp)->meshsetelemdistgrid(*dg);
 

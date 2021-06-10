@@ -1607,7 +1607,7 @@ void MeshCap::meshcreatenodedistgrid(int *rc) {
                                         ESMC_CONTEXT, rc)) return;
     } else {
 #if defined ESMF_MOAB
-      MBMesh_createnodedistgrid(&mbmesh, dg, &localrc); //TODO: looks wrong to gjt, need &dg to get pointer back
+      MBMesh_createnodedistgrid(&mbmesh, &dg, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, rc)) return;
 #else
@@ -1644,7 +1644,7 @@ void MeshCap::meshcreateelemdistgrid(int *rc) {
   
     } else {
 #if defined ESMF_MOAB
-      MBMesh_createelemdistgrid(&mbmesh, dg, &localrc); //TODO: looks wrong to gjt, need &dg to get pointer back
+      MBMesh_createelemdistgrid(&mbmesh, &dg, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, rc)) return;
 
