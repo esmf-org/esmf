@@ -84,11 +84,11 @@ extern "C" void FTN_X(c_esmc_meshsetmoab)(int *_moabOn, int *rc) {
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
-extern "C" void FTN_X(c_esmc_meshgetisfree)(MeshCap **meshpp, bool *isfree) {
+extern "C" void FTN_X(c_esmc_meshgetisfree)(MeshCap **meshpp, ESMC_Logical *isfree) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshgetisfree()"
 
-  *isfree = (*meshpp)->isfree;
+  *isfree = ((*meshpp)->isfree) ? ESMF_TRUE : ESMF_FALSE;
 }
 
 extern "C" void FTN_X(c_esmc_meshsetisfree)(MeshCap **meshpp) {
@@ -105,11 +105,11 @@ extern "C" void FTN_X(c_esmc_meshgetstatus)(MeshCap **meshpp, ESMC_MeshStatus_Fl
   *status = (*meshpp)->status;
 }
 
-extern "C" void FTN_X(c_esmc_meshsetstatus)(MeshCap **meshpp, ESMC_MeshStatus_Flag status) {
+extern "C" void FTN_X(c_esmc_meshsetstatus)(MeshCap **meshpp, ESMC_MeshStatus_Flag *status) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshsetstatus()"
 
-  (*meshpp)->status = status;
+  (*meshpp)->status = *status;
 }
 
 // Accessors to MeshCap member variables

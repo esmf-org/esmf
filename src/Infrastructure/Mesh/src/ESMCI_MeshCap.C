@@ -1615,12 +1615,12 @@ void MeshCap::meshcreatenodedistgrid(int *rc) {
   if (node_distgrid_set == false) {
     // Call into func. depending on mesh type
     if (is_esmf_mesh) {
-      ESMCI_meshcreatenodedistgrid(&mesh, dg, &localrc);
+      ESMCI_meshcreatenodedistgrid(&mesh, &dg, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, rc)) return;
     } else {
 #if defined ESMF_MOAB
-      MBMesh_createnodedistgrid(&mbmesh, dg, &localrc);
+      MBMesh_createnodedistgrid(&mbmesh, &dg, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, rc)) return;
 #else
@@ -1628,6 +1628,7 @@ void MeshCap::meshcreatenodedistgrid(int *rc) {
         "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
     }
+dg->validate(); //TODO: remove this validate() once all is working!!!
     // Set member 
     this->node_distgrid = dg;
     this->node_distgrid_set = true;
@@ -1650,13 +1651,13 @@ void MeshCap::meshcreateelemdistgrid(int *rc) {
   if (elem_distgrid_set == false) {
   // Call into func. depending on mesh type
     if (is_esmf_mesh) {
-      ESMCI_meshcreateelemdistgrid(&mesh, dg, &localrc);
+      ESMCI_meshcreateelemdistgrid(&mesh, &dg, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, rc)) return;
   
     } else {
 #if defined ESMF_MOAB
-      MBMesh_createelemdistgrid(&mbmesh, dg, &localrc);
+      MBMesh_createelemdistgrid(&mbmesh, &dg, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, rc)) return;
 
@@ -1665,7 +1666,7 @@ void MeshCap::meshcreateelemdistgrid(int *rc) {
         "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
     }
-  
+dg->validate(); //TODO: remove this validate() once all is working!!!
     // Set member variables
     this->elem_distgrid = dg;
     this->elem_distgrid_set = true;
@@ -1731,7 +1732,7 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   // Calc Size
-  int size = 7*sizeof(int)+sizeof(ESMC_CoordSys_Flag);
+  int size = 10*sizeof(int);
 
   // TODO: verify length > vars.
   if (*inquireflag != ESMF_INQUIREONLY) {
@@ -1746,8 +1747,11 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
   int *ip= (int *)(buffer + *offset);
   if (*inquireflag != ESMF_INQUIREONLY) {
     *ip++ = static_cast<int> (is_esmf_mesh);
+    *ip++ = static_cast<int> (isfree);
+    *ip++ = static_cast<int> (status);
     *ip++ = sdim_mc;
     *ip++ = pdim_mc;
+    *ip++ = static_cast<int> (coordsys_mc);
     *ip++ = num_owned_node_mc;
     *ip++ = num_owned_elem_mc;
     *ip++ = static_cast<int> (node_distgrid_set);
@@ -1755,6 +1759,8 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
   }
   
   // printf("serialize - is_esmf_mesh = %d\n", is_esmf_mesh);
+  // printf("serialize - isfree = %d\n", isfree);
+  // printf("serialize - status = %d\n", status);
   // printf("serialize - sdim_mc = %d\n", sdim_mc);
   // printf("serialize - pdim_mc = %d\n", pdim_mc);
   // printf("serialize - coordsys_mc = %d\n", coordsys_mc);
@@ -1766,17 +1772,8 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
 
 
   // Adjust offset
-  *offset += sizeof(int)*7;
+  *offset += size;
   
-  // save coordsys
-  ESMC_CoordSys_Flag *ip2 = (ESMC_CoordSys_Flag *)(buffer + *offset);
-  if (*inquireflag != ESMF_INQUIREONLY) {
-    *ip++ = static_cast<ESMC_CoordSys_Flag> (coordsys_mc);
-  }
-
-  // Adjust offset
-  *offset += sizeof(ESMC_CoordSys_Flag);
-
   // save the DistGrids
   if (node_distgrid_set) {
     localrc = node_distgrid->serialize(buffer, length, offset, *inquireflag);
@@ -1795,7 +1792,7 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;
 
-  if (!baseOnly){
+  if (!baseOnly && !isfree){
     // Call into func. depending on mesh type
     if (is_esmf_mesh) {
       ESMCI_meshserialize(&mesh,
@@ -1831,35 +1828,42 @@ void MeshCap::meshdeserialize(char *buffer, int *offset,
   MBMesh *mbmesh = nullptr;
   int localrc;
   int local_is_esmf_mesh = 1;
+  int local_isfree = 0;
+  int local_status = 0;
+  int local_coordsys = 0;
   int local_node_distgrid_set = 0;
   int local_elem_distgrid_set = 0;
   
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
+  // Calc Size
+  int size = 10*sizeof(int);
+
   // Get pointer
   int *ip= (int *)(buffer + *offset);
 
   // Get values
   local_is_esmf_mesh=*ip++;
+  local_isfree=*ip++;
+  local_status=*ip++;
   sdim_mc=*ip++;
   pdim_mc=*ip++;
+  local_coordsys=*ip++;
   num_owned_node_mc=*ip++;
   num_owned_elem_mc=*ip++;
   local_node_distgrid_set=*ip++;
   local_elem_distgrid_set=*ip++;
 
   // Adjust offset
-  *offset += sizeof(int)*7;
-
-  ESMC_CoordSys_Flag *ip2 = (ESMC_CoordSys_Flag *)(buffer + *offset);
-  coordsys_mc=*ip2++;
-  *offset += sizeof(ESMC_CoordSys_Flag);
+  *offset += size;
 
   // printf("deserialize - local_is_esmf_mesh = %d\n", local_is_esmf_mesh);
+  // printf("deserialize - local_isfree = %d\n", local_isfree);
+  // printf("deserialize - local_status = %d\n", local_status);
   // printf("deserialize - sdim_mc = %d\n", sdim_mc);
   // printf("deserialize - pdim_mc = %d\n", pdim_mc);
-  // printf("deserialize - coordsys_mc = %d\n", coordsys_mc);
+  // printf("deserialize - local_coordsys = %d\n", local_coordsys);
   // printf("deserialize - num_owned_node_mc = %d\n", num_owned_node_mc);
   // printf("deserialize - num_owned_elem_mc = %d\n", num_owned_elem_mc);
   // printf("deserialize - local_node_distgrid_set = %d\n", local_node_distgrid_set);
@@ -1878,10 +1882,8 @@ void MeshCap::meshdeserialize(char *buffer, int *offset,
     rc)) return;
 
 
-  if (!baseOnly){
+  if (!baseOnly && !local_isfree){
     if (local_is_esmf_mesh) {
-    // ESMC_LogDefault.Write("meshdeserialize:creating with NATIVE", ESMC_LOGMSG_DEBUG);
-
       ESMCI_meshdeserialize(&mesh,
                           buffer, offset, &localrc,
                           buffer_l);
@@ -1889,7 +1891,6 @@ void MeshCap::meshdeserialize(char *buffer, int *offset,
                                       ESMC_CONTEXT, rc)) return;
     } else {
 #if defined ESMF_MOAB
-    // ESMC_LogDefault.Write("meshdeserialize:creating with MOAB", ESMC_LOGMSG_DEBUG);
       MBMesh_deserialize(&mbmesh, buffer, offset, &localrc, buffer_l);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
@@ -1898,19 +1899,23 @@ void MeshCap::meshdeserialize(char *buffer, int *offset,
         "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
     }
+
     // Set member variables
-    this->is_esmf_mesh=static_cast<bool> (local_is_esmf_mesh);
-    this->node_distgrid_set=static_cast<bool> (local_node_distgrid_set);
-    this->elem_distgrid_set=static_cast<bool> (local_elem_distgrid_set);
     this->mesh=mesh;
     this->mbmesh=mbmesh;
     
   }
 
-  if (rc!=NULL) *rc=ESMF_SUCCESS;
+  // Set member variables
+  this->is_esmf_mesh=static_cast<bool> (local_is_esmf_mesh);
+  this->isfree=static_cast<bool> (local_isfree);
+  this->status=static_cast<ESMC_MeshStatus_Flag> (local_status);
+  this->coordsys_mc=static_cast<ESMC_CoordSys_Flag> (local_coordsys);
+  this->node_distgrid_set=static_cast<bool> (local_node_distgrid_set);
+  this->elem_distgrid_set=static_cast<bool> (local_elem_distgrid_set);
+  // this->status=ESMC_MESHSTATUS_COMPLETE;
 
-  // Output new MeshCap
-  return;
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
 
 void MeshCap::meshfindpnt(int *unmappedaction, int *dimPnts, int *numPnts,
