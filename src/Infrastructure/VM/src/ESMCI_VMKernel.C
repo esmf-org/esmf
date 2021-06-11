@@ -3677,10 +3677,18 @@ void VMK::epochExit(bool keepAlloc){
           << " dst=" << getVas(lpid[its->first]) << " size=" << size
           << " buffer=" << buffer;
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        double t0; wtime(&t0);
 #endif
         MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
           &sm->mpireq);
         sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
+#ifdef VM_EPOCHLOG_on
+        double t1; wtime(&t1);
+        msg.str(""); // clear
+        msg << "epochBuffer:" << __LINE__ << " cost of non-blocking send: "
+          << t1 - t0 << " seconds";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
       }
 #else
       sm->streamBuffer = sm->stream.str();  // copy data into persistent buffer
@@ -3693,9 +3701,17 @@ void VMK::epochExit(bool keepAlloc){
         << " size=" << sm->streamBuffer.size()
         << " buffer=" << (void *)sm->streamBuffer.data();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        double t0; wtime(&t0);
 #endif
         MPI_Isend((void *)sm->streamBuffer.data(), sm->streamBuffer.size(),
           MPI_BYTE, lpid[its->first], tag, mpi_c, &sm->mpireq);
+#ifdef VM_EPOCHLOG_on
+        double t1; wtime(&1);
+        msg.str(""); // clear
+        msg << "epochBuffer:" << __LINE__ << " cost of non-blocking send: "
+          << t1 - t0 << " seconds";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
       }
 #endif
     }
@@ -3731,11 +3747,14 @@ void VMK::sendBuffer::clear(){
     std::stringstream msg;
     msg << "epochBuffer:" << __LINE__ << " posting MPI_Wait()";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    double t0; wtime(&t0);
 #endif
     MPI_Wait(&mpireq, MPI_STATUS_IGNORE);
 #ifdef VM_EPOCHLOG_on
+    double t1; wtime(&t1);
     msg.str(""); // clear
-    msg << "epochBuffer:" << __LINE__ << " returned from MPI_Wait()";
+    msg << "epochBuffer:" << __LINE__ << " returned from MPI_Wait(), cost: "
+      << t1 - t0 << " seconds";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
@@ -4306,9 +4325,17 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         << " size=" << rm->streamBuffer.size()
         << " streamBuffer=" << (void *)rm->streamBuffer.data();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        double t0; wtime(&t0);
 #endif
         MPI_Recv(rm->buffer, bytecount, MPI_BYTE,
           lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
+#ifdef VM_EPOCHLOG_on
+        double t1; wtime(&t1);
+        msg.str(""); // clear
+        msg << "epochBuffer:" << __LINE__ << " cost of blocking recv: "
+          << t1 - t0 << " seconds";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
       }
       // now service the specific receive call with chunk of data from buffer
       int *ip = (int *)rm->buffer;
