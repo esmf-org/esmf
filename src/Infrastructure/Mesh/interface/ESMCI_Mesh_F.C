@@ -113,26 +113,28 @@ extern "C" void FTN_X(c_esmc_meshsetstatus)(MeshCap **meshpp, ESMC_MeshStatus_Fl
 }
 
 // Accessors to MeshCap member variables
-extern "C" void FTN_X(c_esmc_meshgetnodedistgridpresent)(MeshCap **meshpp, bool *ispresent, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetnodedistgridpresent)(MeshCap **meshpp, 
+  ESMC_Logical *ispresent, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshgetnodedistgridpresent()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
-    *ispresent = (*meshpp)->node_distgrid_set;
-    
+    *ispresent = ((*meshpp)->node_distgrid_set) ? ESMF_TRUE : ESMF_FALSE;
+
     if (rc!=NULL) *rc = ESMF_SUCCESS; 
 }
 
 // Accessors to MeshCap member variables
-extern "C" void FTN_X(c_esmc_meshgetelemdistgridpresent)(MeshCap **meshpp, bool *ispresent, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetelemdistgridpresent)(MeshCap **meshpp, 
+  ESMC_Logical *ispresent, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshgetelemdistgridpresent()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
-    *ispresent = (*meshpp)->elem_distgrid_set;
-    
+    *ispresent = ((*meshpp)->elem_distgrid_set) ? ESMF_TRUE : ESMF_FALSE;
+
     if (rc!=NULL) *rc = ESMF_SUCCESS; 
 }
 
@@ -146,7 +148,7 @@ extern "C" void FTN_X(c_esmc_meshgetnodedistgrid)(MeshCap **meshpp, DistGrid **d
     // ensure 'meshpp' argument is valid to be dereferenced
     if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "The 'dg' argument must not be a NULL pointer",
+        "The 'meshpp' argument must not be a NULL pointer",
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
@@ -166,7 +168,7 @@ extern "C" void FTN_X(c_esmc_meshgetelemdistgrid)(MeshCap **meshpp, DistGrid **d
     // ensure 'meshpp' argument is valid to be dereferenced
     if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "The 'dg' argument must not be a NULL pointer",
+        "The 'meshpp' argument must not be a NULL pointer",
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
@@ -186,7 +188,7 @@ extern "C" void FTN_X(c_esmc_meshsetnodedistgrid)(MeshCap **meshpp, DistGrid **d
     // ensure 'meshpp' argument is valid to be dereferenced
     if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "The 'dg' argument must not be a NULL pointer",
+        "The 'meshpp' argument must not be a NULL pointer",
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
@@ -197,9 +199,6 @@ extern "C" void FTN_X(c_esmc_meshsetnodedistgrid)(MeshCap **meshpp, DistGrid **d
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
-
-    printf("c_esmc_meshsetnodedistgrid: distgrid dimcount = %d\n", 
-            (*dg)->getDimCount());
 
     ESMCI_NULL_CHECK_PRC(dg, rc)
     (*meshpp)->meshsetnodedistgrid(*dg);
@@ -218,7 +217,7 @@ extern "C" void FTN_X(c_esmc_meshsetelemdistgrid)(MeshCap **meshpp, DistGrid **d
     // ensure 'meshpp' argument is valid to be dereferenced
     if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "The 'dg' argument must not be a NULL pointer",
+        "The 'meshpp' argument must not be a NULL pointer",
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
@@ -230,9 +229,6 @@ extern "C" void FTN_X(c_esmc_meshsetelemdistgrid)(MeshCap **meshpp, DistGrid **d
       return; // bail out
     }
     
-    printf("c_esmc_meshsetelemdistgrid: distgrid dimcount = %d\n", 
-            (*dg)->getDimCount());
-
     ESMCI_NULL_CHECK_PRC(dg, rc)
     (*meshpp)->meshsetelemdistgrid(*dg);
 
