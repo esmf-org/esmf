@@ -99,6 +99,7 @@ module ESMF_FieldBundleMod
     type(ESMF_FieldBundleStatus) :: status    ! status of this FieldBundle
     logical                      :: is_proxy  ! true if this is a proxy FB
     logical                      :: is_packed ! true if this is a packed FB
+    character(len=:), allocatable:: encodeName! storage for packed FB
     ESMF_INIT_DECLARE
   end type
 
@@ -1209,6 +1210,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     do i = 2, size(fieldNameList) @\
       encodeName = concatName(trim(encodeName), ':', trim(fieldNameList(i))) @\
     enddo @\
+    this%encodeName = encodeName @\
 @\
     ! Create an internal g2f map @\
     if(present(gridToFieldMap)) then @\
@@ -1234,7 +1236,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     fieldList(1) = ESMF_FieldCreate(grid, farrayPtr, staggerloc=staggerloc, & @\
       gridToFieldMap=gridToFieldMap, totalLWidth=totalLWidth, totalUWidth=totalUWidth, & @\
-      name=encodeName, rc=localrc) @\
+      name='packedFieldBundleField', rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -1411,10 +1413,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     do i = 2, size(fieldNameList) @\
       encodeName = concatName(trim(encodeName), ':', trim(fieldNameList(i))) @\
     enddo @\
+    this%encodeName = encodeName @\
 @\
     fieldList(1) = ESMF_FieldCreate(mesh, farrayPtr, meshloc=meshloc, & @\
       gridToFieldMap=gridToFieldMap, & @\
-      name=encodeName, rc=localrc) @\
+      name='packedFieldBundleField', rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -1860,10 +1863,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-      call ESMF_FieldGet(l_fieldList(1), name=packedName, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      call decodeName(packedName, ':', l_fieldCount, fieldNameListPtr)
+      call decodeName(fieldBundle%this%encodeName, ':', l_fieldCount, fieldNameListPtr)
       if(present(fieldCount)) fieldCount = l_fieldCount
       if(present(fieldList)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
@@ -6558,8 +6558,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 !
 !EOPI
 
-      integer :: localrc                     ! Error status
-      integer :: i, fieldCount, packedVal
+      integer :: localrc                          ! Error status
+      integer :: i, fieldCount, packedVal, encodeNameLength
       type(ESMF_FieldBundleType), pointer :: bp   ! fieldbundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_InquireFlag) :: linquireflag
@@ -6670,6 +6670,15 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 
       deallocate(l_fieldList)
 
+      if(bp%is_packed) then
+        encodeNameLength = len(bp%encodeName)
+        call c_ESMC_FieldBundleSerializeEncodeName(encodeNameLength, bp%encodeName, &
+                                   buffer, length, offset, linquireflag, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+        
       if  (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_FieldBundleSerialize
@@ -6718,7 +6727,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 !EOPI
 
       integer :: localrc, status             ! Error status, allocation status
-      integer :: i, fieldCount, packedVal
+      integer :: i, fieldCount, packedVal, encodeNameLength
       type(ESMF_FieldBundleType), pointer :: bp   ! fieldbundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_Grid) :: grid
@@ -6856,6 +6865,20 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       deallocate(flist)
+
+      if(bp%is_packed) then
+        call c_ESMC_FieldBundleDeserializeInt(encodeNameLength, &
+                                   buffer, offset, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(character(encodeNameLength) :: bp%encodeName)
+        call c_ESMC_FieldBundleDeSerializeEncodeName(encodeNameLength, bp%encodeName, &
+                                   buffer, offset, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -7182,7 +7205,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       ! Local Variables
       integer   :: n, m, p
       integer   :: i, idx
-      character(len=ESMF_MAXSTR):: strtmp
+      character(len=:), allocatable:: strtmp
 
 
       ! 0. remove initial blanks if any
