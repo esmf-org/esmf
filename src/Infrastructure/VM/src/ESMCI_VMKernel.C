@@ -3685,10 +3685,12 @@ void VMK::epochFinal(){
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
     sendBuffer *sm = &(its->second);
 #ifdef USE_STRSTREAM
+    // use strstream
     void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
     int size = sm->stream.pcount();           // bytes in stream buffer
     sm->stream.freeze(false); // unfreeze the persistent buffer for deallocation
 #else
+    // use stringstream
     void *buffer = (void *)sm->streamBuffer.data();
     int size = sm->streamBuffer.size();       // bytes in stream buffer
 #endif
@@ -3700,10 +3702,26 @@ void VMK::epochFinal(){
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     sm->clear();
+    // drain throttle data structure
+    while (sm->ackQueue.size() > 0){
+      MPI_Request ack = sm->ackQueue.front();
+      MPI_Wait(&ack, MPI_STATUS_IGNORE);
+      sm->ackQueue.pop();
+#ifdef VM_EPOCHLOG_on
+      std::stringstream msg;
+      msg << "epochBuffer:" << __LINE__ << " drain throttled sends: "
+        << sm->ackQueue.size();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
+    }
   }
 }
 
-void VMK::epochEnter(vmEpoch epoch_){epoch=epoch_;epochSetFirst();}
+void VMK::epochEnter(vmEpoch epoch_, int throttle){
+  epoch=epoch_;
+  epochThrottle = throttle;
+  epochSetFirst();
+}
 
 void VMK::epochExit(bool keepAlloc){
   if (epoch==epochBuffer){
@@ -3712,7 +3730,28 @@ void VMK::epochExit(bool keepAlloc){
     for (its=sendMap.begin(); its!=sendMap.end(); ++its){
       sendBuffer *sm = &(its->second);
       int tag = getDefaultTag(mypet,its->first);
+#ifdef VM_EPOCHLOG_on
+      {
+        std::stringstream msg;
+        msg << "epochBuffer:" << __LINE__ << " outstanding sends: "
+          << sm->ackQueue.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
+      // throttle
+      while (sm->ackQueue.size() > epochThrottle){
+        MPI_Request ack = sm->ackQueue.front();
+        MPI_Wait(&ack, MPI_STATUS_IGNORE);
+        sm->ackQueue.pop();
+#ifdef VM_EPOCHLOG_on
+        std::stringstream msg;
+        msg << "epochBuffer:" << __LINE__ << "  throttling sends: "
+          << sm->ackQueue.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
+      }
 #ifdef USE_STRSTREAM
+      // use strstream
       void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
       int size = sm->stream.pcount();           // bytes in stream buffer
       if (size > 0){
@@ -3736,6 +3775,7 @@ void VMK::epochExit(bool keepAlloc){
 #endif
       }
 #else
+      // use stringstream
       sm->streamBuffer = sm->stream.str();  // copy data into persistent buffer
       sm->stream.str("");                   // clear out stream
 #ifdef VM_EPOCHLOG_on
@@ -3759,6 +3799,11 @@ void VMK::epochExit(bool keepAlloc){
 #endif
       }
 #endif
+      MPI_Request ack;
+      int ackDummy;
+      MPI_Irecv(&ackDummy, sizeof(int), MPI_BYTE, lpid[its->first], tag, mpi_c,
+        &ack);
+      sm->ackQueue.push(ack);
     }
     if (!keepAlloc){
       // clear the recvMap, freeing all receive buffers held
@@ -3804,8 +3849,10 @@ void VMK::sendBuffer::clear(){
 #endif
   }
 #ifdef USE_STRSTREAM
+  // use strstream
   stream.freeze(false); // unfreeze the persistent buffer for deallocation
 #else
+  // use stringstream
   streamBuffer.clear(); // done with buffer
 #endif
 }
@@ -4361,6 +4408,11 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         
         rm->streamBuffer.resize(bytecount);
         rm->buffer = (void *)rm->streamBuffer.data();
+        
+        // send the acknowledge message to sender for throttle
+        int ackDummy=1;
+        MPI_Send(&ackDummy, sizeof(int), MPI_BYTE, lpid[source], defaultTag,
+          mpi_c);
         
         // post blocking recv of the enire epoch buffer
 #ifdef VM_EPOCHLOG_on

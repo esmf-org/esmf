@@ -4259,12 +4259,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMEpochEnter - Enter an ESMF epoch
 
 ! !INTERFACE:
-  subroutine ESMF_VMEpochEnter(keywordEnforcer, vm, epoch, rc)
+  subroutine ESMF_VMEpochEnter(keywordEnforcer, vm, epoch, throttle, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),            intent(in),  optional :: vm
     type(ESMF_VMEpoch_Flag),  intent(in),  optional :: epoch
+    integer,                  intent(in),  optional :: throttle
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4280,6 +4281,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[epoch]}]
 !        The epoch to be entered. See section \ref{const:vmepoch_flag} for a
 !        complete list of options. Defaults to {\tt ESMF\_VMEPOCH\_NONE}.
+!   \item[{[throttle]}]
+!        Maximum number of outstanding communication calls beween any two PETs.
+!        Lower numbers reduce memory pressure at the expense of the level of
+!        asynchronizity achievable. Defaults to 10.
 !   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4313,7 +4318,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm_opt, rc)
 
     ! Call into the C++ interface
-    call c_ESMC_VMEpochEnter(vm_opt, epoch_opt, localrc)
+    call c_ESMC_VMEpochEnter(vm_opt, epoch_opt, throttle, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

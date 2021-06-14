@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <queue>
 #ifdef USE_STRSTREAM
 #include <strstream>
 #endif
@@ -220,6 +221,7 @@ class VMK{
 #endif
     MPI_Request mpireq;
     bool firstFlag;
+    std::queue<MPI_Request> ackQueue; // queue of acknowledge requests
    public:
     sendBuffer(){  // native constructor
       mpireq = MPI_REQUEST_NULL;
@@ -285,6 +287,7 @@ class VMK{
     commhandle *firsthandle;
     // Epoch support
     vmEpoch epoch;
+    int epochThrottle;
     bool pastFirst; // true if the first epoch enabled call has been made
     std::map<int, sendBuffer> sendMap;
     std::map<int, recvBuffer> recvMap;
@@ -515,7 +518,7 @@ class VMK{
     void epochSetFirst();
     void epochInit();
     void epochFinal();
-    void epochEnter(vmEpoch epoch);
+    void epochEnter(vmEpoch epoch, int throttle=10);
     void epochExit(bool keepAlloc=true);
     vmEpoch getEpoch() const {return epoch;}
         
