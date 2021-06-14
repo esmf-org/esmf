@@ -58,6 +58,8 @@
 #endif
 
 // Standard headers
+#include <iostream>
+#include <iomanip>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -389,6 +391,9 @@ void VMK::init(MPI_Comm mpiCommunicator){
     // query the MPI thread support level as set by external MPI initialization
     MPI_Query_thread(&mpi_thread_level);
   }
+  // initialize the MPI tool interface
+  int provided_thread_level;
+  MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
 #else
   // MPIUNI simply set the thread level
   mpi_thread_level = MPI_THREAD_SERIALIZED;
@@ -669,6 +674,8 @@ void VMK::finalize(int finalizeMpi){
 #endif
     if (finalizeMpi)
       MPI_Finalize();
+    // finalize the MPI tool interface
+    MPI_T_finalize();
   }
 }
 
@@ -729,6 +736,8 @@ void VMK::abort(){
   MPI_Finalized(&finalized);
   if (!finalized)
     MPI_Abort(default_mpi_c, EXIT_FAILURE);
+  // finalize the MPI tool interface
+  MPI_T_finalize();
 }
 
 
@@ -2629,6 +2638,42 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
       << " SSIPE=" << ssipe[i];
     ESMC_LogDefault.Write(msg.str(), msgType);
   }
+  msg.str("");  // clear
+  msg << prefix << "--- VMK::logSystem() MPI Control Variables ---------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  int num_cvar;
+  MPI_T_cvar_get_num(&num_cvar);
+  char name[128], desc[1024];
+  int nameLen, descLen, verbosity, binding, scope;
+  MPI_T_enum enumtype;
+  MPI_Datatype datatype;
+  for (int i=0; i<num_cvar; i++){
+    nameLen = sizeof(name);
+    descLen = sizeof(desc);
+    MPI_T_cvar_get_info(i, name, &nameLen, &verbosity, &datatype, &enumtype,
+      desc, &descLen, &binding, &scope);
+    msg.str("");  // clear
+    msg << prefix << "index=" << std::setw(4) << i << std::setw(60) << name
+      << " : " << desc;
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }
+#if 0
+  // testing to change the MPICH EAGER limit for the shared memory channel
+  int ci;
+  MPI_T_cvar_get_index("MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ", &ci);
+  MPI_T_cvar_handle chandle; int nvals, eagersize;
+  MPI_T_cvar_handle_alloc(ci, NULL, &chandle, &nvals);
+  MPI_T_cvar_read(chandle, &eagersize);
+  msg.str("");  // clear
+  msg << prefix << "old MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  eagersize = 4000;
+  MPI_T_cvar_write(chandle, &eagersize);
+  MPI_T_cvar_read(chandle, &eagersize);
+  msg.str("");  // clear
+  msg << prefix << "new MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+#endif
   msg.str("");  // clear
   msg << prefix << "--- VMK::logSystem() end ---------------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
