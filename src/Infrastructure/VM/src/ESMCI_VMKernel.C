@@ -3704,8 +3704,8 @@ void VMK::epochFinal(){
     sm->clear();
     // drain throttle data structure
     while (sm->ackQueue.size() > 0){
-      MPI_Request ack = sm->ackQueue.front();
-      MPI_Wait(&ack, MPI_STATUS_IGNORE);
+      ackElement *ackE = &(sm->ackQueue.front());
+      MPI_Wait(&(ackE->ackReq), MPI_STATUS_IGNORE);
       sm->ackQueue.pop();
 #ifdef VM_EPOCHLOG_on
       std::stringstream msg;
@@ -3740,8 +3740,8 @@ void VMK::epochExit(bool keepAlloc){
 #endif
       // throttle
       while (sm->ackQueue.size() > epochThrottle){
-        MPI_Request ack = sm->ackQueue.front();
-        MPI_Wait(&ack, MPI_STATUS_IGNORE);
+        ackElement *ackE = &(sm->ackQueue.front());
+        MPI_Wait(&(ackE->ackReq), MPI_STATUS_IGNORE);
         sm->ackQueue.pop();
 #ifdef VM_EPOCHLOG_on
         std::stringstream msg;
@@ -3799,11 +3799,11 @@ void VMK::epochExit(bool keepAlloc){
 #endif
       }
 #endif
-      MPI_Request ack;
-      int ackDummy;
-      MPI_Irecv(&ackDummy, sizeof(int), MPI_BYTE, lpid[its->first], tag, mpi_c,
-        &ack);
-      sm->ackQueue.push(ack);
+      // post the receive of the acknowledge message from receiver for throttle
+      sm->ackQueue.push(ackElement());
+      ackElement *ackE = &(sm->ackQueue.back());
+      MPI_Irecv(&(ackE->ackDummy), sizeof(int), MPI_BYTE, lpid[its->first], tag,
+        mpi_c, &(ackE->ackReq));
     }
     if (!keepAlloc){
       // clear the recvMap, freeing all receive buffers held

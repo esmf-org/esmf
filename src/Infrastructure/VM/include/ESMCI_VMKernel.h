@@ -211,7 +211,17 @@ class VMK{
     ipshmAlloc *prev;   // pointer to prev. ipshmAlloc element in list
     ipshmAlloc *next;   // pointer to next ipshmAlloc element in list
   };
-  
+
+  struct ackElement{
+    MPI_Request ackReq;
+    int ackDummy;
+   public:
+    ackElement(){ // native constructor
+      ackReq = MPI_REQUEST_NULL;
+      ackDummy = 0;
+    }
+  };
+
   struct sendBuffer{
 #ifdef USE_STRSTREAM
     std::strstream stream;
@@ -221,7 +231,7 @@ class VMK{
 #endif
     MPI_Request mpireq;
     bool firstFlag;
-    std::queue<MPI_Request> ackQueue; // queue of acknowledge requests
+    std::queue<ackElement> ackQueue; // queue of acknowledge requests
    public:
     sendBuffer(){  // native constructor
       mpireq = MPI_REQUEST_NULL;
