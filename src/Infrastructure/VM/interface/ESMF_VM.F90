@@ -5157,7 +5157,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
     currentSsiPe, petCount, peCount, ssiCount, ssiMap, ssiMinPetCount, ssiMaxPetCount, &
     ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
-    ssiSharedMemoryEnabledFlag, rc)
+    ssiSharedMemoryEnabledFlag, esmfComm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),        intent(in)            :: vm
@@ -5175,6 +5175,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,              intent(out), optional :: pthreadsEnabledFlag
     logical,              intent(out), optional :: openMPEnabledFlag
     logical,              intent(out), optional :: ssiSharedMemoryEnabledFlag
+    character(:), allocatable, intent(out), optional :: esmfComm
     integer,              intent(out), optional :: rc
 !
 ! !STATUS:
@@ -5194,6 +5195,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   current PE within the local SSI that is executing the request.\newline
 !   Added argument {\tt ssiMap} for a convenient way to obtain a view
 !   of the mapping of PETs to single system images across the entire VM.
+! \item[8.2.0] Added argument {\tt esmfComm} to provide easy access to the
+!   {\tt ESMF\_COMM} setting used by the ESMF installation.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5266,6 +5269,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !             ESMF has {\em not} been compiled to support shared memory access
 !             between PETs that are on the same single system image (SSI).
 !        \end{description}
+!   \item[{[esmfComm]}]
+!        Upon return this string is allocated to the appropriate size and holds
+!        the exact value of the {\tt ESMF\_COMM} build environment variable used
+!        by the ESMF installation. This provides a convenient way for the user
+!        to determine the underlying MPI implementation.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5277,6 +5285,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)      :: ssiSharedMemoryEnabledFlagArg  ! helper variable
     integer                 :: petCountArg, i;                ! helper variable
     integer                 :: localrc  ! local return code
+    character(len=40)       :: esmfCommArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -5329,6 +5338,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
+    endif
+
+    ! deal with esmfComm directly on Fortran layer
+    if (present(esmfComm)) then
+      call c_esmc_initget_esmf_comm(esmfCommArg, localrc)
+      allocate(character(len_trim(esmfCommArg))::esmfComm)
+      esmfComm = esmfCommArg
     endif
 
     ! return successfully
