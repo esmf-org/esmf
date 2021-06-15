@@ -3704,15 +3704,15 @@ void VMK::epochFinal(){
     sm->clear();
     // drain throttle data structure
     while (sm->ackQueue.size() > 0){
-      ackElement *ackE = &(sm->ackQueue.front());
-      MPI_Wait(&(ackE->ackReq), MPI_STATUS_IGNORE);
-      sm->ackQueue.pop();
 #ifdef VM_EPOCHLOG_on
       std::stringstream msg;
       msg << "epochBuffer:" << __LINE__ << " drain throttled sends: "
         << sm->ackQueue.size();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
+      ackElement *ackE = &(sm->ackQueue.front());
+      MPI_Wait(&(ackE->ackReq), MPI_STATUS_IGNORE);
+      sm->ackQueue.pop();
     }
   }
 }
@@ -3740,16 +3740,17 @@ void VMK::epochExit(bool keepAlloc){
 #endif
       // throttle
       while (sm->ackQueue.size() > epochThrottle){
-        ackElement *ackE = &(sm->ackQueue.front());
-        MPI_Wait(&(ackE->ackReq), MPI_STATUS_IGNORE);
-        sm->ackQueue.pop();
 #ifdef VM_EPOCHLOG_on
         std::stringstream msg;
         msg << "epochBuffer:" << __LINE__ << "  throttling sends: "
           << sm->ackQueue.size();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
+        ackElement *ackE = &(sm->ackQueue.front());
+        MPI_Wait(&(ackE->ackReq), MPI_STATUS_IGNORE);
+        sm->ackQueue.pop();
       }
+      bool needAck = false;
 #ifdef USE_STRSTREAM
       // use strstream
       void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
@@ -3766,6 +3767,7 @@ void VMK::epochExit(bool keepAlloc){
         MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
           &sm->mpireq);
         sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
+        needAck = true;
 #ifdef VM_EPOCHLOG_on
         double t1; wtime(&t1);
         msg.str(""); // clear
@@ -3790,6 +3792,7 @@ void VMK::epochExit(bool keepAlloc){
 #endif
         MPI_Isend((void *)sm->streamBuffer.data(), sm->streamBuffer.size(),
           MPI_BYTE, lpid[its->first], tag, mpi_c, &sm->mpireq);
+        needAck = true;
 #ifdef VM_EPOCHLOG_on
         double t1; wtime(&1);
         msg.str(""); // clear
@@ -3799,11 +3802,13 @@ void VMK::epochExit(bool keepAlloc){
 #endif
       }
 #endif
-      // post the receive of the acknowledge message from receiver for throttle
-      sm->ackQueue.push(ackElement());
-      ackElement *ackE = &(sm->ackQueue.back());
-      MPI_Irecv(&(ackE->ackDummy), sizeof(int), MPI_BYTE, lpid[its->first], tag,
-        mpi_c, &(ackE->ackReq));
+      if (needAck){
+        // post the receive of the acknowledge message from receiver for throttle
+        sm->ackQueue.push(ackElement());
+        ackElement *ackE = &(sm->ackQueue.back());
+        MPI_Irecv(&(ackE->ackDummy), sizeof(int), MPI_BYTE, lpid[its->first], tag,
+          mpi_c, &(ackE->ackReq));
+      }
     }
     if (!keepAlloc){
       // clear the recvMap, freeing all receive buffers held
