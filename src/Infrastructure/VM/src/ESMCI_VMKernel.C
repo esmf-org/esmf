@@ -3669,6 +3669,8 @@ bool VMK::cancelled(status *status){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void VMK::epochInit(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::epochInit()"
 #ifdef VM_EPOCHLOG_on
   ESMC_LogDefault.Write("epochInit", ESMC_LOGMSG_DEBUG);
 #endif
@@ -3677,6 +3679,8 @@ void VMK::epochInit(){
 }
 
 void VMK::epochFinal(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::epochFinal()"
   // loop over the sendMap and wait for outstanding comms
 #ifdef VM_EPOCHLOG_on
   ESMC_LogDefault.Write("epochFinal", ESMC_LOGMSG_DEBUG);
@@ -3718,12 +3722,23 @@ void VMK::epochFinal(){
 }
 
 void VMK::epochEnter(vmEpoch epoch_, int throttle){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::epochEnter()"
   epoch=epoch_;
+  if (throttle < 1){
+    int localrc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "The value of throttle must be greater than zero.",
+      ESMC_CONTEXT, &localrc);
+    throw localrc;  // bail out with exception
+  }
   epochThrottle = throttle;
   epochSetFirst();
 }
 
 void VMK::epochExit(bool keepAlloc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::epochExit()"
   if (epoch==epochBuffer){
     // loop over the sendMap and post non-blocking sends
     std::map<int, sendBuffer>:: iterator its;
@@ -3821,6 +3836,8 @@ void VMK::epochExit(bool keepAlloc){
 }
 
 void VMK::epochSetFirst(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::epochSetFirst()"
   std::map<int, sendBuffer>:: iterator its;
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
     its->second.firstFlag=true;
@@ -3832,6 +3849,8 @@ void VMK::epochSetFirst(){
 }
 
 void VMK::sendBuffer::clear(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::sendBuffer::clear"
 #ifdef VM_EPOCHLOG_on
   std::stringstream msg;
   msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm";
