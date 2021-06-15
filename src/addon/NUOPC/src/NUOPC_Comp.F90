@@ -1894,10 +1894,11 @@ module NUOPC_Comp
       rcToReturn=rc)) return  ! bail out
     
     ! The NUOPC/Connector Attributes
-    allocate(attrList(3))
+    allocate(attrList(4))
     attrList(1) = "CplList"
     attrList(2) = "CplSetList"
     attrList(3) = "ConnectionOptions"
+    attrList(4) = "EpochThrottle"
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
       attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
