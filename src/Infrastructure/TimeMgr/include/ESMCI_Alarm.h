@@ -139,6 +139,7 @@ class Alarm {
                                                  // to adjust alarm on timeStep
                                                  // direction (sign) change
     bool              enabled;    // able to ring (TMG 4.5.3)
+    bool              ringerIsOn; // whether ringer is on or off
     bool              sticky;     // must be turned off via
                                   //   Alarm::ringerOff(),
                                   //  otherwise will turn self off after
@@ -271,6 +272,9 @@ class Alarm {
 
     // reconstruct ringBegin during ESMF_DIRECTION_REVERSE
     int resetRingBegin(bool timeStepPositive);
+
+    // enable Sticky
+    void enableSticky(void);
 
     // friend class alarm
     friend class Clock;

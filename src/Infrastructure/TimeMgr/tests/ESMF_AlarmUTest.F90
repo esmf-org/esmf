@@ -1043,7 +1043,7 @@ program ESMF_AlarmTest
       ! Test Setting the Alarm Time
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Set Alarm Time Initialization Test"
-      call ESMF_TimeSet(alarmTime, yy=2003, mm=3, dd=13, h=5, &
+      call ESMF_TimeSet(alarmTime, yy=2003, mm=3, dd=13, h=5, m=45, s=27, &
                                    calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
