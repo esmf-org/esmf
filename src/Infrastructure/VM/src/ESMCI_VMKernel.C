@@ -2618,6 +2618,9 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   msg << prefix << "--- VMK::logSystem() start -------------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+  msg << prefix << "esmfComm=" << getEsmfComm();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
   msg << prefix << "isPthreadsEnabled=" << isPthreadsEnabled();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
@@ -2639,6 +2642,7 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
     ESMC_LogDefault.Write(msg.str(), msgType);
   }
   msg.str("");  // clear
+#ifndef ESMF_MPIUNI
   msg << prefix << "--- VMK::logSystem() MPI Control Variables ---------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
   int num_cvar;
@@ -2673,6 +2677,7 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   msg.str("");  // clear
   msg << prefix << "new MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
   ESMC_LogDefault.Write(msg.str(), msgType);
+#endif
 #endif
   msg.str("");  // clear
   msg << prefix << "--- VMK::logSystem() end ---------------------------------";
@@ -3754,7 +3759,7 @@ void VMK::epochExit(bool keepAlloc){
       }
 #endif
       // throttle
-      while (sm->ackQueue.size() > epochThrottle){
+      while ((int)sm->ackQueue.size() > epochThrottle){
 #ifdef VM_EPOCHLOG_on
         std::stringstream msg;
         msg << "epochBuffer:" << __LINE__ << "  throttling sends: "

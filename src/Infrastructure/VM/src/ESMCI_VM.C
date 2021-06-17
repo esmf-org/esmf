@@ -2599,7 +2599,7 @@ void VM::logMemInfo(
   info << "[malloc] Total space used (mmap + non-mmap): " <<setw(16)<< in_use;
   sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
-#else if (defined ESMF_OS_Darwin)
+#elif (defined ESMF_OS_Darwin)
   // Get memory
   task_vm_info_data_t mem_info;
   mach_msg_type_number_t size = TASK_VM_INFO_COUNT;
