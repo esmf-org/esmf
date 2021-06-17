@@ -85,7 +85,7 @@
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-      write(msgString,*) "esmfComm=", esmfComm
+      write(msgString,*) "esmfComm=", esmfComm, "  len(esmfComm)=", len(esmfComm)
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
