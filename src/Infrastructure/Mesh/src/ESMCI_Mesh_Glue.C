@@ -1963,6 +1963,8 @@ void ESMCI_MeshGetOwnedElemCount(Mesh *mesh, int *elemCount, int *rc){
 
     if (!GetAttr(elem).is_locally_owned()) continue;
 
+    if (mesh->is_split && elem.get_id() > mesh->max_non_split_id) continue;
+
     // Add number of nodes for this elem to connection count
     elemCountLocal++;
   }
