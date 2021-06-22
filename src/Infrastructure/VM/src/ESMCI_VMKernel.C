@@ -664,6 +664,8 @@ void VMK::finalize(int finalizeMpi){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
+  // finalize the MPI tool interface
+  MPI_T_finalize();
   // conditionally finalize MPI
   int finalized;
   MPI_Finalized(&finalized);
@@ -674,8 +676,6 @@ void VMK::finalize(int finalizeMpi){
 #endif
     if (finalizeMpi)
       MPI_Finalize();
-    // finalize the MPI tool interface
-    MPI_T_finalize();
   }
 }
 
@@ -731,13 +731,13 @@ struct SpawnArg{
 
     
 void VMK::abort(){
+  // finalize the MPI tool interface
+  MPI_T_finalize();
   // abort default (all MPI) virtual machine
   int finalized;
   MPI_Finalized(&finalized);
   if (!finalized)
     MPI_Abort(default_mpi_c, EXIT_FAILURE);
-  // finalize the MPI tool interface
-  MPI_T_finalize();
 }
 
 
