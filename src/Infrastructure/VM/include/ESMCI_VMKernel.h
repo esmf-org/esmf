@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <queue>
 #ifdef USE_STRSTREAM
 #include <strstream>
 #endif
@@ -210,7 +211,17 @@ class VMK{
     ipshmAlloc *prev;   // pointer to prev. ipshmAlloc element in list
     ipshmAlloc *next;   // pointer to next ipshmAlloc element in list
   };
-  
+
+  struct ackElement{
+    MPI_Request ackReq;
+    int ackDummy;
+   public:
+    ackElement(){ // native constructor
+      ackReq = MPI_REQUEST_NULL;
+      ackDummy = 0;
+    }
+  };
+
   struct sendBuffer{
 #ifdef USE_STRSTREAM
     std::strstream stream;
@@ -220,6 +231,7 @@ class VMK{
 #endif
     MPI_Request mpireq;
     bool firstFlag;
+    std::queue<ackElement> ackQueue; // queue of acknowledge requests
    public:
     sendBuffer(){  // native constructor
       mpireq = MPI_REQUEST_NULL;
@@ -285,6 +297,7 @@ class VMK{
     commhandle *firsthandle;
     // Epoch support
     vmEpoch epoch;
+    int epochThrottle;
     bool pastFirst; // true if the first epoch enabled call has been made
     std::map<int, sendBuffer> sendMap;
     std::map<int, recvBuffer> recvMap;
@@ -425,6 +438,10 @@ class VMK{
       //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
       //TODO: Move it into the VMKernel header once includes are fixed.
 
+#define XSTR(X) STR(X)
+#define STR(X) #X
+    static std::string getEsmfComm(){return std::string(XSTR(ESMF_COMM));}
+
     // p2p communication calls
     int send(const void *message, int size, int dest, int tag=-1);
     int send(const void *message, int size, int dest, commhandle **commh,
@@ -515,7 +532,7 @@ class VMK{
     void epochSetFirst();
     void epochInit();
     void epochFinal();
-    void epochEnter(vmEpoch epoch);
+    void epochEnter(vmEpoch epoch, int throttle=10);
     void epochExit(bool keepAlloc=true);
     vmEpoch getEpoch() const {return epoch;}
         

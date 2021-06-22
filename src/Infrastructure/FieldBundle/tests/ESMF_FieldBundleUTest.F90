@@ -2420,7 +2420,7 @@
       ! NOT part of the ESMF API.
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Serialization test, inquire only
       allocate (buffer(1))
       buffer_len = 1
@@ -2434,7 +2434,7 @@
       call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! Serialization test
       deallocate (buffer)
       allocate (buffer(offset_inq))
@@ -2451,7 +2451,7 @@
       print *, 'offset_inq, offset =', offset_inq, offset
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_UTest_Multi_Proc_Only
       ! DeSerialization test
       buffer_len = offset_inq
       offset = 0

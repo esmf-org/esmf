@@ -73,6 +73,7 @@ The Connector Component metadata is implemented as an ESMF Attribute Package:
      {\tt FinalizePhaseMap} & List of string values, mapping the logical NUOPC finalize phases to the actual ESMF finalize phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
      {\tt CplList} & List of StandardNames of the connected Fields. Each StandardName entry may be followed by a colon separated list of connection options. The details are discussed in section \ref{connection_options} & {\em Standard names} as per field dictionary, followed by {\em connection options} defined in section \ref{connection_options}.\\ \hline
      {\tt CplSetList} & List of coupling sets. Each coupling set is identified by a string value.& {\em no restriction}\\ \hline
-     {\tt ConnectionOptions} & Connection options to be applied to all the fields in the {\tt CplList} by default.& {\em Connection options} defined in section \ref{connection_options}.\\ \hline
+     {\tt ConnectionOptions} & String value specifying the connection options to be applied to all the fields in the {\tt CplList} by default.& {\em Connection options} defined in section \ref{connection_options}.\\ \hline
+     {\tt EpochThrottle} & Integer specifying the maximum number of outstanding EPOCH messages between any two PETs. The ESMF level default is 10. & Any positive integer.\\ \hline
      \hline
 \end{longtable}
