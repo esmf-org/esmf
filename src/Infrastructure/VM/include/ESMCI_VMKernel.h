@@ -438,6 +438,10 @@ class VMK{
       //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
       //TODO: Move it into the VMKernel header once includes are fixed.
 
+#define XSTR(X) STR(X)
+#define STR(X) #X
+    static std::string getEsmfComm(){return std::string(XSTR(ESMF_COMM));}
+
     // p2p communication calls
     int send(const void *message, int size, int dest, int tag=-1);
     int send(const void *message, int size, int dest, commhandle **commh,

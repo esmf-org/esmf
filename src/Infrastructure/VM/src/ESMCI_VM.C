@@ -2515,6 +2515,7 @@ void VM::logMemInfo(
   VM *vm = getCurrent();
   vm->lock();
   char msg[800];
+  std::stringstream info;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
   // access /proc/self
   char line[128];
@@ -2529,7 +2530,6 @@ void VM::logMemInfo(
   }
   fclose(file);
   // access mallinfo
-  std::stringstream info;
   struct mallinfo m = mallinfo();
   info << "[malloc] Non-mmapped space allocated:        " <<setw(16)<< m.arena;
   sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
@@ -2599,7 +2599,7 @@ void VM::logMemInfo(
   info << "[malloc] Total space used (mmap + non-mmap): " <<setw(16)<< in_use;
   sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
-#else if (defined ESMF_OS_Darwin)
+#elif (defined ESMF_OS_Darwin)
   // Get memory
   task_vm_info_data_t mem_info;
   mach_msg_type_number_t size = TASK_VM_INFO_COUNT;
