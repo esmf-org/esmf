@@ -4423,6 +4423,8 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       gridList=>gridList%prev
 #define CLEAN_OUT_OLD_ACCEPTOR_GRID
 #ifdef CLEAN_OUT_OLD_ACCEPTOR_GRID
+call ESMF_PointerLog(gridListE%keyGrid%this, prefix="about to destroy Grid: ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
       call ESMF_GridDestroy(gridListE%keyGrid, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

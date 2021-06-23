@@ -5348,8 +5348,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! deal with esmfComm directly on Fortran layer
     if (present(esmfComm)) then
       call c_esmc_initget_esmf_comm(esmfCommArg, localrc)
-      allocate(character(len_trim(esmfCommArg))::esmfComm)
-      esmfComm = esmfCommArg
+      esmfComm = trim(esmfCommArg)  ! implicit allocation of esmfComm
     endif
 
     ! return successfully
