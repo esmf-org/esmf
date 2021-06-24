@@ -56,13 +56,6 @@ namespace ESMCI {
     DistGrid *node_distgrid;
     DistGrid *elem_distgrid;
 
-    // bool hasSplitElem;
-    // int splitElemStart;
-    // int splitElemCount;
-    // int *splitElemMap;
-    // int origElemStart;
-    // int origElemCount;
-
     MeshCap(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
       is_esmf_mesh = false;
       mesh = NULL;
