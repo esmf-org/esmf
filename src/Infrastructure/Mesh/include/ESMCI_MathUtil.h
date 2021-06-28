@@ -68,6 +68,10 @@ namespace ESMCI {
 
   void write_3D_hex_woid_to_vtk(const char *filename, double *hex);
 
+  void write_3D_hex_to_vtk(const char *filename, int id, double *hex);
+
+  void write_3D_minmax_to_vtk(const char *filename, int id, double *min, double *max);
+
   void write_3D_pnt_woid_to_vtk(const char *filename, double *pnt);
 
 
