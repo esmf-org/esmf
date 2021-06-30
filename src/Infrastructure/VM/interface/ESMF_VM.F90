@@ -5641,8 +5641,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_VMGetCurrentGarbageInfo(fobjCount, objCount, rc)
 !
 ! !ARGUMENTS:
-    integer, intent(in)             :: fobjCount
-    integer, intent(in)             :: objCount
+    integer, intent(out)            :: fobjCount
+    integer, intent(out)            :: objCount
     integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
@@ -5693,8 +5693,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc)
 !
 ! !ARGUMENTS:
-    integer, intent(in)             :: virtMemPet
-    integer, intent(in)             :: physMemPet
+    integer, intent(out)            :: virtMemPet
+    integer, intent(out)            :: physMemPet
     integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:

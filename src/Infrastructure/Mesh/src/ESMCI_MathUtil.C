@@ -878,6 +878,42 @@ bool is_smashed_quad3D(int num_p, double *p) {
   }
 
 
+  void write_3D_hex_to_vtk(const char *filename, int id, double *hex) {
+#define MAX_STR_LEN 1000
+    char new_filename[MAX_STR_LEN];
+
+    if (((double)strlen(filename))+log10((double)id)+1.0 > ((double)MAX_STR_LEN)) {
+       printf("ERROR: filename too long!!!\n");
+       return;
+    }
+
+    sprintf(new_filename,"%s%dx",filename,id);
+ 
+     write_3D_hex_woid_to_vtk(new_filename, hex);
+
+#undef MAX_STR_LEN
+  }
+
+  void write_3D_minmax_to_vtk(const char *filename, int id, double *min, double *max) {
+    double hex[24];
+
+    // Use min max to construct hex
+    hex[0]=min[0]; hex[1]=min[1]; hex[2]=min[2]; // 1
+    hex[3]=max[0]; hex[4]=min[1]; hex[5]=min[2]; // 2
+    hex[6]=max[0]; hex[7]=max[1]; hex[8]=min[2]; // 3
+    hex[9]=min[0]; hex[10]=max[1]; hex[11]=min[2]; // 4
+    hex[12]=min[0]; hex[13]=min[1]; hex[14]=max[2]; // 5
+    hex[15]=max[0]; hex[16]=min[1]; hex[17]=max[2]; // 6
+    hex[18]=max[0]; hex[19]=max[1]; hex[20]=max[2]; // 7
+    hex[21]=min[0]; hex[22]=max[1]; hex[23]=max[2]; // 8
+
+    // Write to vtk
+    write_3D_hex_to_vtk(filename, id, hex);
+  }
+
+
+
+
   // Write a single point to a vtk file
   // The point should be 3 doubles
   void write_3D_pnt_woid_to_vtk(const char *filename, double *pnt) {
