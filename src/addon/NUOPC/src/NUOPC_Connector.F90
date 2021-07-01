@@ -4423,6 +4423,8 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       gridList=>gridList%prev
 #define CLEAN_OUT_OLD_ACCEPTOR_GRID
 #ifdef CLEAN_OUT_OLD_ACCEPTOR_GRID
+call ESMF_PointerLog(gridListE%keyGrid%this, prefix="about to destroy Grid: ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
       call ESMF_GridDestroy(gridListE%keyGrid, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -6127,14 +6129,14 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     type(type_InternalState)  :: is
     type(ESMF_VM)             :: vm
     integer                   :: localrc
-    logical                   :: existflag
+    logical                   :: existflag, isSet
     logical                   :: routeHandleIsCreated
     character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
     integer                   :: phase
     integer                   :: verbosity, diagnostic, profiling
     character(ESMF_MAXSTR)    :: name
-    integer                   :: i
+    integer                   :: i, epochThrottle
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -6272,9 +6274,22 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       ! if not specialized -> use default method to execute the exchange
       ! Conditionally enter VMEpoch
       if (.not. is%wrap%srcDstOverlap) then
-        call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
+        call NUOPC_CompAttributeGet(connector, name="EpochThrottle", &
+          value=epochThrottle, isSet=isSet, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (isSet) then
+          ! using custom throttle
+          call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, &
+            throttle=epochThrottle, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        else
+          ! using default throttle
+          call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
       endif
       ! call the SMM consistent with CplSets present or not
       if (is%wrap%cplSetCount > 1) then

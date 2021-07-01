@@ -40,6 +40,8 @@
 #include "ESMCI_VM.h"
 
 // include higher level, 3rd party or system headers
+#include <iostream>
+#include <iomanip>
 #include <map>
 #include <vector>
 #include <string>
@@ -65,6 +67,7 @@
 using std::string;
 using std::vector;
 using std::map;
+using std::setw;
 
 
 //-----------------------------------------------------------------------------
@@ -2508,14 +2511,15 @@ void VM::logMemInfo(
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;   // final return code
 
-#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
   // must lock/unlock for thread-safety
   VM *vm = getCurrent();
   vm->lock();
-  // access /proc/self
-  FILE* file = fopen("/proc/self/status", "r");
-  char line[128];
   char msg[800];
+  std::stringstream info;
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  // access /proc/self
+  char line[128];
+  FILE* file = fopen("/proc/self/status", "r");
   while (fgets(line, 128, file) != NULL){
     if (strncmp(line, "Vm", 2) == 0){
       int len = strlen(line);
@@ -2526,91 +2530,76 @@ void VM::logMemInfo(
   }
   fclose(file);
   // access mallinfo
-  std::stringstream info;
   struct mallinfo m = mallinfo();
-  info << "Non-mmapped space allocated (bytes):       \t" << m.arena;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "[malloc] Non-mmapped space allocated:        " <<setw(16)<< m.arena;
+  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
   info.str(""); // clear info
-  info << "Space allocated in mmapped regions (bytes):\t" << m.hblkhd;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "[malloc] Space allocated in mmapped regions: " <<setw(16)<< m.hblkhd;
+  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
   info.str(""); // clear info
-  info << "Maximum total allocated space (bytes):     \t" << m.usmblks;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "[malloc] Maximum total allocated space:      " <<setw(16)<< m.usmblks;
+  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
   info.str(""); // clear info
-  info << "Space in freed fastbin blocks (bytes):     \t" << m.fsmblks;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "[malloc] Space in freed fastbin blocks:      " <<setw(16)<< m.fsmblks;
+  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
   info.str(""); // clear info
-  info << "Total allocated space (bytes):             \t" << m.uordblks;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "[malloc] Total allocated space:              " <<setw(16)<< m.uordblks;
+  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
   info.str(""); // clear info
-  info << "Total free space (bytes):                  \t" << m.fordblks;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "[malloc] Total free space:                   " <<setw(16)<< m.fordblks;
+  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
   info.str(""); // clear info
-  info << "Top-most, releasable space (bytes):        \t" << m.keepcost;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "[malloc] Top-most, releasable space:         " <<setw(16)<< m.keepcost;
+  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
   long total = 0; // init
   if (m.hblkhd>=0 && m.uordblks>=0){
     total = (long)m.hblkhd+(long)m.uordblks;
-    total /= (long)1024;  // scale to KiB
+//    total /= (long)1024;  // scale to KiB
   }
   info.str(""); // clear info
-  info << "Total space in use, mmap + non-mmap (KiB): \t" << total;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "[malloc] Total space in use, mmap + non-mmap:" <<setw(16)<< total;
+  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
   // access through malloc_stats()
-  FILE *stderrOrig = stderr;
-  char *buf;
+  fflush(stderr);
+  FILE *stderrOrig = stderr;  // keep for restoring later
+  char *buf = NULL;
   size_t len;
-  stderr = open_memstream(&buf, &len);
+  FILE *fp = stderr = open_memstream(&buf, &len); // redirect stderr
   malloc_stats();
   fflush(stderr);
+  stderr = stderrOrig;  // restore original stderr
+  fflush(fp);
+  fclose(fp); // must close before free(buf), b/c buf may re-alloc!
   std::string malloc_stats_output;
   if (buf){
     malloc_stats_output = string(buf, buf+len);
     free(buf);
   }
-  stderr = stderrOrig;
   size_t pos = malloc_stats_output.rfind("system bytes     =");
   pos += 18;
   long system = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
-  system /= (long)1024;  // scale to KiB
+//  system /= (long)1024;  // scale to KiB
   info.str(""); // clear info
-  info << "Total space held (mmap + non-mmap) (KiB):  \t" << system;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "[malloc] Total space held (mmap + non-mmap): " <<setw(16)<< system;
+  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
   pos = malloc_stats_output.rfind("in use bytes     =");
   pos += 18;
   long in_use = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
-  in_use /= (long)1024;  // scale to KiB
+//  in_use /= (long)1024;  // scale to KiB
   info.str(""); // clear info
-  info << "Total space used (mmap + non-mmap) (KiB):  \t" << in_use;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "[malloc] Total space used (mmap + non-mmap): " <<setw(16)<< in_use;
+  sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
-  // output the wtime since execution start
-  double wt;
-  ESMCI::VMK::wtime(&wt);
-  info.str(""); // clear info
-  info << "Wall-clock time since execution start (s): \t" << wt;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  log->Write(msg, msgType);
-  // unlock again
-  vm->unlock();
-#endif
-#if (defined ESMF_OS_Darwin)
-  // must lock/unlock for thread-safety
-  VM *vm = getCurrent();
-  vm->lock();
-
-  // string storage
-  char msg[800];
-
+#elif (defined ESMF_OS_Darwin)
   // Get memory
   task_vm_info_data_t mem_info;
   mach_msg_type_number_t size = TASK_VM_INFO_COUNT;
@@ -2649,22 +2638,17 @@ void VM::logMemInfo(
     sprintf(msg, "%s - MemInfo: phys_footprint:                       \t%d",prefix.c_str(),mem_info.phys_footprint);
     log->Write(msg, msgType);
 #endif
-
   }
-
-
+#endif
   // output the wtime since execution start
-  std::stringstream info;
   double wt;
   ESMCI::VMK::wtime(&wt);
   info.str(""); // clear info
-  info << "Wall-clock time since execution start (s): \t" << wt;
-  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  info << "Wall-clock time since execution start:       " <<setw(16)<< wt;
+  sprintf(msg, "%s - MemInfo: %s seconds", prefix.c_str(), info.str().c_str());
   log->Write(msg, msgType);
-
   // unlock again
   vm->unlock();
-#endif
 
   // return successfully
 }

@@ -402,7 +402,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmepochenter)(ESMCI::VM **vm, vmEpoch *epoch, int *rc){
+  void FTN_X(c_esmc_vmepochenter)(ESMCI::VM **vm, vmEpoch *epoch, int *throttle,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmepochenter()"
     // Initialize return code; assume routine not implemented
@@ -413,7 +414,10 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
     try{
-      (*vm)->epochEnter(*epoch);
+      if (ESMC_NOT_PRESENT_FILTER(throttle) != ESMC_NULL_POINTER)
+        (*vm)->epochEnter(*epoch, *throttle);
+      else
+        (*vm)->epochEnter(*epoch);  // let throttle default
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))

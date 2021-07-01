@@ -97,11 +97,12 @@ extern void *MPIUNI_TMP;
 #define MPI_STATUS_IGNORE    0
 
 /* External types */
-typedef int    MPI_Comm;  
+typedef int    MPI_Comm;
 typedef void   *MPI_Request;
 typedef void   *MPI_Group;
 typedef struct {int MPI_TAG,MPI_SOURCE,MPI_ERROR;} MPI_Status;
-typedef char*   MPI_Errhandler;
+typedef char*  MPI_Errhandler;
+typedef int    MPI_T_enum;
 
 extern int MPIUNI_Memcpy(void*,const void*,int);
 
@@ -651,7 +652,11 @@ extern double ESMC_MPI_Wtime(void);
      MPI_SUCCESS)
 #define MPI_Errhandler_get(comm,errhandler) MPI_SUCCESS
 #define MPI_Errhandler_free(errhandler) MPI_SUCCESS
-#define MPI_Error_string(errorcode,string,result_len) MPI_SUCCESS
+#define MPI_Error_string(errorcode,string,result_len) \
+  (MPIUNI_TMP = (void*)(long) (errorcode),\
+   string[0]='\0', \
+   *result_len=0, \
+   MPI_SUCCESS)
 #define MPI_Error_class(errorcode,errorclass) MPI_SUCCESS
 #define MPI_Wtick() 1.0
 /*gjt replaced this with real function call #define MPI_Wtime() 0.0 */
@@ -663,6 +668,13 @@ extern double ESMC_MPI_Wtime(void);
 
 #define MPI_Comm_c2f(comm) ((int)comm)
 #define MPI_Comm_f2c(comm) ((MPI_Comm)comm)
+
+/* MPI_T API */
+#define MPI_T_finalize() (MPI_SUCCESS)
+#define MPI_T_cvar_get_num(num) \
+  (*num=0, \
+  MPI_SUCCESS)
+
 
 #ifdef __cplusplus
 }
