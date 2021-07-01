@@ -276,6 +276,8 @@ class Alarm {
     // enable Sticky
     void enableSticky(void);
 
+    bool willRingAtTime(const Time & clockTime) const;
+
     // friend class alarm
     friend class Clock;
 

@@ -836,7 +836,9 @@ void Alarm::enableSticky(void){
     // Initialize return code; assume routine not implemented
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
-    return(enabled && ringing);
+    Time clockTime = clock->currTime;
+
+    return(enabled && willRingAtTime(clockTime));
 
  } // end Alarm::isRinging
 
@@ -890,26 +892,10 @@ void Alarm::enableSticky(void){
     }
 
     // get clock's next time
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     Time clockNextTime;
     clock->Clock::getNextTime(&clockNextTime, timeStep);
-
-    // if specified, use passed-in timestep, otherwise use clock's
-    TimeInterval tStep = (timeStep != ESMC_NULL_POINTER) ?
-                               *timeStep : clock->timeStep;
-
-    // get timestep direction: positive or negative
-    bool positive = tStep.TimeInterval::absValue() == tStep ? true : false;
-
-    // check if alarm will turn on
-    bool willRing = false;
-    if (enabled) {
-      willRing = (positive) ?
-                  clockNextTime >= ringTime && clock->currTime < ringTime :
-                  clockNextTime <= ringTime && clock->currTime > ringTime;
-    }
-
-    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
-    return(willRing);
+    return willRingAtTime(clockNextTime);
 
  } // end Alarm::willRingNext
 
@@ -952,7 +938,10 @@ void Alarm::enableSticky(void){
 
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
-    return(ringingOnPrevTimeStep);
+    // get clock's prev time
+    if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+    Time clockTime = clock->currTime - clock->timeStep;
+    return willRingAtTime(clockTime);
 
  } // end Alarm::wasPrevRinging
 
@@ -1090,6 +1079,29 @@ void Alarm::enableSticky(void){
 
  } // end Alarm::isSticky
 
+#define DEBUG 0
+bool Alarm::willRingAtTime(const Time & clockTime) const{
+    bool retval = false;
+
+    TimeInterval deltaT = clockTime - this->firstRingTime;
+
+    ESMC_R8 rn = deltaT/ringInterval;
+
+    ESMC_I4 n = int(rn);
+
+#ifdef DEBUG
+    printf("number of intervals %f %d \n", rn, n);
+#endif
+
+    if( (this->firstRingTime + n    *ringInterval == clockTime) ||
+        (this->firstRingTime + (n+1)*ringInterval == clockTime) ) 
+      retval = true;
+    else
+      retval = false;
+
+    return retval;
+}
+
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  Alarm::checkRingTime - check if time to ring
@@ -1131,32 +1143,22 @@ void Alarm::enableSticky(void){
       return(false);
     }
 
-#define DEBUG 1
     // If the alarm is sticky then whether it's ringing or not is controled
     // by ringerOn or ringerOff by user
 
     // If the alarm is sticky and the ringer is turned off, then it cannot ring
     // else calculate the ringing state of the alarm.
     if(sticky) {
-      if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
-      if(!ringerIsOn) return false;
+      if(!ringerIsOn) {
+        if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+        return false;
+      }
     }
 
     // Otherwise only the current state of the clock and alarm is used
     // to determine if the alarm should ring.
     Time clockTime = clock->currTime;
-    TimeInterval deltaT = clockTime - this->firstRingTime;
-
-    ESMC_R8 rn = deltaT/ringInterval;
-
-    ESMC_I4 n = int(rn);
-
-#ifdef DEBUG
-    printf("number of intervals %f %d \n", rn, n);
-#endif
-
-    if( (this->firstRingTime + n    *ringInterval == clockTime) ||
-        (this->firstRingTime + (n+1)*ringInterval == clockTime) ) {
+    if (willRingAtTime( clockTime)){
       ringTime = clockTime;
       ringing = true;
     }else{
