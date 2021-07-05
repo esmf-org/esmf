@@ -41,7 +41,7 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
 
 # TESTS_BUILD   = \
-# 		$(ESMF_TESTDIR)/ESMC_FieldUTest
+# 		$(ESMF_TESTDIR)/ESMC_FieldRegridCsrvUTest
 
 TESTS_RUN     = \
 		RUN_ESMC_FieldUTest \

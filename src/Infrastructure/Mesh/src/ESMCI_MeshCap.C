@@ -57,7 +57,7 @@
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::MeshCap()"
 
-    is_esmf_mesh = false;
+    is_esmf_mesh = true;
     mesh = nullptr;
     mbmesh = nullptr;
     
@@ -189,7 +189,7 @@ MeshCap *MeshCap::meshcreateempty(bool _is_esmf_mesh, int *rc) {
 
 
 // returns NULL if unsuccessful
-MeshCap *MeshCap::create_from_ptr(void **_mesh,
+MeshCap *MeshCap::create_from_ptr(void *_mesh,
                               bool _is_esmf_mesh, int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::create_from_ptr()"
@@ -199,35 +199,16 @@ MeshCap *MeshCap::create_from_ptr(void **_mesh,
   // Create MeshCap
   MeshCap *mc=new MeshCap();
 
+  MeshCap *mesh_in = static_cast<MeshCap*> (_mesh);
+
   // Set member variables
   mc->is_esmf_mesh=_is_esmf_mesh;
 
-  int sdim = 0;
-  int pdim = 0;
-  ESMC_CoordSys_Flag cs = ESMC_COORDSYS_SPH_DEG;
-  if (_is_esmf_mesh) {
-    // ESMC_LogDefault.Write("create_from_ptr: creating with NATIVE", ESMC_LOGMSG_DEBUG);
-    mc->mesh=(Mesh *)(*_mesh);
-    
-    sdim = (static_cast<Mesh*>(*_mesh))->orig_spatial_dim;
-    pdim = (static_cast<Mesh*>(*_mesh))->parametric_dim();
-    cs = (static_cast<Mesh*>(*_mesh))->coordsys;
-    if (sdim == pdim) cs = ESMC_COORDSYS_CART;
-  } else {
-#if defined ESMF_MOAB
-    // ESMC_LogDefault.Write("create_from_ptr: creating with MOAB", ESMC_LOGMSG_DEBUG);
-   mc->mbmesh=static_cast<MBMesh*>(*_mesh);
-   sdim = (static_cast<MBMesh*>(*_mesh))->orig_sdim;
-   pdim = (static_cast<MBMesh*>(*_mesh))->pdim;
-   cs = (static_cast<MBMesh*>(*_mesh))->coordsys;
-#else
-   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return NULL;
-#endif
-  }
+  mc->mesh = mesh_in->mesh;
+  mc->mbmesh = mesh_in->mbmesh;
 
   // Set member variables
-  mc->finalize_dims(sdim, pdim, cs);
+  mc->finalize_dims(mesh_in->sdim_mc, mesh_in->pdim_mc, mesh_in->coordsys_mc);
   mc->finalize_counts(&localrc);
 
   // Set error code to success
@@ -478,6 +459,56 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
   return mc;
  }
 
+MeshCap *MeshCap::meshcreatefromfile(const char *filename, 
+                                     int fileTypeFlag,
+                                     int *convertToDual, 
+                                     int *addUserArea,
+                                     const char *meshname, 
+                                     int *maskFlag, 
+                                     const char *varname, 
+                                     bool _is_esmf_mesh, int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshcreatefromfile()"
+
+  int localrc;
+
+  // Call into func. depending on mesh type
+  Mesh *mesh;
+  MBMesh *mbmesh = nullptr;
+  
+  int pdim, sdim;
+  ESMC_CoordSys_Flag cs;
+  
+  if (_is_esmf_mesh) {
+    // ESMC_LogDefault.Write("meshcreatefromfile:creating with NATIVE", ESMC_LOGMSG_DEBUG);
+
+    mesh = ESMCI::Mesh::createfromfile(filename, fileTypeFlag,
+                                        convertToDual, addUserArea, meshname,
+                                        maskFlag, varname,
+                                        &pdim, &sdim, &cs,
+                                        &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return NULL;
+  } else {
+    // ESMC_LogDefault.Write("meshcreatefromfile:creating with MOAB", ESMC_LOGMSG_DEBUG);
+
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return NULL;
+  }
+
+  // Create MeshCap
+  MeshCap *mc=new MeshCap();
+
+  // Set member variables
+  mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_dims(pdim, sdim, cs);
+  mc->finalize_counts(&localrc);
+
+  // Output new MeshCap
+  return mc;
+ }
 
 void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
                            double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
@@ -513,7 +544,8 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
 void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                               int *_areaPresent, double *elemArea,
                               int *_coordsPresent, double *elemCoords,
-                              int *_num_elemConn, int *elemConn, int *regridConserve,
+                              int *_num_elemConn, int *elemConn, 
+                              int *regridConserve,
                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                               int *rc)
 {

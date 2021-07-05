@@ -817,7 +817,7 @@ extern "C" void FTN_X(c_esmc_meshgetinternalptr)(MeshCap **meshpp,
 #define ESMC_METHOD "c_esmc_meshgetinternalptr"
 
   *internal_ptr=(*meshpp)->get_internal_mesh_ptr();
-
+  
   // return success
   if (rc) *rc=ESMF_SUCCESS;
 
@@ -825,7 +825,7 @@ extern "C" void FTN_X(c_esmc_meshgetinternalptr)(MeshCap **meshpp,
 
 
 extern "C" void FTN_X(c_esmc_meshcreatefromintptr)(MeshCap **meshpp,
-                                                void **ptr, int *rc)
+                                                void *ptr, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreatefromintptr()"

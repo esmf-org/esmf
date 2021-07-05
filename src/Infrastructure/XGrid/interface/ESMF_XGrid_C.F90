@@ -424,9 +424,10 @@
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get internal pointer
-    call ESMF_MeshGetIntPtr(mesh, meshp, rc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! call ESMF_MeshGetIntPtr(mesh, meshp, rc)
+    ! if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+    !   ESMF_CONTEXT, rcToReturn=rc)) return
+    meshp = mesh%this
 
     ! Get other information
     call ESMF_MeshGet(mesh, &

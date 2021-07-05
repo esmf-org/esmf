@@ -180,7 +180,8 @@
    else
    endif
 
-   ! Get internal pointer
+    ! Get internal pointer (to native mesh, ...
+    !   not sure why but it required for return from Mesh::createfromfile)
    call ESMF_MeshGetIntPtr(mesh, meshp, rc=rc)
    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
