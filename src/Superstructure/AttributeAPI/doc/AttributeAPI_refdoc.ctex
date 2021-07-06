@@ -50,19 +50,16 @@
 
 #endif
 
-\section{Attribute Class}
+\section{Appendix D:  Attribute Class Legacy API}
+\label{appendix_attribute_legacy_api}
 
-%#ifdef STANDALONE
-%\input{AttributeAPI_desc}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Base/doc/AttributeAPI_desc}
-%#endif
+Documentation for the legacy \texttt{ESMF\_Attribute} Class. It is recommended that users migrate to the \texttt{ESMF\_Info} class (see section \ref{esmf_info_class}).
 
 \subsection{Constants}
 #ifdef STANDALONE
 \input{Attribute_options}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Attribute/doc/Attribute_options}
+\input{../Superstructure/AttributeAPI/doc/Attribute_options}
 #endif
 
 \subsection{Class API}
