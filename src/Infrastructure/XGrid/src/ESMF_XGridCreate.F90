@@ -564,6 +564,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     type(ESMF_XGridGeomType_Flag), allocatable :: xggt_a(:), xggt_b(:)
     integer :: tileCount
     integer :: side
+    type(ESMF_CoordSys_Flag)      :: coordSys
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1006,7 +1007,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
         if(i .gt. 2) then
           ! the intermediate meshA is only a pointer type of mesh at this point, 
           ! call the C api to destroy it
-          call C_ESMC_MeshDestroy(meshA%this, ESMF_TRUE, localrc)
+          call C_ESMC_MeshDestroy(meshA, ESMF_TRUE, localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1092,7 +1093,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         if(i .gt. 2) then
-          call C_ESMC_MeshDestroy(meshB%this, ESMF_TRUE, localrc)
+          call C_ESMC_MeshDestroy(meshB, ESMF_TRUE, localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1139,11 +1140,11 @@ function ESMF_XGridCreate(keywordEnforcer, &
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-        
-    call C_ESMC_MeshGetDimensions(mesh%this, sdim2, pdim, ESMF_NULL_POINTER, localrc)
+
+    call C_ESMC_MeshGetDimensions(mesh, sdim2, pdim, coordSys, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     if(sdim /= sdim2) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_OUTOFRANGE, &
          msg="spatial dim mismatch", ESMF_CONTEXT, rcToReturn=rc)
@@ -1159,10 +1160,10 @@ function ESMF_XGridCreate(keywordEnforcer, &
     endif
 
     if(localElemCount .gt. 0) then
-      call C_ESMC_MeshGetArea(mesh%this, localElemCount, xgtype%area, localrc)
+      call C_ESMC_MeshGetArea(mesh, localElemCount, xgtype%area, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      call C_ESMC_MeshGetCentroid(mesh%this, localElemCount, xgtype%centroid, localrc)
+      call C_ESMC_MeshGetCentroid(mesh, localElemCount, xgtype%centroid, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
