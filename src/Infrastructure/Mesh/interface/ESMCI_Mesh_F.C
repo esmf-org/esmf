@@ -521,19 +521,13 @@ extern "C" void FTN_X(c_esmc_meshgetelemconncount)(MeshCap **meshpp, int *elemCo
 
 extern "C" void FTN_X(c_esmc_meshgetownednodecount)(MeshCap **meshpp, int *nodeCount, int *rc){
 
-  *nodeCount = (*meshpp)->getOwnedNodeCount();
-
-  // return success
-  if (rc) *rc=ESMF_SUCCESS;
+  (*meshpp)->getOwnedNodeCount(nodeCount, rc);
 }
 
 
 extern "C" void FTN_X(c_esmc_meshgetownedelemcount)(MeshCap **meshpp, int *elemCount, int *rc){
 
-  *elemCount = (*meshpp)->getOwnedElemCount();
-
-  // return success
-  if (rc) *rc=ESMF_SUCCESS;
+  (*meshpp)->getOwnedElemCount(elemCount, rc);
 }
 
 extern "C" void FTN_X(c_esmc_meshgeteleminfopresence)(MeshCap **meshpp, 

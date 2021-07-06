@@ -777,6 +777,25 @@ void MeshCap::getElemConnCount(int *elemConnCount, int *rc){
   }
 }
 
+void MeshCap::getOwnedNodeCount(int *nodeCount, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getOwnedNodeCount()"
+
+  *nodeCount = this->num_owned_node_mc;
+  *rc = ESMF_SUCCESS;
+}
+
+
+void MeshCap::getOwnedElemCount(int *elemCount, int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getOwnedElemCount()"
+
+  *elemCount = this->num_owned_elem_mc;
+  *rc = ESMF_SUCCESS;
+
+}
+
+
 void MeshCap::getElemInfoPresence(int *elemMaskIsPresent,
                                   int *elemAreaIsPresent,
                                   int *elemCoordsIsPresent,

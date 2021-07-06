@@ -176,8 +176,8 @@ namespace ESMCI {
     void getElemCount(int *elemCount, int *rc);
     void getElemConnCount(int *elemConnCount, int *rc);
 
-    int getOwnedNodeCount(){return num_owned_node_mc;};
-    int getOwnedElemCount(){return num_owned_elem_mc;};
+    void getOwnedNodeCount(int *nodeCount, int *rc);
+    void getOwnedElemCount(int *elemCount, int *rc);
 
 
     void geteleminfointoarray(DistGrid *elemDistgrid,

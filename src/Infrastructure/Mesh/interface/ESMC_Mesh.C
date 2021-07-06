@@ -419,7 +419,6 @@ int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int *num_nodes){
 int ESMC_MeshGetOwnedNodeCount(ESMC_Mesh mesh, int *num_nodes){
 
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;
   int rc = ESMC_RC_NOT_IMPL;
 
   // init output (because 0 could be legit)
@@ -428,10 +427,8 @@ int ESMC_MeshGetOwnedNodeCount(ESMC_Mesh mesh, int *num_nodes){
   MeshCap *mc = static_cast<MeshCap*> (mesh.ptr);
 
   // get node count
-  *num_nodes = mc->getOwnedNodeCount();
-
-  // return successfully
-  rc = ESMF_SUCCESS;
+  mc->getOwnedNodeCount(num_nodes, &rc);
+  
   return rc;
 }
 //--------------------------------------------------------------------------
@@ -470,7 +467,6 @@ int ESMC_MeshGetLocalElementCount(ESMC_Mesh mesh, int *num_elems){
 int ESMC_MeshGetOwnedElementCount(ESMC_Mesh mesh, int *num_elems){
 
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;
   int rc = ESMC_RC_NOT_IMPL;
 
   // init output (because 0 could be legit)
@@ -479,10 +475,9 @@ int ESMC_MeshGetOwnedElementCount(ESMC_Mesh mesh, int *num_elems){
   MeshCap *mc = static_cast<MeshCap*> (mesh.ptr);
 
   // get elem count
-  *num_elems = mc->getOwnedElemCount();
+  mc->getOwnedElemCount(num_elems, &rc);
 
   // return successfully
-  rc = ESMF_SUCCESS;
   return rc;
 }
 //--------------------------------------------------------------------------
