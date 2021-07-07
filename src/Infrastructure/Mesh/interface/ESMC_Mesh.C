@@ -223,32 +223,6 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
 }
 //--------------------------------------------------------------------------
 
-#if 0
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_MeshCreateDistGrids()"
-int ESMC_MeshCreateDistGrids(ESMC_Mesh mesh, int *nodeDistGrid,
-  int *elemDistGrid, int *num_nodes, int *num_elements){
-
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  // typecast into ESMCI type
-  MeshCap *mc = static_cast<MeshCap*> (mesh.ptr);
-
-  // call into ESMCI method
-  localrc = mc->createDistGrids(nodeDistGrid, elemDistGrid, num_nodes,
-    num_elements);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;  // bail out
-
-  // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
-}
-//--------------------------------------------------------------------------
-#endif
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

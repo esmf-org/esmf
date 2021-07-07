@@ -28,8 +28,6 @@ namespace ESMCI {
 
   class MeshCap : public ESMC_Base {
 
-    // Eventually merge this with MeshCXX
-
   private:
 
   public:
@@ -39,7 +37,7 @@ namespace ESMCI {
     // NOT NEEDED RIGHT NOW
     //    bool is_internal_mesh_esmf() {return is_esmf_mesh;}
 
-    Mesh *mesh;     // Make 1 void pointer here for both
+    Mesh *mesh;
     MBMesh *mbmesh;
     
     bool isfree;

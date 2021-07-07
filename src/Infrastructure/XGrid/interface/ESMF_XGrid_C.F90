@@ -424,17 +424,14 @@
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get internal pointer
-    ! call ESMF_MeshGetIntPtr(mesh, meshp, rc)
-    ! if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-    !   ESMF_CONTEXT, rcToReturn=rc)) return
     meshp = mesh%this
 
     ! Get other information
     call ESMF_MeshGet(mesh, &
-         parametricDim=parametricDim, &
-         spatialDim=spatialDim, &
-         coordSys=coordSys, &
-         rc=rc)
+                      parametricDim=parametricDim, &
+                      spatialDim=spatialDim, &
+                      coordSys=coordSys, &
+                      rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
