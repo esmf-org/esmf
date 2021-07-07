@@ -221,6 +221,7 @@ integer,              intent(out), optional :: rc
     type(ESMF_XGridType), pointer :: xgtypep
     type(ESMF_DELayout)           :: delayout
     type(ESMF_XGridGeomType_Flag) :: xggt
+    type(ESMF_CoordSys_Flag) :: coord_sys
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -561,8 +562,8 @@ integer,              intent(out), optional :: rc
              msg="- Cannot retrieve dimCount of the super mesh when storeOverylay is false.", &
              ESMF_CONTEXT, rcToReturn=rc)
           return
-      endif    
-      call C_ESMC_MeshGetDimensions(xgtypep%mesh%this, dimCount, pdim, ESMF_NULL_POINTER, localrc);
+      endif
+      call C_ESMC_MeshGetDimensions(xgtypep%mesh%this, dimCount, pdim, coord_sys, localrc);
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
