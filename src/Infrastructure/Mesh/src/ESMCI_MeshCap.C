@@ -44,16 +44,33 @@
 #include "Mesh/include/ESMCI_MBMesh_Util.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 //-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
 // static const char *const version = "$Id$";
- //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 
- using namespace ESMCI;
+using namespace ESMCI;
+
+// Moab variable
+bool moab_on=false;
+
+void MeshCap::meshGetMOAB(int *_moabOn, int *rc){
+  *_moabOn=0;
+  if (moab_on) *_moabOn=1; 
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+void MeshCap::meshSetMOAB(int *_moabOn, int *rc){
+  if (*_moabOn==1) moab_on=true;
+  else moab_on=false;
+  
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
 
 // Private constructor
- MeshCap::MeshCap() {
+MeshCap::MeshCap() {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::MeshCap()"
 
@@ -78,14 +95,15 @@
     elem_distgrid = nullptr;
   }
 
-void MeshCap::finalize_ptr(int is_esmf_mesh, Mesh *mesh, MBMesh *mbmesh){
+void MeshCap::finalize_ptr(Mesh *mesh, MBMesh *mbmesh, bool is_esmf_mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::finalize_ptr()"
 
   // Set member variables
-  this->is_esmf_mesh=is_esmf_mesh;
   this->mesh=mesh;
   this->mbmesh=mbmesh;
+  this->is_esmf_mesh=is_esmf_mesh;
+
 }
 
 void MeshCap::finalize_dims(int sdim, int pdim, ESMC_CoordSys_Flag coordsys){
@@ -127,16 +145,18 @@ void MeshCap::finalize_counts(int *rc){
 // returns NULL if unsuccessful
 MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
                               ESMC_CoordSys_Flag *coordsys,
-                              bool _is_esmf_mesh, int *rc) {
+                              int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreate()"
 
   int localrc;
 
+  bool is_esmf_mesh = !moab_on;
+  
   // Create mesh depending on the type
   Mesh *mesh;
   MBMesh *mbmesh = nullptr;
-  if (_is_esmf_mesh) {
+  if (is_esmf_mesh) {
     // ESMC_LogDefault.Write("meshcreate:creating with NATIVE", ESMC_LOGMSG_DEBUG);
     ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh create");
     ESMCI_meshcreate(&mesh,
@@ -165,7 +185,7 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims(*sdim, *pdim, *coordsys);
   
   // Output new MeshCap
@@ -173,7 +193,7 @@ MeshCap *MeshCap::meshcreate(int *pdim, int *sdim,
 }
 
 // returns NULL if unsuccessful
-MeshCap *MeshCap::meshcreateempty(bool _is_esmf_mesh, int *rc) {
+MeshCap *MeshCap::meshcreateempty(int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreateempty()"
 
@@ -181,7 +201,9 @@ MeshCap *MeshCap::meshcreateempty(bool _is_esmf_mesh, int *rc) {
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->is_esmf_mesh=_is_esmf_mesh;
+  mc->is_esmf_mesh=!moab_on;
+
+  if (rc) *rc = ESMF_SUCCESS;
 
   // Output new MeshCap
   return mc;
@@ -189,8 +211,7 @@ MeshCap *MeshCap::meshcreateempty(bool _is_esmf_mesh, int *rc) {
 
 
 // returns NULL if unsuccessful
-MeshCap *MeshCap::create_from_ptr(void *_mesh,
-                              bool _is_esmf_mesh, int *rc) {
+MeshCap *MeshCap::create_from_ptr(void *_mesh, int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::create_from_ptr()"
 
@@ -202,12 +223,9 @@ MeshCap *MeshCap::create_from_ptr(void *_mesh,
   MeshCap *mesh_in = static_cast<MeshCap*> (_mesh);
 
   // Set member variables
-  mc->is_esmf_mesh=_is_esmf_mesh;
-
-  mc->mesh = mesh_in->mesh;
-  mc->mbmesh = mesh_in->mbmesh;
-
-  // Set member variables
+  // TODO: this should actually query the _mesh for moab_on and pass that into this method
+  //       because that could be different if user has toggled moab_on
+  mc->finalize_ptr(mesh_in->mesh, mesh_in->mbmesh, !moab_on);
   mc->finalize_dims(mesh_in->sdim_mc, mesh_in->pdim_mc, mesh_in->coordsys_mc);
   mc->finalize_counts(&localrc);
 
@@ -215,7 +233,7 @@ MeshCap *MeshCap::create_from_ptr(void *_mesh,
   if (rc) *rc=ESMF_SUCCESS;
 
   // Output new MeshCap
-   return mc;
+  return mc;
 }
 
 MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
@@ -225,13 +243,13 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   int localrc;
 
  // Get mesh type
-  bool _is_esmf_mesh=(*src_meshpp)->is_esmf_mesh;
+  bool is_esmf_mesh=(*src_meshpp)->is_esmf_mesh;
 
   // Call into func. depending on mesh type
   Mesh *mesh;
   MBMesh *mbmesh = nullptr;
   // Call into func. depending on mesh type
-  if (_is_esmf_mesh) {
+  if (is_esmf_mesh) {
     // ESMC_LogDefault.Write("meshcreatedual:creating with NATIVE", ESMC_LOGMSG_DEBUG);
     ESMCI_DUALMESH_TRACE_ENTER("NativeMesh Dual Mesh Generation");
     ESMCI_meshcreatedual(&((*src_meshpp)->mesh), &mesh, &localrc);
@@ -258,7 +276,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   MeshCap *mc=new MeshCap();
   
   // Set member variables
-  mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims((*src_meshpp)->sdim_mc, (*src_meshpp)->pdim_mc,
                     (*src_meshpp)->coordsys_mc);
   mc->finalize_counts(&localrc);
@@ -285,16 +303,18 @@ MeshCap *MeshCap::meshcreate_easy_elems(int *pdim,
                                         int *has_elemCoords,
                                         double *elemCoords,
                                         ESMC_CoordSys_Flag *coordsys,
-                                        bool _is_esmf_mesh, int *rc) {
+                                        int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreate_easy_elems()"
 
   int localrc;
 
+  bool is_esmf_mesh = !moab_on;
+
   // Create mesh depending on the type
   Mesh *mesh;
   MBMesh *mbmesh = nullptr;
-  if (_is_esmf_mesh) {
+  if (is_esmf_mesh) {
     // ESMC_LogDefault.Write(":meshcreate_easy_elems:creating with NATIVE", ESMC_LOGMSG_DEBUG);
     ESMCI_meshcreate_easy_elems(&mesh,
                                 pdim, sdim,
@@ -317,7 +337,7 @@ MeshCap *MeshCap::meshcreate_easy_elems(int *pdim,
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims(*sdim, *pdim, *coordsys);
   mc->finalize_counts(&localrc);
 
@@ -328,9 +348,7 @@ MeshCap *MeshCap::meshcreate_easy_elems(int *pdim,
 
 
 // returns NULL if unsuccessful
-MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
-                                       bool _is_esmf_mesh,
-                                       int *rc) {
+MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp, int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreate_from_grid()"
   int localrc;
@@ -353,13 +371,15 @@ MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
   // Empty vector of Arrays
   std::vector<ESMCI::Array*> empty_arrays;
 
+  bool is_esmf_mesh = !moab_on;
+
   // Create mesh depending on the type
   Mesh *mesh;
   MBMesh *mbmesh = nullptr;
 
   int sdim = 0;
   int pdim = 0;
-  if (_is_esmf_mesh) {
+  if (is_esmf_mesh) {
     // ESMC_LogDefault.Write("meshcreate_from_grid:creating with NATIVE", ESMC_LOGMSG_DEBUG);
 
     ESMCI_GridToMeshCell(grid,
@@ -392,14 +412,8 @@ MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
 
   // Set member variables
   ESMC_CoordSys_Flag cs = grid.getCoordSys();
-  
-  // int sdim_twk = 0;
-  // if ((cs == ESMC_COORDSYS_SPH_DEG) || (cs == ESMC_COORDSYS_SPH_RAD)) {
-  //   if (sdim == 3) sdim_twk = 2;
-  //   else sdim_twk = sdim;
-  // }
 
-  mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims(sdim, pdim, cs);
   mc->finalize_counts(&localrc);
 
@@ -450,7 +464,7 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->finalize_ptr(is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims((*meshapp)->sdim_mc, (*meshapp)->pdim_mc,
                     (*meshapp)->coordsys_mc);
   mc->finalize_counts(&localrc);
@@ -466,11 +480,13 @@ MeshCap *MeshCap::meshcreatefromfile(const char *filename,
                                      const char *meshname, 
                                      int *maskFlag, 
                                      const char *varname, 
-                                     bool _is_esmf_mesh, int *rc) {
+                                     int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreatefromfile()"
 
   int localrc;
+
+  bool is_esmf_mesh = !moab_on;
 
   // Call into func. depending on mesh type
   Mesh *mesh;
@@ -479,7 +495,7 @@ MeshCap *MeshCap::meshcreatefromfile(const char *filename,
   int pdim, sdim;
   ESMC_CoordSys_Flag cs;
   
-  if (_is_esmf_mesh) {
+  if (is_esmf_mesh) {
     // ESMC_LogDefault.Write("meshcreatefromfile:creating with NATIVE", ESMC_LOGMSG_DEBUG);
 
     mesh = ESMCI::Mesh::createfromfile(filename, fileTypeFlag,
@@ -502,7 +518,7 @@ MeshCap *MeshCap::meshcreatefromfile(const char *filename,
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims(pdim, sdim, cs);
   mc->finalize_counts(&localrc);
 
@@ -599,7 +615,7 @@ int MeshCap::destroy(MeshCap **mcpp, bool noGarbage) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::destroy()"
 
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  int rc = ESMC_RC_NOT_IMPL;
   int localrc;
 
     // Dereference meshcap
@@ -1153,7 +1169,7 @@ MeshCap *MeshCap::merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp,
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->finalize_ptr(is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims((*srcmeshpp)->sdim_mc, (*srcmeshpp)->pdim_mc,
                     (*srcmeshpp)->coordsys_mc);
   mc->finalize_counts(&localrc);
@@ -1217,12 +1233,12 @@ void MeshCap::xgridregrid_create(MeshCap **meshsrcpp, MeshCap **meshdstpp,
     MeshCap *mc=new MeshCap();
 
     // Set member variables
-    mc->finalize_ptr(is_esmf_mesh, mesh, nullptr);
+    mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
     mc->finalize_dims(mesh->orig_spatial_dim, mesh->parametric_dim(),
                       mesh->coordsys);
     // segfault in XGrid due to mesh not being fully created
     mc->finalize_counts(&localrc);
-    
+
     // Output new MeshCap
     *out_mesh=mc;
   } else *out_mesh = NULL;
@@ -1238,12 +1254,11 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::GridToMesh()"
 
-
-  // Eventually should be argument
-  bool _is_esmf_mesh=true;
-
   // Local error code
   int localrc;
+
+  // bool is_esmf_mesh = !moab_on;
+  bool is_esmf_mesh = true;
 
   // Create mesh depending on the type
   Mesh *mesh;
@@ -1252,7 +1267,7 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
   int sdim = 0;
   int pdim = 0;
   ESMC_CoordSys_Flag cs = ESMC_COORDSYS_SPH_DEG;
-  if (_is_esmf_mesh) {
+  if (is_esmf_mesh) {
     // ESMC_LogDefault.Write("GridToMesh:creating with NATIVE", ESMC_LOGMSG_DEBUG);
     ESMCI_GridToMesh(grid_, staggerLoc,
                      arrays,
@@ -1278,7 +1293,7 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
   MeshCap *mc=new MeshCap();
 
   // // Set member variables
-  mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims(sdim, pdim, cs);
   mc->finalize_counts(&localrc);
 
@@ -1286,23 +1301,16 @@ MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
    return mc;
 }
 
-// Global in ESMCI_Mesh_F.C
-// (This is kind of ugly, and the variable should probably moved to this file
-//  after the release, but I don't want to make big changes this close.)
-extern bool Moab_on;
 MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
                              const std::vector<ESMCI::Array*> &arrays,
                              int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::GridToMeshCell()"
 
-
-  // Set from global var. set in ESMCI_Mesh_F.C
-  bool _is_esmf_mesh=true;
-  if (Moab_on) _is_esmf_mesh=false;
-
   // Local error code
   int localrc;
+
+  bool is_esmf_mesh = !moab_on;
 
   // Create mesh depending on the type
   Mesh *mesh;
@@ -1311,7 +1319,7 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
   int sdim = 0;
   int pdim = 0;
   ESMC_CoordSys_Flag cs = ESMC_COORDSYS_SPH_DEG;
-  if (_is_esmf_mesh) {
+  if (is_esmf_mesh) {
     // ESMC_LogDefault.Write("GridToMeshCell:creating with NATIVE", ESMC_LOGMSG_DEBUG);
     ESMCI_GridToMeshCell(grid_,
                          arrays,
@@ -1334,7 +1342,7 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
     pdim = mbmesh->pdim;
     cs = mbmesh->coordsys;
 #else
-   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
       "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return NULL;
 #endif
   }
@@ -1343,26 +1351,26 @@ MeshCap *MeshCap::GridToMeshCell(const Grid &grid_,
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->finalize_ptr(_is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims(sdim, pdim, cs);
   mc->finalize_counts(&localrc);
 
   // Output new MeshCap
-   return mc;
+  return mc;
 }
 
 
 // This method converts a Mesh to a PointList
 void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
-                                   ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
+                                   ESMCI::InterArray<int> *maskValuesArg, 
+                                   PointList **out_pl,
                                    int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::MeshCap_to_PointList()"
 
-
-
   // Call into func. depending on mesh type
   int localrc;
+  
   if (is_esmf_mesh) {
     *out_pl=mesh->MeshToPointList(meshLoc,
                                   maskValuesArg, &localrc);
@@ -2171,7 +2179,7 @@ MeshCap *MeshCap::meshcreateredistelems(MeshCap **src_meshpp, int *num_elem_gids
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->finalize_ptr(is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims((*src_meshpp)->sdim_mc,(*src_meshpp)->pdim_mc,
                     (*src_meshpp)->coordsys_mc);
   mc->finalize_counts(&localrc);
@@ -2227,7 +2235,7 @@ MeshCap *MeshCap::meshcreateredistnodes(MeshCap **src_meshpp,int *num_node_gids,
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->finalize_ptr(is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims((*src_meshpp)->sdim_mc,(*src_meshpp)->pdim_mc,
                     (*src_meshpp)->coordsys_mc);
   mc->finalize_counts(&localrc);
@@ -2283,7 +2291,7 @@ MeshCap *MeshCap::meshcreateredist(MeshCap **src_meshpp, int *num_node_gids, int
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-  mc->finalize_ptr(is_esmf_mesh, mesh, mbmesh);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims((*src_meshpp)->sdim_mc,(*src_meshpp)->pdim_mc,
                     (*src_meshpp)->coordsys_mc);
   mc->finalize_counts(&localrc);

@@ -56,6 +56,9 @@ namespace ESMCI {
     DistGrid *node_distgrid;
     DistGrid *elem_distgrid;
 
+    static void meshGetMOAB(int *_moabOn, int *rc);
+    static void meshSetMOAB(int *_moabOn, int *rc);
+
     MeshCap(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
       is_esmf_mesh = false;
       mesh = NULL;
@@ -76,7 +79,7 @@ namespace ESMCI {
       elem_distgrid = nullptr;
     }
 
-    void finalize_ptr(int is_esmf_mesh, Mesh *mesh, MBMesh *mbmesh);
+    void finalize_ptr(Mesh *mesh, MBMesh *mbmesh, bool is_esmf_mesh);
     void finalize_dims(int sdim, int pdim, ESMC_CoordSys_Flag coordsys);
     void finalize_counts(int *rc);
     
@@ -94,14 +97,13 @@ namespace ESMCI {
                               ESMCI::InterArray<int> *maskValuesArg, PointList **out_pl,
                               int *rc);
 
-    static MeshCap *create_from_ptr(void *_mesh,
-                                    bool _is_esmf_mesh, int *rc);
+    static MeshCap *create_from_ptr(void *_mesh, int *rc);
 
-    static MeshCap *meshcreateempty(bool _is_esmf_mesh, int *rc);
+    static MeshCap *meshcreateempty(int *rc);
     
     static MeshCap *meshcreate(int *pdim, int *sdim,
                                ESMC_CoordSys_Flag *coordsys,
-                               bool _is_esmf_mesh, int *rc);
+                               int *rc);
 
     static MeshCap *meshcreatefromfile(const char *filename, 
                                        int fileTypeFlag,
@@ -110,7 +112,7 @@ namespace ESMCI {
                                        const char *meshname, 
                                        int *maskFlag, 
                                        const char *varname, 
-                                       bool _is_esmf_mesh, int *rc);
+                                       int *rc);
 
     static MeshCap *meshcreate_easy_elems(int *pdim,
                                           int *sdim,
@@ -125,11 +127,9 @@ namespace ESMCI {
                                           int *has_elemCoords,
                                           double *elemCoords,
                                           ESMC_CoordSys_Flag *coordsys,
-                                          bool _is_esmf_mesh, int *rc);
+                                          int *rc);
 
-    static MeshCap *meshcreate_from_grid(Grid **gridpp,
-                                         bool _is_esmf_mesh,
-                                         int *rc);
+    static MeshCap *meshcreate_from_grid(Grid **gridpp, int *rc);
 
     void meshaddnodes(int *num_nodes, int *nodeId,
                       double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,

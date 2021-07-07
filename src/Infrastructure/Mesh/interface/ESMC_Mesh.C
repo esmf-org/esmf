@@ -65,7 +65,7 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim,
 
   // call into ESMCI method
   mc = MeshCap::meshcreate(&parametricDim, &spatialDim, 
-                           &localCoordSys, true, &localrc);
+                           &localCoordSys, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return mesh; // bail out
 
@@ -101,7 +101,7 @@ ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag,
   // Call into ESMCI method
   mc = MeshCap::meshcreatefromfile(filename, fileTypeFlag,
                                convertToDual, addUserArea,
-                               meshname, maskFlag, varname, true,
+                               meshname, maskFlag, varname,
                                &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return mesh; // bail out
@@ -131,7 +131,7 @@ ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag,
   MeshCap *mc;
   
   // call into ESMCI method
-  mc = MeshCap::create_from_ptr(mesh_ptr, true, &localrc);
+  mc = MeshCap::create_from_ptr(mesh_ptr, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return mesh;
 

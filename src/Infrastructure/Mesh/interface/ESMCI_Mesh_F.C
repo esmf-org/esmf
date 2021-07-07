@@ -59,18 +59,12 @@ using namespace ESMCI;
  *  Low level helper functions: translate from F90 to C++.
  *----------------------------------------------------------------------------*/
 
-// Moab variable
-bool Moab_on=false;
-
 // This method turns on MOAB
 extern "C" void FTN_X(c_esmc_meshgetmoab)(int *_moabOn, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshgetmoab()"
 
-  *_moabOn=0;
-  if (Moab_on) *_moabOn=1; 
-
-  if (rc!=NULL) *rc=ESMF_SUCCESS;
+  MeshCap::meshGetMOAB(_moabOn, rc);
 }
 
 // This method turns on MOAB
@@ -78,10 +72,7 @@ extern "C" void FTN_X(c_esmc_meshsetmoab)(int *_moabOn, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshsetmoab()"
 
-  if (*_moabOn==1) Moab_on=true;
-  else Moab_on=false;
-  
-  if (rc!=NULL) *rc=ESMF_SUCCESS;
+  MeshCap::meshSetMOAB(_moabOn, rc);
 }
 
 extern "C" void FTN_X(c_esmc_meshgetisfree)(MeshCap **meshpp, ESMC_Logical *isfree) {
@@ -333,11 +324,7 @@ extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
   int localrc = ESMC_RC_NOT_IMPL;
 
   // Create Mesh depending on whether MOAB or not
-  if (Moab_on) {
-    *meshpp=MeshCap::meshcreate(pdim,sdim,coordSys,false,rc);
-  } else {
-    *meshpp=MeshCap::meshcreate(pdim,sdim,coordSys,true,rc);
-  }
+  *meshpp=MeshCap::meshcreate(pdim,sdim,coordSys,rc);
 
   // copy and convert F90 string to null terminated one
   std::string cname(name, name_l);
@@ -354,12 +341,8 @@ extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
 
 extern "C" void FTN_X(c_esmc_meshcreateempty)(MeshCap **mesh, int *rc) {
 
-  if (Moab_on)
-    *mesh=MeshCap::meshcreateempty(false, rc);
-  else
-    *mesh=MeshCap::meshcreateempty(true, rc);
+  *mesh=MeshCap::meshcreateempty(rc);
   
-  if (rc) *rc=ESMF_SUCCESS;
 }
 
 
@@ -824,9 +807,7 @@ extern "C" void FTN_X(c_esmc_meshcreatefromintptr)(MeshCap **meshpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreatefromintptr()"
 
-  // Create MeshCap for now assuming pointer is Mesh, need other way
-  // to indicate it's MOAB, or wait until passing whole MeshCap struct
-    *meshpp=MeshCap::create_from_ptr(ptr, true, rc);
+    *meshpp=MeshCap::create_from_ptr(ptr, rc);
 }
 
 extern "C" void FTN_X(c_esmc_meshfitonvm)(MeshCap **meshpp, VM **vm, int *rc) {
@@ -854,21 +835,12 @@ extern "C" void FTN_X(c_esmc_meshcreateeasyelems)(MeshCap **meshpp,
 #define ESMC_METHOD "c_esmc_meshcreateeasyelems()"
 
   // Create Mesh depending on whether MOAB or not
-  if (Moab_on) {
     *meshpp=MeshCap::meshcreate_easy_elems(pdim, sdim,
                                 num_elems, elemIdsII, elemTypes, elemMaskII,
                                 num_elemCorners, elemCornerCoords,
                                 has_elemArea, elemArea,
                                 has_elemCoords, elemCoords,
-                                coordSys,false,rc);
-  } else {
-    *meshpp=MeshCap::meshcreate_easy_elems(pdim, sdim,
-                                num_elems, elemIdsII, elemTypes, elemMaskII,
-                                num_elemCorners, elemCornerCoords,
-                                has_elemArea, elemArea,
-                                has_elemCoords, elemCoords,
-                                coordSys,true,rc);
-  }
+                                coordSys,rc);
 
 } // meshcreate
 
@@ -885,12 +857,7 @@ extern "C" void FTN_X(c_esmc_meshcreatefromgrid)(MeshCap **meshpp,
 
   int localrc = ESMC_RC_NOT_IMPL;
 
-  // Create Mesh depending on whether MOAB or not
-  if (Moab_on) {
-    *meshpp=MeshCap::meshcreate_from_grid(gridpp,false,rc);
-  } else {
-    *meshpp=MeshCap::meshcreate_from_grid(gridpp,true,rc);
-  }
+  *meshpp=MeshCap::meshcreate_from_grid(gridpp,rc);
 
   // copy and convert F90 string to null terminated one
   std::string cname(name, name_l);
