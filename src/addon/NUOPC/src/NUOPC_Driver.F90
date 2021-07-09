@@ -6200,9 +6200,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (len_trim(tempString) > 2) then
             ! start of an alarm block
             level = level + 1
+            kindStack(level)=0  ! alarm block
             if (zeroSkip) cycle ! go to next line ---^
             slotStack(level)=slot
-            kindStack(level)=0  ! alarm block
             slot = slotHWM + 1
             slotHWM = slotHWM + 1
             if (slot>1) then
@@ -6311,6 +6311,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (len_trim(tempString) > 1) then
             ! start of a time loop
             level = level + 1
+            kindStack(level)=1  ! time loop
             if (zeroSkip) cycle ! go to next line ---^
             colonIndex = index(tempString,":")
             haveRunDuration = .false. ! reset
@@ -6336,7 +6337,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               endif
             endif
             slotStack(level)=slot
-            kindStack(level)=1  ! time loop
             slot = slotHWM + 1
             slotHWM = slotHWM + 1
             if (slot>1) then
