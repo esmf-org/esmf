@@ -5888,6 +5888,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                                         :: i, lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
     integer, allocatable                            :: slotStack(:)
+    integer, allocatable                            :: kindStack(:)
     character(len=NUOPC_FreeFormatLen)              :: tempString
     type(ESMF_TimeInterval)                         :: timeStep, runDuration
     type(ESMF_Clock)                                :: internalClock, runClock
@@ -6148,8 +6149,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return  ! bail out
     endif
 
-    ! allocate the slotStack
-    allocate(slotStack(slotCount))
+    ! allocate slotStack and kindStack
+    allocate(slotStack(slotCount), kindStack(slotCount))
 
     ! Replace the default RunSequence with a customized one
     call NUOPC_DriverNewRunSequence(driver, slotCount=slotCount, rc=localrc)
@@ -6201,6 +6202,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             level = level + 1
             if (zeroSkip) cycle ! go to next line ---^
             slotStack(level)=slot
+            kindStack(level)=0  ! alarm block
             slot = slotHWM + 1
             slotHWM = slotHWM + 1
             if (slot>1) then
@@ -6285,12 +6287,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return  ! bail out
           else
             ! end of an alarm block
+            ! ensure we are indeed inside an alarm block
+            if (kindStack(level)/=0) then
+              call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                msg="Incorrect nesting of time loop and alarm block detected.",&
+                line=__LINE__, &
+                file=trim(name)//":"//FILENAME, rcToReturn=rc)
+              return  ! bail out
+            endif
+            ! continue with ending the alarm block
             if (zeroSkip) then
               if (level==zeroSkipLevel) zeroSkip = .false.
               level = level - 1
               cycle ! go to next line ---^
             endif
-            ! exiting time loop level
+            ! exiting nesting level
             slot = slotStack(level)
             level = level - 1
           endif
@@ -6325,6 +6336,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               endif
             endif
             slotStack(level)=slot
+            kindStack(level)=1  ! time loop
             slot = slotHWM + 1
             slotHWM = slotHWM + 1
             if (slot>1) then
@@ -6440,12 +6452,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return  ! bail out
           else
             ! end of a time loop
+            ! ensure we are indeed inside a time loop
+            if (kindStack(level)/=1) then
+              call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                msg="Incorrect nesting of time loop and alarm block detected.",&
+                line=__LINE__, &
+                file=trim(name)//":"//FILENAME, rcToReturn=rc)
+              return  ! bail out
+            endif
+            ! continue with ending the time loop
             if (zeroSkip) then
               if (level==zeroSkipLevel) zeroSkip = .false.
               level = level - 1
               cycle ! go to next line ---^
             endif
-            ! exiting time loop level
+            ! exiting nesting level
             slot = slotStack(level)
             level = level - 1
           endif
@@ -6496,7 +6517,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     enddo
     ! clean-up
     if (allocated(tokenList)) deallocate(tokenList) ! for zeroSkip cycle case
-    deallocate(slotStack)
+    deallocate(slotStack, kindStack)
 
     if (needDriverTopLoop) then
       ! destroy the temporary FreeFormat object copy
