@@ -28,6 +28,7 @@
 // insert higher level, 3rd party or system includes
 #include <string>
 #include <sstream>
+#include <cstring>
 #ifndef ESMF_NO_DLFCN
 #include <dlfcn.h>
 #endif
@@ -222,6 +223,51 @@ extern "C" {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "corrupt label string", ESMC_CONTEXT, rc);
       return;
+    }
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_methodtablegetinfo"
+  void FTN_X(c_esmc_methodtablegetinfo)(ESMCI::MethodTable **ptr, int *count,
+    int *maxLen, int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    *count = (*ptr)->size();
+
+    *maxLen = 0;
+    for (auto it=(*ptr)->begin(); it!=(*ptr)->end(); ++it){
+      auto len = (it->first).find("::ESMF::index::");
+      if ((int)len > *maxLen) *maxLen = len;
+    }
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_methodtablegetlabels"
+  void FTN_X(c_esmc_methodtablegetlabels)(ESMCI::MethodTable **ptr,
+    char *labelList, int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    int count = (*ptr)->size();
+
+    int maxLen = 0;
+    for (auto it=(*ptr)->begin(); it!=(*ptr)->end(); ++it){
+      auto len = (it->first).find("::ESMF::index::");
+      if ((int)len > maxLen) maxLen = len;
+    }
+
+    int i = 0;
+    for (auto it=(*ptr)->begin(); it!=(*ptr)->end(); ++it, ++i){
+      auto len = (it->first).find("::ESMF::index::");
+      memcpy(labelList+i*maxLen, (it->first).c_str(), len);
+      memset(labelList+i*maxLen+len, ' ', maxLen-len);  // fill with white space
     }
 
     // return successfully
