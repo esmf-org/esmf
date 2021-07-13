@@ -2264,21 +2264,23 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompCheckSetClock - Check Clock compatibility and set stopTime
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompCheckSetClock() 
-  subroutine NUOPC_GridCompCheckSetClock(comp, externalClock, forceTimeStep, rc)
+  subroutine NUOPC_GridCompCheckSetClock(comp, externalClock, checkTimeStep, &
+    forceTimeStep, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: comp
     type(ESMF_Clock),        intent(in)            :: externalClock
+    logical,                 intent(in),  optional :: checkTimeStep
     logical,                 intent(in),  optional :: forceTimeStep
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Compare {\tt externalClock} to the internal clock of {\tt comp} to make sure
-!   they match in their current time. Also ensure that the time step of the 
-!   external clock is a multiple of the time step of the internal clock. If 
+!   they match in their current time. Also ensure that the time step of the
+!   external clock is a multiple of the time step of the internal clock. If
 !   both conditions are satisfied then set the stop time of the internal clock
 !   so it is reached in one time step of the external clock. Otherwise leave the
 !   internal clock unchanged and return with error. The direction of
 !   the involved clocks is taking into account.
-!   Setting the {\tt forceTimeStep} argument to {\tt .true.} forces the 
+!   Setting the {\tt forceTimeStep} argument to {\tt .true.} forces the
 !   {\tt timeStep} of the {\tt externalClock} to be used to reset the
 !   {\tt timeStep} of the internal clock.
 !EOP
@@ -2288,16 +2290,17 @@ module NUOPC_Comp
     type(ESMF_Clock)        :: internalClock
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     call ESMF_GridCompGet(comp, clock=internalClock, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    
+
     call NUOPC_CheckSetClock(setClock=internalClock, &
-      checkClock=externalClock, forceTimeStep=forceTimeStep, rc=localrc)
+      checkClock=externalClock, checkTimeStep=checkTimeStep, &
+      forceTimeStep=forceTimeStep, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
