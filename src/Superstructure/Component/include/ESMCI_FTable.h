@@ -123,6 +123,8 @@ class FTable {
     static void setDP(FTable ***ptr, void **datap, int *rc);
     int getDataPtr(char const *name, void **data, enum dtype *dtype);
     int setDataPtr(char const *name, void **data, enum dtype dtype);
+    int getDataPtrCount(int *count, int *maxLen);
+    int getDataPtrList(char *labelList);
     // func
     static void setServices(void *ptr, void (*func)(), int *userRc, int *rc);
     static void setVM(void *ptr, void (*func)(), int *userRc, int *rc);
