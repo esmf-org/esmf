@@ -373,6 +373,7 @@
     !wrap2%p=>data2
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get Internal State Test"
+    nullify(wrap2%p)
     call ESMF_CplCompGetInternalState(cpl, wrap2, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -383,8 +384,13 @@
     data2 = wrap2%p
     write(failMsg, *) "Did not return correct data"
     write(name, *) "Verify Internal State Test"
-    call ESMF_Test((data2%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
-    print *, "data2%testnumber = ", data2%testnumber
+    if (associated(wrap2%p)) then
+      call ESMF_Test((data2%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
+      print *, "data2%testnumber = ", data2%testnumber
+    else
+      call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+    endif
+
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest

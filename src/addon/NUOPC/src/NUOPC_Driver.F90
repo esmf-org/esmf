@@ -474,7 +474,11 @@ module NUOPC_Driver
       
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -708,7 +712,11 @@ module NUOPC_Driver
       msg="Allocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompSetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompSetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2369,7 +2377,11 @@ module NUOPC_Driver
 
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2515,7 +2527,11 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2651,7 +2667,11 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -2794,7 +2814,11 @@ module NUOPC_Driver
 
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -3137,7 +3161,11 @@ module NUOPC_Driver
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -3480,7 +3508,11 @@ module NUOPC_Driver
     
     ! query component for its internal state
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -3692,7 +3724,11 @@ module NUOPC_Driver
 
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4048,7 +4084,11 @@ module NUOPC_Driver
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4242,7 +4282,11 @@ module NUOPC_Driver
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4410,7 +4454,11 @@ module NUOPC_Driver
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4592,7 +4640,11 @@ module NUOPC_Driver
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4910,7 +4962,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5057,7 +5113,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5196,7 +5256,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5251,7 +5315,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5300,7 +5368,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5376,7 +5448,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5482,7 +5558,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5566,7 +5646,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5660,7 +5744,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5929,7 +6017,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -6563,7 +6655,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -6619,7 +6715,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -6733,7 +6833,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -7092,7 +7196,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -7452,7 +7560,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out

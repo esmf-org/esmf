@@ -57,6 +57,7 @@
 #ifdef ESMF_TESTEXHAUSTIVE
     character(ESMF_MAXSTR)        :: bname
     type(dataWrapper)             :: wrap1, wrap2, wrap3, wrap4, wrap5, wrap6
+    type(dataWrapper)             :: wrap7, wrap8, wrap9, wrap10
     type(ESMF_Grid)               :: grid, gridInA, gridInB
     type(ESMF_Grid), allocatable  :: gridList(:)
     type(ESMF_Mesh)               :: mesh, meshInA, meshInB
@@ -915,6 +916,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get Internal State Test"
+    nullify(wrap2%p)
     call ESMF_GridCompGetInternalState(comp1, wrap2, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -924,9 +926,13 @@
     !EX_UTest
     write(failMsg, *) "Did not return correct data"
     write(name, *) "Verify Internal State Test"
-    call ESMF_Test((wrap2%p%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
-    print *, "wrap2%p%testnumber = ", wrap2%p%testnumber
-    
+    if (associated(wrap2%p)) then
+      call ESMF_Test((wrap2%p%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
+      print *, "wrap2%p%testnumber = ", wrap2%p%testnumber
+    else
+      call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+    endif
+
 !-------------------------------------------------------------------------
 !   !
 !   !  Set Internal State
@@ -945,6 +951,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get Internal State 2nd time Test"
+    nullify(wrap4%p)
     call ESMF_GridCompGetInternalState(comp1, wrap4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -954,9 +961,13 @@
     !EX_UTest
     write(failMsg, *) "Did not return correct data"
     write(name, *) "Verify Internal State 2nd time Test"
-    call ESMF_Test((wrap4%p%testnumber.eq.1234), name, failMsg, result, ESMF_SRCLINE)
-    print *, "wrap4%p%testnumber = ", wrap4%p%testnumber
-    
+    if (associated(wrap4%p)) then
+      call ESMF_Test((wrap4%p%testnumber.eq.1234), name, failMsg, result, ESMF_SRCLINE)
+      print *, "wrap4%p%testnumber = ", wrap4%p%testnumber
+    else
+      call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+    endif
+
 !-------------------------------------------------------------------------
 !   !  Set Internal State
     !EX_UTest
@@ -974,6 +985,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get Internal State 3rd time Test"
+    nullify(wrap6%p)
     call ESMF_GridCompGetInternalState(comp1, wrap6, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -983,12 +995,95 @@
     !EX_UTest
     write(failMsg, *) "Did not return correct data"
     write(name, *) "Verify Internal State 3rd time Test"
-    call ESMF_Test((wrap6%p%testnumber.eq.9182), name, failMsg, result, ESMF_SRCLINE)
-    print *, "wrap6%p%testnumber = ", wrap6%p%testnumber
-    
+    if (associated(wrap6%p)) then
+      call ESMF_Test((wrap6%p%testnumber.eq.9182), name, failMsg, result, ESMF_SRCLINE)
+      print *, "wrap6%p%testnumber = ", wrap6%p%testnumber
+    else
+      call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+    endif
+
+!-------------------------------------------------------------------------
+!   !  Set Internal State - through UserComp API
+    !EX_UTest
+    allocate(wrap7%p)
+    wrap7%p%testnumber=192837465
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set Internal State (4th time) through UserComp API Test"
+    call ESMF_UserCompSetInternalState(comp1, "namedLabel", wrap7, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Get Internal State - through UserComp API
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get Internal State (4th time) through UserComp API Test"
+    nullify(wrap8%p)
+    call ESMF_UserCompGetInternalState(comp1, "namedLabel", wrap8, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Verify Internal State - through UserComp API
+    !EX_UTest
+    write(failMsg, *) "Did not return correct data"
+    write(name, *) "Verify Internal State (4th time) through UserComp API Test"
+    if (associated(wrap8%p)) then
+      call ESMF_Test((wrap8%p%testnumber.eq.192837465), name, failMsg, result, ESMF_SRCLINE)
+      print *, "wrap8%p%testnumber = ", wrap8%p%testnumber
+    else
+      call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+    endif
+
+!-------------------------------------------------------------------------
+!   !  Set Internal State - through UserComp API
+    !EX_UTest
+    allocate(wrap9%p)
+    wrap9%p%testnumber=564738291
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set Internal State (5th time) through UserComp API Test"
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+    call ESMF_UserCompSetInternalState(comp1, internalState=wrap9, rc=rc)
+#else
+    call ESMF_UserCompSetInternalState(comp1, "namedLabel2", wrap9, rc)
+#endif
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Get Internal State - through UserComp API
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get Internal State (5th time) through UserComp API Test"
+    nullify(wrap10%p)
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+    call ESMF_UserCompGetInternalState(comp1, internalState=wrap10, rc=rc)
+#else
+    call ESMF_UserCompGetInternalState(comp1, "namedLabel2", wrap10, rc)
+#endif
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Verify Internal State - through UserComp API
+    !EX_UTest
+    write(failMsg, *) "Did not return correct data"
+    write(name, *) "Verify Internal State (5th time) through UserComp API Test"
+    if (associated(wrap10%p)) then
+      call ESMF_Test((wrap10%p%testnumber.eq.564738291), name, failMsg, result, ESMF_SRCLINE)
+      print *, "wrap10%p%testnumber = ", wrap10%p%testnumber
+    else
+      call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+    endif
+
+! - clean-up
     deallocate(wrap1%p)
     deallocate(wrap3%p)
     deallocate(wrap5%p)
+    deallocate(wrap7%p)
+    deallocate(wrap9%p)
 
 !-------------------------------------------------------------------------
 !   !

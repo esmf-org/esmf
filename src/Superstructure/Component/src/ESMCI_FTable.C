@@ -506,23 +506,25 @@ extern "C" {
 
 
 //==============================================================================
-// these functions have no leading c_ and are ESMF and not ESMC because
+// These functions have no leading c_ and are ESMF and not ESMC because
 // they're intended to be called directly by F90 user code.
 //
-// also note they CANNOT have prototypes in fortran because the routine
-// types and data types are private/different for each call so there
-// is no correct prototype syntax which will work.
+// The Fortran interfaces for these entry points are defined in ESMF_Comp.F90.
 //
-// and finally, note that they have an extra level of indirection,
-// because the first arg is actually being called with a component
-// pointer - and after one dereference we are at the component derived
-// type.  the second dereference finds the ftable pointer which must
-// be the first entry in the comp derived type.
-//
-// these interface subroutine names MUST be in lower case
+// These interface subroutine names MUST be in lower case.
 extern "C" {
 
+  // ---------- Official ESMF_InternalState API ---------------
+  // TODO: Official ESMF_InternalState API will depend on Fortran 2018
+  // TODO: assumed-type dummy arguments!!!
+  // TODO: To be implemented... to match ESMF_Method API:
+  //  ESMF_InternalStateAdd()
+  //  ESMF_InternalStateAddReplace()
+  //  ESMF_InternalStateGet()
+  //  ESMF_InternalStateRemove()
+
   // ---------- GridComp ---------------
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_gridcompsetinternalstate"
   void FTN_X(esmf_gridcompsetinternalstate)(ESMCI::FTable ***ptr, void **datap,
@@ -536,6 +538,7 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_gridcompgetinternalstate"
   void FTN_X(esmf_gridcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
@@ -550,6 +553,7 @@ extern "C" {
   }
 
   // ---------- CplComp ---------------
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_cplcompsetinternalstate"
   void FTN_X(esmf_cplcompsetinternalstate)(ESMCI::FTable ***ptr, void **datap,
@@ -563,6 +567,7 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_cplcompgetinternalstate"
   void FTN_X(esmf_cplcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
@@ -577,6 +582,7 @@ extern "C" {
   }
 
   // ---------- UserComp ---------------
+  //TODO: DEPRECATED -> NOT USED
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompsetvm"
   void FTN_X(esmf_usercompsetvm)(void *ptr, void (*func)(), int *userRc,
@@ -590,6 +596,7 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+  //TODO: DEPRECATED -> NOT USED
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompsetservices"
   void FTN_X(esmf_usercompsetservices)(void *ptr, void (*func)(), int *userRc,
@@ -603,6 +610,7 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompsetinternalstate"
   void FTN_X(esmf_usercompsetinternalstate)(ESMCI::FTable ***ptr,
@@ -617,21 +625,32 @@ extern "C" {
       return;
     }
 
-    char *tbuf;
-    ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
-    //printf("after newtrim, name = '%s'\n", tbuf);
+    if (name){
 
-    enum ESMCI::dtype dtype = ESMCI::DT_FORTRAN_UDT_POINTER;
-    localrc = (**ptr)->setDataPtr(tbuf, datap, dtype);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) return;
+      char *tbuf;
+      ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
+      //printf("after newtrim, name = '%s'\n", tbuf);
 
-    delete[] tbuf;
+      enum ESMCI::dtype dtype = ESMCI::DT_FORTRAN_UDT_POINTER;
+      localrc = (**ptr)->setDataPtr(tbuf, datap, dtype);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+
+      delete[] tbuf;
+
+    }else{
+
+      ESMCI::FTable::setDP(ptr, datap, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+
+    }
 
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompgetinternalstate"
   void FTN_X(esmf_usercompgetinternalstate)(ESMCI::FTable ***ptr,
@@ -646,16 +665,26 @@ extern "C" {
       return;
     }
 
-    char *tbuf;
-    ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
-    //printf("after newtrim, name = '%s'\n", tbuf);
+    if (name){
 
-    enum ESMCI::dtype dtype;
-    localrc = (**ptr)->getDataPtr(tbuf, datap, &dtype);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) return;
+      char *tbuf;
+      ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
+      //printf("after newtrim, name = '%s'\n", tbuf);
 
-    delete[] tbuf;
+      enum ESMCI::dtype dtype;
+      localrc = (**ptr)->getDataPtr(tbuf, datap, &dtype);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+
+      delete[] tbuf;
+
+    }else{
+
+      ESMCI::FTable::getDP(ptr, datap, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+
+    }
 
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
