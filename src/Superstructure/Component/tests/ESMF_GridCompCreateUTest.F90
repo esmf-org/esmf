@@ -53,7 +53,6 @@
         type(testData), pointer :: p
     end type
 
-
 #ifdef ESMF_TESTEXHAUSTIVE
     character(ESMF_MAXSTR)        :: bname
     type(dataWrapper)             :: wrap1, wrap2, wrap3, wrap4, wrap5, wrap6
@@ -64,7 +63,8 @@
     type(ESMF_Mesh), allocatable  :: meshList(:)
     logical                       :: isPresent
     type(ESMF_Config)             :: config
-    integer                       :: fred
+    integer                       :: fred, i
+    character(len=:), allocatable :: labelList(:)
 #endif
 
 !-------------------------------------------------------------------------------
@@ -1084,6 +1084,22 @@
     deallocate(wrap5%p)
     deallocate(wrap7%p)
     deallocate(wrap9%p)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Access information about the currently set internal states
+
+    call ESMF_InternalStateGet(comp1, labelList, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Accessing information about the set internal states Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    ! print the labels
+    do i=1, size(labelList)
+      print *, labelList(i)
+    enddo
 
 !-------------------------------------------------------------------------
 !   !

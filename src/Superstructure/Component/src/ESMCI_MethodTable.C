@@ -255,8 +255,6 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-    int count = (*ptr)->size();
-
     int maxLen = 0;
     for (auto it=(*ptr)->begin(); it!=(*ptr)->end(); ++it){
       auto len = (it->first).find("::ESMF::index::");

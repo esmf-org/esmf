@@ -53,7 +53,7 @@
     sequence
       type(testData), pointer :: p
     end type
-    
+
 #ifdef ESMF_TESTEXHAUSTIVE
     logical                 :: bool
     type(ESMF_VM)           :: vm
@@ -64,7 +64,8 @@
     type(testData), target  :: data1, data2
     logical                 :: isPresent
     type(ESMF_Config)       :: config
-    integer                 :: fred
+    integer                 :: fred, i
+    character(len=:), allocatable :: labelList(:)
 #endif
 
 !-------------------------------------------------------------------------------
@@ -390,6 +391,22 @@
     else
       call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
     endif
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Access information about the currently set internal states
+
+    call ESMF_InternalStateGet(cpl, labelList, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Accessing information about the set internal states Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    ! print the labels
+    do i=1, size(labelList)
+      print *, labelList(i)
+    enddo
 
 !-------------------------------------------------------------------------
 !   !

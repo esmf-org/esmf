@@ -333,12 +333,8 @@ module ESMF_CompMod
   public ESMF_CompWait
 
   public ESMF_CWrapSetInitCreated
-  
+
   public ESMF_CompStatusGet
-  
-  public ESMF_GridCompGetInternalState, ESMF_GridCompSetInternalState
-  public ESMF_CplCompGetInternalState,  ESMF_CplCompSetInternalState
-  public ESMF_UserCompGetInternalState, ESMF_UserCompSetInternalState
 
 !EOPI
 
@@ -367,63 +363,6 @@ module ESMF_CompMod
     module procedure ESMF_ctne
   end interface
 !------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-! ! Internal State Interfaces
-! ! The InternalState functionality is implemented on the C++ side. Fortran
-! ! interfaces are defined here.
-
-#ifndef ESMF_NO_F2018ASSUMEDTYPE
-
-  interface
-
-    !TODO: DEPRECATED -> transition to ESMF_InternalState API
-    subroutine ESMF_GridCompSetInternalState(table, internalState, rc)
-      type(*)                 :: table
-      type(*)                 :: internalState
-      integer                 :: rc
-    end subroutine
-
-    !TODO: DEPRECATED -> transition to ESMF_InternalState API
-    subroutine ESMF_GridCompGetInternalState(table, internalState, rc)
-      type(*)                 :: table
-      type(*)                 :: internalState
-      integer                 :: rc
-    end subroutine
-
-    !TODO: DEPRECATED -> transition to ESMF_InternalState API
-    subroutine ESMF_CplCompSetInternalState(table, internalState, rc)
-      type(*)                 :: table
-      type(*)                 :: internalState
-      integer                 :: rc
-    end subroutine
-
-    !TODO: DEPRECATED -> transition to ESMF_InternalState API
-    subroutine ESMF_CplCompGetInternalState(table, internalState, rc)
-      type(*)                 :: table
-      type(*)                 :: internalState
-      integer                 :: rc
-    end subroutine
-
-    !TODO: DEPRECATED -> transition to ESMF_InternalState API
-    subroutine ESMF_UserCompSetInternalState(table, label, internalState, rc)
-      type(*)                 :: table
-      character(*), optional  :: label
-      type(*)                 :: internalState
-      integer                 :: rc
-    end subroutine
-
-    !TODO: DEPRECATED -> transition to ESMF_InternalState API
-    subroutine ESMF_UserCompGetInternalState(table, label, internalState, rc)
-      type(*)                 :: table
-      character(*), optional  :: label
-      type(*)                 :: internalState
-      integer                 :: rc
-    end subroutine
-
-  end interface
-
-#endif
 
 !------------------------------------------------------------------------------
 

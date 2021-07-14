@@ -523,6 +523,36 @@ extern "C" {
   //  ESMF_InternalStateGet()
   //  ESMF_InternalStateRemove()
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_internalstategetinfo"
+  void FTN_X(c_esmc_internalstategetinfo)(ESMCI::FTable ***ptr, int *count,
+    int *maxLen, int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    localrc = (**ptr)->getDataPtrCount(count, maxLen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return;
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_internalstategetlabels"
+  void FTN_X(c_esmc_internalstategetlabels)(ESMCI::FTable ***ptr,
+    char *labelList, int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    localrc = (**ptr)->getDataPtrList(labelList);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return;
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
   // ---------- GridComp ---------------
   //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
@@ -1138,7 +1168,7 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::getDP()"
 void FTable::getDP(FTable ***ptr, void **datap, int *rc){
-  char const *name = "localdata";
+  char const *name = "ESMF-default-localdata";
   enum dtype dtype;
   int localrc;
 
@@ -1163,7 +1193,7 @@ void FTable::getDP(FTable ***ptr, void **datap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::setDP()"
 void FTable::setDP(FTable ***ptr, void **datap, int *rc){
-  char const *name = "localdata";
+  char const *name = "ESMF-default-localdata";
   enum dtype dtype = DT_FORTRAN_UDT_POINTER;
   int localrc;
 
@@ -1206,9 +1236,7 @@ int FTable::getDataPtr(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int i;
-
-  for (i=datacount-1; i>=0; i--) {    // go backwards for: "last in first out"
+  for (int i=datacount-1; i>=0; i--) {    // go backwards for: "last in first out"
     if (strcmp(namep, data[i].dataname)) continue;
 
     *dtype = data[i].dtype;
@@ -1273,6 +1301,80 @@ int FTable::setDataPtr(
 
   rc = ESMF_SUCCESS;
   return rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::FTable::getDataPtrCount()"
+//BOPI
+// !IROUTINE:  getDataPtrCount - get data pointer count
+//
+// !INTERFACE:
+int FTable::getDataPtrCount(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *count,           // out, number of internal states with label
+      int *maxLen){         // out, length of the longest currently set label
+//
+// !DESCRIPTION:
+//    Returns info about set data pointers.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  *count = datacount;
+
+  *maxLen = 0;  // reset
+
+  for (int i=datacount-1; i>=0; i--) {    // go backwards for: "last in first out"
+    auto len = strlen(data[i].dataname);
+    if ((int)len > *maxLen) *maxLen = len;
+  }
+
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::FTable::getDataPtrList()"
+//BOPI
+// !IROUTINE:  getDataPtrList - get data pointer list
+//
+// !INTERFACE:
+int FTable::getDataPtrList(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      char *labelList){      // out, list of currently set labels
+//
+// !DESCRIPTION:
+//    Returns list of labels of currently set data pointers.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int maxLen = 0;  // reset
+
+  for (int i=datacount-1; i>=0; i--) {    // go backwards for: "last in first out"
+    auto len = strlen(data[i].dataname);
+    if ((int)len > maxLen) maxLen = len;
+  }
+
+  int k = 0;
+  for (int i=datacount-1; i>=0; i--, k++) {    // go backwards for: "last in first out"
+    auto len = strlen(data[i].dataname);
+    memcpy(labelList+k*maxLen, data[i].dataname, len);
+    memset(labelList+k*maxLen+len, ' ', maxLen-len);  // fill with white space
+  }
+
+  // return successfully
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
