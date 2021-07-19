@@ -1089,7 +1089,7 @@ bool Alarm::willRingAtTime(const Time & clockTime) const{
 
     ESMC_I4 n = int(rn);
 
-#ifdef DEBUG
+#if DEBUG == 1
     printf("number of intervals %f %d \n", rn, n);
 #endif
 
@@ -1159,7 +1159,6 @@ bool Alarm::willRingAtTime(const Time & clockTime) const{
     // to determine if the alarm should ring.
     Time clockTime = clock->currTime;
     if (willRingAtTime( clockTime)){
-      ringTime = clockTime;
       ringing = true;
     }else{
       ringing = false;

@@ -3395,6 +3395,17 @@ program ESMF_AlarmTest
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
       if (.not. testPass) print *, 'bad return codes discovered'
       call ESMF_Test (testPass, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      write(failMsg, *) " Alarms with ClockSet... "
+      write(name, *) "Test ClockSet after alarm attached to clock "
+      rc = ESMF_SUCCESS
+      testPass = .true.
+      call Test_ClockSet(testPass, rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+      if (.not. testPass) print *, 'bad return codes discovered'
+      call ESMF_Test (testPass, name, failMsg, result, ESMF_SRCLINE)
 #endif
 
       ! ----------------------------------------------------------------------------
@@ -3753,7 +3764,6 @@ subroutine Test_RevAlarmSticky(dt, testPass, rc)
 
   rc = ESMF_SUCCESS
   
-  call ESMF_Initialize( defaultcalkind=ESMF_CALKIND_GREGORIAN, rc=rc )         ; CHECKRC
   call ESMF_TimeSet(time, yy=2021, mm=4, dd=6, rc=rc)                          ; CHECKRC
   
   secs = 0
@@ -3807,6 +3817,78 @@ end subroutine Test_RevAlarmSticky
          call ESMF_Finalize()
       end if
     end subroutine verify_
+
+subroutine Test_ClockSet(testPass, rc)
+#define CONTEXT line=__LINE__,file=__FILE__
+#define CHECKRC if(ESMF_LogFoundError(rcToCheck=rc,msg=ESMF_LOGERR_PASSTHRU,CONTEXT,rcToReturn=rc))then;write(0,*)'app abort: ',__FILE__,__LINE__;return;endif
+  logical, intent(out) :: testPass
+  integer, parameter :: r8 = SELECTED_REAL_KIND(12)   ! real r8
+  integer :: rc
+  
+  type(ESMF_Clock)         :: clock
+  type(ESMF_Alarm)         :: alarm
+  type(ESMF_TimeInterval)  :: esmf_ival
+  type(ESMF_Time)          :: time, initial, finish, ring_time
+  real(kind=r8)            :: secs
+  logical                  :: reverse_clock, sticky_alarm
+
+  rc = ESMF_SUCCESS
+  
+  call ESMF_TimeSet(time, yy=2021, mm=4, dd=6, rc=rc)                          ; CHECKRC
+  
+  secs = 0
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)                         ; CHECKRC
+  initial = time + esmf_ival
+  call ESMF_TimePrint(initial, options="string", rc=rc)  ; CHECKRC
+  
+  secs = 6000
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)                         ; CHECKRC
+  finish = time + esmf_ival
+  call ESMF_TimePrint(finish, options="string", rc=rc)  ; CHECKRC
+  
+  secs = 60
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)                         ; CHECKRC
+  
+  clock = ESMF_Clockcreate(timeStep=esmf_ival   &
+          ,startTime=initial,stopTime=finish    &
+          ,refTime=time, rc=rc                  )      ; CHECKRC
+  
+  call ESMF_ClockSet(clock,direction=ESMF_DIRECTION_REVERSE, rc=rc)    ; CHECKRC
+
+  reverse_clock = ESMF_ClockIsReverse(clock, rc=rc)                      ; CHECKRC
+  sticky_alarm  = .not.reverse_clock
+  
+  write(0,'("reverse =",x,l)') reverse_clock
+  write(0,'("sticky  =",x,l)') sticky_alarm
+  
+  secs = 3000
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)  ; CHECKRC
+  ring_time = initial + esmf_ival
+  print *, 'Before Alarm Create ringTime: '
+  call ESMF_TimePrint(ring_time, options="string", rc=rc)  ; CHECKRC
+#if 1
+  alarm = ESMF_AlarmCreate(clock, ringTime=ring_time, sticky=sticky_alarm,  &
+                           ringTimeStepCount=1, rc=rc) ; CHECKRC
+#else
+  alarm = ESMF_AlarmCreate(clock, ringTime=ring_time, sticky=.false.,  &
+                           ringTimeStepCount=1, rc=rc) ; CHECKRC
+#endif
+
+  call ESMF_TimePrint(ring_time, options="string", rc=rc)  ; CHECKRC
+  call ESMF_AlarmGet(alarm, ringTime=ring_time, rc=rc)                         ; CHECKRC
+  print *, 'After Alarm Create ringTime: '
+  call ESMF_TimePrint(ring_time, options="string", rc=rc)  ; CHECKRC
+
+  call ESMF_ClockSet(clock, stopTime=ring_time, rc=rc) ; CHECKRC
+  
+  call ESMF_alarmPrint(alarm,options='sticky')
+
+  testPass = .true. ! Because the C++ runtime failure cannot be caught reliably, set this to false.
+
+#undef CONTEXT
+#undef CHECKRC
+end subroutine Test_ClockSet
+
 #endif
 
 end program ESMF_AlarmTest
