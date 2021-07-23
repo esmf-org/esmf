@@ -49,8 +49,7 @@
 # define _NETCDF
 # include <netcdf.h>
 #endif
-#include "pio.h"
-#include "pio_types.h"
+#include <pio.h>
 
 #include "esmf_io_debug.h"
 
@@ -81,8 +80,8 @@ namespace ESMCI
   class PIO_IODescHandler {
   private:
     static std::vector<PIO_IODescHandler *> activePioIoDescriptors;
-    pio_iosystem_desc_t ios;     // PIO IO system instance for this descriptor
-    pio_io_desc_t io_descriptor; // PIO IO descriptor
+    int ios;     // PIO IO system instance for this descriptor
+    int io_descriptor; // PIO IO descriptor
     int nDims;                   // The number of dimensions for Array IO
     int *dims;                   // The shape of the Array IO
     int basepiotype;             // PIO version of Array data type
@@ -90,9 +89,9 @@ namespace ESMCI
     int arrayRank;               // The rank of array_p
     int *arrayShape;             // The shape of array_p
   public:
-    PIO_IODescHandler(pio_iosystem_desc_t iosArg, Array *arrayArg) {
+    PIO_IODescHandler(int iosArg, Array *arrayArg) {
       ios = iosArg;
-      io_descriptor = (pio_io_desc_t)NULL;
+      io_descriptor = (int)NULL;
       array_p = arrayArg;
       nDims = 0;
       dims = (int *)NULL;
@@ -103,16 +102,16 @@ namespace ESMCI
   public:
     ~PIO_IODescHandler();
     static void finalize(void);
-    static int constructPioDecomp(pio_iosystem_desc_t iosys, Array *arr_p,
-                                  pio_io_desc_t *newDecomp_p);
-    static int freePioDecomp(pio_io_desc_t *decomp_p);
-    static int getDims(const pio_io_desc_t &iodesc,
+    static int constructPioDecomp(int iosys, Array *arr_p,
+                                  int *newDecomp_p);
+    static int freePioDecomp(int *decomp_p);
+    static int getDims(const int &iodesc,
                        int * nioDims = (int *)NULL,
                        int ** ioDims = (int **)NULL,
                        int * narrDims = (int *)NULL,
                        int ** arrDims = (int **)NULL);
-    static int getIOType(const pio_io_desc_t &iodesc, int *rc = (int *)NULL);
-    static pio_io_desc_t getIODesc(pio_iosystem_desc_t iosys,
+    static int getIOType(const int &iodesc, int *rc = (int *)NULL);
+    static int getIODesc(int iosys,
                                    Array *arrayArg, int *rc = (int *)NULL);
   };
 
@@ -124,7 +123,7 @@ namespace ESMCI
 //-------------------------------------------------------------------------
 //
 
-  std::vector<pio_iosystem_desc_t> PIO_Handler::activePioInstances;
+  std::vector<int> PIO_Handler::activePioInstances;
   std::vector<PIO_IODescHandler *> PIO_IODescHandler::activePioIoDescriptors;
 
 //
@@ -153,7 +152,6 @@ void PIO_Handler::initialize (
   int comp_rank,                        // (in)  - local PE rank
   MPI_Comm comp_comm,                   // (in)  - MPI communicator for IO
   int num_iotasks,                      // (in)  - Number of IO tasks
-  int num_aggregator,                   // (in)  - MPI aggregator count
   int stride,                           // (in)  - IO task stride
   int rearr,                            // (in)  - rearrangement type
   int *base_p,                          // (in)  - base option (IO task offset)
@@ -174,7 +172,7 @@ void PIO_Handler::initialize (
   int localrc = ESMF_RC_NOT_IMPL;      // local return code
   int base;
   bool instanceFound = false;          // try to find a PIO sys to reuse
-  pio_iosystem_desc_t instance = PIO_IOSYSTEM_DESC_NULL;
+  int instance = 0;
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;            // final return code
   }
@@ -198,12 +196,12 @@ void PIO_Handler::initialize (
                           stride, base, rearr, &instance);
       PRINTMSG("After PIOc_Init_Intracomm, instance = " << instance);
       // If we get here, hopefully everything is OK.
-      if (instance != PIO_IOSYSTEM_DESC_NULL) {
+      if (instance != 0) {
         // Set the error handling to return PIO errors
         // Just return error (error code may be different on different PEs).
         // pio_cpp_seterrorhandlingi(&instance, PIO_RETURN_ERROR);
         // Broadcast the error to all PEs (consistant error handling)
-        PIOc_Set_IOSystem_Error_Handling(&instance, PIO_BCAST_ERROR);
+        PIOc_Set_IOSystem_Error_Handling(instance, PIO_BCAST_ERROR);
         PRINTMSG("After PIOc_Set_IOSystem_Error_Handling");
         // Add the instance to the global list
         PIO_Handler::activePioInstances.push_back(instance);
@@ -280,21 +278,19 @@ int PIO_Handler::initializeVM (void
       // Figure out the inputs for the initialize call
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
       num_iotasks = vm->getPetCount();
-      num_aggregators = 1;
       stride = 1;
       rearr = PIO_rearr_box;
       base = 0;
 #else // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
       num_iotasks = 1;
-      num_aggregators = 1;
       stride = 1;
-      rearr = PIO_rearr_box;
+      rearr = PIO_REARR_BOX;
       base = 0;
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
 
       // Call the static function
       PIO_Handler::initialize(my_rank, communicator, num_iotasks,
-                              num_aggregators, stride, rearr, &base, &rc);
+                              stride, rearr, &base, &rc);
       PRINTMSG("After initialize, rc = " << rc);
       if (ESMF_SUCCESS == rc) {
         PRINTMSG("Looking for active instance, size = " << activePioInstances.size());
@@ -364,8 +360,8 @@ void PIO_Handler::finalize (
   try {
     // Now, close any open PIO instances
     while(!PIO_Handler::activePioInstances.empty()) {
-      pio_iosystem_desc_t instance = PIO_Handler::activePioInstances.back();
-      pio_cpp_finalize(&instance, &piorc);
+      int instance = PIO_Handler::activePioInstances.back();
+      piorc = PIOc_finalize(instance);
       // Even if we have an error but log and keep going to try and shut
       // down other PIO instances
       CHECKPIOWARN(piorc, "Error shutting down PIO instance",
@@ -482,10 +478,10 @@ PIO_Handler::PIO_Handler(
 
   try {  
 
-    // fill in the PIO_Handler object
-    pioSystemDesc =  PIO_IOSYSTEM_DESC_NULL;
-    pioFileDesc = (pio_file_desc_t)NULL;
-    pioIODesc = (pio_io_desc_t)NULL;
+    // fill in the PIO_Handler objecte
+      pioSystemDesc =  0;
+    pioFileDesc = 0;
+    pioIODesc = 0;
     user_count = 0;
     localrc = ESMF_SUCCESS;
     new_file = false;
@@ -539,15 +535,15 @@ void PIO_Handler::destruct (void
     close((int *)NULL);     // Don't care about an error, continue with cleanup
   }
   // Kill the file descriptor
-  if ((pio_file_desc_t)NULL != pioFileDesc) {
+  if ((int)NULL != pioFileDesc) {
     PRINTMSG(" (" << my_rank << "): killing PIO file descriptor");
     free(pioFileDesc);
-    pioFileDesc = (pio_file_desc_t)NULL;
+    pioFileDesc = (int)NULL;
   }
-  if ((pio_io_desc_t)NULL != pioIODesc) {
+  if ((int)NULL != pioIODesc) {
     PRINTMSG(" \"killing\" pioIODesc");
     PIO_IODescHandler::freePioDecomp(&pioIODesc);
-    pioIODesc = (pio_io_desc_t)NULL;
+    pioIODesc = (int)NULL;
   }
 
   // kill the pointer to the PIO_Handler object
@@ -590,8 +586,8 @@ void PIO_Handler::arrayRead(
   int nioDims;                            // Array IO rank
   int * arrDims;                          // Array shape
   int narrDims;                           // Array rank
-  pio_io_desc_t iodesc;                   // PIO IO descriptor
-  pio_var_desc_t vardesc = NULL;          // PIO variable descriptor
+  int iodesc;                   // PIO IO descriptor
+  int vardesc = NULL;          // PIO variable descriptor
   int basepiotype;                        // PIO version of Array data type
   void *baseAddress;                      // The address of the Array IO data
   int localDE;                            // DE to use for IO
@@ -615,7 +611,7 @@ void PIO_Handler::arrayRead(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return;
 
-  vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
+  int vardesc = 0;
   if (!vardesc){
     ESMC_LogDefault.MsgAllocError(" failed to allocate pio variable desc",
       ESMC_CONTEXT, rc);
@@ -641,8 +637,6 @@ void PIO_Handler::arrayRead(
     piorc = PIOc_inq(pioFileDesc, &nDims,
                               &nVar, &nAtt, &unlim);
     if (!CHECKPIOERROR(piorc, "File is not in NetCDF format", ESMF_RC_FILE_READ, (*rc))) {
-      free (vardesc);
-      vardesc = NULL;
       return;
     }
   }
@@ -651,8 +645,6 @@ void PIO_Handler::arrayRead(
     // An error here means the variable is not in the file
     const std::string errmsg = "variable " + varname + " not found in file";
     if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
-      free (vardesc);
-      vardesc = NULL;
       return;
     }
   }
@@ -663,8 +655,6 @@ void PIO_Handler::arrayRead(
       int time_len;
       piorc = PIOc_inq_dimid(pioFileDesc, "time", &dimid_time);
       if (!CHECKPIOERROR(piorc, "No time dimension found in file", ESMF_RC_FILE_READ, (*rc))) {
-        free (vardesc);
-        vardesc = NULL;
         return;
       }
       // Check to see if time is the unlimited dimension
@@ -674,8 +664,6 @@ void PIO_Handler::arrayRead(
         if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
             " time is not the file's unlimited dimension",
             ESMC_CONTEXT, rc)) {
-          free (vardesc);
-          vardesc = NULL;
           return;
         }
       }
@@ -683,8 +671,6 @@ void PIO_Handler::arrayRead(
       piorc = PIOc_inq_dimlen(pioFileDesc,
           dimid_time, &time_len);
       if (!CHECKPIOERROR(piorc, "Error finding time length", ESMF_RC_FILE_READ, (*rc))) {
-        free (vardesc);
-        vardesc = NULL;
         return;
       }
       if (*timeslice > time_len) {
@@ -695,8 +681,6 @@ void PIO_Handler::arrayRead(
         if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
             "Timeframe is greater than max in file",
             ESMC_CONTEXT, rc)) {
-          free (vardesc);
-          vardesc = NULL;
           return;
         }
       }
@@ -720,15 +704,7 @@ void PIO_Handler::arrayRead(
                            arraylen, (void *)baseAddress);
 
   if (!CHECKPIOERROR(piorc, "Error reading array data", ESMF_RC_FILE_READ, (*rc))) {
-    free (vardesc);
-    vardesc = NULL;
     return;
-  }
-
-  // Cleanup
-  if ((pio_var_desc_t)NULL != vardesc) {
-    free (vardesc);
-    vardesc = NULL;
   }
 
   // return
@@ -776,8 +752,8 @@ void PIO_Handler::arrayWrite(
   int nioDims;                            // Array IO rank
   int * arrDims;                          // Array shape
   int narrDims;                           // Array rank
-  pio_io_desc_t iodesc;                   // PIO IO descriptor
-  pio_var_desc_t vardesc = NULL;          // PIO variable descriptor
+  int iodesc;                   // PIO IO descriptor
+  int vardesc = NULL;          // PIO variable descriptor
   int basepiotype;                        // PIO version of Array data type
   void *baseAddress;                      // The address of the Array IO data
   int localDE;                            // DE to use for IO
@@ -818,7 +794,7 @@ void PIO_Handler::arrayWrite(
             ESMC_CONTEXT, rc)) return;
   }
 
-  vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
+  vardesc = (int)calloc(PIO_SIZE_VAR_DESC, 1);
   if (!vardesc){
     ESMC_LogDefault.MsgAllocError("failed to allocate pio variable desc",
       ESMC_CONTEXT, rc);
@@ -1440,7 +1416,7 @@ void PIO_Handler::open(
   }
 
   // Allocate a file descriptor
-  pioFileDesc = (pio_file_desc_t)calloc(PIO_SIZE_FILE_DESC, 1);
+  pioFileDesc = (int)calloc(PIO_SIZE_FILE_DESC, 1);
   if (!pioFileDesc){
     ESMC_LogDefault.MsgAllocError(" failed to allocate pio file desc",
       ESMC_CONTEXT, rc);
@@ -1504,7 +1480,7 @@ void PIO_Handler::attPackPut (
 //
 // !ARGUMENTS:
 //
-  pio_var_desc_t vardesc,      // (in) - variable to write attributes into, NULL for global
+  int vardesc,      // (in) - variable to write attributes into, NULL for global
   const ESMCI::Info *attPack,  // (in) - AttPack containing name/value(s) pairs
   int *rc                      // (out) - Error return code
   ) {
@@ -1627,7 +1603,7 @@ ESMC_Logical PIO_Handler::isOpen(
 //EOPI
 //-----------------------------------------------------------------------------
   PRINTPOS;
-  if ((pio_file_desc_t)NULL == pioFileDesc) {
+  if ((int)NULL == pioFileDesc) {
     PRINTMSG("pioFileDesc is NULL");
     return ESMF_FALSE;
   } else if (PIOc_file_is_open(pioFileDesc) != 0) {
@@ -1639,7 +1615,7 @@ ESMC_Logical PIO_Handler::isOpen(
     errmsg = std::string ("File, ") + getFilename() + ", closed by PIO";
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     free(pioFileDesc);
-    pioFileDesc = (pio_file_desc_t)NULL;
+    pioFileDesc = (int)NULL;
     return ESMF_FALSE;
   }
 } // PIO_Handler::isOpen()
@@ -1722,7 +1698,7 @@ void PIO_Handler::close(
   if (isOpen() == ESMF_TRUE) {
     PIOc_closefile(pioFileDesc);
     free(pioFileDesc);
-    pioFileDesc = (pio_file_desc_t)NULL;
+    pioFileDesc = (int)NULL;
     new_file = false;
   }
 
@@ -1741,15 +1717,15 @@ void PIO_Handler::close(
 // !IROUTINE:  ESMCI::PIO_Handler::getIODesc - Find or create an IO descriptor
 //
 // !INTERFACE:
-  pio_io_desc_t PIO_Handler::getIODesc(
+  int PIO_Handler::getIODesc(
 //
 // !RETURN VALUE:
 //
-//    pio_io_desc_t PIO IO descriptor
+//    int PIO IO descriptor
 //
 // !ARGUMENTS:
 //
-  pio_iosystem_desc_t iosys,          // (in)  - PIO system handle to use
+  int iosys,          // (in)  - PIO system handle to use
   Array *arr_p,                       // (in)  - Array for IO decompomposition
   int ** ioDims,                      // (out) - Array shape for IO
   int *nioDims,                       // (out) - Rank of Array IO
@@ -1765,7 +1741,7 @@ void PIO_Handler::close(
 //EOPI
 //-----------------------------------------------------------------------------
 
-  pio_io_desc_t new_io_desc = (pio_io_desc_t)NULL;
+  int new_io_desc = (int)NULL;
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;         // local return code
   if (rc != NULL) {
@@ -1774,7 +1750,7 @@ void PIO_Handler::close(
   
   PRINTPOS;
   new_io_desc = PIO_IODescHandler::getIODesc(iosys, arr_p, &localrc);
-  if ((pio_io_desc_t)NULL == new_io_desc) {
+  if ((int)NULL == new_io_desc) {
     PRINTMSG("calling constructPioDecomp");
     localrc = PIO_IODescHandler::constructPioDecomp(iosys,
                                                     arr_p, &new_io_desc);
@@ -1940,7 +1916,7 @@ PIO_IODescHandler::~PIO_IODescHandler (
 //-----------------------------------------------------------------------------
   PIOc_freedecomp_ios(&ios, io_descriptor);
   free(io_descriptor);
-  io_descriptor = (pio_io_desc_t)NULL;
+  io_descriptor = (int)NULL;
   if (dims != (int *)NULL) {
     delete[] dims;
     dims = (int *)NULL;
@@ -2002,9 +1978,9 @@ int PIO_IODescHandler::constructPioDecomp(
 //
 // !ARGUMENTS:
 //
-  pio_iosystem_desc_t iosys,          // (in)  - PIO system handle to use
+  int iosys,          // (in)  - PIO system handle to use
   Array *arr_p,                       // (in)  - Array for IO decompomposition
-  pio_io_desc_t *newDecomp_p          // (out) - New decomposition descriptor
+  int *newDecomp_p          // (out) - New decomposition descriptor
   ) {
 //
 // !DESCRIPTION:
@@ -2031,7 +2007,7 @@ int PIO_IODescHandler::constructPioDecomp(
       ESMC_CONTEXT, &localrc);
     return ESMF_RC_ARG_BAD;
   }
-  if ((pio_io_desc_t *)NULL == newDecomp_p) {
+  if ((int *)NULL == newDecomp_p) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL,
       "- newDecomp_p cannot be NULL", ESMC_CONTEXT, &localrc);
     return ESMF_RC_ARG_BAD;
@@ -2065,8 +2041,8 @@ int PIO_IODescHandler::constructPioDecomp(
     // Allocate space for the DOF list
     pioDofList = new int64_t[pioDofCount];
 
-    handle->io_descriptor = (pio_io_desc_t)calloc(PIO_SIZE_IO_DESC, 1);
-    if ((pio_io_desc_t)NULL == handle->io_descriptor) {
+    handle->io_descriptor = (int)calloc(PIO_SIZE_IO_DESC, 1);
+    if ((int)NULL == handle->io_descriptor) {
       // Free the DofList!
       delete[] pioDofList;
       pioDofList = (int64_t *)NULL;
@@ -2221,7 +2197,7 @@ int PIO_IODescHandler::freePioDecomp(
 //
 // !ARGUMENTS:
 //
-  pio_io_desc_t *decomp_p             // (inout) - PIO decomp desc to free
+  int *decomp_p             // (inout) - PIO decomp desc to free
   ) {
 //
 // !DESCRIPTION:
@@ -2238,7 +2214,7 @@ int PIO_IODescHandler::freePioDecomp(
   bool foundHandle = false;
 
   // check the inputs
-  if ((pio_io_desc_t *)NULL == *decomp_p) {
+  if ((int *)NULL == *decomp_p) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL,
       "- newDecomp_p cannot be NULL", ESMC_CONTEXT, &localrc);
     return ESMF_RC_ARG_BAD;
@@ -2252,7 +2228,7 @@ int PIO_IODescHandler::freePioDecomp(
       foundHandle = true;
       delete handle;
       handle = (PIO_IODescHandler *)NULL;
-      *decomp_p = (pio_io_desc_t)NULL;
+      *decomp_p = (int)NULL;
       break;
     }
   }
@@ -2286,7 +2262,7 @@ int PIO_IODescHandler::getDims(
 //
 // !ARGUMENTS:
 //
-  const pio_io_desc_t &iodesc,    // (in)  - The IO descriptor
+  const int &iodesc,    // (in)  - The IO descriptor
   int * nioDims,                  // (out) - The number of IO dimensions
   int ** ioDims,                  // (out) - Array of dimensions (shape) for IO
   int * narrDims,                 // (out) - The array's rank
@@ -2348,7 +2324,7 @@ int PIO_IODescHandler::getIOType(
 //
 // !ARGUMENTS:
 //
-  const pio_io_desc_t &iodesc,            // (in)  - The IO descriptor
+  const int &iodesc,            // (in)  - The IO descriptor
   int *rc                                 // (out) - Error return code
   ) {
 //
@@ -2390,16 +2366,16 @@ int PIO_IODescHandler::getIOType(
 // !IROUTINE:  ESMCI::PIO_IODescHandler::getIODesc
 //
 // !INTERFACE:
-pio_io_desc_t PIO_IODescHandler::getIODesc(
+int PIO_IODescHandler::getIODesc(
 //
 // !RETURN VALUE:
 //
-//    pio_io_desc_t Pointer to the IODescHandler matching the IO system and
+//    int Pointer to the IODescHandler matching the IO system and
 //                  array
 //
 // !ARGUMENTS:
 //
-  pio_iosystem_desc_t iosys,              // (in)  - The PIO IO system
+  int iosys,              // (in)  - The PIO IO system
   Array *arrayArg,                        // (in)  - The IO descriptor
   int *rc                                 // (out) - Error return code
   ) {
@@ -2409,7 +2385,7 @@ pio_io_desc_t PIO_IODescHandler::getIODesc(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  pio_io_desc_t iodesc = (pio_io_desc_t)NULL; // IO descriptor
+  int iodesc = (int)NULL; // IO descriptor
   int localrc = ESMF_RC_NOT_FOUND;        // local return code
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code

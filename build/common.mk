@@ -1155,6 +1155,13 @@ endif
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
+# PIO
+#-------------------------------------------------------------------------------
+ESMF_CXXCOMPILEPATHSTHIRD += -I$(PIO_INCDIR)
+ESMF_F90COMPILEPATHSTHIRD += -I$(PIO_INCDIR)
+
+
+#-------------------------------------------------------------------------------
 # MOAB
 #-------------------------------------------------------------------------------
 ifneq ($(ESMF_MOAB),OFF)
@@ -1275,12 +1282,12 @@ ESMF_CPPFLAGS             += -DESMF_ACC_SOFTWARE_STACK=1
 endif
 ifeq ($(ESMF_ACC_SOFTWARE_STACK),intelmic)
 ESMF_CPPFLAGS             += -DESMF_ACC_SOFTWARE_STACK=1
-ESMF_ARDEFAULT 						= xiar
+ESMF_ARDEFAULT						= xiar
 endif
 ifeq ($(ESMF_ACC_SOFTWARE_STACK),openmp4)
 ESMF_CPPFLAGS             += -DESMF_ACC_SOFTWARE_STACK=1
 ifeq ($(ESMF_COMPILER),intel)
-ESMF_ARDEFAULT 						= xiar
+ESMF_ARDEFAULT						= xiar
 endif
 endif
 ifeq ($(ESMF_ACC_SOFTWARE_STACK),none)
@@ -1328,19 +1335,19 @@ ifdef ESMF_NCCONFIG
       # nc-config was provided via absolute path -> look for NFCONFIG there first
       ESMF_NFCONFIG := $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
       ifeq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
-        export ESMF_NFCONFIG
+	export ESMF_NFCONFIG
       endif
     endif
     ifndef ESMF_NFCONFIG
       ifeq ($(shell $(ESMF_DIR)/scripts/available nf-config),nf-config)
-        # There is an nf-config command in the user's path, use it
-        ESMF_NFCONFIG := nf-config
+	# There is an nf-config command in the user's path, use it
+	ESMF_NFCONFIG := nf-config
       else
-        # Last attempt see if there is a nf-config command same place as nc-config
-        ESMF_NFCONFIG := $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
-        ifneq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
-          ESMF_NFCONFIG :=
-        endif
+	# Last attempt see if there is a nf-config command same place as nc-config
+	ESMF_NFCONFIG := $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
+	ifneq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
+	  ESMF_NFCONFIG :=
+	endif
       endif
     endif
     export ESMF_NFCONFIG
@@ -1369,8 +1376,8 @@ ifdef ESMF_NCCONFIG
   ifneq ($(origin ESMF_NETCDFF_INCLUDE), environment)
     ifdef ESMF_NFCONFIG
       ifeq ($(shell $(ESMF_DIR)/scripts/nfconfigtest $(ESMF_NFCONFIG)),working)
-        # a working nf-config -> access the include path
-        ESMF_NETCDFF_INCLUDE := $(shell $(ESMF_NFCONFIG) --includedir)
+	# a working nf-config -> access the include path
+	ESMF_NETCDFF_INCLUDE := $(shell $(ESMF_NFCONFIG) --includedir)
       endif
       export ESMF_NETCDFF_INCLUDE
     endif
@@ -1378,11 +1385,11 @@ ifdef ESMF_NCCONFIG
   ifneq ($(origin ESMF_NETCDFF_LIBS), environment)
     ifdef ESMF_NFCONFIG
       ifeq ($(shell $(ESMF_DIR)/scripts/nfconfigtest $(ESMF_NFCONFIG)),working)
-        # a working nf-config -> use it to get -lnetcdf* options
-        ESMF_NETCDFF_LIBS    := $(filter -lnetcdf%,$(shell $(ESMF_NFCONFIG) --flibs))
+	# a working nf-config -> use it to get -lnetcdf* options
+	ESMF_NETCDFF_LIBS    := $(filter -lnetcdf%,$(shell $(ESMF_NFCONFIG) --flibs))
       else
-        # not a working nf-config -> try manually guessing the correct -lnetcdf* option
-        ESMF_NETCDFF_LIBS    := -lnetcdff
+	# not a working nf-config -> try manually guessing the correct -lnetcdf* option
+	ESMF_NETCDFF_LIBS    := -lnetcdff
       endif
     else
       # no nf-config available -> use nc-config to get -lnetcdf* options
@@ -1393,8 +1400,8 @@ ifdef ESMF_NCCONFIG
   ifneq ($(origin ESMF_NETCDFF_LIBPATH), environment)
     ifdef ESMF_NFCONFIG
       ifeq ($(shell $(ESMF_DIR)/scripts/nfconfigtest $(ESMF_NFCONFIG)),working)
-        # a working nf-config -> extract the -L options out of the --flibs return value
-        ESMF_NETCDFF_LIBPATH := $(subst -L,,$(filter -L%,$(shell $(ESMF_NFCONFIG) --flibs)))
+	# a working nf-config -> extract the -L options out of the --flibs return value
+	ESMF_NETCDFF_LIBPATH := $(subst -L,,$(filter -L%,$(shell $(ESMF_NFCONFIG) --flibs)))
       endif
       export ESMF_NETCDFF_LIBPATH
      endif
@@ -1933,8 +1940,8 @@ ESMF_TRACE_STATICLINKOPTS += $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPE
 # target is the one you invoke, and it should look like this:
 #
 # fred:
-# 	cd $(ESMF_DIR) ;\
-# 	$(MAKE) ACTION=tree_fred tree
+#	cd $(ESMF_DIR) ;\
+#	$(MAKE) ACTION=tree_fred tree
 #
 # "tree" is a preexisting target in this file which recursively descends
 # the build tree (using the DIR= settings in each individual makefile
@@ -2039,16 +2046,16 @@ ifneq ($(ESMF_TESTESMFMKFILE),ON)
 	  echo "ESMF library directory not found:" ; \
 	  echo " $(ESMF_LIBDIR) " ; \
 	  echo "Library must be built first, or verify the current value of ESMF_BOPT" ; \
-          echo " has the same setting as at library build time." ; \
+	  echo " has the same setting as at library build time." ; \
 	  echo "" ; \
-          $(MAKE) err ; fi
+	  $(MAKE) err ; fi
 	@if [ ! -d $(ESMF_MODDIR) ]; then \
 	  echo "ESMF module directory not found:" ; \
 	  echo " $(ESMF_MODDIR) " ; \
 	  echo "Library must be built first, or verify the current value of ESMF_BOPT" ; \
-          echo " has the same setting as at library build time." ; \
+	  echo " has the same setting as at library build time." ; \
 	  echo "" ; \
-          $(MAKE) err ; fi
+	  $(MAKE) err ; fi
 endif
 
 reqdir_tests:
@@ -2056,18 +2063,18 @@ reqdir_tests:
 	  echo "ESMF test directory not found:" ; \
 	  echo " $(ESMF_TESTDIR) " ; \
 	  echo "Tests must be built first, or verify the current value of ESMF_BOPT" ; \
-          echo " has the same setting as at test build time." ; \
+	  echo " has the same setting as at test build time." ; \
 	  echo "" ; \
-          $(MAKE) err ; fi
+	  $(MAKE) err ; fi
 
 reqdir_examples:
 	@if [ ! -d $(ESMF_EXDIR) ]; then \
 	  echo "ESMF examples directory not found:" ; \
 	  echo " $(ESMF_EXDIR) " ; \
 	  echo "Examples must be built first, or verify the current value of ESMF_BOPT" ; \
-          echo " has the same setting as at example build time." ; \
+	  echo " has the same setting as at example build time." ; \
 	  echo "" ; \
-          $(MAKE) err ; fi
+	  $(MAKE) err ; fi
 
 #-------------------------------------------------------------------------------
 # test to see if this will help our lack of real dependencies.  require that
@@ -2300,16 +2307,16 @@ tree_mostlyclean:
 # (build, run), (build, run), ... not (build, build, ...) then (run, run, ...)
 
 TEST_TARGETS = build_unit_tests run_unit_tests \
-               build_system_tests run_system_tests
+	       build_system_tests run_system_tests
 
 ALLTEST_TARGETS = $(TEST_TARGETS) \
-                  build_examples run_examples
+		  build_examples run_examples
 
 TEST_TARGETS_UNI = build_unit_tests run_unit_tests_uni \
-                   build_system_tests run_system_tests_uni
+		   build_system_tests run_system_tests_uni
 
 ALLTEST_TARGETS_UNI = $(TEST_TARGETS_UNI) \
-                      build_examples run_examples_uni
+		      build_examples run_examples_uni
 
 
 # TODO: a bit more on what eventually these targets should be:
@@ -2335,7 +2342,7 @@ check: info
 	  $(MAKE) clean_check $(TEST_TARGETS_UNI) results_ck_summary ;\
 	else \
 	  $(MAKE) clean_check $(TEST_TARGETS) results_ck_summary ;\
-        fi
+	fi
 
 
 build_check:
@@ -2347,7 +2354,7 @@ run_check:
 	  $(MAKE) run_unit_tests_uni run_system_tests_uni ; \
 	else \
 	  $(MAKE) run_unit_tests run_system_tests ;\
-        fi
+	fi
 
 
 clean_check:
@@ -2360,7 +2367,7 @@ all_tests: info
 	  $(MAKE) $(ALLTEST_TARGETS_UNI) results_summary ;\
 	else \
 	  $(MAKE) $(ALLTEST_TARGETS) results_summary ;\
-        fi
+	fi
 
 all_tests_uni: info
 	$(MAKE) $(ALLTEST_TARGETS_UNI) results_summary
@@ -2373,15 +2380,15 @@ build_all_tests: clean_if_exhaustive_flag_mismatch
 run_all_tests:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
 	  $(MAKE) run_unit_tests_uni run_system_tests_uni \
-                  run_examples_uni results_summary ;\
+		  run_examples_uni results_summary ;\
 	else \
 	  $(MAKE) run_unit_tests run_system_tests \
-                  run_examples results_summary ;\
-        fi
+		  run_examples results_summary ;\
+	fi
 
 run_all_tests_uni:
 	$(MAKE) run_unit_tests_uni run_system_tests_uni \
-          run_examples_uni results_summary
+	  run_examples_uni results_summary
 
 clean_all_tests:
 	$(MAKE) clean_unit_tests clean_system_tests clean_examples
@@ -2395,7 +2402,7 @@ validate:
 	  $(MAKE) unit_tests_uni ;\
 	else \
 	  $(MAKE) unit_tests ;\
-        fi
+	fi
 
 
 build_validate:
@@ -2407,7 +2414,7 @@ run_validate:
 	  $(MAKE) run_unit_tests_uni ;\
 	else \
 	  $(MAKE) run_unit_tests ;\
-        fi
+	fi
 
 
 clean_validate:
@@ -2451,18 +2458,18 @@ system_tests: test_esmfmkfile chkdir_tests autobuild_libs dust_system_tests
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
-           else \
-               echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
-               exit; \
+	   else \
+	       echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
+	       exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
-        fi; \
+	fi; \
 	if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-          echo "Cannot run multiprocessor system tests when ESMF_COMM is mpiuni;" ; \
+	  echo "Cannot run multiprocessor system tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run system_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-          exit ; \
+	  exit ; \
 	fi ; \
 	$(MAKE) MULTI="Multiprocessor" config_sys_tests update_sys_tests_flags; \
 	$(MAKE) ACTION=tree_system_tests tree ; \
@@ -2478,9 +2485,9 @@ system_tests_uni: test_esmfmkfile chkdir_tests autobuild_libs dust_system_tests
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
-           else \
-              echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
-              exit; \
+	   else \
+	      echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
+	      exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
 	fi ; \
@@ -2498,12 +2505,12 @@ build_system_tests: test_esmfmkfile reqfile_libesmf reqdir_lib chkdir_tests
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
-           else \
-              echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
-              exit; \
+	   else \
+	      echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
+	      exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
-        fi ; \
+	fi ; \
 	$(MAKE) config_sys_tests update_sys_tests_flags ;\
 	$(MAKE) ACTION=tree_build_system_tests tree
 	echo "ESMF system tests built successfully."
@@ -2589,23 +2596,23 @@ run_system_tests: test_esmfmkfile reqdir_tests update_sys_tests_flags
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
-           else \
-              echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
-              exit; \
+	   else \
+	      echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
+	      exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
-        fi; \
+	fi; \
 	if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-          echo "Cannot run multiprocessor system tests when ESMF_COMM is mpiuni;" ; \
+	  echo "Cannot run multiprocessor system tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_system_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-          exit; \
+	  exit; \
 	fi; \
-        if [ -f $(SYS_TESTS_CONFIG) ] ; then \
-           $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
-           $(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG); \
-        fi; \
+	if [ -f $(SYS_TESTS_CONFIG) ] ; then \
+	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+	   $(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG); \
+	fi; \
 	$(MAKE) ACTION=tree_run_system_tests tree
 	$(MAKE) check_system_tests
 
@@ -2619,19 +2626,19 @@ run_system_tests_uni: test_esmfmkfile reqdir_tests update_sys_tests_flags
 	  $(MAKE) dust_system_tests ; \
 	fi
 	@if [ -f $(SYS_TESTS_CONFIG) ] ; then \
-           $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
-           $(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG); \
-        fi; \
+	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(SYS_TESTS_CONFIG) > $(SYS_TESTS_CONFIG).temp; \
+	   $(ESMF_MV) $(SYS_TESTS_CONFIG).temp $(SYS_TESTS_CONFIG); \
+	fi; \
 	if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
-           else \
-              echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
-              exit; \
+	   else \
+	      echo "SYSTEM_TEST $(SYSTEM_TEST) does not exist."; \
+	      exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
-        fi; \
+	fi; \
 	$(MAKE) ACTION=tree_run_system_tests_uni tree
 	$(MAKE) check_system_tests
 
@@ -2729,19 +2736,19 @@ use_test_cases: test_esmfmkfile chkdir_tests
 	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
 	   if [ -d $(USE_TEST_CASE) ] ; then \
 	       cd $(USE_TEST_CASE); \
-           else \
-               echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
-               echo "Check out use_test_cases at the $(ESMF_DIR)/src directory."; \
-               exit; \
+	   else \
+	       echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
+	       echo "Check out use_test_cases at the $(ESMF_DIR)/src directory."; \
+	       exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
-        fi; \
+	fi; \
 	if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-          echo "Cannot run multiprocessor use test cases when ESMF_COMM is mpiuni;" ; \
+	  echo "Cannot run multiprocessor use test cases when ESMF_COMM is mpiuni;" ; \
 	  echo "run use_test_cases_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-          exit ; \
+	  exit ; \
 	fi; \
 	$(MAKE) ACTION=tree_use_test_cases tree ; \
 	$(MAKE) check_use_test_cases
@@ -2756,9 +2763,9 @@ use_test_cases_uni: test_esmfmkfile chkdir_tests
 	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
 	   if [ -d $(USE_TEST_CASE) ] ; then \
 	       cd $(USE_TEST_CASE); \
-           else \
-              echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
-              exit; \
+	   else \
+	      echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
+	      exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
 	fi; \
@@ -2775,12 +2782,12 @@ build_use_test_cases: test_esmfmkfile reqfile_libesmf reqdir_lib chkdir_tests
 	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
 	   if [ -d $(USE_TEST_CASE) ] ; then \
 	       cd $(USE_TEST_CASE); \
-           else \
-              echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
-              exit; \
+	   else \
+	      echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
+	      exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
-        fi; \
+	fi; \
 	$(MAKE) ACTION=tree_build_use_test_cases tree ; \
 	echo "ESMF use test cases built successfully."
 
@@ -2847,19 +2854,19 @@ run_use_test_cases: test_esmfmkfile reqdir_tests
 	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
 	   if [ -d $(USE_TEST_CASE) ] ; then \
 	       cd $(USE_TEST_CASE); \
-           else \
-              echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
-              echo "Check out use_test_cases at the $(ESMF_DIR)/src directory."; \
-              exit; \
+	   else \
+	      echo "USE_TEST_CASE $(USE_TEST_CASE) does not exist."; \
+	      echo "Check out use_test_cases at the $(ESMF_DIR)/src directory."; \
+	      exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
-        fi; \
+	fi; \
 	if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-          echo "Cannot run multiprocessor use test cases when ESMF_COMM is mpiuni;" ; \
+	  echo "Cannot run multiprocessor use test cases when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_use_test_cases_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
-          exit ; \
+	  exit ; \
 	fi; \
 	$(MAKE) ACTION=tree_run_use_test_cases tree ; \
 	$(MAKE) check_use_test_cases
@@ -2874,13 +2881,13 @@ run_use_test_cases_uni: test_esmfmkfile reqdir_tests
 	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
 	   if [ -d $(USE_TEST_CASE) ] ; then \
 	       cd $(USE_TEST_CASE); \
-           else \
-              echo "USE_TEST_CASE  $(USE_TEST_CASE) does not exist."; \
-               echo "Checkout use_test_cases at the $(ESMF_DIR)/src directory."; \
-              exit; \
+	   else \
+	      echo "USE_TEST_CASE  $(USE_TEST_CASE) does not exist."; \
+	       echo "Checkout use_test_cases at the $(ESMF_DIR)/src directory."; \
+	      exit; \
 	   fi; \
 	   echo current working directory is now `pwd` ; \
-        fi; \
+	fi; \
 	$(MAKE) ACTION=tree_run_use_test_cases_uni tree ; \
 	$(MAKE) check_use_test_cases
 
@@ -2892,17 +2899,17 @@ tree_run_use_test_cases_uni: tree_dry_run_use_test_cases $(USE_TEST_CASES_RUN_UN
 #
 dry_run_use_test_cases: test_esmfmkfile
 	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR) ; fi; \
-        if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
-           if [ -d $(USE_TEST_CASE) ] ; then \
-               cd $(USE_TEST_CASE); \
-           else \
-              echo "USE_TEST_CASE  $(USE_TEST_CASE) does not exist."; \
-               echo "Checkout use_test_cases at the $(ESMF_DIR)/src directory."; \
-              exit; \
-           fi; \
-           echo current working directory is now `pwd` ; \
-        fi; \
-        $(MAKE) ACTION=tree_dry_run_use_test_cases tree
+	if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
+	   if [ -d $(USE_TEST_CASE) ] ; then \
+	       cd $(USE_TEST_CASE); \
+	   else \
+	      echo "USE_TEST_CASE  $(USE_TEST_CASE) does not exist."; \
+	       echo "Checkout use_test_cases at the $(ESMF_DIR)/src directory."; \
+	      exit; \
+	   fi; \
+	   echo current working directory is now `pwd` ; \
+	fi; \
+	$(MAKE) ACTION=tree_dry_run_use_test_cases tree
 
 tree_dry_run_use_test_cases: $(USE_TEST_CASES_DRY_RUN)
 
@@ -2945,7 +2952,7 @@ check_use_test_cases:
 
 unit_tests: test_esmfmkfile chkdir_tests autobuild_libs dust_unit_tests
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-          echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
+	  echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run unit_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
@@ -3017,7 +3024,7 @@ dust_unit_tests: dust_test_harness
 #
 run_unit_tests: test_esmfmkfile reqdir_tests verify_exhaustive_flag
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-          echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
+	  echo "Cannot run multiprocessor unit tests when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_unit_tests_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
@@ -3027,8 +3034,8 @@ run_unit_tests: test_esmfmkfile reqdir_tests verify_exhaustive_flag
 	fi
 	@if [ -f $(UNIT_TESTS_CONFIG) ] ; then \
 	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Multiprocessor/' $(UNIT_TESTS_CONFIG) > $(UNIT_TESTS_CONFIG).temp; \
-           $(ESMF_MV) $(UNIT_TESTS_CONFIG).temp $(UNIT_TESTS_CONFIG); \
-        fi
+	   $(ESMF_MV) $(UNIT_TESTS_CONFIG).temp $(UNIT_TESTS_CONFIG); \
+	fi
 	-$(MAKE) ACTION=tree_run_unit_tests tree
 	$(MAKE) check_unit_tests
 
@@ -3043,8 +3050,8 @@ run_unit_tests_uni: test_esmfmkfile reqdir_tests verify_exhaustive_flag
 	fi
 	@if [ -f $(UNIT_TESTS_CONFIG) ] ; then \
 	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(UNIT_TESTS_CONFIG) > $(UNIT_TESTS_CONFIG).temp; \
-           $(ESMF_MV) $(UNIT_TESTS_CONFIG).temp $(UNIT_TESTS_CONFIG); \
-        fi
+	   $(ESMF_MV) $(UNIT_TESTS_CONFIG).temp $(UNIT_TESTS_CONFIG); \
+	fi
 	-$(MAKE) ACTION=tree_run_unit_tests_uni tree
 	$(MAKE) check_unit_tests
 
@@ -3092,12 +3099,12 @@ exhaustive_flag_check:
 	@if [ -s $(UNIT_TESTS_CONFIG) -a \
 	     `$(ESMF_SED) -ne '/$(UNIT_TEST_STRING)/p' $(UNIT_TESTS_CONFIG) | $(ESMF_WC) -l` -ne 1 ] ; then \
 	  echo "The ESMF_TESTEXHAUSTIVE environment variable is a compile-time control for" ;\
-          echo "whether a basic set or an exhaustive set of tests are built." ;\
+	  echo "whether a basic set or an exhaustive set of tests are built." ;\
 	  echo "" ;\
 	  echo "The current setting of ESMF_TESTEXHAUSTIVE is \"$(ESMF_TESTEXHAUSTIVE)\", which" ;\
 	  echo "is not the same as when the unit tests were last built." ;\
 	  echo "(This is based on the contents of the file:" ;\
-          echo "$(UNIT_TESTS_CONFIG) ";\
+	  echo "$(UNIT_TESTS_CONFIG) ";\
 	  echo "which contains: `$(ESMF_SED) -e '1d' $(UNIT_TESTS_CONFIG)` )." ;\
 	  echo "" ;\
 	  echo "To rebuild and run the unit tests with the current ESMF_TESTEXHAUSTIVE value, run:" ;\
@@ -3306,7 +3313,7 @@ run_test_harness_sec:
 	if [ -d harness_config ] ; then \
 	  if [ -f harness_config/$(TESTHARNESSCASE)_test.rc ] ; then \
 	    cp -f harness_config/$(TESTHARNESSCASE)_*.rc $(ESMF_TESTDIR) ; \
-            cp -f harness_config/$(TESTHARNESSCASE)_test.rc $(ESMF_TESTDIR)/test_harness.rc ; \
+	    cp -f harness_config/$(TESTHARNESSCASE)_test.rc $(ESMF_TESTDIR)/test_harness.rc ; \
 	    $(MAKE) htest ; \
 	  else \
 	    echo "FAIL: missing file - harness_config/$(TESTHARNESSCASE)_test.rc" ; \
@@ -3361,7 +3368,7 @@ err: ; $(error gnumake exiting)
 #
 examples: test_esmfmkfile chkdir_examples autobuild_libs dust_examples
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-          echo "Cannot run multiprocessor examples when ESMF_COMM is mpiuni;" ; \
+	  echo "Cannot run multiprocessor examples when ESMF_COMM is mpiuni;" ; \
 	  echo "run examples_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
@@ -3421,7 +3428,7 @@ dust_examples:
 #
 run_examples: test_esmfmkfile reqdir_examples
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-          echo "Cannot run multiprocessor examples when ESMF_COMM is mpiuni;" ; \
+	  echo "Cannot run multiprocessor examples when ESMF_COMM is mpiuni;" ; \
 	  echo "run run_examples_uni instead." ; \
 	  echo "" ; \
 	  $(MAKE) err ; \
@@ -3448,7 +3455,7 @@ run_examples_uni: test_esmfmkfile reqdir_examples
 	@if [ -f $(EXAMPLES_CONFIG) ] ; then \
 	   $(ESMF_SED) -e 's/ [A-Za-z][A-Za-z]*processor/ Uniprocessor/' $(EXAMPLES_CONFIG) > $(EXAMPLES_CONFIG).temp; \
 	$(ESMF_MV) $(EXAMPLES_CONFIG).temp $(EXAMPLES_CONFIG); \
-        fi
+	fi
 	-$(MAKE) ACTION=tree_run_examples_uni tree
 	$(MAKE) check_examples
 
@@ -3552,10 +3559,10 @@ doc:  chkdir_doc
 	@echo "doc rule from common.mk"
 	@echo "========================================="
 	@if [ ! -d $(ESMF_DIR)/src/doc ] ; then \
-          echo "*** This version of the ESMF source tree does not contain documentation files. Please see http://www.earthsystemmodeling.org/ for ESMF documentation." ; \
-          $(ESMF_RM) $(ESMF_DOCDIR) ; \
-          $(MAKE) err; \
-        fi;
+	  echo "*** This version of the ESMF source tree does not contain documentation files. Please see http://www.earthsystemmodeling.org/ for ESMF documentation." ; \
+	  $(ESMF_RM) $(ESMF_DOCDIR) ; \
+	  $(MAKE) err; \
+	fi;
 	cd $(ESMF_DIR)/src/doc ;\
 	$(MAKE) dvi html pdf
 	@echo "Build doc completed."
@@ -3569,17 +3576,17 @@ alldoc: doc
 
 localdoc:
 	@if [ "$(GRAPHFILES)"foo != foo ] ; then \
-          cp $(addprefix $(ESMF_BUILD)/src/doc/,$(GRAPHFILES)) .;\
+	  cp $(addprefix $(ESMF_BUILD)/src/doc/,$(GRAPHFILES)) .;\
 	fi;
 	$(MAKE) $(TEXFILES_TO_MAKE)
 	@if [ "$(DVIFILES)"foo != foo ] ; then \
-          $(MAKE) $(DVIFILES);\
+	  $(MAKE) $(DVIFILES);\
 	fi;
 	@if [ "$(PDFFILES)"foo != foo ] ; then \
-          $(MAKE) $(PDFFILES);\
+	  $(MAKE) $(PDFFILES);\
 	fi;
 	@if [ "$(HTMLFILES)"foo != foo ] ; then \
-          $(MAKE) $(HTMLFILES);\
+	  $(MAKE) $(HTMLFILES);\
 	fi;
 
 onedoc: chkdir_doc include tex
@@ -3627,7 +3634,7 @@ tree_html:chkdir_doc $(HTMLFILES)
 clean_doc:
 	@cd $(ESMF_BUILD)/src/doc ;\
 	$(MAKE) tree_clean ; \
-        $(ESMF_RM) $(ESMF_BUILD)/doc
+	$(ESMF_RM) $(ESMF_BUILD)/doc
 
 #-------------------------------------------------------------------------------
 # Recursive calls
@@ -3660,26 +3667,26 @@ tree: $(ACTION)
 ifeq (,$(findstring k,$(MAKEFLAGS)))
 	@if [ "$(DIRS)" != "" ]; then \
 	  for dir in $(DIRS) foo ; do \
-            if [ -d $$dir ]; then \
-              (cd $$dir ; \
-              echo "$(ACTION)" in: `pwd`; \
-              $(MAKE) -f makefile tree ACTION="$(ACTION)");\
-              if [ "$$?" != 0 ]; then \
-                exit 1; \
-              fi; \
-            fi; \
+	    if [ -d $$dir ]; then \
+	      (cd $$dir ; \
+	      echo "$(ACTION)" in: `pwd`; \
+	      $(MAKE) -f makefile tree ACTION="$(ACTION)");\
+	      if [ "$$?" != 0 ]; then \
+		exit 1; \
+	      fi; \
+	    fi; \
 	  done; \
-        fi
+	fi
 else
 	@if [ "$(DIRS)" != "" ]; then \
 	  for dir in $(DIRS) foo ; do \
-            if [ -d $$dir ]; then \
-              (cd $$dir ; \
-              echo "$(ACTION)" in: `pwd`; \
-              $(MAKE) -f makefile tree ACTION="$(ACTION)");\
-            fi; \
+	    if [ -d $$dir ]; then \
+	      (cd $$dir ; \
+	      echo "$(ACTION)" in: `pwd`; \
+	      $(MAKE) -f makefile tree ACTION="$(ACTION)");\
+	    fi; \
 	  done; \
-        fi
+	fi
 endif
 
 
@@ -3886,11 +3893,11 @@ shared:
 		    echo Converting $$NEXTLIB.a to $$NEXTLIB.$(ESMF_SL_SUFFIX) ;\
 		    mkdir tmp_$$NEXTLIB ;\
 		    cd tmp_$$NEXTLIB  ;\
-	                $(ESMF_AREXTRACT) ../$$NEXTLIB.$(ESMF_LIB_SUFFIX) ;\
-                    echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
+			$(ESMF_AREXTRACT) ../$$NEXTLIB.$(ESMF_LIB_SUFFIX) ;\
+		    echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    echo Converting $$NEXTLIB.$(ESMF_SL_SUFFIX) to $$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) ;\
-                    echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
+		    echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
 		    cd .. ;\
 		    $(ESMF_RM) -r tmp_$$NEXTLIB ;\
@@ -4210,16 +4217,16 @@ $(filter-out $(addsuffix .o,$(basename $(1))), \
   $(sort \
    $(addsuffix .o, \
       $(shell awk  '/^ *use  *ESMF_/' $(1) \
-            | sed 's/^ *use  *ESMF_/ESMF_/' \
-            | sed 's/Mod.*$$//' \
+	    | sed 's/^ *use  *ESMF_/ESMF_/' \
+	    | sed 's/Mod.*$$//' \
        ) \
       $(shell awk  '/^ *use  *NUOPC/' $(1) \
-            | sed 's/^ *use  *NUOPC/NUOPC/' \
-            | sed 's/,.*$$//' \
+	    | sed 's/^ *use  *NUOPC/NUOPC/' \
+	    | sed 's/,.*$$//' \
        ) \
       $(shell awk  '/^ *use  *pio/' $(1) \
-            | sed 's/^ *use  *pio/pio/' \
-            | sed 's/,.*$$//' \
+	    | sed 's/^ *use  *pio/pio/' \
+	    | sed 's/,.*$$//' \
        ) \
      ) \
    ) \
@@ -4232,8 +4239,8 @@ endef
 define INC_FUNC
 $(notdir $(sort \
   $(shell awk  '/^ *[#\^] *include *["<]/' $(1) \
-        | sed 's/^ *[#\^] *include *["<]//' \
-        | sed 's/[">].*$$//' \
+	| sed 's/^ *[#\^] *include *["<]//' \
+	| sed 's/[">].*$$//' \
    ) \
  ))
 endef

@@ -12,8 +12,8 @@
 
 // PIO header
 #if defined (ESMF_PIO)
-#include "pio.h"
-#include "pio_types.h"
+#include <pio.h>
+#include <pio_types.h>
 #endif
 
 // ESMF header
@@ -52,10 +52,10 @@ int main(void){
   string fname;
   int pioerr;
 #if defined (ESMF_PIO)
-  pio_file_desc_t pio_file1[PIO_SIZE_FILE_DESC];
-  pio_io_desc_t iodesc1[PIO_SIZE_IO_DESC];
-  pio_var_desc_t pio_vardesc1[PIO_SIZE_VAR_DESC];
-  pio_dof_t compdof[DIM_X];
+  int pio_file1[PIO_SIZE_FILE_DESC];
+  int iodesc1[PIO_SIZE_IO_DESC];
+  int pio_vardesc1[PIO_SIZE_VAR_DESC];
+  long int compdof[DIM_X];
   int amode_in;
 
   int answer;
