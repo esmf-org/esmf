@@ -279,7 +279,7 @@ int PIO_Handler::initializeVM (void
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
       num_iotasks = vm->getPetCount();
       stride = 1;
-      rearr = PIO_rearr_box;
+      rearr = PIO_REARR_BOX;
       base = 0;
 #else // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
       num_iotasks = 1;
@@ -629,7 +629,7 @@ void PIO_Handler::arrayRead(
     }
   }
   if (getFormat() != ESMF_IOFMT_BIN) {
-    piorc = PIOc_inq_varid(pioFileDesc, varname.c_str(), vardesc);
+    piorc = PIOc_inq_varid(pioFileDesc, varname.c_str(), &vardesc);
     // An error here means the variable is not in the file
     const std::string errmsg = "variable " + varname + " not found in file";
     if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
@@ -640,7 +640,7 @@ void PIO_Handler::arrayRead(
     int frame;
     if (((int *)NULL != timeslice) && (*timeslice > 0)) {
       int dimid_time;
-      int time_len;
+      MPI_Offset time_len;
       piorc = PIOc_inq_dimid(pioFileDesc, "time", &dimid_time);
       if (!CHECKPIOERROR(piorc, "No time dimension found in file", ESMF_RC_FILE_READ, (*rc))) {
         return;
@@ -808,7 +808,7 @@ void PIO_Handler::arrayWrite(
       PRINTMSG("Entering NetCDF define mode (redef)");
       piorc = PIOc_redef(pioFileDesc);
       // Not all NetCDF errors are really errors here so we need to check
-      if ((PIO_noerr != piorc) && (NC_EINDEFINE != piorc)) {
+      if ((PIO_NOERR != piorc) && (NC_EINDEFINE != piorc)) {
         if (!CHECKPIOERROR(piorc,
             ((NC_EPERM == piorc) ?
             "File is read only" :
@@ -820,7 +820,7 @@ void PIO_Handler::arrayWrite(
 
       // This should work if it is a NetCDF file.
       PRINTMSG("Calling PIOc_inq");
-      piorc = pioc_inq(pioFileDesc, &nfDims,
+      piorc = PIOc_inq(pioFileDesc, &nfDims,
                                 &nVar, &nAtt, &unlim);
       if (!CHECKPIOERROR(piorc, "File is not in NetCDF format",
           ESMF_RC_FILE_WRITE, (*rc))) {
@@ -829,9 +829,9 @@ void PIO_Handler::arrayWrite(
 
       // We have a NetCDF file, see if the variable is in there
       PRINTMSG("Looking for variable in file");
-      piorc = PIOC_inq_varid(pioFileDesc, varname.c_str(), vardesc);
+      piorc = PIOc_inq_varid(pioFileDesc, varname.c_str(), &vardesc);
       // This should succeed if the variable exists
-      varExists = (PIO_noerr == piorc);
+      varExists = (PIO_NOERR == piorc);
     }
   }
 
@@ -839,13 +839,13 @@ void PIO_Handler::arrayWrite(
   bool hasTimeDim;
   if (getFormat() != ESMF_IOFMT_BIN) {
     int dimidTime;
-    int timeLen;
+    MPI_Offset timeLen;
     PRINTMSG("Checking time dimension");
     piorc = PIOc_inq_dimid(pioFileDesc, "time", &dimidTime);
     // NetCDF does not specify which error code goes with with
     // condition so we will guess that there is no time dimension 
     // on any error condition (This may be an error depending on context).
-    hasTimeDim = (PIO_noerr == piorc);
+    hasTimeDim = (PIO_NOERR == piorc);
     PRINTMSG("hasTimeDim = " << hasTimeDim);
     if (hasTimeDim) {
       // Retrieve the max time field
@@ -910,14 +910,13 @@ void PIO_Handler::arrayWrite(
 
     PRINTMSG("Calling pio_cpp_inq_vardimid_vdesc");
     std::vector<int> dimIds(nDims);
-    piorc = PIOc_inq_vardimid(pioFileDesc, vardesc,
-                                       &dimIds.front(), nDims);
+    piorc = PIOc_inq_vardimid(pioFileDesc, vardesc, &dimIds.front());
     if (!CHECKPIOERROR(piorc, "Error retrieving information about variable",
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
     }
 
-    int dimLen;
+    MPI_Offset dimLen;
     int ioDimNum = 0;
     for (int i = 0; i < nDims; i++) {
       PRINTMSG("pio_cpp_inq_dimlen for dim = " << i);
@@ -969,7 +968,7 @@ void PIO_Handler::arrayWrite(
     PRINTMSG("Going into NetCDF define mode (redef)");
     piorc = PIOc_redef(pioFileDesc);
     // Not all NetCDF errors are really errors here so we need to check
-    if ((PIO_noerr != piorc) && (NC_EINDEFINE != piorc)) {
+    if ((PIO_NOERR != piorc) && (NC_EINDEFINE != piorc)) {
       if (!CHECKPIOERROR(piorc,
           ((NC_EPERM == piorc) ?
           "File is read only" :
@@ -995,8 +994,8 @@ void PIO_Handler::arrayWrite(
       // if dimension already exists, use it.
       int dimid_existing;
       piorc = PIOc_inq_dimid(pioFileDesc, axis.c_str(), &dimid_existing);
-      if (PIO_noerr == piorc) {
-        int dim_len;
+      if (PIO_NOERR == piorc) {
+        MPI_Offset dim_len;
         piorc = PIOc_inq_dimlen(pioFileDesc, dimid_existing, &dim_len);
         if (!CHECKPIOERROR(piorc, "Error finding existing dimension length", ESMF_RC_FILE_WRITE, (*rc))) {
           return;
@@ -1032,7 +1031,7 @@ void PIO_Handler::arrayWrite(
       } else {
         PRINTMSG("Defining time dimension");
         piorc = PIOc_def_dim(pioFileDesc, "time",
-                                PIO_unlimited, &ncDims[nioDims]);
+                                PIO_UNLIMITED, &ncDims[nioDims]);
         if (!CHECKPIOERROR(piorc, "Attempting to define 'time' dimension",
             ESMF_RC_FILE_WRITE, (*rc))) {
           return;
@@ -1043,8 +1042,8 @@ void PIO_Handler::arrayWrite(
   }
   PRINTMSG("varExists = " << varExists);
   if ((getFormat() != ESMF_IOFMT_BIN) && !varExists) {
-    piorc = PIOc_def_var_md(pioFileDesc, varname.c_str(), basepiotype,
-                               ncDims, nioDims, vardesc);
+    piorc = PIOc_def_var(pioFileDesc, varname.c_str(), basepiotype,
+			 nioDims, ncDims, &vardesc);
     if (!CHECKPIOERROR(piorc, "Attempting to define PIO vardesc for: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
@@ -1053,10 +1052,10 @@ void PIO_Handler::arrayWrite(
   if ((getFormat() != ESMF_IOFMT_BIN) && (timeFrame >= 0)) {
 #ifdef ESMFIO_DEBUG
     int nvdims;
-    PIOc_inq_varndims_vdesc(pioFileDesc, vardesc, &nvdims);
+    PIOc_inq_varndims(pioFileDesc, vardesc, &nvdims);
     PRINTMSG("calling setframe, ndims = " << nvdims);
 #endif // ESMFIO_DEBUG
-    PIOc_setframe(vardesc, timeFrame);
+    PIOc_setframe(pioFileDesc, vardesc, timeFrame);
   }
 #ifdef ESMFIO_DEBUG
   else if (getFormat() != ESMF_IOFMT_BIN) {
@@ -1066,7 +1065,7 @@ void PIO_Handler::arrayWrite(
     if (varExists) {
       int varid;
       int lrc;
-      lrc = PIOc_inq_varid_vid(pioFileDesc, varname.c_str(), &varid);
+      lrc = PIOc_inq_varid(pioFileDesc, varname.c_str(), &varid);
       PRINTMSG("varid = " << varid);
     }
   }
@@ -1104,7 +1103,7 @@ void PIO_Handler::arrayWrite(
   PIOc_set_log_level(0);
 #endif // ESMFIO_DEBUG
   // Write the array
-  piorc =  PIOc_write_darray(pioFileDesc, vardesc, iodesc, arrlen
+  piorc =  PIOc_write_darray(pioFileDesc, vardesc, iodesc, arrlen,
                              (void *)baseAddress, NULL);
   if (!CHECKPIOERROR(piorc, "Attempting to write file",
             ESMF_RC_FILE_WRITE, (*rc))) {
@@ -1155,19 +1154,16 @@ void PIO_Handler::open(
     int esmf_iofmt;
     int pio_fmt;
   } iofmt_map[] = {
-     { ESMF_IOFMT_BIN,      PIO_iotype_pbinary }
-#if defined (ESMF_NETCDF) || defined (ESMF_PNETCDF)
 #if defined (ESMF_PNETCDF)
-    ,{ ESMF_IOFMT_NETCDF,   PIO_iotype_pnetcdf }
-    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_iotype_pnetcdf }
-    ,{ ESMF_IOFMT_NETCDF4,  PIO_iotype_pnetcdf }
+    { ESMF_IOFMT_NETCDF,   PIO_IOTYPE_PNETCDF }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_IOTYPE_PNETCDF }
+    ,{ ESMF_IOFMT_NETCDF4,  PIO_IOTYPE_PNETCDF }
 #elif defined (ESMF_NETCDF)
-    ,{ ESMF_IOFMT_NETCDF,   PIO_iotype_netcdf }
-    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_iotype_netcdf }
-    ,{ ESMF_IOFMT_NETCDF4,  PIO_iotype_netcdf }
-    ,{ ESMF_IOFMT_NETCDF4C, PIO_iotype_netcdf4c }
-    ,{ ESMF_IOFMT_NETCDF4P, PIO_iotype_netcdf4p }
-#endif
+    { ESMF_IOFMT_NETCDF,   PIO_IOTYPE_NETCDF }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_IOTYPE_NETCDF }
+    ,{ ESMF_IOFMT_NETCDF4,  PIO_IOTYPE_NETCDF }
+    ,{ ESMF_IOFMT_NETCDF4C, PIO_IOTYPE_NETCDF4C }
+    ,{ ESMF_IOFMT_NETCDF4P, PIO_IOTYPE_NETCDF4P }
 #endif
   };
   int iofmt_map_size = sizeof (iofmt_map)/sizeof (iofmt_map_t);
@@ -1185,18 +1181,16 @@ void PIO_Handler::open(
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_OPEN,
         "PIO not initialized",
         ESMC_CONTEXT, rc)) return;
-  } else if (PIO_IOSYSTEM_DESC_NULL == pioSystemDesc) {
+  } else if (pioSystemDesc <= 0 ) {
     // Just grab last created PIO instance for now (TBD: need way to choose)
     pioSystemDesc = PIO_Handler::activePioInstances.back();
   }
 
   // Translate the I/O format from ESMF to PIO
 #if !defined(ESMF_NETCDF) && !defined (ESMF_PNETCDF)
-  if (getFormat() != ESMF_IOFMT_BIN) {
-    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_LIB_NOT_PRESENT,
-        "Library for requested I/O format is not present", ESMC_CONTEXT, rc))
-      return;
-  }
+  if (ESMC_LogDefault.MsgFoundError(ESMF_RC_LIB_NOT_PRESENT,
+      "Library for requested I/O format is not present", ESMC_CONTEXT, rc))
+    return;
 #endif
 
   int i_loop;
@@ -1358,8 +1352,8 @@ void PIO_Handler::open(
     PIOc_set_log_level(3);
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_DEBUG
-    piorc = PIOc_createfile(&pioSystemDesc, pioFileDesc,
-                                 iotype, getFilename(), clobberMode);
+    piorc = PIOc_createfile(pioSystemDesc, &pioFileDesc,
+                                 &iotype, getFilename(), clobberMode);
     if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ") + getFilename(),
       ESMF_RC_FILE_OPEN, (*rc))) {
       return;
@@ -1374,8 +1368,8 @@ void PIO_Handler::open(
     PRINTMSG(" calling PIOc_openfile with mode = " << mode <<
              ", file = \"" << getFilename() << "\"");
     // Looks like we are ready to go
-    piorc = PIOc_openfile(&pioSystemDesc, pioFileDesc,
-                               iotype, getFilename(), mode);
+    piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc,
+                               &iotype, getFilename(), mode);
     PRINTMSG(", called PIOc_openfile on " << getFilename());
     if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + getFilename(),
         ESMF_RC_FILE_OPEN, (*rc))) {
@@ -1452,40 +1446,40 @@ void PIO_Handler::attPackPut (
             return;
         }
         const std::string value = jcurr[0];
-        piorc = PIOc_put_att_string (pioFileDesc, vardesc,
-                                        it.key().c_str(), value.c_str());
+        piorc = PIOc_put_att_text (pioFileDesc, vardesc,
+				   it.key().c_str(), strlen(value.c_str()), value.c_str());
         if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
       case ESMC_TYPEKIND_I8: {
-        const std::vector<int> value = jcurr.get<std::vector<int>>();
-        piorc = PIOc_put_att_ints (pioFileDesc, vardesc,
-                                      it.key().c_str(), value.data(), size);
+        const std::vector<long> value = jcurr.get<std::vector<long>>();
+        piorc = PIOc_put_att_long (pioFileDesc, vardesc,
+				   it.key().c_str(), att_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set I8 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
       case ESMC_TYPEKIND_R8: {
         const std::vector<double> value = jcurr.get<std::vector<double>>();
-        piorc = PIOc_put_att_doubles (pioFileDesc, vardesc,
-                                         it.key().c_str(), value.data(), size);
+        piorc = PIOc_put_att_double (pioFileDesc, vardesc,
+				     it.key().c_str(), att_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set R8 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
       case ESMC_TYPEKIND_I4: {
         const std::vector<int> value = jcurr.get<std::vector<int>>();
-        piorc = PIOc_put_att_ints (pioFileDesc, vardesc,
-                                      it.key().c_str(), value.data(), size);
+        piorc = PIOc_put_att_int (pioFileDesc, vardesc,
+				  it.key().c_str(), att_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set I4 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
       }
       case ESMC_TYPEKIND_R4: {
         const std::vector<float> value = jcurr.get<std::vector<float>>();
-        piorc = PIOc_put_att_floats (pioFileDesc, vardesc,
-                                         it.key().c_str(), value.data(), size);
+        piorc = PIOc_put_att_float (pioFileDesc, vardesc,
+				    it.key().c_str(), att_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set R4 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
         break;
@@ -1526,10 +1520,10 @@ ESMC_Logical PIO_Handler::isOpen(
 //EOPI
 //-----------------------------------------------------------------------------
   PRINTPOS;
-  if ((int)NULL == pioFileDesc) {
+  if (pioFileDesc == 0) {
     PRINTMSG("pioFileDesc is NULL");
     return ESMF_FALSE;
-  } else if (PIOc_file_is_open(pioFileDesc) != 0) {
+  } else if (PIOc_File_is_Open(pioFileDesc) != 0) {
     PRINTMSG("File is open");
     return ESMF_TRUE;
   } else {
@@ -1574,7 +1568,7 @@ void PIO_Handler::flush(
   PRINTPOS;
   // Not open? No problem, just skip
   if (isOpen() == ESMF_TRUE) {
-    PIOc_syncfile(pioFileDesc);
+    PIOc_sync(pioFileDesc);
   }
   // return successfully
   if (rc != NULL) {
@@ -1750,7 +1744,7 @@ bool PIO_Handler::CheckPIOError(
   }
 
   std::stringstream errmsg;
-  if (pioRetCode != PIO_noerr) {
+  if (pioRetCode != PIO_NOERR) {
 #if defined(ESMF_PNETCDF)
     // Log the error, assuming the error code was passed through PIO from PNetCDF
     if (!fmtStr.empty()) {
@@ -1807,7 +1801,7 @@ bool PIO_Handler::CheckPIOError(
         line, file, method, rc);
   }
 
-  return (pioRetCode == PIO_noerr);
+  return (pioRetCode == PIO_NOERR);
 } // PIO_Handler::CheckPIOError()
 //-----------------------------------------------------------------------------
 
@@ -1913,7 +1907,7 @@ int PIO_IODescHandler::constructPioDecomp(
   int localDe;                      // The DE being processed
   int localDeCount;                 // The number of DEs on this PET
   int pioDofCount;                  // Number 
-  int64_t *pioDofList;              // Local to global array map
+  MPI_Offset *pioDofList;              // Local to global array map
   DistGrid *distGrid;               // The Array's associated DistGrid
   PIO_IODescHandler *handle;        // New handler object for this IO desc.
 
@@ -1931,7 +1925,7 @@ int PIO_IODescHandler::constructPioDecomp(
   }
 
   handle = new PIO_IODescHandler(iosys, arr_p);
-  pioDofList = (int64_t *)NULL;
+  pioDofList = (MPI_Offset *)NULL;
 
   localDeCount = arr_p->getDELayout()->getLocalDeCount();
   PRINTMSG("localDeCount = " << localDeCount);
@@ -1956,13 +1950,13 @@ int PIO_IODescHandler::constructPioDecomp(
   PRINTMSG("(" << my_rank << "): pioDofCount = " << pioDofCount);
   try {
     // Allocate space for the DOF list
-    pioDofList = new int64_t[pioDofCount];
+    pioDofList = new MPI_Offset[pioDofCount];
 
   } catch(...) {
-    if ((int64_t *)NULL != pioDofList) {
+    if ((MPI_Offset *)NULL != pioDofList) {
       // Free the DofList!
       delete[] pioDofList;
-      pioDofList = (int64_t *)NULL;
+      pioDofList = (MPI_Offset *)NULL;
     }
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, &localrc);
     return localrc;
@@ -1973,11 +1967,11 @@ int PIO_IODescHandler::constructPioDecomp(
   localDe = 0;
   if (pioDofCount>0){
     // construct the mapping of the local elements
-    localrc = arr_p->constructFileMap(pioDofList, pioDofCount, localDe);
+    localrc = arr_p->constructFileMap((int64_t *) pioDofList, pioDofCount, localDe);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &localrc)) {
       delete[] pioDofList;
-      pioDofList = (int64_t *)NULL;
+      pioDofList = (MPI_Offset *)NULL;
       return localrc;
     }
   }
@@ -1993,13 +1987,13 @@ int PIO_IODescHandler::constructPioDecomp(
   // Get TKR info
   switch(arr_p->getTypekind()) {
   case ESMC_TYPEKIND_I4:
-    handle->basepiotype = PIO_int;
+    handle->basepiotype = PIO_INT;
     break;
    case ESMC_TYPEKIND_R4:
-    handle->basepiotype = PIO_real;
+    handle->basepiotype = PIO_REAL;
     break;
    case ESMC_TYPEKIND_R8:
-    handle->basepiotype = PIO_double;
+    handle->basepiotype = PIO_DOUBLE;
     break;
   case ESMC_TYPEKIND_I1:
   case ESMC_TYPEKIND_I2:
@@ -2012,7 +2006,7 @@ int PIO_IODescHandler::constructPioDecomp(
     if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, "Unsupported typekind", ESMC_CONTEXT,
         &localrc)) {
       delete[] pioDofList;
-      pioDofList = (int64_t *)NULL;
+      pioDofList = (MPI_Offset *)NULL;
       return localrc;
     }
   }
@@ -2064,9 +2058,9 @@ int PIO_IODescHandler::constructPioDecomp(
 #endif // ESMFIO_DEBUG
 
   // Create the decomposition
-  PIOc_initdecomp_dof(&iosys, handle->basepiotype, handle->dims,
-                         handle->nDims, pioDofList, pioDofCount,
-                         handle->io_descriptor);
+  PIOc_init_decomp(iosys, handle->basepiotype, handle->nDims,
+		  handle->dims, pioDofCount, pioDofList,
+		  &(handle->io_descriptor), PIO_REARR_BOX, NULL, NULL);
   PRINTMSG("after call to PIOc_initdecomp_dof");
 #ifdef ESMFIO_DEBUG
   PIOc_set_log_level(0);
@@ -2079,7 +2073,7 @@ int PIO_IODescHandler::constructPioDecomp(
   
   // Free the DofList!
   delete[] pioDofList;
-  pioDofList = (int64_t *)NULL;
+  pioDofList = (MPI_Offset *)NULL;
 
   // return successfully
   return ESMF_SUCCESS;
@@ -2119,7 +2113,7 @@ int PIO_IODescHandler::freePioDecomp(
   bool foundHandle = false;
 
   // check the inputs
-  if ((int *)NULL == *decomp_p) {
+  if (decomp_p == 0) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL,
       "- newDecomp_p cannot be NULL", ESMC_CONTEXT, &localrc);
     return ESMF_RC_ARG_BAD;
