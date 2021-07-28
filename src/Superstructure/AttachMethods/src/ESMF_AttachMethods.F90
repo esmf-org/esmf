@@ -95,8 +95,11 @@ module ESMF_AttachMethodsMod
 
   interface ESMF_MethodGet
     module procedure ESMF_MethodCplCompGet
+    module procedure ESMF_MethodCplCompGetList
     module procedure ESMF_MethodGridCompGet
+    module procedure ESMF_MethodGridCompGetList
     module procedure ESMF_MethodStateGet
+    module procedure ESMF_MethodStateGetList
   end interface
 
   interface ESMF_MethodRemove
@@ -166,7 +169,7 @@ module ESMF_AttachMethodsMod
         integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -240,7 +243,7 @@ module ESMF_AttachMethodsMod
     integer,          intent(in),  optional :: index
     character(len=*), intent(in)            :: userRoutine
     character(len=*), intent(in),  optional :: sharedObj
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -330,7 +333,7 @@ module ESMF_AttachMethodsMod
         integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -404,7 +407,7 @@ module ESMF_AttachMethodsMod
     integer,          intent(in),  optional :: index
     character(len=*), intent(in)            :: userRoutine
     character(len=*), intent(in),  optional :: sharedObj
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -494,7 +497,7 @@ module ESMF_AttachMethodsMod
         integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -568,7 +571,7 @@ module ESMF_AttachMethodsMod
     integer,          intent(in),  optional :: index
     character(len=*), intent(in)            :: userRoutine
     character(len=*), intent(in),  optional :: sharedObj
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -659,7 +662,7 @@ module ESMF_AttachMethodsMod
         integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -733,7 +736,7 @@ module ESMF_AttachMethodsMod
     integer,          intent(in),  optional :: index
     character(len=*), intent(in)            :: userRoutine
     character(len=*), intent(in),  optional :: sharedObj
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -823,7 +826,7 @@ module ESMF_AttachMethodsMod
         integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -897,7 +900,7 @@ module ESMF_AttachMethodsMod
     integer,          intent(in),  optional :: index
     character(len=*), intent(in)            :: userRoutine
     character(len=*), intent(in),  optional :: sharedObj
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -987,7 +990,7 @@ module ESMF_AttachMethodsMod
         integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -1061,7 +1064,7 @@ module ESMF_AttachMethodsMod
     integer,          intent(in),  optional :: index
     character(len=*), intent(in)            :: userRoutine
     character(len=*), intent(in),  optional :: sharedObj
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Attach {\tt userRoutine}.
@@ -1155,7 +1158,7 @@ module ESMF_AttachMethodsMod
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
-!   The {\tt ESMF\_CplComp} to attach to.
+!   The {\tt ESMF\_CplComp} object holding the attachable method.
 ! \item[label]
 !   Label of method.
 ! \item[{[index]}]
@@ -1238,7 +1241,7 @@ module ESMF_AttachMethodsMod
 ! The arguments are:
 ! \begin{description}
 ! \item[gcomp]
-!   The {\tt ESMF\_GridComp} to attach to.
+!   The {\tt ESMF\_GridComp} object holding the attachable method.
 ! \item[label]
 !   Label of method.
 ! \item[{[index]}]
@@ -1321,7 +1324,7 @@ module ESMF_AttachMethodsMod
 ! The arguments are:
 ! \begin{description}
 ! \item[state]
-!   The {\tt ESMF\_State} to attach to.
+!   The {\tt ESMF\_State} object holding the attachable method.
 ! \item[label]
 !   Label of method.
 ! \item[{[index]}]
@@ -1394,7 +1397,7 @@ module ESMF_AttachMethodsMod
     character(len=*), intent(in)            :: label
     integer,          intent(in),  optional :: index
     logical,          intent(out), optional :: isPresent
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Access information about attached method.
@@ -1402,7 +1405,7 @@ module ESMF_AttachMethodsMod
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
-!   The {\tt ESMF\_CplComp} to attach to.
+!   The {\tt ESMF\_CplComp} object holding the attachable method.
 ! \item[label]
 !   Label of method.
 ! \item[{[index]}]
@@ -1425,10 +1428,10 @@ module ESMF_AttachMethodsMod
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-    
+
     indexArg = -987654  ! unique default index
     if (present(index)) indexArg = index
-    
+
     call c_ESMC_MethodTableGet(cplcomp%compp%methodTable, label, indexArg, &
       isPresentArg, localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1436,7 +1439,69 @@ module ESMF_AttachMethodsMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(isPresent)) isPresent = isPresentArg
- 
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MethodCplCompGet"
+!BOP
+! !IROUTINE: ESMF_MethodGet - Get info about user methods attached to CplComp
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MethodGet()
+  subroutine ESMF_MethodCplCompGetList(cplcomp, labelList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp)                                   :: cplcomp
+    character(len=:), allocatable, intent(out)           :: labelList(:)
+    integer,                       intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Access labels of all attached methods.
+!
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   The {\tt ESMF\_CplComp} object holding the attachable method.
+! \item[labelList]
+!   List of labels of {\em all} the attached methods. On return, it will be
+!   allocated with as many list elements as there are attached methods. The
+!   length of each label in {\tt labelList} is that of the largest method label
+!   currently attached. Elements with shorter labels are padded with white
+!   spaces.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    integer :: count, maxLen
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+
+    call c_ESMC_MethodTableGetInfo(cplcomp%compp%methodTable, count, maxLen, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(character(maxLen) :: labelList(count))
+
+    call c_ESMC_MethodTableGetLabels(cplcomp%compp%methodTable, labelList, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
@@ -1457,7 +1522,7 @@ module ESMF_AttachMethodsMod
     character(len=*), intent(in)            :: label
     integer,          intent(in),  optional :: index
     logical,          intent(out), optional :: isPresent
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Access information about attached method.
@@ -1465,7 +1530,7 @@ module ESMF_AttachMethodsMod
 ! The arguments are:
 ! \begin{description}
 ! \item[gcomp]
-!   The {\tt ESMF\_GridComp} to attach to.
+!   The {\tt ESMF\_GridComp} object holding the attachable method.
 ! \item[label]
 !   Label of method.
 ! \item[{[index]}]
@@ -1488,10 +1553,10 @@ module ESMF_AttachMethodsMod
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
-    
+
     indexArg = -987654  ! unique default index
     if (present(index)) indexArg = index
-    
+
     call c_ESMC_MethodTableGet(gcomp%compp%methodTable, label, indexArg, &
       isPresentArg, localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1499,7 +1564,69 @@ module ESMF_AttachMethodsMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(isPresent)) isPresent = isPresentArg
- 
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MethodGridCompGet"
+!BOP
+! !IROUTINE: ESMF_MethodGet - Get info about user methods attached to GridComp
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MethodGet()
+  subroutine ESMF_MethodGridCompGetList(gcomp, labelList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp)                                  :: gcomp
+    character(len=:), allocatable, intent(out)           :: labelList(:)
+    integer,                       intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Access labels of all attached methods.
+!
+! The arguments are:
+! \begin{description}
+! \item[gcomp]
+!   The {\tt ESMF\_GridComp} object holding the attachable method.
+! \item[labelList]
+!   List of labels of {\em all} the attached methods. On return, it will be
+!   allocated with as many list elements as there are attached methods. The
+!   length of each label in {\tt labelList} is that of the largest method label
+!   currently attached. Elements with shorter labels are padded with white
+!   spaces.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    integer :: count, maxLen
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
+
+    call c_ESMC_MethodTableGetInfo(gcomp%compp%methodTable, count, maxLen, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(character(maxLen) :: labelList(count))
+
+    call c_ESMC_MethodTableGetLabels(gcomp%compp%methodTable, labelList, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
@@ -1520,7 +1647,7 @@ module ESMF_AttachMethodsMod
     character(len=*), intent(in)            :: label
     integer,          intent(in),  optional :: index
     logical,          intent(out), optional :: isPresent
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Access information about attached method.
@@ -1528,7 +1655,7 @@ module ESMF_AttachMethodsMod
 ! The arguments are:
 ! \begin{description}
 ! \item[state]
-!   The {\tt ESMF\_State} to attach to.
+!   The {\tt ESMF\_State} object holding the attachable method.
 ! \item[label]
 !   Label of method.
 ! \item[{[index]}]
@@ -1551,10 +1678,10 @@ module ESMF_AttachMethodsMod
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit, state, rc)
-    
+
     indexArg = -987654  ! unique default index
     if (present(index)) indexArg = index
-    
+
     call c_ESMC_MethodTableGet(state%statep%methodTable, label, indexArg, &
       isPresentArg, localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1562,7 +1689,69 @@ module ESMF_AttachMethodsMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(isPresent)) isPresent = isPresentArg
- 
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MethodStateGet"
+!BOP
+! !IROUTINE: ESMF_MethodGet - Get info about user methods attached to State
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MethodGet()
+  subroutine ESMF_MethodStateGetList(state, labelList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State)                                     :: state
+    character(len=:), allocatable, intent(out)           :: labelList(:)
+    integer,                       intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Access labels of all attached methods.
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!   The {\tt ESMF\_State} object holding the attachable method.
+! \item[labelList]
+!   List of labels of {\em all} the attached methods. On return, it will be
+!   allocated with as many list elements as there are attached methods. The
+!   length of each label in {\tt labelList} is that of the largest method label
+!   currently attached. Elements with shorter labels are padded with white
+!   spaces.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+    integer :: count, maxLen
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit, state, rc)
+
+    call c_ESMC_MethodTableGetInfo(state%statep%methodTable, count, maxLen, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(character(maxLen) :: labelList(count))
+
+    call c_ESMC_MethodTableGetLabels(state%statep%methodTable, labelList, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
@@ -1582,7 +1771,7 @@ module ESMF_AttachMethodsMod
     type(ESMF_CplComp)                      :: cplcomp
     character(len=*), intent(in)            :: label
     integer,          intent(in),  optional :: index
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Remove attached method.
@@ -1590,7 +1779,7 @@ module ESMF_AttachMethodsMod
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
-!   The {\tt ESMF\_CplComp} to attach to.
+!   The {\tt ESMF\_CplComp} object holding the attachable method.
 ! \item[label]
 !   Label of method.
 ! \item[{[index]}]
@@ -1638,7 +1827,7 @@ module ESMF_AttachMethodsMod
     type(ESMF_GridComp)                      :: gcomp
     character(len=*),  intent(in)            :: label
      integer,          intent(in),  optional :: index
-   integer,            intent(out), optional :: rc 
+   integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Remove attached method.
@@ -1646,7 +1835,7 @@ module ESMF_AttachMethodsMod
 ! The arguments are:
 ! \begin{description}
 ! \item[gcomp]
-!   The {\tt ESMF\_GridComp} to attach to.
+!   The {\tt ESMF\_GridComp} object holding the attachable method.
 ! \item[label]
 !   Label of method.
 ! \item[{[index]}]
@@ -1694,7 +1883,7 @@ module ESMF_AttachMethodsMod
     type(ESMF_State)                        :: state
     character(len=*), intent(in)            :: label
     integer,          intent(in),  optional :: index
-    integer,          intent(out), optional :: rc 
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Remove attached method.
@@ -1702,7 +1891,7 @@ module ESMF_AttachMethodsMod
 ! The arguments are:
 ! \begin{description}
 ! \item[state]
-!   The {\tt ESMF\_State} to attach to.
+!   The {\tt ESMF\_State} object holding the attachable method.
 ! \item[label]
 !   Label of method.
 ! \item[{[index]}]
