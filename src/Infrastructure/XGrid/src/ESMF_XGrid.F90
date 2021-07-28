@@ -1313,6 +1313,11 @@ contains
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+          msg="The XGrid mesh was not stored during XGrid creation, re-create XGrid with storeOverlay set to .true.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+         return
       endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
