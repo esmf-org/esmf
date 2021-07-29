@@ -92,7 +92,7 @@ module ESMF_InitMod
 ! !INTERFACE:
       subroutine ESMF_Initialize(keywordEnforcer, defaultConfigFileName, defaultCalKind, &
         defaultLogFileName, logappendflag, logkindflag, mpiCommunicator,  &
-        ioUnitLBound, ioUnitUBound, vm, rc)
+        ioUnitLBound, ioUnitUBound, globalResourceControl, vm, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -104,6 +104,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(in),  optional :: ioUnitLBound
       integer,                 intent(in),  optional :: ioUnitUBound
+      logical,                 intent(in),  optional :: globalResourceControl
       type(ESMF_VM),           intent(out), optional :: vm
       integer,                 intent(out), optional :: rc
 
@@ -115,6 +116,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[7.0.0] Added argument {\tt logappendflag} to allow specifying that the existing
 !              log files will be overwritten.\newline
+! \item[8.2.0] Added argument {\tt globalResourceControl} to support ESMF-aware
+!              threading and resource control on the global VM level.
 ! \end{description}
 ! \end{itemize}
 !
@@ -163,7 +166,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     In cases where {\tt ESMF\_*CompSetVM*()} methods are used to move
 !     processing elements (PEs), i.e. CPU cores, between persistent execution
 !     threads (PETs), ESMF uses POSIX signals between PETs. In order to do so
-!     safely, the proper signal handlers must be installed before MPI is
+!     safely, the proper signal handlers must be installed {\em before} MPI is
 !     initialized. {\tt ESMF\_Initialize()} handles this automatically if it is
 !     in charge of initializing MPI. If, however, MPI is explicitly initialized
 !     by user code, then to ensure correct signal handling it is necessary to
@@ -227,6 +230,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Must be set to a value at least 5 units higher than {\tt ioUnitLBound}.
 !           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}, which is
 !           distributed with a value of 99.
+!     \item [{[globalResourceControl]}]
+!           For {\tt .true.}, each global PET is pinned to the corresponding
+!           PE (i.e. CPU core) in order. If OpenMP support is enabled,
+!           {\tt OMP\_NUM\_THREADS} is set to {\tt 1} on every PET, regardless
+!           of the setting in the launching environment. The {\tt .true.}
+!           setting is recommended for applications that utilize the ESMF-aware
+!           threading and resource control features.
+!           For {\tt .false.}, global PETs are {\em not} pinned by ESMF, and
+!           {\tt OMP\_NUM\_THREADS} is {\em not} modified.
+!           The default setting is {\tt .false.}.
 !     \item [{[vm]}]
 !           Returns the global {\tt ESMF\_VM} that was created 
 !           during initialization.
@@ -253,7 +266,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         defaultLogFileName=defaultLogFileName, logappendflag=logappendflag_local,  &
         logkindflag=logkindflag, mpiCommunicator=mpiCommunicator, &
         ioUnitLBound=ioUnitLBound, ioUnitUBound=ioUnitUBound,  &
-        rc=localrc)
+        globalResourceControl=globalResourceControl, rc=localrc)
                                       
       ! on failure LogErr is not initialized -> explicit print on error
       if (localrc .ne. ESMF_SUCCESS) then
@@ -352,19 +365,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
         defaultCalKind, defaultLogFileName, logappendflag, logkindflag, &
-        mpiCommunicator, ioUnitLBound, ioUnitUBound, rc)
+        mpiCommunicator, ioUnitLBound, ioUnitUBound, globalResourceControl, rc)
 !
 ! !ARGUMENTS:
-      integer,                 intent(in)            :: lang     
+      integer,                 intent(in)            :: lang
       character(len=*),        intent(in),  optional :: defaultConfigFileName
-      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind     
+      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_Logical),      intent(in),  optional :: logappendflag
-      type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag  
+      type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag
       integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(in),  optional :: ioUnitLBound
       integer,                 intent(in),  optional :: ioUnitUBound
-      integer,                 intent(out), optional :: rc     
+      logical,                 intent(in),  optional :: globalResourceControl
+      integer,                 intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -402,6 +416,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[ioUnitUBound]}]
 !           Upper bound for Fortran unit numbers used within the ESMF library.
 !           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}
+!     \item [{[globalResourceControl]}]
+!           Global resource control enabled or disabled. Default {\tt .false.}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -464,9 +480,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! ESMF_VMInitialize() with an un-initialized MPI will install correct 
       ! signal handlers _before_ possible helper threads are spawned by 
       ! MPI_Init().
-      ! If, however, VMKernel threading is not used it is fine to come in with
-      ! a user initialized MPI, and thus we support this mode as well!
-      call ESMF_VMInitialize(mpiCommunicator=mpiCommunicator, rc=localrc)
+      ! If, however, VMKernel threading is not used, or ESMF_InitializePreMPI()
+      ! has been called, it is fine to come in with a user initialized MPI,
+      ! and thus we support this mode as well!
+      call ESMF_VMInitialize(mpiCommunicator=mpiCommunicator, &
+        globalResourceControl=globalResourceControl, rc=localrc)
       ! error handling without LogErr because it's not initialized yet
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing VM"

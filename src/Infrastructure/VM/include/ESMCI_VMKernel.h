@@ -373,7 +373,8 @@ class VMK{
   public:
     static void InitPreMPI();
       // initialization step before MPI is initialized
-    void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
+    void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD,
+      bool globalResourceControl=false);
       // initialize the physical machine and a default (all MPI) virtual machine
     void finalize(int finalizeMpi=1);
       // finalize default (all MPI) virtual machine

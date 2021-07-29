@@ -9204,10 +9204,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMInitialize - Initialize the Global VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMInitialize(mpiCommunicator, rc)
+  subroutine ESMF_VMInitialize(mpiCommunicator, globalResourceControl, rc)
 !
 ! !ARGUMENTS:
     integer, intent(in),  optional :: mpiCommunicator
+    logical, intent(in),  optional :: globalResourceControl
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -9219,6 +9220,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        MPI communicator defining the group of processes on which the
 !        ESMF application is running.
 !        If not sepcified, defaults to {\tt MPI\_COMM\_WORLD}
+!     \item [{[globalResourceControl]}]
+!        For {\tt .true.}, each global PET is pinned to the corresponding
+!        PE (i.e. CPU core) in order. If OpenMP support is enabled,
+!        {\tt OMP\_NUM\_THREADS} is set to {\tt 1} on every PET, regardless
+!        of the setting in the launching environment. The {\tt .true.}
+!        setting is recommended for applications that utilize the ESMF-aware
+!        threading and resource control features.
+!        For {\tt .false.}, global PETs are {\em not} pinned by ESMF, and
+!        {\tt OMP\_NUM\_THREADS} is {\em not} modified.
+!        The default setting is {\tt .false.}.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -9226,19 +9237,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: globalResourceControl_opt  ! helper variable
+
+    ! deal with logical argument
+    globalResourceControl_opt = ESMF_FALSE ! default
+    if (present(globalResourceControl)) &
+      globalResourceControl_opt = globalResourceControl
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface.
-    call c_ESMC_VMInitialize(GlobalVM, mpiCommunicator, localrc)
+    call c_ESMC_VMInitialize(GlobalVM, mpiCommunicator, &
+      globalResourceControl_opt, localrc)
     ! Cannot use LogErr here because LogErr initializes _after_ VM
     if (localrc /= ESMF_SUCCESS) then
       if (present(rc)) rc = localrc
       return
     endif
-    
+
     ! Set init code
     ESMF_INIT_SET_CREATED(GlobalVM)
 

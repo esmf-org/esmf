@@ -1119,7 +1119,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vminitialize)(ESMCI::VM **vm, int *mpiCommunicator, int *rc){
+  void FTN_X(c_esmc_vminitialize)(ESMCI::VM **vm, int *mpiCommunicator,
+    ESMC_Logical *globalResourceControl, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vminitialize()"
     // Initialize return code; assume routine not implemented
@@ -1139,7 +1140,11 @@ extern "C" {
       *rc = ESMC_RC_INTNRL_BAD;
       return;
     }
-    *vm = ESMCI::VM::initialize(localMpiComm, &localrc);
+    bool globalResourceControlOpt = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(globalResourceControl) != ESMC_NULL_POINTER)
+      globalResourceControlOpt = (*globalResourceControl == ESMF_TRUE);
+    // call into C++ method
+    *vm = ESMCI::VM::initialize(localMpiComm, globalResourceControlOpt, &localrc);
     // Cannot use LogErr here because LogErr initializes _after_ VM
     if (rc!=NULL) *rc = localrc;
   }

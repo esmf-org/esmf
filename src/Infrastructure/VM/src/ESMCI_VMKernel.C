@@ -353,7 +353,7 @@ void VMK::InitPreMPI(){
 }
 
 
-void VMK::init(MPI_Comm mpiCommunicator){
+void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   // initialize the physical machine and a default (all MPI) virtual machine
   // obtain command line arguments and store in the VM class
   argc = 0; // reset
@@ -575,18 +575,22 @@ void VMK::init(MPI_Comm mpiCommunicator){
       ++j;
     }
   }
-#if 0
-  // setting affinity on this level might interfer with user level pinning
+  if (globalResourceControl){
+    // setting affinity on this level might interfer with user level pinning
+    // therefore only do it by user request
 #ifndef ESMF_NO_PTHREADS
 #ifndef PARCH_darwin
-  // set thread affinity
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  CPU_SET(ssipe[mypet], &cpuset);
-  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+    // set thread affinity
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(ssipe[mypet], &cpuset);
+    pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#ifndef ESMF_NO_OPENMP
+    omp_set_num_threads(1);
 #endif
 #endif
 #endif
+  }
 #endif
   // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];

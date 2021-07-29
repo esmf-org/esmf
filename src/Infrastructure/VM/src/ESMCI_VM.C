@@ -3058,6 +3058,7 @@ VM *VM::initialize(
 // !ARGUMENTS:
 //
   MPI_Comm mpiCommunicator,
+  bool globalResourceControl,
   int *rc){   // return code
 //
 // !DESCRIPTION:
@@ -3075,7 +3076,9 @@ VM *VM::initialize(
       "- GlobalVM allocation failure", ESMC_CONTEXT, rc);
     return NULL;
   }
-  GlobalVM->VMK::init(mpiCommunicator);  // set up default VMK (all MPI)
+
+  // set up default VMK (all MPI)
+  GlobalVM->VMK::init(mpiCommunicator, globalResourceControl);
 
   // allocate the VM association table
 //gjtNotYet  matchTable_tid = new esmf_pthread_t[ESMC_VM_MATCHTABLEMAX];
