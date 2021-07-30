@@ -603,12 +603,6 @@ void PIO_Handler::arrayRead(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return;
 
-  if (!vardesc){
-    ESMC_LogDefault.MsgAllocError(" failed to allocate pio variable desc",
-      ESMC_CONTEXT, rc);
-    return;
-  }
-
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
   localDE = 0;
@@ -744,7 +738,7 @@ void PIO_Handler::arrayWrite(
   int * arrDims;                          // Array shape
   int narrDims;                           // Array rank
   int iodesc;                   // PIO IO descriptor
-  int vardesc = NULL;          // PIO variable descriptor
+  int vardesc = 0;          // PIO variable descriptor
   int basepiotype;                        // PIO version of Array data type
   void *baseAddress;                      // The address of the Array IO data
   int localDE;                            // DE to use for IO
@@ -1406,7 +1400,7 @@ void PIO_Handler::attPackPut (
   ) {
 //
 // !DESCRIPTION:
-//    Puts the Attributes and their values into the NetCDF file.  If vardesc is NULL, the
+//    Puts the Attributes and their values into the NetCDF file.  If vardesc is 0, the
 //    attribute will be considered a global attribute.
 //
 //EOPI
