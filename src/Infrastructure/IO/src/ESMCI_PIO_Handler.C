@@ -278,13 +278,14 @@ int PIO_Handler::initializeVM (void
       // Figure out the inputs for the initialize call
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
       num_iotasks = vm->getPetCount();
+      //num_iotasks = 2;
       stride = 1;
-      rearr = PIO_REARR_BOX;
+      rearr = PIO_REARR_SUBSET;
       base = 0;
 #else // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
       num_iotasks = 1;
       stride = 1;
-      rearr = PIO_REARR_BOX;
+      rearr = PIO_REARR_SUBSET;
       base = 0;
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
 
@@ -366,9 +367,10 @@ void PIO_Handler::finalize (
       // down other PIO instances
       CHECKPIOWARN(piorc, "Error shutting down PIO instance",
           ESMF_RC_FILE_UNEXPECTED, localrc);
+      /*
 #ifdef ESMFIO_DEBUG
       static int ionum = 1;
-      if (piorc != PIO_noerr) {
+      if (piorc != PIO_NOERR) {
         int lrc;
         ESMC_VM currentVM;
         int localPet;
@@ -382,6 +384,8 @@ void PIO_Handler::finalize (
       }
       ionum++;
 #endif // ESMFIO_DEBUG
+      */
+
       PIO_Handler::activePioInstances.pop_back();
     }
   } catch(int lrc) {
@@ -685,8 +689,7 @@ void PIO_Handler::arrayRead(
   PIOc_set_log_level(0);
 #endif // ESMFIO_DEBUG
 
-  PRINTMSG("calling read_darray, status = " << statusOK <<
-           ", pio type = " << basepiotype << ", address = " << baseAddress);
+  PRINTMSG("calling read_darray, pio type = " << basepiotype << ", address = " << baseAddress);
   // Read in the array
   piorc = PIOc_read_darray(pioFileDesc, vardesc, iodesc,
                            arrlen, (void *)baseAddress);
@@ -1089,7 +1092,7 @@ void PIO_Handler::arrayWrite(
     }
   }
 
-  PRINTMSG("calling enddef, status = " << statusOK);
+  //  PRINTMSG("calling enddef, status = " << statusOK);
   if ((getFormat() != ESMF_IOFMT_BIN)) {
     piorc = PIOc_enddef(pioFileDesc);
     if (!CHECKPIOERROR(piorc,  "Attempting to end definition of variable: " + varname,
@@ -1348,7 +1351,7 @@ void PIO_Handler::open(
   if (okToCreate) {
     // Looks like we are ready to try and create the file
 #ifdef ESMFIO_DEBUG
-    std::string errmsg = "Calling PIOc_createfile: file = " + getFilename();
+    std::string errmsg = "Calling PIOc_createfile";
     PIOc_set_log_level(3);
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_DEBUG
@@ -1947,7 +1950,7 @@ int PIO_IODescHandler::constructPioDecomp(
       pioDofCount += arr_p->getTotalElementCountPLocalDe()[localDe];
   }
 
-  PRINTMSG("(" << my_rank << "): pioDofCount = " << pioDofCount);
+  //  PRINTMSG("(" << my_rank << "): pioDofCount = " << pioDofCount);
   try {
     // Allocate space for the DOF list
     pioDofList = new MPI_Offset[pioDofCount];
@@ -2060,7 +2063,7 @@ int PIO_IODescHandler::constructPioDecomp(
   // Create the decomposition
   PIOc_init_decomp(iosys, handle->basepiotype, handle->nDims,
 		  handle->dims, pioDofCount, pioDofList,
-		  &(handle->io_descriptor), PIO_REARR_BOX, NULL, NULL);
+		  &(handle->io_descriptor), PIO_REARR_SUBSET, NULL, NULL);
   PRINTMSG("after call to PIOc_initdecomp_dof");
 #ifdef ESMFIO_DEBUG
   PIOc_set_log_level(0);
