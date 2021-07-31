@@ -32,7 +32,7 @@ using namespace std;
 
 using namespace ESMCI;
 
-#include "pio_kinds.h"
+#include <pio_kinds.h>
 
 extern "C" {
 
