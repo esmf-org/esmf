@@ -128,15 +128,6 @@ IO_Handler *IO_Handler::create (
   try {
     // Determine if we have the support for the requested I/O format
     switch (iofmt) {
-    case ESMF_IOFMT_BIN:
-#ifdef ESMF_PIO
-      iohandler = new PIO_Handler(iofmt, &localrc);
-#else // ESMF_PIO
-      localrc = ESMF_RC_LIB_NOT_PRESENT;
-      ESMC_LogDefault.Write("PIO library required for I/O operation",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-#endif // ESMF_PIO
-      break;
     case ESMF_IOFMT_NETCDF:
       // No break
     case ESMF_IOFMT_NETCDF_64BIT_OFFSET:

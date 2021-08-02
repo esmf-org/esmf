@@ -1597,13 +1597,6 @@ ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_PIO_LIBPATH)
 endif
 endif
 
-ifneq ($(ESMF_COMM),mpiuni)
-ifneq ($(ESMF_COMM),mvapich)
-export ESMF_MPIIO = supported
-ESMF_CPPFLAGS += -DESMF_MPIIO
-endif
-endif
-
 #-------------------------------------------------------------------------------
 # Proj.4
 #-------------------------------------------------------------------------------
