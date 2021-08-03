@@ -9,10 +9,11 @@ LOCDIR	  = src/Infrastructure/IO/PIO
 # Leave this line alone.
 include $(ESMF_DIR)/makefile
 
+#TODO: Fix hard-coded CC issue below... 
 tree_lib:
 	mkdir -p Build
 	cd Build; \
-	env CC=mpicc FC=$(ESMF_F90COMPILER) CFLAGS="$(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)" cmake -DNetCDF_PATH=/opt/GCC/7.4.0/mpich/3.3.1/netcdf/4.7.4 -DCMAKE_INSTALL_PREFIX=../Install -DPIO_ENABLE_TIMING=OFF ../ParallelIO; \
+	env CC=mpicc FC=$(ESMF_F90COMPILER) CFLAGS="$(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)" cmake -DNetCDF_PATH=$(ESMF_NETCDF_INCLUDE)/.. -DCMAKE_INSTALL_PREFIX=../Install -DPIO_ENABLE_TIMING=OFF ../ParallelIO; \
 	make -f ./Makefile; \
 	make -f ./Makefile install; \
 	cp -fp ../Install/include/* $(ESMF_INCDIR); \
