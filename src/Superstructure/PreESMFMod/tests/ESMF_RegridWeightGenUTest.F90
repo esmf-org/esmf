@@ -29,7 +29,7 @@ program ESMF_RegridWeightGenUTest
 !-----------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod     ! test methods
-  use ESMF_RegridWeightGenMod
+  use ESMF
 
   implicit none
 
