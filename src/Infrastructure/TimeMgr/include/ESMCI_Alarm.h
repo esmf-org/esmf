@@ -219,6 +219,7 @@ class Alarm {
                          // Check for crossing ringTime in either positive or
                          //   negative direction
                          // Can be basis for asynchronous alarm reporting
+              void     updateRingTime(int *rc=0);
 
     bool operator==(const Alarm &) const; 
     bool operator!=(const Alarm &) const; 

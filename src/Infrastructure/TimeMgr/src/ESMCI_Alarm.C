@@ -1172,6 +1172,35 @@ bool Alarm::willRingAtTime(const Time & clockTime) const{
 
 //-------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  Alarm::updateRingTime - update Alarm Ring Time
+//
+// !INTERFACE:
+      void Alarm::updateRingTime(
+//
+// !RETURN VALUE:
+//    bool is ringing or not
+//
+// !ARGUMENTS:
+      int *rc) {         // out - error return code
+
+// !DESCRIPTION:
+//    Update ringTime and prevRingTime
+//
+//EOP
+// !REQUIREMENTS:  TMG4.4, 4.6
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::Alarm::updateRingTime()"
+
+  if(ringing){
+    prevRingTime = ringTime;
+    ringTime = clock->currTime;
+  }
+
+}
+
+//-------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  Alarm(==) - Alarm equality comparison    
 //
 // !INTERFACE:

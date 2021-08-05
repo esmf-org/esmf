@@ -645,6 +645,7 @@ int Clock::count=0;
 
       // check each alarm to see if it's time to ring
       ringing = alarmList[i]->Alarm::checkRingTime(&rc);
+      if(ringing) alarmList[i]->Alarm::updateRingTime(&rc);
 
       // report ringing alarms if requested
       if (ringing) {

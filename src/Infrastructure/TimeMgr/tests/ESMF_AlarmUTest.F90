@@ -3406,6 +3406,16 @@ program ESMF_AlarmTest
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
       if (.not. testPass) print *, 'bad return codes discovered'
       call ESMF_Test (testPass, name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
+      write(failMsg, *) " Alarms with getPrevRingTime... "
+      write(name, *) "Test getPrevRingTime... after alarm attached to clock "
+      rc = ESMF_SUCCESS
+      testPass = .true.
+      call Test_GetPrevRingTime(testPass, rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+      if (.not. testPass) print *, 'bad return codes discovered'
+      call ESMF_Test (testPass, name, failMsg, result, ESMF_SRCLINE)
 #endif
 
       ! ----------------------------------------------------------------------------
@@ -3888,6 +3898,99 @@ subroutine Test_ClockSet(testPass, rc)
 #undef CONTEXT
 #undef CHECKRC
 end subroutine Test_ClockSet
+
+subroutine Test_GetPrevRingTime(testPass, rc)
+#define CONTEXT line=__LINE__,file=__FILE__
+#define CHECKRC if(ESMF_LogFoundError(rcToCheck=rc,msg=ESMF_LOGERR_PASSTHRU,CONTEXT,rcToReturn=rc))then;write(0,*)'app abort: ',__FILE__,__LINE__;return;endif
+  logical, intent(out) :: testPass
+  integer, parameter :: r8 = SELECTED_REAL_KIND(12)   ! real r8
+  integer :: rc
+  
+  type(ESMF_Clock)         :: clock
+  type(ESMF_Alarm)         :: alarm
+  type(ESMF_TimeInterval)  :: esmf_ival, diffTime
+  type(ESMF_Time)          :: time, initial, finish, ring_time, ringTime, prevTime
+  real(kind=r8)            :: secs
+  logical                  :: reverse_clock, sticky_alarm, esmf_ring
+  integer                  :: i, nstep = 6, nrings
+
+  rc = ESMF_SUCCESS
+  testPass = .true.
+  
+  call ESMF_TimeSet(time, yy=2021, mm=4, dd=6, rc=rc)                          ; CHECKRC
+  
+  secs = 0
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)                         ; CHECKRC
+  initial = time + esmf_ival
+  call ESMF_TimePrint(initial, options="string", rc=rc)  ; CHECKRC
+  
+  secs = 6000
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)                         ; CHECKRC
+  finish = time + esmf_ival
+  call ESMF_TimePrint(finish, options="string", rc=rc)  ; CHECKRC
+  
+  secs = 60
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)                         ; CHECKRC
+  
+  clock = ESMF_Clockcreate(timeStep=esmf_ival   &
+          ,startTime=initial,stopTime=finish    &
+          ,refTime=time, rc=rc                  )      ; CHECKRC
+
+  secs = 120 ! alarm step is clock step x 2
+  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)  ; CHECKRC
+  ring_time = initial
+  alarm = ESMF_AlarmCreate(clock, ringTime=ring_time, ringInterval=esmf_ival,  &
+                           rc=rc) ; CHECKRC
+  nrings = 0
+  do i=1,nstep
+     call ESMF_ClockAdvance(clock)
+     call ESMF_ClockGet(clock,currTime=time)
+     esmf_ring = ESMF_AlarmIsRinging(alarm, rc=rc)
+     call verify_(rc)
+     if ( esmf_ring) then
+       nrings = nrings + 1
+       write(*,*) 'alarm is ringing'
+       call ESMF_TimePrint(time,options='string')
+       call ESMF_AlarmGet(alarm, ringTime=ringTime, prevRingTime=prevTime, rc=rc)
+       call verify_(rc)
+       write(*,*) 'prev Ring Time'
+       call ESMF_TimePrint(prevTime,options='string')
+       write(*,*) 'Ring Time'
+       call ESMF_TimePrint(ringTime,options='string')
+
+       diffTime = ringTime - prevTime
+       if(diffTime /= esmf_ival) testPass = .false. ! both should be 20 minutes or 120 seconds
+      end if
+  enddo
+  
+!  call ESMF_ClockSet(clock,direction=ESMF_DIRECTION_REVERSE, rc=rc)    ; CHECKRC
+!
+!  reverse_clock = ESMF_ClockIsReverse(clock, rc=rc)                      ; CHECKRC
+!  sticky_alarm  = .not.reverse_clock
+!  
+!  write(0,'("reverse =",x,l)') reverse_clock
+!  write(0,'("sticky  =",x,l)') sticky_alarm
+!  
+!  secs = 3000
+!  call ESMF_TimeIntervalSet(esmf_ival,s_r8=secs,rc=rc)  ; CHECKRC
+!  ring_time = initial + esmf_ival
+!  print *, 'Before Alarm Create ringTime: '
+!  call ESMF_TimePrint(ring_time, options="string", rc=rc)  ; CHECKRC
+!
+!  call ESMF_TimePrint(ring_time, options="string", rc=rc)  ; CHECKRC
+!  call ESMF_AlarmGet(alarm, ringTime=ring_time, rc=rc)                         ; CHECKRC
+!  print *, 'After Alarm Create ringTime: '
+!  call ESMF_TimePrint(ring_time, options="string", rc=rc)  ; CHECKRC
+!
+!  call ESMF_ClockSet(clock, stopTime=ring_time, rc=rc) ; CHECKRC
+!  
+!  call ESMF_alarmPrint(alarm,options='sticky')
+
+
+#undef CONTEXT
+#undef CHECKRC
+end subroutine Test_GetPrevRingTime
+
 
 #endif
 
