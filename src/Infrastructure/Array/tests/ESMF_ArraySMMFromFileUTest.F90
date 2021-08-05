@@ -20,7 +20,6 @@ module ESMF_ArraySMMFromFileUTestMod
   ! modules
   use ESMF_TestMod     ! test methods
   use ESMF_RegridWeightGenCheckMod ! test array SMM from file
-  use ESMF_RegridWeightGenMod      ! test array SMM from file
   use ESMF
   
   implicit none
