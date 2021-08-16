@@ -838,7 +838,7 @@ void Alarm::enableSticky(void){
 
     Time clockTime = clock->currTime;
 
-    return(enabled && willRingAtTime(clockTime));
+    return(enabled && ringerIsOn && willRingAtTime(clockTime));
 
  } // end Alarm::isRinging
 
@@ -1142,6 +1142,12 @@ bool Alarm::willRingAtTime(const Time & clockTime) const{
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       return(false);
     }
+    if(!ringerIsOn) {
+      if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
+      return false;
+    }
+
+    // If the ringing is controlled by ringer, the following logic is redundant.
 
     // If the alarm is sticky then whether it's ringing or not is controled
     // by ringerOn or ringerOff by user
