@@ -13,7 +13,6 @@
 // PIO header
 #if defined (ESMF_PIO)
 #include <pio.h>
-#include <pio_types.h>
 #endif
 
 // ESMF header
@@ -52,9 +51,9 @@ int main(void){
   string fname;
   int pioerr;
 #if defined (ESMF_PIO)
-  int pio_file1[PIO_SIZE_FILE_DESC];
-  int iodesc1[PIO_SIZE_IO_DESC];
-  int pio_vardesc1[PIO_SIZE_VAR_DESC];
+  int pio_file1;
+  int iodesc1;
+  int pio_vardesc1;
   long int compdof[DIM_X];
   int amode_in;
 
@@ -88,7 +87,7 @@ int main(void){
   strcpy(name, "Get VM pet info");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_VMGet(vm, &localPet, &petCount, &peCount,
-         &mpiCommunicator, &pthreadsEnabledFlag, &openMPEnabledFlag);
+	 &mpiCommunicator, &pthreadsEnabledFlag, &openMPEnabledFlag);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 //  cout << "I am PET " << localPet << " of " << petCount << endl;
   //----------------------------------------------------------------------------
@@ -105,22 +104,20 @@ int main(void){
   int iosys_handle;
   int base=0;
 #if defined (ESMF_PIO)
-  pio_cpp_init_intracom(localPet, mpiCommunicator,
-      num_iotasks, num_aggregators,
-      stride, rearr,
-      &iosys_handle,
-      base);
+  rc = PIOc_Init_Intracomm(mpiCommunicator,
+      num_iotasks, stride, base, rearr,
+      &iosys_handle);
 #else
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
- 
+
   //------------------------------------------------------------------------
   // Test NETCDF
   //------------------------------------------------------------------------
 #if defined (ESMF_PIO)
-  iotype = PIO_iotype_netcdf;
+  iotype = PIO_IOTYPE_NETCDF;
 #endif
   fname="pio_file1c_netcdf.nc";
 
@@ -132,7 +129,7 @@ int main(void){
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   amode_in=PIO_CLOBBER;
   pioerr = pio_cpp_createfile(&iosys_handle, &pio_file1, iotype,
-           fname.c_str(), amode_in);
+	   fname.c_str(), amode_in);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
   rc = ESMF_SUCCESS;
@@ -333,7 +330,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   pioerr = pio_cpp_openfile(&iosys_handle, &pio_file1, iotype,
-           fname.c_str(), 0);
+	   fname.c_str(), 0);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
   rc = ESMF_SUCCESS;
@@ -384,7 +381,7 @@ int main(void){
     if (test_data[i] != read_data[i]) {
       rc = ESMF_FAILURE;
       cout << "Comparison failed at element " << i
-          << test_data[i] << " != " << read_data[i] << endl;
+	  << test_data[i] << " != " << read_data[i] << endl;
       break;
     };
 #else
@@ -420,12 +417,12 @@ int main(void){
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
- 
+
   //------------------------------------------------------------------------
   // Test PNETCDF
   //------------------------------------------------------------------------
 #if defined (ESMF_PIO)
-  iotype = PIO_iotype_pnetcdf;
+  iotype = PIO_IOTYPE_PNETCDF;
 #endif
   fname="pio_file1c_pnetcdf.nc";
 
@@ -437,7 +434,7 @@ int main(void){
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   amode_in=PIO_CLOBBER;
   pioerr = pio_cpp_createfile(&iosys_handle, &pio_file1, iotype,
-           fname.c_str(), amode_in);
+	   fname.c_str(), amode_in);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
   rc = ESMF_SUCCESS;
@@ -638,7 +635,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   pioerr = pio_cpp_openfile(&iosys_handle, &pio_file1, iotype,
-           fname.c_str(), 0);
+	   fname.c_str(), 0);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
   rc = ESMF_SUCCESS;
@@ -689,7 +686,7 @@ int main(void){
     if (test_data[i] != read_data[i]) {
       rc = ESMF_FAILURE;
       cout << "Comparison failed at element " << i
-          << test_data[i] << " != " << read_data[i] << endl;
+	  << test_data[i] << " != " << read_data[i] << endl;
       break;
     };
 #else
@@ -703,9 +700,9 @@ int main(void){
   // Free the decomposition
   strcpy(name, "Free PIO PNETCDF mode decomposition");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pio_cpp_freedecomp_ios (&iosys_handle, iodesc1);
-  rc = ESMF_SUCCESS;
+  rc = PIOc_freedecomp(iosys_handle, iodesc1);
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -718,8 +715,7 @@ int main(void){
   strcpy(name, "PIO PNETCDF mode closefile after read test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pio_cpp_closefile (&pio_file1);
-  rc = ESMF_SUCCESS;
+  rc = PIOc_closefile (pio_file1);
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -732,7 +728,7 @@ int main(void){
   strcpy(name, "Finalization of a PIO iosystem handle");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO)
-  pio_cpp_finalize (&iosys_handle, &rc);
+  rc = PIOc_free_iosystem(iosys_handle);
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -745,7 +741,3 @@ int main(void){
 
   return 0;
 }
-
-
-
-
