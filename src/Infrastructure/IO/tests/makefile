@@ -31,7 +31,7 @@ include ${ESMF_DIR}/makefile
 DIRS        =
 
 CLEANDIRS   =
-CLEANFILES  = $(TESTS_BUILD)
+CLEANFILES  = $(TESTS_BUILD) $(ESMF_TESTDIR)/doodle*.nc
 CLOBBERDIRS =
 
 

@@ -38,6 +38,7 @@ using namespace std;
 int main(void){
 
   char name[80];
+  char disname[80];
   char failMsg[80];
   int result = 0;
   int rc;
@@ -134,6 +135,9 @@ int main(void){
 	   fname.c_str(), amode_in);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -149,6 +153,9 @@ int main(void){
 			      "filename", strlen(fname.c_str()),fname.c_str());
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -167,6 +174,9 @@ int main(void){
 		  DIM_X, compdof, &iodesc1, NULL, NULL, NULL);
   rc = ESMF_SUCCESS;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -182,6 +192,9 @@ int main(void){
   pioerr = PIOc_def_dim (pio_file1, "x", DIM_X, &dimid_x);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -197,6 +210,9 @@ int main(void){
 			 1, &dimid_x, &pio_vardesc1);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -212,6 +228,9 @@ int main(void){
 			      "units", 7, "ordinal");
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -228,6 +247,9 @@ int main(void){
 			 "answer", PIO_INT, 1, &answer);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -244,6 +266,9 @@ int main(void){
 			 "float_att_value", PIO_FLOAT, 1, &float_att_value);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -260,6 +285,9 @@ int main(void){
 			 "_FillValue", PIO_DOUBLE, 1, &fillvalue);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -274,13 +302,16 @@ int main(void){
   pioerr = PIOc_enddef (pio_file1);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_disabled_UTest
   // Set variable descriptor frame number
 //  strcpy(name, "PIO NETCDF mode setframe test");
 //  strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -288,6 +319,9 @@ int main(void){
 //  pioerr = PIOc_setframe (pio_file1, pio_vardesc1, 1);
 //  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 //#else
+//  strcpy(disname, "DISABLED: ");
+//  strcat(disname, name);
+//  strcpy(name, disname);
 //  rc = ESMF_SUCCESS;
 //#endif
 //  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -306,6 +340,9 @@ int main(void){
 			      DIM_X, test_data, NULL);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -320,6 +357,9 @@ int main(void){
   pioerr = PIOc_closefile (pio_file1);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -335,13 +375,16 @@ int main(void){
 			 fname.c_str(), 0);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_disabled_UTest
   // Set variable descriptor frame number
 //  strcpy(name, "PIO NETCDF mode setframe number for read test");
 //  strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -349,6 +392,9 @@ int main(void){
 //  pioerr = PIOc_setframe (pio_file1, pio_vardesc1, 1);
 //  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 //#else
+//  strcpy(disname, "DISABLED: ");
+//  strcat(disname, name);
+//  strcpy(name, disname);
 //  rc = ESMF_SUCCESS;
 //#endif
 //  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -367,6 +413,9 @@ int main(void){
 			     DIM_X, read_data);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -387,6 +436,9 @@ int main(void){
       break;
     };
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -401,6 +453,9 @@ int main(void){
   pioerr = PIOc_freedecomp (iosys_handle, iodesc1);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -415,6 +470,9 @@ int main(void){
   pioerr = PIOc_closefile (pio_file1);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -439,6 +497,9 @@ int main(void){
 	   fname.c_str(), amode_in);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -454,6 +515,9 @@ int main(void){
 			      "filename", strlen(fname.c_str()), fname.c_str());
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -471,6 +535,9 @@ int main(void){
   rc = PIOc_InitDecomp(iosys_handle, PIO_DOUBLE, NDIMS, dims,
 		       DIM_X, compdof, &iodesc1, NULL, NULL, NULL);
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -486,6 +553,9 @@ int main(void){
   pioerr = PIOc_def_dim (pio_file1, "x", DIM_X, &dimid_x);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -502,6 +572,9 @@ int main(void){
 			 1, dims, &pio_vardesc1);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -517,6 +590,9 @@ int main(void){
 			      "units", 7, "ordinal");
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -533,6 +609,9 @@ int main(void){
 			     "answer", PIO_INT, 1, &answer);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -549,6 +628,9 @@ int main(void){
 			 "float_att_value", PIO_FLOAT, 1, &float_att_value);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -565,6 +647,9 @@ int main(void){
 				"_FillValue", PIO_DOUBLE, 1, &fillvalue);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -579,6 +664,9 @@ int main(void){
   pioerr = PIOc_enddef (pio_file1);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -597,6 +685,9 @@ int main(void){
 			      DIM_X, test_data, NULL);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -611,6 +702,9 @@ int main(void){
   pioerr = PIOc_closefile (pio_file1);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -626,6 +720,9 @@ int main(void){
 	   fname.c_str(), 0);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -640,6 +737,9 @@ int main(void){
   PIOc_setframe (pio_file1, pio_vardesc1, 1);
   rc = ESMF_SUCCESS;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -658,6 +758,9 @@ int main(void){
 			     DIM_X, read_data);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -678,6 +781,9 @@ int main(void){
       break;
     };
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -692,6 +798,9 @@ int main(void){
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   rc = PIOc_freedecomp(iosys_handle, iodesc1);
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -705,6 +814,9 @@ int main(void){
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   rc = PIOc_closefile (pio_file1);
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
