@@ -31,7 +31,7 @@ include ${ESMF_DIR}/makefile
 DIRS        =
 
 CLEANDIRS   =
-CLEANFILES  = $(TESTS_BUILD) $(ESMF_TESTDIR)/doodle*.nc
+CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
 
@@ -61,9 +61,11 @@ RUN_ESMC_IO_InqUTestUNI:
 	$(MAKE) TNAME=IO_Inq NP=1 ctest
 
 RUN_ESMF_IOUTest:
+	rm -f $(ESMF_TESTDIR)/doodle*.nc
 	$(MAKE) TNAME=IO NP=4 ftest
 
 RUN_ESMF_IOUTestUNI:
+	rm -f $(ESMF_TESTDIR)/doodle*.nc
 	$(MAKE) TNAME=IO NP=1 ftest
 
 RUN_ESMF_IO_YAMLUTest:
