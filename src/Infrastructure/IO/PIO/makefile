@@ -1,4 +1,4 @@
-# $Id$ 
+# $Id$
 
 ALL: build_here
 
@@ -9,11 +9,17 @@ LOCDIR	  = src/Infrastructure/IO/PIO
 # Leave this line alone.
 include $(ESMF_DIR)/makefile
 
-#TODO: Fix hard-coded CC issue below... 
+PIO_CMAKE_OPTS = -DPIO_ENABLE_TIMING=OFF
+
+ifeq ("$(ESMF_BOPT)","g")
+  PIO_CMAKE_OPTS += -DPIO_ENABLE_LOGGING=ON -DCMAKE_BUILD_TYPE=DEBUG
+endif
+
+#TODO: Fix hard-coded CC issue below...
 tree_lib:
 	mkdir -p Build
 	cd Build; \
-	env CC=mpicc FC=$(ESMF_F90COMPILER) CFLAGS="$(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)" cmake -DNetCDF_PATH=$(ESMF_NETCDF_INCLUDE)/.. -DCMAKE_INSTALL_PREFIX=../Install -DPIO_ENABLE_TIMING=OFF ../ParallelIO; \
+	env CC=mpicc FC=$(ESMF_F90COMPILER) CFLAGS="$(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)" cmake -DNetCDF_PATH=$(ESMF_NETCDF_INCLUDE)/.. -DCMAKE_INSTALL_PREFIX=../Install $(PIO_CMAKE_OPTS) ../ParallelIO; \
 	make -f ./Makefile; \
 	make -f ./Makefile install; \
 	cp -fp ../Install/include/* $(ESMF_INCDIR); \
