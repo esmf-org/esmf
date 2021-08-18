@@ -1563,6 +1563,13 @@ ifeq ($(ESMF_COMM),mpiuni)
 #TODO: but want to allow external PIO or explicit ESMF_PIO setting for developm. #TODO: Eventually this should become unnecessary.
 ESMF_PIO = OFF
 endif
+ifndef ESMF_NETCDF
+# PIO, starting with version 2, depends on NetCDF. Defaulting to internal needs
+# be turned off if there is no NetCDF available. Externally set PIO will be let
+# through, but will trigger the error down when actually attempting to build
+# PIO internally.
+ESMF_PIO = OFF
+endif
 endif
 
 endif
