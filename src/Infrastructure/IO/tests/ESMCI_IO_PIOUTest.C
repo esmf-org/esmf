@@ -189,7 +189,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dims[0] = DIM_X * petCount;
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pioerr = PIOc_def_dim (pio_file1, "x", DIM_X, &dimid_x);
+  pioerr = PIOc_def_dim (pio_file1, "x", dims[0], &dimid_x);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
   strcpy(disname, "DISABLED: ");
@@ -308,23 +308,6 @@ int main(void){
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_disabled_UTest
-  // Set variable descriptor frame number
-//  strcpy(name, "PIO NETCDF mode setframe test");
-//  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-//#if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-//  pioerr = PIOc_setframe (pio_file1, pio_vardesc1, 1);
-//  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
-//#else
-//  strcpy(disname, "DISABLED: ");
-//  strcat(disname, name);
-//  strcpy(name, disname);
-//  rc = ESMF_SUCCESS;
-//#endif
-//  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -550,7 +533,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dims[0] = DIM_X * petCount;
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pioerr = PIOc_def_dim (pio_file1, "x", DIM_X, &dimid_x);
+  pioerr = PIOc_def_dim (pio_file1, "x", dims[0], &dimid_x);
   rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
   strcpy(disname, "DISABLED: ");
