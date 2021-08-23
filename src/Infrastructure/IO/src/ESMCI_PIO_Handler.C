@@ -836,24 +836,28 @@ void PIO_Handler::arrayWrite(
   bool hasTimeDim;
   if (getFormat() != ESMF_IOFMT_BIN) {
     int dimidTime;
-    MPI_Offset timeLen;
+    PIO_Offset timeLen;
     PRINTMSG("Checking time dimension");
-    piorc = PIOc_inq_dimid(pioFileDesc, "time", &dimidTime);
+    //piorc = PIOc_inq_dimid(pioFileDesc, "time", &dimidTime);
+    piorc = PIOc_inq_unlimdim(pioFileDesc, &dimidTime);
     // NetCDF does not specify which error code goes with with
     // condition so we will guess that there is no time dimension
     // on any error condition (This may be an error depending on context).
-    hasTimeDim = (PIO_NOERR == piorc);
+    hasTimeDim = (PIO_NOERR == piorc && dimidTime != -1);
+    PRINTMSG("inq_dimid  = " << piorc);
     PRINTMSG("hasTimeDim = " << hasTimeDim);
+    PRINTMSG("unlim = " << unlim);
     if (hasTimeDim) {
       // Retrieve the max time field
       piorc = PIOc_inq_dimlen(pioFileDesc, dimidTime, &timeLen);
+      PRINTMSG("inq_dimlen = " << piorc);
+      PRINTMSG("dimidTime = " << dimidTime);
+      PRINTMSG("timeLen = " << timeLen);
       if (!CHECKPIOERROR(piorc, "Error retrieving information about time",
 	  ESMF_RC_FILE_WRITE, (*rc))) {
 	return;
       }
-    }
 
-    if (hasTimeDim) {
       // Check to make sure that time is the unlimited dimension
       if (dimidTime != unlim)
 	if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
@@ -862,7 +866,7 @@ void PIO_Handler::arrayWrite(
 	  return;
 	}
     }
-    if (timesliceVal > 0) {
+    if (timesliceVal >= 0) {
       if (varExists & !hasTimeDim) {
 	// It is an error to not have a time dimension if we are trying to
 	// write a timeslice and the variable already exists
@@ -1019,8 +1023,11 @@ void PIO_Handler::arrayWrite(
     PRINTMSG("finished defining space dims, timeFrame = " << timeFrame);
 
     if (timeFrame > -1) {
+        nioDims++;
+        for(int i=nioDims;i>0;i--)
+            ncDims[i] = ncDims[i-1];
       if (hasTimeDim) {
-	piorc = PIOc_inq_dimid (pioFileDesc, "time", &ncDims[nioDims]);
+	piorc = PIOc_inq_dimid (pioFileDesc, "time", &ncDims[0]);
 	if (!CHECKPIOERROR(piorc, "Attempting to obtain 'time' dimension ID",
 	    ESMF_RC_FILE_WRITE, (*rc))) {
 	  return;
@@ -1028,17 +1035,18 @@ void PIO_Handler::arrayWrite(
       } else {
 	PRINTMSG("Defining time dimension");
 	piorc = PIOc_def_dim(pioFileDesc, "time",
-				PIO_UNLIMITED, &ncDims[nioDims]);
+				PIO_UNLIMITED, &ncDims[0]);
 	if (!CHECKPIOERROR(piorc, "Attempting to define 'time' dimension",
 	    ESMF_RC_FILE_WRITE, (*rc))) {
 	  return;
 	}
       }
-      nioDims++;
     }
   }
   PRINTMSG("varExists = " << varExists);
   if ((getFormat() != ESMF_IOFMT_BIN) && !varExists) {
+    PRINTMSG("niodims = " << nioDims);
+    PRINTMSG("basepiotype = " << basepiotype);
     piorc = PIOc_def_var(pioFileDesc, varname.c_str(), basepiotype,
 			 nioDims, ncDims, &vardesc);
     if (!CHECKPIOERROR(piorc, "Attempting to define PIO vardesc for: " + varname,
@@ -1086,7 +1094,7 @@ void PIO_Handler::arrayWrite(
     }
   }
 
-  //  PRINTMSG("calling enddef, status = " << statusOK);
+  PRINTMSG("calling enddef, status = " << rc);
   if ((getFormat() != ESMF_IOFMT_BIN)) {
     piorc = PIOc_enddef(pioFileDesc);
     if (!CHECKPIOERROR(piorc,  "Attempting to end definition of variable: " + varname,
