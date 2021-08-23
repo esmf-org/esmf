@@ -775,8 +775,9 @@ int ArrayBundle::halo(
   
   // implemented via sparseMatMul
   ESMC_Region_Flag zeroregionflag = ESMC_REGION_SELECT;
+  ESMC_TermOrder_Flag termorderflag = ESMC_TERMORDER_SRCSEQ;
   localrc = sparseMatMul(arraybundle, arraybundle, routehandle,
-    &zeroregionflag, 1, NULL, 0, checkflag, true);
+    &zeroregionflag, 1, &termorderflag, 1, checkflag, true);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
@@ -1079,8 +1080,9 @@ int ArrayBundle::redist(
   
   // implemented via sparseMatMul
   ESMC_Region_Flag zeroregionflag = ESMC_REGION_SELECT;
+  ESMC_TermOrder_Flag termorderflag = ESMC_TERMORDER_SRCSEQ;
   localrc = sparseMatMul(srcArraybundle, dstArraybundle, routehandle,
-    &zeroregionflag, 1, NULL, 0, checkflag);
+    &zeroregionflag, 1, &termorderflag, 1, checkflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
