@@ -3,7 +3,7 @@
 %\subsubsection{Restrictions and Future Work}
 \begin{itemize}
 
-\item {\bf Non-blocking} communication via the {\tt routesyncflag} option is implemented for Fields and Arrays. It is {\em not} yet available for FieldBundles and ArrayBundles.
+\item {\bf Non-blocking} communication via the {\tt routesyncflag} option is implemented for Fields and Arrays. It is {\em not} available for FieldBundles and ArrayBundles. The user is advised to use the VMEpoch approach for all cases to achive asynchronicity.
 
 \item The {\bf dynamic masking} feature currently has the following limitations:
 
@@ -15,7 +15,7 @@
 
 \item Destination objects that have undistributed dimensions {\em after} any distributed dimension are not supported.
 
-\item No check is implemented to ensure the provided RouteHandle object is suitable for dynamic masking.
+\item No check is implemented that ensure the user-provided RouteHandle object is suitable for dynamic masking.
 
 \end{itemize}
 
