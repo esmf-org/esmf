@@ -401,7 +401,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           If the default log file already exists, a value of {\tt .false.}
 !           will set the file position to the beginning of the file.  A value
 !           of [\tt .true.} sets the position to the end of the file.
-!           If not specified, defaults to {\tt .true.}.
+!           If not specified, defaults to {\tt .false.}.
 !     \item [{[logkindflag]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
 !           If not specified, defaults to "ESMF\_LOGKIND\_MULTI".
@@ -438,6 +438,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(ESMF_MAXPATHLEN) :: build_detail
       character(16) :: build_date, build_time
       integer :: detail_loc
+
+      character(ESMF_MAXSTR) :: errmsg
+      integer :: errmsg_l
+      type(ESMF_Config)   :: config
 
       ! Initialize return code
       rcpresent = .FALSE.
@@ -511,24 +515,66 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logappendflag_local = logappendflag
       end if
 
+      if (present(defaultConfigFileName)) then
+        ! have a default Config
+
+        ! first must initialize a temporary ESMF default log
+        call ESMF_LogInitialize("ESMF_LogFile",  &
+          logappendflag=logappendflag_local, &
+          logkindflag=ESMF_LOGKIND_MULTI_ON_ERROR, &
+          rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error LogInitialize() log file: ", errmsg(:errmsg_l)
+          return
+        endif
+
+        ! open the Config
+        config = ESMF_ConfigCreate(rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_ConfigLoadFile(config, defaultConfigFileName, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+!TODO: here read from config...
+
+        ! close the Config
+        call ESMF_ConfigDestroy(config, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! shut down temporary Log
+        call ESMF_LogFinalize(rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error finalizing log file: ", errmsg(:errmsg_l)
+          return
+        endif
+      endif
+
+      ! Initialize ESMF default log
       if (present(defaultLogFileName)) then
-         if (len_trim(defaultLogFileName).ne.0) then
-           call ESMF_LogInitialize(defaultLogFileName,  &
-               logappendflag=logappendflag_local, logkindflag=logkindflagUse, &
-               rc=localrc)
-         else
-           call ESMF_LogInitialize("ESMF_LogFile",  &
-               logappendflag=logappendflag_local, logkindflag=logkindflagUse, &
-               rc=localrc)
-         endif
-      else
+       if (len_trim(defaultLogFileName).ne.0) then
+         call ESMF_LogInitialize(defaultLogFileName,  &
+             logappendflag=logappendflag_local, logkindflag=logkindflagUse, &
+             rc=localrc)
+       else
          call ESMF_LogInitialize("ESMF_LogFile",  &
-               logappendflag=logappendflag_local, logkindflag=logkindflagUse, &
-               rc=localrc)
+             logappendflag=logappendflag_local, logkindflag=logkindflagUse, &
+             rc=localrc)
+       endif
+      else
+       call ESMF_LogInitialize("ESMF_LogFile",  &
+             logappendflag=logappendflag_local, logkindflag=logkindflagUse, &
+             rc=localrc)
       endif
       if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing the default log/error manager"
-          return
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing the default log/error manager"
+        return
       endif
       
       ! Write out warning about performance impact of logging
@@ -751,28 +797,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
       endif
 
-      ! Open config file if specified
-      if (present(defaultConfigFileName)) then
-         if (len_trim(defaultConfigFileName).ne.0) then
-            ! TODO: write this and remove the fixed status= line
-            !call ESMF_ConfigInitialize(defaultConfigFileName, status)
-            localrc = ESMF_SUCCESS
-            if (localrc /= ESMF_SUCCESS) then
-              write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-                  ": Error opening the default config file"
-              return
-            endif
-         endif
-      endif
-
-      ! Initialize the machine model, the comms, etc.  Old code, superceeded
-      ! by VM code.
-      !call ESMF_MachineInitialize(lang, status)
-      !if (status .ne. ESMF_SUCCESS) then
-      !    print *, "Error initializing the machine characteristics"
-      !    return
-      !endif
-
       ! in case we need to know what the language was for main, we have it.
       ! right now we do not make use of it for anything.
       if (lang .eq. ESMF_MAIN_C) then
@@ -938,7 +962,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: errmsg_l
       logical, save :: already_final = .false.    ! Static, maintains state.
 
-      logical, parameter :: trace = .false.
       integer :: traceIsOn, profileIsOn
 
       ! Initialize return code
@@ -987,8 +1010,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Delete any internal built-in time manager calendars
-      if (trace) write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ': Finalizing Calendar (if needed)'
       call ESMF_CalendarFinalize(rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
@@ -1014,8 +1035,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
       if (abortFlag) then
         ! Abort the VM
-      if (trace) write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ': calling ESMF_VMAbort'
         call ESMF_VMAbort(rc=localrc)
         if (localrc /= ESMF_SUCCESS) then
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
@@ -1025,8 +1044,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       else
         ! Finalize the VM
-      if (trace) write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ': calling ESMF_VMFinalize'
         call ESMF_VMFinalize(keepMpiFlag=keepMpiFlag, rc=localrc)
         if (localrc /= ESMF_SUCCESS) then
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
@@ -1037,8 +1054,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Shut down the log file
-      if (trace) write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ': Finalizing Log'
       call ESMF_LogFinalize(localrc)
       if (localrc /= ESMF_SUCCESS) then
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
