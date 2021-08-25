@@ -11,6 +11,7 @@
 !==============================================================================
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Base.F90"
 !==============================================================================
+#define DEBUG_SETVM_on
 
 module NUOPC_Base
 
@@ -68,6 +69,7 @@ module NUOPC_Base
   ! internal Utility API
   public NUOPC_ChopString                 ! method
   public NUOPC_LogPetList                 ! method
+  public NUOPC_SetVM                      ! method
 
 !==============================================================================
 ! 
@@ -5196,6 +5198,213 @@ module NUOPC_Base
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine NUOPC_SetVM(gcomp, rc)
+    type(ESMF_GridComp)  :: gcomp
+    integer, intent(out) :: rc
+
+    ! local variables
+    type(ESMF_VM)             :: gvm
+    character(ESMF_MAXSTR)    :: name
+    logical                   :: pthreadsEnabled
+    logical                   :: isPresent, isStructured
+    logical                   :: isPresent2, isStructured2
+    logical                   :: forceChildPthreads
+    integer                   :: value
+    integer                   :: size, idx
+    integer                   :: size2, idx2
+    type(ESMF_Info)           :: info
+    character(80)             :: ikey
+    character(80)             :: ikey2
+    integer                   :: maxCount, pthreadMinStackSize, openMpNumThreads
+    character(40)             :: msgString, openMpHandling
+
+    rc = ESMF_SUCCESS
+
+    ! query the component for info
+    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+#ifdef DEBUG_SETVM_on
+    call ESMF_LogWrite("Generic SetVM() is executing for: "// &
+      trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+
+    ! query global information about this ESMF execution instance
+    call ESMF_VMGetGlobal(gvm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_VMGet(gvm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! iterate through NUOPC Hints
+
+    call ESMF_InfoGetFromHost(gcomp, info=info, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    call ESMF_InfoGet(info, key="/NUOPC/Hint", isPresent=isPresent, &
+      isStructured=isStructured, size=size, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    if (isPresent .and. isStructured) then
+      do idx=1, size
+        call ESMF_InfoGet(info, key="/NUOPC/Hint", idx=idx, ikey=ikey, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (trim(ikey)=="PePerPet") then
+          ! conditionally error out if call into SetVM cannot be supported
+          if (.not.pthreadsEnabled) then
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Generic SetVM() detected lacking Pthreads "// &
+              "support for: "//trim(name), &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+            return  ! bail out
+          endif
+          ! set defaults
+          maxCount = -1
+          openMpHandling = ""
+          openMpNumThreads = -1
+          forceChildPthreads = .false.
+          pthreadMinStackSize = -1
+          ! iterate through the PePerPet hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="MaxCount") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/MaxCount", &
+                  value=maxCount, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="OpenMpHandling") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/OpenMpHandling", &
+                  value=openMpHandling, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="OpenMpNumThreads") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/OpenMpNumThreads", &
+                  value=openMpNumThreads, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="ForceChildPthreads") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/ForceChildPthreads", &
+                  value=forceChildPthreads, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="PthreadMinStackSize") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/PthreadMinStackSize", &
+                  value=pthreadMinStackSize, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
+          endif
+          ! make the actual call into ESMF_GridCompSetVMMaxPEs()
+#ifdef DEBUG_SETVM_on
+          call ESMF_LogWrite("Generic SetVM() is calling "// &
+            "ESMF_GridCompSetVMMaxPEs() for: "// &
+            trim(name)//" with:", ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "MaxCount", maxCount
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',A10)") "OpenMpHandling", &
+            trim(openMpHandling)
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "OpenMpNumThreads", &
+            openMpNumThreads
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',L10)") "ForceChildPthreads", &
+            forceChildPthreads
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "PthreadMinStackSize", &
+            pthreadMinStackSize
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+          if (maxCount == -1 .and. pthreadMinStackSize == -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, openMpHandling=openMpHandling,&
+              openMpNumThreads=openMpNumThreads, &
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount > -1 .and. pthreadMinStackSize == -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
+              openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount == -1 .and. pthreadMinStackSize > -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, &
+              pthreadMinStackSize=pthreadMinStackSize, &
+              openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount > -1 .and. pthreadMinStackSize > -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
+              pthreadMinStackSize=pthreadMinStackSize, &
+              openMpHandling=openMpHandling, &
+              openMpNumThreads=openMpNumThreads, &
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="Unknown NUOPC Hint: "//trim(ikey), &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+          return  ! bail out
+        endif
+      enddo
+    else
+#ifdef DEBUG_SETVM_on
+      call ESMF_LogWrite("Generic SetVM() found no NUOPC Hint for: "// &
+        trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogWrite("Generic SetVM() therefore is NOT calling "// &
+        "ESMF_GridCompSetVMMaxPEs() for: "// &
+        trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+    endif
 
   end subroutine
   !-----------------------------------------------------------------------------

@@ -3058,6 +3058,7 @@ VM *VM::initialize(
 // !ARGUMENTS:
 //
   MPI_Comm mpiCommunicator,
+  bool globalResourceControl,
   int *rc){   // return code
 //
 // !DESCRIPTION:
@@ -3075,7 +3076,9 @@ VM *VM::initialize(
       "- GlobalVM allocation failure", ESMC_CONTEXT, rc);
     return NULL;
   }
-  GlobalVM->VMK::init(mpiCommunicator);  // set up default VMK (all MPI)
+
+  // set up default VMK (all MPI)
+  GlobalVM->VMK::init(mpiCommunicator, globalResourceControl);
 
   // allocate the VM association table
 //gjtNotYet  matchTable_tid = new esmf_pthread_t[ESMC_VM_MATCHTABLEMAX];
@@ -3225,6 +3228,57 @@ VM *VM::initialize(
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return GlobalVM;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::set()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::set
+//
+// !INTERFACE:
+void VM::set(
+//
+// !RETURN VALUE:
+//    void
+//
+// !ARGUMENTS:
+//
+  bool globalResourceControl,
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//    Set properties of global virtual machine after initialize().
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  if (GlobalVM==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid GlobalVM", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  try{
+    GlobalVM->VMK::set(globalResourceControl);
+  }catch(int catchrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc);
+    return;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
