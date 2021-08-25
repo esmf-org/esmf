@@ -376,6 +376,8 @@ class VMK{
     void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD,
       bool globalResourceControl=false);
       // initialize the physical machine and a default (all MPI) virtual machine
+    void set(bool globalResourceControl);
+      // set after init
     void finalize(int finalizeMpi=1);
       // finalize default (all MPI) virtual machine
     void abort();

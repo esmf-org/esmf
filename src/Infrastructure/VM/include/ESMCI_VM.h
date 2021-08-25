@@ -113,6 +113,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     // initialize(), finalize() and abort() of global VM
     static VM *initialize(MPI_Comm mpiCommunicator, bool globalResourceControl,
       int *rc);
+    static void set(bool globalResourceControl, int *rc);
     static void finalize(ESMC_Logical *keepMpiFlag, int *rc);
     static void abort(int *rc);
     static bool isInitialized(int *rc);

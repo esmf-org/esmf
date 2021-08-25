@@ -1149,6 +1149,23 @@ extern "C" {
     if (rc!=NULL) *rc = localrc;
   }
 
+  void FTN_X(c_esmc_vmset)(ESMC_Logical *globalResourceControl, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmset()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    bool globalResourceControlOpt = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(globalResourceControl) != ESMC_NULL_POINTER)
+      globalResourceControlOpt = (*globalResourceControl == ESMF_TRUE);
+    // call into C++ method
+    ESMCI::VM::set(globalResourceControlOpt, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmfinalize)(ESMC_Logical *keepMpiFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmfinalize()"

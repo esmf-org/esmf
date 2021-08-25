@@ -47,6 +47,7 @@ module ESMF_InitMod
       use ESMF_DELayoutMod
       use ESMF_CalendarMod
       use ESMF_TraceMod
+      use ESMF_UtilMod
 
       implicit none
       private
@@ -443,6 +444,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: errmsg_l
       type(ESMF_Config)   :: config
 
+      logical             :: globalResourceControlConfig
+      character(80)       :: logKindFlagS, logKindFlagSU
+
       ! Initialize return code
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -535,11 +539,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
+        ! load config file
         call ESMF_ConfigLoadFile(config, defaultConfigFileName, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-!TODO: here read from config...
+        ! globalResourceControl
+        if (.not.present(globalResourceControl)) then
+          ! not supplied on caller side -> attempt to read from config
+          call ESMF_ConfigGetAttribute(config, globalResourceControlConfig, &
+            label="globalResourceControl:", default=.false., rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          ! set global VM resource control
+          call ESMF_VMSet(globalResourceControl=globalResourceControlConfig, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        ! logKindFlag
+        if (.not.present(logKindFlag)) then
+          ! not supplied on caller side -> attempt to read from config
+          call ESMF_ConfigGetAttribute(config, logKindFlagS, &
+            label="logKindFlag:", default="invalid", rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          logKindFlagSU = ESMF_UtilStringUpperCase(logKindFlagS, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (trim(logKindFlagSU)=="ESMF_LOGKIND_NONE") then
+            logkindflagUse = ESMF_LOGKIND_NONE
+          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_SINGLE") then
+            logkindflagUse = ESMF_LOGKIND_SINGLE
+          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_MULTI") then
+            logkindflagUse = ESMF_LOGKIND_MULTI
+          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_MULTI_ON_ERROR") then
+            logkindflagUse = ESMF_LOGKIND_MULTI_ON_ERROR
+          endif
+        endif
 
         ! close the Config
         call ESMF_ConfigDestroy(config, rc=localrc)
