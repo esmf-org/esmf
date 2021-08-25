@@ -42,6 +42,8 @@
 
 #include <ESMCI_VM.h>
 #include "ESMCI_Macros.h"
+#include "ESMCI_CoordSys.h"
+
 
 namespace ESMCI{
 
@@ -1536,6 +1538,44 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     sintd_cells.clear(); sintd_cells.reserve(unique_cells.size());
     sintd_cells.insert(sintd_cells.begin(),unique_cells.begin(),unique_cells.end());
   } 
+
+
+//// THESE ARE TEMPORARY UNTIL WE MERGE WITH THE mbmesh layering branch THEN USE ONES ////
+//// IN ESMCI_MathUtil.C                                                              ////
+
+// calculates spherical coords in radians
+// lon -> (-pi to +pi)
+// lat -> (0   to +pi)
+static void _tmp_convert_cart_to_sph(double x, double y, double z,
+                         double *lon, double *lat, double *r) {
+
+  // calc radius of sphere
+  *r=sqrt(x*x+y*y+z*z);
+
+  // calc lon
+  *lon=atan2(y,x);
+
+  // calc lat
+  *lat=acos(z/(*r));
+}
+
+
+// calculates spherical coords in degs
+// lon -> (-180 to 180)
+// lat -> (-90  to 90)
+static void _tmp_convert_cart_to_sph_deg(double x, double y, double z,
+                             double *lon, double *lat, double *r) {
+
+  const double RAD2DEG=57.295779513082325;
+  double lon_r,lat_r;
+
+  _tmp_convert_cart_to_sph(x, y, z,
+                      &lon_r, &lat_r, r);
+
+  *lon=lon_r*RAD2DEG;
+  *lat=90.0-(lat_r*RAD2DEG);
+}
+
   
   void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_cell *> & sintd_cells, int pdim, int sdim, Mesh *midmesh, int side){
 
@@ -1682,6 +1722,23 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     elem_list[i] = cell;
   }
 
+  // Hack coordSys until better way of handling comes in with layering branch
+  ESMC_CoordSys_Flag coordSys;
+  int orig_sdim;
+  if ((sdim == 2) && (pdim == 2)) {
+    coordSys=ESMC_COORDSYS_CART;
+    orig_sdim=2;
+  } else if ((sdim == 3) && (pdim == 2)) {
+    coordSys=ESMC_COORDSYS_SPH_DEG;
+    orig_sdim=2;
+  } else {
+    Throw() << "This combination of dimensions (sdim="<<sdim<<" and pdim="<<pdim<<") isn't supported in XGrid"; 
+  }
+
+  // Set orig_sdim in mesh
+  meshmid.orig_spatial_dim=orig_sdim;
+
+
   // set up the fraction Field
   // Intersection cells should not be masked, fraction should all be 1.0
   Context ctxt; ctxt.flip();
@@ -1692,8 +1749,22 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
   // turn on elem_area so that user supplied area can be used during weight calculation
   MEField<> *elem_area = meshmid.RegisterField("elem_area",
                      MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-  MEField<> *elem_centroid = meshmid.RegisterField("elem_centroid",
-                     MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
+
+  // Store centroids in elem_coordinates, so they can be used in normal mesh things
+  //  MEField<> *elem_centroid = meshmid.RegisterField("elem_centroid",
+  //                   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
+  
+  // Add element coords field
+   meshmid.RegisterField("elem_coordinates",
+                             MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
+  
+  // If not cartesian then add original coordinates field
+  if (coordSys != ESMC_COORDSYS_CART) {
+     meshmid.RegisterField("elem_orig_coordinates",
+                                     MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, orig_sdim, true);
+  }
+
+
 
   // Field to record original mesh ind per elem
   MEField<> *side1_mesh_ind = NULL;
@@ -1720,7 +1791,12 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
   elem_frac = meshmid.GetField("elem_frac");
   elem_frac2 = meshmid.GetField("elem_frac2");
   elem_area = meshmid.GetField("elem_area");
-  elem_centroid = meshmid.GetField("elem_centroid");
+  // Store centroids in elem_coordinates, so they can be used in normal mesh things
+  // elem_centroid = meshmid.GetField("elem_centroid");
+  MEField<> *elem_coords = meshmid.GetField("elem_coordinates");
+  MEField<> *elem_orig_coords = meshmid.GetField("elem_orig_coordinates");
+
+
   for (int i=0; i<num_cells; i++) {
     double *frac = elem_frac->data(*(elem_list[i]));
     *frac = 1.0;
@@ -1729,8 +1805,31 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     double *area = elem_area->data(*(elem_list[i]));
     *area = sintd_cells[i]->get_area();
     //std::cout << i << "th cell area: " << *area << "\n";
-    double *centroid = elem_centroid->data(*(elem_list[i]));
-    sintd_cells[i]->get_centroid(centroid, sdim, pdim);
+
+    // Use centroid for elem coords
+    double *elem_coords_ptr = elem_coords->data(*(elem_list[i]));
+    sintd_cells[i]->get_centroid(elem_coords_ptr, sdim, pdim);
+
+    // If orig_coords exist then set those too
+    if (elem_orig_coords) {
+
+      // Get pointer to data
+      double *elem_orig_coords_ptr = elem_orig_coords->data(*(elem_list[i]));
+
+      // We don't support COORDSYS_SPH_DEG in this part yet, add it when layering branch merged
+      ThrowRequire(coordSys == ESMC_COORDSYS_SPH_DEG); 
+
+      // If we're coverting coords the sdim should be 3
+      ThrowRequire(sdim == 3);
+
+      // ...and orig_sdim should be 2 (since we don't support 3D XGrids...) 
+      ThrowRequire(orig_sdim == 2);
+
+      // Calculate lon and lat from 3D Cart...
+      double r;
+      _tmp_convert_cart_to_sph_deg(elem_coords_ptr[0], elem_coords_ptr[1], elem_coords_ptr[2],
+                                   elem_orig_coords_ptr, elem_orig_coords_ptr+1, &r); 
+    }
 
     if (side == 1) {
       double *side1_mesh_ind_ptr = side1_mesh_ind->data(*(elem_list[i]));

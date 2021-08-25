@@ -4327,7 +4327,8 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
 
 
     // If an centroid field exists use that instead
-    MEField<> *centroid_field = mesh.GetField("elem_centroid");
+    // SWTICH TO USING elem_coordinate field instead
+    MEField<> *centroid_field = mesh.GetField("elem_coordinates");
     if (centroid_field) {
 
       // Loop through elements and put centroids into array
