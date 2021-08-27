@@ -3025,6 +3025,13 @@ end function ESMF_MeshCreateFromScrip
     ! Set default coordsys
     ESMF_MeshCreateFromPointer%coordSys=ESMF_COORDSYS_SPH_DEG
 
+    ! Set default dims
+    ! WARNING: THIS IS JUST A HACK UNTIL THE LAYERING BRACH COMES
+    !  IN AND MOVES THE DIM INFO DOWN, THAT SHOULD BE USED WHEN IT COMES
+    !  IN NOT THIS
+    ESMF_MeshCreateFromPointer%parametricDim=2
+    ESMF_MeshCreateFromPointer%spatialDim=2
+
     ! The C side has been created
     ESMF_MeshCreateFromPointer%isCMeshFreed=.false.
 
