@@ -74,10 +74,6 @@
 #endif
 #include <limits.h>
 
-#ifndef ESMF_NO_OPENMP
-#include <omp.h>
-#endif
-
 using namespace std;
 
 // Memory mapped files may not be available on all systems
@@ -357,7 +353,29 @@ void VMK::InitPreMPI(){
 }
 
 
-void VMK::init(MPI_Comm mpiCommunicator){
+void VMK::set(bool globalResourceControl){
+#ifndef ESMF_NO_GETHOSTID
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+  if (globalResourceControl){
+    // setting affinity on this level might interfer with user level pinning
+    // therefore only do it by user request
+    // set thread affinity
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(ssipe[mypet], &cpuset);
+    pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#ifndef ESMF_NO_OPENMP
+    omp_set_num_threads(1);
+#endif
+  }
+#endif
+#endif
+#endif
+}
+
+
+void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   // initialize the physical machine and a default (all MPI) virtual machine
   // obtain command line arguments and store in the VM class
   argc = 0; // reset
@@ -579,18 +597,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
       ++j;
     }
   }
-#if 0
-  // setting affinity on this level might interfer with user level pinning
-#ifndef ESMF_NO_PTHREADS
-#ifndef PARCH_darwin
-  // set thread affinity
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  CPU_SET(ssipe[mypet], &cpuset);
-  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
-#endif
-#endif
-#endif
+  set(globalResourceControl);
 #endif
   // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];
@@ -741,10 +748,14 @@ void VMK::abort(){
 }
 
 
-void VMK::setAffinities(void *ssarg){
+VMK::Affinities VMK::setAffinities(void *ssarg){
   SpawnArg *sarg = (SpawnArg *)ssarg;
+  Affinities affs;
+  affs.mypthid = mypthid;
 #ifndef ESMF_NO_PTHREADS
 #ifndef PARCH_darwin
+  // get the current thread affinity
+  pthread_getaffinity_np(mypthid, sizeof(cpu_set_t), &(affs.cpuset));
   // set thread affinity
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
@@ -752,6 +763,8 @@ void VMK::setAffinities(void *ssarg){
     CPU_SET(ssipe[cid[mypet][i]], &cpuset);
   pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
 #ifndef ESMF_NO_OPENMP
+  // get the current omp max thread count
+  affs.omp_num_threads = omp_get_max_threads();
   // OpenMP handling according to sarg->openmphandling
   if (sarg->openmphandling>0){
     // Set the number of OpenMP threads
@@ -776,6 +789,7 @@ void VMK::setAffinities(void *ssarg){
 #endif
 #endif
 #endif
+  return affs;
 }
 
 
@@ -1087,7 +1101,8 @@ static void enter_callback(SpawnArg *sarg, void *mutex){
   }
 #endif
 
-  vm->setAffinities((void *)sarg);
+  // set affinities and OpenMP details according to plan, keep current settings
+  VMK::Affinities oldAffs = vm->setAffinities((void *)sarg);
 
   // call the function pointer with the new VMK as its argument
   // this is where we finally enter the user code again...
@@ -1148,6 +1163,10 @@ static void enter_callback(SpawnArg *sarg, void *mutex){
       pthread_mutex_unlock(pmutex);
 #endif
   }
+  
+  // reset previous affinities and OpenMP settings
+  oldAffs.reset();
+
 }
 
 
@@ -2315,7 +2334,7 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
     }
   }else{
     // mypet is a spawner, wait on all the contributors to this spawner
-    for (int i=0; i<npets; i++)
+    for (int i=0; i<npets; i++){
       if (vmp->contribute[i]==mypet && i!=mypet){
 #ifdef VM_PETMANAGEMENTLOG_on
         {
@@ -2335,6 +2354,7 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
         }
 #endif
       }
+    }
     // now all contributors are in, pets that spawn need to release their vmkts
     if (vmp->eachChildPetOwnPthread){
       // Each child PET in its own Pthread
@@ -2369,7 +2389,11 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
       }else if (vmp->spawnflag[mypet]==0){
         // not a spawning PET -> NoOp
       }else{
-        // TODO: implemnet error handling here!!!
+        int localrc;
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "Cannot spawn multiple child PETs without eachChildPetOwnPthread!",
+          ESMC_CONTEXT, &localrc);
+        throw localrc;  // bail out with exception
       }
     }
   }
@@ -2585,14 +2609,42 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   msg << prefix << "petCount=" << getPetCount() << " localPet=" << getLocalPet()
-    << " currentSsiPe=" << getCurrentSsiPe();
+    << " mypthid=" << mypthid << " currentSsiPe=" << getCurrentSsiPe();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+  // output thread affinity
+  cpu_set_t cpuset;
+  pthread_getaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+  msg << prefix << "Current system level affinity pinning for local PET:";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  for (int i=0; i<CPU_SETSIZE; i++){
+    if (CPU_ISSET(i, &cpuset)){
+      msg.str("");  // clear
+      msg << prefix << " SSIPE=" << i;
+      ESMC_LogDefault.Write(msg.str(), msgType);
+    }
+  }
+  msg.str("");  // clear
+#endif
+#endif
+#ifndef ESMF_NO_OPENMP
+  // output OpenMP info
+  msg << prefix << "Current system level OMP_NUM_THREADS setting for local PET: "
+    << omp_get_max_threads();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+#endif
   msg << prefix << "ssiCount=" << getSsiCount()
     << " localSsi=" << ssiid[cid[mypet][0]];
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   msg << prefix << "mpionly=" << mpionly << " threadsflag=" << threadsflag;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "ESMF level logical PET->PE association "
+   << "(but consider system level affinity pinning!):";
   ESMC_LogDefault.Write(msg.str(), msgType);
   for (int i=0; i<npets; i++){
     msg.str("");  // clear

@@ -69,7 +69,7 @@ class MethodElement{
   friend class MethodTable;
 };
 
-class MethodTable : std::map<std::string, MethodElement>{
+class MethodTable : public std::map<std::string, MethodElement>{
   public:
     // other methods
     int add(std::string labelArg, void *pointer);

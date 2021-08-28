@@ -29,6 +29,10 @@
 #endif
 #include <map>
 
+#ifndef ESMF_NO_OPENMP
+#include <omp.h>
+#endif
+
 #ifdef VMK_STANDALONE
 #include <pthread.h>
 typedef pthread_mutex_t esmf_pthread_mutex_t;
@@ -250,6 +254,29 @@ class VMK{
     }
   };
 
+  struct Affinities{
+    esmf_pthread_t mypthid;
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+    cpu_set_t cpuset;
+#ifndef ESMF_NO_OPENMP
+    int omp_num_threads;
+#endif
+#endif
+#endif
+   public:
+    void reset(){
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+      pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#ifndef ESMF_NO_OPENMP
+      omp_set_num_threads(omp_num_threads);
+#endif
+#endif
+#endif
+    }
+  };
+
   // members
   protected:
     int mypet;          // PET id of this instance
@@ -346,14 +373,17 @@ class VMK{
   public:
     static void InitPreMPI();
       // initialization step before MPI is initialized
-    void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
+    void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD,
+      bool globalResourceControl=false);
       // initialize the physical machine and a default (all MPI) virtual machine
+    void set(bool globalResourceControl);
+      // set after init
     void finalize(int finalizeMpi=1);
       // finalize default (all MPI) virtual machine
     void abort();
       // abort default (all MPI) virtual machine
 
-    void setAffinities(void *ssarg);
+    Affinities setAffinities(void *ssarg);
       // set thread affinities, including OpenMP handling if configured
 
     void construct(void *sarg);

@@ -249,7 +249,7 @@
 \input{ESMF_options}
 \input{ESMF_appuml}
 \input{ESMF_apperr}
-\input{ESMF_appattr}
+#include "../Superstructure/AttributeAPI/doc/AttributeAPI_refdoc.ctex"
 
 \end{document}
 

@@ -57,6 +57,11 @@ module producerMod
       userRoutine=finalCalc, rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
+    ! just for testing purposes add the same method with a crazy string label
+    call ESMF_MethodAdd(exportState, label="Somewhat of a SILLY @$^@_ label", &
+      userRoutine=finalCalc, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
   end subroutine !--------------------------------------------------------------
 !EOC
 
@@ -147,14 +152,27 @@ module consumerMod
     type(ESMF_Clock):: clock
     integer, intent(out):: rc
 
-    integer:: userRc
+    integer:: userRc, i
     logical:: isPresent
+    character(len=:), allocatable :: labelList(:)
 
     rc = ESMF_SUCCESS
 !EOC
 !BOE
-! It is possible to first check the importState if the desired method is
-! attached. This allows the consumer code to implement alternatives in case
+! The importState can be queried for a list of {\em all} the attached methods.
+!EOE
+!BOC
+    call ESMF_MethodGet(importState, labelList=labelList, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    
+    ! print the labels
+    do i=1, size(labelList)
+      print *, labelList(i)
+    enddo
+!EOC
+!BOE
+! It is also possible to check the importState whether a {\em specific} method
+! is attached. This allows the consumer code to implement alternatives in case
 ! the method is not available.
 !EOE
 !BOC

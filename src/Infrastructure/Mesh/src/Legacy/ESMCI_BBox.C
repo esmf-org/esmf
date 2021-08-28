@@ -16,6 +16,7 @@
 #include <Mesh/include/Regridding/ESMCI_Mapping.h>
 #include <Mesh/include/Legacy/ESMCI_MeshllField.h>
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
+#include <Mesh/include/ESMCI_MathUtil.h>
 
 #include <limits>
 #include <vector>
@@ -56,6 +57,86 @@ BBox &BBox::operator=(const BBox &rhs) {
   return *this;
 }
 
+  // If the 3D object surrounds an axis and extends on that side of the sphere
+  // then it could bulge up to max_radius where the axis is
+  static void _add_axis_bulge(double *min, double *max, double max_radius) {
+    
+    //// +X  ////
+
+    /// If extends in +X direction
+    if (max[0] > 0.0) {
+      // If the hex surrounds the X axis
+      if ((max[1] >= 0.0) && (min[1] <= 0.0)) {
+        if ((max[2] >= 0.0) && (min[2] <= 0.0)) {
+          if (max_radius > max[0]) max[0]=max_radius; 
+        }
+      }
+    }
+
+    //// -X  ////
+
+    /// If extends in -X direction
+    if (min[0] < 0.0) {
+      // If the hex surrounds the X axis
+      if ((max[1] >= 0.0) && (min[1] <= 0.0)) {
+        if ((max[2] >= 0.0) && (min[2] <= 0.0)) {
+          if (-max_radius < min[0]) min[0]=-max_radius; 
+        }
+      }
+    }
+    
+    //// +Y  ////
+
+    /// If extends in +Y direction
+    if (max[1] > 0.0) {
+      // If the hex surrounds the Y axis
+      if ((max[0] >= 0.0) && (min[0] <= 0.0)) {
+        if ((max[2] >= 0.0) && (min[2] <= 0.0)) {
+          if (max_radius > max[1]) max[1]=max_radius; 
+        }
+      }
+    }
+
+    //// -Y  ////
+
+    /// If extends in -Y direction
+    if (min[1] < 0.0) {
+      // If the hex surrounds the Y axis
+      if ((max[0] >= 0.0) && (min[0] <= 0.0)) {
+        if ((max[2] >= 0.0) && (min[2] <= 0.0)) {
+          if (-max_radius < min[1]) min[1]=-max_radius; 
+        }
+      }
+    }
+
+
+    //// +Z  ////
+
+    /// If extends in +Z direction
+    if (max[2] > 0.0) {
+      // If the hex surrounds the Z axis
+      if ((max[0] >= 0.0) && (min[0] <= 0.0)) {
+        if ((max[1] >= 0.0) && (min[1] <= 0.0)) {
+          if (max_radius > max[2]) max[2]=max_radius; 
+        }
+      }
+    }
+
+    //// -Z  ////
+
+    /// If extends in -Z direction
+    if (min[2] < 0.0) {
+      // If the hex surrounds the Z axis
+      if ((max[0] >= 0.0) && (min[0] <= 0.0)) {
+        if ((max[1] >= 0.0) && (min[1] <= 0.0)) {
+          if (-max_radius < min[2]) min[2]=-max_radius; 
+        }
+      }
+    }
+    
+  }
+
+
   // TODO: take normexp out of parameter list because it's reset inside
   BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp, bool is_sph) :
  isempty(false)
@@ -71,7 +152,7 @@ BBox &BBox::operator=(const BBox &rhs) {
     // Shell, expand by normexp in normal direction
     for (UInt i =0; i < dim; i++) {
       min[i] = std::numeric_limits<double>::max();
-       max[i] = -std::numeric_limits<double>::max();
+      max[i] = -std::numeric_limits<double>::max();
     }
 
     double nr[3];
@@ -92,12 +173,6 @@ BBox &BBox::operator=(const BBox &rhs) {
       nr[0] =0.0; nr[1] =0.0; nr[2] =0.0;
     }
 
-    /*
-    if (obj.get_id() == 2426) {
-      std::cout << "elem 2426 coords:";
-       std::copy(&cd[0], &cd[0] + 3*me->num_functions(), std::ostream_iterator<double>(std::cout, " "));
-      std::cout << std::endl;
-    }*/
     // Get cell diameter
     double diam = 0;
     for (UInt n = 1; n < me->num_functions(); n++) {
@@ -125,13 +200,14 @@ BBox &BBox::operator=(const BBox &rhs) {
       }
     } // for n
   } else {
+
     // Good old fashioned element
     for (UInt i =0; i < dim; i++) {
       min[i] = std::numeric_limits<double>::max();
       max[i] = -std::numeric_limits<double>::max();
     }
 
-    // Loop the nodes
+    // Loop the nodes calculating min and max coords
     for (UInt n = 0; n < topo.num_nodes; n++) {
       const MeshObj &node = *(obj.Relations[n].obj);
       const double *coord = coords.data(node);
@@ -144,39 +220,56 @@ BBox &BBox::operator=(const BBox &rhs) {
     // If this is on a 3D sphere then extend outward to include the bulge
     // Spatial dimension is assumed to be 3, because we don't allow sdim<pdim
     if ((topo.parametric_dim==3) && is_sph) {
-      // Compute diameter of min max box
-      // (as an easy stand in for diameter of the cell)
-      double diam=std::sqrt((max[0]-min[0])*(max[0]-min[0])+
-                            (max[1]-min[1])*(max[1]-min[1])+
-                            (max[2]-min[2])*(max[2]-min[2]));
 
-      // Reduce the diameter by 1/2 because
-      // that's the most it can be (in the case that the cell is the diameter of the whole sphere)
-      diam *=0.5;
+      // Find the max radius squared
+      double max_radius_sq=0.0;
+      for (UInt n = 0; n < topo.num_nodes; n++) {
+        const MeshObj &node = *(obj.Relations[n].obj);
+        const double *coord = coords.data(node);
+        
+        // Compute radius squared
+        double radius_sq=MU_LENSQ_VEC3D(coord);
 
-      // Loop through extending the min max box if necessary
+        // If bigger than update
+        if (radius_sq > max_radius_sq) max_radius_sq=radius_sq;
+      }
+
+      // Find the max radius
+      double max_radius=std::sqrt(max_radius_sq);
+
+      // If one of the axis are through
+      // the hex then the hex may bulge up to max_radius
+      // Do this here before adding the modifications to min max
+      // by the max_radius through each point
+      _add_axis_bulge(min, max, max_radius);
+
+      // Loop through extending the min max box by the max radius through points
+      // Takes care of upper part of hex that may go out to max radius through 
+      // one of the points
       for (UInt n = 0; n < topo.num_nodes; n++) {
         const MeshObj &node = *(obj.Relations[n].obj);
         const double *coord = coords.data(node);
         
         // Compute unit vector in direction of point 
-        double len=std::sqrt(coord[0]*coord[0]+coord[1]*coord[1]+coord[2]*coord[2]);
+        double len=MU_LEN_VEC3D(coord);
+
+        // Get 1/len to compute unit vector
+        double div_len=1.0;
+        if (len != 0.0) div_len=1.0/len;
+
+        // Compute unit vector
         double uvec[3];
-        uvec[0]=coord[0]/len;
-        uvec[1]=coord[1]/len;
-        uvec[2]=coord[2]/len;
+        MU_MULT_BY_SCALAR_VEC3D(uvec,coord,div_len);        
         
-        // Compute new point
+        // Compute new point at max radius
         double new_pnt[3];
-        new_pnt[0]=coord[0]+diam*uvec[0];
-        new_pnt[1]=coord[1]+diam*uvec[1];
-        new_pnt[2]=coord[2]+diam*uvec[2];
-        
-        for (UInt j = 0; j < 3; j++) {
-          if (new_pnt[j] < min[j]) min[j] = new_pnt[j];
-          if (new_pnt[j] > max[j]) max[j] = new_pnt[j];
-        }
+        MU_MULT_BY_SCALAR_VEC3D(new_pnt,uvec,max_radius);        
+
+        // Update min and max
+        MU_SET_MIN_VEC3D(min,new_pnt);        
+        MU_SET_MAX_VEC3D(max,new_pnt);        
       }
+
     }
   } // nonshell
 }

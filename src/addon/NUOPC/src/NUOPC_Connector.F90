@@ -159,7 +159,11 @@ module NUOPC_Connector
       msg="Allocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompSetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompSetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! initialize internal state members that require sepcial treatment
@@ -364,7 +368,11 @@ module NUOPC_Connector
 
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1924,7 +1932,11 @@ module NUOPC_Connector
 
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2690,7 +2702,11 @@ module NUOPC_Connector
 
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3796,7 +3812,11 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
 
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -5061,7 +5081,11 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -6227,7 +6251,11 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -6475,7 +6503,11 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
 
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -8206,7 +8238,11 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -8363,7 +8399,11 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
