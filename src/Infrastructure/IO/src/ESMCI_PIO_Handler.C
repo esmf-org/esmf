@@ -19,7 +19,7 @@
 //
 //-------------------------------------------------------------------------
 #define ESMC_FILENAME "ESMCI_PIO_Handler.C"
-
+#define PIO_DEBUG_LEVEL 0
 // include associated header file
 #include "ESMCI_PIO_Handler.h"
 
@@ -186,7 +186,7 @@ void PIO_Handler::initialize (
   try {
 
 #ifdef ESMFIO_DEBUG
-    PIOc_set_log_level(3);
+    PIOc_set_log_level(PIO_DEBUG_LEVEL);
 #else // ESMFIO_DEBUG
     PIOc_set_log_level(0);
 #endif // ESMFIO_DEBUG
@@ -670,12 +670,12 @@ void PIO_Handler::arrayRead(
 	  return;
 	}
       }
-      frame = *timeslice;
+      frame = (*timeslice);
     } else {
       frame = -1;
     }
     if (unlim >= 0 && frame > 0) {
-	PIOc_setframe(pioFileDesc, vardesc, frame);
+	PIOc_setframe(pioFileDesc, vardesc, frame-1);
     }
   }
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
@@ -1060,7 +1060,7 @@ void PIO_Handler::arrayWrite(
     PIOc_inq_varndims(pioFileDesc, vardesc, &nvdims);
     PRINTMSG("calling setframe, ndims = " << nvdims);
 #endif // ESMFIO_DEBUG
-    PIOc_setframe(pioFileDesc, vardesc, timeFrame);
+    PIOc_setframe(pioFileDesc, vardesc, timeFrame-1);
   }
 #ifdef ESMFIO_DEBUG
   else if (getFormat() != ESMF_IOFMT_BIN) {
@@ -1354,7 +1354,7 @@ void PIO_Handler::open(
     // Looks like we are ready to try and create the file
 #ifdef ESMFIO_DEBUG
     std::string errmsg = "Calling PIOc_createfile";
-    PIOc_set_log_level(3);
+    PIOc_set_log_level(PIO_DEBUG_LEVEL);
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_DEBUG
     piorc = PIOc_createfile(pioSystemDesc, &pioFileDesc,
@@ -1573,6 +1573,7 @@ void PIO_Handler::flush(
   PRINTPOS;
   // Not open? No problem, just skip
   if (isOpen() == ESMF_TRUE) {
+    PRINTMSG("calling sync");
     PIOc_sync(pioFileDesc);
   }
   // return successfully
@@ -1616,8 +1617,9 @@ void PIO_Handler::close(
   PRINTPOS;
   // Not open? No problem, just skip
   if (isOpen() == ESMF_TRUE) {
-    PIOc_closefile(pioFileDesc);
+    int piorc = PIOc_closefile(pioFileDesc);
     new_file = false;
+    if (rc != NULL) *rc = piorc;
   }
 
   // return successfully
@@ -1981,7 +1983,7 @@ int PIO_IODescHandler::constructPioDecomp(
     }
   }
 
-#if 0
+#if 1
     std::cout << " pioDofList = [";
     for (int i = 0; i < pioDofCount; i++) {
       std::cout << " " << pioDofList[i]
@@ -2060,7 +2062,7 @@ int PIO_IODescHandler::constructPioDecomp(
     }
     PRINTMSG(", IODesc shape = [" << dimstr << "], calling pio_initdecomp");
   }
-  PIOc_set_log_level(3);
+  PIOc_set_log_level(PIO_DEBUG_LEVEL);
 #endif // ESMFIO_DEBUG
 
   // Create the decomposition
