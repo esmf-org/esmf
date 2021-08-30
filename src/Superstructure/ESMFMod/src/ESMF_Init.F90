@@ -197,7 +197,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[defaultConfigFilename]}]
 !           Name of the default configuration file for the entire application.
 !           If this argument is specified, the configuration file must exist,
-!           and its contents is read during {\tt ESMF\_Initialize()}.
+!           and its content is read during {\tt ESMF\_Initialize()}.
 !           If any of the following labels are found in the specified
 !           configuration file, and the associated argument of the same name
 !           was {\em not} specified explicitly in the call to
@@ -228,7 +228,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           {\tt .true.}.
 !     \item [{[logKindFlag]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
-!           See section \ref{const:logKindFlag} for a list of valid options.
+!           See section \ref{const:logkindflag} for a list of valid options.
 !           If not specified,
 !           defaults to specification in {\tt defaultConfigFilename}, or
 !           {\tt ESMF\_LOGKIND\_MULTI}.
