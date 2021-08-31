@@ -41,6 +41,7 @@
 
 #include "stdlib.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_CoordSys.h"
 #include <cstring>
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -84,6 +85,8 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   // Get dim info for mesh
   int sdim=srcmesh.spatial_dim();
   int pdim=srcmesh.parametric_dim();
+  int orig_sdim=srcmesh.orig_spatial_dim;
+  ESMC_CoordSys_Flag coordsys=srcmesh.coordsys;
 
   int rc;
 
@@ -108,8 +111,11 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   Mesh &meshmrg=*(meshmrgp);
   *meshpp = meshmrgp;
 
-  meshmrg.set_parametric_dimension(sdim);
-  meshmrg.set_spatial_dimension(pdim);
+  meshmrg.set_parametric_dimension(pdim);
+  meshmrg.set_spatial_dimension(sdim);
+  meshmrg.orig_spatial_dim=orig_sdim;
+  meshmrg.coordsys=coordsys;
+  
 
   Interp * interp=0;
   SearchResult sres;

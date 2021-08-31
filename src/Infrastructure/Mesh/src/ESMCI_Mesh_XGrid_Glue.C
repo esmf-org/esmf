@@ -59,6 +59,7 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
                    int *compute_midmesh,
                    int *regridMethod,
                    int *unmappedaction,
+                   ESMC_CoordSys_Flag *coordSys,
                    int *nentries, ESMCI::TempWeights **tweights,
                    int*rc) {
 #undef  ESMC_METHOD
@@ -67,13 +68,41 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
 
   Mesh &srcmesh = **meshsrcpp;
   Mesh &dstmesh = **meshdstpp;
-  if(*compute_midmesh) *mesh = new Mesh();
-  else *mesh = 0;
 
   // Old Regrid conserve turned off for now
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
   try {
+
+    // Get source mesh dimensions
+    int pdim=srcmesh.parametric_dim();
+    int sdim=srcmesh.spatial_dim();
+
+    // Check that meshes dimensions match
+    if ((pdim != dstmesh.parametric_dim()) ||
+        (sdim != dstmesh.spatial_dim())) {
+      // printf("spdim=%d ssdim=%d dpdim=%d dsdim=%d\n",pdim,sdim,dstmesh.parametric_dim(),dstmesh.spatial_dim());
+      Throw() <<"Source and destination dimensions must match when creating an XGrid";
+    }
+
+    // Create Mesh and set info
+    *mesh=0;
+    if(*compute_midmesh) {
+      // Create mesh
+      *mesh = new Mesh();
+
+      // Get cartesian dimension
+      int cart_sdim;
+      int localrc=ESMCI_CoordSys_CalcCartDim(*coordSys, sdim, &cart_sdim);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+        throw localrc;  // bail out with exception
+
+      // Set dimensions and coord_sys
+      (*mesh)->set_parametric_dimension(pdim);
+      (*mesh)->set_spatial_dimension(cart_sdim);
+      (*mesh)->orig_spatial_dim=sdim;
+      (*mesh)->coordsys=*coordSys;
+    }
 
     // Weights matrix
     IWeights wts;
