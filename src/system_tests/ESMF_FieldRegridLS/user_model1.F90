@@ -69,6 +69,7 @@
         type(ESMF_ArraySpec) :: arrayspec
         integer :: npets, de_id
         integer :: clb(1),cub(1),i
+        integer(ESMF_KIND_I4), pointer :: mask(:)
         real(ESMF_KIND_R8), pointer :: lon(:),lat(:)
         real(ESMF_KIND_R8), pointer :: srcfptr(:)
         integer :: totalNumPoints=100
@@ -106,6 +107,14 @@
              keyLongName="Longitude", rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
+        call ESMF_LocStreamAddKey(locstream,                 &
+             keyName="ESMF:Mask",           &
+             KeyTypeKind=ESMF_TYPEKIND_I4, &
+             keyUnits="none",           &
+             keyLongName="mask values", rc=rc)
+        if (rc .ne. ESMF_SUCCESS) return
+
+
         ! Get coordinate memory
         call ESMF_LocStreamGetKey(locstream,                 &
              localDE=0,                    &
@@ -121,6 +130,14 @@
              rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
+        ! Get mask memory
+        call ESMF_LocStreamGetKey(locstream,                 &
+             localDE=0,                    &
+             keyName="ESMF:Mask",           &
+             farray=mask,                   &
+             rc=rc)
+        if (rc .ne. ESMF_SUCCESS) return
+
         ! Create Field
         humidity = ESMF_FieldCreate(locstream, ESMF_TYPEKIND_R8, &
             name="humidity", rc=rc)
@@ -128,7 +145,7 @@
 
         ! Get Field memory
         call ESMF_FieldGet(humidity, localDe=0, farrayPtr=srcfptr, &
-             computationalUBound=clb, computationalLBound=cub, &
+             computationalLBound=clb, computationalUBound=cub, &
              rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
 
@@ -137,6 +154,14 @@
            lon(i)=(i-1)*360.0/REAL(totalNumPoints)
            lat(i)=0.0
            srcfptr(i)=lon(i)/360.0 ! Just set it to this for testing
+           mask(i)=0
+
+           ! Mask out range and make dara bad
+           ! (Same range as in user_model1.F90)
+           if ((lon(i) > 10.0) .and. (lon(i) < 20.0)) then
+              mask(i)=1
+              srcfptr(i)=-10000.0 ! Bad value to check that mask works
+           endif
         enddo
 
         call ESMF_StateAdd(exportState, (/humidity/), rc=rc)

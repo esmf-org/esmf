@@ -111,7 +111,8 @@
       if(rc/=ESMF_SUCCESS) return
 
       ! Call ESMF_FieldRegridStore() to calculate routehandle between different locstreams
-      call ESMF_FieldRegridStore(srcField=humidity1, dstField=humidity2, &
+      call ESMF_FieldRegridStore(srcField=humidity1, srcMaskValues=(/1/), &
+           dstField=humidity2, dstMaskValues=(/2/), &
            regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
            routeHandle=routehandle, rc=rc)
       if(rc/=ESMF_SUCCESS) return
