@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = gfortran
 ESMF_CXXDEFAULT         = g++
+ESMF_CDEFAULT           = gcc
 
 ############################################################
 # Default MPI setting.
@@ -55,6 +56,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 
 ############################################################
 # Special debug flags
@@ -178,6 +180,7 @@ ESMF_F90COMPILEOPTS += -ffree-line-length-none
 #
 ESMF_F90RPATHPREFIX         = -Wl,-rpath,
 ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
 # Determine where gcc's libraries are located

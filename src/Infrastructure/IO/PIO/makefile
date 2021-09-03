@@ -27,12 +27,12 @@ else
   PIO_CMAKE_OPTS += -DWITH_PNETCDF=off
 endif
 
-#TODO: Fix hard-coded CC issue below...
+# Use the PIO native build system to build and install
 tree_lib:
 	mkdir -p Build
 	cd Build; \
-	env CC=mpicc FC=$(ESMF_F90COMPILER) CFLAGS="$(ESMF_CXXOPTFLAG) $(ESMF_SO_CXXCOMPILEOPTS)" cmake -DCMAKE_INSTALL_PREFIX=../Install $(PIO_CMAKE_OPTS) ../ParallelIO; \
-	make -f ./Makefile; \
+	env CC=$(ESMF_CCOMPILER) FC=$(ESMF_F90COMPILER) CFLAGS="$(ESMF_COPTFLAG) $(ESMF_SO_CCOMPILEOPTS)" cmake -DCMAKE_INSTALL_PREFIX=../Install $(PIO_CMAKE_OPTS) ../ParallelIO; \
+	make VERBOSE=1 -f ./Makefile; \
 	make -f ./Makefile install; \
 	cp -fp ../Install/include/* $(ESMF_INCDIR); \
 	cp -fp ../Install/lib/* $(ESMF_LDIR)

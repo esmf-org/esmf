@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = ftn
 ESMF_CXXDEFAULT         = CC
+ESMF_CDEFAULT           = cc
 
 ############################################################
 # Default MPI setting.
@@ -46,6 +47,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v -version
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -V
 
 ############################################################
 # XT compute nodes do not have support for POSIX IPC (memory mapped files)
@@ -93,6 +95,7 @@ ESMF_F90COMPILEFIXCPP    = -fixedform -cpp
 #
 ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
+ESMF_CLINKRPATHS        =
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
