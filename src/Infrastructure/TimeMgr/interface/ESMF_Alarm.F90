@@ -662,7 +662,7 @@
       subroutine ESMF_AlarmGet(alarm, keywordEnforcer, &
         clock, ringTime, prevRingTime, ringInterval, stopTime, ringDuration, &
         ringTimeStepCount, timeStepRingingCount, ringBegin, ringEnd, &
-        refTime, ringing, ringingOnPrevTimeStep, enabled, sticky, name, rc)
+        refTime, ringing, ringingOnPrevTimeStep, enabled, sticky, ringerIsOn, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(in)            :: alarm
@@ -682,6 +682,7 @@
       logical,                 intent(out), optional :: ringingOnPrevTimeStep
       logical,                 intent(out), optional :: enabled
       logical,                 intent(out), optional :: sticky
+      logical,                 intent(out), optional :: ringerIsOn
       character (len=*),       intent(out), optional :: name
       integer,                 intent(out), optional :: rc
 
@@ -746,6 +747,9 @@
 !     \item[{[sticky]}]
 !          The sticky state.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
+!     \item[{[ringerIsOn]}]
+!          The ringer state.
+!          See also {\tt ESMF\_AlarmRingerOn()}, {\tt ESMF\_AlarmRingerOff()}.
 !     \item[{[name]}]
 !          The name of this alarm.
 !     \item[{[rc]}]
@@ -782,7 +786,7 @@
                     ringTime, prevRingTime, ringInterval, stopTime, &
                     ringDuration, ringTimeStepCount, &
                     timeStepRingingCount, ringBegin, ringEnd, refTime, &
-                    ringing, ringingOnPrevTimeStep, enabled, sticky, localrc)
+                    ringing, ringingOnPrevTimeStep, enabled, sticky, ringerIsOn, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

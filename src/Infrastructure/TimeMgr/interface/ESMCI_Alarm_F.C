@@ -108,7 +108,7 @@ extern "C" {
                 TimeInterval *ringDuration, int *ringTimeStepCount,
                 int *timeStepRingingCount, Time *ringBegin,
                 Time *ringEnd, Time *refTime, bool *ringing,
-                bool *ringingOnPrevTimeStep, bool *enabled, bool *sticky,
+                bool *ringingOnPrevTimeStep, bool *enabled, bool *sticky, bool *ringerIsOn, 
                 int *status,
                 ESMCI_FortranStrLenArg tempName_l) {
           ESMF_CHECK_POINTER(*ptr, status)
@@ -131,7 +131,8 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(ringing),
                     ESMC_NOT_PRESENT_FILTER(ringingOnPrevTimeStep),
                     ESMC_NOT_PRESENT_FILTER(enabled),
-                    ESMC_NOT_PRESENT_FILTER(sticky) );
+                    ESMC_NOT_PRESENT_FILTER(sticky),
+                    ESMC_NOT_PRESENT_FILTER(ringerIsOn) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 

@@ -51,7 +51,8 @@
       use ESMF_TimeMod
       use ESMF_TimeTypeMod
       use ESMF_AlarmTypeMod
-
+      use ESMF_AlarmMod
+      use ESMF_VMMod
       ! type definition for this module
       use ESMF_ClockTypeMod
 
@@ -113,6 +114,11 @@
       private ESMF_ClockCreateNew
       private ESMF_ClockCreateCopy
 
+! !PUBLIC MEMBER FUNCTIONS:
+      public ESMF_TimeDebug
+      public ESMF_TimeIntervalDebug
+      public ESMF_AlarmDebug
+      public ESMF_ClockDebug
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
@@ -2062,5 +2068,148 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end function ESMF_ClockNE
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeIntervalDebug()"
+
+  subroutine ESMF_TimeIntervalDebug(TimeIV, name, rc)
+    type (ESMF_TimeInterval), intent(in)  :: TimeIV
+    character(len=*), intent(in)  :: name
+    integer, intent(out)          :: rc
+
+    type (ESMF_VM)         :: vm
+    integer                :: lpet, npet, yy, mm, dd, d, h, m, s
+
+    rc = ESMF_SUCCESS
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, localpet =lpet, petcount=npet, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_TimeIntervalGet(TimeIV, yy=yy, mm=mm, d=d, h=h, m=m, s=s, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(lpet == 0) then
+      write(*, '(A, A, 2I4, I10, 3I4)') 'TimeInterval Debug Printout: ', name, yy, mm, d, h, m, s
+    endif
+
+  end subroutine ESMF_TimeIntervalDebug
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeDebug()"
+  subroutine ESMF_TimeDebug(Time, name, rc)
+    type (ESMF_Time), intent(in)  :: Time
+    character(len=*), intent(in)  :: name
+    integer, intent(out)          :: rc
+
+    type (ESMF_VM)         :: vm
+    integer                :: lpet, npet, yy, mm, dd, d, h, m, s
+
+    rc = ESMF_SUCCESS
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, localpet =lpet, petcount=npet, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_TimeGet(Time, yy=yy, mm=mm, dd=dd, d=d, h=h, m=m, s=s, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(lpet == 0) then
+      write(*, '(A, A, 3I4, I10, 3I4)') 'Time Debug Printout: ', name, yy, mm, dd, d, h, m, s
+    endif
+
+  end subroutine ESMF_TimeDebug
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AlarmDebug()"
+  subroutine ESMF_AlarmDebug(alarm, name, rc)
+    type (ESMF_Alarm), intent(in) :: alarm
+    character(len=*), intent(in)  :: name
+    integer, intent(out)          :: rc
+
+    type (ESMF_VM)         :: vm
+    integer                :: lpet, npet
+    logical                :: ringing, enabled, sticky, ringingOnPrevTimeStep, ringerIsOn
+    type (ESMF_Time)       :: ringTime, refTime, prevRingTime, stopTime, ringBegin, ringEnd, ringRef
+    type (ESMF_TimeInterval) :: ringInterval, ringDuration
+
+    rc = ESMF_SUCCESS
+
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, localpet =lpet, petcount=npet, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ringing = .false.
+    enabled = .false.
+    sticky = .false.
+    ringerIsOn = .false.
+
+    call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, ringerIsOn=ringerIsOn, &
+      ringTime=ringTime, refTime=refTime, stopTime=stopTime, ringBegin=ringBegin, ringEnd=ringEnd, &
+      ringInterval=ringInterval, ringDuration=ringDuration, rc=rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(lpet == 0) then
+      write(*, '(A,A)') 'Alarm Debug Printout: ', name
+      print *, ''
+      print *, 'ringing = ', ringing
+      print *, 'enabled = ', enabled
+      print *, 'sticky = ' , sticky
+      print *, 'ringerIsOn = ' , ringerIsOn
+      call ESMF_TimeDebug(ringTime, 'ringTime', rc=rc)
+      call ESMF_TimeDebug(refTime, 'refTime', rc=rc)
+      !call ESMF_TimeDebug(stopTime, 'stopTime', rc=rc)
+      !call ESMF_TimeDebug(ringBegin, 'ringBegin', rc=rc)
+      !call ESMF_TimeDebug(ringEnd, 'ringEnd', rc=rc)
+      call ESMF_TimeIntervalDebug(ringInterval, 'ringInterval', rc=rc)
+      call ESMF_TimeIntervalDebug(ringDuration, 'ringDuration', rc=rc)
+
+    endif
+  end subroutine ESMF_AlarmDebug
+
+  subroutine ESMF_ClockDebug(clock, name, rc)
+  type (ESMF_Clock), intent(in) :: clock
+  character(len=*), intent(in)  :: name
+  integer, intent(out)          :: rc
+
+  type (ESMF_VM)         :: vm
+  integer                :: lpet, npet, alarmCount
+  logical                :: ringing, enabled, sticky, ringingOnPrevTimeStep, alarmRinging
+  type (ESMF_Time)       :: currTime, ringTime, prevRingTime, stopTime, ringBegin, ringEnd, ringRef
+  type (ESMF_TimeInterval) :: ringInterval, ringDuration
+
+  rc = ESMF_SUCCESS
+
+  call ESMF_VMGetCurrent(vm, rc=rc)
+  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, localpet =lpet, petcount=npet, rc=rc)
+  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_ClockGet(clock, currTime=currTime, alarmCount=alarmCount, rc=rc)
+  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if(lpet == 0) then
+    write(*, '(A, A)') 'Clock Debug Printout: ', name
+    write(*, *) ''
+    write(*, *) 'AlarmCount = ', alarmCount
+    call ESMF_TimeDebug(currTime, 'currTime', rc=rc)
+  endif
+end subroutine ESMF_ClockDebug
 
       end module ESMF_ClockMod

@@ -195,7 +195,8 @@ class Alarm {
                       bool              *ringing=0,
                       bool              *ringingOnPrevTimeStep=0,
                       bool              *enabled=0,  // (TMG 4.1, 4.7)
-                      bool              *sticky=0);
+                      bool              *sticky=0, 
+                      bool              *ringerIsOn=0);
 
               int      enable(void);    // TMG4.5.3
               int      disable(void);
@@ -277,7 +278,7 @@ class Alarm {
     // enable Sticky
     void enableSticky(void);
 
-    bool willRingAtTime(const Time & clockTime) const;
+    bool canRingAtTime(const Time & clockTime) const;
 
     // friend class alarm
     friend class Clock;

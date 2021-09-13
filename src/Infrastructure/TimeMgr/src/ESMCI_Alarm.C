@@ -154,6 +154,8 @@ int Alarm::count=0;
       alarm->stopTime = *stopTime;
     }
     if (ringDuration != ESMC_NULL_POINTER) {
+      ESMC_LogDefault.Write("ringDuration is no longer supported. Please contact ESMF support.", 
+        ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       alarm->ringDuration = *ringDuration;
     }
     if (ringTimeStepCount != ESMC_NULL_POINTER) {
@@ -477,7 +479,8 @@ void Alarm::enableSticky(void){
       bool              *ringing,                // out
       bool              *ringingOnPrevTimeStep,  // out
       bool              *enabled,                // out
-      bool              *sticky) {               // out
+      bool              *sticky,                 // out
+      bool              *ringerIsOn) {           // out
 //
 // !DESCRIPTION:
 //      Gets {\tt ESMC\_Alarm} property values;
@@ -562,6 +565,9 @@ void Alarm::enableSticky(void){
     }
     if (sticky != ESMC_NULL_POINTER) {
       *sticky = this->sticky;
+    }
+    if (ringerIsOn != ESMC_NULL_POINTER) {
+      *ringerIsOn = this->ringerIsOn;
     }
 
     rc = ESMF_SUCCESS;
@@ -836,9 +842,10 @@ void Alarm::enableSticky(void){
     // Initialize return code; assume routine not implemented
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
-    Time clockTime = clock->currTime;
+    //Time clockTime = clock->currTime;
 
-    return(enabled && ringerIsOn && willRingAtTime(clockTime));
+    //return(enabled && ringerIsOn && canRingAtTime(clockTime));
+    return(enabled && ringing);
 
  } // end Alarm::isRinging
 
@@ -895,7 +902,7 @@ void Alarm::enableSticky(void){
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     Time clockNextTime;
     clock->Clock::getNextTime(&clockNextTime, timeStep);
-    return willRingAtTime(clockNextTime);
+    return canRingAtTime(clockNextTime);
 
  } // end Alarm::willRingNext
 
@@ -941,7 +948,7 @@ void Alarm::enableSticky(void){
     // get clock's prev time
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
     Time clockTime = clock->currTime - clock->timeStep;
-    return willRingAtTime(clockTime);
+    return canRingAtTime(clockTime);
 
  } // end Alarm::wasPrevRinging
 
@@ -1079,25 +1086,12 @@ void Alarm::enableSticky(void){
 
  } // end Alarm::isSticky
 
-#define DEBUG 0
-bool Alarm::willRingAtTime(const Time & clockTime) const{
+#define DEBUG 1
+bool Alarm::canRingAtTime(const Time & clockTime) const{
     bool retval = false;
 
-    TimeInterval deltaT = clockTime - this->firstRingTime;
-
-    ESMC_R8 rn = deltaT/ringInterval;
-
-    ESMC_I4 n = int(rn);
-
-#if DEBUG == 1
-    printf("number of intervals %f %d \n", rn, n);
-#endif
-
-    if( (this->firstRingTime + n    *ringInterval == clockTime) ||
-        (this->firstRingTime + (n+1)*ringInterval == clockTime) ) 
+    if(this->ringTime  == clockTime) 
       retval = true;
-    else
-      retval = false;
 
     return retval;
 }
@@ -1142,30 +1136,26 @@ bool Alarm::willRingAtTime(const Time & clockTime) const{
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       return(false);
     }
-    if(!ringerIsOn) {
-      if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
-      return false;
-    }
+    Time clockTime = clock->currTime;
+    bool canRing = canRingAtTime( clockTime); // Check if the alarm can ring when time matches.
 
-    // If the ringing is controlled by ringer, the following logic is redundant.
-
-    // If the alarm is sticky then whether it's ringing or not is controled
-    // by ringerOn or ringerOff by user
-
-    // If the alarm is sticky and the ringer is turned off, then it cannot ring
-    // else calculate the ringing state of the alarm.
     if(sticky) {
-      if(!ringerIsOn) {
-        if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
-        return false;
+
+      /* A sticky alarm can ring for two reasons
+       * 1) it rang previously
+       * 2) it didn't ring but now it's the time to ring
+       */
+      if(ringing || canRing){ // Set ringing true either because it's a sticky ringing alarm or time matches.
+        ringing = true;
+        if (canRing) updateRingTime(rc); // If the alarm's time match clock time, advance ringTime
+        return (ringing && enabled);
       }
     }
 
-    // Otherwise only the current state of the clock and alarm is used
-    // to determine if the alarm should ring.
-    Time clockTime = clock->currTime;
-    if (willRingAtTime( clockTime)){
+    // Non-sticky one shot alarms, time must match
+    if (canRing){
       ringing = true;
+      updateRingTime(rc); // If the alarm's time match clock time, advance ringTime
     }else{
       ringing = false;
     }
@@ -1200,9 +1190,8 @@ bool Alarm::willRingAtTime(const Time & clockTime) const{
 
   if(ringing){
     prevRingTime = ringTime;
-    ringTime = clock->currTime;
+    ringTime = ringTime + ringInterval;
   }
-
 }
 
 //-------------------------------------------------------------------------
