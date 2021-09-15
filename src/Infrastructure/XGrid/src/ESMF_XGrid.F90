@@ -115,6 +115,7 @@ module ESMF_XGridMod
     logical                                :: is_proxy         ! .true. for a proxy xgrid
     logical                                :: storeOverlay     ! .false. do not save mesh in the middle
     integer                                :: online           ! 1 if Xgrid is computed based on user input, 0 offline
+    type(ESMF_CoordSys_Flag)               :: coordSys         ! Coordinate system of the XGrid
     type (ESMF_Status)                     :: status
     ESMF_INIT_DECLARE
   end type
@@ -1385,6 +1386,7 @@ contains
 !
 !EOPI
         xgtypep%status  = ESMF_STATUS_UNINIT
+        xgtypep%coordSys  = ESMF_COORDSYS_SPH_DEG
         xgtypep%online         = 0
         xgtypep%is_proxy       = .false. 
         xgtypep%storeOverlay   = .false. 

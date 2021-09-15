@@ -47,6 +47,7 @@ module ESMF_InitMod
       use ESMF_DELayoutMod
       use ESMF_CalendarMod
       use ESMF_TraceMod
+      use ESMF_UtilMod
 
       implicit none
       private
@@ -91,19 +92,20 @@ module ESMF_InitMod
 !
 ! !INTERFACE:
       subroutine ESMF_Initialize(keywordEnforcer, defaultConfigFileName, defaultCalKind, &
-        defaultLogFileName, logappendflag, logkindflag, mpiCommunicator,  &
-        ioUnitLBound, ioUnitUBound, vm, rc)
+        defaultLogFileName, logAppendFlag, logKindFlag, mpiCommunicator,  &
+        ioUnitLBound, ioUnitUBound, globalResourceControl, vm, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind
       character(len=*),        intent(in),  optional :: defaultLogFileName
-      logical,                 intent(in),  optional :: logappendflag
-      type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag
+      logical,                 intent(in),  optional :: logAppendFlag
+      type(ESMF_LogKind_Flag), intent(in),  optional :: logKindFlag
       integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(in),  optional :: ioUnitLBound
       integer,                 intent(in),  optional :: ioUnitUBound
+      logical,                 intent(in),  optional :: globalResourceControl
       type(ESMF_VM),           intent(out), optional :: vm
       integer,                 intent(out), optional :: rc
 
@@ -113,8 +115,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.0.0] Added argument {\tt logappendflag} to allow specifying that the existing
+! \item[7.0.0] Added argument {\tt logAppendFlag} to allow specifying that the existing
 !              log files will be overwritten.\newline
+! \item[8.2.0] Added argument {\tt globalResourceControl} to support ESMF-aware
+!              threading and resource control on the global VM level.
 ! \end{description}
 ! \end{itemize}
 !
@@ -163,7 +167,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     In cases where {\tt ESMF\_*CompSetVM*()} methods are used to move
 !     processing elements (PEs), i.e. CPU cores, between persistent execution
 !     threads (PETs), ESMF uses POSIX signals between PETs. In order to do so
-!     safely, the proper signal handlers must be installed before MPI is
+!     safely, the proper signal handlers must be installed {\em before} MPI is
 !     initialized. {\tt ESMF\_Initialize()} handles this automatically if it is
 !     in charge of initializing MPI. If, however, MPI is explicitly initialized
 !     by user code, then to ensure correct signal handling it is necessary to
@@ -176,7 +180,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     large number of log files and writing log messages from all the processors
 !     could become a performance bottleneck.  Therefore, it is recommended
 !     to turn the Error Log feature off in these situations by setting
-!     {\tt logkindflag} to ESMF\_LOGKIND\_NONE.
+!     {\tt logKindFlag} to ESMF\_LOGKIND\_NONE.
 !
 !     When integrating ESMF with applications where Fortran unit number conflicts
 !     exist, the optional {\tt ioUnitLBound} and {\tt ioUnitUBound} arguments may be
@@ -192,22 +196,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [{[defaultConfigFilename]}]
 !           Name of the default configuration file for the entire application.
+!           If this argument is specified, the configuration file must exist,
+!           and its content is read during {\tt ESMF\_Initialize()}.
+!           If any of the following labels are found in the specified
+!           configuration file, and the associated argument of the same name
+!           was {\em not} specified explicitly in the call to
+!           {\tt ESMF\_Initialize()}, then the value specified in the
+!           configuration file is used as the default. The supported config
+!           labels are:
+!           \begin{itemize}
+!              \item {\tt defaultLogFileName:}
+!              \item {\tt logAppendFlag:}
+!              \item {\tt logKindFlag:}
+!              \item {\tt globalResourceControl:}
+!           \end{itemize}
 !     \item [{[defaultCalKind]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           See section \ref{const:calkindflag} for a list of valid options.
 !           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
-!           If not specified, defaults to {\tt ESMF\_ErrorLog}.
-!     \item [{[logappendflag]}]
+!           If not specified,
+!           defaults to specification in {\tt defaultConfigFilename}, or
+!           {\tt ESMF\_LogFile}.
+!     \item [{[logAppendFlag]}]
 !           If the default log file already exists, a value of {\tt .false.}
 !           will set the file position to the beginning of the file.  A value
 !           of {\tt .true.} sets the position to the end of the file.
-!           If not specified, defaults to {\tt .true.}.
-!     \item [{[logkindflag]}]
+!           If not specified,
+!           defaults to specification in {\tt defaultConfigFilename}, or
+!           {\tt .true.}.
+!     \item [{[logKindFlag]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
 !           See section \ref{const:logkindflag} for a list of valid options.
-!           If not specified, defaults to {\tt ESMF\_LOGKIND\_MULTI}.
+!           If not specified,
+!           defaults to specification in {\tt defaultConfigFilename}, or
+!           {\tt ESMF\_LOGKIND\_MULTI}.
 !     \item [{[mpiCommunicator]}]
 !           MPI communicator defining the group of processes on which the
 !           ESMF application is running.
@@ -227,6 +251,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Must be set to a value at least 5 units higher than {\tt ioUnitLBound}.
 !           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}, which is
 !           distributed with a value of 99.
+!     \item [{[globalResourceControl]}]
+!           For {\tt .true.}, each global PET is pinned to the corresponding
+!           PE (i.e. CPU core) in order. If OpenMP support is enabled,
+!           {\tt OMP\_NUM\_THREADS} is set to {\tt 1} on every PET, regardless
+!           of the setting in the launching environment. The {\tt .true.}
+!           setting is recommended for applications that utilize the ESMF-aware
+!           threading and resource control features.
+!           For {\tt .false.}, global PETs are {\em not} pinned by ESMF, and
+!           {\tt OMP\_NUM\_THREADS} is {\em not} modified.
+!           If not specified,
+!           defaults to specification in {\tt defaultConfigFilename}, or
+!           {\tt .false.}.
 !     \item [{[vm]}]
 !           Returns the global {\tt ESMF\_VM} that was created 
 !           during initialization.
@@ -237,23 +273,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
       integer       :: localrc                        ! local return code
       type(ESMF_VM) :: localvm
-      type(ESMF_Logical) :: logappendflag_local
 
       ! assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      logappendflag_local = ESMF_TRUE
-      if (present (logappendflag)) then
-        logappendflag_local = logappendflag
-      end if
-
       ! initialize the framework
       call ESMF_FrameworkInternalInit(lang=ESMF_MAIN_F90, &
-        defaultConfigFileName=defaultConfigFileName, defaultCalKind=defaultCalKind,  &
-        defaultLogFileName=defaultLogFileName, logappendflag=logappendflag_local,  &
-        logkindflag=logkindflag, mpiCommunicator=mpiCommunicator, &
-        ioUnitLBound=ioUnitLBound, ioUnitUBound=ioUnitUBound,  &
-        rc=localrc)
+        defaultConfigFileName=defaultConfigFileName, defaultCalKind=defaultCalKind, &
+        defaultLogFileName=defaultLogFileName, logAppendFlag=logAppendFlag, &
+        logKindFlag=logKindFlag, mpiCommunicator=mpiCommunicator, &
+        ioUnitLBound=ioUnitLBound, ioUnitUBound=ioUnitUBound, &
+        globalResourceControl=globalResourceControl, rc=localrc)
                                       
       ! on failure LogErr is not initialized -> explicit print on error
       if (localrc .ne. ESMF_SUCCESS) then
@@ -351,20 +381,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
-        defaultCalKind, defaultLogFileName, logappendflag, logkindflag, &
-        mpiCommunicator, ioUnitLBound, ioUnitUBound, rc)
+        defaultCalKind, defaultLogFileName, logAppendFlag, logKindFlag, &
+        mpiCommunicator, ioUnitLBound, ioUnitUBound, globalResourceControl, rc)
 !
 ! !ARGUMENTS:
-      integer,                 intent(in)            :: lang     
+      integer,                 intent(in)            :: lang
       character(len=*),        intent(in),  optional :: defaultConfigFileName
-      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind     
+      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind
       character(len=*),        intent(in),  optional :: defaultLogFileName
-      type(ESMF_Logical),      intent(in),  optional :: logappendflag
-      type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag  
+      logical,                 intent(in),  optional :: logAppendFlag
+      type(ESMF_LogKind_Flag), intent(in),  optional :: logKindFlag
       integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(in),  optional :: ioUnitLBound
       integer,                 intent(in),  optional :: ioUnitUBound
-      integer,                 intent(out), optional :: rc     
+      logical,                 intent(in),  optional :: globalResourceControl
+      integer,                 intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -382,13 +413,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
-!           If not specified, defaults to "ESMF_ErrorLog".
-!     \item [{[logappendflag]}]
+!           If not specified, defaults to {\tt ESMF\_LogFile}.
+!     \item [{[logAppendFlag]}]
 !           If the default log file already exists, a value of {\tt .false.}
 !           will set the file position to the beginning of the file.  A value
 !           of [\tt .true.} sets the position to the end of the file.
 !           If not specified, defaults to {\tt .true.}.
-!     \item [{[logkindflag]}]
+!     \item [{[logKindFlag]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
 !           If not specified, defaults to "ESMF\_LOGKIND\_MULTI".
 !     \item [{[mpiCommunicator]}]
@@ -402,6 +433,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[ioUnitUBound]}]
 !           Upper bound for Fortran unit numbers used within the ESMF library.
 !           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}
+!     \item [{[globalResourceControl]}]
+!           Global resource control enabled or disabled. Default {\tt .false.}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -411,8 +444,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical :: rcpresent                       ! Return code present   
       integer :: localrc
       logical, save :: already_init = .false.    ! Static, maintains state.
-      logical :: logappendflag_local
-      type(ESMF_LogKind_Flag) :: logkindflagUse
+      type(ESMF_LogKind_Flag) :: logKindFlagUse
       logical :: openflag
       integer :: complianceCheckIsOn
       integer :: traceIsOn, profileIsOn, profileToLog
@@ -422,6 +454,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(ESMF_MAXPATHLEN) :: build_detail
       character(16) :: build_date, build_time
       integer :: detail_loc
+
+      character(ESMF_MAXSTR) :: errmsg
+      integer :: errmsg_l
+      type(ESMF_Config)   :: config
+
+      logical             :: globalResourceControlConfig
+      character(80)       :: logKindFlagS, logKindFlagSU
+      character(160)      :: defaultLogFileNameS, defaultLogFileNameUse
+      logical             :: logAppendFlagUse
 
       ! Initialize return code
       rcpresent = .FALSE.
@@ -464,58 +505,148 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! ESMF_VMInitialize() with an un-initialized MPI will install correct 
       ! signal handlers _before_ possible helper threads are spawned by 
       ! MPI_Init().
-      ! If, however, VMKernel threading is not used it is fine to come in with
-      ! a user initialized MPI, and thus we support this mode as well!
-      call ESMF_VMInitialize(mpiCommunicator=mpiCommunicator, rc=localrc)
+      ! If, however, VMKernel threading is not used, or ESMF_InitializePreMPI()
+      ! has been called, it is fine to come in with a user initialized MPI,
+      ! and thus we support this mode as well!
+      call ESMF_VMInitialize(mpiCommunicator=mpiCommunicator, &
+        globalResourceControl=globalResourceControl, rc=localrc)
       ! error handling without LogErr because it's not initialized yet
       if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing VM"
           return
       endif
 
-      ! check logkindflag in case it is coming across from the C++ side with
+      ! check logKindFlag in case it is coming across from the C++ side with
       ! an incorrect value
-      if (present(logkindflag)) then
-        if (logkindflag == ESMF_LOGKIND_SINGLE .or. &
-            logkindflag == ESMF_LOGKIND_MULTI .or. &
-            logkindflag == ESMF_LOGKIND_MULTI_ON_ERROR .or.  &
-            logkindflag == ESMF_LOGKIND_NONE) then
-          logkindflagUse = logkindflag
+      if (present(logKindFlag)) then
+        if (logKindFlag == ESMF_LOGKIND_SINGLE .or. &
+            logKindFlag == ESMF_LOGKIND_MULTI .or. &
+            logKindFlag == ESMF_LOGKIND_MULTI_ON_ERROR .or.  &
+            logKindFlag == ESMF_LOGKIND_NONE) then
+          logKindFlagUse = logKindFlag
         else
-          logkindflagUse = ESMF_LOGKIND_MULTI
+          logKindFlagUse = ESMF_LOGKIND_MULTI
         endif
       else
-        logkindflagUse = ESMF_LOGKIND_MULTI
+        logKindFlagUse = ESMF_LOGKIND_MULTI
       endif
 
-      logappendflag_local = .false.
-      if (present (logappendflag)) then
-        logappendflag_local = logappendflag
-      end if
-
+      defaultLogFileNameUse = "ESMF_LogFile"
       if (present(defaultLogFileName)) then
-         if (len_trim(defaultLogFileName).ne.0) then
-           call ESMF_LogInitialize(defaultLogFileName,  &
-               logappendflag=logappendflag_local, logkindflag=logkindflagUse, &
-               rc=localrc)
-         else
-           call ESMF_LogInitialize("ESMF_LogFile",  &
-               logappendflag=logappendflag_local, logkindflag=logkindflagUse, &
-               rc=localrc)
-         endif
-      else
-         call ESMF_LogInitialize("ESMF_LogFile",  &
-               logappendflag=logappendflag_local, logkindflag=logkindflagUse, &
-               rc=localrc)
+        defaultLogFileNameUse = trim(defaultLogFileName)
       endif
-      if (localrc /= ESMF_SUCCESS) then
-          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing the default log/error manager"
+
+      logAppendFlagUse = .true.
+      if (present(logAppendFlag)) then
+        logAppendFlagUse = logAppendFlag
+      endif
+
+      if (present(defaultConfigFileName)) then
+        ! have a default Config
+
+        ! first must initialize a temporary ESMF default log
+        call ESMF_LogInitialize("ESMF_LogFile",  &
+          logKindFlag=ESMF_LOGKIND_MULTI_ON_ERROR, &
+          rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error LogInitialize() log file: ", errmsg(:errmsg_l)
           return
+        endif
+
+        ! open the Config
+        config = ESMF_ConfigCreate(rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! load config file
+        call ESMF_ConfigLoadFile(config, defaultConfigFileName, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! globalResourceControl
+        if (.not.present(globalResourceControl)) then
+          ! not supplied on caller side -> attempt to read from config
+          call ESMF_ConfigGetAttribute(config, globalResourceControlConfig, &
+            label="globalResourceControl:", default=.false., rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          ! set global VM resource control
+          call ESMF_VMSet(globalResourceControl=globalResourceControlConfig, &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        ! logKindFlag
+        if (.not.present(logKindFlag)) then
+          ! not supplied on caller side -> attempt to read from config
+          call ESMF_ConfigGetAttribute(config, logKindFlagS, &
+            label="logKindFlag:", default="---invalid---", rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          logKindFlagSU = ESMF_UtilStringUpperCase(logKindFlagS, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (trim(logKindFlagSU)=="ESMF_LOGKIND_NONE") then
+            logkindflagUse = ESMF_LOGKIND_NONE
+          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_SINGLE") then
+            logkindflagUse = ESMF_LOGKIND_SINGLE
+          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_MULTI") then
+            logkindflagUse = ESMF_LOGKIND_MULTI
+          else if (trim(logKindFlagSU)=="ESMF_LOGKIND_MULTI_ON_ERROR") then
+            logkindflagUse = ESMF_LOGKIND_MULTI_ON_ERROR
+          endif
+        endif
+
+        ! defaultLogFileName
+        if (.not.present(defaultLogFileName)) then
+          ! not supplied on caller side -> attempt to read from config
+          call ESMF_ConfigGetAttribute(config, defaultLogFileNameS, &
+            label="defaultLogFileName:", default="---invalid---", rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (trim(defaultLogFileNameS)/="---invalid---") then
+            defaultLogFileNameUse = trim(defaultLogFileNameS)
+          endif
+        endif
+
+        ! logAppendFlag
+        if (.not.present(logAppendFlag)) then
+          ! not supplied on caller side -> attempt to read from config
+          call ESMF_ConfigGetAttribute(config, logAppendFlagUse, &
+            label="logAppendFlag:", default=.true., rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        ! close the Config
+        call ESMF_ConfigDestroy(config, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! shut down temporary Log
+        call ESMF_LogFinalize(rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": Error finalizing log file: ", errmsg(:errmsg_l)
+          return
+        endif
+      endif
+
+      ! Initialize ESMF default log
+      call ESMF_LogInitialize(trim(defaultLogFileNameUse), &
+        logAppendFlag=logAppendFlagUse, logKindFlag=logKindFlagUse, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing the default log/error manager"
+        return
       endif
       
       ! Write out warning about performance impact of logging
-      if ((logkindflagUse/=ESMF_LOGKIND_NONE) .and. &
-        (logkindflagUse/=ESMF_LOGKIND_MULTI_ON_ERROR)) then
+      if ((logKindFlagUse/=ESMF_LOGKIND_NONE) .and. &
+        (logKindFlagUse/=ESMF_LOGKIND_MULTI_ON_ERROR)) then
         call ESMF_LogWrite(&
           "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", &
           ESMF_LOGMSG_INFO, rc=localrc)
@@ -714,8 +845,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       if (traceIsOn == 1 .or. profileIsOn == 1) then
         profileToLog = 0
-        if ((logkindflagUse/=ESMF_LOGKIND_NONE) .and. &
-          (logkindflagUse/=ESMF_LOGKIND_MULTI_ON_ERROR)) then
+        if ((logKindFlagUse/=ESMF_LOGKIND_NONE) .and. &
+          (logKindFlagUse/=ESMF_LOGKIND_MULTI_ON_ERROR)) then
           profileToLog = 1
         endif
         call ESMF_TraceOpen("./traceout", profileToLog=profileToLog, rc=localrc)
@@ -732,28 +863,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ": Error initializing the default time manager calendar"
       return
       endif
-
-      ! Open config file if specified
-      if (present(defaultConfigFileName)) then
-         if (len_trim(defaultConfigFileName).ne.0) then
-            ! TODO: write this and remove the fixed status= line
-            !call ESMF_ConfigInitialize(defaultConfigFileName, status)
-            localrc = ESMF_SUCCESS
-            if (localrc /= ESMF_SUCCESS) then
-              write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-                  ": Error opening the default config file"
-              return
-            endif
-         endif
-      endif
-
-      ! Initialize the machine model, the comms, etc.  Old code, superceeded
-      ! by VM code.
-      !call ESMF_MachineInitialize(lang, status)
-      !if (status .ne. ESMF_SUCCESS) then
-      !    print *, "Error initializing the machine characteristics"
-      !    return
-      !endif
 
       ! in case we need to know what the language was for main, we have it.
       ! right now we do not make use of it for anything.
@@ -920,7 +1029,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: errmsg_l
       logical, save :: already_final = .false.    ! Static, maintains state.
 
-      logical, parameter :: trace = .false.
       integer :: traceIsOn, profileIsOn
 
       ! Initialize return code
@@ -969,8 +1077,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Delete any internal built-in time manager calendars
-      if (trace) write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ': Finalizing Calendar (if needed)'
       call ESMF_CalendarFinalize(rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
@@ -996,8 +1102,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
       if (abortFlag) then
         ! Abort the VM
-      if (trace) write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ': calling ESMF_VMAbort'
         call ESMF_VMAbort(rc=localrc)
         if (localrc /= ESMF_SUCCESS) then
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
@@ -1007,8 +1111,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       else
         ! Finalize the VM
-      if (trace) write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ': calling ESMF_VMFinalize'
         call ESMF_VMFinalize(keepMpiFlag=keepMpiFlag, rc=localrc)
         if (localrc /= ESMF_SUCCESS) then
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)
@@ -1019,8 +1121,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Shut down the log file
-      if (trace) write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ': Finalizing Log'
       call ESMF_LogFinalize(localrc)
       if (localrc /= ESMF_SUCCESS) then
           call ESMF_LogRc2Msg (localrc, errmsg, errmsg_l)

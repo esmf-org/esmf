@@ -88,6 +88,9 @@ namespace ESMCI {
                                double *lon, double *lat, double *r);
 
 
+  void convert_cart_to_sph_rad(double x, double y, double z,
+                               double *lon, double *lat, double *r);
+
   bool is_smashed_quad2D(int num_p, double *p);
 
   bool is_smashed_quad3D(int num_p, double *p);

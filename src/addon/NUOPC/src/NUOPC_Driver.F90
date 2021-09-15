@@ -20,7 +20,7 @@ module NUOPC_Driver
   !-----------------------------------------------------------------------------
 
   use ESMF
-  use NUOPC
+  use NUOPC, SetVM => NUOPC_SetVM
   use NUOPC_RunSequenceDef
   use NUOPC_Connector, only: cplSS => SetServices, NUOPC_ConnectorSet
   
@@ -150,16 +150,6 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
   contains
-  !-----------------------------------------------------------------------------
-  
-  recursive subroutine SetVM(driver, rc)
-    type(ESMF_GridComp)  :: driver
-    integer, intent(out) :: rc
-
-    rc = ESMF_SUCCESS
-  
-  end subroutine
-
   !-----------------------------------------------------------------------------
   
   recursive subroutine SetServices(driver, rc)

@@ -1623,8 +1623,9 @@ static void _tmp_convert_cart_to_sph_deg(double x, double y, double z,
   //sintd_nodes.erase(std::unique(sintd_nodes.begin(), sintd_nodes.end(), sintd_node_equal()), sintd_nodes.end());
 
   Mesh & meshmid = *midmesh;
-  meshmid.set_parametric_dimension(pdim);
-  meshmid.set_spatial_dimension(sdim);
+  //// Set these when mesh is first created in ESMCI_xgridregrid_create() 
+  // meshmid.set_parametric_dimension(pdim);
+  // meshmid.set_spatial_dimension(sdim);
   meshmid.side=side;
   int rc;
   int me = VM::getCurrent(&rc)->getLocalPet();

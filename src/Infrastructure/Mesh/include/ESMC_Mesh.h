@@ -427,44 +427,6 @@ void ESMC_MeshGetConnectivity(
 //EOP
 //-----------------------------------------------------------------------------
 
-
-//------------------------------------------------------------------------------
-//BOPI
-// !IROUTINE: ESMC_MeshCreateDistGrids - Create Dist Grids in a Mesh
-//
-// !INTERFACE:
-int ESMC_MeshCreateDistGrids(
-  ESMC_Mesh mesh,             // in
-  int *nodeDistGrid,          // in
-  int *elemDistGrid,          // in
-  int *nodeCount,             // in
-  int *elementCount           // in
-);
-
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Description to be added.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[mesh]
-//    Mesh object.
-//  \item[nodeDistGrid]
-//  Description to be added.
-//  \item[elemDistGrid]
-//  Description to be added.
-//  \item[nodeCount]
-//  Description to be added.
-//  \item[elementCount]
-//  Description to be added.
-//  \end{description}
-//
-//EOPI
-//-----------------------------------------------------------------------------
-
 //------------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_MeshDestroy - Destroy a Mesh
