@@ -27,7 +27,19 @@ else
   PIO_CMAKE_OPTS += -DWITH_PNETCDF=off
 endif
 
-# Use the PIO native build system to build and install
+ifdef PIO_AUTOCONF_BUILD
+# Use the PIO native autoconf build system to build and install
+tree_lib:
+	mkdir -p Install
+	cd ParallelIO; \
+	autoreconf -i; \
+	configure CC=$(ESMF_CCOMPILER) CFLAGS="$(ESMF_COPTFLAG) $(ESMF_SO_CCOMPILEOPTS)" --prefix=$(ESMF_DIR)/src/Infrastructure/IO/PIO/Install ;\
+	make -f ./Makefile ;\
+	make -f ./Makefile install ;\
+	cp -fp ../Install/include/* $(ESMF_INCDIR); \
+	cp -fp ../Install/lib/* $(ESMF_LDIR)
+else
+# Use the PIO native cmake build system to build and install
 tree_lib:
 	mkdir -p Build
 	cd Build; \
@@ -37,6 +49,7 @@ tree_lib:
 	cp -fp ../Install/include/* $(ESMF_INCDIR); \
 	cp -fp ../Install/lib/* $(ESMF_LDIR)
 
+endif
 DIRS      =
 
 CLEANDIRS   = Build Install
