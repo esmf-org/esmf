@@ -22,6 +22,7 @@ module NUOPC_Base
   use ESMF
   use NUOPC_FieldDictionaryApi
   use NUOPC_Auxiliary
+  use NUOPC_FreeFormatDef
 
   implicit none
   
@@ -54,6 +55,7 @@ module NUOPC_Base
   public NUOPC_GetStateMemberCount        ! method
   public NUOPC_GetTimestamp               ! method
   public NUOPC_InitAttributes             ! method
+  public NUOPC_IngestPetList              ! method
   public NUOPC_IsAtTime                   ! method
   public NUOPC_IsConnected                ! method
   public NUOPC_IsUpdated                  ! method
@@ -2321,7 +2323,142 @@ module NUOPC_Base
 
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IngestPetList - Ingest a petList from FreeFormat
+! !INTERFACE:
+  subroutine NUOPC_IngestPetList(petList, freeFormat, rc)
+! !ARGUMENTS:
+    integer, allocatable,   intent(out)           :: petList(:)
+    type(NUOPC_FreeFormat), intent(in),  target   :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Construct a petList from a {\tt FreeFormat} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[petList]
+!     The constructed petList. The size and content is set by this method.
+!   \item[freeFormat]
+!     The incoming petList information in free format. The format supports
+!     two types of elements:
+!     \begin{itemize}
+!     \item Single PET elements consist of a single number referring to the PET.
+!     \item Block elements consist of two PET numbers, separated by a "-" 
+!           character. No white spaces are accepted between the dash and the
+!           PET numbers. A block element includes all of the PETs between the
+!           lower bound (left PET number), and the upper bound (right PET
+!           number), bounds inclusive. The upper bound must {\em not} be
+!           less than the lower bound. 
+!     \end{itemize}
+!     Any number of elements may be listed in the free format. The idividual
+!     elements are separated by white spaces.
+!
+!     For an example, the free format petList definition
+!     \begin{verbatim}
+!     "2-5 12 0 15-23"
+!     \end{verbatim}
+!     would translate into a {\tt petList} output of
+!     \begin{verbatim}
+!     (/2, 3, 4, 5, 12, 0, 15, 16, 17, 18, 19, 20, 21, 22, 23/)
+!     \end{verbatim}
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: localrc
+    integer                 :: i, j, k
+    integer                 :: lineCount, tokenCount, blockCount, petCount
+    integer, allocatable    :: lb(:), ub(:)
+    character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+    character(len=ESMF_MAXSTR), pointer :: chopStringList(:)
+
+    call NUOPC_FreeFormatGet(freeFormat, lineCount=lineCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    blockCount = 0
+    do i=1, lineCount
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=localrc)
+      blockCount = blockCount + tokenCount
+    enddo
+
+    allocate(lb(tokenCount),ub(tokenCount))
+    petCount = 0
+    k = 1
+
+    do i=1, lineCount
+
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      allocate(tokenList(tokenCount))
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenList=tokenList, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      do j=1, tokenCount
+
+        if (index(trim(tokenList(j)),"-") > 0) then
+          ! this is a PET range
+          call NUOPC_ChopString(tokenList(j), chopChar="-", &
+            chopStringList=chopStringList, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          if (size(chopStringList) /= 2) then
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+              msg="Syntax error detected in petList block element.", &
+              line=__LINE__, file=FILENAME, &
+              rcToReturn=rc)
+            return  ! bail out
+          endif
+          read(chopStringList(1),*) lb(k)
+          read(chopStringList(2),*) ub(k)
+          deallocate(chopStringList)
+          if (ub(k)<lb(k)) then
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+              msg="Upper bound must not be less than lower bound in "//& 
+              "petList block element.", line=__LINE__, file=FILENAME, &
+              rcToReturn=rc)
+            return  ! bail out
+          endif
+        else
+          ! this is a single PET
+          read(tokenList(j),*) lb(k)
+          read(tokenList(j),*) ub(k)
+        endif
+
+        petCount = petCount + ub(k) - lb(k) + 1
+        k = k+1
+
+      enddo
+
+      deallocate(tokenList)
+
+    enddo
+
+    allocate(petList(petCount))
+    i = 1
+
+    do k=1, blockCount
+      do j=lb(k), ub(k)
+        petList(i) = j
+        i = i+1
+      enddo
+    enddo
+
+    deallocate(lb, ub)
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_IsAtTime - Check if a Field is at the given Time
