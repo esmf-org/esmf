@@ -93,7 +93,7 @@ module ESMF_InitMod
 ! !INTERFACE:
       subroutine ESMF_Initialize(keywordEnforcer, defaultConfigFileName, defaultCalKind, &
         defaultLogFileName, logAppendFlag, logKindFlag, mpiCommunicator,  &
-        ioUnitLBound, ioUnitUBound, globalResourceControl, vm, rc)
+        ioUnitLBound, ioUnitUBound, globalResourceControl, config, vm, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -106,6 +106,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(in),  optional :: ioUnitLBound
       integer,                 intent(in),  optional :: ioUnitUBound
       logical,                 intent(in),  optional :: globalResourceControl
+      type(ESMF_Config),       intent(out), optional :: config
       type(ESMF_VM),           intent(out), optional :: vm
       integer,                 intent(out), optional :: rc
 
@@ -116,9 +117,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[7.0.0] Added argument {\tt logAppendFlag} to allow specifying that the existing
-!              log files will be overwritten.\newline
+!              log files will be overwritten.
 ! \item[8.2.0] Added argument {\tt globalResourceControl} to support ESMF-aware
-!              threading and resource control on the global VM level.
+!              threading and resource control on the global VM level.\newline
+!              Added argument {\tt config} to return default handle to the
+!              defaultConfig.
 ! \end{description}
 ! \end{itemize}
 !
@@ -263,6 +266,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           If not specified,
 !           defaults to specification in {\tt defaultConfigFilename}, or
 !           {\tt .false.}.
+!     \item [{[config]}]
+!           Returns the default {\tt ESMF\_Config} if the
+!           {\tt defaultConfigFilename} argument was provided. Otherwise the
+!           presence of this argument triggers an error.
 !     \item [{[vm]}]
 !           Returns the global {\tt ESMF\_VM} that was created 
 !           during initialization.
@@ -283,7 +290,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         defaultLogFileName=defaultLogFileName, logAppendFlag=logAppendFlag, &
         logKindFlag=logKindFlag, mpiCommunicator=mpiCommunicator, &
         ioUnitLBound=ioUnitLBound, ioUnitUBound=ioUnitUBound, &
-        globalResourceControl=globalResourceControl, rc=localrc)
+        globalResourceControl=globalResourceControl, config=config, rc=localrc)
                                       
       ! on failure LogErr is not initialized -> explicit print on error
       if (localrc .ne. ESMF_SUCCESS) then
@@ -382,7 +389,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
         defaultCalKind, defaultLogFileName, logAppendFlag, logKindFlag, &
-        mpiCommunicator, ioUnitLBound, ioUnitUBound, globalResourceControl, rc)
+        mpiCommunicator, ioUnitLBound, ioUnitUBound, globalResourceControl, &
+        config, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang
@@ -395,6 +403,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(in),  optional :: ioUnitLBound
       integer,                 intent(in),  optional :: ioUnitUBound
       logical,                 intent(in),  optional :: globalResourceControl
+      type(ESMF_Config),       intent(out), optional :: config
       integer,                 intent(out), optional :: rc
 
 !
@@ -435,6 +444,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           If not specified, defaults to {\tt ESMF\_LOG\_UPPER}
 !     \item [{[globalResourceControl]}]
 !           Global resource control enabled or disabled. Default {\tt .false.}.
+!     \item [{[config]}]
+!           Returns the default {\tt ESMF\_Config} if the
+!           {\tt defaultConfigFilename} argument was provided. Otherwise the
+!           presence of this argument triggers an error.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -457,7 +470,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       character(ESMF_MAXSTR) :: errmsg
       integer :: errmsg_l
-      type(ESMF_Config)   :: config
+      type(ESMF_Config)   :: configInternal
 
       logical             :: globalResourceControlConfig
       character(80)       :: logKindFlagS, logKindFlagSU
@@ -556,19 +569,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         ! open the Config
-        config = ESMF_ConfigCreate(rc=localrc)
+        configInternal = ESMF_ConfigCreate(rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! load config file
-        call ESMF_ConfigLoadFile(config, defaultConfigFileName, rc=localrc)
+        call ESMF_ConfigLoadFile(configInternal, defaultConfigFileName, &
+          rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! globalResourceControl
         if (.not.present(globalResourceControl)) then
           ! not supplied on caller side -> attempt to read from config
-          call ESMF_ConfigGetAttribute(config, globalResourceControlConfig, &
+          call ESMF_ConfigGetAttribute(configInternal, &
+            globalResourceControlConfig, &
             label="globalResourceControl:", default=.false., rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -582,7 +597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! logKindFlag
         if (.not.present(logKindFlag)) then
           ! not supplied on caller side -> attempt to read from config
-          call ESMF_ConfigGetAttribute(config, logKindFlagS, &
+          call ESMF_ConfigGetAttribute(configInternal, logKindFlagS, &
             label="logKindFlag:", default="---invalid---", rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -603,7 +618,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! defaultLogFileName
         if (.not.present(defaultLogFileName)) then
           ! not supplied on caller side -> attempt to read from config
-          call ESMF_ConfigGetAttribute(config, defaultLogFileNameS, &
+          call ESMF_ConfigGetAttribute(configInternal, defaultLogFileNameS, &
             label="defaultLogFileName:", default="---invalid---", rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -615,16 +630,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! logAppendFlag
         if (.not.present(logAppendFlag)) then
           ! not supplied on caller side -> attempt to read from config
-          call ESMF_ConfigGetAttribute(config, logAppendFlagUse, &
+          call ESMF_ConfigGetAttribute(configInternal, logAppendFlagUse, &
             label="logAppendFlag:", default=.true., rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-        ! close the Config
-        call ESMF_ConfigDestroy(config, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! optionally destroy the Config
+        if (.not.present(config)) then
+          call ESMF_ConfigDestroy(configInternal, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          config = configInternal ! return back to user
+        endif
 
         ! shut down temporary Log
         call ESMF_LogFinalize(rc=localrc)
@@ -643,7 +662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error initializing the default log/error manager"
         return
       endif
-      
+
       ! Write out warning about performance impact of logging
       if ((logKindFlagUse/=ESMF_LOGKIND_NONE) .and. &
         (logKindFlagUse/=ESMF_LOGKIND_MULTI_ON_ERROR)) then
@@ -875,6 +894,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       already_init = .true.
+
+      if (.not.present(defaultConfigFileName).and.present(config)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Cannot request 'config' without supplying "// &
+            "'defaultConfigFileName'", &
+            ESMF_CONTEXT, rcToReturn=rc)
+        return  ! bail out
+      endif
 
       if (rcpresent) rc = ESMF_SUCCESS
 
