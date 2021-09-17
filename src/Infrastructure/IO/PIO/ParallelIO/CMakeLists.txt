@@ -5,7 +5,7 @@
 # Jim Edwards
 
 cmake_minimum_required (VERSION 2.8.12)
-project (PIO C Fortran)
+project (PIO C)
 #cmake_policy(VERSION 3.5.2)
 
 # The project version number.
@@ -27,18 +27,18 @@ include(CMakePrintHelpers)
 
 # Determine the configure date.
 IF(DEFINED ENV{SOURCE_DATE_EPOCH})
-        EXECUTE_PROCESS(
-          COMMAND "date" "-u" "-d" "@$ENV{SOURCE_DATE_EPOCH}"
-          OUTPUT_VARIABLE CONFIG_DATE
-          )
+	EXECUTE_PROCESS(
+	  COMMAND "date" "-u" "-d" "@$ENV{SOURCE_DATE_EPOCH}"
+	  OUTPUT_VARIABLE CONFIG_DATE
+	  )
 ELSE()
-        EXECUTE_PROCESS(
-          COMMAND date
-          OUTPUT_VARIABLE CONFIG_DATE
-          )
+	EXECUTE_PROCESS(
+	  COMMAND date
+	  OUTPUT_VARIABLE CONFIG_DATE
+	  )
 ENDIF()
 IF(CONFIG_DATE)
-        string(STRIP ${CONFIG_DATE} CONFIG_DATE)
+	string(STRIP ${CONFIG_DATE} CONFIG_DATE)
 ENDIF()
 
 # A function used to create autotools-style 'yes/no' definitions.
@@ -94,6 +94,12 @@ option (PIO_USE_MPISERIAL    "Enable mpi-serial support (instead of MPI)"   OFF)
 option (PIO_USE_PNETCDF_VARD       "Use pnetcdf put_vard "  OFF)
 option (WITH_PNETCDF         "Require the use of PnetCDF"                   ON)
 
+if(APPLE)
+  # The linker on macOS does not include `common symbols` by default
+  # Passing the -c flag includes them and fixes an error with undefined symbols (err_buffer, resultlen)
+  set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -c <TARGET>")
+endif()
+
 # Set a variable that appears in the config.h.in file.
 if(PIO_USE_PNETCDF_VARD)
   set(USE_VARD 1)
@@ -134,25 +140,28 @@ endif()
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 #===== External modules =====
-if (NOT DEFINED USER_CMAKE_MODULE_PATH)
-  message (STATUS "Importing CMake_Fortran_utils")
-  execute_process(
-    COMMAND git clone https://github.com/CESM-Development/CMake_Fortran_utils
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    OUTPUT_QUIET
-    ERROR_QUIET)
-  find_path (USER_CMAKE_MODULE_PATH
-    NAMES mpiexec.cmake
-    HINTS ${CMAKE_BINARY_DIR}/CMake_Fortran_utils)
-  if (USER_CMAKE_MODULE_PATH)
-    message (STATUS "Importing CMake_Fortran_utils - success")
-  else ()
-    message (FATAL_ERROR "Failed to import CMake_Fortran_utils")
+if (PIO_ENABLE_FORTRAN)
+  enable_language(Fortran)
+  if (NOT DEFINED USER_CMAKE_MODULE_PATH)
+    message (STATUS "Importing CMake_Fortran_utils")
+    execute_process(
+      COMMAND git clone https://github.com/CESM-Development/CMake_Fortran_utils
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      OUTPUT_QUIET
+      ERROR_QUIET)
+    find_path (USER_CMAKE_MODULE_PATH
+      NAMES mpiexec.cmake
+      HINTS ${CMAKE_BINARY_DIR}/CMake_Fortran_utils)
+    if (USER_CMAKE_MODULE_PATH)
+      message (STATUS "Importing CMake_Fortran_utils - success")
+    else ()
+      message (FATAL_ERROR "Failed to import CMake_Fortran_utils")
+    endif ()
   endif ()
-endif ()
-set (USER_CMAKE_MODULE_PATH ${USER_CMAKE_MODULE_PATH}
+  set (USER_CMAKE_MODULE_PATH ${USER_CMAKE_MODULE_PATH}
   CACHE STRING "Location of the CMake_Fortran_utils")
-list (APPEND CMAKE_MODULE_PATH ${USER_CMAKE_MODULE_PATH})
+  list (APPEND CMAKE_MODULE_PATH ${USER_CMAKE_MODULE_PATH})
+endif ()
 
 INCLUDE (CheckTypeSize)
 
@@ -212,13 +221,14 @@ set (CMAKE_C_COMPILER_DIRECTIVE "CPR${CMAKE_C_COMPILER_NAME}"
   CACHE STRING "C compiler name preprocessor directive")
 
 # Fortran Compiler Name
-string (TOUPPER "${CMAKE_Fortran_COMPILER_ID}" CMAKE_Fortran_COMPILER_NAME)
-if (CMAKE_Fortran_COMPILER_NAME STREQUAL "XL")
-  set (CMAKE_Fortran_COMPILER_NAME "IBM")
-endif ()
-set (CMAKE_Fortran_COMPILER_DIRECTIVE "CPR${CMAKE_Fortran_COMPILER_NAME}"
-  CACHE STRING "Fortran compiler name preprocessor directive")
-
+if (PIO_ENABLE_FORTRAN)
+  string (TOUPPER "${CMAKE_Fortran_COMPILER_ID}" CMAKE_Fortran_COMPILER_NAME)
+  if (CMAKE_Fortran_COMPILER_NAME STREQUAL "XL")
+    set (CMAKE_Fortran_COMPILER_NAME "IBM")
+  endif ()
+  set (CMAKE_Fortran_COMPILER_DIRECTIVE "CPR${CMAKE_Fortran_COMPILER_NAME}"
+    CACHE STRING "Fortran compiler name preprocessor directive")
+endif()
 #==============================================================================
 #  SET CODE COVERAGE COMPILER FLAGS
 #==============================================================================

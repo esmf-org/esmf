@@ -12,9 +12,10 @@ LDADD = ${top_builddir}/src/flib/libpiof.la	\
 ${top_builddir}/src/clib/libpioc.la
 
 # Build the test for make check.
-check_PROGRAMS = examplePio
+check_PROGRAMS = examplePio exampleAsyncPio
 
 examplePio_SOURCES = examplePio.F90
+exampleAsyncPio_SOURCES = exampleAsyncPio.F90
 
 if RUN_TESTS
 # Tests will run from a bash script.

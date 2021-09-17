@@ -142,9 +142,11 @@ int check_darray_file(int iosysid, char *data_filename, int iotype, int my_rank,
 #ifdef _NETCDF4
     unsigned char expected_ubyte[LAT_LEN * LON_LEN] = {10, 11, 20, 21, 30, 31};
     unsigned short expected_ushort[LAT_LEN * LON_LEN] = {1000, 1001, 2000, 2001, 3000, 3001};
-    unsigned int expected_uint[LAT_LEN * LON_LEN] = {(unsigned short)32777, (unsigned short)32778, (unsigned short)32787, (unsigned short)32788, (unsigned short)32797, (unsigned short)32798};
-    long long expected_int64[LAT_LEN * LON_LEN] = {-2147483639LL, -2147483637LL, -2147483629LL,
-                                                   -2147483627LL, -2147483619LL, -2147483617LL};
+    unsigned int expected_uint[LAT_LEN * LON_LEN] = {(unsigned short)32777, (unsigned short)32778,
+                                                     (unsigned short)32787, (unsigned short)32788,
+                                                     (unsigned short)32797, (unsigned short)32798};
+    long long int expected_int64[LAT_LEN * LON_LEN] = {2147483657LL, -2147483658LL, 2147483667LL,
+                                                       -2147483668LL, 2147483677LL, -2147483678LL};
     unsigned long long expected_uint64[LAT_LEN * LON_LEN] = {9223372036854775817ULL, 9223372036854775818ULL,
                                                              9223372036854775827ULL, 9223372036854775828ULL,
                                                              9223372036854775837ULL, 9223372036854775838ULL};
@@ -361,7 +363,7 @@ int run_darray_async_test(int iosysid, int my_rank, MPI_Comm test_comm,
     unsigned char my_data_ubyte[LAT_LEN] = {my_rank * 10, my_rank * 10 + 1};
     unsigned short my_data_ushort[LAT_LEN] = {my_rank * 1000, my_rank * 1000 + 1};
     unsigned int my_data_uint[LAT_LEN] = {NC_MAX_SHORT + my_rank * 10, NC_MAX_SHORT + my_rank * 10 + 1};
-    long long my_data_int64[LAT_LEN] = {NC_MAX_INT + my_rank * 10, -NC_MAX_INT + my_rank * 10};
+    long long int my_data_int64[LAT_LEN] = {2147483647LL + my_rank * 10, -2147483648LL - my_rank * 10};
     unsigned long long my_data_uint64[LAT_LEN] = {NC_MAX_INT64 + my_rank * 10,
                                                   NC_MAX_INT64 + my_rank * 10 + 1};
 #endif /* _NETCDF4 */
