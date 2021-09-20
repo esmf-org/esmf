@@ -14,8 +14,6 @@
 
 module ESMF
 
-    use BreakMe ! temporarily break the ESMF library build for testing
-
     use ESMF_UtilTypesMod
     use ESMF_UtilSortMod
     use ESMF_UtilStringMod
