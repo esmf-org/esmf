@@ -1428,8 +1428,10 @@ int ArrayBundle::sparseMatMul(
     Array *dstArray = NULL;
     vector<Array *> srcArrayVector;
     vector<Array *> dstArrayVector;
-    srcArraybundle->getVector(srcArrayVector, ESMC_ITEMORDER_ADDORDER);
-    dstArraybundle->getVector(dstArrayVector, ESMC_ITEMORDER_ADDORDER);
+    if (srcArraybundle != NULL)
+      srcArraybundle->getVector(srcArrayVector, ESMC_ITEMORDER_ADDORDER);
+    if (dstArraybundle != NULL)
+      dstArraybundle->getVector(dstArrayVector, ESMC_ITEMORDER_ADDORDER);
     
     // prepare zeroRegion and termOrders vector
     vector<ESMC_Region_Flag> zeroRegion;
