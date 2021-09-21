@@ -1320,9 +1320,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc
       type(ESMF_GeomType_Flag)  :: geomtype
       type(ESMF_Grid)      :: grid
+      type(ESMF_XGrid)      :: xgrid
       type(ESMF_Mesh)      :: tmpMesh
       type(ESMF_MeshLoc)   :: meshloc
       type(ESMF_StaggerLoc) :: staggerLoc
+
 
       ! Init variable
       createdTmpMesh=.false.
@@ -1396,10 +1398,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
 
        else if (geomtype .eq. ESMF_GEOMTYPE_XGRID) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-               msg=" This regrid method not supported for an ESMF_Field built on an ESMF_XGrid.", & 
-               ESMF_CONTEXT, rcToReturn=rc) 
-          return              
+          
+          ! Get information about XGrid from field
+          call ESMF_FieldGet(field, xgrid=xgrid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          
+          ! Get XGrid Mesh
+          call ESMF_XGridGet(xgrid, mesh=tmpMesh, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! We don't have a location for XGrids right now, so assume centers
+          mesh=ESMF_MeshCreateDual(tmpMesh, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          
+          ! Record that we created the mesh
+          createdTmpMesh=.true.
 
        else if (geomtype .eq. ESMF_GEOMTYPE_LOCSTREAM) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
@@ -1434,6 +1450,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Mesh)      :: tmpMesh
       type(ESMF_MeshLoc)   :: meshloc
       type(ESMF_StaggerLoc) :: staggerLoc
+      type(ESMF_XGrid)      :: xgrid
 
       ! Init variables
       createdTmpMesh=.false.
@@ -1496,10 +1513,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
 
        else if (geomtype .eq. ESMF_GEOMTYPE_XGRID) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-               msg=" This regrid method not supported for an ESMF_Field built on an ESMF_XGrid.", & 
-               ESMF_CONTEXT, rcToReturn=rc) 
-          return              
+
+          ! Get information about XGrid from field
+          call ESMF_FieldGet(field, xgrid=xgrid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          
+          ! Get XGrid Mesh
+          call ESMF_XGridGet(xgrid, mesh=mesh, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Record that we didn't create it
+          createdTmpMesh=.false.
 
        else if (geomtype .eq. ESMF_GEOMTYPE_LOCSTREAM) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
@@ -1533,6 +1559,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_MeshLoc)   :: meshloc
       type(ESMF_StaggerLoc) :: staggerLoc
       type(ESMF_LocStream)  :: tmpLocStream
+      type(ESMF_XGrid)      :: xgrid
 
       ! Init variable
       createdTmpPointList=.false.
@@ -1573,7 +1600,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-          ! Create PointList
+          ! Create PointList from Mesh
           pointlist=ESMF_PointListCreate(tmpMesh, meshloc, &
                maskValues=maskValues, &
                rc=localrc)
@@ -1584,10 +1611,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          createdTmpPointList=.true.
              
        else if (geomtype .eq. ESMF_GEOMTYPE_XGRID) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-               msg=" This regrid method not supported for an ESMF_Field built on an ESMF_XGrid.", & 
-               ESMF_CONTEXT, rcToReturn=rc) 
-          return              
+
+          ! Get information about XGrid from field
+          call ESMF_FieldGet(field, xgrid=xgrid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          
+          ! Get XGrid Mesh
+          call ESMF_XGridGet(xgrid, mesh=tmpMesh, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Create PointList from Mesh
+          ! (Until we have an XGrid location indicator, assume center/element) 
+          pointlist=ESMF_PointListCreate(tmpMesh, ESMF_MESHLOC_ELEMENT, &
+               maskValues=maskValues, &
+               rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Record that we created the PointList
+          createdTmpPointList=.true.
 
        else if (geomtype .eq. ESMF_GEOMTYPE_LOCSTREAM) then
 

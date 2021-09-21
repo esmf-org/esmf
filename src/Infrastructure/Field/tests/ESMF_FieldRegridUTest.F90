@@ -1431,7 +1431,7 @@
       !------------------------------------------------------------------------
 
 #endif
-#if 0
+
       !------------------------------------------------------------------------
       !EX_OFF_UTest
       ! Test regrid with masks
@@ -1447,7 +1447,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
        !-----------------------------------------------------------------------
-#endif
 
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
@@ -43378,7 +43377,6 @@ write(*,*) "H Beg"
     return
   endif
 
-write(*,*) "H1"
 
   ! Create source/destination fields
    srcField = ESMF_FieldCreate(aGrid, ESMF_TYPEKIND_R8, &
@@ -43441,7 +43439,6 @@ write(*,*) "H1"
     return
   endif
 
-write(*,*) "H2"
 
   ! Construct Src Grid
   ! (Get memory and set coords for src)
@@ -43483,7 +43480,6 @@ write(*,*) "H2"
 
   enddo    ! lDE
 
-write(*,*) "H3"
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Destination
@@ -43499,8 +43495,7 @@ write(*,*) "H3"
    
    ! Init destination field to 0.0
    dstFarrayPtr=0.0
-   
-write(*,*) "H3.1"
+
 
    ! Init exact destination field
    ! Should only be 1 localDE
@@ -43517,8 +43512,6 @@ write(*,*) "H3.1"
      return
   endif
 
-write(*,*) "H3.2"
-
   ! Get number of points in destination mesh
   call ESMF_MeshGet(xgridMesh, &
        numOwnedElements=numOwnedElems, &
@@ -43528,14 +43521,10 @@ write(*,*) "H3.2"
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
-write(*,*) "Xgrid numOwned=",numOwnedElems
-write(*,*) "Xgrid spatialDim=",sdim
-
-write(*,*) "H3.21"
    ! Allocate space for coordinates
    allocate(ownedElemCoords(sdim*numOwnedElems))
 
-write(*,*) "H3.22"
+
    ! Set exact destination field
    call ESMF_MeshGet(xgridMesh, ownedElemCoords=ownedElemCoords, &
        rc=localrc)
@@ -43543,7 +43532,6 @@ write(*,*) "H3.22"
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-write(*,*) "H3.3"
 
    ! loop through and set xfield
    do i1=1,numOwnedElems
@@ -43560,12 +43548,10 @@ write(*,*) "H3.3"
      !xdstFarrayPtr(i1) = 1.0
    enddo
 
-write(*,*) "H3.4"
 
    ! Deallocate space for coordinates
    deallocate(ownedElemCoords)
 
-write(*,*) "H4"
 
 #if 0
   call ESMF_GridWriteVTK(aGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -43603,8 +43589,8 @@ write(*,*) "H4"
    endif
 
   ! get dst Field
-  call ESMF_FieldGet(dstField, 0, dstFarrayPtr, computationalLBound=clbnd, &
-                             computationalUBound=cubnd,  rc=localrc)
+  call ESMF_FieldGet(dstField, 0, dstFarrayPtr, computationalLBound=clbnd(1:1), &
+                             computationalUBound=cubnd(1:1),  rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=ESMF_FAILURE
      return
@@ -43638,7 +43624,7 @@ write(*,*) "H4"
      ! if working everything should be close to exact answer
      if (relErr .gt. 0.005) then
         correct=.false.
-        !  write(*,*) "relErr=",relErr,farrayPtr(i1,i2),xfarrayPtr(i1,i2)
+        write(*,*) "relErr=",relErr,dstFarrayPtr(i1),xdstFarrayPtr(i1)
      endif
 
      ! put in error field
