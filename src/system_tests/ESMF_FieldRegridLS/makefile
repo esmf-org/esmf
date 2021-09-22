@@ -32,4 +32,4 @@ CLOBBERDIRS =
 
 
 RUN_FieldRegridLS:
-	$(MAKE) TNAME=FieldRegridLS NP=4 stest
+	$(MAKE) TNAME=FieldRegridLS NP=6 stest
