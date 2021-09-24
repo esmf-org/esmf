@@ -91,6 +91,7 @@ module NUOPC
   public NUOPC_GetStateMemberCount        ! method
   public NUOPC_GetTimestamp               ! method
   public NUOPC_InitAttributes             ! method, internal use only
+  public NUOPC_IngestPetList              ! method
   public NUOPC_IsAtTime                   ! method
   public NUOPC_IsConnected                ! method
   public NUOPC_IsUpdated                  ! method
