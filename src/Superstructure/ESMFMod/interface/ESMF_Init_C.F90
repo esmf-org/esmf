@@ -35,7 +35,7 @@
 ! 
 !EOP
 !------------------------------------------------------------------------------
-   subroutine f_esmf_frameworkinitialize(lang, defaultConfigFileName, &
+   subroutine f_esmf_frameworkinitialize(lang, configFileName, &
                                         defaultCalKind, defaultLogFileName, &
                                         logkindflag, rc)
        use ESMF_LogErrMod
@@ -46,14 +46,14 @@
        implicit none
 
        integer :: lang
-       character(len=*) :: defaultConfigFileName
+       character(len=*) :: configFileName
        type(ESMF_CalKind_Flag) :: defaultCalKind
        character(len=*) :: defaultLogFileName
        type(ESMF_LogKind_Flag) :: logkindflag
        integer :: rc
 
        call ESMF_FrameworkInternalInit(lang=lang, &
-         defaultConfigFilename=defaultConfigFilename, &
+         configFilename=configFileName, &
          defaultCalKind=defaultCalKind,defaultLogFileName=defaultLogFileName,&
          logkindflag=logkindflag, rc=rc)
 
