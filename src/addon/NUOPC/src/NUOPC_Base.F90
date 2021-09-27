@@ -2392,6 +2392,9 @@ module NUOPC_Base
     petCount = 0
     k = 1
 
+    ! prepare chopStringList
+    nullify(chopStringList)
+
     do i=1, lineCount
 
       call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
