@@ -75,6 +75,10 @@ class Manager(object):
     will always be called prior to exiting Python.  Calling __init__
     explicitly results in a no-op.
 
+    The Manager can be used to enable the 
+    `MOAB <https://sigma.mcs.anl.gov/moab-library/>`_
+    mesh backend to the Mesh. This is done by calling ``set_moab()`` with ``moab_on=True``.
+
     :param bool debug: outputs logging information to ESMF logfiles. If
         ``None``, defaults to False.
     '''
@@ -147,7 +151,7 @@ class Manager(object):
         """
         :rtype: int
         :return: The number of Persistent Execution Threads (PETs i.e. processing cores)
-        available in this execution.
+                 available in this execution.
         """
         return self._pet_count
 

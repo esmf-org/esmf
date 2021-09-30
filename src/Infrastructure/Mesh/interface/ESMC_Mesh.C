@@ -43,12 +43,12 @@ extern "C" {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetMOAB()"
-void ESMC_MeshGetMOAB(bool moab_on, int *rc){
+void ESMC_MeshGetMOAB(bool moabOn, int *rc){
 
-  int moab_on_int = 0;
-  MeshCap::meshGetMOAB(&moab_on_int, rc);
+  int moabOnInt = 0;
+  MeshCap::meshGetMOAB(&moabOnInt, rc);
   
-  moab_on = static_cast<bool> (moab_on_int);
+  moabOn = static_cast<bool> (moabOnInt);
   
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
@@ -58,12 +58,12 @@ void ESMC_MeshGetMOAB(bool moab_on, int *rc){
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshSetMOAB()"
-void ESMC_MeshSetMOAB(bool moab_on, int *rc){
+void ESMC_MeshSetMOAB(bool moabOn, int *rc){
 
-  int moab_on_int = 0;
-  if (moab_on == true) moab_on_int = 1;
+  int moabOnInt = 0;
+  if (moabOn == true) moabOnInt = 1;
   
-  MeshCap::meshSetMOAB(&moab_on_int, rc);
+  MeshCap::meshSetMOAB(&moabOnInt, rc);
   
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;

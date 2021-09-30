@@ -63,7 +63,7 @@ typedef struct{
 //
 // !INTERFACE:
 void ESMC_MeshGetMOAB(
-  bool moab_on,
+  bool moabOn,
   int *rc
 );
 // !RETURN VALUE:
@@ -75,7 +75,7 @@ void ESMC_MeshGetMOAB(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[moab_on]
+//  \item[moabOn]
 //    This parameter will receive a boolean value indicating if MOAB is enabled.
 //  \item[rc]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -90,7 +90,7 @@ void ESMC_MeshGetMOAB(
 //
 // !INTERFACE:
 void ESMC_MeshSetMOAB(
-  bool moab_on,
+  bool moabOn,
   int *rc
 );
 // !RETURN VALUE:
@@ -102,7 +102,7 @@ void ESMC_MeshSetMOAB(
 //
 //  The arguments are:
 //  \begin{description}
-//  \item[moab_on]
+//  \item[moabOn]
 //    This parameter will hold a boolean value to indicate the setting for the
 //    MOAB mesh back end (on or off).
 //  \item[rc]
