@@ -127,7 +127,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[8.2.0] Added argument {\tt globalResourceControl} to support ESMF-aware
 !              threading and resource control on the global VM level.\newline
 !              Added argument {\tt config} to return default handle to the
-!              defaultConfig.
+!              defaultConfig.\newline
 !              Renamed argument {\tt defaultConfigFilename} to
 !              {\tt configFilename}, in order to clarify that provided settings
 !              in the Config file are {\em not} defaults, but final
@@ -223,7 +223,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           configuration file, their values are used to set the associated
 !           {\tt ESMF\_Initialize()} argument, overriding any defaults.
 !           If the same argument is also specified in the
-!           {\tt ESMF\_Initialize()} call directly, an error is return,
+!           {\tt ESMF\_Initialize()} call directly, an error is returned,
 !           and ESMF is not initialized.
 !           The supported config labels are:
 !           \begin{itemize}
@@ -289,7 +289,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           If not specified, the default is {\tt .false.}.
 !     \item [{[globalResourceControl]}]
 !           For {\tt .true.}, each global PET is pinned to the corresponding
-!           PE (i.e. CPU core) in order. Furter, if OpenMP support is enabled
+!           PE (i.e. CPU core) in order. Further, if OpenMP support is enabled
 !           for the ESMF installation (during build time), the
 !           {\tt OMP\_NUM\_THREADS} is set to {\tt 1} on every PET, regardless
 !           of the setting in the launching environment. The {\tt .true.}
