@@ -127,6 +127,10 @@ class Manager(object):
 
     @property
     def local_pet(self):
+        """
+        :rtype: int
+        :return: The id of the current Persistent Execution Thread (PET i.e. processing core).
+        """
         return self._local_pet
 
     @property
@@ -140,6 +144,11 @@ class Manager(object):
 
     @property
     def pet_count(self):
+        """
+        :rtype: int
+        :return: The number of Persistent Execution Threads (PETs i.e. processing cores)
+        available in this execution.
+        """
         return self._pet_count
 
     @property
@@ -168,10 +177,12 @@ class Manager(object):
     def __repr__(self):
         string = ("ESMPyManager:\n"
                   "    local_pet = %r\n"
-                  "    pet_count = %r\n)" 
+                  "    pet_count = %r\n" 
+                  "    moab = %r\n" 
                   %
                   (self.local_pet,
-                   self.pet_count))
+                   self.pet_count,
+                   self.moab))
 
         return string
 
