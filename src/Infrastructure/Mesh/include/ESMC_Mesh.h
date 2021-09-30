@@ -59,6 +59,61 @@ typedef struct{
 
 //------------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_MeshGetMOAB - Query if the MOAB mesh backend is enabled
+//
+// !INTERFACE:
+void ESMC_MeshGetMOAB(
+  bool moab_on,
+  int *rc
+);
+// !RETURN VALUE:
+//  None
+//
+// !DESCRIPTION:
+//
+//  This call will query whether or not the MOAB mesh backend is enabled.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[moab_on]
+//    This parameter will receive a boolean value indicating if MOAB is enabled.
+//  \item[rc]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshSetMOAB - Toggle the MOAB mesh backend
+//
+// !INTERFACE:
+void ESMC_MeshSetMOAB(
+  bool moab_on,
+  int *rc
+);
+// !RETURN VALUE:
+//  None
+//
+// !DESCRIPTION:
+//
+//  This call will toggle the MOAB mesh backend.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[moab_on]
+//    This parameter will hold a boolean value to indicate the setting for the
+//    MOAB mesh back end (on or off).
+//  \item[rc]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_MeshAddElements - Add elements to a Mesh \label{sec:mesh:capi:meshaddelements}
 //
 // !INTERFACE:

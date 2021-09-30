@@ -42,6 +42,36 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetMOAB()"
+void ESMC_MeshGetMOAB(bool moab_on, int *rc){
+
+  int moab_on_int = 0;
+  MeshCap::meshGetMOAB(&moab_on_int, rc);
+  
+  moab_on = static_cast<bool> (moab_on_int);
+  
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshSetMOAB()"
+void ESMC_MeshSetMOAB(bool moab_on, int *rc){
+
+  int moab_on_int = 0;
+  if (moab_on == true) moab_on_int = 1;
+  
+  MeshCap::meshSetMOAB(&moab_on_int, rc);
+  
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreate()"
 ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, 
                           enum ESMC_CoordSys_Flag *coordSys,

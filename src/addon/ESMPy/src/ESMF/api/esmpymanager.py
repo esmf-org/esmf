@@ -119,11 +119,24 @@ class Manager(object):
 
             # Increase frequency of log buffering upon user request
             ESMP_LogSet(debug)
+            
+            # set up to use the ESMF native mesh backend by default
+            self._moab = False
+
         return
 
     @property
     def local_pet(self):
         return self._local_pet
+
+    @property
+    def moab(self):
+        """
+        :rtype: bool
+        :return: A boolean value to indicate if the MOAB mesh backend is in use.
+        """
+        ESMP_MeshGetMOAB(self._moab)
+        return self._moab
 
     @property
     def pet_count(self):
@@ -169,6 +182,14 @@ class Manager(object):
         '''
         ESMP_VMBarrier(self.vm)
         
+    def set_moab(self, moab_on=True):
+        """
+        Set the Mesh backend to use MOAB or the Native ESMF mesh.
+        """
+        
+        ESMP_MeshSetMOAB(moab_on)
+        self._moab = moab_on
+
     def _broadcast_(self, bcstBuf, count, rootPet=0):
         '''
         Broadcast data from bcstBuf across the VM.\n

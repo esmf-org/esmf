@@ -456,6 +456,24 @@ def ESMP_LogSet(flush):
         raise ValueError('ESMC_LogSet() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
+#### MOAB #####################################################################
+
+_ESMF.ESMC_MeshGetMOAB.restype = ct.c_void_p
+_ESMF.ESMC_MeshGetMOAB.argtypes = [ct.c_int, ct.c_int]
+
+def ESMP_MeshGetMOAB(flush):
+    """
+    Preconditions: ESMP has been initialized\n
+    Postconditions: The default Log has been set to flush after every message.\n
+    Arguments:\n
+        bool                     :: flush\n
+    """
+    lflush = ct.c_int(flush)
+    rc = _ESMF.ESMC_LogSet(lflush)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_LogSet() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
 #### GRID #####################################################
 
 #TODO: InterfaceInt should be passed by value when ticket 3613642 is resolved
@@ -1024,6 +1042,42 @@ def ESMP_GridWrite(grid, filename, staggerloc=constants.StaggerLoc.CENTER):
     rc = _ESMF.ESMC_GridWrite(grid.struct.ptr, staggerloc, filename)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_GridWrite() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+#### MOAB #####################################################################
+
+_ESMF.ESMC_MeshGetMOAB.restype = None
+_ESMF.ESMC_MeshGetMOAB.argtypes = [ct.c_bool, ct.POINTER(ct.c_int)]
+
+def ESMP_MeshGetMOAB(moab_on):
+    """
+    Preconditions: ESMP has been initialized\n
+    Postconditions: The Mesh backend has been set to 'moab_on'.\n
+    Arguments:\n
+        bool :: moab_on\n
+    """
+    lrc = ct.c_int(0)
+    _ESMF.ESMC_MeshGetMOAB(moab_on, ct.byref(lrc))
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_MeshGetMOAB() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+_ESMF.ESMC_MeshSetMOAB.restype = None
+_ESMF.ESMC_MeshSetMOAB.argtypes = [ct.c_bool, ct.POINTER(ct.c_int)]
+
+def ESMP_MeshSetMOAB(moab_on):
+    """
+    Preconditions: ESMP has been initialized\n
+    Postconditions: The Mesh backend has been set to 'moab_on'.\n
+    Arguments:\n
+        bool :: moab_on\n
+    """
+    lrc = ct.c_int(0)
+    _ESMF.ESMC_MeshSetMOAB(moab_on, ct.byref(lrc))
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_MeshSetMOAB() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
 #### MESH #####################################################
