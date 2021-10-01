@@ -47,6 +47,8 @@
 
 namespace ESMCI{
 
+ extern bool mathutil_debug;
+
 //
 // Most of the algorithm comes from: http://paulbourke.net/geometry/
 // except the Weiler algorithm motivated by the intersection version.
@@ -144,6 +146,7 @@ double polygon::area(int sdim) const {
   return split_area;
 }
 
+
 xpoint polygon::centroid(int sdim) const {
   double area = std::abs(this->area(sdim));
   int n = this->size();
@@ -160,6 +163,8 @@ xpoint polygon::centroid(int sdim) const {
     return xpoint(sum, sdim);
   }else if(sdim == 3){
     //translate the center of the coordinate system to points[0]
+    // I'M NOT SURE THIS WORKS WELL FOR QUADS SEE INSTEAD:
+    //   calc_poly_centroid_sph2D3D() in ESMCI_MathUtil.C
     double tmp;
     for(int i = 0; i < n-2; i ++){
       tmp = tri_area(points[i].c, points[(i+1)%n].c, points[(i+2)%n].c);
@@ -174,6 +179,7 @@ xpoint polygon::centroid(int sdim) const {
   }else
     Throw() << "Cannot handle sdim > 3\n";
 }
+
 
 void sintd_cell::get_centroid(double * centroid, int sdim, int pdim){
   int n = nodes.size();
@@ -1543,37 +1549,45 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 //// THESE ARE TEMPORARY UNTIL WE MERGE WITH THE mbmesh layering branch THEN USE ONES ////
 //// IN ESMCI_MathUtil.C                                                              ////
 
-// calculates spherical coords in radians
-// lon -> (-pi to +pi)
-// lat -> (0   to +pi)
-static void _tmp_convert_cart_to_sph(double x, double y, double z,
-                         double *lon, double *lat, double *r) {
 
-  // calc radius of sphere
-  *r=sqrt(x*x+y*y+z*z);
+// This is a helper function to get the centroid of an elem to avoid some
+// of the redundant stuff that happens when going through res_poly
+static void _get_centroid_from_elem(MeshObj *elem, const MEField<>  *cfield, int sdim, double *centroid) {
+#define  MAX_NUM_NODES 40
 
-  // calc lon
-  *lon=atan2(y,x);
+  // Declaration for elem polygon
+  int num_p;
+  double p[3*MAX_NUM_NODES]; // 3 for sphere, but also works for 2. 
 
-  // calc lat
-  *lat=acos(z/(*r));
-}
+  // Get coords from elem
+  get_elem_coords(elem, cfield, sdim, MAX_NUM_NODES, &num_p, p);
 
 
-// calculates spherical coords in degs
-// lon -> (-180 to 180)
-// lat -> (-90  to 90)
-static void _tmp_convert_cart_to_sph_deg(double x, double y, double z,
-                             double *lon, double *lat, double *r) {
 
-  const double RAD2DEG=57.295779513082325;
-  double lon_r,lat_r;
+  // Calc centroid based on dimension
+  if (sdim == 2) {
 
-  _tmp_convert_cart_to_sph(x, y, z,
-                      &lon_r, &lat_r, r);
+    if (elem->get_id() == 1) mathutil_debug=true;
 
-  *lon=lon_r*RAD2DEG;
-  *lat=90.0-(lat_r*RAD2DEG);
+    // Call into spherical centroid calc routine
+    calc_poly_centroid_cart2D2D(num_p, p, centroid);
+
+    if (elem->get_id() == 1) mathutil_debug=false;
+
+  } else if (sdim == 3) {
+    int tri_ind[3*(MAX_NUM_NODES-2)];
+    double td[MAX_NUM_NODES];
+    int ti[MAX_NUM_NODES];
+
+    // Call into spherical centroid calc routine
+    calc_poly_centroid_sph2D3D(num_p, p, tri_ind, td, ti, centroid);
+
+  } else {
+    Throw() << "Centroid calculation currenly only works for spatial dims of 2 or 3.";
+  }
+
+
+#undef MAX_NUM_NODES
 }
 
   
@@ -1690,6 +1704,10 @@ static void _tmp_convert_cart_to_sph_deg(double x, double y, double z,
   std::vector<MeshObj *> elem_list;
   elem_list.resize(num_cells);
   for (int i=0; i<num_cells; i++) {
+
+    // Init to NULL in case skipped below
+    elem_list[i] = NULL;
+
     // dump Cells
     // sintd_cells[i]->print(me, i+offset+1, i);
 
@@ -1723,22 +1741,9 @@ static void _tmp_convert_cart_to_sph_deg(double x, double y, double z,
     elem_list[i] = cell;
   }
 
-  // Hack coordSys until better way of handling comes in with layering branch
-  ESMC_CoordSys_Flag coordSys;
-  int orig_sdim;
-  if ((sdim == 2) && (pdim == 2)) {
-    coordSys=ESMC_COORDSYS_CART;
-    orig_sdim=2;
-  } else if ((sdim == 3) && (pdim == 2)) {
-    coordSys=ESMC_COORDSYS_SPH_DEG;
-    orig_sdim=2;
-  } else {
-    Throw() << "This combination of dimensions (sdim="<<sdim<<" and pdim="<<pdim<<") isn't supported in XGrid"; 
-  }
-
-  // Set orig_sdim in mesh
-  meshmid.orig_spatial_dim=orig_sdim;
-
+  // Get Coordsys and orig_sdim from midmesh
+  ESMC_CoordSys_Flag coordSys=meshmid.coordsys;
+  int orig_sdim=meshmid.orig_spatial_dim;
 
   // set up the fraction Field
   // Intersection cells should not be masked, fraction should all be 1.0
@@ -1789,6 +1794,7 @@ static void _tmp_convert_cart_to_sph_deg(double x, double y, double z,
 
   meshmid.Commit();
 
+  MEField<> *node_coord_field = meshmid.GetCoordField();
   elem_frac = meshmid.GetField("elem_frac");
   elem_frac2 = meshmid.GetField("elem_frac2");
   elem_area = meshmid.GetField("elem_area");
@@ -1799,6 +1805,10 @@ static void _tmp_convert_cart_to_sph_deg(double x, double y, double z,
 
 
   for (int i=0; i<num_cells; i++) {
+    // Skip if NULL
+    if (elem_list[i] == NULL) continue;
+
+    // Get data pointers for element elem_list[i]
     double *frac = elem_frac->data(*(elem_list[i]));
     *frac = 1.0;
     double *frac2 = elem_frac2->data(*(elem_list[i]));
@@ -1809,7 +1819,7 @@ static void _tmp_convert_cart_to_sph_deg(double x, double y, double z,
 
     // Use centroid for elem coords
     double *elem_coords_ptr = elem_coords->data(*(elem_list[i]));
-    sintd_cells[i]->get_centroid(elem_coords_ptr, sdim, pdim);
+    _get_centroid_from_elem(elem_list[i], node_coord_field, sdim, elem_coords_ptr);
 
     // If orig_coords exist then set those too
     if (elem_orig_coords) {
@@ -1818,7 +1828,6 @@ static void _tmp_convert_cart_to_sph_deg(double x, double y, double z,
       double *elem_orig_coords_ptr = elem_orig_coords->data(*(elem_list[i]));
 
       // We don't support COORDSYS_SPH_DEG in this part yet, add it when layering branch merged
-      ThrowRequire(coordSys == ESMC_COORDSYS_SPH_DEG); 
 
       // If we're coverting coords the sdim should be 3
       ThrowRequire(sdim == 3);
@@ -1828,9 +1837,18 @@ static void _tmp_convert_cart_to_sph_deg(double x, double y, double z,
 
       // Calculate lon and lat from 3D Cart...
       double r;
-      _tmp_convert_cart_to_sph_deg(elem_coords_ptr[0], elem_coords_ptr[1], elem_coords_ptr[2],
-                                   elem_orig_coords_ptr, elem_orig_coords_ptr+1, &r); 
+      if (coordSys==ESMC_COORDSYS_SPH_DEG) {
+        convert_cart_to_sph_deg(elem_coords_ptr[0], elem_coords_ptr[1], elem_coords_ptr[2],
+                                elem_orig_coords_ptr, elem_orig_coords_ptr+1, &r); 
+      } else if (coordSys==ESMC_COORDSYS_SPH_RAD) {
+        convert_cart_to_sph_rad(elem_coords_ptr[0], elem_coords_ptr[1], elem_coords_ptr[2],
+                                elem_orig_coords_ptr, elem_orig_coords_ptr+1, &r); 
+
+      } else {
+        Throw() << "Coordinate system should be either _SPH_DEG or _SPH_RAD when generating orig. coords..";
+      }
     }
+
 
     if (side == 1) {
       double *side1_mesh_ind_ptr = side1_mesh_ind->data(*(elem_list[i]));

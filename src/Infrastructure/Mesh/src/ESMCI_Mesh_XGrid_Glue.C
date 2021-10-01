@@ -76,11 +76,13 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
 
     // Get source mesh dimensions
     int pdim=srcmesh.parametric_dim();
-    int sdim=srcmesh.spatial_dim();
+   int sdim=srcmesh.spatial_dim();
+    int orig_sdim=srcmesh.orig_spatial_dim;
 
     // Check that meshes dimensions match
     if ((pdim != dstmesh.parametric_dim()) ||
-        (sdim != dstmesh.spatial_dim())) {
+        (sdim != dstmesh.spatial_dim())    ||
+        (orig_sdim != dstmesh.orig_spatial_dim)) {
       // printf("spdim=%d ssdim=%d dpdim=%d dsdim=%d\n",pdim,sdim,dstmesh.parametric_dim(),dstmesh.spatial_dim());
       Throw() <<"Source and destination dimensions must match when creating an XGrid";
     }
@@ -91,16 +93,10 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
       // Create mesh
       *mesh = new Mesh();
 
-      // Get cartesian dimension
-      int cart_sdim;
-      int localrc=ESMCI_CoordSys_CalcCartDim(*coordSys, sdim, &cart_sdim);
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-        throw localrc;  // bail out with exception
-
       // Set dimensions and coord_sys
       (*mesh)->set_parametric_dimension(pdim);
-      (*mesh)->set_spatial_dimension(cart_sdim);
-      (*mesh)->orig_spatial_dim=sdim;
+      (*mesh)->set_spatial_dimension(sdim);
+      (*mesh)->orig_spatial_dim=orig_sdim;
       (*mesh)->coordsys=*coordSys;
     }
 

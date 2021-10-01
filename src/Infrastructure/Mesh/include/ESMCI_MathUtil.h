@@ -339,6 +339,12 @@ template <class GEOM>
 template <class GEOM>
   bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti, bool *success=NULL);
 
+// TODO: combine these into one template like the above
+ void calc_poly_centroid_sph2D3D(int num_p, double *p, int *tri_ind, double *td, int *ti, 
+                                  double *centroid);
+ void calc_poly_centroid_cart2D2D(int num_p, double *p, double *centroid);
+
+
 } // namespace
 
 #endif
