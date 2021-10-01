@@ -3849,9 +3849,10 @@ bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_i
 
     // Triangulate p
     int ret_p=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td, ti, tri_ind);  
-    if (ret_p == ESMCI_TP_CLOCKWISE_POLY) Throw() << "Can't triangulate polygon.";
-    else if (ret_p == ESMCI_TP_DEGENERATE_POLY) {
-      // If degenerate (e.g. a line) then just return average of points
+
+    // If couldn't triangulate, then just return average of corners, because
+    // that's usually a reasonable approximation
+    if (ret_p != ESMCI_TP_SUCCESS) {
 
       // Compute sum of points
       centroid[0]=0.0; centroid[1]=0.0; centroid[2]=0.0;
