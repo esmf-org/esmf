@@ -238,7 +238,7 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH https://github.com/esmf-org/esmf.git
       - run:
           name: Docker Run API Changes
-          command: docker build -t "esmf/api-change:${CIRCLE_BRANCH_NEW}" --file "ESCOMP-Containers/ESMF/API_changes/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" --build-arg TAG1="ESMF_8_1_0" --build-arg TAG2="${CIRCLE_BRANCH}" --no-cache .
+          command: docker build -t "esmf/api-change:${CIRCLE_BRANCH_NEW}" --file "ESCOMP-Containers/ESMF/API_changes/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" --build-arg TAG1="ESMF_8_2_0" --build-arg TAG2="${CIRCLE_BRANCH}" --no-cache .
       - run:
           name: Extract API Changes
           command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/api_change-artifacts.zip" "esmf/api-change:${CIRCLE_BRANCH_NEW}"
