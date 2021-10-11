@@ -295,6 +295,8 @@ void MeshCreateDiff(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp, double threshol
   // Get dim info for mesh
   int sdim=srcmesh.spatial_dim();
   int pdim=srcmesh.parametric_dim();
+  int orig_sdim=srcmesh.orig_spatial_dim;
+  ESMC_CoordSys_Flag coordsys=srcmesh.coordsys;
 
   int rc;
 
@@ -319,8 +321,12 @@ void MeshCreateDiff(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp, double threshol
   Mesh &meshdiff =*(meshdiffp);
   *meshpp = meshdiffp;
 
-  meshdiff.set_parametric_dimension(sdim);
-  meshdiff.set_spatial_dimension(pdim);
+  // Set information in new mesh (obtained from srcmesh above)
+  meshdiff.set_spatial_dimension(sdim);
+  meshdiff.set_parametric_dimension(pdim);
+  meshdiff.orig_spatial_dim=orig_sdim;
+  meshdiff.coordsys=coordsys;
+
 
   Interp * interp=0;
   SearchResult sres;
