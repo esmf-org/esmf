@@ -18,7 +18,7 @@
 !BOE
 !
 ! \subsubsection{Communication - Non-blocking option and VMEpochs}
-!
+! \label{VM:NBVMEpoch}
 ! The VM communication methods offer the option to execute in non-blocking
 ! mode. In this mode, both sending and receving calls return immediatly on each
 ! local PET. A separate synchronization call is needed to assure completion of

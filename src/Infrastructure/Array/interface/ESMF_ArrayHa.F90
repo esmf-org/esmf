@@ -857,6 +857,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)        :: opt_cancelledflag  ! helper variable
     type(ESMF_Region_Flag)    :: opt_zeroregion     ! helper variable
     type(ESMF_Logical)        :: opt_checkflag      ! helper variable
+    type(ESMF_Pointer)        :: this
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -865,18 +866,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments, deal with optional Array args
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     if (present(srcArray)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      call ESMF_ArrayGetThis(srcArray, this, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (this /= ESMF_NULL_POINTER) then
+        ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      endif
       opt_srcArray = srcArray
     else
-      call ESMF_ArraySetThisNull(opt_srcArray, localrc)
+      call ESMF_ArraySetThisNull(opt_srcArray, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if (present(dstArray)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      call ESMF_ArrayGetThis(dstArray, this, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (this /= ESMF_NULL_POINTER) then
+        ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      endif
       opt_dstArray = dstArray
     else
-      call ESMF_ArraySetThisNull(opt_dstArray, localrc)
+      call ESMF_ArraySetThisNull(opt_dstArray, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif

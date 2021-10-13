@@ -11,6 +11,7 @@
 !==============================================================================
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Base.F90"
 !==============================================================================
+#define DEBUG_SETVM_on
 
 module NUOPC_Base
 
@@ -21,6 +22,7 @@ module NUOPC_Base
   use ESMF
   use NUOPC_FieldDictionaryApi
   use NUOPC_Auxiliary
+  use NUOPC_FreeFormatDef
 
   implicit none
   
@@ -53,6 +55,7 @@ module NUOPC_Base
   public NUOPC_GetStateMemberCount        ! method
   public NUOPC_GetTimestamp               ! method
   public NUOPC_InitAttributes             ! method
+  public NUOPC_IngestPetList              ! method
   public NUOPC_IsAtTime                   ! method
   public NUOPC_IsConnected                ! method
   public NUOPC_IsUpdated                  ! method
@@ -68,6 +71,7 @@ module NUOPC_Base
   ! internal Utility API
   public NUOPC_ChopString                 ! method
   public NUOPC_LogPetList                 ! method
+  public NUOPC_SetVM                      ! method
 
 !==============================================================================
 ! 
@@ -2319,7 +2323,145 @@ module NUOPC_Base
 
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IngestPetList - Ingest a petList from FreeFormat
+! !INTERFACE:
+  subroutine NUOPC_IngestPetList(petList, freeFormat, rc)
+! !ARGUMENTS:
+    integer, allocatable,   intent(out)           :: petList(:)
+    type(NUOPC_FreeFormat), intent(in),  target   :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Construct a petList from a {\tt FreeFormat} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[petList]
+!     The constructed petList. The size and content is set by this method.
+!   \item[freeFormat]
+!     The incoming petList information in free format. The format supports
+!     two types of elements:
+!     \begin{itemize}
+!     \item Single PET elements consist of a single number referring to the PET.
+!     \item Block elements consist of two PET numbers, separated by a "-" 
+!           character. No white spaces are accepted between the dash and the
+!           PET numbers. A block element includes all of the PETs between the
+!           lower bound (left PET number), and the upper bound (right PET
+!           number), bounds inclusive. The upper bound must {\em not} be
+!           less than the lower bound. 
+!     \end{itemize}
+!     Any number of elements may be listed in the free format. The idividual
+!     elements are separated by white spaces.
+!
+!     For an example, the free format petList definition
+!     \begin{verbatim}
+!     "2-5 12 0 15-23"
+!     \end{verbatim}
+!     would translate into a {\tt petList} output of
+!     \begin{verbatim}
+!     (/2, 3, 4, 5, 12, 0, 15, 16, 17, 18, 19, 20, 21, 22, 23/)
+!     \end{verbatim}
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: localrc
+    integer                 :: i, j, k
+    integer                 :: lineCount, tokenCount, blockCount, petCount
+    integer, allocatable    :: lb(:), ub(:)
+    character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+    character(len=ESMF_MAXSTR), pointer :: chopStringList(:)
+
+    call NUOPC_FreeFormatGet(freeFormat, lineCount=lineCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    blockCount = 0
+    do i=1, lineCount
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=localrc)
+      blockCount = blockCount + tokenCount
+    enddo
+
+    allocate(lb(tokenCount),ub(tokenCount))
+    petCount = 0
+    k = 1
+
+    ! prepare chopStringList
+    nullify(chopStringList)
+
+    do i=1, lineCount
+
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      allocate(tokenList(tokenCount))
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenList=tokenList, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      do j=1, tokenCount
+
+        if (index(trim(tokenList(j)),"-") > 0) then
+          ! this is a PET range
+          call NUOPC_ChopString(tokenList(j), chopChar="-", &
+            chopStringList=chopStringList, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          if (size(chopStringList) /= 2) then
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+              msg="Syntax error detected in petList block element.", &
+              line=__LINE__, file=FILENAME, &
+              rcToReturn=rc)
+            return  ! bail out
+          endif
+          read(chopStringList(1),*) lb(k)
+          read(chopStringList(2),*) ub(k)
+          deallocate(chopStringList)
+          if (ub(k)<lb(k)) then
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+              msg="Upper bound must not be less than lower bound in "//& 
+              "petList block element.", line=__LINE__, file=FILENAME, &
+              rcToReturn=rc)
+            return  ! bail out
+          endif
+        else
+          ! this is a single PET
+          read(tokenList(j),*) lb(k)
+          read(tokenList(j),*) ub(k)
+        endif
+
+        petCount = petCount + ub(k) - lb(k) + 1
+        k = k+1
+
+      enddo
+
+      deallocate(tokenList)
+
+    enddo
+
+    allocate(petList(petCount))
+    i = 1
+
+    do k=1, blockCount
+      do j=lb(k), ub(k)
+        petList(i) = j
+        i = i+1
+      enddo
+    enddo
+
+    deallocate(lb, ub)
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_IsAtTime - Check if a Field is at the given Time
@@ -5196,6 +5338,213 @@ module NUOPC_Base
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine NUOPC_SetVM(gcomp, rc)
+    type(ESMF_GridComp)  :: gcomp
+    integer, intent(out) :: rc
+
+    ! local variables
+    type(ESMF_VM)             :: gvm
+    character(ESMF_MAXSTR)    :: name
+    logical                   :: pthreadsEnabled
+    logical                   :: isPresent, isStructured
+    logical                   :: isPresent2, isStructured2
+    logical                   :: forceChildPthreads
+    integer                   :: value
+    integer                   :: size, idx
+    integer                   :: size2, idx2
+    type(ESMF_Info)           :: info
+    character(80)             :: ikey
+    character(80)             :: ikey2
+    integer                   :: maxCount, pthreadMinStackSize, openMpNumThreads
+    character(40)             :: msgString, openMpHandling
+
+    rc = ESMF_SUCCESS
+
+    ! query the component for info
+    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+#ifdef DEBUG_SETVM_on
+    call ESMF_LogWrite("Generic SetVM() is executing for: "// &
+      trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+
+    ! query global information about this ESMF execution instance
+    call ESMF_VMGetGlobal(gvm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_VMGet(gvm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! iterate through NUOPC Hints
+
+    call ESMF_InfoGetFromHost(gcomp, info=info, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    call ESMF_InfoGet(info, key="/NUOPC/Hint", isPresent=isPresent, &
+      isStructured=isStructured, size=size, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    if (isPresent .and. isStructured) then
+      do idx=1, size
+        call ESMF_InfoGet(info, key="/NUOPC/Hint", idx=idx, ikey=ikey, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (trim(ikey)=="PePerPet") then
+          ! conditionally error out if call into SetVM cannot be supported
+          if (.not.pthreadsEnabled) then
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Generic SetVM() detected lacking Pthreads "// &
+              "support for: "//trim(name), &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+            return  ! bail out
+          endif
+          ! set defaults
+          maxCount = -1
+          openMpHandling = ""
+          openMpNumThreads = -1
+          forceChildPthreads = .false.
+          pthreadMinStackSize = -1
+          ! iterate through the PePerPet hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="MaxCount") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/MaxCount", &
+                  value=maxCount, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="OpenMpHandling") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/OpenMpHandling", &
+                  value=openMpHandling, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="OpenMpNumThreads") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/OpenMpNumThreads", &
+                  value=openMpNumThreads, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="ForceChildPthreads") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/ForceChildPthreads", &
+                  value=forceChildPthreads, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="PthreadMinStackSize") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/PthreadMinStackSize", &
+                  value=pthreadMinStackSize, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
+          endif
+          ! make the actual call into ESMF_GridCompSetVMMaxPEs()
+#ifdef DEBUG_SETVM_on
+          call ESMF_LogWrite("Generic SetVM() is calling "// &
+            "ESMF_GridCompSetVMMaxPEs() for: "// &
+            trim(name)//" with:", ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "MaxCount", maxCount
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',A10)") "OpenMpHandling", &
+            trim(openMpHandling)
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "OpenMpNumThreads", &
+            openMpNumThreads
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',L10)") "ForceChildPthreads", &
+            forceChildPthreads
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "PthreadMinStackSize", &
+            pthreadMinStackSize
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+          if (maxCount == -1 .and. pthreadMinStackSize == -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, openMpHandling=openMpHandling,&
+              openMpNumThreads=openMpNumThreads, &
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount > -1 .and. pthreadMinStackSize == -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
+              openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount == -1 .and. pthreadMinStackSize > -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, &
+              pthreadMinStackSize=pthreadMinStackSize, &
+              openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount > -1 .and. pthreadMinStackSize > -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
+              pthreadMinStackSize=pthreadMinStackSize, &
+              openMpHandling=openMpHandling, &
+              openMpNumThreads=openMpNumThreads, &
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="Unknown NUOPC Hint: "//trim(ikey), &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+          return  ! bail out
+        endif
+      enddo
+    else
+#ifdef DEBUG_SETVM_on
+      call ESMF_LogWrite("Generic SetVM() found no NUOPC Hint for: "// &
+        trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogWrite("Generic SetVM() therefore is NOT calling "// &
+        "ESMF_GridCompSetVMMaxPEs() for: "// &
+        trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+    endif
 
   end subroutine
   !-----------------------------------------------------------------------------

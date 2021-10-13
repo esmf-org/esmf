@@ -101,6 +101,8 @@ void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc);
 void ESMCI_MeshGetNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
 void ESMCI_MeshGetElemCount(Mesh *meshpp, int *elemCount, int *rc);
 void ESMCI_MeshGetElemConnCount(Mesh *meshpp, int *elemConnCount, int *rc);
+void ESMCI_MeshGetOwnedNodeCount(Mesh *meshpp, int *nodeCount, int *rc);
+void ESMCI_MeshGetOwnedElemCount(Mesh *meshpp, int *elemCount, int *rc);
 
 void ESMCI_MeshGetElemInfoPresence(Mesh *mesh, 
                                    int *elemMaskIsPresent,
@@ -132,34 +134,18 @@ void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *nodeMask,
                                  int *rc);
 
-void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc);
+void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, DistGrid **dg, int *rc);
 
-void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, int *rc);
-
-void ESMCI_meshinfoserialize(int *intMeshFreed,
-                             int *spatialDim, int *parametricDim,
-                             int *intIsPresentNDG, int *intIsPresentEDG,
-                             int *coordSys, 
-                             char *buffer, int *length, int *offset,
-                             ESMC_InquireFlag *inquireflag, int *rc,
-                             ESMCI_FortranStrLenArg buffer_l);
-
-void ESMCI_meshinfodeserialize(int *intMeshFreed,
-                               int *spatialDim, int *parametricDim,
-                               int *intIsPresentNDG, int *intIsPresentEDG,
-                               int *coordSys, 
-                               char *buffer, int *offset, int *rc,
-                               ESMCI_FortranStrLenArg buffer_l);
+void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, DistGrid **dg, int *rc);
 
 void ESMCI_meshserialize(Mesh **meshpp,
-                char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *rc,
+                         char *buffer, int *length, int *offset,
+                         ESMC_InquireFlag *inquireflag, int *rc,
                          ESMCI_FortranStrLenArg buffer_l);
 
 void ESMCI_meshdeserialize(Mesh **meshpp,
-                                 char *buffer, int *offset, int *rc,
+                           char *buffer, int *offset, int *rc,
                            ESMCI_FortranStrLenArg buffer_l);
-
 
 void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *numPnts,
                        double *pnts, int *pets, int *rc);

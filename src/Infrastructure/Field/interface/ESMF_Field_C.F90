@@ -231,6 +231,8 @@
   ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
+    ! mesh%this = mesh_pointer
+
     mesh = ESMF_MeshCreateFromIntPtr(mesh_pointer)
   
     if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 0) then
@@ -309,8 +311,10 @@
     ! local variables  
     type(ESMF_Mesh)          :: mesh
   
-  ! initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
+
+    ! mesh%this = mesh_pointer
 
     mesh = ESMF_MeshCreateFromIntPtr(mesh_pointer)
 

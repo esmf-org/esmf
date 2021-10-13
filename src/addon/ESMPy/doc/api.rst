@@ -125,6 +125,15 @@ This is commonly required when reusing a :class:`~ESMF.api.regrid.Regrid` object
 to interpolate data between many :class:`~ESMF.api.field.Field` pairs to 
 conserve memory to complete all interpolations in a single execution.
 
+~~~~~~~~~~~~~~~~~
+MOAB Mesh backend
+~~~~~~~~~~~~~~~~~
+
+The Manager can be used to enable the `MOAB <https://sigma.mcs.anl.gov/moab-library/>`_
+mesh backend to the Mesh. This is done by calling ``set_moab()`` with ``moab_on=True``.
+The MOAB mesh is an alternative to the native ESMF mesh, and does not yet have
+full support.
+
 ------------------------------
 Spatial Discretization Objects
 ------------------------------

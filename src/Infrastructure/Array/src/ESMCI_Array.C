@@ -5825,10 +5825,15 @@ int Array::halo(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  // determine a good default for TERMORDER
+  ESMC_TermOrder_Flag termorderflag = ESMC_TERMORDER_SRCSEQ; // supports epoch
+  if (commflag != ESMF_COMM_BLOCKING)
+    termorderflag = ESMC_TERMORDER_FREE;  // RH non-blocking comms require FREE
+
   // implemented via sparseMatMul
   localrc = sparseMatMul(array, array, routehandle,
     commflag, finishedflag, cancelledflag, ESMC_REGION_SELECT,
-    ESMC_TERMORDER_FREE, checkflag, true);
+    termorderflag, checkflag, true);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
@@ -6531,10 +6536,15 @@ int Array::redist(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  // determine a good default for TERMORDER
+  ESMC_TermOrder_Flag termorderflag = ESMC_TERMORDER_SRCSEQ; // supports epoch
+  if (commflag != ESMF_COMM_BLOCKING)
+    termorderflag = ESMC_TERMORDER_FREE;  // RH non-blocking comms require FREE
+
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArray, dstArray, routehandle,
     commflag, finishedflag, cancelledflag, zeroflag,
-    ESMC_TERMORDER_FREE, checkflag);
+    termorderflag, checkflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 

@@ -1678,10 +1678,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (dstIsReg .or. dstIsMosaic) then
@@ -1691,10 +1687,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2643,15 +2635,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
         call computeRedistAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2816,51 +2800,24 @@ subroutine computeRedistAreaMesh(mesh, vm, petNo, petCnt, area, rc)
   integer :: localElemCount,i
   integer (ESMF_KIND_I4) :: localCount(1), globalCount(1)
   integer :: totalCount
-  logical :: hasSplitElem
   type(ESMF_DistGrid) :: distgrid, justPet0Distgrid
   type(ESMF_Array) :: areaArray, justPet0Array
   type(ESMF_RouteHandle) :: rh
 
-  ! Find out if elements are split
-  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)
+  ! Get local size of mesh areas
+  call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
+                     ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! Get area depending on split elements
-  if (hasSplitElem) then
-     ! Get local size of mesh areas before split
-     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
-            rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
+  ! allocate space for areas
+  allocate(localArea(localElemCount))
 
-    ! allocate space for areas
-    allocate(localArea(localElemCount))
-
-    ! Get local Areas
-    call ESMF_MeshGetOrigElemArea(mesh, areaList=localArea, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  else
-     ! Get local size of mesh areas
-     call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
-            rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! allocate space for areas
-    allocate(localArea(localElemCount))
-
-    ! Get local Areas
-    call ESMF_MeshGetElemArea(mesh, areaList=localArea, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  endif
+  ! Get local Areas
+  call ESMF_MeshGetElemArea(mesh, areaList=localArea, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! The element disgrid is for the split elements, thus the following code
   ! doesn't work with split element
@@ -3343,7 +3300,6 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
   integer (ESMF_KIND_I4) :: localCount(1)
   integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
   integer :: totalCount
-  logical :: hasSplitElem
 
   ! Get localFrac from field
   call ESMF_FieldGet(fracField, localDE=0, farrayPtr=localFrac,  rc=localrc)
@@ -3352,41 +3308,8 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
      return
   endif
 
-  ! Find out if elements are split
-  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-     rc=localrc
-     return
-  endif
-
-  ! Get merge frac field depending on if split elements
-  if (hasSplitElem) then
-     ! Get local size of mesh areas before split
-     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
-          rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=localrc
-        return
-     endif
-
-     ! allocate space for frac
-     allocate(mergedFrac(localElemCount))
-
-     ! Get local Areas
-     call ESMF_MeshGetOrigElemFrac(mesh, splitFracList=localFrac, &
-          origfracList=mergedFrac, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=localrc
-        return
-     endif
-
-     ! switch to point to merged areas
-     localFrac=>mergedFrac
-  else
-     localElemCount=size(localFrac)
-     ! localFrac is gotten from the fracField above
-  endif
-
+  localElemCount=size(localFrac)
+  ! localFrac is gotten from the fracField above
 
   ! Allocate List of counts
   allocate(globalCount(petCnt))
@@ -3434,10 +3357,6 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
      return
   endif
 
-  ! Get rid of helper variables
-  if (hasSplitElem) then
-     deallocate(mergedFrac)
-  endif
   deallocate(globalCount)
   deallocate(globalDispl)
   if (petNo .ne. 0) deallocate(frac)
@@ -3467,7 +3386,6 @@ subroutine gatherRedistFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, r
   integer :: localElemCount,i
   integer (ESMF_KIND_I4) :: localCount(1), globalCount(1)
   integer :: totalCount
-  logical :: hasSplitElem
   integer, pointer :: seqIndexList(:)
 
 
@@ -3478,41 +3396,8 @@ subroutine gatherRedistFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, r
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
-
-  ! Find out if elements are split
-  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-       ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-  ! Get merge frac field depending on if split elements
-  if (hasSplitElem) then
-     ! Get local size of mesh areas before split
-     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
-          rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-       ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-     ! allocate space for frac
-     allocate(mergedFrac(localElemCount))
-
-     ! Get local Areas
-     call ESMF_MeshGetOrigElemFrac(mesh, splitFracList=localFrac, &
-          origfracList=mergedFrac, rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-       ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-     ! switch to point to merged areas
-     localFrac=>mergedFrac
-  else
-     localElemCount=size(localFrac)
-     ! localFrac is gotten from the fracField above
-  endif
+  localElemCount=size(localFrac)
+  ! localFrac is gotten from the fracField above
 
 
   ! Get total size
@@ -3588,12 +3473,6 @@ subroutine gatherRedistFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, r
 
 
   ! Properly redisted fractions should now be in frac(:)
-
-
-  ! Get rid of helper variables
-  if (hasSplitElem) then
-     deallocate(mergedFrac)
-  endif
 
   call ESMF_ArrayDestroy(justPet0Array)
   call ESMF_DistGridDestroy(justPet0Distgrid)
