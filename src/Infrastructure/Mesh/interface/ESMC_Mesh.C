@@ -43,13 +43,14 @@ extern "C" {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetMOAB()"
-void ESMC_MeshGetMOAB(bool moabOn, int *rc){
+void ESMC_MeshGetMOAB(bool *moabOn, int *rc){
 
   int moabOnInt = 0;
   MeshCap::meshGetMOAB(&moabOnInt, rc);
   
-  moabOn = static_cast<bool> (moabOnInt);
-  
+  if (moabOnInt == 0) *moabOn = false;
+  else *moabOn = true;
+    
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }

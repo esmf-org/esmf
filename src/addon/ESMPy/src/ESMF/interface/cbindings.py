@@ -1029,7 +1029,7 @@ def ESMP_GridWrite(grid, filename, staggerloc=constants.StaggerLoc.CENTER):
 #### MOAB #####################################################################
 
 _ESMF.ESMC_MeshGetMOAB.restype = None
-_ESMF.ESMC_MeshGetMOAB.argtypes = [ct.c_bool, ct.POINTER(ct.c_int)]
+_ESMF.ESMC_MeshGetMOAB.argtypes = [ct.POINTER(ct.c_bool), ct.POINTER(ct.c_int)]
 
 def ESMP_MeshGetMOAB(moab_on):
     """
@@ -1039,11 +1039,15 @@ def ESMP_MeshGetMOAB(moab_on):
         bool :: moab_on\n
     """
     lrc = ct.c_int(0)
-    _ESMF.ESMC_MeshGetMOAB(moab_on, ct.byref(lrc))
+    lmb = ct.c_bool(moab_on)
+    _ESMF.ESMC_MeshGetMOAB(ct.byref(lmb), ct.byref(lrc))
     rc = lrc.value
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_MeshGetMOAB() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
+    mb = lmb.value
+                        
+    return mb
 
 _ESMF.ESMC_MeshSetMOAB.restype = None
 _ESMF.ESMC_MeshSetMOAB.argtypes = [ct.c_bool, ct.POINTER(ct.c_int)]
