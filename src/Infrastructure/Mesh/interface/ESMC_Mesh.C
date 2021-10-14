@@ -321,7 +321,7 @@ void ESMC_MeshGetCoord(ESMC_Mesh mesh,
     rc)) return;  // bail out
 
   // get the num_nodes
-  mc->getNodeCount(num_nodes, &localrc);
+  mc->getOwnedNodeCount(num_nodes, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;  // bail out
 
@@ -351,7 +351,7 @@ void ESMC_MeshGetElemCoord(ESMC_Mesh mesh,
     rc)) return;  // bail out
 
   // get the num_elems
-  mc->getElemCount(num_elems, &localrc);
+  mc->getOwnedElemCount(num_elems, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;  // bail out
 
