@@ -486,6 +486,7 @@ workflows:
             branches:
               only:
                 - develop
+		- /release*/
       - build-esmpy-docs
 #          requires:
 #            - should-build-docs
