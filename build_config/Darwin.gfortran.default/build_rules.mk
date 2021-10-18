@@ -119,11 +119,6 @@ ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 endif
 
 ############################################################
-# Gfortran runtime library on Darwin does not currently seem thread-safe
-#
-ESMF_PTHREADS := OFF
-
-############################################################
 # Fortran symbol convention
 #
 ifeq ($(ESMF_FORTRANSYMBOLS),default)
