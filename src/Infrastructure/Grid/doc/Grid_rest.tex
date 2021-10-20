@@ -6,11 +6,7 @@
 
 \item {\bf 7D limit.}  Only grids up to 7D will be supported.
 
-\item {\bf During the first development phase only single
-tile grids are supported.}  In the near future, support
-for mosaic grids will be added.  The initial implementation 
-will be to create mosaics that contain tiles of the same
-grid type, e.g. rectilinear.
+\item {\bf Grids with factorized coordinates can only be redisted when they are 2D}  Using the ESMF_GridCreate() interface that allows the user to create a copy of an existing Grid with a new distribution will give incorrect results when used on a Grid with 3 or more dimensions and whose coordinate arrays are less than the full dimension of the Grid (i.e. it contains factorized coordinates).
 
 \item {\bf Future adaptation.}  Currently Grids
 are created and then remain unchanged. In the future, it would

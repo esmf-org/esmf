@@ -284,10 +284,10 @@ program ESMF_FieldRegridEx
 
 !BOC
 
-  ! (Create source Grid, Mesh, or LocStream.)
+  ! (Create source Grid, Mesh, XGrid, or LocStream.)
   ! (Create srcField on the above.)
 
-  ! (Create destination Grid, Mesh, or LocStream.)
+  ! (Create destination Grid, Mesh, XGrid, or LocStream.)
   ! (Create dstField on the above.)
   
   ! Create the routeHandle which encodes the communication and
