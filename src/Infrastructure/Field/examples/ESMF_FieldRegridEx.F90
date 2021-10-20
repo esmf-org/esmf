@@ -258,7 +258,7 @@ program ESMF_FieldRegridEx
 ! please see Section~\ref{sec:regrid}. 
 !
 ! The basic flow of ESMF Field regridding is as follows. First a source and destination geometry object are created, depending on 
-! the regrid method they can be either a Grid, a Mesh, or a LocStream. 
+! the regrid method they can be either a Grid, a Mesh, an XGrid, or a LocStream. 
 ! Next Fields are built on the source and destination grid objects. These Fields are then passed into {\tt ESMF\_FieldRegridStore()}. The user can either get a 
 ! sparse matrix from this call and/or a {\tt routeHandle}. If the user gets the sparse matrix then they are responsible for deallocating it, but other than that
 ! can use it as they wish. The {\tt routeHandle} can be used in the {\tt ESMF\_FieldRegrid()} call to perform the actual interpolation of data from the source 

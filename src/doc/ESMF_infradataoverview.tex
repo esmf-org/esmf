@@ -318,15 +318,13 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 \smallskip
 
 \textbf{Restrictions:}\\*
- \begin{itemize}
- \item The unmapped destination point detection doesn't currently work for this method. Even if there are unmapped points, no error will be returned. 
- \end{itemize}
+\textit{NONE}
 
 \smallskip
 
  To use the nearest source to destination method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
- must contain coordinates. This method will also work with a source or destination Field built on a LocStream that contains coordinates or when the source 
+ must contain coordinates. This method will also work with a source or destination Field built on a LocStream that contains coordinates, or when the source 
 or destination Field is built on an XGrid.
 
 
@@ -355,13 +353,15 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 \smallskip
 
 \textbf{Restrictions:}\\*
-\textit{NONE}
+\begin{itemize}
+\item The unmapped destination point detection doesn't currently work for this method. Even if there are unmapped points, no error will be returned. 
+\end{itemize}
 
 \smallskip
 
  To use the nearest destination to source method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
- must contain coordinates. This method will also work with a source or destination Field built on a LocStream that contains coordinates or when the source 
+ must contain coordinates. This method will also work with a source or destination Field built on a LocStream that contains coordinates, or when the source 
 or destination Field is built on an XGrid.
 
 \subsubsection{Interpolation methods: first-order conservative}\label{sec:interpolation:conserve}
@@ -836,11 +836,11 @@ Figure~\ref{line_type_support} shows which line types are supported for each reg
 \subsubsection{Restrictions and Future Work}
 This section contains restrictions that apply to the entire regridding system. For restrictions that apply to just one interpolation method, see the section corresponding to that method above.
 
-\begin{enumerate}
+\begin{itemize}
 
 \item {\bf Regridding doesn't work on a Field created on a Grid with an arbitrary distribution:} Using a Field built on a Grid with an arbitrary distribution will cause the regridding to stop with an error.  
 
-\end{enumerate}
+\end{itemize}
 
 \subsubsection{Design and implementation notes}
 
