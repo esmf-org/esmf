@@ -3252,7 +3252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_FieldRegridStoreX"
 
 !BOP
-! !IROUTINE: ESMF_FieldRegridStore - Precompute a Field regridding operation and return a RouteHandle using XGrid
+! !IROUTINE: ESMF_FieldRegridStore - Precompute a Field regridding operation between an XGrid and one of its side Grids or Meshes
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
@@ -3288,10 +3288,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !       \begin{sloppypar}
-!       Creates a sparse matrix operation (stored in {\tt routehandle}) that contains the calculations and 
-!       communications necessary to interpolate from {\tt srcField} to {\tt dstField}. 
-!       The routehandle can then be used in the call
-!       {\tt ESMF\_FieldRegrid()} to interpolate between the {\tt ESMF\_Field}s. Information such as
+!       This method creates a RouteHandle to do conservative interpolation specifically between a
+!       Field built on an XGrid and a Field build on one of the Grids or Meshes used to create that XGrid. 
+!       To do more general interpolation see the {\tt ESMF\_FieldRegridStore()} call
+!       in section~\ref{api:esmf_fieldregridstorenx}.
+!
+!       The RouteHandle produced by this method can then be used in the call
+!       {\tt ESMF\_FieldRegrid()} to interpolate from the {\tt srcField} to the {\tt dstField} . Information such as
 !       index mapping and weights are obtained from the XGrid by matching the Field Grids or Meshes in the XGrid. 
 !       It's erroneous to have matching Grid or Mesh objects in the {\tt srcField} and {\tt dstField}. 
 !       They must be different in either topological or geometric characteristics. For {\tt ESMF\_Field}s 
@@ -3318,9 +3321,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [xgrid]
 !           Exchange Grid.
 !     \item [srcField]
-!           Source Field.
+!           Source Field built on either {\tt xgrid} or one of the Grids or Meshes used to create {\tt xgrid}.
 !     \item [dstField]
-!           Destination Field. The data in this Field may be overwritten by this call. 
+!           Destination Field built on either {\tt xgrid} or one of the Grids or Meshes used to create {\tt xgrid}. 
+!           The data in this Field may be overwritten by this call. 
 !     \item [{[regridmethod]}]
 !           The type of interpolation. For this method only 
 !           {\tt ESMF\_REGRIDMETHOD\_CONSERVE} and {\tt ESMF\_REGRIDMETHOD\_CONSERVE\_2ND} are
