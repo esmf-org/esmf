@@ -194,7 +194,7 @@ class FileMode(IntEnum):
     """
     WITHAUX = 1
     """
-    Indicates that grid center coordinates should also be written.
+    Indicates that grid center coordinates and cell areas should also be written.
     """
 
 # GridItem
