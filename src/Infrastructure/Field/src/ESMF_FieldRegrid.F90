@@ -3290,8 +3290,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \begin{sloppypar}
 !       This method creates a RouteHandle to do conservative interpolation specifically between a
 !       Field built on an XGrid and a Field build on one of the Grids or Meshes used to create that XGrid. 
-!       To do more general interpolation use the {\tt ESMF\_FieldRegridStore()} method
-!       in section~\ref{api:esmf_fieldregridstorenx}. The RouteHandle produced by this method can then be used in the call
+!       (To do more general interpolation use the {\tt ESMF\_FieldRegridStore()} method
+!       in section~\ref{api:esmf_fieldregridstorenx}.) The RouteHandle produced by this method can then be used in the call
 !       {\tt ESMF\_FieldRegrid()} to interpolate from the {\tt srcField} to the {\tt dstField}. 
 !       \end{sloppypar}
 !       
