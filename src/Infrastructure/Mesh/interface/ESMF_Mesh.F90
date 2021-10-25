@@ -2581,7 +2581,14 @@ end function ESMF_MeshCreateFromFile
     endif
 
 
+    call ESMF_VMLogMemInfo("Before_MC_dealloc_nodeCoords", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
     deallocate(nodeCoords)
+    call ESMF_VMLogMemInfo("After_MC_dealloc_nodeCoords", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
     if (.not. haveNodeMask) then
        ! Add nodes
        call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
@@ -2788,7 +2795,16 @@ end function ESMF_MeshCreateFromFile
     endif
 
 
-    deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
+    call ESMF_VMLogMemInfo("Before_MC_dealloc_node_used_and_owners1", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    deallocate(NodeUsed, NodeOwners1)
+    call ESMF_VMLogMemInfo("After_MC_dealloc_node_used_and_owners1", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    deallocate(NodeId, NodeCoords1D, NodeOwners)
+
     deallocate(ElemId, ElemType, ElemConn, elementConn, elmtNum)
     if (haveElmtMask) deallocate(elementMask)
     if (haveMask) deallocate(ElemMask)
