@@ -161,6 +161,33 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
+  //NEX_UTest
+  bool moabOn = true;
+  strcpy(name, "Test ESMC_MeshSetMOAB");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined ESMF_MOAB
+  ESMC_MeshSetMOAB(moabOn, &rc);
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  bool moabOn_out = false;
+  strcpy(name, "Test ESMC_MeshGetMOAB");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#if defined ESMF_MOAB
+  ESMC_MeshGetMOAB(&moabOn_out, &rc);
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS) && (moabOn_out == moabOn), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 
   return 0;

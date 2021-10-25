@@ -43,13 +43,14 @@ extern "C" {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetMOAB()"
-void ESMC_MeshGetMOAB(bool moabOn, int *rc){
+void ESMC_MeshGetMOAB(bool *moabOn, int *rc){
 
   int moabOnInt = 0;
   MeshCap::meshGetMOAB(&moabOnInt, rc);
   
-  moabOn = static_cast<bool> (moabOnInt);
-  
+  if (moabOnInt == 0) *moabOn = false;
+  else *moabOn = true;
+    
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }
@@ -320,7 +321,7 @@ void ESMC_MeshGetCoord(ESMC_Mesh mesh,
     rc)) return;  // bail out
 
   // get the num_nodes
-  mc->getNodeCount(num_nodes, &localrc);
+  mc->getOwnedNodeCount(num_nodes, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;  // bail out
 
@@ -350,7 +351,7 @@ void ESMC_MeshGetElemCoord(ESMC_Mesh mesh,
     rc)) return;  // bail out
 
   // get the num_elems
-  mc->getElemCount(num_elems, &localrc);
+  mc->getOwnedElemCount(num_elems, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;  // bail out
 

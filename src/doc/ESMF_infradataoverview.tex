@@ -214,6 +214,7 @@ ESMF\_RegridWeightGen & Command Line Tool & Grid files & yes  & no & Sec.~\ref{s
  \item Structured grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
  \item A set of disconnected points ({\tt ESMF\_LocStream}) may be the destination of the regridding
+ \item An exchange grid ({\tt ESMF\_XGrid})
  \end{itemize}
 
 \smallskip
@@ -232,11 +233,13 @@ ESMF\_RegridWeightGen & Command Line Tool & Grid files & yes  & no & Sec.~\ref{s
  \item Cells which contain enough identical corners to collapse to a line or point are currently ignored
  \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported 
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
+ \item Source Fields built on a Grid which contains a DE of width less than 2 elements are not supported
  \end{itemize}
 
  To use the bilinear method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
- must contain coordinates. 
+ must contain coordinates. This method will also work with a destination Field built on a LocStream that contains coordinates, 
+ or with a source or destination Field built on an XGrid.
 
 \subsubsection{Interpolation methods: higher-order patch}\label{sec:interpolation:patch}
 
@@ -265,6 +268,7 @@ ESMF\_RegridWeightGen & Command Line Tool & Grid files & yes  & no & Sec.~\ref{s
  \item Structured Grids ({\tt ESMF\_Grid}) composed of a single logically rectangular tile
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
  \item A set of disconnected points ({\tt ESMF\_LocStream}) may be the destination of the regridding
+ \item An exchange grid ({\tt ESMF\_XGrid})
  \end{itemize}
 
 \smallskip
@@ -281,11 +285,13 @@ ESMF\_RegridWeightGen & Command Line Tool & Grid files & yes  & no & Sec.~\ref{s
  \item Cells which contain enough identical corners to collapse to a line or point are currently ignored
  \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
+ \item Source Fields built on a Grid which contains a DE of width less than 2 elements are not supported
  \end{itemize}
 
  To use the patch method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
- must contain coordinates. 
+ must contain coordinates. This method will also work with a destination Field built on a LocStream that contains coordinates, 
+ or with a source or destination Field built on an XGrid.
 
 \subsubsection{Interpolation methods: nearest source to destination}\label{sec:interpolation:neareststod}
 In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST\_STOD}) each destination point is mapped to the closest source point. A given source point may map to multiple destination points, but no destination point will receive input from more than one source point. If two points are equally close, then the point with the smallest sequence index is arbitrarily used (i.e. the point which would have the smallest index in the weight matrix). 
@@ -297,6 +303,7 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  \item Structured Grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
  \item A set of disconnected points ({\tt ESMF\_LocStream}) 
+ \item An exchange grid ({\tt ESMF\_XGrid})
  \end{itemize}
 
 \smallskip
@@ -317,7 +324,8 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
  To use the nearest source to destination method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
- must contain coordinates. 
+ must contain coordinates. This method will also work with a source or destination Field built on a LocStream that contains coordinates, or when the source 
+or destination Field is built on an XGrid.
 
 
 \subsubsection{Interpolation methods: nearest destination to source}\label{sec:interpolation:nearestdtos}
@@ -330,6 +338,7 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  \item Structured Grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
  \item A set of disconnected points ({\tt ESMF\_LocStream}) 
+ \item An exchange grid ({\tt ESMF\_XGrid})
  \end{itemize}
 
 \smallskip
@@ -344,13 +353,16 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 \smallskip
 
 \textbf{Restrictions:}\\*
-\textit{NONE}
+\begin{itemize}
+\item The unmapped destination point detection doesn't currently work for this method. Even if there are unmapped points, no error will be returned. 
+\end{itemize}
 
 \smallskip
 
  To use the nearest destination to source method the user may create their Fields on any stagger location (e.g. {\tt ESMF\_STAGGERLOC\_CENTER}) for a Grid, or
  any Mesh location (e.g. {\tt ESMF\_MESHLOC\_NODE}) for a Mesh. For either a Grid or a Mesh, the location upon which the Field is built 
- must contain coordinates. 
+ must contain coordinates. This method will also work with a source or destination Field built on a LocStream that contains coordinates, or when the source 
+or destination Field is built on an XGrid.
 
 \subsubsection{Interpolation methods: first-order conservative}\label{sec:interpolation:conserve}
  The goal of this method is to preserve the integral of the field across the interpolation from source to destination.  
@@ -362,7 +374,7 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  to the total being the amount that that source cell overlaps with the destination cell. 
  In particular, the weight is the ratio of the area of intersection of the source and destination cells to the area of the whole destination cell. 
 
- To see a description of how the different normalization options affect the values and integrals produced by the conservative methods see section~\ref{sec:interpolation:conservative_norm_opts}. For Grids or Meshes on a sphere this method uses great circle cells, for a description of potential problems with these see~\ref{sec:interpolation:great_circle_cells}.
+ To see a description of how the different normalization options affect the values and integrals produced by the conservative methods see section~\ref{sec:interpolation:conservative_norm_opts}. For Grids, Meshes, or XGrids on a sphere this method uses great circle cells, for a description of potential problems with these see~\ref{sec:interpolation:great_circle_cells}.
 
 \smallskip
 
@@ -370,6 +382,7 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  \begin{itemize}
  \item Structured Grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
+ \item An exchange grid ({\tt ESMF\_XGrid})
  \end{itemize}
 
 \smallskip
@@ -387,13 +400,14 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  \item Cells which contain enough identical corners to collapse to a line or point are optionally (via a flag) either ignored or return an error
  \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
+ \item Source or destination Fields built on a Grid which contains a DE of width less than 2 elements are not supported
  \end{itemize}
 
 \smallskip
 
  To use the conservative method the user should create their Fields on the center 
  stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} in 2D or {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} in 3D) for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
- For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D or {\tt ESMF\_STAGGERLOC\_CORNER\_VFACE} in 3D) must contain coordinates describing the outer perimeter of the Grid cells. 
+ For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D or {\tt ESMF\_STAGGERLOC\_CORNER\_VFACE} in 3D) must contain coordinates describing the outer perimeter of the Grid cells. This method will also work when the source or destination Field is built on an XGrid.
 
 \subsubsection{Interpolation methods: second-order conservative}\label{sec:interpolation:conserve_2ndorder}
  Like the first-order conservative method, this method's goal is to preserve the integral of the field across the interpolation from source to destination.  
@@ -428,7 +442,7 @@ Where:
 
 \smallskip
 
- To see a description of how the different normalization options affect the values and integrals produced by the conservative methods see section~\ref{sec:interpolation:conservative_norm_opts}. For Grids or Meshes on a sphere this method uses great circle cells, for a description of potential problems with these see~\ref{sec:interpolation:great_circle_cells}.
+ To see a description of how the different normalization options affect the values and integrals produced by the conservative methods see section~\ref{sec:interpolation:conservative_norm_opts}. For Grids, Meshes, or XGrids on a sphere this method uses great circle cells, for a description of potential problems with these see~\ref{sec:interpolation:great_circle_cells}.
 
 
 \smallskip
@@ -437,6 +451,7 @@ Where:
  \begin{itemize}
  \item Structured Grids ({\tt ESMF\_Grid}) composed of any number of logically rectangular tiles
  \item Unstructured meshes ({\tt ESMF\_Mesh}) composed of polygons with any number of sides
+ \item An exchange grid ({\tt ESMF\_XGrid})
  \end{itemize}
 
 \smallskip
@@ -453,6 +468,7 @@ Where:
  \item Cells which contain enough identical corners to collapse to a line or point are optionally (via a flag) either ignored or return an error
  \item Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
+ \item Source or destination Fields built on a Grid which contains a DE of width less than 2 elements are not supported
  \end{itemize}
  
 \smallskip
@@ -460,6 +476,7 @@ Where:
  To use the second-order conservative method the user should create their Fields on the center 
  stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
  For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D must contain coordinates describing the outer perimeter of the Grid cells. 
+ This method will also work when the source or destination Field is built on an XGrid.
 
 \subsubsection{Conservation}\label{sec:interpolation:conservation}
  Conservation means that the following equation will hold:  $\sum^{all-source-cells}(V_{si}*A_{si}) = \sum^{all-destination-cells}(V_{dj}*A_{dj})$, where
@@ -551,7 +568,7 @@ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldR
 \end{verbatim}
 
 \subsubsection{Great circle cells}\label{sec:interpolation:great_circle_cells}
- For Grids and Meshes on a sphere some combinations of interpolation options 
+ For Grids, Meshes, or XGrids on a sphere some combinations of interpolation options 
  (e.g. first and second-order conservative methods) use cells whose edges are great circles. This section describes some behavior 
  that the user may not expect from these cells and some potential solutions. 
  
@@ -571,7 +588,7 @@ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldR
 
 \subsubsection{Masking}
 \label {regrid:masking}
-Masking is the process whereby parts of a Grid, Mesh or LocStream 
+Masking is the process whereby parts of a Grid, Mesh, or LocStream 
 can be marked to be ignored during an operation, such as when they 
 are used in regridding.  Masking can be used on a Field created from 
 a regridding source to indicate that certain portions should not be 
@@ -659,7 +676,7 @@ of the regridding weights).
 
 Because it depends on the connections in the destination grid, creep fill extrapolation is not supported when the 
 destination Field is built on a Location Stream (ESMF\_LocStream). Also, creep fill is currently only supported for 
-2D Grids or Meshes.
+2D Grids, Meshes, or XGrids
 
 \subsubsection{Unmapped destination points}
  If a destination point can't be mapped to a location in the source grid by the combination of regrid method and 
@@ -683,8 +700,7 @@ require this level of detail in representing the Earth's shape, but it could be 
 For Grids on a sphere, the regridding occurs in 3D Cartesian to avoid
 problems with periodicity and with the pole singularity. This library
  supports four options for handling the pole region (i.e. the empty area above the top row of the source grid or below
- the bottom row of the source grid).  Note that all of these pole options currently only work for the Fields build on the Grid class and not for those built on 
- the Mesh class. 
+ the bottom row of the source grid).  Note that all of these pole options currently only work for the Fields build on the Grid class.
 
  The first option is to leave the pole region empty ({\tt polemethod=ESMF\_POLEMETHOD\_NONE}), in this 
  case if a destination point lies above or below the 
@@ -816,6 +832,15 @@ Figure~\ref{line_type_support} shows which line types are supported for each reg
  {\tt totalWidth} arguments to include this extra padding in the Field. Note, however, 
  that the regrid won't update these extra points, so the user will have to do a copy to fill the points
  in the overlap region in the Field.  
+
+\subsubsection{Restrictions and Future Work}
+This section contains restrictions that apply to the entire regridding system. For restrictions that apply to just one interpolation method, see the section corresponding to that method above.
+
+\begin{itemize}
+
+\item {\bf Regridding doesn't work on a Field created on a Grid with an arbitrary distribution:} Using a Field built on a Grid with an arbitrary distribution will cause the regridding to stop with an error.  
+
+\end{itemize}
 
 \subsubsection{Design and implementation notes}
 

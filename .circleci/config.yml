@@ -135,7 +135,7 @@ jobs:
       - run:
          name: "Removing slash from branch name "
          command: |
-                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's:/:_:g'`' >> $BASH_ENV
                   echo $CIRCLE_BRANCH_NEW
                   source $BASH_ENV
       - run:
@@ -181,7 +181,7 @@ jobs:
       - run:
          name: "Removing slash from branch name "
          command: |
-                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's:/:_:g'`' >> $BASH_ENV
                   echo $CIRCLE_BRANCH_NEW
                   source $BASH_ENV
       - run:
@@ -227,7 +227,7 @@ jobs:
       - run:
          name: "Removing slash from branch name "
          command: |
-                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's:/:_:g'`' >> $BASH_ENV
                   echo $CIRCLE_BRANCH_NEW
                   source $BASH_ENV
       - run:
@@ -290,7 +290,7 @@ jobs:
       - run:
          name: "Removing slash from branch name "
          command: |
-                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's#/#_#'`' >> $BASH_ENV
+                  echo 'export CIRCLE_BRANCH_NEW=`echo ${CIRCLE_BRANCH} | sed 's:/:_:g'`' >> $BASH_ENV
                   echo $CIRCLE_BRANCH_NEW
                   source $BASH_ENV
       - run:
@@ -486,6 +486,7 @@ workflows:
             branches:
               only:
                 - develop
+                - /^release/.*$/
       - build-esmpy-docs
 #          requires:
 #            - should-build-docs
