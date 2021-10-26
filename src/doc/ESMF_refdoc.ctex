@@ -15,7 +15,7 @@
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
 \newcommand{\mytitle}{\longname \docmttype ~~}
-\newcommand{\myversion}{Version 8.1.0}
+\newcommand{\myversion}{Version 8.2.0}
 
 \input{common_commands}
 
@@ -249,7 +249,7 @@
 \input{ESMF_options}
 \input{ESMF_appuml}
 \input{ESMF_apperr}
-\input{ESMF_appattr}
+#include "../Superstructure/AttributeAPI/doc/AttributeAPI_refdoc.ctex"
 
 \end{document}
 

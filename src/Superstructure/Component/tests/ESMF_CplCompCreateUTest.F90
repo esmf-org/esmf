@@ -53,7 +53,7 @@
     sequence
       type(testData), pointer :: p
     end type
-    
+
 #ifdef ESMF_TESTEXHAUSTIVE
     logical                 :: bool
     type(ESMF_VM)           :: vm
@@ -64,7 +64,8 @@
     type(testData), target  :: data1, data2
     logical                 :: isPresent
     type(ESMF_Config)       :: config
-    integer                 :: fred
+    integer                 :: fred, i
+    character(len=:), allocatable :: labelList(:)
 #endif
 
 !-------------------------------------------------------------------------------
@@ -373,6 +374,7 @@
     !wrap2%p=>data2
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get Internal State Test"
+    nullify(wrap2%p)
     call ESMF_CplCompGetInternalState(cpl, wrap2, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -383,8 +385,29 @@
     data2 = wrap2%p
     write(failMsg, *) "Did not return correct data"
     write(name, *) "Verify Internal State Test"
-    call ESMF_Test((data2%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
-    print *, "data2%testnumber = ", data2%testnumber
+    if (associated(wrap2%p)) then
+      call ESMF_Test((data2%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
+      print *, "data2%testnumber = ", data2%testnumber
+    else
+      call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+    endif
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Access information about the currently set internal states
+
+    call ESMF_InternalStateGet(cpl, labelList, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Accessing information about the set internal states Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    ! print the labels
+    do i=1, size(labelList)
+      print *, labelList(i)
+    enddo
+
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest

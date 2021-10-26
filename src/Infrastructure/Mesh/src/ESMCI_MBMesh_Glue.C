@@ -62,7 +62,7 @@ using namespace ESMCI;
 // #define DEBUG_OWNED
 
 
-extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
+extern "C" void FTN_X(f_esmf_getmeshdistgrid)(DistGrid**, int*, int*, int*);
 
 void MBMesh_create(MBMesh **mbmpp, int *pdim, int *sdim,
                    ESMC_CoordSys_Flag *coordSys, int *rc)
@@ -864,7 +864,7 @@ void MBMesh_write(MBMesh **mbmpp, char *fname, int *rc,
 }
 
 
-void MBMesh_createnodedistgrid(MBMesh **mbmpp, int *ngrid, int *num_lnodes, int *rc) {
+void MBMesh_createnodedistgrid(MBMesh **mbmpp, DistGrid **dg, int *rc) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createnodedistgrid()"
@@ -914,17 +914,19 @@ void MBMesh_createnodedistgrid(MBMesh **mbmpp, int *ngrid, int *num_lnodes, int 
       }
     }
 
+    
+
   } 
   CATCH_MBMESH_RETURN(rc);
 
   // Create the distgrids
   {
-    int nsize = *num_lnodes = ngids.size();
+    int nsize = ngids.size();
     int rc1;
 
     int *indices = (nsize==0)?NULL:&ngids[0];
 
-    FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
+    FTN_X(f_esmf_getmeshdistgrid)(dg, &nsize, indices, &rc1);
 
     if (ESMC_LogDefault.MsgFoundError(rc1,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1006,7 +1008,7 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
 }
 
 
-void MBMesh_createelemdistgrid(MBMesh **mbmpp, int *egrid, int *num_lelems, int *rc) {
+void MBMesh_createelemdistgrid(MBMesh **mbmpp, DistGrid **dg, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_createelemdistgrid()"
 
@@ -1030,12 +1032,12 @@ void MBMesh_createelemdistgrid(MBMesh **mbmpp, int *egrid, int *num_lelems, int 
   CATCH_MBMESH_RETURN(rc);
 
   {
-    int esize = *num_lelems = egids.size();
+    int esize = egids.size();
     int rc1;
 
     int *indices = (esize==0)?NULL:&egids[0];
 
-    FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
+    FTN_X(f_esmf_getmeshdistgrid)(dg, &esize, indices, &rc1);
 
     if(ESMC_LogDefault.MsgFoundError(rc1,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1711,7 +1713,7 @@ void MBMesh_serialize(MBMesh **mbmpp, char *buffer, int *length,
     Interface *mesh=mbmp->mesh;
 
     // Calc Size
-    int size = 0;
+    int size = 13*sizeof(int);
 
     // TODO: verify length > vars.
     if (*inquireflag != ESMF_INQUIREONLY) {
@@ -1754,7 +1756,7 @@ void MBMesh_serialize(MBMesh **mbmpp, char *buffer, int *length,
     }
 
     // Adjust offset
-    *offset += size * sizeof(int);
+    *offset += 13*sizeof(int);
 
   } 
   CATCH_MBMESH_RETURN(rc);
@@ -2241,15 +2243,19 @@ void MBMesh_FitOnVM(MBMesh **meshpp, VM **new_vm, int *rc)
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 } // ESMCI_MeshFitOnVM
 
-void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, int *rc) {
+void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, 
+                          ESMC_CoordSys_Flag *coordsys, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetDimensions()"
   try {
-    if (sdim)
+    if (sdim != nullptr)
       *sdim = meshp->orig_sdim;
 
-    if (pdim)
+    if (pdim != nullptr)
       *pdim = meshp->pdim;
+      
+    if (coordsys != nullptr)
+      *coordsys = meshp->coordsys;
   }
   CATCH_MBMESH_RETURN(rc);
   

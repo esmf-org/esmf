@@ -333,8 +333,8 @@ class Grid(object):
         self._coords = [None]
 
         # mask and area
-        self._mask = np.zeros(None)
-        self._area = np.zeros(None)
+        self._mask = np.zeros(())
+        self._area = np.zeros(())
 
         # create the correct grid
         self._struct = None

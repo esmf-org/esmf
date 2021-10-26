@@ -23,10 +23,15 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <queue>
 #ifdef USE_STRSTREAM
 #include <strstream>
 #endif
 #include <map>
+
+#ifndef ESMF_NO_OPENMP
+#include <omp.h>
+#endif
 
 #ifdef VMK_STANDALONE
 #include <pthread.h>
@@ -210,7 +215,17 @@ class VMK{
     ipshmAlloc *prev;   // pointer to prev. ipshmAlloc element in list
     ipshmAlloc *next;   // pointer to next ipshmAlloc element in list
   };
-  
+
+  struct ackElement{
+    MPI_Request ackReq;
+    int ackDummy;
+   public:
+    ackElement(){ // native constructor
+      ackReq = MPI_REQUEST_NULL;
+      ackDummy = 0;
+    }
+  };
+
   struct sendBuffer{
 #ifdef USE_STRSTREAM
     std::strstream stream;
@@ -220,6 +235,7 @@ class VMK{
 #endif
     MPI_Request mpireq;
     bool firstFlag;
+    std::queue<ackElement> ackQueue; // queue of acknowledge requests
    public:
     sendBuffer(){  // native constructor
       mpireq = MPI_REQUEST_NULL;
@@ -235,6 +251,29 @@ class VMK{
    public:
     recvBuffer(){  // native constructor
       firstFlag = true;
+    }
+  };
+
+  struct Affinities{
+    esmf_pthread_t mypthid;
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+    cpu_set_t cpuset;
+#ifndef ESMF_NO_OPENMP
+    int omp_num_threads;
+#endif
+#endif
+#endif
+   public:
+    void reset(){
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+      pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#ifndef ESMF_NO_OPENMP
+      omp_set_num_threads(omp_num_threads);
+#endif
+#endif
+#endif
     }
   };
 
@@ -257,7 +296,7 @@ class VMK{
     int *ssiLocalPetList; // PETs that are on the same SSI as localPet (incl.)
     // general information about this VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
-    int nothreadsflag; // 0-threaded VM, 1-non-threaded VM
+    bool threadsflag; // threaded or none-threaded VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
@@ -285,6 +324,7 @@ class VMK{
     commhandle *firsthandle;
     // Epoch support
     vmEpoch epoch;
+    int epochThrottle;
     bool pastFirst; // true if the first epoch enabled call has been made
     std::map<int, sendBuffer> sendMap;
     std::map<int, recvBuffer> recvMap;
@@ -333,12 +373,18 @@ class VMK{
   public:
     static void InitPreMPI();
       // initialization step before MPI is initialized
-    void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD);
+    void init(MPI_Comm mpiCommunicator=MPI_COMM_WORLD,
+      bool globalResourceControl=false);
       // initialize the physical machine and a default (all MPI) virtual machine
+    void set(bool globalResourceControl);
+      // set after init
     void finalize(int finalizeMpi=1);
       // finalize default (all MPI) virtual machine
     void abort();
       // abort default (all MPI) virtual machine
+
+    Affinities setAffinities(void *ssarg);
+      // set thread affinities, including OpenMP handling if configured
 
     void construct(void *sarg);
       // fill an already existing VMK object with info
@@ -421,6 +467,10 @@ class VMK{
       //TODO: For now had to implement this method in the source file, because
       //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
       //TODO: Move it into the VMKernel header once includes are fixed.
+
+#define XSTR(X) STR(X)
+#define STR(X) #X
+    static std::string getEsmfComm(){return std::string(XSTR(ESMF_COMM));}
 
     // p2p communication calls
     int send(const void *message, int size, int dest, int tag=-1);
@@ -512,7 +562,7 @@ class VMK{
     void epochSetFirst();
     void epochInit();
     void epochFinal();
-    void epochEnter(vmEpoch epoch);
+    void epochEnter(vmEpoch epoch, int throttle=10);
     void epochExit(bool keepAlloc=true);
     vmEpoch getEpoch() const {return epoch;}
         
@@ -531,7 +581,8 @@ class VMKPlan{
     int npets;
     int nplist;       // number of PETs in petlist that participate
     int *petlist;     // keeping sequence of parent pets
-    int nothreadflag; // 0-default threaded VM, 1-non-threaded VM
+    bool supportContributors;     // default: false
+    bool eachChildPetOwnPthread;  // default: false
     int parentVMflag; // 0-create child VM, 1-run on parent VM
     int *spawnflag;   // for each pet: 0-don't spawn, >=1-spawn threads
     int *contribute;  // pet id to which non-spawning pet contributes its cores
@@ -581,7 +632,8 @@ class VMKPlan{
       // set up a VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
     int vmkplan_maxthreads(VMK &vm, int max, int *plist, int nplist,
-      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
+      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+      bool forceEachChildPetOwnPthread=false);
       // set up a VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
     void vmkplan_minthreads(VMK &vm);
@@ -597,7 +649,8 @@ class VMKPlan{
       // up to max cores per pet but only allow PETs listed in plist to
       // participate
     int vmkplan_minthreads(VMK &vm, int max, int *plist, int nplist,
-      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
+      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+      bool forceEachChildPetOwnPthread=false);
       // set up a VMKPlan that will only have single threaded pet
       // instantiations and claim all cores of pets that don't make it through,
       // up to max cores per pet but only allow PETs listed in plist to
@@ -613,14 +666,15 @@ class VMKPlan{
       // cores available, but not more than max and only use PETs listed in
       // plist
     int vmkplan_maxcores(VMK &vm, int max, int *plist, int nplist,
-      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
+      int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+      bool forceEachChildPetOwnPthread=false);
       // set up a VMKPlan that will have pets with the maximum number of
       // cores available, but not more than max and only use PETs listed in
       // plist
-    void vmkplan_print();  
+    void vmkplan_print();
 
   friend class VMK;
-  
+
 };
 
 

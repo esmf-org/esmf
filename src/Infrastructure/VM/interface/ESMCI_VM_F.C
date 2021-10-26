@@ -18,6 +18,7 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMCI_VM.h"
+#include "ESMCI_VMKernel.h"
 
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Macros.h"
@@ -401,7 +402,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmepochenter)(ESMCI::VM **vm, vmEpoch *epoch, int *rc){
+  void FTN_X(c_esmc_vmepochenter)(ESMCI::VM **vm, vmEpoch *epoch, int *throttle,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmepochenter()"
     // Initialize return code; assume routine not implemented
@@ -412,7 +414,10 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
     try{
-      (*vm)->epochEnter(*epoch);
+      if (ESMC_NOT_PRESENT_FILTER(throttle) != ESMC_NULL_POINTER)
+        (*vm)->epochEnter(*epoch, *throttle);
+      else
+        (*vm)->epochEnter(*epoch);  // let throttle default
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))
@@ -708,19 +713,6 @@ extern "C" {
     fflush(stdout);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
-  }
-
-  void FTN_X(c_esmc_vmprintmatchtable)(ESMCI::VM **vm){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmprintmatchtable()"
-    int localrc = ESMC_RC_NOT_IMPL;
-    int *rc = &localrc;
-    // test for NULL pointer via macro before calling any class methods
-    ESMCI_NULL_CHECK_PRC(vm, rc)
-    ESMCI_NULL_CHECK_PRC(*vm, rc)
-    (*vm)->printMatchTable();
-    // Flush before crossing language interface to ensure correct output order
-    fflush(stdout);
   }
 
   void FTN_X(c_esmc_vmvalidate)(ESMCI::VM **vm, int *rc){
@@ -1127,7 +1119,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vminitialize)(ESMCI::VM **vm, int *mpiCommunicator, int *rc){
+  void FTN_X(c_esmc_vminitialize)(ESMCI::VM **vm, int *mpiCommunicator,
+    ESMC_Logical *globalResourceControl, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vminitialize()"
     // Initialize return code; assume routine not implemented
@@ -1147,9 +1140,30 @@ extern "C" {
       *rc = ESMC_RC_INTNRL_BAD;
       return;
     }
-    *vm = ESMCI::VM::initialize(localMpiComm, &localrc);
+    bool globalResourceControlOpt = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(globalResourceControl) != ESMC_NULL_POINTER)
+      globalResourceControlOpt = (*globalResourceControl == ESMF_TRUE);
+    // call into C++ method
+    *vm = ESMCI::VM::initialize(localMpiComm, globalResourceControlOpt, &localrc);
     // Cannot use LogErr here because LogErr initializes _after_ VM
     if (rc!=NULL) *rc = localrc;
+  }
+
+  void FTN_X(c_esmc_vmset)(ESMC_Logical *globalResourceControl, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmset()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    bool globalResourceControlOpt = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(globalResourceControl) != ESMC_NULL_POINTER)
+      globalResourceControlOpt = (*globalResourceControl == ESMF_TRUE);
+    // call into C++ method
+    ESMCI::VM::set(globalResourceControlOpt, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmc_vmfinalize)(ESMC_Logical *keepMpiFlag, int *rc){
@@ -1246,8 +1260,9 @@ extern "C" {
       (*ptr)->vmkplan_minthreads(**vm, 1);
       (*ptr)->vmkplan_mpi_c_part(**vm);
     }
-    // set the nothreadflag because this is the default for new VMs
-    (*ptr)->nothreadflag = 1; // override what vmkplan_minthreads() above set
+    // reset the supportContributors flag to default for new VMs
+    (*ptr)->supportContributors = false; // override vmkplan_minthreads() setting
+    (*ptr)->openmphandling = 0; // override what vmkplan_minthreads() above set
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMCI::VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMCI::VMPlan
@@ -1337,7 +1352,8 @@ extern "C" {
    
   void FTN_X(c_esmc_vmplanmaxpes)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
-    int *npetlist, int *petlist, int *rc){
+    int *npetlist, int *petlist, ESMC_Logical *forceEachChildPetOwnPthread,
+      int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanmaxpes()"
     // Initialize return code; assume routine not implemented
@@ -1371,9 +1387,15 @@ extern "C" {
       delete (*ptr)->myvms[i];
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
+    // convert ESMC_Logical->bool
+    bool forceEachChildPetOwnPthreadBool = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(forceEachChildPetOwnPthread) != ESMC_NULL_POINTER)
+      if (*forceEachChildPetOwnPthread == ESMF_TRUE)
+        forceEachChildPetOwnPthreadBool = true;
     // Now define a new vmplan
     localrc = (*ptr)->vmkplan_maxcores(**vm, maxx, (int*)petlist,
-      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi,
+      forceEachChildPetOwnPthreadBool);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
     if (ESMC_LogDefault.MsgFoundError(localrc,"- this ESMF library"
@@ -1396,7 +1418,8 @@ extern "C" {
        
   void FTN_X(c_esmc_vmplanmaxthreads)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
-    int *npetlist, int *petlist, int *rc){
+    int *npetlist, int *petlist, ESMC_Logical *forceEachChildPetOwnPthread,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanmaxthreads()"
     // Initialize return code; assume routine not implemented
@@ -1430,9 +1453,15 @@ extern "C" {
       delete (*ptr)->myvms[i];
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
+    // convert ESMC_Logical->bool
+    bool forceEachChildPetOwnPthreadBool = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(forceEachChildPetOwnPthread) != ESMC_NULL_POINTER)
+      if (*forceEachChildPetOwnPthread == ESMF_TRUE)
+        forceEachChildPetOwnPthreadBool = true;
     // Now define a new vmplan
     localrc = (*ptr)->vmkplan_maxthreads(**vm, maxx, (int*)petlist,
-      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi,
+      forceEachChildPetOwnPthreadBool);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
     if (ESMC_LogDefault.MsgFoundError(localrc,"- this ESMF library"
@@ -1455,7 +1484,8 @@ extern "C" {
   
   void FTN_X(c_esmc_vmplanminthreads)(ESMCI::VMPlan **ptr, ESMCI::VM **vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
-    int *npetlist, int *petlist, int *rc){
+    int *npetlist, int *petlist, ESMC_Logical *forceEachChildPetOwnPthread,
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanminthreads()"
     // Initialize return code; assume routine not implemented
@@ -1489,9 +1519,15 @@ extern "C" {
       delete (*ptr)->myvms[i];
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
+    // convert ESMC_Logical->bool
+    bool forceEachChildPetOwnPthreadBool = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(forceEachChildPetOwnPthread) != ESMC_NULL_POINTER)
+      if (*forceEachChildPetOwnPthread == ESMF_TRUE)
+        forceEachChildPetOwnPthreadBool = true;
     // Now define a new vmplan
     localrc = (*ptr)->vmkplan_minthreads(**vm, maxx, (int*)petlist,
-      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi,
+      forceEachChildPetOwnPthreadBool);
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
     if (ESMC_LogDefault.MsgFoundError(localrc,"- this ESMF library"

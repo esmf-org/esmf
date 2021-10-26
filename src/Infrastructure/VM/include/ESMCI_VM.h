@@ -111,7 +111,9 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     std::map<std::string, VMTimer> timers;
   public:
     // initialize(), finalize() and abort() of global VM
-    static VM *initialize(MPI_Comm mpiCommunicator, int *rc);
+    static VM *initialize(MPI_Comm mpiCommunicator, bool globalResourceControl,
+      int *rc);
+    static void set(bool globalResourceControl, int *rc);
     static void finalize(ESMC_Logical *keepMpiFlag, int *rc);
     static void abort(int *rc);
     static bool isInitialized(int *rc);
@@ -144,7 +146,6 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void addFObject(void **fobject, int objectID, VMId *vmID);
     static void rmFObject(void **fobject);
     static bool validObject(ESMC_Base *);
-    static void printMatchTable(void);
     static char const *getenv(char const *name);
     // misc.
     int print() const;

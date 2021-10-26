@@ -69,6 +69,11 @@ program ESMF_PrintInfoF
       print *, "ESMF_PrintInfo"
       print *
       print *, "  ESMF_VERSION_STRING:       ", ESMF_VERSION_STRING
+#ifdef ESMF_VERSION_STRING_GIT
+      print *, "  ESMF_VERSION_STRING_GIT:   ", ESMF_VERSION_STRING_GIT
+#else
+      print *, "  ESMF_VERSION_STRING_GIT:   ", "(not available)"
+#endif
       print *
       print *, "  ESMF_VERSION_MAJOR:        ", ESMF_VERSION_MAJOR
       print *, "  ESMF_VERSION_MINOR:        ", ESMF_VERSION_MINOR

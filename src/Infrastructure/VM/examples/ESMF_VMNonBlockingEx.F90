@@ -18,7 +18,7 @@
 !BOE
 !
 ! \subsubsection{Communication - Non-blocking option and VMEpochs}
-!
+! \label{VM:NBVMEpoch}
 ! The VM communication methods offer the option to execute in non-blocking
 ! mode. In this mode, both sending and receving calls return immediatly on each
 ! local PET. A separate synchronization call is needed to assure completion of
@@ -275,10 +275,6 @@ program ESMF_VMNonBlockingEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
-  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-  ! file that the scripts grep for.
-  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-
 !BOE
 ! For cases where multiple messages are being sent between the same
 ! {\tt src}-{\tt dst}
@@ -432,6 +428,10 @@ program ESMF_VMNonBlockingEx
   call ESMF_VMEpochExit(rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize(rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

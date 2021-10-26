@@ -90,7 +90,8 @@ module ESMF_BaseMod
 !   Base class methods
        public ESMF_BaseCreate
        public ESMF_BaseDestroy
-   
+       public ESMF_BaseDestroyWoGarbage
+
 !      public ESMF_BaseGetInstCount
 
 !      public ESMF_BaseSetID
@@ -115,6 +116,7 @@ module ESMF_BaseMod
 
        public ESMF_BaseSerialize
        public ESMF_BaseDeserialize
+       public ESMF_BaseDeserializeWoGarbage
        public ESMF_BaseDeserializeIDVMId
 
 !   Virtual methods to be defined by derived classes
@@ -369,7 +371,59 @@ module ESMF_BaseMod
   end subroutine ESMF_BaseDestroy
 
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseDestroyWoGarbage"
+!BOPI
+! !IROUTINE:  ESMF_BaseDestroyWoGarbage - Release resources from a Base object without garbage collection
+!
+! !INTERFACE:
+  subroutine ESMF_BaseDestroyWoGarbage(base, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Base)                        :: base                 
+    integer,        intent(out),  optional :: rc     
+
+!
+! !DESCRIPTION:
+!     Release resources held by a Base object.
+!
+!     \begin{description}
+!     \item [base]
+!           An {\tt ESMF\_Base} derived type to be deleted.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    logical :: rcpresent                          ! Return code present   
+    integer :: localrc
+    type(ESMF_Logical)      :: opt_noGarbage  ! helper variable
+
+    ! Initialize return code
+    rcpresent = .FALSE.
+    if(present(rc)) then
+      rcpresent = .TRUE.
+      rc = ESMF_RC_NOT_IMPL
+    endif
+
+    ! check input parameters
+    ESMF_INIT_CHECK_DEEP(ESMF_BaseGetInit,base,rc)
+
+    ! Call into the C++ interface
+    call c_ESMC_BaseDestroyWoGarbage(base, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set init code
+    ESMF_INIT_SET_DELETED(base)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_BaseDestroyWoGarbage
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1152,6 +1206,64 @@ module ESMF_BaseMod
     if (present (rc)) rc = ESMF_SUCCESS
 
   end function ESMF_BaseDeserialize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseDeserializeWoGarbage"
+!BOPI
+! !IROUTINE: ESMF_BaseDeserializeWoGarbage - Deserialize from a buffer without garbage collection
+!
+! !INTERFACE:
+  function ESMF_BaseDeserializeWoGarbage (buffer, offset, attreconflag, rc) 
+!
+! !RETURN VALUE:
+    type(ESMF_Base) :: ESMF_BaseDeserializeWoGarbage
+!
+! !ARGUMENTS:
+    character,       intent(in)    :: buffer(:)
+    integer,         intent(inout) :: offset
+    type(ESMF_AttReconcileFlag), intent(in) :: attreconflag
+    integer,         intent(out), optional  :: rc
+!
+! !DESCRIPTION:
+!      Recreates a {\tt ESMF\_Base} object from a serialized byte stream.
+!      Expected to be used by {\tt ESMF\_StateReconcile()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer of serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item[attreconflag]
+!           Flag to tell if Attribute deserialization is to be done
+!     \item [rc]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+    integer :: localrc
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    call c_ESMC_BaseDeserializeWoGarbage(ESMF_BaseDeserializeWoGarbage,  &
+        buffer, offset, &
+        attreconflag, localrc)
+    if (ESMF_LogFoundError(localrc, &
+        msg="Top level Base Deserialize", &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present (rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_BaseDeserializeWoGarbage
 !------------------------------------------------------------------------------
 
 

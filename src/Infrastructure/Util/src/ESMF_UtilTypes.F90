@@ -82,13 +82,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
-      integer, parameter :: ESMF_VERSION_MINOR        = 1
+      integer, parameter :: ESMF_VERSION_MINOR        = 2
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .true.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.1.0"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.2.0"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -2377,6 +2377,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (versionFlag)) then
       if (versionFlag) then
         print *, "  ESMF_VERSION_STRING:       ", ESMF_VERSION_STRING
+#ifdef ESMF_VERSION_STRING_GIT
+        print *, "  ESMF_VERSION_STRING_GIT:   ", ESMF_VERSION_STRING_GIT
+#else
+        print *, "  ESMF_VERSION_STRING_GIT:   ", "(not available)"
+#endif
         print *, "  ESMF_VERSION_MAJOR:        ", ESMF_VERSION_MAJOR
         print *, "  ESMF_VERSION_MINOR:        ", ESMF_VERSION_MINOR
         print *, "  ESMF_VERSION_REVISION:     ", ESMF_VERSION_REVISION

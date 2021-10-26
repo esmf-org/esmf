@@ -162,7 +162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[6.3.0r] Added argument {\tt vm} in order to offer information about the
 !               VM on which the Field was created.
-! \item[8.0.0] Added argument {\tt minIndex}.
+! \item[8.1.0] Added argument {\tt minIndex}.
 !              The new argument allows the user to query the global lower bounds of the field data across all PETs.\newline
 !              Added argument {\tt maxIndex}.
 !              The new argument allows the user to query the global upper bounds of the field data across all PETs.\newline
@@ -173,8 +173,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt localMaxIndex}.
 !              The new argument allows the user to query the PET local upper bounds globally indexed of the field data.\newline
 !              Added argument {\tt localElementCount}.
-!              The new argument allows the user to query the PET local number of items of the field data.
-! \item[8.1.0] Added argument {\tt ssiLocalDeCount} and {\tt localarrayList} to
+!              The new argument allows the user to query the PET local number of items of the field data.\newline
+!              Added argument {\tt ssiLocalDeCount} and {\tt localarrayList} to
 !              support DE sharing between PETs on the same single system
 !              image (SSI).\newline
 !              Added argument {\tt localDeToDeMap} to support DE handling from

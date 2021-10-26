@@ -66,6 +66,11 @@ int main(int argc, char *argv[]){
       printf("ESMF_PrintInfoC\n");
       printf("\n");
       printf("  ESMF_VERSION_STRING:       %s\n", ESMF_VERSION_STRING);
+#ifdef ESMF_VERSION_STRING_GIT
+      printf("  ESMF_VERSION_STRING_GIT    %s\n", ESMF_VERSION_STRING_GIT);
+#else
+      printf("  ESMF_VERSION_STRING_GIT    %s\n", "(not available)");
+#endif
       printf("\n");
       printf("  ESMF_VERSION_MAJOR:        %d\n", ESMF_VERSION_MAJOR);
       printf("  ESMF_VERSION_MINOR:        %d\n", ESMF_VERSION_MINOR);

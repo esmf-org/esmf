@@ -3094,9 +3094,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
        enddo
 
-       srcAB = ESMF_ArrayBundleCreate(arrayList=srcA2D(1:nStaggers), rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+!       srcAB = ESMF_ArrayBundleCreate(arrayList=srcA2D(1:nStaggers), multiflag=.true., rc=localrc)
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rcToReturn=rc)) return
 
 
        ! Create dst Arraybundle
@@ -3135,9 +3135,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
        enddo
 
-       dstAB = ESMF_ArrayBundleCreate(arrayList=dstA2D(1:nStaggers), rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+!       dstAB = ESMF_ArrayBundleCreate(arrayList=dstA2D(1:nStaggers), multiflag=.true., rc=localrc)
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if 0
         call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG before coord RedistStore()",&
@@ -3228,12 +3228,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
 !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !            ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayBundleDestroy(srcAB, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayBundleDestroy(dstAB, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+!       call ESMF_ArrayBundleDestroy(srcAB, noGarbage=.true., rc=localrc)
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rcToReturn=rc)) return
+!       call ESMF_ArrayBundleDestroy(dstAB, noGarbage=.true., rc=localrc)
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rcToReturn=rc)) return
 
 
 #if 1
@@ -3656,6 +3656,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ESMF_GridCreateCopyFromReg=ESMF_GridCreate(grid, distgrid, &
             name=name, copyAttributes=copyAttributes, rc=localrc)
@@ -8324,6 +8330,7 @@ end function ESMF_GridCreateFrmGridspec
     type(ESMF_Grid)             :: newgrid
     type(ESMF_Index_Flag)       :: indexflag
     type(ESMF_CoordSys_Flag)    :: coordSys
+    character(len=ESMF_MAXSTR)  :: gridName
 
     ! begin
     if (present(rc)) rc = ESMF_SUCCESS
@@ -8342,7 +8349,7 @@ end function ESMF_GridCreateFrmGridspec
     end if
 
     ! get grid parameters and associated DistGrid object
-    call ESMF_GridGet(grid, distgrid=distgrid, &
+    call ESMF_GridGet(grid, distgrid=distgrid, name=gridName, &
       dimCount=dimCount, coordSys=coordSys, indexflag=indexflag, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -8472,13 +8479,18 @@ end function ESMF_GridCreateFrmGridspec
     if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    call ESMF_DistGridSet(distgrid, name="DG-GridFrom:"//trim(gridName), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     deallocate(newminIndexPTile, newmaxIndexPTile, newconnectionList, stat=localrc)
     if (ESMF_LogFoundDeallocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! create 3D Grid object
     newgrid = ESMF_GridCreate(newdistgrid, coordDimCount=newcoordDimCount, &
-      coordDimMap=newcoordDimMap, coordSys=coordSys, indexflag=indexflag, rc=localrc)
+      coordDimMap=newcoordDimMap, coordSys=coordSys, indexflag=indexflag, &
+      name="GridFrom:"//trim(gridName), rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -9032,6 +9044,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set default widths and alignment and error check
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
@@ -9314,6 +9331,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set default widths and alignment and error check
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
@@ -9569,6 +9591,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
    ! Convert coordDeps to coordDimCount and coordDimMap
    allocate(coordDimCount(dimCount), stat=localrc)
@@ -9824,6 +9851,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set default widths and alignment and error check
      allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
@@ -10086,6 +10118,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set default widths and alignment and error check
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
@@ -10326,6 +10363,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
    ! Convert coordDeps to coordDimCount and coordDimMap
    allocate(coordDimCount(dimCount), stat=localrc)
@@ -10573,6 +10615,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set default widths and alignment and error check
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
@@ -10826,6 +10873,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set default widths and alignment and error check
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
@@ -11057,6 +11109,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Convert coordDeps to coordDimCount and coordDimMap
     allocate(coordDimCount(dimCount), stat=localrc)
@@ -11662,6 +11719,12 @@ msg=" coords in periodic dim (i.e. 1) are not periodic "// &
       connectionList=connectionList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     allocate(coordDimMap(dimCount,dimCount))
     coordDimMap = reshape((/1,2,0,0/), shape(coordDimMap))
@@ -12871,6 +12934,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
    if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimCount", &
@@ -13797,6 +13865,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
@@ -14471,6 +14544,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
    endif
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
    ! Create Grid from specification -----------------------------------------------
    ESMF_GridCreateShapeTileArb=ESMF_GridCreateFrmDistGridArb( &
                                distgrid, indexArray, &
@@ -14753,6 +14832,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(name)) then
+      call ESMF_DistGridSet(distgrid, name="DG-"//trim(name), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! - create Grid
     grid = ESMF_GridCreate(distgrid, coordSys=coordSysLocal, &

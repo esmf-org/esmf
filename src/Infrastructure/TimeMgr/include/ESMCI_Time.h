@@ -204,6 +204,8 @@
     int getDayOfYear(ESMC_R8 *dayOfYear) const; // (TMG 2.5.2)
     int getDayOfYear(TimeInterval *dayOfYear) const;
 
+    Calendar * getCalendar(void) const;
+
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private:

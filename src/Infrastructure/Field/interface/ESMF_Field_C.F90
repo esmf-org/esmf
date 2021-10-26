@@ -231,6 +231,8 @@
   ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
+    ! mesh%this = mesh_pointer
+
     mesh = ESMF_MeshCreateFromIntPtr(mesh_pointer)
   
     if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 0) then
@@ -309,8 +311,10 @@
     ! local variables  
     type(ESMF_Mesh)          :: mesh
   
-  ! initialize return code; assume routine not implemented
+    ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
+
+    ! mesh%this = mesh_pointer
 
     mesh = ESMF_MeshCreateFromIntPtr(mesh_pointer)
 
@@ -1176,7 +1180,17 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     use ESMF_RHandleMod
     use ESMF_FieldRegridMod
     use ESMF_FieldMod
+    use ESMF_FieldCreateMod
+    use ESMF_FieldGetMod
     use ESMF_IOScripMod
+    use ESMF_GeomBaseMod
+    use ESMF_GridMod
+    use ESMF_MeshMod
+    use ESMF_LocStreamMod
+    use ESMF_XGridMod
+    use ESMF_StaggerLocMod
+    use ESMF_VMMod
+    use ESMF_UtilRWGMod
 
     implicit none
 
@@ -1205,9 +1219,20 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     logical, optional                       :: largeFileFlag
 
+    real(ESMF_KIND_R8), pointer             :: srcArea(:), dstArea(:)
+    type(ESMF_GeomType_Flag)                :: srcgt, dstgt
+    type(ESMF_TypeKind_Flag)                :: srctk, dsttk
+    type(ESMF_Grid)                         :: srcgrid, dstgrid
+    type(ESMF_Mesh)                         :: srcmesh, dstmesh
+    integer                                 :: srcslc, dstslc
+    logical                                 :: ecip
+
     type(ESMF_Field)                        :: srcFracField
     type(ESMF_Field)                        :: dstFracField
 
+    type(ESMF_VM)                           :: vm
+    integer                                 :: localPet, petCount
+    
     integer                                 :: rc
 
     integer :: localrc
@@ -1221,6 +1246,15 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+    
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present (createRoutehandle)) then
       if (createRoutehandle .eqv. .false.) then  
@@ -1259,7 +1293,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                    dstFracField=dstFracField, &
                                    rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return        
+            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     else
       call ESMF_FieldRegridStore(srcField, dstField, &
@@ -1291,14 +1325,170 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     if (filemode_local == ESMF_FILEMODE_BASIC) then
       call ESMF_SparseMatrixWrite(localFactorList, localFactorIndexList, &
                                   fileName, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filemode_local == ESMF_FILEMODE_WITHAUX) then
-      call ESMF_OutputScripWeightFile(fileName, &
-                                      localFactorList, localFactorIndexList, &
-                                      srcFile=srcFile, dstFile=dstFile, &
-                                      srcFileType=srcFileType, &
-                                      dstFileType=dstFileType, &
-                                      largeFileFlag=largeFileFlag, &
-                                      rc=localrc)
+      ! query field for geom type
+      call ESMF_FieldGet(srcField, geomType=srcgt, typekind=srctk, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! determine which stagger locations are available
+      srcslc = 0
+      if (srcgt == ESMF_GEOMTYPE_GRID) then
+        call ESMF_FieldGet(srcField, grid=srcgrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+            
+        call ESMF_GridGetCoord(srcgrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                               isPresent=ecip, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (ecip .eqv. .true.) srcslc = 1
+        
+        call ESMF_GridGetCoord(srcgrid, staggerloc=ESMF_STAGGERLOC_CORNER, &
+                               isPresent=ecip, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (ecip .eqv. .true.) srcslc = 2
+      else if (srcgt == ESMF_GEOMTYPE_MESH) then
+        call ESMF_FieldGet(srcField, mesh=srcmesh, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ecip = .false.
+        call ESMF_MeshGet(srcmesh, elementCoordsIsPresent=ecip, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+            
+        srcslc = 1
+        if (ecip .eqv. .true.) srcslc = 2
+      else if (srcgt == ESMF_GEOMTYPE_XGRID) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
+                            msg="- xgrid cannot retrieve areas", &
+                            ESMF_CONTEXT, rcToReturn=rc)
+      endif
+      
+      ! query field for geom type
+      call ESMF_FieldGet(dstField, geomType=dstgt, typekind=dsttk, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! determine which stagger locations are available
+      dstslc = 0
+      if (srcgt == ESMF_GEOMTYPE_GRID) then
+        call ESMF_FieldGet(dstField, grid=dstgrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_GridGetCoord(dstgrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                               isPresent=ecip, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (ecip .eqv. .true.) dstslc = 1
+        
+        call ESMF_GridGetCoord(dstgrid, staggerloc=ESMF_STAGGERLOC_CORNER, &
+                               isPresent=ecip, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (ecip .eqv. .true.) dstslc = 2
+      else if (srcgt == ESMF_GEOMTYPE_MESH) then
+        call ESMF_FieldGet(dstField, mesh=dstmesh, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        ecip = .false.
+        call ESMF_MeshGet(dstmesh, elementCoordsIsPresent=ecip, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        dstslc = 1
+        if (ecip .eqv. .true.) dstslc = 2
+      else if (srcgt == ESMF_GEOMTYPE_XGRID) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
+                            msg="- xgrid cannot retrieve areas", &
+                            ESMF_CONTEXT, rcToReturn=rc)
+      endif
+
+      ! compute the areas
+      if (srcslc > 1) then
+        if (srcgt == ESMF_GEOMTYPE_GRID) then
+          call computeAreaGrid(srcgrid, localPet, srcarea, 0, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        else if (srcgt == ESMF_GEOMTYPE_MESH) then
+          call computeAreaMesh(srcmesh, vm, localPet, petCount, srcarea, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+      endif
+
+      if (dstslc > 1) then
+        if (dstgt == ESMF_GEOMTYPE_GRID) then
+          call computeAreaGrid(dstgrid, petCount, dstarea, 0, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        else if (dstgt == ESMF_GEOMTYPE_MESH) then
+          call computeAreaMesh(dstmesh, vm, localPet, petCount, dstarea, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+      endif
+
+      ! write the weight file
+      if (srcslc > 1 .and. dstslc > 1) then
+        call ESMF_OutputScripWeightFile(fileName, &
+                                        localFactorList, localFactorIndexList, &
+                                        srcFile=srcFile, dstFile=dstFile, &
+                                        srcFileType=srcFileType, &
+                                        dstFileType=dstFileType, &
+                                        srcArea=srcArea, &
+                                        dstArea=dstArea, &
+                                        largeFileFlag=largeFileFlag, &
+                                        rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (srcslc > 1 .and. dstslc == 1) then
+        call ESMF_OutputScripWeightFile(fileName, &
+                                        localFactorList, localFactorIndexList, &
+                                        srcFile=srcFile, dstFile=dstFile, &
+                                        srcFileType=srcFileType, &
+                                        dstFileType=dstFileType, &
+                                        srcArea=srcArea, &
+                                        largeFileFlag=largeFileFlag, &
+                                        rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (srcslc == 1 .and. dstslc > 1) then
+        call ESMF_OutputScripWeightFile(fileName, &
+                                        localFactorList, localFactorIndexList, &
+                                        srcFile=srcFile, dstFile=dstFile, &
+                                        srcFileType=srcFileType, &
+                                        dstFileType=dstFileType, &
+                                        dstArea=dstArea, &
+                                        largeFileFlag=largeFileFlag, &
+                                        rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (srcslc == 1 .and. dstslc == 1) then
+        call ESMF_OutputScripWeightFile(fileName, &
+                                        localFactorList, localFactorIndexList, &
+                                        srcFile=srcFile, dstFile=dstFile, &
+                                        srcFileType=srcFileType, &
+                                        dstFileType=dstFileType, &
+                                        largeFileFlag=largeFileFlag, &
+                                        rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_OUTOFRANGE, &
+                              msg="- unrecognized area field options", &
+                              ESMF_CONTEXT, rcToReturn=rc)
+      endif
     else
       call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_OUTOFRANGE, &
                             msg="- filemode not recognized", &
@@ -1317,7 +1507,6 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
         call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      else
       endif
     else 
       call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
@@ -1388,4 +1577,6 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     rc = ESMF_SUCCESS
 
   end subroutine f_esmf_smmstore
+
+
 

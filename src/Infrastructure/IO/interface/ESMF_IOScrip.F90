@@ -1210,7 +1210,12 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            errmsg,&
            rc)) return
 
-         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "CVS_revision", ESMF_VERSION_STRING)
+         ! Output version information
+#ifdef ESMF_VERSION_STRING_GIT 
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "ESMF_version", ESMF_VERSION_STRING_GIT)
+#else
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "ESMF_version", "(No version information available.)")
+#endif
          errmsg = "Attribute CVS_revision in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
@@ -4385,6 +4390,10 @@ end subroutine ESMF_EsmfGetNode
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_EsmfGetElement"
+
+! TODO: currently the presence or absence of centerCoords is detected by setting to NULL() before
+!       passing in and then using associate() on the variable afterwards. If we keep this method
+!       when we redo ESMF_MeshCreateUnstruct() add a better method of indicating centerCoord's presence. 
 subroutine ESMF_EsmfGetElement (filename, elementConn, &
                                  elmtNums, startElmt, elementMask, &
                                  elementArea, centerCoords, convertToDeg, rc)
@@ -4432,6 +4441,8 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     integer :: memstat
 
 #ifdef ESMF_NETCDF
+
+    ! Init variables
      convertToDegLocal = .false.
      isRaggedArray = .false.
     if (present(convertToDeg)) convertToDegLocal = convertToDeg
@@ -4689,81 +4700,76 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
           rc)) return
     end if
 
-    ! check if centerCoords exist, if not, warning and return null pointer, do not return
-    ! error message
+    ! If centerCoords exists in file, return information
     if (present(centerCoords)) then
        ncStatus = nf90_inq_varid (ncid, "centerCoords", VarNo)
-       if (ncStatus /= nf90_noerror) then
-         errmsg = "Variable centerCoords in "//trim(filename)// " does not exist"
-         call ESMF_LogWrite (msg=errmsg, logmsgFlag=ESMF_LOGMSG_WARNING, &
-               ESMF_CONTEXT)
-       else
-       ! Get vertex dimension
-       ncStatus = nf90_inq_dimid (ncid, "coordDim", DimId)
-       errmsg = "Dimension coordDim in "//trim(filename)
-       if (CDFCheckError (ncStatus, &
-          ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
-           rc)) return
-
-       ncStatus = nf90_inquire_dimension (ncid, DimId, len=coordDim)
-       if (CDFCheckError (ncStatus, &
-           ESMF_METHOD,  &
-           ESMF_SRCLINE, errmsg, &
-           rc)) return
-
-       allocate(centerCoords(coordDim, localcount), stat=memstat)
-       if (ESMF_LogFoundAllocError(memstat,  &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ncStatus = nf90_inq_varid (ncid, "centerCoords", VarNo)
-       errmsg = "Variable centerCoords in "//trim(filename)
-       if (CDFCheckError (ncStatus, &
-          ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
-          rc)) return
-
-       ncStatus = nf90_get_var (ncid, VarNo, centerCoords, start=(/1,startElmt/), &
-                                count=(/coordDim, localcount/))
-       if (CDFCheckError (ncStatus, &
-          ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
-          rc)) return
-
-       ! Check units, but only if 2D
-       if (coordDim==2) then
-           ncStatus = nf90_inquire_attribute(ncid, VarNo, "units", len=len)
-           if (CDFCheckError (ncStatus, &
-               ESMF_METHOD, &
-               ESMF_SRCLINE,errmsg,&
+       if (ncStatus == nf90_noerror) then
+          ! Get vertex dimension
+          ncStatus = nf90_inq_dimid (ncid, "coordDim", DimId)
+          errmsg = "Dimension coordDim in "//trim(filename)
+          if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, errmsg, &
                rc)) return
 
-           ncStatus = nf90_get_att(ncid, VarNo, "units", units)
-           if (CDFCheckError (ncStatus, &
-               ESMF_METHOD, &
-               ESMF_SRCLINE,errmsg,&
+          ncStatus = nf90_inquire_dimension (ncid, DimId, len=coordDim)
+          if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, errmsg, &
                rc)) return
-           ! if len != 7, something is wrong, check the value.  If it starts
-            ! with Degres/degrees/Radians/radians, ignore the garbage after the
-           ! word.  Otherwise, return the whole thing
-           if (units(len:len) .eq. achar(0)) len = len-1
-           units = ESMF_UtilStringLowerCase(units(1:len))
-           if (units(1:len) .ne. 'degrees' .and. &
-                 units(1:len) .ne. 'radians') then
-              call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
-                    msg="- units attribute is not degrees or radians", &
-                    ESMF_CONTEXT, rcToReturn=rc)
-              return
-           endif
 
-           ! if units is "radians", convert it to degree
-           if (convertToDegLocal) then
-              if (units(1:len) .eq. "radians") then
-                  centerCoords(:,:) = &
-                      centerCoords(:,:)*ESMF_COORDSYS_RAD2DEG
-              endif
-           endif
-           endif
+          allocate(centerCoords(coordDim, localcount), stat=memstat)
+          if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ncStatus = nf90_inq_varid (ncid, "centerCoords", VarNo)
+          errmsg = "Variable centerCoords in "//trim(filename)
+          if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, errmsg, &
+               rc)) return
+
+          ncStatus = nf90_get_var (ncid, VarNo, centerCoords, start=(/1,startElmt/), &
+               count=(/coordDim, localcount/))
+          if (CDFCheckError (ncStatus, &
+               ESMF_METHOD,  &
+               ESMF_SRCLINE, errmsg, &
+               rc)) return
+
+          ! Check units, but only if 2D
+          if (coordDim==2) then
+             ncStatus = nf90_inquire_attribute(ncid, VarNo, "units", len=len)
+             if (CDFCheckError (ncStatus, &
+                  ESMF_METHOD, &
+                  ESMF_SRCLINE,errmsg,&
+                  rc)) return
+
+             ncStatus = nf90_get_att(ncid, VarNo, "units", units)
+             if (CDFCheckError (ncStatus, &
+                  ESMF_METHOD, &
+                  ESMF_SRCLINE,errmsg,&
+                  rc)) return
+             ! if len != 7, something is wrong, check the value.  If it starts
+             ! with Degres/degrees/Radians/radians, ignore the garbage after the
+             ! word.  Otherwise, return the whole thing
+             if (units(len:len) .eq. achar(0)) len = len-1
+             units = ESMF_UtilStringLowerCase(units(1:len))
+             if (units(1:len) .ne. 'degrees' .and. &
+                  units(1:len) .ne. 'radians') then
+                call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                     msg="- units attribute is not degrees or radians", &
+                     ESMF_CONTEXT, rcToReturn=rc)
+                return
+             endif
+
+             ! if units is "radians", convert it to degree
+             if (convertToDegLocal) then
+                if (units(1:len) .eq. "radians") then
+                   centerCoords(:,:) = &
+                        centerCoords(:,:)*ESMF_COORDSYS_RAD2DEG
+                endif
+             endif
+          endif
        endif
     end if
 

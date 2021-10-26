@@ -5,7 +5,7 @@ DOC_ARTIFACTS="/tmp/artifacts/artifacts"
 
 cd 
 
-git config --global user.email "himanshu@ucar.edu"
+git config --global user.email "dunlap@ucar.edu"
 git config --global user.name "esmf-orgbot"
 
 
@@ -25,9 +25,12 @@ cp -rf ${DOC_ARTIFACTS}/* ~/esmf-test-artifacts/${CIRCLE_BRANCH}/platform_indepe
 
 cd ~/esmf-test-artifacts/
 git add .
-git commit -a -m " Test Coverage pushed in the artifacts `date` [ci skip] "
+git commit -a -m " `echo ${CIRCLE_BRANCH}` Test Coverage pushed in the artifacts `date` [ci skip] "
 
 # Push the changes ------------------------------------------------------------
 
 git remote prune origin
+
+# helps to avoid failures due to commits than come in between
+git pull --no-edit
 git push origin main

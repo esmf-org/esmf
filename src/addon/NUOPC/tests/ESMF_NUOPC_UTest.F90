@@ -204,13 +204,14 @@ program ESMF_NUOPC_UTest
   real(ESMF_KIND_R8),      pointer  :: xPtr(:), yPtr(:), dataPtr(:,:)
   character(ESMF_MAXSTR),  pointer  :: stdAttrNameList(:)
   character(len=120)      :: tempString
-  type(NUOPC_FreeFormat)  :: runSeqFF, attrFF, fdFF
+  type(NUOPC_FreeFormat)  :: runSeqFF, petListFF, attrFF, fdFF
   character(len=NUOPC_FreeFormatLen)  :: runSequence(5)
   real(ESMF_KIND_R8), allocatable :: factorList(:)
   integer, allocatable            :: factorIndexList(:,:)
   character(len=40)       :: phaseLabel
   logical                 :: isSet
   integer                 :: fieldCount
+  integer, allocatable    :: petList(:)
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -403,7 +404,7 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_FreeFormatCreate() from stringList Test"
+  write(name, *) "NUOPC_FreeFormatCreate() from stringList RunSequence Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   ! set up run sequence in free format
   data runSequence/&
@@ -423,7 +424,7 @@ program ESMF_NUOPC_UTest
   call NUOPC_DriverIngestRunSequence(gridComp, runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_DriverGet() slotCount Test"
@@ -446,7 +447,7 @@ program ESMF_NUOPC_UTest
   call NUOPC_FreeFormatGetLine(runSeqFF, line=1, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_FreeFormatAdd() Test"
@@ -454,7 +455,7 @@ program ESMF_NUOPC_UTest
   call NUOPC_FreeFormatAdd(runSeqFF, stringList=(/"abc", "def"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_FreeFormatDestroy() Test"
@@ -462,7 +463,7 @@ program ESMF_NUOPC_UTest
   call NUOPC_FreeFormatDestroy(runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_DriverEgestRunSequence() Test"
@@ -470,7 +471,7 @@ program ESMF_NUOPC_UTest
   call NUOPC_DriverEgestRunSequence(gridComp, runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_FreeFormatPrint() Test"
@@ -478,7 +479,7 @@ program ESMF_NUOPC_UTest
   call NUOPC_FreeFormatPrint(runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_FreeFormatGet() Test"
@@ -486,7 +487,7 @@ program ESMF_NUOPC_UTest
   call NUOPC_FreeFormatGet(runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_FreeFormatDestroy() Test"
@@ -494,7 +495,51 @@ program ESMF_NUOPC_UTest
   call NUOPC_FreeFormatDestroy(runSeqFF, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-  
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FreeFormatCreate() from stringList PetList Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  petListFF = NUOPC_FreeFormatCreate(stringList=(/"0-3 5 4 6"/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_IngestPetList() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_IngestPetList(petList, petListFF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify ingested PetList size Test"
+  write(failMsg, *) "PetList incorrect size"
+  rc = ESMF_FAILURE
+  if (size(petList)==7) rc = ESMF_SUCCESS
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify ingested PetList content Test"
+  write(failMsg, *) "PetList incorrect content"
+  rc = ESMF_FAILURE
+  if (all(petList==(/0,1,2,3,5,4,6/))) rc = ESMF_SUCCESS
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FreeFormatDestroy() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_FreeFormatDestroy(petListFF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  deallocate(petList)
+
   !------------------------------------------------------------------------
   ! -> NUOPC Utility methods
   !------------------------------------------------------------------------

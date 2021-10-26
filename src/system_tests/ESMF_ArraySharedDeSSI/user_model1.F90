@@ -43,12 +43,6 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 #ifdef ESMF_TESTWITHTHREADS
-    ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for
-    ! your own code development you probably don't want to include the
-    ! following call unless you are interested in exploring ESMF's
-    ! threading features.
-
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -103,9 +97,6 @@ module user_model1
     rc = ESMF_SUCCESS
 
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
-    call ESMF_VMLog(vm, prefix="model1: ", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_VMGet(vm, ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, &
@@ -177,6 +168,9 @@ module user_model1
 
     ! Get VM
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_VMLog(vm, prefix="model1: ", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 do loop=1, 5 ! repeatedly go through the work loops to monitor PE affinity.

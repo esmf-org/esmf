@@ -51,13 +51,13 @@
 
 
 #define ESMF_VERSION_MAJOR        8
-#define ESMF_VERSION_MINOR        1
+#define ESMF_VERSION_MINOR        2
 #define ESMF_VERSION_REVISION     0
 #define ESMF_VERSION_PATCHLEVEL   0
 #define ESMF_VERSION_PUBLIC       'T'
 #define ESMF_VERSION_BETASNAPSHOT 'F'
 
-#define ESMF_VERSION_STRING "8.1.0"
+#define ESMF_VERSION_STRING "8.2.0"
 
 #endif   // ESMC_MACROS_H
 

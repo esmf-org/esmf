@@ -15,6 +15,7 @@
 
 #define WITHBLOCKER_on
 
+#define VM_PTHREADLOG_on
 #define VM_PETMANAGEMENTLOG_off
 #define VM_MEMLOG_off
 #define VM_COMMQUEUELOG_off
@@ -57,6 +58,8 @@
 #endif
 
 // Standard headers
+#include <iostream>
+#include <iomanip>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -70,10 +73,6 @@
 #include <csignal>
 #endif
 #include <limits.h>
-
-#ifndef ESMF_NO_OPENMP
-#include <omp.h>
-#endif
 
 using namespace std;
 
@@ -192,13 +191,15 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg,
         pthread_attr_setstacksize(&pthreadAttrs, minStackSize);
       }
     }
-#if (VERBOSITY > 0)
+#ifdef VM_PTHREADLOG_on
     size_t stack_size;
     pthread_attr_getstacksize(&pthreadAttrs, &stack_size);
     std::stringstream msg;
-    msg << "service: " << service
-      << "  PTHREAD_STACK_MIN: " << PTHREAD_STACK_MIN << " bytes"
-      << "  stack_size: " << stack_size << " bytes";
+    msg << "vmkt_create()#" << __LINE__
+      << " Pthread: service=" << service
+      << " (0: actual PET, 1: service thread) -"
+      << " PTHREAD_STACK_MIN: " << PTHREAD_STACK_MIN << " bytes"
+      << " stack_size: " << stack_size << " bytes";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     pthreadAttrsPtr = &pthreadAttrs;
@@ -352,7 +353,29 @@ void VMK::InitPreMPI(){
 }
 
 
-void VMK::init(MPI_Comm mpiCommunicator){
+void VMK::set(bool globalResourceControl){
+#ifndef ESMF_NO_GETHOSTID
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+  if (globalResourceControl){
+    // setting affinity on this level might interfer with user level pinning
+    // therefore only do it by user request
+    // set thread affinity
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(ssipe[mypet], &cpuset);
+    pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#ifndef ESMF_NO_OPENMP
+    omp_set_num_threads(1);
+#endif
+  }
+#endif
+#endif
+#endif
+}
+
+
+void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   // initialize the physical machine and a default (all MPI) virtual machine
   // obtain command line arguments and store in the VM class
   argc = 0; // reset
@@ -386,6 +409,9 @@ void VMK::init(MPI_Comm mpiCommunicator){
     // query the MPI thread support level as set by external MPI initialization
     MPI_Query_thread(&mpi_thread_level);
   }
+  // initialize the MPI tool interface
+  int provided_thread_level;
+  MPI_T_init_thread(VM_MPI_THREAD_LEVEL, &provided_thread_level);
 #else
   // MPIUNI simply set the thread level
   mpi_thread_level = MPI_THREAD_SERIALIZED;
@@ -415,7 +441,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
     mpionly=1;          // normally the default VM can only be MPI-only
 #endif
   // no threading in default global VM
-  nothreadsflag = 1;
+  threadsflag = false;
   // set up private Group and Comm objects across "mpiCommunicator"
   MPI_Group mpi_g;
   MPI_Comm_group(mpiCommunicator, &mpi_g);
@@ -556,7 +582,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
 #if 0
 {
   std::stringstream msg;
-  msg << "VMK::init: " << __LINE__
+  msg << "VMK::init()#" << __LINE__
     << " ssiLocalPetCount=" << ssiLocalPetCount;
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 }
@@ -571,15 +597,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
       ++j;
     }
   }
-#ifndef ESMF_NO_PTHREADS
-#ifndef PARCH_darwin
-  // set thread affinity
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  CPU_SET(ssipe[mypet], &cpuset);
-  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
-#endif
-#endif
+  set(globalResourceControl);
 #endif
   // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];
@@ -653,6 +671,8 @@ void VMK::finalize(int finalizeMpi){
     delete [] cid[i];
   delete [] cid;
   delete [] ssiLocalPetList;
+  // finalize the MPI tool interface
+  MPI_T_finalize();
   // conditionally finalize MPI
   int finalized;
   MPI_Finalized(&finalized);
@@ -699,7 +719,7 @@ struct SpawnArg{
   MPI_Comm mpi_c;
   MPI_Comm mpi_c_ssi;
   int mpi_c_freeflag;
-  int nothreadsflag;
+  bool threadsflag;
   int openmphandling;
   int openmpnumthreads;
   // shared memory variables
@@ -718,11 +738,58 @@ struct SpawnArg{
 
     
 void VMK::abort(){
+  // finalize the MPI tool interface
+  MPI_T_finalize();
   // abort default (all MPI) virtual machine
   int finalized;
   MPI_Finalized(&finalized);
   if (!finalized)
     MPI_Abort(default_mpi_c, EXIT_FAILURE);
+}
+
+
+VMK::Affinities VMK::setAffinities(void *ssarg){
+  SpawnArg *sarg = (SpawnArg *)ssarg;
+  Affinities affs;
+  affs.mypthid = mypthid;
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+  // get the current thread affinity
+  pthread_getaffinity_np(mypthid, sizeof(cpu_set_t), &(affs.cpuset));
+  // set thread affinity
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  for (int i=0; i<ncpet[mypet]; i++)
+    CPU_SET(ssipe[cid[mypet][i]], &cpuset);
+  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#ifndef ESMF_NO_OPENMP
+  // get the current omp max thread count
+  affs.omp_num_threads = omp_get_max_threads();
+  // OpenMP handling according to sarg->openmphandling
+  if (sarg->openmphandling>0){
+    // Set the number of OpenMP threads
+    int numthreads = ncpet[mypet]; // default
+    if (sarg->openmpnumthreads>=0)
+      numthreads = sarg->openmpnumthreads;
+    omp_set_num_threads(numthreads);
+    if (sarg->openmphandling>1){
+#pragma omp parallel
+      {
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        int cIndex = omp_get_thread_num()%ncpet[mypet];
+        CPU_SET(ssipe[cid[mypet][cIndex]], &cpuset);
+        if (sarg->openmphandling>2){
+          // set affinity on all OpenMP threads
+          pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+        }
+      }
+    }
+  }
+#endif
+#endif
+#endif
+  return affs;
 }
 
 
@@ -779,7 +846,7 @@ void VMK::construct(void *ssarg){
 #if 0
 {
   std::stringstream msg;
-  msg << "VMK::init: " << __LINE__
+  msg << "VMK::init()#" << __LINE__
     << " ssiLocalPetCount=" << ssiLocalPetCount;
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 }
@@ -796,40 +863,8 @@ void VMK::construct(void *ssarg){
   mpi_c = sarg->mpi_c;
 #if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
   mpi_c_ssi = sarg->mpi_c_ssi;
-#endif  
-#ifndef ESMF_NO_PTHREADS
-#ifndef PARCH_darwin
-  // set thread affinity
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  for (int i=0; i<ncpet[mypet]; i++)
-    CPU_SET(ssipe[cid[mypet][i]], &cpuset);
-  pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
-#ifndef ESMF_NO_OPENMP
-  // OpenMP handling according to sarg->openmphandling
-  if (sarg->openmphandling>0){
-    // Set the number of OpenMP threads
-    int numthreads = ncpet[mypet]; // default
-    if (sarg->openmpnumthreads>=0)
-      numthreads = sarg->openmpnumthreads;
-    omp_set_num_threads(numthreads);
-    if (sarg->openmphandling>1){
-#pragma omp parallel
-      {
-        cpu_set_t cpuset;
-        CPU_ZERO(&cpuset);
-        int cIndex = omp_get_thread_num()%ncpet[mypet];
-        CPU_SET(ssipe[cid[mypet][cIndex]], &cpuset);
-        if (sarg->openmphandling>2){
-          // set affinity on all OpenMP threads
-          pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
-        }
-      }
-    }
-  }
 #endif
-#endif
-#endif
+
   // pthread mutex control
   pth_mutex2 = sarg->pth_mutex2;
   pth_mutex = sarg->pth_mutex;
@@ -940,7 +975,7 @@ void VMK::construct(void *ssarg){
       if (tid[i]>0) mpionly=0;    // found multi-threading PET
   }
 #endif
-  nothreadsflag = sarg->nothreadsflag;
+  threadsflag = sarg->threadsflag;
   epochInit();  // start epoch support
 
   // need a barrier here before any of the PETs get into user code...
@@ -1049,16 +1084,108 @@ void VMK::destruct(){
 }
 
 
+static void enter_callback(SpawnArg *sarg, void *mutex){
+  vmkt_t *vmkt = &(sarg->vmkt);
+  VMK *vm = sarg->myvm;
+#ifndef ESMF_NO_PTHREADS
+  esmf_pthread_mutex_t *pmutex = (esmf_pthread_mutex_t *)mutex;
+#endif
+
+#ifdef VM_PETMANAGEMENTLOG_on
+  {
+    std::stringstream msg;
+    msg << "enter_callback()#" << __LINE__
+      << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
+      << " just before user code callback, pid=" << getpid();
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
+
+  // set affinities and OpenMP details according to plan, keep current settings
+  VMK::Affinities oldAffs = vm->setAffinities((void *)sarg);
+
+  // call the function pointer with the new VMK as its argument
+  // this is where we finally enter the user code again...
+  if (vmkt->arg==NULL)
+    sarg->fctp((void *)vm, sarg->cargo);
+  else
+    sarg->fctp((void *)vm, vmkt->arg);
+  //vmkt->routine(vmkt->arg);
+
+#ifdef VM_PETMANAGEMENTLOG_on
+  {
+    std::stringstream msg;
+    msg << "enter_callback()#" << __LINE__
+      << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
+      << " has returned from user code callback, pid=" << getpid();
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
+
+  // before pet terminates it must send a signal indicating that core is free
+  for (int i=0; i<sarg->ncontributors; i++){
+    // send signal to the _other_ process
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "enter_callback()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
+        << " sending kill(VM_SIG1) to PID="
+        << sarg->contributors[i].pid;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+#if !defined (ESMF_OS_MinGW)
+    kill(sarg->contributors[i].pid, VM_SIG1);
+#else
+    // TODO: Windows equivalent, perhaps using TerminateProcess
+#endif
+#ifdef VM_PETMANAGEMENTLOG_on
+    {
+      std::stringstream msg;
+      msg << "enter_callback()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
+        << " done sending kill(VM_SIG1) to PID="
+        << sarg->contributors[i].pid;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+    // which ever thread of the other process woke up will try to receive tid
+#ifndef ESMF_NO_PTHREADS
+    if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
+      pthread_mutex_lock(pmutex);
+#endif
+    MPI_Send(&(sarg->contributors[i].blocker_vmkt),
+      sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[i].mpi_pid,
+      VM_TID_MPI_TAG, vm->default_mpi_c);
+#ifndef ESMF_NO_PTHREADS
+    if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
+      pthread_mutex_unlock(pmutex);
+#endif
+  }
+  
+  // reset previous affinities and OpenMP settings
+  oldAffs.reset();
+
+}
+
+
 static void *vmk_spawn(void *arg){
   // vmkt's first level spawn function, includes the catch/release loop
   // typecast the argument into the type it really is:
   SpawnArg *sarg = (SpawnArg *)arg;
-#if (VERBOSITY > 5)
-  fprintf(stderr, "hello from within vmk_spawn, mypet=%d\n", sarg->mypet);
+  vmkt_t *vmkt = &(sarg->vmkt);
+#ifdef VM_PETMANAGEMENTLOG_on
+  {
+    std::stringstream msg;
+    msg << "vmk_spawn()#" << __LINE__
+      << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
+      << " pid=" << getpid() << " starting prologue negotiation.";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
 #endif
   // now use vmkt features to prepare for catch/release loop (back-sync)
   // - part 1
-  vmkt_t *vmkt = &(sarg->vmkt);
 #ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut0));        // back-sync #1 ...
   pthread_cond_signal(&(vmkt->cond0));      // . back-sync #1 .
@@ -1085,6 +1212,15 @@ static void *vmk_spawn(void *arg){
   pthread_cond_signal(&(vmkt->cond_extra2));  // . back-sync #2 .
   pthread_mutex_unlock(&(vmkt->mut_extra2));  // ... back-sync #2
 #endif
+#ifdef VM_PETMANAGEMENTLOG_on
+  {
+    std::stringstream msg;
+    msg << "vmk_spawn()#" << __LINE__
+      << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
+      << " pid=" << getpid() << " finished prologue negotiation.";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
   volatile int *f = &(vmkt->flag);
   // now enter the catch/release loop
   for(;;){
@@ -1093,8 +1229,8 @@ static void *vmk_spawn(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_spawn()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
+      msg << "vmk_spawn()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " going to wait for release, pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1105,8 +1241,8 @@ static void *vmk_spawn(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_spawn()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
+      msg << "vmk_spawn()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " was released, pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1116,70 +1252,9 @@ static void *vmk_spawn(void *arg){
 
     //vm.barrier();
 
-    // call the function pointer with the new VMK as its argument
-    // this is where we finally enter the user code again...
-    if (vmkt->arg==NULL)
-      sarg->fctp((void *)vm, sarg->cargo);
-    else
-      sarg->fctp((void *)vm, vmkt->arg);
-    //vmkt->routine(vmkt->arg);
+    // call back into user code, and return PEs to their contributing PETs
+    enter_callback(sarg, &(vmkt->mut0));
 
-#ifdef VM_PETMANAGEMENTLOG_on
-    {
-      std::stringstream msg;
-      msg << "VMK::vmk_spawn()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
-        << " has returned from user code callback.";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-    }
-#endif
-
-    // before pet terminates it must send a signal indicating that core is free
-    for (int i=0; i<sarg->ncontributors; i++){
-#if (VERBOSITY > 5)
-      fprintf(stderr, " send wake-up signal to : %d %d\n",
-        sarg->contributors[i].pid, 
-        sarg->contributors[i].blocker_tid);
-#endif
-      // send signal to the _other_ process
-#ifdef VM_PETMANAGEMENTLOG_on
-      {
-        std::stringstream msg;
-        msg << "VMK::vmk_spawn()#" << __LINE__
-          << " thread " << vmkt->tid << ": " << pthread_self()
-          << " sending kill(VM_SIG1) to PID="
-          << sarg->contributors[i].pid;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-      }
-#endif
-#if !defined (ESMF_OS_MinGW)
-      kill(sarg->contributors[i].pid, VM_SIG1);
-#else
-// TODO: Windows equivalent, perhaps using TerminateProcess
-#endif
-#ifdef VM_PETMANAGEMENTLOG_on
-      {
-        std::stringstream msg;
-        msg << "VMK::vmk_spawn()#" << __LINE__
-          << " thread " << vmkt->tid << ": " << pthread_self()
-          << " done sending kill(VM_SIG1) to PID="
-          << sarg->contributors[i].pid;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-      }
-#endif
-      // which ever thread of the other process woke up will try to receive tid
-#ifndef ESMF_NO_PTHREADS
-      if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
-        pthread_mutex_lock(&(vmkt->mut0));
-#endif
-      MPI_Send(&(sarg->contributors[i].blocker_vmkt),
-        sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[i].mpi_pid,
-        VM_TID_MPI_TAG, vm->default_mpi_c);
-#ifndef ESMF_NO_PTHREADS
-      if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
-        pthread_mutex_unlock(&(vmkt->mut0));
-#endif
-    }
     // now signal to parent thread that child is done with its work
 #ifndef ESMF_NO_PTHREADS
     pthread_mutex_lock(&(vmkt->mut0)); // wait until parent has reached "catch"
@@ -1188,7 +1263,8 @@ static void *vmk_spawn(void *arg){
 #endif
   }
   // wrap-up...
-  vm->destruct();
+  vm->epochFinal();  // close down epoch handling
+  vm->destruct();    // destroy this vm instance
   // when returning from this procedure this pet will terminate
   return NULL;
 }
@@ -1196,7 +1272,7 @@ static void *vmk_spawn(void *arg){
 
 static void *vmk_sigcatcher(void *arg){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::VMK::vmk_sigcatcher()"
+#define ESMC_METHOD "ESMCI::vmk_sigcatcher()"
   // vmkt's first level spawn function, includes the catch/release loop
   // typecast the argument into the type it really is:
   SpawnArg *sarg = (SpawnArg *)arg;
@@ -1262,8 +1338,8 @@ static void *vmk_sigcatcher(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
+      msg << "vmk_sigcatcher()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " going to wait for release, pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1274,8 +1350,8 @@ static void *vmk_sigcatcher(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
+      msg << "vmk_sigcatcher()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " was released, pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1294,8 +1370,8 @@ static void *vmk_sigcatcher(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
+      msg << "vmk_sigcatcher()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " going to sleep in sigwait(), pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1308,8 +1384,8 @@ static void *vmk_sigcatcher(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
+      msg << "vmk_sigcatcher()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " pid=" << getpid() << " was woken up by signal: " << caught;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1320,8 +1396,8 @@ static void *vmk_sigcatcher(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
+      msg << "vmk_sigcatcher()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " pid=" << getpid() << " now calling MPI_Recv() for MPI_ANY_SOURCE.";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1331,8 +1407,8 @@ static void *vmk_sigcatcher(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
+      msg << "vmk_sigcatcher()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " pid=" << getpid() << " returned from MPI_Recv() for MPI_ANY_SOURCE.";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1343,8 +1419,8 @@ static void *vmk_sigcatcher(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
+      msg << "vmk_sigcatcher()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " pid=" << getpid() << " waking up blocker thread.";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1357,8 +1433,8 @@ static void *vmk_sigcatcher(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_sigcatcher()#" << __LINE__
-        << " thread " << vmkt->tid << ": " << pthread_self()
+      msg << "vmk_sigcatcher()#" << __LINE__
+        << " tid=" << vmkt->tid << ": pthread=" << pthread_self()
         << " pid=" << getpid() << " done waking up blocker thread.";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1417,14 +1493,14 @@ static void *vmk_block(void *arg){
     //sleep(2); // put this in the code to verify that earlier received signals
     // will be pending on a per thread basis...
 #if (VERBOSITY > 5)
-    fprintf(stderr,"vmk_block: thread %d: %d going to wait for release, pid: %d\n",
+    fprintf(stderr,"vmk_block: tid=%d: %d going to wait for release, pid: %d\n",
       vmkt->tid, pthread_self(), getpid());
 #endif
 #ifndef ESMF_NO_PTHREADS
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
 #endif
 #if (VERBOSITY > 5)
-    fprintf(stderr,"vmk_block: thread %d: %d was released, pid:%d\n", vmkt->tid,
+    fprintf(stderr,"vmk_block: tid=%d: %d was released, pid:%d\n", vmkt->tid,
       pthread_self(), getpid());
 #endif
     
@@ -1437,8 +1513,8 @@ static void *vmk_block(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_block()#" << __LINE__
-        << " thread " << pthread_self()
+      msg << "vmk_block()#" << __LINE__
+        << " pthread=" << pthread_self()
         << " going to sleep until sigcatcher wakes me up, pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -1452,8 +1528,8 @@ static void *vmk_block(void *arg){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
-      msg << "VMK::vmk_block()#" << __LINE__
-        << " thread " << pthread_self()
+      msg << "vmk_block()#" << __LINE__
+        << " pthread=" << pthread_self()
         << " awoken by sigcatcher, now get caught..., pid=" << getpid();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -2116,9 +2192,10 @@ void *VMK::startup(class VMKPlan *vmp,
     // threading stuff
     sarg[i].openmphandling = vmp->openmphandling;
     sarg[i].openmpnumthreads = vmp->openmpnumthreads;
-    sarg[i].nothreadsflag = vmp->nothreadflag;
-    if (vmp->nothreadflag){
-      // for a VM that is not thread-based the VM can already be constructed
+    sarg[i].threadsflag = vmp->eachChildPetOwnPthread;
+    if (!vmp->eachChildPetOwnPthread){
+      // For a VM that does not create new Pthreads, the VM can already be
+      // constructed.
       // obtain reference to the vm instance on heap
       VMK &vm = *(sarg[0].myvm);
       // setup the pet section in this vm instance
@@ -2129,10 +2206,10 @@ void *VMK::startup(class VMKPlan *vmp,
 #endif
       vm.construct((void *)&sarg[0]);
     }else{
-      // if this is a thread-based VM then...
-      // ...finally spawn threads from this pet...
-      // in the thread-based case the VM cannot be constructured until the
-      // pthreadID is known!
+      // For a VM that creates new Pthreads...
+      // ... spawn threads from this pet ...
+      // ... cannot construct new VM here ...
+      // ... must construct under the new Pthread where pthreadID is known!
       *rc = vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i],
         false, vmp->minStackSize); // not a service thread
       if (*rc) return NULL;  // could not create pthread -> bail out
@@ -2178,7 +2255,8 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
   simpleBlockingCallback |= vmp->parentVMflag;
   // the non-thread based VMs simply do a blocking callback for all the 
   // spawning PETs.
-  simpleBlockingCallback |= (vmp->nothreadflag && vmp->spawnflag[mypet]==1);
+  simpleBlockingCallback |= 
+    (!vmp->supportContributors && vmp->spawnflag[mypet]==1);
   // finally execute the simple blocking callback
   if (simpleBlockingCallback){
 #ifdef VM_PETMANAGEMENTLOG_on
@@ -2208,6 +2286,7 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
   // sigcatcher _before_ the actual spawner threads get released 
   // (this is so that no signals get missed!)
   if (vmp->spawnflag[mypet]==0){
+    // mypet is a contribtor, not a spawner
     if (vmp->contribute[mypet]>-1){
 
 #ifdef WITHBLOCKER_on
@@ -2254,8 +2333,8 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
 #endif
     }
   }else{
-    // wait on all the contributors to this spawner
-    for (int i=0; i<npets; i++)
+    // mypet is a spawner, wait on all the contributors to this spawner
+    for (int i=0; i<npets; i++){
       if (vmp->contribute[i]==mypet && i!=mypet){
 #ifdef VM_PETMANAGEMENTLOG_on
         {
@@ -2275,26 +2354,48 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
         }
 #endif
       }
+    }
     // now all contributors are in, pets that spawn need to release their vmkts
-    for (int i=0; i<vmp->spawnflag[mypet]; i++){
+    if (vmp->eachChildPetOwnPthread){
+      // Each child PET in its own Pthread
+      for (int i=0; i<vmp->spawnflag[mypet]; i++){
+#ifdef VM_PETMANAGEMENTLOG_on
+        {
+          std::stringstream msg;
+          msg << "VMK::enter()#" << __LINE__
+            << ": pthread=" << pthread_self() << " pid=" << getpid()
+            << " call vmkt_release on spawned thread: " << i;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
+#endif
+        vmkt_release(&(sarg[i].vmkt), argvmkt);
+      }
 #ifdef VM_PETMANAGEMENTLOG_on
       {
         std::stringstream msg;
         msg << "VMK::enter()#" << __LINE__
-          << " call vmkt_release on spawned thread: " << i;
+          << ": pthread=" << pthread_self() << " pid=" << getpid()
+          << " done calling vmkt_release for all spawned threads";
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
-      vmkt_release(&(sarg[i].vmkt), argvmkt);
+    }else{
+      // Each child PET in its parent thread (might be MPI process or Pthread)
+      if (vmp->spawnflag[mypet]==1){
+        // call back into user code, and return PEs to their contributing PETs
+        (sarg->vmkt).arg = argvmkt;
+        (sarg->vmkt).tid = 0; // mark as an invalid tid
+        enter_callback(sarg, pth_mutex);
+      }else if (vmp->spawnflag[mypet]==0){
+        // not a spawning PET -> NoOp
+      }else{
+        int localrc;
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "Cannot spawn multiple child PETs without eachChildPetOwnPthread!",
+          ESMC_CONTEXT, &localrc);
+        throw localrc;  // bail out with exception
+      }
     }
-#ifdef VM_PETMANAGEMENTLOG_on
-    {
-      std::stringstream msg;
-      msg << "VMK::enter()#" << __LINE__
-        << " done calling vmkt_release for all spawned threads";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-    }
-#endif
   }
 }
 
@@ -2307,7 +2408,7 @@ void VMK::exit(class VMKPlan *vmp, void *arg){
   // nothing to catch on exit.
   if (vmp->parentVMflag) return;
   // check if this is a thread-based VM
-  if (!vmp->nothreadflag){
+  if (vmp->supportContributors){
 #ifdef VM_PETMANAGEMENTLOG_on
     {
       std::stringstream msg;
@@ -2317,16 +2418,24 @@ void VMK::exit(class VMKPlan *vmp, void *arg){
     }
 #endif
     // pets that spawn in a thread-based VM need to catch their vmkts
-    for (int i=0; i<vmp->spawnflag[mypet]; i++){
+    if (vmp->eachChildPetOwnPthread){
+      // Each child PET in its own Pthread
+      for (int i=0; i<vmp->spawnflag[mypet]; i++){
 #ifdef VM_PETMANAGEMENTLOG_on
-      {
-        std::stringstream msg;
-        msg << "VMK::exit()#" << __LINE__
+        {
+          std::stringstream msg;
+          msg << "VMK::exit()#" << __LINE__
           << " call vmkt_catch on spawned thread: " << i;
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-      }
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        }
 #endif
-      vmkt_catch(&(sarg[i].vmkt));
+        vmkt_catch(&(sarg[i].vmkt));
+      }
+    }else{
+      // Each child PET in its parent thread (might be MPI process or Pthread)
+      if (vmp->spawnflag[mypet]>1){
+        // TODO: implemnet error handling here!!!
+      }
     }
     // pets that did not spawn but contributed need to catch their blocker and
     // sigcatcher
@@ -2387,7 +2496,7 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
     return;
   }
   for (int i=0; i<vmp->spawnflag[mypet]; i++){
-    if (vmp->nothreadflag){
+    if (!vmp->eachChildPetOwnPthread){
       // obtain reference to the vm instance on heap
       VMK &vm = *(sarg[0].myvm);
       vm.epochFinal();  // close down epoch handling
@@ -2396,7 +2505,7 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
       // thread-based VM pets must be joined
       vmkt_join(&(sarg[i].vmkt));
     }
-    // free arrays in sarg[i[ 
+    // free arrays in sarg[i]
     delete [] sarg[i].lpid;
     delete [] sarg[i].pid;
     delete [] sarg[i].tid;
@@ -2476,7 +2585,7 @@ void VMK::print()const{
   printf("MPI thread level support: %d\n", mpi_thread_level);
   printf("mpi_mutex_flag: %d\n", mpi_mutex_flag);
   printf("mpionly: %d\n", mpionly);
-  printf("nothreadsflag: %d\n", nothreadsflag);
+  printf("threadsflag: %d\n", threadsflag);
   for (int i=0; i<npets; i++){
     printf("  lpid[%d]=%d, tid[%d]=%d, vas[%d]=%d, ncpet[%d]=%d, nadevs[%d]=%d",
       i, lpid[i], i, tid[i], i, pid[i], i, ncpet[i], i, nadevs[i]);
@@ -2500,14 +2609,42 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
   msg << prefix << "petCount=" << getPetCount() << " localPet=" << getLocalPet()
-    << " currentSsiPe=" << getCurrentSsiPe();
+    << " mypthid=" << mypthid << " currentSsiPe=" << getCurrentSsiPe();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+#ifndef ESMF_NO_PTHREADS
+#ifndef PARCH_darwin
+  // output thread affinity
+  cpu_set_t cpuset;
+  pthread_getaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+  msg << prefix << "Current system level affinity pinning for local PET:";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  for (int i=0; i<CPU_SETSIZE; i++){
+    if (CPU_ISSET(i, &cpuset)){
+      msg.str("");  // clear
+      msg << prefix << " SSIPE=" << i;
+      ESMC_LogDefault.Write(msg.str(), msgType);
+    }
+  }
+  msg.str("");  // clear
+#endif
+#endif
+#ifndef ESMF_NO_OPENMP
+  // output OpenMP info
+  msg << prefix << "Current system level OMP_NUM_THREADS setting for local PET: "
+    << omp_get_max_threads();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+#endif
   msg << prefix << "ssiCount=" << getSsiCount()
     << " localSsi=" << ssiid[cid[mypet][0]];
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
-  msg << prefix << "mpionly=" << mpionly << " nothreadsflag=" << nothreadsflag;
+  msg << prefix << "mpionly=" << mpionly << " threadsflag=" << threadsflag;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
+  msg << prefix << "ESMF level logical PET->PE association "
+   << "(but consider system level affinity pinning!):";
   ESMC_LogDefault.Write(msg.str(), msgType);
   for (int i=0; i<npets; i++){
     msg.str("");  // clear
@@ -2533,6 +2670,9 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
   msg << prefix << "--- VMK::logSystem() start -------------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
+  msg << prefix << "esmfComm=" << getEsmfComm();
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  msg.str("");  // clear
   msg << prefix << "isPthreadsEnabled=" << isPthreadsEnabled();
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
@@ -2553,6 +2693,44 @@ void VMK::logSystem(std::string prefix, ESMC_LogMsgType_Flag msgType){
       << " SSIPE=" << ssipe[i];
     ESMC_LogDefault.Write(msg.str(), msgType);
   }
+  msg.str("");  // clear
+#ifndef ESMF_MPIUNI
+  msg << prefix << "--- VMK::logSystem() MPI Control Variables ---------------";
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  int num_cvar;
+  MPI_T_cvar_get_num(&num_cvar);
+  char name[128], desc[1024];
+  int nameLen, descLen, verbosity, binding, scope;
+  MPI_T_enum enumtype;
+  MPI_Datatype datatype;
+  for (int i=0; i<num_cvar; i++){
+    nameLen = sizeof(name);
+    descLen = sizeof(desc);
+    MPI_T_cvar_get_info(i, name, &nameLen, &verbosity, &datatype, &enumtype,
+      desc, &descLen, &binding, &scope);
+    msg.str("");  // clear
+    msg << prefix << "index=" << std::setw(4) << i << std::setw(60) << name
+      << " : " << desc;
+    ESMC_LogDefault.Write(msg.str(), msgType);
+  }
+#if 0
+  // testing to change the MPICH EAGER limit for the shared memory channel
+  int ci;
+  MPI_T_cvar_get_index("MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ", &ci);
+  MPI_T_cvar_handle chandle; int nvals, eagersize;
+  MPI_T_cvar_handle_alloc(ci, NULL, &chandle, &nvals);
+  MPI_T_cvar_read(chandle, &eagersize);
+  msg.str("");  // clear
+  msg << prefix << "old MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+  eagersize = 4000;
+  MPI_T_cvar_write(chandle, &eagersize);
+  MPI_T_cvar_read(chandle, &eagersize);
+  msg.str("");  // clear
+  msg << prefix << "new MPIR_CVAR_NEMESIS_SHM_EAGER_MAX_SZ=" << eagersize;
+  ESMC_LogDefault.Write(msg.str(), msgType);
+#endif
+#endif
   msg.str("");  // clear
   msg << prefix << "--- VMK::logSystem() end ---------------------------------";
   ESMC_LogDefault.Write(msg.str(), msgType);
@@ -2642,9 +2820,10 @@ int VMK::getMaxTag(){
 
 VMKPlan::VMKPlan(){
   // native constructor
-  nothreadflag = 1; // by default use non-threaded VMs
+  supportContributors = false; // by default do not support contributors
+  eachChildPetOwnPthread = false; // by default do not create new Pthreads
   parentVMflag = 0; // default is to create a new VM for every child
-  openmphandling = 3; // default to pin OpenMP threads
+  openmphandling = 0; // default to no OpenMP handling if not explicitly set
   openmpnumthreads = -1; // default to local peCount
   // invalidate the arrays
   spawnflag = NULL;
@@ -2801,7 +2980,7 @@ void VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist,
   // first do garbage collection on current object
   vmkplan_garbage();
   // now set stuff up...
-  nothreadflag = 0; // this plan will allow ESMF-threading
+  supportContributors = true; // this plan will allow contributors
   openmphandling = 3; // default to pin OpenMP threads
   openmpnumthreads = -1; // default to local peCount
   npets = vm.npets;
@@ -2900,11 +3079,13 @@ void VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist,
   delete [] nssiid;
   // now deal with mypet specific members
   nspawn = spawnflag[vm.mypet];
+  if (nspawn > 1) eachChildPetOwnPthread = true;
 }
 
 
 int VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist, 
-  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
+  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+  bool forceEachChildPetOwnPthread){
   // set the communication preferences
   if (pref_intra_process >= 0)
     this->pref_intra_process = pref_intra_process;
@@ -2913,7 +3094,8 @@ int VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist,
   if (pref_inter_ssi >= 0)
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_maxthreads(vm, max, plist, nplist);
-  if ((vm.isPthreadsEnabled()==false) && !nothreadflag) return 1; // error
+  if ((vm.isPthreadsEnabled()==false) && supportContributors) return 1; // error
+  if (forceEachChildPetOwnPthread) eachChildPetOwnPthread=true;
   return 0;
 }
 
@@ -2941,7 +3123,7 @@ void VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
   // first do garbage collection on current object
   vmkplan_garbage();
   // now set stuff up...
-  nothreadflag = 0; // this plan will allow ESMF-threading
+  supportContributors = true; // this plan will support contributors
   openmphandling = 3; // default to pin OpenMP threads
   openmpnumthreads = -1; // default to local peCount
   npets = vm.npets;
@@ -3014,11 +3196,13 @@ void VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
   delete [] first_pet_index;
   // now deal with mypet specific members
   nspawn = spawnflag[vm.mypet];
+  if (nspawn > 1) eachChildPetOwnPthread = true;
 }
 
 
 int VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
-  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
+  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+  bool forceEachChildPetOwnPthread){
   // set the communication preferences
   if (pref_intra_process >= 0)
     this->pref_intra_process = pref_intra_process;
@@ -3027,7 +3211,8 @@ int VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
   if (pref_inter_ssi >= 0)
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_minthreads(vm, max, plist, nplist);
-  if ((vm.isPthreadsEnabled()==false) && !nothreadflag) return 1; // error
+  if ((vm.isPthreadsEnabled()==false) && supportContributors) return 1; // error
+  if (forceEachChildPetOwnPthread) eachChildPetOwnPthread=true;
   return 0;
 }
 
@@ -3053,7 +3238,7 @@ void VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
   // first do garbage collection on current object
   vmkplan_garbage();
   // now set stuff up...
-  nothreadflag = 0; // this plan will allow ESMF-threading
+  supportContributors = true; // this plan will support contributors
   openmphandling = 3; // default to pin OpenMP threads
   openmpnumthreads = -1; // default to local peCount
   npets = vm.npets;
@@ -3133,11 +3318,13 @@ void VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
   delete [] nssiid;
   // now deal with mypet specific members
   nspawn = spawnflag[vm.mypet];
+  if (nspawn > 1) eachChildPetOwnPthread = true;
 }
 
 
 int VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist, 
-  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
+  int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi,
+  bool forceEachChildPetOwnPthread){
   // set the communication preferences
   if (pref_intra_process >= 0)
     this->pref_intra_process = pref_intra_process;
@@ -3146,7 +3333,8 @@ int VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
   if (pref_inter_ssi >= 0)
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_maxcores(vm, max, plist, nplist);
-  if ((vm.isPthreadsEnabled()==false) && !nothreadflag) return 1; // error
+  if ((vm.isPthreadsEnabled()==false) && supportContributors) return 1; // error
+  if (forceEachChildPetOwnPthread) eachChildPetOwnPthread=true;
   return 0;
 }
 
@@ -3154,7 +3342,8 @@ int VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
 void VMKPlan::vmkplan_print(){
   // print info about the VMKPlan object
   printf("--- vmkplan_print start ---\n");
-  printf("nothreadflag = %d\n", nothreadflag);
+  printf("supportContributors = %d\n", supportContributors);
+  printf("eachChildPetOwnPthread = %d\n", eachChildPetOwnPthread);
   printf("parentVMflag = %d\n", parentVMflag);
   printf("npets = %d\n", npets);
   for (int i=0; i<npets; i++)
@@ -3536,18 +3725,33 @@ bool VMK::cancelled(status *status){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void VMK::epochInit(){epoch=epochNone;epochSetFirst();}
+void VMK::epochInit(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::epochInit()"
+#ifdef VM_EPOCHLOG_on
+  ESMC_LogDefault.Write("epochInit", ESMC_LOGMSG_DEBUG);
+#endif
+  epoch=epochNone;
+  epochSetFirst();
+}
 
 void VMK::epochFinal(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::epochFinal()"
   // loop over the sendMap and wait for outstanding comms
+#ifdef VM_EPOCHLOG_on
+  ESMC_LogDefault.Write("epochFinal", ESMC_LOGMSG_DEBUG);
+#endif
   std::map<int, sendBuffer>:: iterator its;
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
     sendBuffer *sm = &(its->second);
 #ifdef USE_STRSTREAM
+    // use strstream
     void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
     int size = sm->stream.pcount();           // bytes in stream buffer
     sm->stream.freeze(false); // unfreeze the persistent buffer for deallocation
 #else
+    // use stringstream
     void *buffer = (void *)sm->streamBuffer.data();
     int size = sm->streamBuffer.size();       // bytes in stream buffer
 #endif
@@ -3559,19 +3763,68 @@ void VMK::epochFinal(){
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     sm->clear();
+    // drain throttle data structure
+    while (sm->ackQueue.size() > 0){
+#ifdef VM_EPOCHLOG_on
+      std::stringstream msg;
+      msg << "epochBuffer:" << __LINE__ << " drain throttled sends: "
+        << sm->ackQueue.size();
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
+      ackElement *ackE = &(sm->ackQueue.front());
+      MPI_Wait(&(ackE->ackReq), MPI_STATUS_IGNORE);
+      sm->ackQueue.pop();
+    }
   }
 }
 
-void VMK::epochEnter(vmEpoch epoch_){epoch=epoch_;epochSetFirst();}
+void VMK::epochEnter(vmEpoch epoch_, int throttle){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::epochEnter()"
+  epoch=epoch_;
+  if (throttle < 1){
+    int localrc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "The value of throttle must be greater than zero.",
+      ESMC_CONTEXT, &localrc);
+    throw localrc;  // bail out with exception
+  }
+  epochThrottle = throttle;
+  epochSetFirst();
+}
 
 void VMK::epochExit(bool keepAlloc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::epochExit()"
   if (epoch==epochBuffer){
     // loop over the sendMap and post non-blocking sends
     std::map<int, sendBuffer>:: iterator its;
     for (its=sendMap.begin(); its!=sendMap.end(); ++its){
       sendBuffer *sm = &(its->second);
       int tag = getDefaultTag(mypet,its->first);
+#ifdef VM_EPOCHLOG_on
+      {
+        std::stringstream msg;
+        msg << "epochBuffer:" << __LINE__ << " outstanding sends: "
+          << sm->ackQueue.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      }
+#endif
+      // throttle
+      while ((int)sm->ackQueue.size() > epochThrottle){
+#ifdef VM_EPOCHLOG_on
+        std::stringstream msg;
+        msg << "epochBuffer:" << __LINE__ << "  throttling sends: "
+          << sm->ackQueue.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
+        ackElement *ackE = &(sm->ackQueue.front());
+        MPI_Wait(&(ackE->ackReq), MPI_STATUS_IGNORE);
+        sm->ackQueue.pop();
+      }
+      bool needAck = false;
 #ifdef USE_STRSTREAM
+      // use strstream
       void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
       int size = sm->stream.pcount();           // bytes in stream buffer
       if (size > 0){
@@ -3581,12 +3834,22 @@ void VMK::epochExit(bool keepAlloc){
           << " dst=" << getVas(lpid[its->first]) << " size=" << size
           << " buffer=" << buffer;
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        double t0; wtime(&t0);
 #endif
         MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
           &sm->mpireq);
         sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
+        needAck = true;
+#ifdef VM_EPOCHLOG_on
+        double t1; wtime(&t1);
+        msg.str(""); // clear
+        msg << "epochBuffer:" << __LINE__ << " cost of non-blocking send: "
+          << t1 - t0 << " seconds";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
       }
 #else
+      // use stringstream
       sm->streamBuffer = sm->stream.str();  // copy data into persistent buffer
       sm->stream.str("");                   // clear out stream
 #ifdef VM_EPOCHLOG_on
@@ -3597,11 +3860,27 @@ void VMK::epochExit(bool keepAlloc){
         << " size=" << sm->streamBuffer.size()
         << " buffer=" << (void *)sm->streamBuffer.data();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        double t0; wtime(&t0);
 #endif
         MPI_Isend((void *)sm->streamBuffer.data(), sm->streamBuffer.size(),
           MPI_BYTE, lpid[its->first], tag, mpi_c, &sm->mpireq);
+        needAck = true;
+#ifdef VM_EPOCHLOG_on
+        double t1; wtime(&1);
+        msg.str(""); // clear
+        msg << "epochBuffer:" << __LINE__ << " cost of non-blocking send: "
+          << t1 - t0 << " seconds";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
       }
 #endif
+      if (needAck){
+        // post the receive of the acknowledge message from receiver for throttle
+        sm->ackQueue.push(ackElement());
+        ackElement *ackE = &(sm->ackQueue.back());
+        MPI_Irecv(&(ackE->ackDummy), sizeof(int), MPI_BYTE, lpid[its->first], tag,
+          mpi_c, &(ackE->ackReq));
+      }
     }
     if (!keepAlloc){
       // clear the recvMap, freeing all receive buffers held
@@ -3614,6 +3893,8 @@ void VMK::epochExit(bool keepAlloc){
 }
 
 void VMK::epochSetFirst(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::epochSetFirst()"
   std::map<int, sendBuffer>:: iterator its;
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
     its->second.firstFlag=true;
@@ -3625,6 +3906,8 @@ void VMK::epochSetFirst(){
 }
 
 void VMK::sendBuffer::clear(){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::sendBuffer::clear"
 #ifdef VM_EPOCHLOG_on
   std::stringstream msg;
   msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm";
@@ -3635,17 +3918,22 @@ void VMK::sendBuffer::clear(){
     std::stringstream msg;
     msg << "epochBuffer:" << __LINE__ << " posting MPI_Wait()";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    double t0; wtime(&t0);
 #endif
     MPI_Wait(&mpireq, MPI_STATUS_IGNORE);
 #ifdef VM_EPOCHLOG_on
+    double t1; wtime(&t1);
     msg.str(""); // clear
-    msg << "epochBuffer:" << __LINE__ << " returned from MPI_Wait()";
+    msg << "epochBuffer:" << __LINE__ << " returned from MPI_Wait(), cost: "
+      << t1 - t0 << " seconds";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
   }
 #ifdef USE_STRSTREAM
+  // use strstream
   stream.freeze(false); // unfreeze the persistent buffer for deallocation
 #else
+  // use stringstream
   streamBuffer.clear(); // done with buffer
 #endif
 }
@@ -4202,6 +4490,11 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         rm->streamBuffer.resize(bytecount);
         rm->buffer = (void *)rm->streamBuffer.data();
         
+        // send the acknowledge message to sender for throttle
+        int ackDummy=1;
+        MPI_Send(&ackDummy, sizeof(int), MPI_BYTE, lpid[source], defaultTag,
+          mpi_c);
+        
         // post blocking recv of the enire epoch buffer
 #ifdef VM_EPOCHLOG_on
         msg.str(""); // clear
@@ -4210,9 +4503,17 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         << " size=" << rm->streamBuffer.size()
         << " streamBuffer=" << (void *)rm->streamBuffer.data();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+        double t0; wtime(&t0);
 #endif
         MPI_Recv(rm->buffer, bytecount, MPI_BYTE,
           lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
+#ifdef VM_EPOCHLOG_on
+        double t1; wtime(&t1);
+        msg.str(""); // clear
+        msg << "epochBuffer:" << __LINE__ << " cost of blocking recv: "
+          << t1 - t0 << " seconds";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
       }
       // now service the specific receive call with chunk of data from buffer
       int *ip = (int *)rm->buffer;
@@ -4493,7 +4794,7 @@ int VMK::sendrecv(void *sendData, int sendSize, int dst, void *recvData,
   
 int VMK::threadbarrier(){
   int localrc=0;
-  if (!mpionly && !nothreadsflag){
+  if (!mpionly && threadsflag){
     // collective barrier over all PETs in thread group with mypet
     int myp = pid[mypet];
     int myt = tid[mypet];

@@ -170,7 +170,7 @@ subroutine attpack_initialize(self, info, convention, purpose, rootKey, rc)
   character(*), intent(in), optional :: convention
   character(*), intent(in), optional :: purpose
   character(*), intent(in), optional :: rootKey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: local_convention, local_purpose
@@ -203,7 +203,7 @@ function attpack_formatKey(self, name, rc) result(key)
   ! object this attribute package points to
   class(ESMF_AttPack), intent(in) :: self
   character(*), intent(in), optional :: name
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
   character(:), allocatable :: key
 
   integer :: localrc
@@ -227,7 +227,7 @@ end function attpack_formatKey
 function attpack_getPayload(self, rc) result(payload)
   ! Get a handle to the Info object associated with this attribute package
   class(ESMF_AttPack), intent(in) :: self
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
   type(ESMF_Info) :: payload
   integer :: localrc
 
@@ -271,7 +271,7 @@ end subroutine
 subroutine ESMF_InfoFormatKey(key, name, rc, convention, purpose)
   character(:), allocatable, intent(out) :: key
   character(len=*), intent(in) :: name
-  integer, intent(inout) :: rc
+  integer, intent(out) :: rc
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
 
@@ -319,7 +319,7 @@ subroutine ESMF_AttributeAddAttPackStdInfo(info, convention, purpose, attrList, 
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
   type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, nest_conv_count
   character(:), allocatable :: key, key_nest_get, key_nest_set
@@ -415,8 +415,8 @@ subroutine ESMF_AttributeAddAttPackStd{{ et }}(target, convention, purpose, attr
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -452,11 +452,11 @@ end subroutine ESMF_AttributeAddAttPackStd{{ et }}
   type(ESMF_{{ et }}), intent(in) :: target
   character(len=*), intent(in) :: name
   {{ t.full_ftype }}, {% if d %}dimension(:), {% endif %}intent(in) :: value{% if d %}List{% endif %}{{ "" }}
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -501,7 +501,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -567,7 +567,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   {{ t.full_ftype }}, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -633,7 +633,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -709,7 +709,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -765,7 +765,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -830,13 +830,13 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
   ! 39.11.15
   type(ESMF_{{ et }}), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -900,11 +900,11 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {% include "ESMF_Attribute-ProcHeader.jinja2" %}{{ "" }}
   type(ESMF_{{ et }}), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -951,7 +951,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -1009,7 +1009,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -1072,7 +1072,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -1199,7 +1199,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -1295,7 +1295,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 {#  character(len=*), intent(in), optional :: convention#}
 {#  character(len=*), intent(in), optional :: purpose#}
 {#  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag#}
-{#  integer, intent(inout), optional :: rc#}
+{#  integer, intent(out), optional :: rc#}
 {##}
 {#  integer :: localrc#}
 {#  type(ESMF_InfoDescribe) :: eidesc#}
@@ -1346,7 +1346,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_{{ et }}), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -1410,7 +1410,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -1447,7 +1447,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 subroutine ESMF_AttPackStreamJSON(attpack, output, rc)
   type(ESMF_AttPack), intent(in) :: attpack
   character(len=*), intent(out), optional :: output
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: c_output, key

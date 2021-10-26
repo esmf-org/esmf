@@ -1149,7 +1149,7 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
 // !INTERFACE:
-      ESMC_Base::ESMC_Base(int id) {
+      ESMC_Base::ESMC_Base(int id, bool woGarbage) {
 //
 // !RETURN VALUE:
 //    none
@@ -1193,8 +1193,10 @@ void ESMC_Base::constructInfo(ESMC_Base& base) {
   ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_DEBUG);
 #endif
 
-  // add object to list for automatic garbage collection
-  ESMCI::VM::addObject(this, vmID);
+  if (!woGarbage){
+    // add object to list for automatic garbage collection
+    ESMCI::VM::addObject(this, vmID);
+  }
 
   // setup the root Attribute, passing the address of this
   if (id==-1){

@@ -457,6 +457,7 @@ module ESMF_VMMod
 ! - ESMF-internal methods:
   public ESMF_VMInitializePreMPI
   public ESMF_VMInitialize
+  public ESMF_VMSet
   public ESMF_VMFinalize
   public ESMF_VMAbort
   public ESMF_VMShutdown
@@ -3446,6 +3447,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Made argument {\tt vm} optional to simplify usage when calling
+!   on the current VM.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -4254,12 +4260,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMEpochEnter - Enter an ESMF epoch
 
 ! !INTERFACE:
-  subroutine ESMF_VMEpochEnter(keywordEnforcer, vm, epoch, rc)
+  subroutine ESMF_VMEpochEnter(keywordEnforcer, vm, epoch, throttle, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),            intent(in),  optional :: vm
     type(ESMF_VMEpoch_Flag),  intent(in),  optional :: epoch
+    integer,                  intent(in),  optional :: throttle
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4275,6 +4282,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[epoch]}]
 !        The epoch to be entered. See section \ref{const:vmepoch_flag} for a
 !        complete list of options. Defaults to {\tt ESMF\_VMEPOCH\_NONE}.
+!   \item[{[throttle]}]
+!        Maximum number of outstanding communication calls beween any two PETs.
+!        Lower numbers reduce memory pressure at the expense of the level of
+!        asynchronizity achievable. Defaults to 10.
 !   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4308,7 +4319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm_opt, rc)
 
     ! Call into the C++ interface
-    call c_ESMC_VMEpochEnter(vm_opt, epoch_opt, localrc)
+    call c_ESMC_VMEpochEnter(vm_opt, epoch_opt, throttle, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5152,7 +5163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
     currentSsiPe, petCount, peCount, ssiCount, ssiMap, ssiMinPetCount, ssiMaxPetCount, &
     ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
-    ssiSharedMemoryEnabledFlag, rc)
+    ssiSharedMemoryEnabledFlag, esmfComm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),        intent(in)            :: vm
@@ -5170,6 +5181,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,              intent(out), optional :: pthreadsEnabledFlag
     logical,              intent(out), optional :: openMPEnabledFlag
     logical,              intent(out), optional :: ssiSharedMemoryEnabledFlag
+    character(:), allocatable, intent(out), optional :: esmfComm
     integer,              intent(out), optional :: rc
 !
 ! !STATUS:
@@ -5189,6 +5201,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   current PE within the local SSI that is executing the request.\newline
 !   Added argument {\tt ssiMap} for a convenient way to obtain a view
 !   of the mapping of PETs to single system images across the entire VM.
+! \item[8.2.0] Added argument {\tt esmfComm} to provide easy access to the
+!   {\tt ESMF\_COMM} setting used by the ESMF installation.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5261,6 +5275,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !             ESMF has {\em not} been compiled to support shared memory access
 !             between PETs that are on the same single system image (SSI).
 !        \end{description}
+!   \item[{[esmfComm]}]
+!        Upon return this string is allocated to the appropriate size and holds
+!        the exact value of the {\tt ESMF\_COMM} build environment variable used
+!        by the ESMF installation. This provides a convenient way for the user
+!        to determine the underlying MPI implementation.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5272,6 +5291,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)      :: ssiSharedMemoryEnabledFlagArg  ! helper variable
     integer                 :: petCountArg, i;                ! helper variable
     integer                 :: localrc  ! local return code
+    character(len=40)       :: esmfCommArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -5324,6 +5344,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
+    endif
+
+    ! deal with esmfComm directly on Fortran layer
+    if (present(esmfComm)) then
+      call c_esmc_initget_esmf_comm(esmfCommArg, localrc)
+      esmfComm = trim(esmfCommArg)  ! implicit allocation of esmfComm
     endif
 
     ! return successfully
@@ -5616,8 +5642,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_VMGetCurrentGarbageInfo(fobjCount, objCount, rc)
 !
 ! !ARGUMENTS:
-    integer, intent(in)             :: fobjCount
-    integer, intent(in)             :: objCount
+    integer, intent(out)            :: fobjCount
+    integer, intent(out)            :: objCount
     integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
@@ -5668,8 +5694,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc)
 !
 ! !ARGUMENTS:
-    integer, intent(in)             :: virtMemPet
-    integer, intent(in)             :: physMemPet
+    integer, intent(out)            :: virtMemPet
+    integer, intent(out)            :: physMemPet
     integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
@@ -9179,10 +9205,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMInitialize - Initialize the Global VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMInitialize(mpiCommunicator, rc)
+  subroutine ESMF_VMInitialize(mpiCommunicator, globalResourceControl, rc)
 !
 ! !ARGUMENTS:
     integer, intent(in),  optional :: mpiCommunicator
+    logical, intent(in),  optional :: globalResourceControl
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -9194,6 +9221,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        MPI communicator defining the group of processes on which the
 !        ESMF application is running.
 !        If not sepcified, defaults to {\tt MPI\_COMM\_WORLD}
+!     \item [{[globalResourceControl]}]
+!        For {\tt .true.}, each global PET is pinned to the corresponding
+!        PE (i.e. CPU core) in order. If OpenMP support is enabled,
+!        {\tt OMP\_NUM\_THREADS} is set to {\tt 1} on every PET, regardless
+!        of the setting in the launching environment. The {\tt .true.}
+!        setting is recommended for applications that utilize the ESMF-aware
+!        threading and resource control features.
+!        For {\tt .false.}, global PETs are {\em not} pinned by ESMF, and
+!        {\tt OMP\_NUM\_THREADS} is {\em not} modified.
+!        The default setting is {\tt .false.}.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -9201,19 +9238,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: globalResourceControl_opt  ! helper variable
+
+    ! deal with logical argument
+    globalResourceControl_opt = ESMF_FALSE ! default
+    if (present(globalResourceControl)) &
+      globalResourceControl_opt = globalResourceControl
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface.
-    call c_ESMC_VMInitialize(GlobalVM, mpiCommunicator, localrc)
+    call c_ESMC_VMInitialize(GlobalVM, mpiCommunicator, &
+      globalResourceControl_opt, localrc)
     ! Cannot use LogErr here because LogErr initializes _after_ VM
     if (localrc /= ESMF_SUCCESS) then
       if (present(rc)) rc = localrc
       return
     endif
-    
+
     ! Set init code
     ESMF_INIT_SET_CREATED(GlobalVM)
 
@@ -9221,6 +9265,64 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMInitialize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSet()"
+!BOPI
+! !IROUTINE: ESMF_VMSet - Set properties of the Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMSet(globalResourceControl, rc)
+!
+! !ARGUMENTS:
+    logical, intent(in),  optional :: globalResourceControl
+    integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set properties of the Global VM.
+!
+!   The arguments are:
+!   \begin{description}
+!     \item [{[globalResourceControl]}]
+!        For {\tt .true.}, each global PET is pinned to the corresponding
+!        PE (i.e. CPU core) in order. If OpenMP support is enabled,
+!        {\tt OMP\_NUM\_THREADS} is set to {\tt 1} on every PET, regardless
+!        of the setting in the launching environment. The {\tt .true.}
+!        setting is recommended for applications that utilize the ESMF-aware
+!        threading and resource control features.
+!        For {\tt .false.}, global PETs are {\em not} pinned by ESMF, and
+!        {\tt OMP\_NUM\_THREADS} is {\em not} modified.
+!        The default setting is {\tt .false.}.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: globalResourceControl_opt  ! helper variable
+
+    ! deal with logical argument
+    globalResourceControl_opt = ESMF_FALSE ! default
+    if (present(globalResourceControl)) &
+      globalResourceControl_opt = globalResourceControl
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMSet(globalResourceControl_opt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMSet
 !------------------------------------------------------------------------------
 
 
@@ -9886,7 +9988,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_VMPlanMaxPEs(vmplan, vm, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, &
+    forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
@@ -9897,6 +10000,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
+    logical,           intent(in),  optional :: forceEachChildPetOwnPthread
     integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -9920,6 +10024,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of PETs in petlist
 !   \item[petlist] 
 !        List of PETs that the parent VM will provide to the child VM
+!   \item[{[forceEachChildPetOwnPthread]}] 
+!        For {\tt .true.}, force each child PET to execute in its own Pthread.
+!        By default, {\tt .false.}, single PETs spawned from a parent PET
+!        execute in the same thread (or MPI process) as the parent PET. Multiple
+!        child PETs spawned by the same parent PET always execute as their own
+!        Pthreads.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -9939,7 +10049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface.
     call c_ESMC_VMPlanMaxPEs(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, localrc)
+      npetlist, petlist, forceEachChildPetOwnPthread, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -9958,7 +10068,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_VMPlanMaxThreads(vmplan, vm, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, &
+    forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
@@ -9969,6 +10080,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
+    logical,           intent(in),  optional :: forceEachChildPetOwnPthread
     integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -9992,6 +10104,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of PETs in petlist
 !   \item[petlist] 
 !        List of PETs that the parent VM will provide to the child VM
+!   \item[{[forceEachChildPetOwnPthread]}] 
+!        For {\tt .true.}, force each child PET to execute in its own Pthread.
+!        By default, {\tt .false.}, single PETs spawned from a parent PET
+!        execute in the same thread (or MPI process) as the parent PET. Multiple
+!        child PETs spawned by the same parent PET always execute as their own
+!        Pthreads.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -10011,7 +10129,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface.
     call c_ESMC_VMPlanMaxThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, localrc)
+      npetlist, petlist, forceEachChildPetOwnPthread, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -10030,7 +10148,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_VMPlanMinThreads(vmplan, vm, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, &
+    forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
@@ -10041,6 +10160,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
+    logical,           intent(in),  optional :: forceEachChildPetOwnPthread
     integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -10064,6 +10184,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of PETs in petlist
 !   \item[petlist] 
 !        List of PETs that the parent VM will provide to the child VM
+!   \item[{[forceEachChildPetOwnPthread]}] 
+!        For {\tt .true.}, force each child PET to execute in its own Pthread.
+!        By default, {\tt .false.}, single PETs spawned from a parent PET
+!        execute in the same thread (or MPI process) as the parent PET. Multiple
+!        child PETs spawned by the same parent PET always execute as their own
+!        Pthreads.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -10083,7 +10209,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface.
     call c_ESMC_VMPlanMinThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, localrc)
+      npetlist, petlist, forceEachChildPetOwnPthread, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

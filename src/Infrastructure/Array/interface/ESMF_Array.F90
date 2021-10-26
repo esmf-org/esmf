@@ -424,8 +424,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [array]
 !       {\tt ESMF\_Array} object for which to set properties.
-!     \item [{[name]}]
-!       The Array name.
 !     \item[{[computationalLWidth]}] 
 !       \begin{sloppypar}
 !       This argument must have of size {\tt (dimCount, localDeCount)}.
@@ -440,6 +438,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       computational region with respect to the upper corner of the exclusive
 !       region for all local DEs.
 !       \end{sloppypar}
+!     \item [{[name]}]
+!       The Array name.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -709,6 +709,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DynamicMaskStateWrpR4R4R4V):: dynMaskStateR4R4R4V
 #endif
     type(ESMF_Logical)          :: handleAllElements
+    type(ESMF_Pointer)          :: this
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -717,18 +718,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments, deal with optional Array args
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     if (present(srcArray)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      call ESMF_ArrayGetThis(srcArray, this, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (this /= ESMF_NULL_POINTER) then
+        ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      endif
       opt_srcArray = srcArray
     else
-      call ESMF_ArraySetThisNull(opt_srcArray, localrc)
+      call ESMF_ArraySetThisNull(opt_srcArray, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if (present(dstArray)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      call ESMF_ArrayGetThis(dstArray, this, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (this /= ESMF_NULL_POINTER) then
+        ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      endif
       opt_dstArray = dstArray
     else
-      call ESMF_ArraySetThisNull(opt_dstArray, localrc)
+      call ESMF_ArraySetThisNull(opt_dstArray, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif

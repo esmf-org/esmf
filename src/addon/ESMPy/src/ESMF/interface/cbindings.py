@@ -1026,6 +1026,46 @@ def ESMP_GridWrite(grid, filename, staggerloc=constants.StaggerLoc.CENTER):
         raise ValueError('ESMC_GridWrite() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
+#### MOAB #####################################################################
+
+_ESMF.ESMC_MeshGetMOAB.restype = None
+_ESMF.ESMC_MeshGetMOAB.argtypes = [ct.POINTER(ct.c_bool), ct.POINTER(ct.c_int)]
+
+def ESMP_MeshGetMOAB(moab_on):
+    """
+    Preconditions: ESMP has been initialized\n
+    Postconditions: The setting for the Mesh backend has been retrieved.\n
+    Arguments:\n
+        bool :: moab_on\n
+    """
+    lrc = ct.c_int(0)
+    lmb = ct.c_bool(moab_on)
+    _ESMF.ESMC_MeshGetMOAB(ct.byref(lmb), ct.byref(lrc))
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_MeshGetMOAB() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+    mb = lmb.value
+                        
+    return mb
+
+_ESMF.ESMC_MeshSetMOAB.restype = None
+_ESMF.ESMC_MeshSetMOAB.argtypes = [ct.c_bool, ct.POINTER(ct.c_int)]
+
+def ESMP_MeshSetMOAB(moab_on):
+    """
+    Preconditions: ESMP has been initialized\n
+    Postconditions: The Mesh backend has been set to the value of 'moab_on'.\n
+    Arguments:\n
+        bool :: moab_on\n
+    """
+    lrc = ct.c_int(0)
+    _ESMF.ESMC_MeshSetMOAB(moab_on, ct.byref(lrc))
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_MeshSetMOAB() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
 #### MESH #####################################################
 
 _ESMF.ESMC_MeshAddElements.restype = ct.c_int
@@ -1249,7 +1289,7 @@ def ESMP_MeshGetCoordPtr(mesh):
     lrc = ct.c_int(0)
     lnum_nodes = ct.c_int(0)
     lnum_dims = ct.c_int(0)
-    num_nodes = ESMP_MeshGetLocalNodeCount(mesh)
+    num_nodes = ESMP_MeshGetOwnedNodeCount(mesh)
     nodeCoords = np.array(np.zeros(num_nodes*3),dtype=np.float64)
     _ESMF.ESMC_MeshGetCoord(mesh.struct.ptr, nodeCoords,
                             ct.byref(lnum_nodes),
@@ -1283,7 +1323,7 @@ def ESMP_MeshGetElemCoordPtr(mesh):
     lrc = ct.c_int(0)
     lnum_elems = ct.c_int(0)
     lnum_dims = ct.c_int(0)
-    num_elems = ESMP_MeshGetLocalElementCount(mesh)
+    num_elems = ESMP_MeshGetOwnedElementCount(mesh)
     elemCoords = np.array(np.zeros(num_elems*3),dtype=np.float64)
     _ESMF.ESMC_MeshGetElemCoord(mesh.struct.ptr, elemCoords,
                             ct.byref(lnum_elems),

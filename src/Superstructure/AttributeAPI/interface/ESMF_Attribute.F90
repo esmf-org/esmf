@@ -865,6 +865,10 @@ contains  !====================================================================
 !     type(ESMF_AttPack),  intent(out),   optional :: attpack
 !     integer,             intent(inout), optional :: rc
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Add an ESMF Attribute package.
 !
@@ -910,6 +914,10 @@ contains  !====================================================================
 !     character (len = *), intent(in)     optional :: nestPurpose
 !     type(ESMF_AttPack),  intent(out),   optional :: attpack
 !     integer,             intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Add an ESMF Attribute package containing a nested Attribute package.
@@ -969,6 +977,10 @@ contains  !====================================================================
 !     type(ESMF_AttCopy_Flag), intent(in),  optional :: attcopy
 !     integer,                 intent(out), optional :: rc
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Copy an Attribute hierarchy from \texttt{src} to \texttt{dst}.
 !
@@ -1022,6 +1034,10 @@ contains  !====================================================================
 !     type(ESMF_AttNest_Flag),intent(in),  optional   :: attnestflag
 !     logical,                intent(out), optional   :: isPresent
 !     integer,                intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the \texttt{target}, or from an Attribute
@@ -1099,6 +1115,10 @@ contains  !====================================================================
 !     integer,                intent(out), optional   :: itemCount
 !     logical,                intent(out), optional   :: isPresent
 !     integer,                intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the \texttt{target}, or from an
@@ -1182,6 +1202,10 @@ contains  !====================================================================
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the \texttt{target}, or from an Attribute
@@ -1268,6 +1292,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the \texttt{target}, or from an
 !     Attribute package on the \texttt{target}, specified by {\tt convention}
@@ -1346,6 +1374,10 @@ contains  !====================================================================
 !     type(ESMF_AttNest_Flag),    intent(in),    optional :: attnestflag
 !     integer,                    intent(inout), optional :: rc
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Return the Attribute count for \texttt{target}.
 !
@@ -1412,6 +1444,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Return the Attribute count for \texttt{target}.
 !
@@ -1475,6 +1511,10 @@ contains  !====================================================================
 !     integer,                  intent(out),   optional :: itemCount
 !     logical,                  intent(out),   optional :: isPresent
 !     integer,                  intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return information associated with an Attribute in an Attribute package,
@@ -1549,6 +1589,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Return information associated with the named Attribute,
 !     including {\tt typekind} and {\tt itemCount}.
@@ -1616,6 +1660,10 @@ contains  !====================================================================
 !     integer,                  intent(out), optional :: itemCount
 !     logical,                  intent(out), optional :: isPresent
 !     integer,                  intent(out), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute,
@@ -1694,6 +1742,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute,
 !     including {\tt name}, {\tt typekind} and {\tt itemCount}.  Keep in
@@ -1770,6 +1822,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Get an ESMF Attribute package object.
 !
@@ -1831,6 +1887,10 @@ contains  !====================================================================
 !     \item \texttt{ schemaFileName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Read Attributes for \texttt{target} from \texttt{fileName}, whose format is JSON.
 !
@@ -1876,6 +1936,10 @@ contains  !====================================================================
 !     type(ESMF_AttPack),      intent(inout), optional :: attpack
 !     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
 !     integer,                 intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Remove an Attribute, or Attribute package on \texttt{target}.
@@ -1944,6 +2008,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Remove an Attribute, or Attribute package on \texttt{target}.
 !
@@ -2008,6 +2076,10 @@ contains  !====================================================================
 !     integer,                 intent(in),    optional :: itemcount
 !     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
 !     integer,                 intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
@@ -2080,6 +2152,10 @@ contains  !====================================================================
 !     integer,                 intent(in),    optional :: itemcount
 !     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
 !     integer,                 intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
@@ -2160,6 +2236,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
@@ -2239,6 +2319,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and a
@@ -2314,6 +2398,10 @@ contains  !====================================================================
 !     \item \texttt{ reconcile }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Update an Attribute hierarchy during runtime. The information from
 !     the PETs in the {\tt rootList} is transferred to the PETs that are not
@@ -2362,6 +2450,10 @@ contains  !====================================================================
 !     character (len = *),     intent(in),  optional :: purpose
 !     type(ESMF_AttWriteFlag), intent(in),  optional :: attwriteflag
 !     integer,                 intent(out), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Write the Attribute package to file for \texttt{target}. JSON is the
@@ -2416,7 +2508,7 @@ subroutine attpack_initialize(self, info, convention, purpose, rootKey, rc)
   character(*), intent(in), optional :: convention
   character(*), intent(in), optional :: purpose
   character(*), intent(in), optional :: rootKey
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: local_convention, local_purpose
@@ -2449,7 +2541,7 @@ function attpack_formatKey(self, name, rc) result(key)
   ! object this attribute package points to
   class(ESMF_AttPack), intent(in) :: self
   character(*), intent(in), optional :: name
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
   character(:), allocatable :: key
 
   integer :: localrc
@@ -2473,7 +2565,7 @@ end function attpack_formatKey
 function attpack_getPayload(self, rc) result(payload)
   ! Get a handle to the Info object associated with this attribute package
   class(ESMF_AttPack), intent(in) :: self
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
   type(ESMF_Info) :: payload
   integer :: localrc
 
@@ -2517,7 +2609,7 @@ end subroutine
 subroutine ESMF_InfoFormatKey(key, name, rc, convention, purpose)
   character(:), allocatable, intent(out) :: key
   character(len=*), intent(in) :: name
-  integer, intent(inout) :: rc
+  integer, intent(out) :: rc
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
 
@@ -2565,7 +2657,7 @@ subroutine ESMF_AttributeAddAttPackStdInfo(info, convention, purpose, attrList, 
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
   type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, nest_conv_count
   character(:), allocatable :: key, key_nest_get, key_nest_set
@@ -2660,8 +2752,8 @@ subroutine ESMF_AttributeAddAttPackStdArray(target, convention, purpose, attrLis
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2688,8 +2780,8 @@ subroutine ESMF_AttributeAddAttPackStdArrayBundle(target, convention, purpose, a
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2716,8 +2808,8 @@ subroutine ESMF_AttributeAddAttPackStdCplComp(target, convention, purpose, attrL
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2744,8 +2836,8 @@ subroutine ESMF_AttributeAddAttPackStdGridComp(target, convention, purpose, attr
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2772,8 +2864,8 @@ subroutine ESMF_AttributeAddAttPackStdSciComp(target, convention, purpose, attrL
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2800,8 +2892,8 @@ subroutine ESMF_AttributeAddAttPackStdDistGrid(target, convention, purpose, attr
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2828,8 +2920,8 @@ subroutine ESMF_AttributeAddAttPackStdField(target, convention, purpose, attrLis
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2856,8 +2948,8 @@ subroutine ESMF_AttributeAddAttPackStdFieldBundle(target, convention, purpose, a
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2884,8 +2976,8 @@ subroutine ESMF_AttributeAddAttPackStdGrid(target, convention, purpose, attrList
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2912,8 +3004,8 @@ subroutine ESMF_AttributeAddAttPackStdState(target, convention, purpose, attrLis
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2940,8 +3032,8 @@ subroutine ESMF_AttributeAddAttPackStdLocStream(target, convention, purpose, att
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2968,8 +3060,8 @@ subroutine ESMF_AttributeAddAttPackStdMesh(target, convention, purpose, attrList
   character(len=*), dimension(:), intent(in), optional :: attrList
   character(len=*), intent(in), optional :: nestConvention
   character(len=*), intent(in), optional :: nestPurpose
-  type(ESMF_AttPack), intent(out), optional :: attpack
-  integer, intent(inout), optional :: rc
+  type(ESMF_AttPack), intent(inout), optional :: attpack
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_Info) :: info
@@ -2998,11 +3090,11 @@ subroutine ESMF_AttributeSetAttPackArrayR4(target, name, value, attpack, keyword
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -3051,7 +3143,7 @@ subroutine ESMF_AttributeSetObjArrayR4(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -3114,11 +3206,11 @@ subroutine ESMF_AttributeSetAttPackArrayR4List(target, name, valueList, attpack,
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -3167,7 +3259,7 @@ subroutine ESMF_AttributeSetObjArrayR4List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -3230,11 +3322,11 @@ subroutine ESMF_AttributeSetAttPackArrayR8(target, name, value, attpack, keyword
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -3283,7 +3375,7 @@ subroutine ESMF_AttributeSetObjArrayR8(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -3346,11 +3438,11 @@ subroutine ESMF_AttributeSetAttPackArrayR8List(target, name, valueList, attpack,
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -3399,7 +3491,7 @@ subroutine ESMF_AttributeSetObjArrayR8List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -3462,11 +3554,11 @@ subroutine ESMF_AttributeSetAttPackArrayI4(target, name, value, attpack, keyword
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -3515,7 +3607,7 @@ subroutine ESMF_AttributeSetObjArrayI4(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -3578,11 +3670,11 @@ subroutine ESMF_AttributeSetAttPackArrayI4List(target, name, valueList, attpack,
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -3631,7 +3723,7 @@ subroutine ESMF_AttributeSetObjArrayI4List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -3694,11 +3786,11 @@ subroutine ESMF_AttributeSetAttPackArrayI8(target, name, value, attpack, keyword
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -3747,7 +3839,7 @@ subroutine ESMF_AttributeSetObjArrayI8(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -3810,11 +3902,11 @@ subroutine ESMF_AttributeSetAttPackArrayI8List(target, name, valueList, attpack,
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -3863,7 +3955,7 @@ subroutine ESMF_AttributeSetObjArrayI8List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -3926,11 +4018,11 @@ subroutine ESMF_AttributeSetAttPackArrayCH(target, name, value, attpack, keyword
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -3979,7 +4071,7 @@ subroutine ESMF_AttributeSetObjArrayCH(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -4042,11 +4134,11 @@ subroutine ESMF_AttributeSetAttPackArrayCHList(target, name, valueList, attpack,
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -4095,7 +4187,7 @@ subroutine ESMF_AttributeSetObjArrayCHList(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -4158,11 +4250,11 @@ subroutine ESMF_AttributeSetAttPackArrayLG(target, name, value, attpack, keyword
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -4211,7 +4303,7 @@ subroutine ESMF_AttributeSetObjArrayLG(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -4274,11 +4366,11 @@ subroutine ESMF_AttributeSetAttPackArrayLGList(target, name, valueList, attpack,
   type(ESMF_Array), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -4327,7 +4419,7 @@ subroutine ESMF_AttributeSetObjArrayLGList(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -4390,11 +4482,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleR4(target, name, value, attpack, k
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -4443,7 +4535,7 @@ subroutine ESMF_AttributeSetObjArrayBundleR4(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -4506,11 +4598,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleR4List(target, name, valueList, at
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -4559,7 +4651,7 @@ subroutine ESMF_AttributeSetObjArrayBundleR4List(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -4622,11 +4714,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleR8(target, name, value, attpack, k
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -4675,7 +4767,7 @@ subroutine ESMF_AttributeSetObjArrayBundleR8(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -4738,11 +4830,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleR8List(target, name, valueList, at
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -4791,7 +4883,7 @@ subroutine ESMF_AttributeSetObjArrayBundleR8List(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -4854,11 +4946,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleI4(target, name, value, attpack, k
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -4907,7 +4999,7 @@ subroutine ESMF_AttributeSetObjArrayBundleI4(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -4970,11 +5062,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleI4List(target, name, valueList, at
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -5023,7 +5115,7 @@ subroutine ESMF_AttributeSetObjArrayBundleI4List(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -5086,11 +5178,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleI8(target, name, value, attpack, k
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -5139,7 +5231,7 @@ subroutine ESMF_AttributeSetObjArrayBundleI8(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -5202,11 +5294,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleI8List(target, name, valueList, at
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -5255,7 +5347,7 @@ subroutine ESMF_AttributeSetObjArrayBundleI8List(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -5318,11 +5410,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleCH(target, name, value, attpack, k
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -5371,7 +5463,7 @@ subroutine ESMF_AttributeSetObjArrayBundleCH(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -5434,11 +5526,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleCHList(target, name, valueList, at
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -5487,7 +5579,7 @@ subroutine ESMF_AttributeSetObjArrayBundleCHList(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -5550,11 +5642,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleLG(target, name, value, attpack, k
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -5603,7 +5695,7 @@ subroutine ESMF_AttributeSetObjArrayBundleLG(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -5666,11 +5758,11 @@ subroutine ESMF_AttributeSetAttPackArrayBundleLGList(target, name, valueList, at
   type(ESMF_ArrayBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -5719,7 +5811,7 @@ subroutine ESMF_AttributeSetObjArrayBundleLGList(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -5782,11 +5874,11 @@ subroutine ESMF_AttributeSetAttPackCplCompR4(target, name, value, attpack, keywo
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -5835,7 +5927,7 @@ subroutine ESMF_AttributeSetObjCplCompR4(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -5898,11 +5990,11 @@ subroutine ESMF_AttributeSetAttPackCplCompR4List(target, name, valueList, attpac
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -5951,7 +6043,7 @@ subroutine ESMF_AttributeSetObjCplCompR4List(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -6014,11 +6106,11 @@ subroutine ESMF_AttributeSetAttPackCplCompR8(target, name, value, attpack, keywo
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -6067,7 +6159,7 @@ subroutine ESMF_AttributeSetObjCplCompR8(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -6130,11 +6222,11 @@ subroutine ESMF_AttributeSetAttPackCplCompR8List(target, name, valueList, attpac
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -6183,7 +6275,7 @@ subroutine ESMF_AttributeSetObjCplCompR8List(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -6246,11 +6338,11 @@ subroutine ESMF_AttributeSetAttPackCplCompI4(target, name, value, attpack, keywo
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -6299,7 +6391,7 @@ subroutine ESMF_AttributeSetObjCplCompI4(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -6362,11 +6454,11 @@ subroutine ESMF_AttributeSetAttPackCplCompI4List(target, name, valueList, attpac
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -6415,7 +6507,7 @@ subroutine ESMF_AttributeSetObjCplCompI4List(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -6478,11 +6570,11 @@ subroutine ESMF_AttributeSetAttPackCplCompI8(target, name, value, attpack, keywo
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -6531,7 +6623,7 @@ subroutine ESMF_AttributeSetObjCplCompI8(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -6594,11 +6686,11 @@ subroutine ESMF_AttributeSetAttPackCplCompI8List(target, name, valueList, attpac
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -6647,7 +6739,7 @@ subroutine ESMF_AttributeSetObjCplCompI8List(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -6710,11 +6802,11 @@ subroutine ESMF_AttributeSetAttPackCplCompCH(target, name, value, attpack, keywo
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -6763,7 +6855,7 @@ subroutine ESMF_AttributeSetObjCplCompCH(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -6826,11 +6918,11 @@ subroutine ESMF_AttributeSetAttPackCplCompCHList(target, name, valueList, attpac
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -6879,7 +6971,7 @@ subroutine ESMF_AttributeSetObjCplCompCHList(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -6942,11 +7034,11 @@ subroutine ESMF_AttributeSetAttPackCplCompLG(target, name, value, attpack, keywo
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -6995,7 +7087,7 @@ subroutine ESMF_AttributeSetObjCplCompLG(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -7058,11 +7150,11 @@ subroutine ESMF_AttributeSetAttPackCplCompLGList(target, name, valueList, attpac
   type(ESMF_CplComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -7111,7 +7203,7 @@ subroutine ESMF_AttributeSetObjCplCompLGList(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -7174,11 +7266,11 @@ subroutine ESMF_AttributeSetAttPackGridCompR4(target, name, value, attpack, keyw
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -7227,7 +7319,7 @@ subroutine ESMF_AttributeSetObjGridCompR4(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -7290,11 +7382,11 @@ subroutine ESMF_AttributeSetAttPackGridCompR4List(target, name, valueList, attpa
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -7343,7 +7435,7 @@ subroutine ESMF_AttributeSetObjGridCompR4List(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -7406,11 +7498,11 @@ subroutine ESMF_AttributeSetAttPackGridCompR8(target, name, value, attpack, keyw
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -7459,7 +7551,7 @@ subroutine ESMF_AttributeSetObjGridCompR8(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -7522,11 +7614,11 @@ subroutine ESMF_AttributeSetAttPackGridCompR8List(target, name, valueList, attpa
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -7575,7 +7667,7 @@ subroutine ESMF_AttributeSetObjGridCompR8List(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -7638,11 +7730,11 @@ subroutine ESMF_AttributeSetAttPackGridCompI4(target, name, value, attpack, keyw
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -7691,7 +7783,7 @@ subroutine ESMF_AttributeSetObjGridCompI4(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -7754,11 +7846,11 @@ subroutine ESMF_AttributeSetAttPackGridCompI4List(target, name, valueList, attpa
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -7807,7 +7899,7 @@ subroutine ESMF_AttributeSetObjGridCompI4List(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -7870,11 +7962,11 @@ subroutine ESMF_AttributeSetAttPackGridCompI8(target, name, value, attpack, keyw
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -7923,7 +8015,7 @@ subroutine ESMF_AttributeSetObjGridCompI8(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -7986,11 +8078,11 @@ subroutine ESMF_AttributeSetAttPackGridCompI8List(target, name, valueList, attpa
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -8039,7 +8131,7 @@ subroutine ESMF_AttributeSetObjGridCompI8List(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -8102,11 +8194,11 @@ subroutine ESMF_AttributeSetAttPackGridCompCH(target, name, value, attpack, keyw
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -8155,7 +8247,7 @@ subroutine ESMF_AttributeSetObjGridCompCH(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -8218,11 +8310,11 @@ subroutine ESMF_AttributeSetAttPackGridCompCHList(target, name, valueList, attpa
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -8271,7 +8363,7 @@ subroutine ESMF_AttributeSetObjGridCompCHList(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -8334,11 +8426,11 @@ subroutine ESMF_AttributeSetAttPackGridCompLG(target, name, value, attpack, keyw
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -8387,7 +8479,7 @@ subroutine ESMF_AttributeSetObjGridCompLG(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -8450,11 +8542,11 @@ subroutine ESMF_AttributeSetAttPackGridCompLGList(target, name, valueList, attpa
   type(ESMF_GridComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -8503,7 +8595,7 @@ subroutine ESMF_AttributeSetObjGridCompLGList(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -8566,11 +8658,11 @@ subroutine ESMF_AttributeSetAttPackSciCompR4(target, name, value, attpack, keywo
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -8619,7 +8711,7 @@ subroutine ESMF_AttributeSetObjSciCompR4(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -8682,11 +8774,11 @@ subroutine ESMF_AttributeSetAttPackSciCompR4List(target, name, valueList, attpac
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -8735,7 +8827,7 @@ subroutine ESMF_AttributeSetObjSciCompR4List(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -8798,11 +8890,11 @@ subroutine ESMF_AttributeSetAttPackSciCompR8(target, name, value, attpack, keywo
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -8851,7 +8943,7 @@ subroutine ESMF_AttributeSetObjSciCompR8(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -8914,11 +9006,11 @@ subroutine ESMF_AttributeSetAttPackSciCompR8List(target, name, valueList, attpac
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -8967,7 +9059,7 @@ subroutine ESMF_AttributeSetObjSciCompR8List(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -9030,11 +9122,11 @@ subroutine ESMF_AttributeSetAttPackSciCompI4(target, name, value, attpack, keywo
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -9083,7 +9175,7 @@ subroutine ESMF_AttributeSetObjSciCompI4(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -9146,11 +9238,11 @@ subroutine ESMF_AttributeSetAttPackSciCompI4List(target, name, valueList, attpac
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -9199,7 +9291,7 @@ subroutine ESMF_AttributeSetObjSciCompI4List(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -9262,11 +9354,11 @@ subroutine ESMF_AttributeSetAttPackSciCompI8(target, name, value, attpack, keywo
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -9315,7 +9407,7 @@ subroutine ESMF_AttributeSetObjSciCompI8(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -9378,11 +9470,11 @@ subroutine ESMF_AttributeSetAttPackSciCompI8List(target, name, valueList, attpac
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -9431,7 +9523,7 @@ subroutine ESMF_AttributeSetObjSciCompI8List(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -9494,11 +9586,11 @@ subroutine ESMF_AttributeSetAttPackSciCompCH(target, name, value, attpack, keywo
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -9547,7 +9639,7 @@ subroutine ESMF_AttributeSetObjSciCompCH(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -9610,11 +9702,11 @@ subroutine ESMF_AttributeSetAttPackSciCompCHList(target, name, valueList, attpac
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -9663,7 +9755,7 @@ subroutine ESMF_AttributeSetObjSciCompCHList(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -9726,11 +9818,11 @@ subroutine ESMF_AttributeSetAttPackSciCompLG(target, name, value, attpack, keywo
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -9779,7 +9871,7 @@ subroutine ESMF_AttributeSetObjSciCompLG(target, name, value, convention, purpos
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -9842,11 +9934,11 @@ subroutine ESMF_AttributeSetAttPackSciCompLGList(target, name, valueList, attpac
   type(ESMF_SciComp), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -9895,7 +9987,7 @@ subroutine ESMF_AttributeSetObjSciCompLGList(target, name, valueList, convention
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -9958,11 +10050,11 @@ subroutine ESMF_AttributeSetAttPackDistGridR4(target, name, value, attpack, keyw
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -10011,7 +10103,7 @@ subroutine ESMF_AttributeSetObjDistGridR4(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -10074,11 +10166,11 @@ subroutine ESMF_AttributeSetAttPackDistGridR4List(target, name, valueList, attpa
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -10127,7 +10219,7 @@ subroutine ESMF_AttributeSetObjDistGridR4List(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -10190,11 +10282,11 @@ subroutine ESMF_AttributeSetAttPackDistGridR8(target, name, value, attpack, keyw
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -10243,7 +10335,7 @@ subroutine ESMF_AttributeSetObjDistGridR8(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -10306,11 +10398,11 @@ subroutine ESMF_AttributeSetAttPackDistGridR8List(target, name, valueList, attpa
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -10359,7 +10451,7 @@ subroutine ESMF_AttributeSetObjDistGridR8List(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -10422,11 +10514,11 @@ subroutine ESMF_AttributeSetAttPackDistGridI4(target, name, value, attpack, keyw
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -10475,7 +10567,7 @@ subroutine ESMF_AttributeSetObjDistGridI4(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -10538,11 +10630,11 @@ subroutine ESMF_AttributeSetAttPackDistGridI4List(target, name, valueList, attpa
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -10591,7 +10683,7 @@ subroutine ESMF_AttributeSetObjDistGridI4List(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -10654,11 +10746,11 @@ subroutine ESMF_AttributeSetAttPackDistGridI8(target, name, value, attpack, keyw
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -10707,7 +10799,7 @@ subroutine ESMF_AttributeSetObjDistGridI8(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -10770,11 +10862,11 @@ subroutine ESMF_AttributeSetAttPackDistGridI8List(target, name, valueList, attpa
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -10823,7 +10915,7 @@ subroutine ESMF_AttributeSetObjDistGridI8List(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -10886,11 +10978,11 @@ subroutine ESMF_AttributeSetAttPackDistGridCH(target, name, value, attpack, keyw
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -10939,7 +11031,7 @@ subroutine ESMF_AttributeSetObjDistGridCH(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -11002,11 +11094,11 @@ subroutine ESMF_AttributeSetAttPackDistGridCHList(target, name, valueList, attpa
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -11055,7 +11147,7 @@ subroutine ESMF_AttributeSetObjDistGridCHList(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -11118,11 +11210,11 @@ subroutine ESMF_AttributeSetAttPackDistGridLG(target, name, value, attpack, keyw
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -11171,7 +11263,7 @@ subroutine ESMF_AttributeSetObjDistGridLG(target, name, value, convention, purpo
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -11234,11 +11326,11 @@ subroutine ESMF_AttributeSetAttPackDistGridLGList(target, name, valueList, attpa
   type(ESMF_DistGrid), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -11287,7 +11379,7 @@ subroutine ESMF_AttributeSetObjDistGridLGList(target, name, valueList, conventio
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -11350,11 +11442,11 @@ subroutine ESMF_AttributeSetAttPackFieldR4(target, name, value, attpack, keyword
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -11403,7 +11495,7 @@ subroutine ESMF_AttributeSetObjFieldR4(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -11466,11 +11558,11 @@ subroutine ESMF_AttributeSetAttPackFieldR4List(target, name, valueList, attpack,
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -11519,7 +11611,7 @@ subroutine ESMF_AttributeSetObjFieldR4List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -11582,11 +11674,11 @@ subroutine ESMF_AttributeSetAttPackFieldR8(target, name, value, attpack, keyword
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -11635,7 +11727,7 @@ subroutine ESMF_AttributeSetObjFieldR8(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -11698,11 +11790,11 @@ subroutine ESMF_AttributeSetAttPackFieldR8List(target, name, valueList, attpack,
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -11751,7 +11843,7 @@ subroutine ESMF_AttributeSetObjFieldR8List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -11814,11 +11906,11 @@ subroutine ESMF_AttributeSetAttPackFieldI4(target, name, value, attpack, keyword
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -11867,7 +11959,7 @@ subroutine ESMF_AttributeSetObjFieldI4(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -11930,11 +12022,11 @@ subroutine ESMF_AttributeSetAttPackFieldI4List(target, name, valueList, attpack,
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -11983,7 +12075,7 @@ subroutine ESMF_AttributeSetObjFieldI4List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -12046,11 +12138,11 @@ subroutine ESMF_AttributeSetAttPackFieldI8(target, name, value, attpack, keyword
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -12099,7 +12191,7 @@ subroutine ESMF_AttributeSetObjFieldI8(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -12162,11 +12254,11 @@ subroutine ESMF_AttributeSetAttPackFieldI8List(target, name, valueList, attpack,
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -12215,7 +12307,7 @@ subroutine ESMF_AttributeSetObjFieldI8List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -12278,11 +12370,11 @@ subroutine ESMF_AttributeSetAttPackFieldCH(target, name, value, attpack, keyword
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -12331,7 +12423,7 @@ subroutine ESMF_AttributeSetObjFieldCH(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -12394,11 +12486,11 @@ subroutine ESMF_AttributeSetAttPackFieldCHList(target, name, valueList, attpack,
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -12447,7 +12539,7 @@ subroutine ESMF_AttributeSetObjFieldCHList(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -12510,11 +12602,11 @@ subroutine ESMF_AttributeSetAttPackFieldLG(target, name, value, attpack, keyword
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -12563,7 +12655,7 @@ subroutine ESMF_AttributeSetObjFieldLG(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -12626,11 +12718,11 @@ subroutine ESMF_AttributeSetAttPackFieldLGList(target, name, valueList, attpack,
   type(ESMF_Field), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -12679,7 +12771,7 @@ subroutine ESMF_AttributeSetObjFieldLGList(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -12742,11 +12834,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleR4(target, name, value, attpack, k
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -12795,7 +12887,7 @@ subroutine ESMF_AttributeSetObjFieldBundleR4(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -12858,11 +12950,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleR4List(target, name, valueList, at
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -12911,7 +13003,7 @@ subroutine ESMF_AttributeSetObjFieldBundleR4List(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -12974,11 +13066,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleR8(target, name, value, attpack, k
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -13027,7 +13119,7 @@ subroutine ESMF_AttributeSetObjFieldBundleR8(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -13090,11 +13182,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleR8List(target, name, valueList, at
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -13143,7 +13235,7 @@ subroutine ESMF_AttributeSetObjFieldBundleR8List(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -13206,11 +13298,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleI4(target, name, value, attpack, k
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -13259,7 +13351,7 @@ subroutine ESMF_AttributeSetObjFieldBundleI4(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -13322,11 +13414,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleI4List(target, name, valueList, at
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -13375,7 +13467,7 @@ subroutine ESMF_AttributeSetObjFieldBundleI4List(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -13438,11 +13530,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleI8(target, name, value, attpack, k
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -13491,7 +13583,7 @@ subroutine ESMF_AttributeSetObjFieldBundleI8(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -13554,11 +13646,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleI8List(target, name, valueList, at
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -13607,7 +13699,7 @@ subroutine ESMF_AttributeSetObjFieldBundleI8List(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -13670,11 +13762,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleCH(target, name, value, attpack, k
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -13723,7 +13815,7 @@ subroutine ESMF_AttributeSetObjFieldBundleCH(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -13786,11 +13878,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleCHList(target, name, valueList, at
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -13839,7 +13931,7 @@ subroutine ESMF_AttributeSetObjFieldBundleCHList(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -13902,11 +13994,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleLG(target, name, value, attpack, k
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -13955,7 +14047,7 @@ subroutine ESMF_AttributeSetObjFieldBundleLG(target, name, value, convention, pu
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -14018,11 +14110,11 @@ subroutine ESMF_AttributeSetAttPackFieldBundleLGList(target, name, valueList, at
   type(ESMF_FieldBundle), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -14071,7 +14163,7 @@ subroutine ESMF_AttributeSetObjFieldBundleLGList(target, name, valueList, conven
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -14134,11 +14226,11 @@ subroutine ESMF_AttributeSetAttPackGridR4(target, name, value, attpack, keywordE
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -14187,7 +14279,7 @@ subroutine ESMF_AttributeSetObjGridR4(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -14250,11 +14342,11 @@ subroutine ESMF_AttributeSetAttPackGridR4List(target, name, valueList, attpack, 
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -14303,7 +14395,7 @@ subroutine ESMF_AttributeSetObjGridR4List(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -14366,11 +14458,11 @@ subroutine ESMF_AttributeSetAttPackGridR8(target, name, value, attpack, keywordE
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -14419,7 +14511,7 @@ subroutine ESMF_AttributeSetObjGridR8(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -14482,11 +14574,11 @@ subroutine ESMF_AttributeSetAttPackGridR8List(target, name, valueList, attpack, 
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -14535,7 +14627,7 @@ subroutine ESMF_AttributeSetObjGridR8List(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -14598,11 +14690,11 @@ subroutine ESMF_AttributeSetAttPackGridI4(target, name, value, attpack, keywordE
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -14651,7 +14743,7 @@ subroutine ESMF_AttributeSetObjGridI4(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -14714,11 +14806,11 @@ subroutine ESMF_AttributeSetAttPackGridI4List(target, name, valueList, attpack, 
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -14767,7 +14859,7 @@ subroutine ESMF_AttributeSetObjGridI4List(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -14830,11 +14922,11 @@ subroutine ESMF_AttributeSetAttPackGridI8(target, name, value, attpack, keywordE
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -14883,7 +14975,7 @@ subroutine ESMF_AttributeSetObjGridI8(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -14946,11 +15038,11 @@ subroutine ESMF_AttributeSetAttPackGridI8List(target, name, valueList, attpack, 
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -14999,7 +15091,7 @@ subroutine ESMF_AttributeSetObjGridI8List(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -15062,11 +15154,11 @@ subroutine ESMF_AttributeSetAttPackGridCH(target, name, value, attpack, keywordE
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -15115,7 +15207,7 @@ subroutine ESMF_AttributeSetObjGridCH(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -15178,11 +15270,11 @@ subroutine ESMF_AttributeSetAttPackGridCHList(target, name, valueList, attpack, 
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -15231,7 +15323,7 @@ subroutine ESMF_AttributeSetObjGridCHList(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -15294,11 +15386,11 @@ subroutine ESMF_AttributeSetAttPackGridLG(target, name, value, attpack, keywordE
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -15347,7 +15439,7 @@ subroutine ESMF_AttributeSetObjGridLG(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -15410,11 +15502,11 @@ subroutine ESMF_AttributeSetAttPackGridLGList(target, name, valueList, attpack, 
   type(ESMF_Grid), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -15463,7 +15555,7 @@ subroutine ESMF_AttributeSetObjGridLGList(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -15526,11 +15618,11 @@ subroutine ESMF_AttributeSetAttPackStateR4(target, name, value, attpack, keyword
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -15579,7 +15671,7 @@ subroutine ESMF_AttributeSetObjStateR4(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -15642,11 +15734,11 @@ subroutine ESMF_AttributeSetAttPackStateR4List(target, name, valueList, attpack,
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -15695,7 +15787,7 @@ subroutine ESMF_AttributeSetObjStateR4List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -15758,11 +15850,11 @@ subroutine ESMF_AttributeSetAttPackStateR8(target, name, value, attpack, keyword
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -15811,7 +15903,7 @@ subroutine ESMF_AttributeSetObjStateR8(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -15874,11 +15966,11 @@ subroutine ESMF_AttributeSetAttPackStateR8List(target, name, valueList, attpack,
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -15927,7 +16019,7 @@ subroutine ESMF_AttributeSetObjStateR8List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -15990,11 +16082,11 @@ subroutine ESMF_AttributeSetAttPackStateI4(target, name, value, attpack, keyword
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -16043,7 +16135,7 @@ subroutine ESMF_AttributeSetObjStateI4(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -16106,11 +16198,11 @@ subroutine ESMF_AttributeSetAttPackStateI4List(target, name, valueList, attpack,
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -16159,7 +16251,7 @@ subroutine ESMF_AttributeSetObjStateI4List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -16222,11 +16314,11 @@ subroutine ESMF_AttributeSetAttPackStateI8(target, name, value, attpack, keyword
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -16275,7 +16367,7 @@ subroutine ESMF_AttributeSetObjStateI8(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -16338,11 +16430,11 @@ subroutine ESMF_AttributeSetAttPackStateI8List(target, name, valueList, attpack,
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -16391,7 +16483,7 @@ subroutine ESMF_AttributeSetObjStateI8List(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -16454,11 +16546,11 @@ subroutine ESMF_AttributeSetAttPackStateCH(target, name, value, attpack, keyword
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -16507,7 +16599,7 @@ subroutine ESMF_AttributeSetObjStateCH(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -16570,11 +16662,11 @@ subroutine ESMF_AttributeSetAttPackStateCHList(target, name, valueList, attpack,
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -16623,7 +16715,7 @@ subroutine ESMF_AttributeSetObjStateCHList(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -16686,11 +16778,11 @@ subroutine ESMF_AttributeSetAttPackStateLG(target, name, value, attpack, keyword
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -16739,7 +16831,7 @@ subroutine ESMF_AttributeSetObjStateLG(target, name, value, convention, purpose,
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -16802,11 +16894,11 @@ subroutine ESMF_AttributeSetAttPackStateLGList(target, name, valueList, attpack,
   type(ESMF_State), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -16855,7 +16947,7 @@ subroutine ESMF_AttributeSetObjStateLGList(target, name, valueList, convention, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -16918,11 +17010,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamR4(target, name, value, attpack, key
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -16971,7 +17063,7 @@ subroutine ESMF_AttributeSetObjLocStreamR4(target, name, value, convention, purp
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -17034,11 +17126,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamR4List(target, name, valueList, attp
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -17087,7 +17179,7 @@ subroutine ESMF_AttributeSetObjLocStreamR4List(target, name, valueList, conventi
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -17150,11 +17242,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamR8(target, name, value, attpack, key
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -17203,7 +17295,7 @@ subroutine ESMF_AttributeSetObjLocStreamR8(target, name, value, convention, purp
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -17266,11 +17358,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamR8List(target, name, valueList, attp
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -17319,7 +17411,7 @@ subroutine ESMF_AttributeSetObjLocStreamR8List(target, name, valueList, conventi
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -17382,11 +17474,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamI4(target, name, value, attpack, key
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -17435,7 +17527,7 @@ subroutine ESMF_AttributeSetObjLocStreamI4(target, name, value, convention, purp
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -17498,11 +17590,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamI4List(target, name, valueList, attp
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -17551,7 +17643,7 @@ subroutine ESMF_AttributeSetObjLocStreamI4List(target, name, valueList, conventi
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -17614,11 +17706,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamI8(target, name, value, attpack, key
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -17667,7 +17759,7 @@ subroutine ESMF_AttributeSetObjLocStreamI8(target, name, value, convention, purp
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -17730,11 +17822,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamI8List(target, name, valueList, attp
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -17783,7 +17875,7 @@ subroutine ESMF_AttributeSetObjLocStreamI8List(target, name, valueList, conventi
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -17846,11 +17938,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamCH(target, name, value, attpack, key
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -17899,7 +17991,7 @@ subroutine ESMF_AttributeSetObjLocStreamCH(target, name, value, convention, purp
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -17962,11 +18054,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamCHList(target, name, valueList, attp
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -18015,7 +18107,7 @@ subroutine ESMF_AttributeSetObjLocStreamCHList(target, name, valueList, conventi
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -18078,11 +18170,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamLG(target, name, value, attpack, key
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -18131,7 +18223,7 @@ subroutine ESMF_AttributeSetObjLocStreamLG(target, name, value, convention, purp
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -18194,11 +18286,11 @@ subroutine ESMF_AttributeSetAttPackLocStreamLGList(target, name, valueList, attp
   type(ESMF_LocStream), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -18247,7 +18339,7 @@ subroutine ESMF_AttributeSetObjLocStreamLGList(target, name, valueList, conventi
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -18310,11 +18402,11 @@ subroutine ESMF_AttributeSetAttPackMeshR4(target, name, value, attpack, keywordE
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -18363,7 +18455,7 @@ subroutine ESMF_AttributeSetObjMeshR4(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -18426,11 +18518,11 @@ subroutine ESMF_AttributeSetAttPackMeshR4List(target, name, valueList, attpack, 
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -18479,7 +18571,7 @@ subroutine ESMF_AttributeSetObjMeshR4List(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -18542,11 +18634,11 @@ subroutine ESMF_AttributeSetAttPackMeshR8(target, name, value, attpack, keywordE
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -18595,7 +18687,7 @@ subroutine ESMF_AttributeSetObjMeshR8(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -18658,11 +18750,11 @@ subroutine ESMF_AttributeSetAttPackMeshR8List(target, name, valueList, attpack, 
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -18711,7 +18803,7 @@ subroutine ESMF_AttributeSetObjMeshR8List(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -18774,11 +18866,11 @@ subroutine ESMF_AttributeSetAttPackMeshI4(target, name, value, attpack, keywordE
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -18827,7 +18919,7 @@ subroutine ESMF_AttributeSetObjMeshI4(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -18890,11 +18982,11 @@ subroutine ESMF_AttributeSetAttPackMeshI4List(target, name, valueList, attpack, 
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -18943,7 +19035,7 @@ subroutine ESMF_AttributeSetObjMeshI4List(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -19006,11 +19098,11 @@ subroutine ESMF_AttributeSetAttPackMeshI8(target, name, value, attpack, keywordE
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -19059,7 +19151,7 @@ subroutine ESMF_AttributeSetObjMeshI8(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -19122,11 +19214,11 @@ subroutine ESMF_AttributeSetAttPackMeshI8List(target, name, valueList, attpack, 
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   integer(ESMF_KIND_I8), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -19175,7 +19267,7 @@ subroutine ESMF_AttributeSetObjMeshI8List(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -19238,11 +19330,11 @@ subroutine ESMF_AttributeSetAttPackMeshCH(target, name, value, attpack, keywordE
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -19291,7 +19383,7 @@ subroutine ESMF_AttributeSetObjMeshCH(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -19354,11 +19446,11 @@ subroutine ESMF_AttributeSetAttPackMeshCHList(target, name, valueList, attpack, 
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   character(len=*), dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -19407,7 +19499,7 @@ subroutine ESMF_AttributeSetObjMeshCHList(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -19470,11 +19562,11 @@ subroutine ESMF_AttributeSetAttPackMeshLG(target, name, value, attpack, keywordE
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, intent(in) :: value
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -19523,7 +19615,7 @@ subroutine ESMF_AttributeSetObjMeshLG(target, name, value, convention, purpose, 
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -19586,11 +19678,11 @@ subroutine ESMF_AttributeSetAttPackMeshLGList(target, name, valueList, attpack, 
   type(ESMF_Mesh), intent(in) :: target
   character(len=*), intent(in) :: name
   logical, dimension(:), intent(in) :: valueList
-  type(ESMF_AttPack), intent(inout) :: attpack
+  type(ESMF_AttPack), intent(in) :: attpack
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: pkey
@@ -19639,7 +19731,7 @@ subroutine ESMF_AttributeSetObjMeshLGList(target, name, valueList, convention, p
   character(len=*), intent(in), optional :: purpose
   integer, intent(in), optional :: itemcount
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: len_key, localrc
   character(:), allocatable :: key, pkey
@@ -19709,7 +19801,7 @@ subroutine ESMF_AttributeGetAttPackArrayR4(target, name, attpack, value, default
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -19783,7 +19875,7 @@ subroutine ESMF_AttributeGetObjArrayR4(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -19858,7 +19950,7 @@ subroutine ESMF_AttributeGetAttPackArrayR8(target, name, attpack, value, default
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -19932,7 +20024,7 @@ subroutine ESMF_AttributeGetObjArrayR8(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20007,7 +20099,7 @@ subroutine ESMF_AttributeGetAttPackArrayI4(target, name, attpack, value, default
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20081,7 +20173,7 @@ subroutine ESMF_AttributeGetObjArrayI4(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20156,7 +20248,7 @@ subroutine ESMF_AttributeGetAttPackArrayI8(target, name, attpack, value, default
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20230,7 +20322,7 @@ subroutine ESMF_AttributeGetObjArrayI8(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20305,7 +20397,7 @@ subroutine ESMF_AttributeGetAttPackArrayCH(target, name, attpack, value, default
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20379,7 +20471,7 @@ subroutine ESMF_AttributeGetObjArrayCH(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20454,7 +20546,7 @@ subroutine ESMF_AttributeGetAttPackArrayLG(target, name, attpack, value, default
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20528,7 +20620,7 @@ subroutine ESMF_AttributeGetObjArrayLG(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20603,7 +20695,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR4(target, name, attpack, value, d
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20677,7 +20769,7 @@ subroutine ESMF_AttributeGetObjArrayBundleR4(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20752,7 +20844,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR8(target, name, attpack, value, d
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20826,7 +20918,7 @@ subroutine ESMF_AttributeGetObjArrayBundleR8(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20901,7 +20993,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI4(target, name, attpack, value, d
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -20975,7 +21067,7 @@ subroutine ESMF_AttributeGetObjArrayBundleI4(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21050,7 +21142,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI8(target, name, attpack, value, d
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21124,7 +21216,7 @@ subroutine ESMF_AttributeGetObjArrayBundleI8(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21199,7 +21291,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleCH(target, name, attpack, value, d
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21273,7 +21365,7 @@ subroutine ESMF_AttributeGetObjArrayBundleCH(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21348,7 +21440,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleLG(target, name, attpack, value, d
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21422,7 +21514,7 @@ subroutine ESMF_AttributeGetObjArrayBundleLG(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21497,7 +21589,7 @@ subroutine ESMF_AttributeGetAttPackCplCompR4(target, name, attpack, value, defau
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21571,7 +21663,7 @@ subroutine ESMF_AttributeGetObjCplCompR4(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21646,7 +21738,7 @@ subroutine ESMF_AttributeGetAttPackCplCompR8(target, name, attpack, value, defau
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21720,7 +21812,7 @@ subroutine ESMF_AttributeGetObjCplCompR8(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21795,7 +21887,7 @@ subroutine ESMF_AttributeGetAttPackCplCompI4(target, name, attpack, value, defau
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21869,7 +21961,7 @@ subroutine ESMF_AttributeGetObjCplCompI4(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -21944,7 +22036,7 @@ subroutine ESMF_AttributeGetAttPackCplCompI8(target, name, attpack, value, defau
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22018,7 +22110,7 @@ subroutine ESMF_AttributeGetObjCplCompI8(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22093,7 +22185,7 @@ subroutine ESMF_AttributeGetAttPackCplCompCH(target, name, attpack, value, defau
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22167,7 +22259,7 @@ subroutine ESMF_AttributeGetObjCplCompCH(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22242,7 +22334,7 @@ subroutine ESMF_AttributeGetAttPackCplCompLG(target, name, attpack, value, defau
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22316,7 +22408,7 @@ subroutine ESMF_AttributeGetObjCplCompLG(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22391,7 +22483,7 @@ subroutine ESMF_AttributeGetAttPackGridCompR4(target, name, attpack, value, defa
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22465,7 +22557,7 @@ subroutine ESMF_AttributeGetObjGridCompR4(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22540,7 +22632,7 @@ subroutine ESMF_AttributeGetAttPackGridCompR8(target, name, attpack, value, defa
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22614,7 +22706,7 @@ subroutine ESMF_AttributeGetObjGridCompR8(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22689,7 +22781,7 @@ subroutine ESMF_AttributeGetAttPackGridCompI4(target, name, attpack, value, defa
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22763,7 +22855,7 @@ subroutine ESMF_AttributeGetObjGridCompI4(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22838,7 +22930,7 @@ subroutine ESMF_AttributeGetAttPackGridCompI8(target, name, attpack, value, defa
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22912,7 +23004,7 @@ subroutine ESMF_AttributeGetObjGridCompI8(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -22987,7 +23079,7 @@ subroutine ESMF_AttributeGetAttPackGridCompCH(target, name, attpack, value, defa
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23061,7 +23153,7 @@ subroutine ESMF_AttributeGetObjGridCompCH(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23136,7 +23228,7 @@ subroutine ESMF_AttributeGetAttPackGridCompLG(target, name, attpack, value, defa
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23210,7 +23302,7 @@ subroutine ESMF_AttributeGetObjGridCompLG(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23285,7 +23377,7 @@ subroutine ESMF_AttributeGetAttPackSciCompR4(target, name, attpack, value, defau
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23359,7 +23451,7 @@ subroutine ESMF_AttributeGetObjSciCompR4(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23434,7 +23526,7 @@ subroutine ESMF_AttributeGetAttPackSciCompR8(target, name, attpack, value, defau
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23508,7 +23600,7 @@ subroutine ESMF_AttributeGetObjSciCompR8(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23583,7 +23675,7 @@ subroutine ESMF_AttributeGetAttPackSciCompI4(target, name, attpack, value, defau
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23657,7 +23749,7 @@ subroutine ESMF_AttributeGetObjSciCompI4(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23732,7 +23824,7 @@ subroutine ESMF_AttributeGetAttPackSciCompI8(target, name, attpack, value, defau
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23806,7 +23898,7 @@ subroutine ESMF_AttributeGetObjSciCompI8(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23881,7 +23973,7 @@ subroutine ESMF_AttributeGetAttPackSciCompCH(target, name, attpack, value, defau
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -23955,7 +24047,7 @@ subroutine ESMF_AttributeGetObjSciCompCH(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24030,7 +24122,7 @@ subroutine ESMF_AttributeGetAttPackSciCompLG(target, name, attpack, value, defau
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24104,7 +24196,7 @@ subroutine ESMF_AttributeGetObjSciCompLG(target, name, value, defaultvalue, conv
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24179,7 +24271,7 @@ subroutine ESMF_AttributeGetAttPackDistGridR4(target, name, attpack, value, defa
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24253,7 +24345,7 @@ subroutine ESMF_AttributeGetObjDistGridR4(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24328,7 +24420,7 @@ subroutine ESMF_AttributeGetAttPackDistGridR8(target, name, attpack, value, defa
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24402,7 +24494,7 @@ subroutine ESMF_AttributeGetObjDistGridR8(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24477,7 +24569,7 @@ subroutine ESMF_AttributeGetAttPackDistGridI4(target, name, attpack, value, defa
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24551,7 +24643,7 @@ subroutine ESMF_AttributeGetObjDistGridI4(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24626,7 +24718,7 @@ subroutine ESMF_AttributeGetAttPackDistGridI8(target, name, attpack, value, defa
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24700,7 +24792,7 @@ subroutine ESMF_AttributeGetObjDistGridI8(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24775,7 +24867,7 @@ subroutine ESMF_AttributeGetAttPackDistGridCH(target, name, attpack, value, defa
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24849,7 +24941,7 @@ subroutine ESMF_AttributeGetObjDistGridCH(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24924,7 +25016,7 @@ subroutine ESMF_AttributeGetAttPackDistGridLG(target, name, attpack, value, defa
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -24998,7 +25090,7 @@ subroutine ESMF_AttributeGetObjDistGridLG(target, name, value, defaultvalue, con
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25073,7 +25165,7 @@ subroutine ESMF_AttributeGetAttPackFieldR4(target, name, attpack, value, default
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25147,7 +25239,7 @@ subroutine ESMF_AttributeGetObjFieldR4(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25222,7 +25314,7 @@ subroutine ESMF_AttributeGetAttPackFieldR8(target, name, attpack, value, default
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25296,7 +25388,7 @@ subroutine ESMF_AttributeGetObjFieldR8(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25371,7 +25463,7 @@ subroutine ESMF_AttributeGetAttPackFieldI4(target, name, attpack, value, default
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25445,7 +25537,7 @@ subroutine ESMF_AttributeGetObjFieldI4(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25520,7 +25612,7 @@ subroutine ESMF_AttributeGetAttPackFieldI8(target, name, attpack, value, default
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25594,7 +25686,7 @@ subroutine ESMF_AttributeGetObjFieldI8(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25669,7 +25761,7 @@ subroutine ESMF_AttributeGetAttPackFieldCH(target, name, attpack, value, default
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25743,7 +25835,7 @@ subroutine ESMF_AttributeGetObjFieldCH(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25818,7 +25910,7 @@ subroutine ESMF_AttributeGetAttPackFieldLG(target, name, attpack, value, default
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25892,7 +25984,7 @@ subroutine ESMF_AttributeGetObjFieldLG(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -25967,7 +26059,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR4(target, name, attpack, value, d
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26041,7 +26133,7 @@ subroutine ESMF_AttributeGetObjFieldBundleR4(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26116,7 +26208,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR8(target, name, attpack, value, d
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26190,7 +26282,7 @@ subroutine ESMF_AttributeGetObjFieldBundleR8(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26265,7 +26357,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI4(target, name, attpack, value, d
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26339,7 +26431,7 @@ subroutine ESMF_AttributeGetObjFieldBundleI4(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26414,7 +26506,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI8(target, name, attpack, value, d
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26488,7 +26580,7 @@ subroutine ESMF_AttributeGetObjFieldBundleI8(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26563,7 +26655,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleCH(target, name, attpack, value, d
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26637,7 +26729,7 @@ subroutine ESMF_AttributeGetObjFieldBundleCH(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26712,7 +26804,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleLG(target, name, attpack, value, d
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26786,7 +26878,7 @@ subroutine ESMF_AttributeGetObjFieldBundleLG(target, name, value, defaultvalue, 
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26861,7 +26953,7 @@ subroutine ESMF_AttributeGetAttPackGridR4(target, name, attpack, value, defaultv
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -26935,7 +27027,7 @@ subroutine ESMF_AttributeGetObjGridR4(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27010,7 +27102,7 @@ subroutine ESMF_AttributeGetAttPackGridR8(target, name, attpack, value, defaultv
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27084,7 +27176,7 @@ subroutine ESMF_AttributeGetObjGridR8(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27159,7 +27251,7 @@ subroutine ESMF_AttributeGetAttPackGridI4(target, name, attpack, value, defaultv
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27233,7 +27325,7 @@ subroutine ESMF_AttributeGetObjGridI4(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27308,7 +27400,7 @@ subroutine ESMF_AttributeGetAttPackGridI8(target, name, attpack, value, defaultv
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27382,7 +27474,7 @@ subroutine ESMF_AttributeGetObjGridI8(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27457,7 +27549,7 @@ subroutine ESMF_AttributeGetAttPackGridCH(target, name, attpack, value, defaultv
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27531,7 +27623,7 @@ subroutine ESMF_AttributeGetObjGridCH(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27606,7 +27698,7 @@ subroutine ESMF_AttributeGetAttPackGridLG(target, name, attpack, value, defaultv
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27680,7 +27772,7 @@ subroutine ESMF_AttributeGetObjGridLG(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27755,7 +27847,7 @@ subroutine ESMF_AttributeGetAttPackStateR4(target, name, attpack, value, default
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27829,7 +27921,7 @@ subroutine ESMF_AttributeGetObjStateR4(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27904,7 +27996,7 @@ subroutine ESMF_AttributeGetAttPackStateR8(target, name, attpack, value, default
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -27978,7 +28070,7 @@ subroutine ESMF_AttributeGetObjStateR8(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28053,7 +28145,7 @@ subroutine ESMF_AttributeGetAttPackStateI4(target, name, attpack, value, default
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28127,7 +28219,7 @@ subroutine ESMF_AttributeGetObjStateI4(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28202,7 +28294,7 @@ subroutine ESMF_AttributeGetAttPackStateI8(target, name, attpack, value, default
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28276,7 +28368,7 @@ subroutine ESMF_AttributeGetObjStateI8(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28351,7 +28443,7 @@ subroutine ESMF_AttributeGetAttPackStateCH(target, name, attpack, value, default
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28425,7 +28517,7 @@ subroutine ESMF_AttributeGetObjStateCH(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28500,7 +28592,7 @@ subroutine ESMF_AttributeGetAttPackStateLG(target, name, attpack, value, default
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28574,7 +28666,7 @@ subroutine ESMF_AttributeGetObjStateLG(target, name, value, defaultvalue, conven
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28649,7 +28741,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamR4(target, name, attpack, value, def
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28723,7 +28815,7 @@ subroutine ESMF_AttributeGetObjLocStreamR4(target, name, value, defaultvalue, co
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28798,7 +28890,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamR8(target, name, attpack, value, def
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28872,7 +28964,7 @@ subroutine ESMF_AttributeGetObjLocStreamR8(target, name, value, defaultvalue, co
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -28947,7 +29039,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamI4(target, name, attpack, value, def
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29021,7 +29113,7 @@ subroutine ESMF_AttributeGetObjLocStreamI4(target, name, value, defaultvalue, co
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29096,7 +29188,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamI8(target, name, attpack, value, def
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29170,7 +29262,7 @@ subroutine ESMF_AttributeGetObjLocStreamI8(target, name, value, defaultvalue, co
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29245,7 +29337,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamCH(target, name, attpack, value, def
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29319,7 +29411,7 @@ subroutine ESMF_AttributeGetObjLocStreamCH(target, name, value, defaultvalue, co
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29394,7 +29486,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamLG(target, name, attpack, value, def
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29468,7 +29560,7 @@ subroutine ESMF_AttributeGetObjLocStreamLG(target, name, value, defaultvalue, co
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29543,7 +29635,7 @@ subroutine ESMF_AttributeGetAttPackMeshR4(target, name, attpack, value, defaultv
   real(ESMF_KIND_R4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29617,7 +29709,7 @@ subroutine ESMF_AttributeGetObjMeshR4(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29692,7 +29784,7 @@ subroutine ESMF_AttributeGetAttPackMeshR8(target, name, attpack, value, defaultv
   real(ESMF_KIND_R8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29766,7 +29858,7 @@ subroutine ESMF_AttributeGetObjMeshR8(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29841,7 +29933,7 @@ subroutine ESMF_AttributeGetAttPackMeshI4(target, name, attpack, value, defaultv
   integer(ESMF_KIND_I4), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29915,7 +30007,7 @@ subroutine ESMF_AttributeGetObjMeshI4(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -29990,7 +30082,7 @@ subroutine ESMF_AttributeGetAttPackMeshI8(target, name, attpack, value, defaultv
   integer(ESMF_KIND_I8), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -30064,7 +30156,7 @@ subroutine ESMF_AttributeGetObjMeshI8(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -30139,7 +30231,7 @@ subroutine ESMF_AttributeGetAttPackMeshCH(target, name, attpack, value, defaultv
   character(len=*), intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -30213,7 +30305,7 @@ subroutine ESMF_AttributeGetObjMeshCH(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -30288,7 +30380,7 @@ subroutine ESMF_AttributeGetAttPackMeshLG(target, name, attpack, value, defaultv
   logical, intent(in), optional :: defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -30362,7 +30454,7 @@ subroutine ESMF_AttributeGetObjMeshLG(target, name, value, defaultvalue, convent
   character(len=*), optional, intent(in) :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -30442,7 +30534,7 @@ subroutine ESMF_AttributeGetAttPackArrayR4List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -30506,7 +30598,7 @@ subroutine ESMF_AttributeGetObjArrayR4List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -30578,7 +30670,7 @@ subroutine ESMF_AttributeGetAttPackArrayR8List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -30642,7 +30734,7 @@ subroutine ESMF_AttributeGetObjArrayR8List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -30714,7 +30806,7 @@ subroutine ESMF_AttributeGetAttPackArrayI4List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -30778,7 +30870,7 @@ subroutine ESMF_AttributeGetObjArrayI4List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -30850,7 +30942,7 @@ subroutine ESMF_AttributeGetAttPackArrayI8List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -30914,7 +31006,7 @@ subroutine ESMF_AttributeGetObjArrayI8List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -30986,7 +31078,7 @@ subroutine ESMF_AttributeGetAttPackArrayCHList(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31050,7 +31142,7 @@ subroutine ESMF_AttributeGetObjArrayCHList(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31122,7 +31214,7 @@ subroutine ESMF_AttributeGetAttPackArrayLGList(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31186,7 +31278,7 @@ subroutine ESMF_AttributeGetObjArrayLGList(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31258,7 +31350,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR4List(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31322,7 +31414,7 @@ subroutine ESMF_AttributeGetObjArrayBundleR4List(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31394,7 +31486,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleR8List(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31458,7 +31550,7 @@ subroutine ESMF_AttributeGetObjArrayBundleR8List(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31530,7 +31622,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI4List(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31594,7 +31686,7 @@ subroutine ESMF_AttributeGetObjArrayBundleI4List(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31666,7 +31758,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleI8List(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31730,7 +31822,7 @@ subroutine ESMF_AttributeGetObjArrayBundleI8List(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31802,7 +31894,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleCHList(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31866,7 +31958,7 @@ subroutine ESMF_AttributeGetObjArrayBundleCHList(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -31938,7 +32030,7 @@ subroutine ESMF_AttributeGetAttPackArrayBundleLGList(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32002,7 +32094,7 @@ subroutine ESMF_AttributeGetObjArrayBundleLGList(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32074,7 +32166,7 @@ subroutine ESMF_AttributeGetAttPackCplCompR4List(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32138,7 +32230,7 @@ subroutine ESMF_AttributeGetObjCplCompR4List(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32210,7 +32302,7 @@ subroutine ESMF_AttributeGetAttPackCplCompR8List(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32274,7 +32366,7 @@ subroutine ESMF_AttributeGetObjCplCompR8List(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32346,7 +32438,7 @@ subroutine ESMF_AttributeGetAttPackCplCompI4List(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32410,7 +32502,7 @@ subroutine ESMF_AttributeGetObjCplCompI4List(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32482,7 +32574,7 @@ subroutine ESMF_AttributeGetAttPackCplCompI8List(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32546,7 +32638,7 @@ subroutine ESMF_AttributeGetObjCplCompI8List(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32618,7 +32710,7 @@ subroutine ESMF_AttributeGetAttPackCplCompCHList(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32682,7 +32774,7 @@ subroutine ESMF_AttributeGetObjCplCompCHList(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32754,7 +32846,7 @@ subroutine ESMF_AttributeGetAttPackCplCompLGList(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32818,7 +32910,7 @@ subroutine ESMF_AttributeGetObjCplCompLGList(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32890,7 +32982,7 @@ subroutine ESMF_AttributeGetAttPackGridCompR4List(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -32954,7 +33046,7 @@ subroutine ESMF_AttributeGetObjGridCompR4List(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33026,7 +33118,7 @@ subroutine ESMF_AttributeGetAttPackGridCompR8List(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33090,7 +33182,7 @@ subroutine ESMF_AttributeGetObjGridCompR8List(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33162,7 +33254,7 @@ subroutine ESMF_AttributeGetAttPackGridCompI4List(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33226,7 +33318,7 @@ subroutine ESMF_AttributeGetObjGridCompI4List(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33298,7 +33390,7 @@ subroutine ESMF_AttributeGetAttPackGridCompI8List(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33362,7 +33454,7 @@ subroutine ESMF_AttributeGetObjGridCompI8List(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33434,7 +33526,7 @@ subroutine ESMF_AttributeGetAttPackGridCompCHList(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33498,7 +33590,7 @@ subroutine ESMF_AttributeGetObjGridCompCHList(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33570,7 +33662,7 @@ subroutine ESMF_AttributeGetAttPackGridCompLGList(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33634,7 +33726,7 @@ subroutine ESMF_AttributeGetObjGridCompLGList(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33706,7 +33798,7 @@ subroutine ESMF_AttributeGetAttPackSciCompR4List(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33770,7 +33862,7 @@ subroutine ESMF_AttributeGetObjSciCompR4List(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33842,7 +33934,7 @@ subroutine ESMF_AttributeGetAttPackSciCompR8List(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33906,7 +33998,7 @@ subroutine ESMF_AttributeGetObjSciCompR8List(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -33978,7 +34070,7 @@ subroutine ESMF_AttributeGetAttPackSciCompI4List(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34042,7 +34134,7 @@ subroutine ESMF_AttributeGetObjSciCompI4List(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34114,7 +34206,7 @@ subroutine ESMF_AttributeGetAttPackSciCompI8List(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34178,7 +34270,7 @@ subroutine ESMF_AttributeGetObjSciCompI8List(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34250,7 +34342,7 @@ subroutine ESMF_AttributeGetAttPackSciCompCHList(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34314,7 +34406,7 @@ subroutine ESMF_AttributeGetObjSciCompCHList(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34386,7 +34478,7 @@ subroutine ESMF_AttributeGetAttPackSciCompLGList(target, name, attpack, valueLis
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34450,7 +34542,7 @@ subroutine ESMF_AttributeGetObjSciCompLGList(target, name, valueList, defaultval
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34522,7 +34614,7 @@ subroutine ESMF_AttributeGetAttPackDistGridR4List(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34586,7 +34678,7 @@ subroutine ESMF_AttributeGetObjDistGridR4List(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34658,7 +34750,7 @@ subroutine ESMF_AttributeGetAttPackDistGridR8List(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34722,7 +34814,7 @@ subroutine ESMF_AttributeGetObjDistGridR8List(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34794,7 +34886,7 @@ subroutine ESMF_AttributeGetAttPackDistGridI4List(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34858,7 +34950,7 @@ subroutine ESMF_AttributeGetObjDistGridI4List(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34930,7 +35022,7 @@ subroutine ESMF_AttributeGetAttPackDistGridI8List(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -34994,7 +35086,7 @@ subroutine ESMF_AttributeGetObjDistGridI8List(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35066,7 +35158,7 @@ subroutine ESMF_AttributeGetAttPackDistGridCHList(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35130,7 +35222,7 @@ subroutine ESMF_AttributeGetObjDistGridCHList(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35202,7 +35294,7 @@ subroutine ESMF_AttributeGetAttPackDistGridLGList(target, name, attpack, valueLi
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35266,7 +35358,7 @@ subroutine ESMF_AttributeGetObjDistGridLGList(target, name, valueList, defaultva
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35338,7 +35430,7 @@ subroutine ESMF_AttributeGetAttPackFieldR4List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35402,7 +35494,7 @@ subroutine ESMF_AttributeGetObjFieldR4List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35474,7 +35566,7 @@ subroutine ESMF_AttributeGetAttPackFieldR8List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35538,7 +35630,7 @@ subroutine ESMF_AttributeGetObjFieldR8List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35610,7 +35702,7 @@ subroutine ESMF_AttributeGetAttPackFieldI4List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35674,7 +35766,7 @@ subroutine ESMF_AttributeGetObjFieldI4List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35746,7 +35838,7 @@ subroutine ESMF_AttributeGetAttPackFieldI8List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35810,7 +35902,7 @@ subroutine ESMF_AttributeGetObjFieldI8List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35882,7 +35974,7 @@ subroutine ESMF_AttributeGetAttPackFieldCHList(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -35946,7 +36038,7 @@ subroutine ESMF_AttributeGetObjFieldCHList(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36018,7 +36110,7 @@ subroutine ESMF_AttributeGetAttPackFieldLGList(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36082,7 +36174,7 @@ subroutine ESMF_AttributeGetObjFieldLGList(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36154,7 +36246,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR4List(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36218,7 +36310,7 @@ subroutine ESMF_AttributeGetObjFieldBundleR4List(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36290,7 +36382,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleR8List(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36354,7 +36446,7 @@ subroutine ESMF_AttributeGetObjFieldBundleR8List(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36426,7 +36518,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI4List(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36490,7 +36582,7 @@ subroutine ESMF_AttributeGetObjFieldBundleI4List(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36562,7 +36654,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleI8List(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36626,7 +36718,7 @@ subroutine ESMF_AttributeGetObjFieldBundleI8List(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36698,7 +36790,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleCHList(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36762,7 +36854,7 @@ subroutine ESMF_AttributeGetObjFieldBundleCHList(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36834,7 +36926,7 @@ subroutine ESMF_AttributeGetAttPackFieldBundleLGList(target, name, attpack, valu
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36898,7 +36990,7 @@ subroutine ESMF_AttributeGetObjFieldBundleLGList(target, name, valueList, defaul
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -36970,7 +37062,7 @@ subroutine ESMF_AttributeGetAttPackGridR4List(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37034,7 +37126,7 @@ subroutine ESMF_AttributeGetObjGridR4List(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37106,7 +37198,7 @@ subroutine ESMF_AttributeGetAttPackGridR8List(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37170,7 +37262,7 @@ subroutine ESMF_AttributeGetObjGridR8List(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37242,7 +37334,7 @@ subroutine ESMF_AttributeGetAttPackGridI4List(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37306,7 +37398,7 @@ subroutine ESMF_AttributeGetObjGridI4List(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37378,7 +37470,7 @@ subroutine ESMF_AttributeGetAttPackGridI8List(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37442,7 +37534,7 @@ subroutine ESMF_AttributeGetObjGridI8List(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37514,7 +37606,7 @@ subroutine ESMF_AttributeGetAttPackGridCHList(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37578,7 +37670,7 @@ subroutine ESMF_AttributeGetObjGridCHList(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37650,7 +37742,7 @@ subroutine ESMF_AttributeGetAttPackGridLGList(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37714,7 +37806,7 @@ subroutine ESMF_AttributeGetObjGridLGList(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37786,7 +37878,7 @@ subroutine ESMF_AttributeGetAttPackStateR4List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37850,7 +37942,7 @@ subroutine ESMF_AttributeGetObjStateR4List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37922,7 +38014,7 @@ subroutine ESMF_AttributeGetAttPackStateR8List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -37986,7 +38078,7 @@ subroutine ESMF_AttributeGetObjStateR8List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38058,7 +38150,7 @@ subroutine ESMF_AttributeGetAttPackStateI4List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38122,7 +38214,7 @@ subroutine ESMF_AttributeGetObjStateI4List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38194,7 +38286,7 @@ subroutine ESMF_AttributeGetAttPackStateI8List(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38258,7 +38350,7 @@ subroutine ESMF_AttributeGetObjStateI8List(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38330,7 +38422,7 @@ subroutine ESMF_AttributeGetAttPackStateCHList(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38394,7 +38486,7 @@ subroutine ESMF_AttributeGetObjStateCHList(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38466,7 +38558,7 @@ subroutine ESMF_AttributeGetAttPackStateLGList(target, name, attpack, valueList,
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38530,7 +38622,7 @@ subroutine ESMF_AttributeGetObjStateLGList(target, name, valueList, defaultvalue
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38602,7 +38694,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamR4List(target, name, attpack, valueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38666,7 +38758,7 @@ subroutine ESMF_AttributeGetObjLocStreamR4List(target, name, valueList, defaultv
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38738,7 +38830,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamR8List(target, name, attpack, valueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38802,7 +38894,7 @@ subroutine ESMF_AttributeGetObjLocStreamR8List(target, name, valueList, defaultv
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38874,7 +38966,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamI4List(target, name, attpack, valueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -38938,7 +39030,7 @@ subroutine ESMF_AttributeGetObjLocStreamI4List(target, name, valueList, defaultv
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39010,7 +39102,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamI8List(target, name, attpack, valueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39074,7 +39166,7 @@ subroutine ESMF_AttributeGetObjLocStreamI8List(target, name, valueList, defaultv
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39146,7 +39238,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamCHList(target, name, attpack, valueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39210,7 +39302,7 @@ subroutine ESMF_AttributeGetObjLocStreamCHList(target, name, valueList, defaultv
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39282,7 +39374,7 @@ subroutine ESMF_AttributeGetAttPackLocStreamLGList(target, name, attpack, valueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39346,7 +39438,7 @@ subroutine ESMF_AttributeGetObjLocStreamLGList(target, name, valueList, defaultv
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39418,7 +39510,7 @@ subroutine ESMF_AttributeGetAttPackMeshR4List(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39482,7 +39574,7 @@ subroutine ESMF_AttributeGetObjMeshR4List(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39554,7 +39646,7 @@ subroutine ESMF_AttributeGetAttPackMeshR8List(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39618,7 +39710,7 @@ subroutine ESMF_AttributeGetObjMeshR8List(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39690,7 +39782,7 @@ subroutine ESMF_AttributeGetAttPackMeshI4List(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39754,7 +39846,7 @@ subroutine ESMF_AttributeGetObjMeshI4List(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39826,7 +39918,7 @@ subroutine ESMF_AttributeGetAttPackMeshI8List(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39890,7 +39982,7 @@ subroutine ESMF_AttributeGetObjMeshI8List(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -39962,7 +40054,7 @@ subroutine ESMF_AttributeGetAttPackMeshCHList(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -40026,7 +40118,7 @@ subroutine ESMF_AttributeGetObjMeshCHList(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -40098,7 +40190,7 @@ subroutine ESMF_AttributeGetAttPackMeshLGList(target, name, attpack, valueList, 
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -40162,7 +40254,7 @@ subroutine ESMF_AttributeGetObjMeshLGList(target, name, valueList, defaultvalueL
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
   integer, intent(out), optional :: itemcount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, ii, local_itemcount
   logical :: local_isPresent
@@ -40230,13 +40322,13 @@ end subroutine ESMF_AttributeGetObjMeshLGList
 subroutine ESMF_AttributeGetCountArray(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_Array), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -40306,11 +40398,11 @@ end subroutine ESMF_AttributeGetCountArray
 subroutine ESMF_AttributeGetCountAttPackArray(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_Array), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -40364,7 +40456,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -40429,7 +40521,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -40499,7 +40591,7 @@ subroutine ESMF_AttributeGetInfoByNumArray(target, attributeIndex, name, convent
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -40630,13 +40722,13 @@ end subroutine ESMF_AttributeGetAttPackArray
 subroutine ESMF_AttributeGetCountArrayBundle(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_ArrayBundle), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -40706,11 +40798,11 @@ end subroutine ESMF_AttributeGetCountArrayBundle
 subroutine ESMF_AttributeGetCountAttPackArrayBundle(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_ArrayBundle), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -40764,7 +40856,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -40829,7 +40921,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -40899,7 +40991,7 @@ subroutine ESMF_AttributeGetInfoByNumArrayBundle(target, attributeIndex, name, c
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -41030,13 +41122,13 @@ end subroutine ESMF_AttributeGetAttPackArrayBundle
 subroutine ESMF_AttributeGetCountCplComp(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_CplComp), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -41106,11 +41198,11 @@ end subroutine ESMF_AttributeGetCountCplComp
 subroutine ESMF_AttributeGetCountAttPackCplComp(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_CplComp), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -41164,7 +41256,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -41229,7 +41321,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -41299,7 +41391,7 @@ subroutine ESMF_AttributeGetInfoByNumCplComp(target, attributeIndex, name, conve
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -41430,13 +41522,13 @@ end subroutine ESMF_AttributeGetAttPackCplComp
 subroutine ESMF_AttributeGetCountGridComp(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_GridComp), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -41506,11 +41598,11 @@ end subroutine ESMF_AttributeGetCountGridComp
 subroutine ESMF_AttributeGetCountAttPackGridComp(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_GridComp), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -41564,7 +41656,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -41629,7 +41721,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -41699,7 +41791,7 @@ subroutine ESMF_AttributeGetInfoByNumGridComp(target, attributeIndex, name, conv
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -41830,13 +41922,13 @@ end subroutine ESMF_AttributeGetAttPackGridComp
 subroutine ESMF_AttributeGetCountSciComp(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_SciComp), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -41906,11 +41998,11 @@ end subroutine ESMF_AttributeGetCountSciComp
 subroutine ESMF_AttributeGetCountAttPackSciComp(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_SciComp), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -41964,7 +42056,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -42029,7 +42121,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -42099,7 +42191,7 @@ subroutine ESMF_AttributeGetInfoByNumSciComp(target, attributeIndex, name, conve
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -42230,13 +42322,13 @@ end subroutine ESMF_AttributeGetAttPackSciComp
 subroutine ESMF_AttributeGetCountDistGrid(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_DistGrid), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -42306,11 +42398,11 @@ end subroutine ESMF_AttributeGetCountDistGrid
 subroutine ESMF_AttributeGetCountAttPackDistGrid(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_DistGrid), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -42364,7 +42456,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -42429,7 +42521,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -42499,7 +42591,7 @@ subroutine ESMF_AttributeGetInfoByNumDistGrid(target, attributeIndex, name, conv
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -42630,13 +42722,13 @@ end subroutine ESMF_AttributeGetAttPackDistGrid
 subroutine ESMF_AttributeGetCountField(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_Field), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -42706,11 +42798,11 @@ end subroutine ESMF_AttributeGetCountField
 subroutine ESMF_AttributeGetCountAttPackField(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_Field), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -42764,7 +42856,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -42829,7 +42921,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -42899,7 +42991,7 @@ subroutine ESMF_AttributeGetInfoByNumField(target, attributeIndex, name, convent
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -43030,13 +43122,13 @@ end subroutine ESMF_AttributeGetAttPackField
 subroutine ESMF_AttributeGetCountFieldBundle(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_FieldBundle), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -43106,11 +43198,11 @@ end subroutine ESMF_AttributeGetCountFieldBundle
 subroutine ESMF_AttributeGetCountAttPackFieldBundle(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_FieldBundle), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -43164,7 +43256,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -43229,7 +43321,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -43299,7 +43391,7 @@ subroutine ESMF_AttributeGetInfoByNumFieldBundle(target, attributeIndex, name, c
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -43430,13 +43522,13 @@ end subroutine ESMF_AttributeGetAttPackFieldBundle
 subroutine ESMF_AttributeGetCountGrid(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_Grid), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -43506,11 +43598,11 @@ end subroutine ESMF_AttributeGetCountGrid
 subroutine ESMF_AttributeGetCountAttPackGrid(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_Grid), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -43564,7 +43656,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -43629,7 +43721,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -43699,7 +43791,7 @@ subroutine ESMF_AttributeGetInfoByNumGrid(target, attributeIndex, name, conventi
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -43830,13 +43922,13 @@ end subroutine ESMF_AttributeGetAttPackGrid
 subroutine ESMF_AttributeGetCountState(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_State), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -43906,11 +43998,11 @@ end subroutine ESMF_AttributeGetCountState
 subroutine ESMF_AttributeGetCountAttPackState(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_State), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -43964,7 +44056,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -44029,7 +44121,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -44099,7 +44191,7 @@ subroutine ESMF_AttributeGetInfoByNumState(target, attributeIndex, name, convent
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -44230,13 +44322,13 @@ end subroutine ESMF_AttributeGetAttPackState
 subroutine ESMF_AttributeGetCountLocStream(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_LocStream), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -44306,11 +44398,11 @@ end subroutine ESMF_AttributeGetCountLocStream
 subroutine ESMF_AttributeGetCountAttPackLocStream(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_LocStream), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -44364,7 +44456,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -44429,7 +44521,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -44499,7 +44591,7 @@ subroutine ESMF_AttributeGetInfoByNumLocStream(target, attributeIndex, name, con
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -44630,13 +44722,13 @@ end subroutine ESMF_AttributeGetAttPackLocStream
 subroutine ESMF_AttributeGetCountMesh(target, count, keywordEnforcer, convention, purpose, attcountflag, attnestflag, rc)
   ! 39.11.15
   type(ESMF_Mesh), intent(in) :: target
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_Info) :: info
   type(ESMF_AttGetCountFlag) :: l_attcountflag
@@ -44706,11 +44798,11 @@ end subroutine ESMF_AttributeGetCountMesh
 subroutine ESMF_AttributeGetCountAttPackMesh(target, attpack, count, keywordEnforcer, attcountflag, attnestflag, rc)
   type(ESMF_Mesh), intent(in) :: target
   type(ESMF_AttPack), intent(inout) :: attpack
-  integer, intent(inout) :: count
+  integer, intent(out) :: count
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
   type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   type(ESMF_AttGetCountFlag) :: l_attcountflag
   integer :: countSingle, countTotal, attPackCount, localrc
@@ -44764,7 +44856,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -44829,7 +44921,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: countSingle, localrc
   character(:), allocatable :: key
@@ -44899,7 +44991,7 @@ subroutine ESMF_AttributeGetInfoByNumMesh(target, attributeIndex, name, conventi
   type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
   integer, intent(out), optional :: itemCount
   logical, intent(out), optional :: isPresent
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: key
@@ -45037,7 +45129,7 @@ subroutine ESMF_AttributeRemoveAttPackArray(target, name, attpack, convention, p
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -45142,7 +45234,7 @@ subroutine ESMF_AttributeRemoveAttPackArrayBundle(target, name, attpack, convent
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -45247,7 +45339,7 @@ subroutine ESMF_AttributeRemoveAttPackCplComp(target, name, attpack, convention,
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -45352,7 +45444,7 @@ subroutine ESMF_AttributeRemoveAttPackGridComp(target, name, attpack, convention
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -45457,7 +45549,7 @@ subroutine ESMF_AttributeRemoveAttPackSciComp(target, name, attpack, convention,
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -45562,7 +45654,7 @@ subroutine ESMF_AttributeRemoveAttPackDistGrid(target, name, attpack, convention
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -45667,7 +45759,7 @@ subroutine ESMF_AttributeRemoveAttPackField(target, name, attpack, convention, p
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -45772,7 +45864,7 @@ subroutine ESMF_AttributeRemoveAttPackFieldBundle(target, name, attpack, convent
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -45877,7 +45969,7 @@ subroutine ESMF_AttributeRemoveAttPackGrid(target, name, attpack, convention, pu
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -45982,7 +46074,7 @@ subroutine ESMF_AttributeRemoveAttPackState(target, name, attpack, convention, p
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -46087,7 +46179,7 @@ subroutine ESMF_AttributeRemoveAttPackLocStream(target, name, attpack, conventio
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -46192,7 +46284,7 @@ subroutine ESMF_AttributeRemoveAttPackMesh(target, name, attpack, convention, pu
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc, purpsize
   type(ESMF_InfoDescribe) :: eidesc
@@ -47058,7 +47150,7 @@ subroutine ESMF_AttributeReadArray(target, filename, keywordenforcer, rc)
   type(ESMF_Array), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47090,7 +47182,7 @@ subroutine ESMF_AttributeReadArrayBundle(target, filename, keywordenforcer, rc)
   type(ESMF_ArrayBundle), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47122,7 +47214,7 @@ subroutine ESMF_AttributeReadCplComp(target, filename, keywordenforcer, rc)
   type(ESMF_CplComp), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47154,7 +47246,7 @@ subroutine ESMF_AttributeReadGridComp(target, filename, keywordenforcer, rc)
   type(ESMF_GridComp), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47186,7 +47278,7 @@ subroutine ESMF_AttributeReadSciComp(target, filename, keywordenforcer, rc)
   type(ESMF_SciComp), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47218,7 +47310,7 @@ subroutine ESMF_AttributeReadDistGrid(target, filename, keywordenforcer, rc)
   type(ESMF_DistGrid), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47250,7 +47342,7 @@ subroutine ESMF_AttributeReadField(target, filename, keywordenforcer, rc)
   type(ESMF_Field), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47282,7 +47374,7 @@ subroutine ESMF_AttributeReadFieldBundle(target, filename, keywordenforcer, rc)
   type(ESMF_FieldBundle), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47314,7 +47406,7 @@ subroutine ESMF_AttributeReadGrid(target, filename, keywordenforcer, rc)
   type(ESMF_Grid), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47346,7 +47438,7 @@ subroutine ESMF_AttributeReadState(target, filename, keywordenforcer, rc)
   type(ESMF_State), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47378,7 +47470,7 @@ subroutine ESMF_AttributeReadLocStream(target, filename, keywordenforcer, rc)
   type(ESMF_LocStream), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47410,7 +47502,7 @@ subroutine ESMF_AttributeReadMesh(target, filename, keywordenforcer, rc)
   type(ESMF_Mesh), intent(inout) :: target
   character(len=*), intent(in) :: fileName
 type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47579,7 +47671,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47626,7 +47718,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47673,7 +47765,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47720,7 +47812,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47767,7 +47859,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47814,7 +47906,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47861,7 +47953,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47908,7 +48000,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -47955,7 +48047,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -48002,7 +48094,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -48049,7 +48141,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -48096,7 +48188,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
   character(len=*), intent(in), optional :: convention
   character(len=*), intent(in), optional :: purpose
   type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   type(ESMF_InfoDescribe) :: eidesc
@@ -48136,7 +48228,7 @@ end subroutine ESMF_AttributeWriteMesh
 subroutine ESMF_AttPackStreamJSON(attpack, output, rc)
   type(ESMF_AttPack), intent(in) :: attpack
   character(len=*), intent(out), optional :: output
-  integer, intent(inout), optional :: rc
+  integer, intent(out), optional :: rc
 
   integer :: localrc
   character(:), allocatable :: c_output, key
