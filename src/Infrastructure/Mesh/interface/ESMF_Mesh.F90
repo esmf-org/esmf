@@ -2266,6 +2266,10 @@ end function ESMF_MeshCreateFromFile
     integer                             :: origGridDims(2)
     integer                 :: poleVal, minPoleGid, maxPoleGid,poleObjType
 
+    call ESMF_VMLogMemInfo("MeshCreate_Begin", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2350,6 +2354,10 @@ end function ESMF_MeshCreateFromFile
                ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
+       call ESMF_VMLogMemInfo("MeshCreate_Alloc_NodeCoords_glbNodeMask_Before", rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
        ! Get information from file
        ! Need to return the coordinate system for the nodeCoords
        if (haveNodeMask) then
@@ -2359,6 +2367,10 @@ end function ESMF_MeshCreateFromFile
            call ESMF_EsmfGetNode(filename, nodeCoords, &
                                 convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
        endif
+
+       call ESMF_VMLogMemInfo("MeshCreate_Alloc_NodeCoords_glbNodeMask_After", rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
        if (haveElmtMask .and. localAddUserArea) then
             call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
@@ -2380,6 +2392,8 @@ end function ESMF_MeshCreateFromFile
                                  centerCoords=faceCoords, &
                                  convertToDeg=convertToDeg, rc=localrc)
        endif
+
+
 
        ElemCnt = ubound (elmtNum, 1)
        totalConnects = ubound(elementConn, 1)
@@ -2474,6 +2488,10 @@ end function ESMF_MeshCreateFromFile
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    call ESMF_VMLogMemInfo("MeshCreate_Alloc_NodeUsed_NodeOwners1_Before", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! These two arrays are temp arrays
     ! NodeUsed() used for multiple purposes, first, find the owners of the node
     ! later, used to store the local Node ID to be used in the ElmtConn table
@@ -2482,6 +2500,10 @@ end function ESMF_MeshCreateFromFile
     ! of the node.
     allocate (NodeUsed(NodeCnt))
     allocate (NodeOwners1(NodeCnt))
+
+    call ESMF_VMLogMemInfo("MeshCreate_Alloc_NodeUsed_NodeOwners1_After", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set to a number > PetCnt because it will store the PetNo if this node is used by
     ! the local elements and we will do a global reduce to find the minimal values
@@ -2580,33 +2602,60 @@ end function ESMF_MeshCreateFromFile
        end do
     endif
 
-
-    call ESMF_VMLogMemInfo("Before_MC_dealloc_nodeCoords", rc=localrc)
+    call ESMF_VMLogMemInfo("MeshCreate_Dealloc_NodeCoords_Before", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
     deallocate(nodeCoords)
-    call ESMF_VMLogMemInfo("After_MC_dealloc_nodeCoords", rc=localrc)
+    call ESMF_VMLogMemInfo("MeshCreate_Dealloc_NodeCoords_After", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (.not. haveNodeMask) then
+       call ESMF_VMLogMemInfo("MeshCreate_AddNodes1_Before", rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
        ! Add nodes
        call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
                             NodeCoords=NodeCoords1D, &
                             NodeOwners=NodeOwners, &
                             rc=localrc)
+
+       call ESMF_VMLogMemInfo("MeshCreate_AddNodes1_After", rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
     else
        allocate(NodeMask(localNodes))
        do i=1,localNodes
          NodeMask(i)=glbNodeMask(NodeId(i))
        enddo
+
+       call ESMF_VMLogMemInfo("MeshCreate_AddNodes2_Before", rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
        call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
                             NodeCoords=NodeCoords1D, &
                             NodeOwners=NodeOwners, &
                             NodeMask = NodeMask, &
                             rc=localrc)
+
+       call ESMF_VMLogMemInfo("MeshCreate_AddNodes2_After", rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+
        deallocate(NodeMask)
+
+
+       call ESMF_VMLogMemInfo("MeshCreate_Dealloc_glbNodeMassk_Before", rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
        deallocate(glbNodeMask)
+       call ESMF_VMLogMemInfo("MeshCreate_Dealloc_glbNodeMassk_After", rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2737,6 +2786,10 @@ end function ESMF_MeshCreateFromFile
     end if
     ! Add elements
 
+    call ESMF_VMLogMemInfo("MeshCreate_AddElements_Before", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     if (hasFaceCoords) then
        if (haveMask .and. localAddUserArea) then
             call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
@@ -2768,9 +2821,13 @@ end function ESMF_MeshCreateFromFile
             call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
        end if
     endif
-
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMLogMemInfo("MeshCreate_AddElements_After", rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     ! Add pole info if applicable
     if ((fileformatlocal == ESMF_FILEFORMAT_ESMFMESH) .and. &
@@ -2794,14 +2851,13 @@ end function ESMF_MeshCreateFromFile
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-
-    call ESMF_VMLogMemInfo("Before_MC_dealloc_node_used_and_owners1", rc=localrc)
+    call ESMF_VMLogMemInfo("MeshCreate_Alloc_NodeUsed_NodeOwners1_Before", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
     deallocate(NodeUsed, NodeOwners1)
-    call ESMF_VMLogMemInfo("After_MC_dealloc_node_used_and_owners1", rc=localrc)
+    call ESMF_VMLogMemInfo("MeshCreate_Alloc_NodeUsed_NodeOwners1_After", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     deallocate(NodeId, NodeCoords1D, NodeOwners)
 
@@ -2812,13 +2868,25 @@ end function ESMF_MeshCreateFromFile
     if (localAddUserArea) deallocate(elementArea, ElemArea)
 
     if (localConvertToDual) then
+       call ESMF_VMLogMemInfo("MeshCreate_create_dual_Before", rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
        ESMF_MeshCreateFromUnstruct = ESMF_MeshCreateDual(Mesh, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_VMLogMemInfo("MeshCreate_create_dual_After", rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
     else
         ESMF_MeshCreateFromUnstruct = Mesh
     endif
     if (present(rc)) rc=ESMF_SUCCESS
+
+    call ESMF_VMLogMemInfo("MeshCreate_End", rc=localrc)
+
     return
 end function ESMF_MeshCreateFromUnstruct
 !------------------------------------------------------------------------------
