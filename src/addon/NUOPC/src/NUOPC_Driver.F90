@@ -20,7 +20,7 @@ module NUOPC_Driver
   !-----------------------------------------------------------------------------
 
   use ESMF
-  use NUOPC
+  use NUOPC, SetVM => NUOPC_SetVM
   use NUOPC_RunSequenceDef
   use NUOPC_Connector, only: cplSS => SetServices, NUOPC_ConnectorSet
   
@@ -150,16 +150,6 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
   contains
-  !-----------------------------------------------------------------------------
-  
-  recursive subroutine SetVM(driver, rc)
-    type(ESMF_GridComp)  :: driver
-    integer, intent(out) :: rc
-
-    rc = ESMF_SUCCESS
-  
-  end subroutine
-
   !-----------------------------------------------------------------------------
   
   recursive subroutine SetServices(driver, rc)
@@ -4205,7 +4195,7 @@ module NUOPC_Driver
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
-    compSetServicesRoutine, compSetVMRoutine, petList, info, comp, rc)
+    compSetServicesRoutine, compSetVMRoutine, petList, info, config, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
@@ -4228,6 +4218,7 @@ module NUOPC_Driver
     optional                                   :: compSetVMRoutine
     integer,             intent(in),  optional :: petList(:)
     type(ESMF_Info),     intent(in),  optional :: info
+    type(ESMF_Config),   intent(in),  optional :: config
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
@@ -4300,7 +4291,7 @@ module NUOPC_Driver
     i = is%wrap%modelCount
     cmEntry%wrap%label = trim(compLabel)
     cmEntry%wrap%component = ESMF_GridCompCreate(name=trim(compLabel), &
-      petList=petList, rc=localrc)
+      config=config, petList=petList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4396,13 +4387,14 @@ module NUOPC_Driver
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddGridCompSO(driver, compLabel, &
-    sharedObj, petList, info, comp, rc)
+    sharedObj, petList, info, config, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(in),  optional :: petList(:)
     type(ESMF_Info),     intent(in),  optional :: info
+    type(ESMF_Config),   intent(in),  optional :: config
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc
 !
@@ -4472,7 +4464,7 @@ module NUOPC_Driver
     i = is%wrap%modelCount
     cmEntry%wrap%label = trim(compLabel)
     cmEntry%wrap%component = ESMF_GridCompCreate(name=trim(compLabel), &
-      petList=petList, rc=localrc)
+      config=config, petList=petList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4557,7 +4549,7 @@ module NUOPC_Driver
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddCplComp(driver, srcCompLabel, &
     dstCompLabel, compSetServicesRoutine, compSetVMRoutine, petList, info, &
-    comp, rc)
+    config, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: srcCompLabel
@@ -4581,6 +4573,7 @@ module NUOPC_Driver
     optional                                   :: compSetVMRoutine
     integer, target,     intent(in),  optional :: petList(:)
     type(ESMF_Info),     intent(in),  optional :: info
+    type(ESMF_Config),   intent(in),  optional :: config
     type(ESMF_CplComp),  intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
@@ -4718,7 +4711,8 @@ module NUOPC_Driver
           return  ! bail out
       endif
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
-        name=trim(cmEntry%wrap%label), petList=connectorPetList, rc=localrc)
+        name=trim(cmEntry%wrap%label), petList=connectorPetList, &
+        config=config, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4734,7 +4728,7 @@ module NUOPC_Driver
           return  ! bail out
       endif
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
-        name=trim(cmEntry%wrap%label), rc=localrc)
+        name=trim(cmEntry%wrap%label), config=config, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out

@@ -343,6 +343,7 @@ namespace ESMCI {
     output_mesh->set_spatial_dimension(src_mesh->spatial_dim());
     output_mesh->set_parametric_dimension(src_mesh->parametric_dim());
     output_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
+    output_mesh->coordsys=src_mesh->coordsys;
 
     // Send elements from src_mesh to output_mesh
     CommReg elemComm;
@@ -471,6 +472,7 @@ namespace ESMCI {
   output_mesh->set_spatial_dimension(src_mesh->spatial_dim());
   output_mesh->set_parametric_dimension(src_mesh->parametric_dim());
   output_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
+  output_mesh->coordsys=src_mesh->coordsys;
 
   // Create a distributed directory to figure out where the elems should go.
   DDir<> edir;
@@ -604,6 +606,7 @@ namespace ESMCI {
   output_mesh->set_spatial_dimension(src_mesh->spatial_dim());
   output_mesh->set_parametric_dimension(src_mesh->parametric_dim());
   output_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
+  output_mesh->coordsys=src_mesh->coordsys;
 
   // Create a distributed directory to figure out where the elems should go.
   DDir<> edir;

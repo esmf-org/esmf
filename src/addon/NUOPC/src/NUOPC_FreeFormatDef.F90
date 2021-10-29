@@ -264,12 +264,13 @@ module NUOPC_FreeFormatDef
     integer,               intent(out), optional :: rc 
 ! !DESCRIPTION:
 !   Create a new FreeFormat object from ESMF\_Config object. The {\tt config}
-!   object must exist, and {\tt label} must reference a table attribute 
-!   within {\tt config}.
+!   object must exist, and {\tt label} must reference either a single line
+!   or a table attribute within {\tt config}. The content of the attribute is
+!   read and returned in the newly created FreeFormat object.
 !
 ! By default an error is returned if {\tt label} is not found in {\tt config}.
-! This error can be suppressed by setting {\tt relaxedflag=.true.}, and an 
-! empty FreeFormat object will be returned.
+! This error can be suppressed by setting {\tt relaxedflag=.true.}, in which
+! case an empty FreeFormat object is returned.
 
 !EOP
   !-----------------------------------------------------------------------------
@@ -310,53 +311,89 @@ module NUOPC_FreeFormatDef
         rcToReturn=rc)
       return  ! bail out
     endif
-    
-    call ESMF_ConfigGetDim(config, lineCount, columnCount, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    allocate(stringList(lineCount), stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="stringList.", &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    if (index(trim(label),"::") > 0) then
+      ! this is reading a table config attribute
 
-    allocate(count(lineCount), stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="count.", &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-    call ESMF_ConfigFindLabel(config, label=label, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-    do i=1, lineCount
-      call ESMF_ConfigNextLine(config, rc=localrc)
+      call ESMF_ConfigGetDim(config, lineCount, columnCount, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      count(i) = ESMF_ConfigGetLen(config, rc=localrc)
+
+      allocate(stringList(lineCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="stringList.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      allocate(count(lineCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="count.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      call ESMF_ConfigFindLabel(config, label=label, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    enddo
 
-    call ESMF_ConfigFindLabel(config, label=label, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      do i=1, lineCount
+        call ESMF_ConfigNextLine(config, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        count(i) = ESMF_ConfigGetLen(config, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      enddo
 
-    do i=1, lineCount
-      call ESMF_ConfigNextLine(config, rc=localrc)
+      call ESMF_ConfigFindLabel(config, label=label, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      allocate(line(count(i)))
+
+      do i=1, lineCount
+        call ESMF_ConfigNextLine(config, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        allocate(line(count(i)))
+        call ESMF_ConfigGetAttribute(config, line, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        stringList(i) = ""
+        do j=1, count(i)
+          stringList(i)=trim(stringList(i))//" "//trim(adjustl(line(j)))
+        enddo
+        deallocate(line)
+      enddo
+      
+      deallocate(count, stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="count.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    else
+      ! this is reading a single line config attribute
+
+      allocate(stringList(1), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="stringList.", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      columnCount = ESMF_ConfigGetLen(config, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      call ESMF_ConfigFindLabel(config, label=label, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      allocate(line(columnCount))
       call ESMF_ConfigGetAttribute(config, line, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      stringList(i) = ""
-      do j=1, count(i)
-        stringList(i)=trim(stringList(i))//" "//trim(adjustl(line(j)))
+      stringList(1) = ""
+      do j=1, columnCount
+        stringList(1)=trim(stringList(1))//" "//trim(adjustl(line(j)))
       enddo
       deallocate(line)
-    enddo
-    
+
+    endif
+
     NUOPC_FreeFormatCreateRead = NUOPC_FreeFormatCreate(stringList=stringList, &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -365,11 +402,6 @@ module NUOPC_FreeFormatDef
     deallocate(stringList, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="stringList.", &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-    deallocate(count, stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="count.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end function
