@@ -10,6 +10,7 @@ SOURCEC	  = \
             ESMCI_ClumpPnts.C \
             ESMCI_MathUtil.C \
             ESMCI_Mesh_Glue.C \
+            ESMCI_Mesh_FileIO.C \
             ESMCI_GToM_Util.C \
             ESMCI_Mesh_GToM_Glue.C \
             ESMCI_Mesh_Regrid_Glue.C \
