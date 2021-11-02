@@ -82,12 +82,75 @@ void ESMCI_mesh_create_from_file(char *filename,
 
     // Only support ESMFMesh right now
     if (fileformat != ESMC_FILEFORMAT_ESMFMESH) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-       " Only ESMFMesh format files supported right now.",
-                                 ESMC_CONTEXT, &localrc)) throw localrc;
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          " Only ESMFMesh format files supported right now.",
+                           ESMC_CONTEXT, &localrc)) throw localrc;
     }    
 
 
+    // Get VM info
+    int local_pet = VM::getCurrent(&localrc)->getLocalPet();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
+    MPI_Comm mpi_comm = VM::getCurrent(&localrc)->getMpi_c();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
+    int pet_count = VM::getCurrent(&localrc)->getPetCount();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
+    // Debug output
+    //printf("%d# filename=%s\n",local_pet,filename);
+
+
+    // Open file - Jim
+
+
+    // Get elem_distgrid ids
+    int num_elem_ids=0;
+    int *elem_ids=NULL;
+    std::vector<int> elem_ids_vec;
+    if (elem_distgrid != NULL) {
+
+      // Currently only support distgrids with 1 localDE
+      if (elem_distgrid->getDELayout()->getLocalDeCount() != 1) {
+        if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+         " Currently only distgrids with 1 DE per PET are supported",
+                                          ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Get seqIndexList
+      // TODO: right now assumes 1 localDE, fix this
+      localrc=elem_distgrid->fillSeqIndexList(elem_ids_vec, 0);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &localrc)) throw localrc;
+
+      // Assign to pointer
+      if (!elem_ids_vec.empty()) {
+        num_elem_ids=elem_ids_vec.size();
+        elem_ids=&elem_ids_vec[0];
+
+      }
+    }
+
+    // Debug output
+    //printf(" %d# ",local_pet);
+    //for (int i=0; i<num_elem_ids; i++) {
+    //  printf(" %d ",elem_ids[i]);
+    //}
+    //printf("\n");
+
+
+    // Get maxNodePElement - Jim
+
+
+    // Get elementConn and numElementConn at elem_ids positions - Jim
+
+
+
+    ///// Close file - Jim
 
 
   }catch(int localrc){
