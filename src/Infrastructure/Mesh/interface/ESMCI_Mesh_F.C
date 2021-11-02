@@ -890,6 +890,60 @@ extern "C" void FTN_X(c_esmc_geteleminfointoarray)(MeshCap **meshpp,
 }
 
 
+extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
+                                                 char *filename,
+                                                 ESMC_FileFormat_Flag *fileformat, 
+                                                 int *convertToDual,
+                                                 int *addUserArea,
+                                                 ESMCI::DistGrid **nodeDistgridpp,
+                                                 ESMCI::DistGrid **elemDistgridpp,
+                                                 int *rc, 
+                                                 ESMCI_FortranStrLenArg filename_len)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreatefromfile()"
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // Get C style filename
+  char *C_filename = ESMC_F90toCstring(filename, filename_len);
+
+  // Convert  Distgrids
+  ESMCI::DistGrid *nodeDistgrid=NULL;
+  if (ESMC_NOT_PRESENT_FILTER(nodeDistgridpp) != ESMC_NULL_POINTER) {
+    nodeDistgrid=*nodeDistgridpp;
+  }
+
+  ESMCI::DistGrid *elemDistgrid=NULL;
+  if (ESMC_NOT_PRESENT_FILTER(elemDistgridpp) != ESMC_NULL_POINTER) {
+    elemDistgrid=*elemDistgridpp;
+  }
+
+  // Convert Flags
+  int *C_convertToDual=NULL;
+  if (ESMC_NOT_PRESENT_FILTER(convertToDual) != ESMC_NULL_POINTER) {
+    C_convertToDual=convertToDual;
+  }
+
+  int *C_addUserArea=NULL;
+  if (ESMC_NOT_PRESENT_FILTER(addUserArea) != ESMC_NULL_POINTER) {
+    C_addUserArea=addUserArea;
+  }
+
+  // Create Mesh from file
+  *meshpp=MeshCap::meshcreatefromfilenew(C_filename,
+                                         *fileformat, // not optional, so not converted 
+                                         C_convertToDual,
+                                         C_addUserArea,
+                                         nodeDistgrid,
+                                         elemDistgrid,
+                                         ESMC_NOT_PRESENT_FILTER(rc));
+
+  // Get rid C style filename
+  delete [] C_filename;
+
+} // meshcreate
+
+
 
 
 #if 0

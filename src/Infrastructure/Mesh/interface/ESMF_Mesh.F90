@@ -194,6 +194,7 @@ module ESMF_MeshMod
   public ESMF_MeshCreateFromIntPtr
   public ESMF_MeshCreateCubedSphere
   public ESMF_MeshEmptyCreate
+  public ESMF_MeshCreateFromFileNew ! When finished will be overloaded into ESMF_MeshCreate()
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -2020,6 +2021,121 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end function ESMF_MeshCreateFromFile
 !------------------------------------------------------------------------------
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromFileNew()"
+!BOPI
+!\label{API:MeshCreateFromFileNew}
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a file
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
+    function ESMF_MeshCreateFromFileNew(filename, fileformat, keywordEnforcer, &
+                 convertToDual, addUserArea, maskFlag, varname, &
+                 nodalDistgrid, elementDistgrid, name, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromFileNew
+! !ARGUMENTS:
+    character(len=*),           intent(in)            :: filename
+    type(ESMF_FileFormat_Flag), intent(in)            :: fileformat
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                    intent(in),  optional :: convertToDual
+    logical,                    intent(in),  optional :: addUserArea
+    type(ESMF_MeshLoc),         intent(in),  optional :: maskFlag
+    character(len=*),           intent(in),  optional :: varname
+    type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
+    type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
+    character(len=*),           intent(in),  optional :: name
+    integer,                    intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create a Mesh from a file. Provides options to convert to 3D and in the case of SCRIP
+!   format files, allows the dual of the mesh to be created.
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [filename]
+!         The name of the grid file
+!   \item[fileformat]
+!         The file format. The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH} and
+!         {\tt ESMF\_FILEFORMAT\_UGRID}.
+!         Please see Section~\ref{const:fileformatflag} for a detailed description of the options.
+!   \item[{[convertToDual]}]
+!         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
+!         defaults to {\tt .false.}.
+!   \item[{[addUserArea]}]
+!         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
+!         only supported when the grid file is in the SCRIP or ESMF format. If not specified,
+!         defaults to {\tt .false.}.
+!   \item[{[maskFlag]}]
+!         If maskFlag is present, generate the mask using the missing\_value attribute defined in 'varname'
+!         This flag is only supported when the grid file is in the UGRID format.
+!         The value could be either {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}.  If the value is
+!         {\tt ESMF\_MESHLOC\_NODE}, the node mask will be generated and the variable has to be
+!         defined on the "node" (specified by its {\tt location} attribute).  If the value is
+!         {\tt ESMF\_MESHLOC\_ELEMENT}, the element mask will be generated and the variable has to be
+!         defined on the "face" of the mesh.  If the variable is not defined on the right location,
+!         no mask will be generated.  If not specified, no mask will be generated.
+!   \item[{[varname]}]
+!         If maskFlag is present, provide a variable name stored in the UGRID file and
+!         the mask will be generated using the missing value of the data value of
+!         this variable.  The first two dimensions of the variable has to be the
+!         the longitude and the latitude dimension and the mask is derived from the
+!         first 2D values of this variable even if this data is 3D, or 4D array. If not
+!         specified, defaults to empty string.
+!   \item [{[nodalDistgrid]}]
+!         A Distgrid describing the user-specified distribution of
+!         the nodes across the PETs.
+!   \item [{[elementDistgrid]}]
+!         A Distgrid describing the user-specified distribution of
+!         the elements across the PETs.
+!   \item [{[name]}]
+!         The name of the Mesh.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    type(ESMF_Mesh) :: myMesh
+    integer::  localrc
+
+    ! Only doing ESMFMesh format right now
+    if (fileformat .ne. ESMF_FILEFORMAT_ESMFMESH) then
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            msg=" only ESMFMesh format supported through this interface right now.", &
+            ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
+
+    ! Call into C 
+    call c_ESMC_MeshCreateFromFile(ESMF_MeshCreateFromFileNew%this, &
+         filename, fileformat, &
+         convertToDual, addUserArea, &
+         !  maskFlag, varname, & ! JUST DO STUFF FOR ESMFMESH format right now
+         nodalDistgrid, elementDistgrid, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set the name in Base object
+    ! Do this here for now, but eventually move into above C func
+    if (present(name)) then
+      call c_ESMC_SetName(ESMF_MeshCreateFromFileNew, "Mesh", name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+
+end function ESMF_MeshCreateFromFileNew
+!------------------------------------------------------------------------------
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromUnstruct()"
@@ -2695,6 +2811,7 @@ end function ESMF_MeshCreateFromFile
     return
 end function ESMF_MeshCreateFromUnstruct
 !------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

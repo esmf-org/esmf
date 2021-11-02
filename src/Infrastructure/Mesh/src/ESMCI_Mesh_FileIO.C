@@ -52,11 +52,28 @@
 using namespace ESMCI;
 
 
-void ESMCI_MeshCreateFromFile(char *filename, ESMC_FileFormat_Flag fileformat, 
-                              int convert_to_dual, int add_user_area, 
-                              Mesh **out_mesh, int *rc){
+// INPUTS: 
+//  filename - file name in NULL delimited form
+//  fileformat - the format of the file
+//  convert_to_dual - specifies if mesh should be converted to dual before returning
+//                    if NULL, then user didn't speficify so default to NOT
+//  add_user_area - specifies if areas should be added to mesh. 
+//                  If NULL, then user didn't specify, so don't
+//  node_distgrid - If not NULL, redist so nodes are on this distgrid
+//  elem_distgrid - If not NULL, redist so elems are on this distgrid
+//
+// OUTPUTS:
+//   out_mesh - the new mesh created from the file
+//   rc       - the return code
+//
+void ESMCI_mesh_create_from_file(char *filename, 
+                                 ESMC_FileFormat_Flag fileformat, 
+                                 int *convert_to_dual, int *add_user_area, 
+                                 ESMCI::DistGrid *node_distgrid, 
+                                 ESMCI::DistGrid *elem_distgrid, 
+                                 Mesh **out_mesh, int *rc){
 #undef ESMC_METHOD
-#define ESMC_METHOD "ESMCI_MeshCreateFromFile()"
+#define ESMC_METHOD "ESMCI_mesh_create_from_file()"
 
   // Try-catch block around main part of method
   try {
@@ -69,7 +86,6 @@ void ESMCI_MeshCreateFromFile(char *filename, ESMC_FileFormat_Flag fileformat,
        " Only ESMFMesh format files supported right now.",
                                  ESMC_CONTEXT, &localrc)) throw localrc;
     }    
-
 
 
 

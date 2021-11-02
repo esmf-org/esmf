@@ -353,6 +353,13 @@ namespace ESMCI {
                           int num_elemArrays, ESMCI::Array **elemArrays,
                           int *rc);
 
+    static MeshCap *meshcreatefromfilenew(char *filename,
+                                          ESMC_FileFormat_Flag fileformat,
+                                          int *convert_to_dual, 
+                                          int *add_user_area, 
+                                          ESMCI::DistGrid *node_distgrid,
+                                          ESMCI::DistGrid *elem_distgrid,
+                                          int *rc);
   };
 
 } // namespace

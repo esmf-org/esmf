@@ -31,6 +31,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 #include "ESMCI_Array.h"
+#include "ESMCI_DistGrid.h"
 
 #include "Mesh/include/ESMCI_Mesh.h"
 
@@ -43,8 +44,11 @@
 
 using namespace ESMCI;
 
-void ESMCI_MeshCreateFromFile(char *filename, ESMC_FileFormat_Flag fileformat, 
-                              int convert_to_dual, int add_user_area, 
-                              Mesh **out_mesh, int *rc);
+void ESMCI_mesh_create_from_file(char *filename, 
+                                 ESMC_FileFormat_Flag fileformat, 
+                                 int *convert_to_dual, int *add_user_area, 
+                                 ESMCI::DistGrid *node_distgrid, 
+                                 ESMCI::DistGrid *elem_distgrid, 
+                                 Mesh **out_mesh, int *rc);
 
 #endif // ESMCI_MESH_FILEIO_H

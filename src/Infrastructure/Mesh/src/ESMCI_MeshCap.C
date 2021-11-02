@@ -42,6 +42,7 @@
 #include "Mesh/include/ESMCI_MBMesh_GToM_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Util.h"
+#include "Mesh/include/ESMCI_Mesh_FileIO.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -2479,5 +2480,52 @@ void MeshCap::meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
                                   ESMC_CONTEXT, rc);
     return;
   }
+}
+
+MeshCap *MeshCap::meshcreatefromfilenew(char *filename,
+                                        ESMC_FileFormat_Flag fileformat,
+                                        int *convert_to_dual, 
+                                        int *add_user_area, 
+                                        ESMCI::DistGrid *node_distgrid,
+                                        ESMCI::DistGrid *elem_distgrid,
+                                        int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshcreatefromfilenew()"
+
+  int localrc;
+
+  bool is_esmf_mesh = !moab_on;
+  
+  // Create mesh depending on the type
+  Mesh *mesh;
+  MBMesh *mbmesh = nullptr;
+  if (is_esmf_mesh) {
+    ESMCI_mesh_create_from_file(filename, 
+                                fileformat, 
+                                convert_to_dual,
+                                add_user_area, 
+                                node_distgrid, 
+                                elem_distgrid, 
+                                &mesh, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, rc)) return NULL;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return NULL;
+  }
+
+  // Create MeshCap
+  MeshCap *mc=new MeshCap();
+
+  // Set member variables
+// SET THESE FROM MESH WHEN THINGS WORKING!
+//  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
+//  mc->finalize_dims(sdim, pdim, cs);
+//  mc->finalize_counts(&localrc);
+  
+  // Output new MeshCap
+  return mc;
 }
 
