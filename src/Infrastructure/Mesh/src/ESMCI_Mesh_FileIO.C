@@ -43,6 +43,15 @@
 #include "Mesh/include/ESMCI_MeshDual.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
 #include "IO/include/ESMCI_PIO_Handler.h"
+
+#ifdef ESMF_PNETCDF
+# define _PNETCDF
+#include <pnetcdf.h>
+# elif ESMF_NETCDF
+# define _NETCDF
+# include <netcdf.h>
+#endif
+#include <pio.h>
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -102,12 +111,23 @@ void ESMCI_mesh_create_from_file(char *filename,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
 
+    int pets_per_Ssi = VM::getCurrent(&localrc)->getSsiLocalPetCount();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
     // Debug output
     //printf("%d# filename=%s\n",local_pet,filename);
     /// Maybe initialize IO system here?
+    int num_iotasks = pet_count/pets_per_Ssi;
+    int stride = pets_per_Ssi;
+    int pioSystemDesc;
+    piorc = PIOc_Init_Intracomm(mpi_comm, num_iotasks, stride, 0, PIO_REARR_SUBSET, &pioSystemDesc);
+
     
     // Open file - Jim
-    piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &iotype, filename, mode);
+    int pioFileDesc;
+    int mode = 0;
+    piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, PIO_IOTYPE_PNETCDF, filename, mode);
     if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + filename,
 	ESMF_RC_FILE_OPEN, (*rc))) {
       return;
