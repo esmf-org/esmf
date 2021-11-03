@@ -42,6 +42,7 @@
 #include "Mesh/include/ESMCI_MeshRedist.h"
 #include "Mesh/include/ESMCI_MeshDual.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
+#include "IO/include/ESMCI_PIO_Handler.h"
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -103,15 +104,21 @@ void ESMCI_mesh_create_from_file(char *filename,
 
     // Debug output
     //printf("%d# filename=%s\n",local_pet,filename);
-
-
+    /// Maybe initialize IO system here?
+    
     // Open file - Jim
+    piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &iotype, filename, mode);
+    if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + filename,
+	ESMF_RC_FILE_OPEN, (*rc))) {
+      return;
+    }
+    piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
 
 
     // Get elem_distgrid ids
     int num_elem_ids=0;
-    int *elem_ids=NULL;
-    std::vector<int> elem_ids_vec;
+    long int *elem_ids=NULL;
+    std::vector<long int> elem_ids_vec;
     if (elem_distgrid != NULL) {
 
       // Currently only support distgrids with 1 localDE
@@ -144,14 +151,55 @@ void ESMCI_mesh_create_from_file(char *filename,
 
 
     // Get maxNodePElement - Jim
-
+    piorc = PIOc_inq_dimid(pioFileDesc, "maxNodePElement", &dimid);
+    if (!CHECKPIOWARN(piorc, std::string("Error reading maxNodePElement dimension from file ") + filename,
+	ESMF_RC_FILE_OPEN, (*rc))) {
+      return;
+    }
 
     // Get elementConn and numElementConn at elem_ids positions - Jim
+    piorc = PIOc_InitDecomp(pioSystemDesc, pio_type, 1, global_vec.size(), num_elem_ids, elem_ids, &iodesc, 
+                    PIO_REARR_SUBSET, NULL, NULL);
+    if (!CHECKPIOWARN(piorc, std::string("Error initializing PIO decomp for file ") + filename,
+	ESMF_RC_FILE_OPEN, (*rc))) {
+      return;
+    }
 
-
+    piorc = PIOc_inq_varid(pioFileDesc, "elementConn", &varid);
+    if (!CHECKPIOWARN(piorc, std::string("Error elementConn variable not in file ") + filename,
+	ESMF_RC_FILE_OPEN, (*rc))) {
+      return;
+    }
+    piorc = PIOc_read_darray(pioFileDesc, varid, iodesc, num_elem_ids, &elementConn);
+    if (!CHECKPIOWARN(piorc, std::string("Error reading variable elementConn from file ") + filename,
+	ESMF_RC_FILE_OPEN, (*rc))) {
+      return;
+    }
+    piorc = PIOc_inq_varid(pioFileDesc, "NumElementConn", &varid);
+    if (!CHECKPIOWARN(piorc, std::string("Error NumElementConn variable not in file ") + filename,
+	ESMF_RC_FILE_OPEN, (*rc))) {
+      return;
+    }
+    piorc = PIOc_read_darray(pioFileDesc, varid, iodesc, num_elem_ids, &NumElementConn);
+    if (!CHECKPIOWARN(piorc, std::string("Error reading NumElementConn variable from file ") + filename,
+	ESMF_RC_FILE_OPEN, (*rc))) {
+      return;
+    }
 
     ///// Close file - Jim
+    piorc = PIOc_closefile(pioFileDesc);
+    if (!CHECKPIOWARN(piorc, std::string("Error closing file ") + filename,
+	ESMF_RC_FILE_OPEN, (*rc))) {
+      return;
+    }
 
+    piorc = PIOc_freedecomp(pioSystemDesc, iodesc);
+    if (!CHECKPIOWARN(piorc, std::string("Error freeing decomp ")
+	ESMF_RC_FILE_OPEN, (*rc))) {
+      return;
+    }
+
+    // maybe free the iosystem here?
 
   }catch(int localrc){
     // catch standard ESMF return code
