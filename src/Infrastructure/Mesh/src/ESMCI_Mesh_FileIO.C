@@ -142,8 +142,8 @@ void ESMCI_mesh_create_from_file(char *filename,
 
     // Get elem_distgrid ids
     int num_elem_ids=0;
-    long int *elem_ids=NULL;
-    std::vector<long int> elem_ids_vec;
+    int *elem_ids=NULL;
+    std::vector<int> elem_ids_vec;
     if (elem_distgrid != NULL) {
 
       // Currently only support distgrids with 1 localDE
@@ -193,10 +193,10 @@ void ESMCI_mesh_create_from_file(char *filename,
 
     PIO_Offset dof1d[num_elem_ids], dof2d[num_elem_ids*maxNodePElement];
     for (int i=0; i<num_elem_ids; i++) {
-        dof1d[i] = elem_ids[i];
+        dof1d[i] = (PIO_Offset) elem_ids[i];
     }
     for (int i=0; i<num_elem_ids*maxNodePElement; i++) {
-        dof2d[i] = elem_ids[i/maxNodePElement] + i%maxNodePElement;
+        dof2d[i] = (PIO_Offset) (elem_ids[i/maxNodePElement] + i%maxNodePElement);
     }
 
 
@@ -260,6 +260,8 @@ void ESMCI_mesh_create_from_file(char *filename,
 //    }
 
     // maybe free the iosystem here?
+    piorc = PIOc_free_iosystem(pioSystemDesc);
+
 
   }catch(int localrc){
     // catch standard ESMF return code
