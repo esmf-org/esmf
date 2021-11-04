@@ -347,13 +347,13 @@ extern "C" void FTN_X(c_esmc_meshcreateempty)(MeshCap **mesh, int *rc) {
 
 
 extern "C" void FTN_X(c_esmc_meshaddnodes)(MeshCap **meshpp, int *num_nodes, int *nodeId,
-                                           double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                                           double *nodeCoord, InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                            int *rc)
 {
   // Call into implementation
   (*meshpp)->meshaddnodes(num_nodes, nodeId,
-                          nodeCoord, nodeOwner, nodeMaskII,
+                          nodeCoord, nodeOwnerII, nodeMaskII,
                           _coordSys, _orig_sdim,
                           rc);
 

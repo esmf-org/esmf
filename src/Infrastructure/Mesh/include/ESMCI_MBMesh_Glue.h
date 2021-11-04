@@ -51,7 +51,7 @@ void MBMesh_create(MBMesh **mbmpp,
 
 
 void MBMesh_addnodes(MBMesh **mbmpp, int *num_nodes, int *nodeId,
-                     double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                     double *nodeCoord, InterArray<int> *nodeOwner, InterArray<int> *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                      int *rc);
 

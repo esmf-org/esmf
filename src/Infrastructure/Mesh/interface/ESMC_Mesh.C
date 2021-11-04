@@ -187,8 +187,11 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
 
   MeshCap *mc = static_cast<MeshCap*> (mesh.ptr);
 
+  // Wrap node_owners in IntArray
+  InterArray<int> nodeOwnersIA(nodeOwners,nodeCount);
+
   // call into ESMCI method
-  mc->meshaddnodes(&nodeCount, nodeIds, nodeCoords, nodeOwners,
+  mc->meshaddnodes(&nodeCount, nodeIds, nodeCoords, &nodeOwnersIA,
                    NULL, &(mc->coordsys_mc), &(mc->sdim_mc), &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;

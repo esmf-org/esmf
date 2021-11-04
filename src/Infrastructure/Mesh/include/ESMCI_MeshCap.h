@@ -130,7 +130,7 @@ namespace ESMCI {
     static MeshCap *meshcreate_from_grid(Grid **gridpp, int *rc);
 
     void meshaddnodes(int *num_nodes, int *nodeId,
-                      double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                      double *nodeCoord,  InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                       ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                       int *rc);
 

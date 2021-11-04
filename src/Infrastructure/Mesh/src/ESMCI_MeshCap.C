@@ -528,7 +528,7 @@ MeshCap *MeshCap::meshcreatefromfile(const char *filename,
  }
 
 void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
-                           double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                           double *nodeCoord, InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                            int *rc)
 {
@@ -539,7 +539,7 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
   if (is_esmf_mesh) {
     ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh addnodes");
     ESMCI_meshaddnodes(&mesh, num_nodes, nodeId,
-                       nodeCoord, nodeOwner, nodeMaskII,
+                       nodeCoord, nodeOwnerII, nodeMaskII,
                        _coordSys, _orig_sdim,
                        rc);
     ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh addnodes");
@@ -547,7 +547,7 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
 #if defined ESMF_MOAB
     ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addnodes");
     MBMesh_addnodes(&mbmesh, num_nodes, nodeId,
-                     nodeCoord, nodeOwner, nodeMaskII,
+                     nodeCoord, nodeOwnerII, nodeMaskII,
                      _coordSys, _orig_sdim,
                      rc);
     ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addnodes");

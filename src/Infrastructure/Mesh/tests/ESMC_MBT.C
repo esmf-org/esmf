@@ -316,8 +316,11 @@ class MBT {
         MBMesh_create(&mesh, &pdim, &sdim, &coord_sys, &localrc);
         ESMC_CHECK_THROW(localrc);
 
+        // Wrap node_owners in IntArray
+        InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
+
         MBMesh_addnodes(&mesh, &num_node, nodeId.data(), nodeCoord.data(), 
-                        nodeOwner.data(), iin, &coord_sys, &orig_sdim, &localrc);
+                        &nodeOwnerIA, iin, &coord_sys, &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         int regridconserve = 0;

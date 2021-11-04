@@ -88,7 +88,7 @@ void ESMCI_mesh_create_from_file(char *filename,
                                  Mesh **out_mesh, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_file()"
-
+#if 0
   // Try-catch block around main part of method
   try {
     // local return code
@@ -272,6 +272,8 @@ void ESMCI_mesh_create_from_file(char *filename,
           " Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
+
+#endif
   
   // We've gotten to bottom successfully, so return success
   if(rc != NULL) *rc = ESMF_SUCCESS;

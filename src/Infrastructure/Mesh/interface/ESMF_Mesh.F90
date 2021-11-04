@@ -818,7 +818,7 @@ end subroutine
     type(ESMF_Mesh),    intent(inout)         :: mesh
     integer,            intent(in)            :: nodeIds(:)
     real(ESMF_KIND_R8), intent(in)            :: nodeCoords(:)
-    integer,            intent(in)            :: nodeOwners(:)
+    integer,            intent(in),  optional :: nodeOwners(:)
     integer,            intent(in),  optional :: nodeMask(:)
     type(ESMF_DistGrid), intent(in), optional :: nodalDistgrid
     integer,            intent(out), optional :: rc
@@ -854,12 +854,13 @@ end subroutine
 !          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(1) and
 !          nodeCoords(2), the coordinates for node 2 are in nodeCoords(3) and nodeCoords(4),
 !          etc.).
-!   \item[nodeOwners]
+!   \item[{[nodeOwners]}]
 !         An array containing the PETs that own the nodes to be created on this PET.
 !         If the node is shared with another PET, the value
 !         may be a PET other than the current one. Only nodes owned by this PET
 !         will have PET local entries in a Field created on the Mesh. This input consists of
-!         a 1D array the size of the number of nodes on this PET.
+!         a 1D array the size of the number of nodes on this PET. If not provided by the user, 
+!         then ESMF will calculate node ownership. 
 !   \item [{[nodeMask]}]
 !          An array containing values which can be used for node masking. Which values indicate
 !          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
@@ -885,7 +886,7 @@ end subroutine
     integer :: num_nodes
     integer :: sdim, pdim, numNode
     type(ESMF_CoordSys_Flag):: coordSys
-    type(ESMF_InterArray) :: nodeMaskII
+    type(ESMF_InterArray) :: nodeMaskII, nodeOwnersII
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -916,6 +917,11 @@ end subroutine
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+   ! Create interface int to wrap optional node owners
+   nodeOwnersII = ESMF_InterArrayCreate(nodeOwners, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Create interface int to wrap optional element mask
     nodeMaskII = ESMF_InterArrayCreate(nodeMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -924,12 +930,16 @@ end subroutine
 
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds, nodeCoords, &
-                         nodeOwners, nodeMaskII, &
+                         nodeOwnersII, nodeMaskII, &
                          coordSys, sdim, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Get rid of interface Int wrapper
+    ! Get rid of interface Int wrappers
+    call ESMF_InterArrayDestroy(nodeOwnersII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     call ESMF_InterArrayDestroy(nodeMaskII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1065,7 +1075,7 @@ end subroutine
     integer,                  intent(in)            :: spatialDim
     integer,                  intent(in)            :: nodeIds(:)
     real(ESMF_KIND_R8),       intent(in)            :: nodeCoords(:)
-    integer,                  intent(in)            :: nodeOwners(:)
+    integer,                  intent(in),  optional :: nodeOwners(:)
     integer,                  intent(in),  optional :: nodeMask(:)
     type(ESMF_DistGrid),      intent(in),  optional :: nodalDistgrid
     integer,                  intent(in)            :: elementIds(:)
@@ -1131,12 +1141,13 @@ end subroutine
 !          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(1) and
 !          nodeCoords(2), the coordinates for node 2 are in nodeCoords(3) and nodeCoords(4),
 !          etc.).
-!   \item[nodeOwners]
+!   \item[{[nodeOwners]}]
 !         An array containing the PETs that own the nodes to be created on this PET.
 !         If the node is shared with another PET, the value
 !         may be a PET other than the current one. Only nodes owned by this PET
 !         will have PET local entries in a Field created on the Mesh. This input consists of
-!         a 1D array the size of the number of nodes on this PET.
+!         a 1D array the size of the number of nodes on this PET. If not provided by the user, 
+!         then ESMF will calculate node ownership. 
 !   \item [{[nodeMask]}]
 !          An array containing values which can be used for node masking. Which values indicate
 !          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
@@ -1224,6 +1235,7 @@ end subroutine
     integer :: num_elems, num_elementConn
     type(ESMF_RegridConserve) :: lregridConserve
     type(ESMF_InterArray) :: elementMaskII, nodeMaskII
+    type(ESMF_InterArray) :: nodeOwnersII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
     real(ESMF_KIND_R8) :: tmpCoords(2)
@@ -1284,25 +1296,34 @@ end subroutine
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate1Part)
 
 
-   ! Create interface int to wrap optional element mask
+   ! Create interface int to wrap optional node owners
+   nodeOwnersII = ESMF_InterArrayCreate(nodeOwners, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+   ! Create interface int to wrap optional node mask
    nodeMaskII = ESMF_InterArrayCreate(nodeMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+
     ! Add the nodes
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(ESMF_MeshCreate1Part%this, num_nodes, nodeIds, nodeCoords, &
-                             nodeOwners, nodeMaskII, &
+                             nodeOwnersII, nodeMaskII, &
                              coordSysLocal, spatialDim, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-    ! Get rid of interface Int wrapper
-    call ESMF_InterArrayDestroy(nodeMaskII, rc=localrc)
+    ! Get rid of interface Int wrappers
+    call ESMF_InterArrayDestroy(nodeOwnersII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    call ESMF_InterArrayDestroy(nodeMaskII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! Create interface int to wrap optional element mask
