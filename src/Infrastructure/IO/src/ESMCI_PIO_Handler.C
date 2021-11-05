@@ -55,12 +55,6 @@
 
 using json = nlohmann::json;  // Convenience rename for JSON namespace.
 
-// For error checking
-#define CHECKPIOERROR(_err, _str, _rc_code, _rc)                                        \
-  PIO_Handler::CheckPIOError((_err), ESMC_CONTEXT, (_str), _rc_code, &(_rc))
-#define CHECKPIOWARN(_err, _str, _rc_code, _rc)                                         \
-  PIO_Handler::CheckPIOError((_err), ESMC_CONTEXT, (_str), _rc_code, &(_rc), true)
-
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.

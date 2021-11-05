@@ -44,6 +44,8 @@
 // PIO include files
 #include <pio.h>
 
+
+
 //-------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -146,6 +148,8 @@ namespace ESMCI {
                             int *basepiotype = (int *)NULL,
                             int *rc = (int *)NULL);
     void attPackPut (int vardesc, const ESMCI::Info *attPack, int *rc);
+
+  public:
     // Error recording routine
     static bool CheckPIOError(int pioRetCode,
                               int line, const char * const file,
@@ -183,6 +187,15 @@ namespace ESMCI {
   };  // class IO_Handler
   //===========================================================================
   
+// Macros
+
+// For error checking
+#define CHECKPIOERROR(_err, _str, _rc_code, _rc)                                        \
+  PIO_Handler::CheckPIOError((_err), ESMC_CONTEXT, (_str), _rc_code, &(_rc))
+#define CHECKPIOWARN(_err, _str, _rc_code, _rc)                                         \
+  PIO_Handler::CheckPIOError((_err), ESMC_CONTEXT, (_str), _rc_code, &(_rc), true)
+
+
 } // namespace ESMCI
 
 #endif // __ESMCI_PIO_HANDLER_H

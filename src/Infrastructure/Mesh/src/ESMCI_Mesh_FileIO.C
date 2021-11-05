@@ -88,7 +88,7 @@ void ESMCI_mesh_create_from_file(char *filename,
                                  Mesh **out_mesh, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_file()"
-#if 0
+#if 1
   // Try-catch block around main part of method
   try {
     // local return code
@@ -128,17 +128,14 @@ void ESMCI_mesh_create_from_file(char *filename,
     int piorc;
     piorc = PIOc_Init_Intracomm(mpi_comm, num_iotasks, stride, 0, PIO_REARR_SUBSET, &pioSystemDesc);
 
-    
     // Open file - Jim
     int pioFileDesc;
     int mode = 0;
     piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
-    // if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + filename,
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-    //     return;
-    //}
-    piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
+    if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
+    piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
 
     // Get elem_distgrid ids
     int num_elem_ids=0;
@@ -223,8 +220,8 @@ void ESMCI_mesh_create_from_file(char *filename,
 //	ESMF_RC_FILE_OPEN, (*rc))) {
 //      return;
 //    }
-    int elementConn[num_elem_ids, maxNodePElement];
-    piorc = PIOc_read_darray(pioFileDesc, varid, iodesc, num_elem_ids, &elementConn);
+    int *elementConn= new int[num_elem_ids*maxNodePElement];
+    piorc = PIOc_read_darray(pioFileDesc, varid, iodesc, num_elem_ids, elementConn);
     // if (!CHECKPIOWARN(piorc, std::string("Error reading variable elementConn from file ") + filename,
 //	ESMF_RC_FILE_OPEN, (*rc))) {
 //      return;
@@ -234,8 +231,8 @@ void ESMCI_mesh_create_from_file(char *filename,
 //	ESMF_RC_FILE_OPEN, (*rc))) {
 //      return;
 //    }
-    char NumElementConn[num_elem_ids];
-    piorc = PIOc_read_darray(pioFileDesc, varid, iodesc, num_elem_ids, &NumElementConn);
+    char *NumElementConn=new char[num_elem_ids];
+    piorc = PIOc_read_darray(pioFileDesc, varid, iodesc, num_elem_ids, NumElementConn);
     // if (!CHECKPIOWARN(piorc, std::string("Error reading NumElementConn variable from file ") + filename,
 //	ESMF_RC_FILE_OPEN, (*rc))) {
 //      return;
@@ -261,6 +258,10 @@ void ESMCI_mesh_create_from_file(char *filename,
 
     // maybe free the iosystem here?
     piorc = PIOc_free_iosystem(pioSystemDesc);
+
+    // Free
+    delete [] elementConn;
+    delete [] NumElementConn;
 
 
   }catch(int localrc){
