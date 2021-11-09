@@ -76,9 +76,6 @@ struct NODE_INFO {
 
 };
 
-static bool _are_node_ids_less(const NODE_INFO lhs, const NODE_INFO rhs) {
-  return (lhs.node_id < rhs.node_id);
-}
 
 // Note that local_elem_conn is base-1 (as expected by mesh create routines)
 static void _convert_global_elem_conn_to_local_node_and_elem_info(int num_local_elem, int max_num_elem_conn, int *num_elem_conn, int *global_elem_conn,
@@ -113,7 +110,6 @@ static void _convert_global_elem_conn_to_local_node_and_elem_info(int num_local_
   }
 
   // Sort list by node_id, to make it easy to find unique node_ids
-  //  std::sort(convert_list,convert_list+num_local_elem_conn, _are_node_ids_less);
   std::sort(convert_list,convert_list+num_local_elem_conn);
 
   // Count number of unique node ids in  convert_list
@@ -261,11 +257,49 @@ void ESMCI_mesh_create_from_file(char *filename,
     //    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
     //                   ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
-    // Get elem_distgrid ids
-    int num_elem_pos=0;
-    int *elem_pos=NULL;
+
+    // Get global elementCount
+    int dimid;
+    piorc = PIOc_inq_dimid(pioFileDesc, "elementCount", &dimid);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading  elementCount dimension length from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+    PIO_Offset elementCount;
+    piorc = PIOc_inq_dim(pioFileDesc, dimid, NULL, &elementCount);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading  elementCount dimension length from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+
+    // Get positions at which to read element information
     std::vector<int> elem_pos_vec;
-    if (elem_distgrid != NULL) {
+    if (elem_distgrid == NULL) {
+
+      // No distgrid provided so divide things up equally
+
+      // Approx. number per PET
+      int num_per_pet=elementCount/pet_count;
+
+      // Figure out range for this PET
+      int min_id=local_pet*num_per_pet+1;
+      int max_id=(local_pet+1)*num_per_pet;
+
+      // Add rest to end
+      // TODO: Spread these more evenly
+      if (local_pet == pet_count-1) max_id=elementCount;
+
+      //  printf("%d# min,max ids=%d %d\n",local_pet,min_id,max_id);
+
+      // Reserve space for ids
+      elem_pos_vec.reserve(max_id-min_id+1);
+      
+      // Fill ids
+      for (int id=min_id; id <= max_id; id++) {
+        elem_pos_vec.push_back(id);
+      }
+
+    } else {
+
+      // Have elem_distgrid, so get ids from that
 
       // Currently only support distgrids with 1 localDE
       if (elem_distgrid->getDELayout()->getLocalDeCount() != 1) {
@@ -279,18 +313,18 @@ void ESMCI_mesh_create_from_file(char *filename,
       localrc=elem_distgrid->fillSeqIndexList(elem_pos_vec, 0);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                         &localrc)) throw localrc;
-
-      // Assign to pointer
-      if (!elem_pos_vec.empty()) {
-        num_elem_pos=elem_pos_vec.size();
-        elem_pos=&elem_pos_vec[0];
-
-      }
     }
 
+    // Assign vector info to pointer for below
+    // TODO: get rid of this
+    int num_elem_pos=0;
+    int *elem_pos=NULL;
+    if (!elem_pos_vec.empty()) {
+      num_elem_pos=elem_pos_vec.size();
+      elem_pos=&elem_pos_vec[0];
+    }
 
     // Get maxNodePElement
-    int dimid;
     piorc = PIOc_inq_dimid(pioFileDesc, "maxNodePElement", &dimid);
     if (!CHECKPIOERROR(piorc, std::string("Error reading maxNodePElement dimension from file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
@@ -313,16 +347,6 @@ void ESMCI_mesh_create_from_file(char *filename,
     
     //printf("coordDim=%d\n",coordDim);
 
-
-    // Get global elementCount
-    piorc = PIOc_inq_dimid(pioFileDesc, "elementCount", &dimid);
-    if (!CHECKPIOERROR(piorc, std::string("Error reading  elementCount dimension length from file ") + filename,
-                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
-
-    PIO_Offset elementCount;
-    piorc = PIOc_inq_dim(pioFileDesc, dimid, NULL, &elementCount);
-    if (!CHECKPIOERROR(piorc, std::string("Error reading  elementCount dimension length from file ") + filename,
-                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
     // Get global nodeCount
     piorc = PIOc_inq_dimid(pioFileDesc, "nodeCount", &dimid);

@@ -132,6 +132,8 @@ subroutine  test_mesh_create_from_file(correct, rc)
   ! If this Pet is last, put the rest there
   if (localPet .eq. petCount-1) maxId=numElems
   
+  ! write(*,*) localPet,"# ",minId,maxId
+
   ! Allocate elemIds
   allocate(elemIds(maxId-minId+1))
   
@@ -142,7 +144,6 @@ subroutine  test_mesh_create_from_file(correct, rc)
      pos=pos+1
   enddo
 
-
   ! Create element Distgrid
   elemdistgrid=ESMF_DistGridCreate(elemIds, rc=rc)
   if (rc /= ESMF_SUCCESS) return
@@ -152,7 +153,7 @@ subroutine  test_mesh_create_from_file(correct, rc)
   mesh=ESMF_MeshCreateFromFileNew("data/ne4np4-esmf.nc", &
 !  mesh=ESMF_MeshCreate("data/ne4np4-esmf.nc", &  ! OLD WAY
        fileformat=ESMF_FILEFORMAT_ESMFMESH, &
-       elementDistgrid=elemDistgrid, &
+!       elementDistgrid=elemDistgrid, &
        rc=rc)
   if (rc /= ESMF_SUCCESS) return
 
