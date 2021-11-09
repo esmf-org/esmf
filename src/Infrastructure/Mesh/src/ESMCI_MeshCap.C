@@ -2484,8 +2484,8 @@ void MeshCap::meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
 
 MeshCap *MeshCap::meshcreatefromfilenew(char *filename,
                                         ESMC_FileFormat_Flag fileformat,
-                                        int *convert_to_dual, 
-                                        int *add_user_area, 
+                                        bool convert_to_dual, 
+                                        bool add_user_area, 
                                         ESMCI::DistGrid *node_distgrid,
                                         ESMCI::DistGrid *elem_distgrid,
                                         int *rc) {

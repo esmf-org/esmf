@@ -2122,11 +2122,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     type(ESMF_Mesh) :: myMesh
     integer::  localrc
+    type(ESMF_Logical) :: localAddUserArea
+    type(ESMF_Logical) :: localConvertToDual
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, nodalDistgrid, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, elementDistgrid, rc)
-
 
     ! Only doing ESMFMesh format right now
     if (fileformat .ne. ESMF_FILEFORMAT_ESMFMESH) then
@@ -2136,10 +2137,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        return
     endif
 
+    ! Process optional arguments and at the same time convert to a format to go through to C
+    localAddUserArea=ESMF_FALSE
+    if (present(addUserArea)) then
+       localAddUserArea=addUserArea
+    endif
+
+    localConvertToDual=ESMF_FALSE
+    if (present(convertToDual)) then
+       localConvertToDual=convertToDual
+    endif
+
+
     ! Call into C 
     call c_ESMC_MeshCreateFromFile(ESMF_MeshCreateFromFileNew%this, &
          filename, fileformat, &
-         convertToDual, addUserArea, &
+         localConvertToDual, localAddUserArea, &
          !  maskFlag, varname, & ! JUST DO STUFF FOR ESMFMESH format right now
          nodalDistgrid, elementDistgrid, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

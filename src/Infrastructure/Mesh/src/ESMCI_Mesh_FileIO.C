@@ -176,7 +176,7 @@ static void _convert_global_elem_conn_to_local_node_and_elem_info(int num_local_
 //
 void ESMCI_mesh_create_from_file(char *filename, 
                                  ESMC_FileFormat_Flag fileformat, 
-                                 int *convert_to_dual, int *add_user_area, 
+                                 bool convert_to_dual, bool add_user_area, 
                                  ESMCI::DistGrid *node_distgrid, 
                                  ESMCI::DistGrid *elem_distgrid, 
                                  Mesh **out_mesh, int *rc){
@@ -188,12 +188,38 @@ void ESMCI_mesh_create_from_file(char *filename,
     // local return code
     int localrc;
     int pio_type = PIO_IOTYPE_NETCDF;
+
+
+    // Error check some unhandled options
+
     // Only support ESMFMesh right now
     if (fileformat != ESMC_FILEFORMAT_ESMFMESH) {
       if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           " Only ESMFMesh format files supported right now.",
                            ESMC_CONTEXT, &localrc)) throw localrc;
     }    
+
+    // Don't currently support redisting to node_distgrid
+    if (node_distgrid != NULL) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          " redistribution to node DistGrid currently not supported.",
+                           ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // Don't currently support converting to dual
+    if (convert_to_dual) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          " converting to dual currently not supported.",
+                           ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // Don't currently support adding user area
+    if (add_user_area) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          " adding user area currently not supported.",
+                           ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
 
 
     // Get VM info

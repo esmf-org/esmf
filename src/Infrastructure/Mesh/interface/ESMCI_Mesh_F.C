@@ -893,8 +893,8 @@ extern "C" void FTN_X(c_esmc_geteleminfointoarray)(MeshCap **meshpp,
 extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
                                                  char *filename,
                                                  ESMC_FileFormat_Flag *fileformat, 
-                                                 int *convertToDual,
-                                                 int *addUserArea,
+                                                 ESMC_Logical *convertToDual,
+                                                 ESMC_Logical *addUserArea,
                                                  ESMCI::DistGrid **nodeDistgridpp,
                                                  ESMCI::DistGrid **elemDistgridpp,
                                                  int *rc, 
@@ -919,14 +919,14 @@ extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
   }
 
   // Convert Flags
-  int *C_convertToDual=NULL;
+  bool C_convertToDual=false;
   if (ESMC_NOT_PRESENT_FILTER(convertToDual) != ESMC_NULL_POINTER) {
-    C_convertToDual=convertToDual;
+    if (*convertToDual == ESMF_TRUE) C_convertToDual=true;
   }
 
-  int *C_addUserArea=NULL;
+  bool C_addUserArea=false;
   if (ESMC_NOT_PRESENT_FILTER(addUserArea) != ESMC_NULL_POINTER) {
-    C_addUserArea=addUserArea;
+    if (*addUserArea == ESMF_TRUE) C_addUserArea=true;
   }
 
   // Create Mesh from file
