@@ -179,6 +179,9 @@ void ESMCI_mesh_create_from_file(char *filename,
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_file()"
 
+  //  printf("in new scalable mesh create from file filename=%s\n",filename);
+
+
   // Try-catch block around main part of method
   try {
     // local return code
@@ -271,7 +274,7 @@ void ESMCI_mesh_create_from_file(char *filename,
 
 
     // Get positions at which to read element information
-    std::vector<int> elem_pos_vec;
+    std::vector<int> elem_ids_vec;
     if (elem_distgrid == NULL) {
 
       // No distgrid provided so divide things up equally
@@ -290,11 +293,11 @@ void ESMCI_mesh_create_from_file(char *filename,
       //  printf("%d# min,max ids=%d %d\n",local_pet,min_id,max_id);
 
       // Reserve space for ids
-      elem_pos_vec.reserve(max_id-min_id+1);
+      elem_ids_vec.reserve(max_id-min_id+1);
       
       // Fill ids
       for (int id=min_id; id <= max_id; id++) {
-        elem_pos_vec.push_back(id);
+        elem_ids_vec.push_back(id);
       }
 
     } else {
@@ -310,18 +313,18 @@ void ESMCI_mesh_create_from_file(char *filename,
 
       // Get seqIndexList
       // TODO: right now assumes 1 localDE, fix this
-      localrc=elem_distgrid->fillSeqIndexList(elem_pos_vec, 0);
+      localrc=elem_distgrid->fillSeqIndexList(elem_ids_vec, 0);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                         &localrc)) throw localrc;
     }
 
     // Assign vector info to pointer for below
     // TODO: get rid of this
-    int num_elem_pos=0;
-    int *elem_pos=NULL;
-    if (!elem_pos_vec.empty()) {
-      num_elem_pos=elem_pos_vec.size();
-      elem_pos=&elem_pos_vec[0];
+    int num_elems=0;
+    int *elem_ids=NULL;
+    if (!elem_ids_vec.empty()) {
+      num_elems=elem_ids_vec.size();
+      elem_ids=&elem_ids_vec[0];
     }
 
     // Get maxNodePElement
@@ -360,16 +363,16 @@ void ESMCI_mesh_create_from_file(char *filename,
 
 
     // Define offsets numElementConn decomp
-    PIO_Offset dof1d[num_elem_pos];
-    for (int i=0; i<num_elem_pos; i++) {
-      dof1d[i] = (PIO_Offset)elem_pos[i];
+    PIO_Offset dof1d[num_elems];
+    for (int i=0; i<num_elems; i++) {
+      dof1d[i] = (PIO_Offset)elem_ids[i];
     }
 
     // Init numElementConn decomp
     int nec_iodesc;
     int rearr = PIO_REARR_SUBSET;
     int gdimlen = (int) elementCount;
-    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_BYTE, 1, &gdimlen, num_elem_pos, dof1d, &nec_iodesc, 
+    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_BYTE, 1, &gdimlen, num_elems, dof1d, &nec_iodesc, 
                     &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -381,14 +384,14 @@ void ESMCI_mesh_create_from_file(char *filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
 
-    char *char_numElementConn=new char[num_elem_pos];
-    piorc = PIOc_read_darray(pioFileDesc, varid, nec_iodesc, num_elem_pos, char_numElementConn);
+    char *char_numElementConn=new char[num_elems];
+    piorc = PIOc_read_darray(pioFileDesc, varid, nec_iodesc, num_elems, char_numElementConn);
     if (!CHECKPIOERROR(piorc, std::string("Error reading numElementConn variable from file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
     // Copy to int array
-    int *numElementConn=new int[num_elem_pos];
-    for (int i=0; i<num_elem_pos; i++) {
+    int *numElementConn=new int[num_elems];
+    for (int i=0; i<num_elems; i++) {
       numElementConn[i]=(int)char_numElementConn[i];
     }
 
@@ -398,16 +401,16 @@ void ESMCI_mesh_create_from_file(char *filename,
 
 //     // DEBUG: output numElementConn
 //     printf("%d# numElementConn=\n",local_pet);
-//     for (int i=0; i<num_elem_pos; i++) {
-//       printf(" [%d]=%d ",elem_pos[i],numElementConn[i]);
+//     for (int i=0; i<num_elems; i++) {
+//       printf(" [%d]=%d ",elem_ids[i],numElementConn[i]);
 //     }
 //     printf("\n");
 
 
     // Define offsets for elementConn decomp
-    PIO_Offset dof2d[num_elem_pos*maxNodePElement];
-    for (int i=0,pos=0; i<num_elem_pos; i++) {
-      int elem_start_ind=(elem_pos[i]-1)*maxNodePElement+1;
+    PIO_Offset dof2d[num_elems*maxNodePElement];
+    for (int i=0,pos=0; i<num_elems; i++) {
+      int elem_start_ind=(elem_ids[i]-1)*maxNodePElement+1;
       for (int j=0; j<maxNodePElement; j++) {
         dof2d[pos] = (PIO_Offset) (elem_start_ind+j);
         pos++;
@@ -417,7 +420,7 @@ void ESMCI_mesh_create_from_file(char *filename,
     // Init elementConn decomp
     int ec_iodesc;
     int gdimlen2D[2]={elementCount,maxNodePElement};
-    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 2, gdimlen2D, num_elem_pos*maxNodePElement, dof2d, &ec_iodesc, 
+    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 2, gdimlen2D, num_elems*maxNodePElement, dof2d, &ec_iodesc, 
                     &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -427,15 +430,15 @@ void ESMCI_mesh_create_from_file(char *filename,
     if (!CHECKPIOERROR(piorc, std::string("Error elementConn variable not in file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
-    int *elementConn= new int[num_elem_pos*maxNodePElement];
-    piorc = PIOc_read_darray(pioFileDesc, varid, ec_iodesc, num_elem_pos*maxNodePElement, elementConn);
+    int *elementConn= new int[num_elems*maxNodePElement];
+    piorc = PIOc_read_darray(pioFileDesc, varid, ec_iodesc, num_elems*maxNodePElement, elementConn);
     if (!CHECKPIOERROR(piorc, std::string("Error reading variable elementConn from file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
     
     //     // DEBUG: output elementConn
-    //     for (int i=0; i<num_elem_pos; i++) {
+    //     for (int i=0; i<num_elems; i++) {
     //       int pos=i*maxNodePElement; // base elementConn position
-    //       printf(" [%d] =",elem_pos[i]);
+    //       printf(" [%d] =",elem_ids[i]);
     //       for (int j=0; j<(int)numElementConn[i]; j++) {
     //         printf(" %d ",elementConn[pos]);
     //         pos++;
@@ -450,7 +453,7 @@ void ESMCI_mesh_create_from_file(char *filename,
     int *node_ids=NULL;
     int num_local_elem_conn;
     int *local_elem_conn=NULL;
-    _convert_global_elem_conn_to_local_node_and_elem_info(num_elem_pos, maxNodePElement, numElementConn, elementConn,
+    _convert_global_elem_conn_to_local_node_and_elem_info(num_elems, maxNodePElement, numElementConn, elementConn,
                                                           num_nodes, node_ids, num_local_elem_conn, local_elem_conn);
 
     // DEBUG output num_nodes
@@ -515,7 +518,7 @@ void ESMCI_mesh_create_from_file(char *filename,
     int elemCoordsPresent=0;
     int regridConserve=1;
     ESMCI_meshaddelements(out_mesh,
-                          &num_elem_pos, elem_pos, numElementConn,
+                          &num_elems, elem_ids, numElementConn,
                           NULL,
                           &areaPresent, NULL,
                           &elemCoordsPresent, NULL, 
