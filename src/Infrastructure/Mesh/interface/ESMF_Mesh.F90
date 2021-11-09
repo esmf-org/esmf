@@ -1248,11 +1248,9 @@ end subroutine
 
     ESMF_MeshCreate1Part%this = ESMF_NULL_POINTER
 
-
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, nodalDistgrid, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, elementDistgrid, rc)
-
 
     ! Handle optional conserve argument
 ! Passing the regridConserve flag into add elements is a fix for source masking
@@ -2125,6 +2123,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Mesh) :: myMesh
     integer::  localrc
 
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, nodalDistgrid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, elementDistgrid, rc)
+
+
     ! Only doing ESMFMesh format right now
     if (fileformat .ne. ESMF_FILEFORMAT_ESMFMESH) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
@@ -2142,6 +2145,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+
+    ! Set nodeDistgrid in Mesh
+    if (present(nodalDistgrid)) then
+      call c_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreateFromFileNew, nodalDistgrid, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromFileNew, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Set elementDistgrid in Mesh
+    if (present(elementDistgrid)) then
+      call c_ESMC_MeshSetElemDistGrid(ESMF_MeshCreateFromFileNew, elementDistgrid, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromFileNew, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
     ! Set the name in Base object
     ! Do this here for now, but eventually move into above C func
     if (present(name)) then
@@ -2150,8 +2177,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+
+    ! Change status
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreateFromFileNew, ESMF_MESHSTATUS_COMPLETE)
+
+    ! Set init status of arguments
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromFileNew)
+
+    ! Return success
     if (present(rc)) rc=ESMF_SUCCESS
-    return
 
 end function ESMF_MeshCreateFromFileNew
 !------------------------------------------------------------------------------

@@ -21,6 +21,7 @@
 #include <string>
 #include <ostream>
 #include <iterator>
+#include <algorithm>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
@@ -65,6 +66,99 @@ void CheckPIOError(int err, char *_str, int rc_code, int rc,bool warn)
         printf("err = %d str = %s\n",err, _str);
 }
 
+struct NODE_INFO {
+  int node_id;
+  int local_elem_conn_pos;
+
+  bool operator< (const NODE_INFO &rhs) const {
+    return node_id < rhs.node_id;
+  }
+
+};
+
+static bool _are_node_ids_less(const NODE_INFO lhs, const NODE_INFO rhs) {
+  return (lhs.node_id < rhs.node_id);
+}
+
+// Note that local_elem_conn is base-1 (as expected by mesh create routines)
+static void _convert_global_elem_conn_to_local_node_and_elem_info(int num_local_elem, int max_num_elem_conn, int *num_elem_conn, int *global_elem_conn,
+                                                                  int &num_nodes, int*& node_ids, int &num_local_elem_conn, int*& local_elem_conn) {
+  // Init output
+  num_nodes=0;
+  node_ids=NULL;
+  num_local_elem_conn=0;
+  local_elem_conn=NULL;
+
+  // Count local elems conns
+  num_local_elem_conn=0;
+  for (int i=0; i<num_local_elem; i++) {
+    num_local_elem_conn += num_elem_conn[i];
+  }
+
+  // If nothing to do leave
+  if (num_local_elem_conn < 1) return;
+
+  // Allocate conversion list
+  NODE_INFO *convert_list=new NODE_INFO[num_local_elem_conn];
+
+  // Copy global elem connection info into conversion list
+  for (int i=0,pos=0; i<num_local_elem; i++) {
+    int global_elem_conn_pos=i*max_num_elem_conn; // base elem_conn position    
+
+    for (int j=0; j<(int)num_elem_conn[i]; j++) {
+      convert_list[pos].node_id=global_elem_conn[global_elem_conn_pos+j];
+      convert_list[pos].local_elem_conn_pos=pos;
+      pos++;
+    }
+  }
+
+  // Sort list by node_id, to make it easy to find unique node_ids
+  //  std::sort(convert_list,convert_list+num_local_elem_conn, _are_node_ids_less);
+  std::sort(convert_list,convert_list+num_local_elem_conn);
+
+  // Count number of unique node ids in  convert_list
+  int num_unique_node_ids=1;                 // There has to be at least 1, 
+  int prev_node_id=convert_list[0].node_id;  // because we leave if < 1 above
+  for (int i=1; i<num_local_elem_conn; i++) {
+
+    // If not the same as the last one count a new one
+    if (convert_list[i].node_id != prev_node_id) {
+      num_unique_node_ids++;
+      prev_node_id=convert_list[i].node_id;
+    }
+  }
+
+  // Allocate node_ids
+  node_ids=new int[num_unique_node_ids];
+
+  // Set output number of nodes
+  num_nodes=num_unique_node_ids;
+
+  // Allocate local elem conn
+  local_elem_conn=new int[num_local_elem_conn];
+
+  // Translate convert_list to node_ids and local_elem_conn
+  int node_ids_pos=0;                             // There has to be at least 1, 
+  node_ids[node_ids_pos]=convert_list[0].node_id; // because we leave if < 1 above
+  local_elem_conn[convert_list[0].local_elem_conn_pos]=node_ids_pos+1; // +1 to make base-1
+  for (int i=1; i<num_local_elem_conn; i++) {
+
+    // If not the same as the last one add a new one
+    if (convert_list[i].node_id != node_ids[node_ids_pos]) {
+      node_ids_pos++;
+      node_ids[node_ids_pos]=convert_list[i].node_id; 
+    }
+
+    // Add an entry for this in local_elem_conn
+    local_elem_conn[convert_list[i].local_elem_conn_pos]=node_ids_pos+1; // +1 to make base-1
+  }
+
+
+  // Get rid of conversion list
+  delete [] convert_list;    
+}
+
+
 
 // INPUTS: 
 //  filename - file name in NULL delimited form
@@ -88,7 +182,7 @@ void ESMCI_mesh_create_from_file(char *filename,
                                  Mesh **out_mesh, int *rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_file()"
-#if 1
+
   // Try-catch block around main part of method
   try {
     // local return code
@@ -127,6 +221,8 @@ void ESMCI_mesh_create_from_file(char *filename,
     int pioSystemDesc;
     int piorc;
     piorc = PIOc_Init_Intracomm(mpi_comm, num_iotasks, stride, 0, PIO_REARR_SUBSET, &pioSystemDesc);
+    if (!CHECKPIOERROR(piorc, std::string("Unable to init PIO Intracomm for file: ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
     // Open file - Jim
     int pioFileDesc;
@@ -136,11 +232,13 @@ void ESMCI_mesh_create_from_file(char *filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
     piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
+    //    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
+    //                   ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
     // Get elem_distgrid ids
-    int num_elem_ids=0;
-    int *elem_ids=NULL;
-    std::vector<int> elem_ids_vec;
+    int num_elem_pos=0;
+    int *elem_pos=NULL;
+    std::vector<int> elem_pos_vec;
     if (elem_distgrid != NULL) {
 
       // Currently only support distgrids with 1 localDE
@@ -152,140 +250,262 @@ void ESMCI_mesh_create_from_file(char *filename,
 
       // Get seqIndexList
       // TODO: right now assumes 1 localDE, fix this
-      localrc=elem_distgrid->fillSeqIndexList(elem_ids_vec, 0);
+      localrc=elem_distgrid->fillSeqIndexList(elem_pos_vec, 0);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                         &localrc)) throw localrc;
 
       // Assign to pointer
-      if (!elem_ids_vec.empty()) {
-        num_elem_ids=elem_ids_vec.size();
-        elem_ids=&elem_ids_vec[0];
+      if (!elem_pos_vec.empty()) {
+        num_elem_pos=elem_pos_vec.size();
+        elem_pos=&elem_pos_vec[0];
 
       }
-
-      // Loop and convert to 0-based
-      for (int i=0; i<num_elem_ids; i++) {
-        elem_ids[0]=elem_ids[0]-1;
-      }
-
     }
 
 
-    // Debug output
-    //printf(" %d# ",local_pet);
-    //printf("\n");
-
+    // Get maxNodePElement
     int dimid;
-    // Get maxNodePElement - Jim
     piorc = PIOc_inq_dimid(pioFileDesc, "maxNodePElement", &dimid);
-    // if (!CHECKPIOWARN(piorc, std::string("Error reading maxNodePElement dimension from file ") + filename,
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-//      return;
-//    }
+    if (!CHECKPIOERROR(piorc, std::string("Error reading maxNodePElement dimension from file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
     PIO_Offset maxNodePElement;
     piorc = PIOc_inq_dim(pioFileDesc, dimid, NULL, &maxNodePElement);
-    // if (!CHECKPIOWARN(piorc, std::string("Error reading maxNodePElement dimension length from file ") + filename,
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-//      return;
-//    }
+    if (!CHECKPIOERROR(piorc, std::string("Error reading maxNodePElement dimension length from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
-    //Get global element count
+
+    // Get global coordDim
+    piorc = PIOc_inq_dimid(pioFileDesc, "coordDim", &dimid);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading coordDim from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+    PIO_Offset coordDim;
+    piorc = PIOc_inq_dim(pioFileDesc, dimid, NULL, &coordDim);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading coordDim length from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+    
+    //printf("coordDim=%d\n",coordDim);
+
+
+    // Get global elementCount
     piorc = PIOc_inq_dimid(pioFileDesc, "elementCount", &dimid);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading  elementCount dimension length from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
     PIO_Offset elementCount;
     piorc = PIOc_inq_dim(pioFileDesc, dimid, NULL, &elementCount);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading  elementCount dimension length from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
-    PIO_Offset dof1d[num_elem_ids];
-    for (int i=0; i<num_elem_ids; i++) {
-        dof1d[i] = (PIO_Offset) elem_ids[i];
+    // Get global nodeCount
+    piorc = PIOc_inq_dimid(pioFileDesc, "nodeCount", &dimid);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading nodeCount dimension length from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+    PIO_Offset nodeCount;
+    piorc = PIOc_inq_dim(pioFileDesc, dimid, NULL, &nodeCount);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading nodeCount dimension length from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+
+    // Define offsets numElementConn decomp
+    PIO_Offset dof1d[num_elem_pos];
+    for (int i=0; i<num_elem_pos; i++) {
+      dof1d[i] = (PIO_Offset)elem_pos[i];
     }
 
+    // Init numElementConn decomp
     int nec_iodesc;
     int rearr = PIO_REARR_SUBSET;
     int gdimlen = (int) elementCount;
-    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_BYTE, 1, &gdimlen, num_elem_ids, dof1d, &nec_iodesc, 
+    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_BYTE, 1, &gdimlen, num_elem_pos, dof1d, &nec_iodesc, 
                     &rearr, NULL, NULL);
-    // if (!CHECKPIOWARN(piorc, std::string("Error initializing PIO decomp for file ") + filename,
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-//      return;
-//    }
+    if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
+    // Get numElementConn
     int varid;
     piorc = PIOc_inq_varid(pioFileDesc, "numElementConn", &varid);
-    // if (!CHECKPIOWARN(piorc, std::string("Error NumElementConn variable not in file ") + filename,
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-//      return;
-//    }
+    if (!CHECKPIOERROR(piorc, std::string("Error NumElementConn variable not in file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
 
-    char *NumElementConn=new char[num_elem_ids];
-    piorc = PIOc_read_darray(pioFileDesc, varid, nec_iodesc, num_elem_ids, NumElementConn);
-    // if (!CHECKPIOWARN(piorc, std::string("Error reading NumElementConn variable from file ") + filename,
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-//      return;
-//    }
+    char *char_numElementConn=new char[num_elem_pos];
+    piorc = PIOc_read_darray(pioFileDesc, varid, nec_iodesc, num_elem_pos, char_numElementConn);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading numElementConn variable from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+    // Copy to int array
+    int *numElementConn=new int[num_elem_pos];
+    for (int i=0; i<num_elem_pos; i++) {
+      numElementConn[i]=(int)char_numElementConn[i];
+    }
+
+    // Get rid of char version
+    delete [] char_numElementConn;
 
 
-    // DEBUG OUTPUT
-    // printf("%d# numElementConn=\n",local_pet);
-    //for (int i=0; i<num_elem_ids; i++) {
-    //  printf(" %d ",(int)NumElementConn[i]);
-    // }
-    //printf("\n");
+//     // DEBUG: output numElementConn
+//     printf("%d# numElementConn=\n",local_pet);
+//     for (int i=0; i<num_elem_pos; i++) {
+//       printf(" [%d]=%d ",elem_pos[i],numElementConn[i]);
+//     }
+//     printf("\n");
 
-    // Offsets for elementConn decomp
-    PIO_Offset dof2d[num_elem_ids*maxNodePElement];
-    for (int i=0; i<num_elem_ids*maxNodePElement; i++) {
-       dof2d[i] = (PIO_Offset) (elem_ids[i/maxNodePElement]*maxNodePElement + i%maxNodePElement);
+
+    // Define offsets for elementConn decomp
+    PIO_Offset dof2d[num_elem_pos*maxNodePElement];
+    for (int i=0,pos=0; i<num_elem_pos; i++) {
+      int elem_start_ind=(elem_pos[i]-1)*maxNodePElement+1;
+      for (int j=0; j<maxNodePElement; j++) {
+        dof2d[pos] = (PIO_Offset) (elem_start_ind+j);
+        pos++;
+      }
     }
 
     // Init elementConn decomp
     int ec_iodesc;
     int gdimlen2D[2]={elementCount,maxNodePElement};
-    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 2, gdimlen2D, num_elem_ids*maxNodePElement, dof2d, &ec_iodesc, 
+    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 2, gdimlen2D, num_elem_pos*maxNodePElement, dof2d, &ec_iodesc, 
                     &rearr, NULL, NULL);
+    if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
-
+    // Get elementConn
     piorc = PIOc_inq_varid(pioFileDesc, "elementConn", &varid);
-    // if (!CHECKPIOWARN(piorc, std::string("Error elementConn variable not in file ") + filename,
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-//      return;
-//    }
+    if (!CHECKPIOERROR(piorc, std::string("Error elementConn variable not in file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
-    int *elementConn= new int[num_elem_ids*maxNodePElement];
-    piorc = PIOc_read_darray(pioFileDesc, varid, ec_iodesc, num_elem_ids*maxNodePElement, elementConn);
-    // if (!CHECKPIOWARN(piorc, std::string("Error reading variable elementConn from file ") + filename,
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-//      return;
-//    }
+    int *elementConn= new int[num_elem_pos*maxNodePElement];
+    piorc = PIOc_read_darray(pioFileDesc, varid, ec_iodesc, num_elem_pos*maxNodePElement, elementConn);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading variable elementConn from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+    
+    //     // DEBUG: output elementConn
+    //     for (int i=0; i<num_elem_pos; i++) {
+    //       int pos=i*maxNodePElement; // base elementConn position
+    //       printf(" [%d] =",elem_pos[i]);
+    //       for (int j=0; j<(int)numElementConn[i]; j++) {
+    //         printf(" %d ",elementConn[pos]);
+    //         pos++;
+    //       }
+    //       printf("\n");
+    //     }
+    //     printf("\n");
+    
+
+    // Convert global elem info
+    int num_nodes;
+    int *node_ids=NULL;
+    int num_local_elem_conn;
+    int *local_elem_conn=NULL;
+    _convert_global_elem_conn_to_local_node_and_elem_info(num_elem_pos, maxNodePElement, numElementConn, elementConn,
+                                                          num_nodes, node_ids, num_local_elem_conn, local_elem_conn);
+
+    // DEBUG output num_nodes
+    //printf("%d# num_nodes=%d\n",local_pet, num_nodes);
+
+    // Define offsets for elementConn decomp
+    PIO_Offset node_offsets[num_nodes*coordDim];
+    for (int i=0,pos=0; i<num_nodes; i++) {
+      int node_start_ind=(node_ids[i]-1)*coordDim+1;
+      for (int j=0; j<coordDim; j++) {
+        node_offsets[pos] = (PIO_Offset) (node_start_ind+j);
+        pos++;
+      }
+    }
+
+    // Init elementConn decomp
+    int node_iodesc;
+    int node_gdimlen2D[2]={nodeCount, coordDim};
+    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_DOUBLE, 2, node_gdimlen2D, num_nodes*coordDim, node_offsets, &node_iodesc, 
+                    &rearr, NULL, NULL);
+    if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+    // Get nodeCoords
+    piorc = PIOc_inq_varid(pioFileDesc, "nodeCoords", &varid);
+    if (!CHECKPIOERROR(piorc, std::string("Error nodeCoords variable not in file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+    double *nodeCoords= new double[num_nodes*coordDim];
+    piorc = PIOc_read_darray(pioFileDesc, varid, node_iodesc, num_nodes*coordDim, nodeCoords);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading variable nodeCoords from file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
 
-    ///// Close file - Jim
+    // Create Mesh    
+    int pdim, sdim;
+    if (coordDim == 2) {
+      pdim=2;
+      sdim=2;
+    } else if (coordDim == 3) {
+      pdim=3;
+      sdim=3;
+    } else {
+      Throw() << "Meshes can only be created with dim=2 or 3.";
+    }
+    ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_SPH_DEG;
+    ESMCI_meshcreate(out_mesh,
+                     &pdim, &sdim, &coord_sys, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
+    // Add nodes
+    ESMCI_meshaddnodes(out_mesh, &num_nodes, node_ids,
+                       nodeCoords, NULL, NULL,
+                       &coord_sys, &sdim,
+                       &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
+    // Add elements
+    int areaPresent=0;
+    int elemCoordsPresent=0;
+    int regridConserve=1;
+    ESMCI_meshaddelements(out_mesh,
+                          &num_elem_pos, elem_pos, numElementConn,
+                          NULL,
+                          &areaPresent, NULL,
+                          &elemCoordsPresent, NULL, 
+                          &num_local_elem_conn, local_elem_conn, &regridConserve,
+                          &coord_sys, &sdim, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
+
+    // Close file
     piorc = PIOc_closefile(pioFileDesc);
-    // if (!CHECKPIOWARN(piorc, std::string("Error closing file ") + filename,
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-//      return;
-//    }
+    if (!CHECKPIOERROR(piorc, std::string("Error closing file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
-    piorc = PIOc_freedecomp(pioSystemDesc, ec_iodesc);
-    // if (!CHECKPIOWARN(piorc, std::string("Error freeing decomp "),
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-//      return;
-//    }
-
+    // Get rid of numElementConn decomp
     piorc = PIOc_freedecomp(pioSystemDesc, nec_iodesc);
-    // if (!CHECKPIOWARN(piorc, std::string("Error freeing decomp "),
-//	ESMF_RC_FILE_OPEN, (*rc))) {
-//      return;
-//    }
+    if (!CHECKPIOERROR(piorc, std::string("Error freeing numElementConn decomp "),
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+    // Get rid of elementConn decomp
+    piorc = PIOc_freedecomp(pioSystemDesc, ec_iodesc);
+    if (!CHECKPIOERROR(piorc, std::string("Error freeing elementConn decomp "),
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+    // Get rid of elementConn decomp
+    piorc = PIOc_freedecomp(pioSystemDesc, node_iodesc);
+    if (!CHECKPIOERROR(piorc, std::string("Error freeing nodeCoord decomp "),
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
 
     // maybe free the iosystem here?
     piorc = PIOc_free_iosystem(pioSystemDesc);
+    if (!CHECKPIOERROR(piorc, std::string("Error freeing pio file system description "),
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
     // Free
     delete [] elementConn;
-    delete [] NumElementConn;
-
+    delete [] numElementConn;
+    delete [] node_ids;
+    delete [] local_elem_conn;
 
   }catch(int localrc){
     // catch standard ESMF return code
@@ -297,8 +517,6 @@ void ESMCI_mesh_create_from_file(char *filename,
     return;
   }
 
-#endif
-  
   // We've gotten to bottom successfully, so return success
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }

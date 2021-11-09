@@ -2497,8 +2497,10 @@ MeshCap *MeshCap::meshcreatefromfilenew(char *filename,
   bool is_esmf_mesh = !moab_on;
   
   // Create mesh depending on the type
-  Mesh *mesh;
+  Mesh *mesh = nullptr;
   MBMesh *mbmesh = nullptr;
+  int orig_sdim,pdim;
+  ESMC_CoordSys_Flag coord_sys; 
   if (is_esmf_mesh) {
     ESMCI_mesh_create_from_file(filename, 
                                 fileformat, 
@@ -2509,6 +2511,11 @@ MeshCap *MeshCap::meshcreatefromfilenew(char *filename,
                                 &mesh, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                         ESMC_CONTEXT, rc)) return NULL;
+      // Get mesh info
+      orig_sdim=mesh->orig_spatial_dim;
+      coord_sys=mesh->coordsys;
+      pdim=mesh->parametric_dim();
+
   } else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
                                   "- this functionality is not currently supported using MOAB",
@@ -2520,10 +2527,9 @@ MeshCap *MeshCap::meshcreatefromfilenew(char *filename,
   MeshCap *mc=new MeshCap();
 
   // Set member variables
-// SET THESE FROM MESH WHEN THINGS WORKING!
-//  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
-//  mc->finalize_dims(sdim, pdim, cs);
-//  mc->finalize_counts(&localrc);
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
+  mc->finalize_dims(orig_sdim, pdim, coord_sys);
+  mc->finalize_counts(&localrc);
   
   // Output new MeshCap
   return mc;

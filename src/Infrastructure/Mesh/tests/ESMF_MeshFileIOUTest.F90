@@ -150,11 +150,16 @@ subroutine  test_mesh_create_from_file(correct, rc)
   
   ! Create Mesh from file
   mesh=ESMF_MeshCreateFromFileNew("data/ne4np4-esmf.nc", &
+!  mesh=ESMF_MeshCreate("data/ne4np4-esmf.nc", &  ! OLD WAY
        fileformat=ESMF_FILEFORMAT_ESMFMESH, &
        elementDistgrid=elemDistgrid, &
        rc=rc)
   if (rc /= ESMF_SUCCESS) return
 
+
+  !! Write mesh for debugging
+  call ESMF_MeshWrite(mesh,"test_mesh",rc=rc)
+  if (rc /= ESMF_SUCCESS) return
 
   ! UNCOMMENT WHEN ABOVE IS WORKING
   ! Get rid of Mesh
