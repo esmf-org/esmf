@@ -783,7 +783,7 @@ end subroutine
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
-       call C_ESMC_MeshSetElemDistGrid(mesh%this, elementDistgrid, localrc)
+       call C_ESMC_MeshSetElemDistGrid(mesh, elementDistgrid, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
