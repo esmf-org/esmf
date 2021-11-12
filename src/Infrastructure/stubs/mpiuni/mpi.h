@@ -103,6 +103,13 @@ typedef void   *MPI_Group;
 typedef struct {int MPI_TAG,MPI_SOURCE,MPI_ERROR;} MPI_Status;
 typedef char*  MPI_Errhandler;
 typedef int    MPI_T_enum;
+/* NOTE: the C type MPI_Offset is NOT the same as MPI datatype MPI_OFFSET */
+typedef long long int MPI_Offset;
+typedef int MPI_Info;         /* handle */
+
+#define MPI_INFO_NULL (0)
+
+
 
 extern int MPIUNI_Memcpy(void*,const void*,int);
 
