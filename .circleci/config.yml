@@ -166,6 +166,9 @@ jobs:
       - restore_cache:
           keys:
             - esmf-docs-{{ .Revision }}
+      - add_ssh_keys:
+          fingerprints:
+            - "89:cb:75:34:f4:61:86:8d:78:bc:7d:c0:49:1d:98:36"
       - run:
           name: Prep Artifacts
           command: cd /tmp/artifacts && unzip doc-artifacts.zip
