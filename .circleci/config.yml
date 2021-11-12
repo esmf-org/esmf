@@ -216,6 +216,9 @@ jobs:
       - restore_cache:
           keys:
             - test-coverage-{{ .Revision }}
+      - add_ssh_keys:
+          fingerprints:
+            - "49:10:da:8a:3d:c0:2e:14:db:ab:93:56:d5:4e:74:67"
       - run:
           name: Prep Test Coverage
           command: cd /tmp/artifacts && unzip test_coverage-artifacts.zip
@@ -262,6 +265,9 @@ jobs:
       - restore_cache:
           keys:
             - api-change-{{ .Revision }}
+      - add_ssh_keys:
+          fingerprints:
+            - "49:10:da:8a:3d:c0:2e:14:db:ab:93:56:d5:4e:74:67"
       - run:
           name: Prep API Changes
           command: cd /tmp/artifacts && unzip api_change-artifacts.zip
