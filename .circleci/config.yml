@@ -325,6 +325,9 @@ jobs:
       - restore_cache:
           keys:
             - esmpy-docs-{{ .Revision }}
+      - add_ssh_keys:
+          fingerprints:
+            - "f9:7d:c6:c0:a5:35:f5:57:ac:0c:44:52:4c:b0:be:de"
       - run:
           name: Prep Artifacts
           command: cd /tmp/artifacts && unzip doc-esmpy.zip
