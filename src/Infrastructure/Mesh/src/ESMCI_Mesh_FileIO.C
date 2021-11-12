@@ -666,14 +666,18 @@ void ESMCI_mesh_create_from_file(char *filename,
       // Init elementConn decomp
       int cc_iodesc;
       int cc_gdimlen2D[2]={elementCount,coordDim};
-      piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 2, cc_gdimlen2D, num_elems*coordDim, cc_offsets, &cc_iodesc, 
+      piorc = PIOc_InitDecomp(pioSystemDesc, PIO_DOUBLE, 2, cc_gdimlen2D, num_elems*coordDim, cc_offsets, &cc_iodesc, 
                               &rearr, NULL, NULL);
       if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for centerCoords ") + filename,
                          ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
+      // Record the centerCoords present
+      centerCoordsPresent=1;
 
       // Allocate space
       centerCoords=new double[num_elems*coordDim];
+
+      // Get the centerCoords
       piorc = PIOc_read_darray(pioFileDesc, varid, cc_iodesc, num_elems*coordDim, centerCoords);
       if (!CHECKPIOERROR(piorc, std::string("Error reading variable centerCoords from file ") + filename,
                          ESMF_RC_FILE_OPEN, localrc)) throw localrc;
@@ -682,6 +686,11 @@ void ESMCI_mesh_create_from_file(char *filename,
       piorc = PIOc_freedecomp(pioSystemDesc, cc_iodesc);
       if (!CHECKPIOERROR(piorc, std::string("Error freeing centerCoords decomp "),
                          ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+      // DEEBUG: output centerCoords
+      //     for(int i=0; i<num_elems; i++) {
+      // printf("%f %f\n",centerCoords[i*coordDim],centerCoords[i*coordDim+1]);
+      //}
     }
 
 
