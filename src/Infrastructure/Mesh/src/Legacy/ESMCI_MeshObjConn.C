@@ -703,6 +703,7 @@ template void face_info<>(MeshObj** node_begin,
                int *rotation, // out
                bool
                );
+template void face_info<>(__gnu_cxx::__normal_iterator<ESMCI::MeshObj**, std::vector<ESMCI::MeshObj*, std::allocator<ESMCI::MeshObj*> > >, __gnu_cxx::__normal_iterator<ESMCI::MeshObj**, std::vector<ESMCI::MeshObj*, std::allocator<ESMCI::MeshObj*> > >, __gnu_cxx::__normal_iterator<ESMCI::MeshObj**, std::vector<ESMCI::MeshObj*, std::allocator<ESMCI::MeshObj*> > >, __gnu_cxx::__normal_iterator<ESMCI::MeshObj**, std::vector<ESMCI::MeshObj*, std::allocator<ESMCI::MeshObj*> > >, int*, int*, int*, bool);
 
 template void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end, 
                  UInt rel_type, 
