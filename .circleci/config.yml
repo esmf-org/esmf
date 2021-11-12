@@ -130,6 +130,7 @@ jobs:
   build-esmf-docs:
     docker:
       - image: cimg/base:2020.01
+    resource_class: large
     steps:
       - setup_remote_docker
       - run:
