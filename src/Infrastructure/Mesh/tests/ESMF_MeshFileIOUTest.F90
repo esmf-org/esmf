@@ -153,7 +153,7 @@ subroutine  test_mesh_create_from_file(correct, rc)
   ! If this Pet is last, put the rest there
   if (localPet .eq. petCount-1) maxId=numElems
   
-  ! write(*,*) localPet,"# ",minId,maxId
+  !write(*,*) localPet,"# ",minId,maxId
 
   ! Allocate elemIds
   allocate(elemIds(maxId-minId+1))
@@ -294,13 +294,15 @@ subroutine  test_mesh_create_3x3_from_file(correct, rc)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) return
 
+
+#if 0
   ! return with an error if not 1 or 4 PETs
   if ((petCount /= 1) .and. (petCount /=4)) then
      rc=ESMF_FAILURE
      return
   endif
 
-#if 0
+
   ! Setup mesh info depending on the
   ! number of PETs
   if (petCount .eq. 1) then
@@ -782,9 +784,9 @@ subroutine  test_mesh_create_3x3_from_file(correct, rc)
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
-   do i=1,numElemsTst
-      write(*,*) localPet,"# ",elemIdsTst(i),"ea=",elemAreaTst(i),"ec=",elemCoordsTst(2*i-1),elemCoordsTst(2*i),"em=",elemMaskTst(i)
-   enddo
+!   do i=1,numElemsTst
+!      write(*,*) localPet,"# ",elemIdsTst(i),"ea=",elemAreaTst(i),"ec=",elemCoordsTst(2*i-1),elemCoordsTst(2*i),"em=",elemMaskTst(i)
+!   enddo
 
 #if 0
    ! Check node ids
