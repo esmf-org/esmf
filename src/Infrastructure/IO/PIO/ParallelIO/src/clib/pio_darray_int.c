@@ -15,7 +15,7 @@
 #include <pio_internal.h>
 
 #if USE_VARD
-#define USE_VARD_READ 1
+#define USE_VARD_READ 0
 #define USE_VARD_WRITE 1
 #endif
 
@@ -1337,14 +1337,24 @@ pio_read_darray_nc(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf)
                     ierr = get_vard_mpidatatype(iodesc, gdim0, unlimdimoffset,
                                                 rrlen, ndims, fndims,
                                                 vdesc->record, startlist, countlist, &filetype);
-                    ierr = ncmpi_get_vard_all(file->fh, vid, filetype, iobuf, iodesc->llen, iodesc->mpitype);
-                    if(filetype != MPI_DATATYPE_NULL && (mpierr = MPI_Type_free(&filetype)))
-                        return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
-
+                    PLOG((2, "get_vard_mpidatatype returned  ierr = %d", ierr));
+                    if(ierr == PIO_NOERR){
+                        ierr = ncmpi_get_vard_all(file->fh, vid, filetype, iobuf, iodesc->llen, iodesc->mpitype);
+                        if(filetype != MPI_DATATYPE_NULL && (mpierr = MPI_Type_free(&filetype)))
+                            return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
+                    }
+                    
 #else
                     /* Read a list of subarrays. */
-                    ierr = ncmpi_get_varn_all(file->fh, vid, rrlen, startlist,
-                                              countlist, iobuf, iodesc->llen, iodesc->mpitype);
+                    if(iodesc->mpitype == MPI_BYTE){
+                        ierr = ncmpi_get_varn_uchar_all(file->fh, vid, rrlen, startlist,
+                                                  countlist, iobuf);
+                    }else{
+                        ierr = ncmpi_get_varn_all(file->fh, vid, rrlen, startlist,
+                                                  countlist, iobuf, iodesc->llen, iodesc->mpitype);
+                    }
+                    PLOG((2, "ncmpi_get_varn_all returned  ierr = %d mpitype=%d", ierr, iodesc->mpitype));
+                    
 #endif
                     /* Release the start and count arrays. */
                     for (int i = 0; i < rrlen; i++)
