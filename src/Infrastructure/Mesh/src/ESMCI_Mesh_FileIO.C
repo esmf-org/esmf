@@ -209,7 +209,7 @@ void ESMCI_mesh_create_from_file(char *filename,
   try {
     // local return code
     int localrc;
-    int pio_type = PIO_IOTYPE_NETCDF;
+    int pio_type = PIO_IOTYPE_PNETCDF;
 
 
     // Error check some unhandled options
