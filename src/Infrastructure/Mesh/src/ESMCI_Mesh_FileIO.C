@@ -209,8 +209,13 @@ void ESMCI_mesh_create_from_file(char *filename,
   try {
     // local return code
     int localrc;
-    int pio_type = PIO_IOTYPE_PNETCDF;
 
+    // Set pio_type based on what's available
+#ifdef ESMF_PNETCDF
+    int pio_type = PIO_IOTYPE_PNETCDF;
+#else
+    int pio_type = PIO_IOTYPE_NETCDF;
+#endif
 
     // Error check some unhandled options
 
