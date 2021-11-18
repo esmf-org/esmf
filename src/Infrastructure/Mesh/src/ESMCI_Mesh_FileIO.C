@@ -155,6 +155,29 @@ static void _convert_global_elem_conn_to_local_node_and_elem_info(int num_local_
 }
 
 
+// Divide num_ids as evenly as possible across pet_count pets, return min_id and max_id as the part 
+// of the range on local_pet. Note that the ids start on 1, so the global range of ids is 1 to num_ids.
+// If pet_count > num_ids, then the empty PETs will have min_id > max_id
+void _divide_ids_evenly_as_possible(int num_ids, int local_pet, int pet_count, int &min_id, int &max_id) {
+
+  // Approx. number per PET
+  int num_per_pet=num_ids/pet_count;
+  
+  // Remainder from even division
+  int remainder=num_ids-num_per_pet*pet_count;
+
+  // Figure out tentative range for this PET
+  min_id=local_pet*num_per_pet+1;
+  max_id=(local_pet+1)*num_per_pet;
+
+  // Add in remainder (1 per PET) to bottom remainder PETs
+  if (local_pet < remainder) min_id += local_pet;
+  else min_id += remainder;
+
+  if (local_pet < remainder) max_id += local_pet+1;
+  else max_id += remainder;
+}
+
 
 // INPUTS: 
 //  filename - file name in NULL delimited form
@@ -186,8 +209,13 @@ void ESMCI_mesh_create_from_file(char *filename,
   try {
     // local return code
     int localrc;
-    int pio_type = PIO_IOTYPE_PNETCDF;
 
+    // Set pio_type based on what's available
+#ifdef ESMF_PNETCDF
+    int pio_type = PIO_IOTYPE_PNETCDF;
+#else
+    int pio_type = PIO_IOTYPE_NETCDF;
+#endif
 
     // Error check some unhandled options
 
@@ -265,25 +293,23 @@ void ESMCI_mesh_create_from_file(char *filename,
     if (!CHECKPIOERROR(piorc, std::string("Error reading  elementCount dimension length from file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
+    // Don't currently support more pets than elements
+    if (pet_count > elementCount) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          " Can't create a Mesh from a file in a VM when that VM contains more PETs than elements in the file.",
+                           ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
 
     // Get positions at which to read element information
     std::vector<int> elem_ids_vec;
     if (elem_distgrid == NULL) {
 
       // No distgrid provided so divide things up equally
+      int min_id, max_id;
+      _divide_ids_evenly_as_possible(elementCount, local_pet, pet_count, min_id, max_id);
 
-      // Approx. number per PET
-      int num_per_pet=elementCount/pet_count;
-
-      // Figure out range for this PET
-      int min_id=local_pet*num_per_pet+1;
-      int max_id=(local_pet+1)*num_per_pet;
-
-      // Add rest to end
-      // TODO: Spread these more evenly
-      if (local_pet == pet_count-1) max_id=elementCount;
-
-      //  printf("%d# min,max ids=%d %d\n",local_pet,min_id,max_id);
+      //printf("%d# min,max ids=%d %d num=%d\n",local_pet,min_id,max_id,max_id-min_id+1);
 
       // Reserve space for ids
       elem_ids_vec.reserve(max_id-min_id+1);
@@ -292,7 +318,6 @@ void ESMCI_mesh_create_from_file(char *filename,
       for (int id=min_id; id <= max_id; id++) {
         elem_ids_vec.push_back(id);
       }
-
     } else {
 
       // Have elem_distgrid, so get ids from that
@@ -318,7 +343,7 @@ void ESMCI_mesh_create_from_file(char *filename,
     if (!elem_ids_vec.empty()) {
       num_elems=elem_ids_vec.size();
       elem_ids=&elem_ids_vec[0];
-    }
+    } 
 
     // Variable declarations for PIO
     int rearr = PIO_REARR_SUBSET;
