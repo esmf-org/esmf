@@ -2005,16 +2005,22 @@ void ESMCI_MeshGetElemInfoPresence(Mesh *mesh,
 #define ESMC_METHOD "ESMCI_MeshGetElemInfoPresence()"
 
   // Check if element mask is present
-  *elemMaskIsPresent=0;
-  if (mesh->GetField("elem_mask_val")) *elemMaskIsPresent=1;
+  if (elemMaskIsPresent) {
+    *elemMaskIsPresent=0;
+    if (mesh->GetField("elem_mask_val")) *elemMaskIsPresent=1;
+  }
 
   // Check if element area is present
-  *elemAreaIsPresent=0;
-  if (mesh->GetField("elem_area")) *elemAreaIsPresent=1;
+  if (elemAreaIsPresent) {
+    *elemAreaIsPresent=0;
+    if (mesh->GetField("elem_area")) *elemAreaIsPresent=1;
+  }
 
   // Check if element coords are present
-  *elemCoordsIsPresent=0;
-  if (mesh->GetField("elem_coordinates")) *elemCoordsIsPresent=1;
+  if (elemCoordsIsPresent) {
+    *elemCoordsIsPresent=0;
+    if (mesh->GetField("elem_coordinates")) *elemCoordsIsPresent=1;
+  }
 
   // return success
   if (rc != NULL) *rc = ESMF_SUCCESS;
