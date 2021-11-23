@@ -9,10 +9,10 @@ LOCDIR    = src/Infrastructure/Mesh/tests
 .NOTPARALLEL:
 
 TESTS_BUILD	  = \
-                $(ESMF_TESTDIR)/ESMC_MBMeshUTest \
-                $(ESMF_TESTDIR)/ESMC_MBMeshRegridUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_ExtrapolateUTest \
                 $(ESMF_TESTDIR)/ESMC_MBMesh_UtilUTest \
+                $(ESMF_TESTDIR)/ESMC_MeshCapUTest \
+                $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest \
                 $(ESMF_TESTDIR)/ESMC_MeshMOABUTest \
                 $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                 $(ESMF_TESTDIR)/ESMC_MeshUTest \
@@ -22,15 +22,15 @@ TESTS_BUILD	  = \
                 $(ESMF_TESTDIR)/ESMC_NearestUTest \
                 $(ESMF_TESTDIR)/ESMC_Proj4UTest
 
-# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshUTest
-# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMeshRegridUTest
+# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapUTest
+# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
 
 TESTS_RUN    =  \
-                RUN_ESMC_MBMeshUTest \
-                RUN_ESMC_MBMeshRegridUTest \
                 RUN_ESMC_MBMesh_ExtrapolateUTest \
                 RUN_ESMC_MBMesh_UtilUTest \
+                RUN_ESMC_MeshCapUTest \
+                RUN_ESMC_MeshCapRegridUTest \
                 RUN_ESMC_MeshMOABUTest \
                 RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MeshUTest \
@@ -41,9 +41,9 @@ TESTS_RUN    =  \
                 RUN_ESMC_Proj4UTest
 
 TESTS_RUN_UNI = \
-                RUN_ESMC_MBMeshUTestUNI \
-                RUN_ESMC_MBMeshRegridUTestUNI \
                 RUN_ESMC_MBMesh_UtilUTestUNI \
+                RUN_ESMC_MeshCapUTestUNI \
+                RUN_ESMC_MeshCapRegridUTestUNI \
                 RUN_ESMC_MeshMOABUTestUNI \
                 RUN_ESMCI_IntegrateUTestUNI \
                 RUN_ESMC_MeshUTestUNI \
@@ -119,18 +119,18 @@ RUN_ESMC_Proj4UTestUNI:
 	$(MAKE) TNAME=Proj4 NP=1 ctest
 
 
-RUN_ESMC_MBMeshUTest:
-	$(MAKE) TNAME=MBMesh NP=4 ctest
+RUN_ESMC_MeshCapUTest:
+	$(MAKE) TNAME=MeshCap NP=4 ctest
 
-RUN_ESMC_MBMeshUTestUNI:
-	$(MAKE) TNAME=MBMesh NP=1 ctest
+RUN_ESMC_MeshCapUTestUNI:
+	$(MAKE) TNAME=MeshCap NP=1 ctest
 
 
-RUN_ESMC_MBMeshRegridUTest:
-	$(MAKE) TNAME=MBMeshRegrid NP=4 ctest
+RUN_ESMC_MeshCapRegridUTest:
+	$(MAKE) TNAME=MeshCapRegrid NP=4 ctest
 
-RUN_ESMC_MBMeshRegridUTestUNI:
-	$(MAKE) TNAME=MBMeshRegrid NP=1 ctest
+RUN_ESMC_MeshCapRegridUTestUNI:
+	$(MAKE) TNAME=MeshCapRegrid NP=1 ctest
 
 
 RUN_ESMC_MBMesh_ExtrapolateUTest:

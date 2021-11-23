@@ -26,6 +26,9 @@
 #include "ESMC_MBT.C"
 #endif
 
+#include "ESMCI_MeshCap.h"
+#include "ESMCI_Mesh.h"
+
 #include <iostream>
 #include <iterator>
 #include <vector>

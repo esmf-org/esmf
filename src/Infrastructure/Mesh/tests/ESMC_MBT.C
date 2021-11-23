@@ -31,7 +31,11 @@
 #include "ESMCI_MBMesh_Search_EtoP.h"
 #include "ESMCI_MBMesh_Util.h"
 #include "ESMCI_PointList.h"
+#include "ESMCI_Array.h"
 #endif
+
+#include "ESMCI_MeshCap.h"
+#include "ESMCI_Mesh.h"
 
 #include <iostream>
 #include <iterator>
@@ -124,13 +128,16 @@ class MBT {
     int np = 0;
     int localPet = -1;
     
-    MBMesh *mesh= nullptr;
-    MBMesh *target = nullptr;
+    // native is 0, mbmesh is 1
+    int nativeormb = 0;
+    
+    MeshCap *mesh= nullptr;
+    MeshCap *target = nullptr;
     PointList *pl = nullptr;
-    std::string name = "MBMesh";
+    std::string name = "Mesh";
 
     // buffer that needs to be deleted
-    char *serialize_buffer = nullptr;
+    // char *serialize_buffer = nullptr;
     
     // integer values
     int pdim;
@@ -194,7 +201,7 @@ class MBT {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT()"
       try {
-        mesh = new MBMesh();
+        mesh = new MeshCap();
 
         // Get parallel information
         int localrc;
@@ -258,15 +265,14 @@ class MBT {
         }
         
         function_map["createget"] = std::bind(&MBT::createget, this);
-        function_map["mbtypes"] = std::bind(&MBT::mbtypes, this);
         function_map["dual"] = std::bind(&MBT::dual, this);
         function_map["redist_elem"] = std::bind(&MBT::redist_elem, this);
         function_map["redist_node"] = std::bind(&MBT::redist_node, this);
         function_map["redist_elno"] = std::bind(&MBT::redist_elno, this);
-        function_map["regrid_rendezvous_center"] = std::bind(&MBT::regrid_rendezvous_center, this);
-        function_map["regrid_rendezvous_corner"] = std::bind(&MBT::regrid_rendezvous_corner, this);
-        function_map["regrid_search_center"] = std::bind(&MBT::regrid_search_center, this);
-        function_map["regrid_search_corner"] = std::bind(&MBT::regrid_search_corner, this);
+        // function_map["regrid_rendezvous_center"] = std::bind(&MBT::regrid_rendezvous_center, this);
+        // function_map["regrid_rendezvous_corner"] = std::bind(&MBT::regrid_rendezvous_corner, this);
+        // function_map["regrid_search_center"] = std::bind(&MBT::regrid_search_center, this);
+        // function_map["regrid_search_corner"] = std::bind(&MBT::regrid_search_corner, this);
         function_map["regrid_bilinear_center"] = std::bind(&MBT::regrid_bilinear_center, this);
         function_map["regrid_bilinear_corner"] = std::bind(&MBT::regrid_bilinear_corner, this);
         // function_map["regrid_conserve_center"] = std::bind(&MBT::regrid_conserve_center, this);
@@ -292,7 +298,7 @@ class MBT {
       if (mesh) delete mesh;
       if (target) delete target;
       if (pl) delete pl;
-      if (serialize_buffer) delete serialize_buffer;
+      // if (serialize_buffer) delete serialize_buffer;
     }
     
     int build() {
@@ -303,6 +309,8 @@ class MBT {
 
       try {
 
+        int localrc;
+
         // this->print();
         node_mask_present = true;
         elem_area_present = true;
@@ -311,22 +319,27 @@ class MBT {
 
         InterArray<int> *iin = new InterArray<int>(nodeMask.data(),num_node);
         InterArray<int> *iie = new InterArray<int>(elemMask.data(),num_elem);
-
-        int localrc;
-        MBMesh_create(&mesh, &pdim, &sdim, &coord_sys, &localrc);
+        
+        MeshCap::meshSetMOAB(&nativeormb, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        MBMesh_addnodes(&mesh, &num_node, nodeId.data(), nodeCoord.data(), 
-                        nodeOwner.data(), iin, &coord_sys, &orig_sdim, &localrc);
+        mesh = MeshCap::meshcreate(&pdim, &sdim, &coord_sys, &localrc);
+        ESMC_CHECK_THROW(localrc);
+
+        mesh->meshaddnodes(&num_node, nodeId.data(), nodeCoord.data(), 
+                           nodeOwner.data(), iin, &coord_sys, 
+                           &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         int regridconserve = 0;
-        MBMesh_addelements(&mesh, &num_elem, elemId.data(), elemType.data(), iie,
-                          &elem_area_present, elemArea.data(),
-                          &elem_coord_present, elemCoord.data(),
-                          &num_elem_conn, elemConn.data(),
-                          &regridconserve,
-                          &coord_sys, &orig_sdim, &localrc);
+        
+        mesh->meshaddelements(&num_elem, elemId.data(), 
+                              elemType.data(), iie,
+                              &elem_area_present, elemArea.data(),
+                              &elem_coord_present, elemCoord.data(),
+                              &num_elem_conn, elemConn.data(),
+                              &regridconserve,
+                              &coord_sys, &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         delete iin;
@@ -358,36 +371,6 @@ class MBT {
       return rc;
     }
 
-    int mbtypes(){
-#undef ESMC_METHOD
-#define ESMC_METHOD "MBT::mbtypes()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        Range elems;
-        int merr=mesh->mesh->get_entities_by_dimension(0,mesh->pdim,elems);
-        ESMC_CHECK_THROW(merr)
-        
-        for (Range::iterator it=elems.begin(); it !=elems.end(); it++) {
-          const EntityHandle elem=*it;
-          int type = mesh->mesh->type_from_handle(elem);
-          std::cout << "type = " << type << std::endl;
-        }
-
-
-      }
-      CATCH_MBT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
     int dual() {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::dual()"
@@ -405,7 +388,7 @@ class MBT {
           
         int ne = redist_elemId.size();
 
-        MBMeshDual(mesh, &target, &localrc);
+        target = MeshCap::meshcreatedual(&mesh, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         // verify the original mesh is still valid
@@ -440,8 +423,8 @@ class MBT {
           
         int ne = redist_elemId.size();
 
-        MBMesh_createredistelems(&mesh,
-                                 &ne, redist_elemId.data(), &target, &localrc);
+        target = MeshCap::meshcreateredistelems(&mesh, &ne, 
+                                                redist_elemId.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
 
         // verify the original mesh is still valid
@@ -475,8 +458,8 @@ class MBT {
           
         int nn = redist_nodeId.size();
         
-        MBMesh_createredistnodes(&mesh, &nn, redist_nodeId.data(), 
-                                 &target, &localrc);
+        target = MeshCap::meshcreateredistnodes(&mesh, &nn,
+                                                redist_nodeId.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
 
         // verify the original mesh is still valid
@@ -511,8 +494,8 @@ class MBT {
         int nn = redist_nodeId.size();
         int ne = redist_elemId.size();
         
-        MBMesh_createredist(&mesh, &nn, redist_nodeId.data(), 
-                            &ne, redist_elemId.data(), &target, &localrc);
+        target = MeshCap::meshcreateredist(&mesh, &nn, redist_nodeId.data(), 
+                            &ne, redist_elemId.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
 
         // verify the original mesh is still valid
@@ -529,38 +512,59 @@ class MBT {
       return rc;
     }
 
-    int regrid_rendezvous_center() {
+    int regrid_generic(int regrid_method) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_rendezvous_center()"
+#define ESMC_METHOD "MBT::regrid_generic()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
       try {
         int localrc;
         
-        // skip if run on one processor
-        if (np == 1) {
-          name = "SKIP - " + name;
-          return ESMF_SUCCESS;
-        }
-        
-        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
-        ESMC_CHECK_THROW(localrc);
-        
         // Cartesian?
         int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
         if (coord_sys == ESMC_COORDSYS_CART)
           map_type = MB_MAP_TYPE_CART_APPROX;
-        
-        MBMesh *mesh_rend=NULL;
-        PointList *pl_rend=NULL;
-        create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend, &map_type);
 
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
+        // hacks to appease the double pointers in this api
+        MeshCap *dummy_mc = NULL;
+        ESMCI::Array *dummy_array = NULL;
+        PointList *dummy_pl = NULL;
+        int has_status_array = 0;
+        ESMCI::Array *dummy_status_array = NULL;
+        int ignore_degenerate = 0;
+        int check_flag = 0;
+        int extrap_method = 0;
+        int has_udl = 0;
+        int unmapped_action = 1;
+        int has_rh = 0;
+        int nentries = 0;
+        int has_iw = 0;
+        int num_udl = 0;
+        ESMCI::TempUDL *tudl = NULL;
+        int regrid_pole_type = 0;
+        
+        // calculate bilinear weights between mesh and pointlist
+        MeshCap::regrid_create(&mesh, &dummy_array, &dummy_pl, 
+                               &dummy_mc, &dummy_array, &pl, 
+                               &regrid_method, &map_type, 
+                               NULL, 
+                               &regrid_pole_type, NULL, 
+                               NULL, 
+                               &extrap_method, NULL, NULL, NULL, NULL, 
+                               &unmapped_action, 
+                               &ignore_degenerate, 
+                               NULL, NULL, 
+                               NULL, &has_rh, 
+                               &has_iw, 
+                               &nentries, NULL, 
+                               &has_udl, &num_udl, &tudl, 
+                               &has_status_array, &dummy_status_array, 
+                               &check_flag, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        // TODO: verify mesh_rend and pls
+        // IWeights wts, dst_status;
+        // calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
       }
       CATCH_MBT_RETURN_RC(&rc)
 
@@ -568,128 +572,6 @@ class MBT {
       return rc;
     }
 
-    int regrid_rendezvous_corner() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_rendezvous_corner()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // skip if run on one processor
-        if (np == 1) {
-          name = "SKIP - " + name;
-          return ESMF_SUCCESS;
-        }
-        
-        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
-        ESMC_CHECK_THROW(localrc);
-        
-        // Cartesian?
-        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
-        if (coord_sys == ESMC_COORDSYS_CART)
-          map_type = MB_MAP_TYPE_CART_APPROX;
-        
-        MBMesh *mesh_rend=NULL;
-        PointList *pl_rend=NULL;
-        create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend, &map_type);
-
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify mesh_rend and pls
-      }
-      CATCH_MBT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int regrid_search_center() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_search_center()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // skip if run on one processor
-        if (np == 1) {
-          name = "SKIP - " + name;
-          return ESMF_SUCCESS;
-        }
-        
-        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
-        ESMC_CHECK_THROW(localrc);
-        
-        // Cartesian?
-        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
-        if (coord_sys == ESMC_COORDSYS_CART)
-          map_type = MB_MAP_TYPE_CART_APPROX;
-        
-        WMat dst_status;
-
-        // search between mesh and pointlist
-        MBMesh_Search_EToP_Result_List sr;
-        MBMesh_Search_EToP(mesh, pl, ESMCI_UNMAPPEDACTION_IGNORE, &map_type,
-                     10E-8, sr, false, dst_status, NULL, NULL);
-
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify sr and dst_status and pl
-      }
-      CATCH_MBT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int regrid_search_corner() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_search_corner()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // skip if run on one processor
-        if (np == 1) {
-          name = "SKIP - " + name;
-          return ESMF_SUCCESS;
-        }
-        
-        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
-        ESMC_CHECK_THROW(localrc);
-        
-        // Cartesian?
-        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
-        if (coord_sys == ESMC_COORDSYS_CART)
-          map_type = MB_MAP_TYPE_CART_APPROX;
-        
-        WMat dst_status;
-
-        // search between mesh and pointlist
-        MBMesh_Search_EToP_Result_List sr;
-        MBMesh_Search_EToP(mesh, pl, ESMCI_UNMAPPEDACTION_IGNORE, &map_type,
-                     10E-8, sr, false, dst_status, NULL, NULL);
-
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify sr and dst_status and pl
-      }
-      CATCH_MBT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
 
     int regrid_bilinear_center() {
 #undef ESMC_METHOD
@@ -700,18 +582,15 @@ class MBT {
       try {
         int localrc;
         
-        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_BILINEAR;
+        int regrid_method = 0;
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &pl, &localrc);
+        ESMC_CHECK_THROW(localrc);
+                
+        localrc = regrid_generic(regrid_method);
         ESMC_CHECK_THROW(localrc);
         
-        // Cartesian?
-        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
-        if (coord_sys == ESMC_COORDSYS_CART)
-          map_type = MB_MAP_TYPE_CART_APPROX;
-        
-        // calculate bilinear weights between mesh and pointlist
-        IWeights wts, dst_status;
-        calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
-
         // verify the original mesh is still valid
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
@@ -733,18 +612,15 @@ class MBT {
       try {
         int localrc;
         
-        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_BILINEAR;
+        int regrid_method = 0;
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &pl, &localrc);
+        ESMC_CHECK_THROW(localrc);
+                
+        localrc = regrid_generic(regrid_method);
         ESMC_CHECK_THROW(localrc);
         
-        // Cartesian?
-        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
-        if (coord_sys == ESMC_COORDSYS_CART)
-          map_type = MB_MAP_TYPE_CART_APPROX;
-        
-        // calculate bilinear weights between mesh and pointlist
-        IWeights wts, dst_status;
-        calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
-
         // verify the original mesh is still valid
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
@@ -766,18 +642,15 @@ class MBT {
       try {
         int localrc;
         
-        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_PATCH;
+        int regrid_method = 1;
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &pl, &localrc);
         ESMC_CHECK_THROW(localrc);
         
-        // Cartesian?
-        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
-        if (coord_sys == ESMC_COORDSYS_CART)
-          map_type = MB_MAP_TYPE_CART_APPROX;
+        localrc = regrid_generic(regrid_method);
+        ESMC_CHECK_THROW(localrc);
         
-        // calculate bilinear weights between mesh and pointlist
-        IWeights wts, dst_status;
-        calc_patch_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
-
         // verify the original mesh is still valid
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
@@ -799,18 +672,15 @@ class MBT {
       try {
         int localrc;
         
-        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_PATCH;
+        int regrid_method = 1;
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &pl, &localrc);
         ESMC_CHECK_THROW(localrc);
         
-        // Cartesian?
-        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
-        if (coord_sys == ESMC_COORDSYS_CART)
-          map_type = MB_MAP_TYPE_CART_APPROX;
+        localrc = regrid_generic(regrid_method);
+        ESMC_CHECK_THROW(localrc);
         
-        // calculate bilinear weights between mesh and pointlist
-        IWeights wts, dst_status;
-        calc_patch_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
-
         // verify the original mesh is still valid
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
@@ -833,21 +703,32 @@ class MBT {
         int localrc;
         
         // serialization buffer
-        int len = 100*sizeof(int);
-        serialize_buffer = new char[len];
+        int len = 300*sizeof(int);
+        char *serialize_buffer = new char[len];
         int length = len; 
         int offset = 0;
         ESMC_InquireFlag inquireflag = ESMF_NOINQUIRE;
+        const ESMC_AttReconcileFlag attreconflag = ESMC_ATTRECONCILE_OFF;
         ESMCI_FortranStrLenArg buffer_l = len;
 
         // serialize, deserialize, verify
-        MBMesh_serialize(&mesh, serialize_buffer, &length, &offset, 
-                         &inquireflag, &localrc, buffer_l);
+        mesh->meshserialize(serialize_buffer, &length, &offset, 
+                            attreconflag, &inquireflag, false, 
+                            &localrc, buffer_l);
         ESMC_CHECK_THROW(localrc);
         
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
         offset = 0;
+
         // deserialize
-        MBMesh_deserialize(&target, serialize_buffer, &offset, &localrc, buffer_l);
+        // prevent BaseID counter increment
+        target = new MeshCap(-1);
+        target->meshdeserialize(serialize_buffer, &offset, 
+                                attreconflag, false,
+                                &localrc, buffer_l);
         ESMC_CHECK_THROW(localrc);
 
         // verify the original mesh is still valid
@@ -856,6 +737,7 @@ class MBT {
         
         // TODO: verify the deserialized target mesh
         // can't get counts because ents not finalized, because no actual info
+        // do we need a meshmatch for a reconciled mesh?
         // localrc = test_get_info(target);
         ESMC_CHECK_THROW(localrc);
       }
@@ -874,7 +756,7 @@ class MBT {
       try {
         int localrc;
         
-        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &pl, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         // verify the original mesh is still valid
@@ -899,7 +781,7 @@ class MBT {
         int localrc;
         
         PointList *pl;
-        pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &pl, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         // verify the original mesh is still valid
@@ -945,7 +827,7 @@ class MBT {
         char fname[len];
         sprintf(fname, "%s_%d", test.c_str(), localPet);
         
-        MBMesh_write(&mesh, fname, &localrc, len);
+        mesh->meshwrite(fname, &localrc, len);
         ESMC_CHECK_THROW(localrc);
 
         // verify the original mesh is still valid
@@ -1022,7 +904,7 @@ class MBT {
       return rc;
     }
 
-    int test_get_counts(MBMesh *mesh){
+    int test_get_counts(MeshCap *mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_get_counts()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1035,7 +917,7 @@ class MBT {
       // get dimensions
       int local_pdim, local_sdim;
       ESMC_CoordSys_Flag local_coordsys;
-      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, &local_coordsys, &localrc);
+      mesh->meshgetdimensions(&local_sdim, &local_pdim, &local_coordsys, &localrc);
       ESMC_CHECK_THROW(localrc);
 
       if (local_pdim != pdim) {
@@ -1067,7 +949,7 @@ class MBT {
       }
 
       int nodeCount;
-      MBMesh_GetNodeCount(mesh, &nodeCount, &localrc);
+      mesh->getNodeCount(&nodeCount, &localrc);
       ESMC_CHECK_THROW(localrc);
     
       if (nodeCount != num_node) {
@@ -1078,7 +960,7 @@ class MBT {
       }
     
       int elemCount;
-      MBMesh_GetElemCount(mesh, &elemCount, &localrc);
+      mesh->getElemCount(&elemCount, &localrc);
       ESMC_CHECK_THROW(localrc);
     
       if (elemCount != num_elem) {
@@ -1091,7 +973,7 @@ class MBT {
       // NOTE: bypass for now, remove when elemConn from ngons fixed
       if (name.find("ngon") == std::string::npos) {
         int elemConnCount;
-        MBMesh_GetElemConnCount(mesh, &elemConnCount, &localrc);
+        mesh->getElemConnCount(&elemConnCount, &localrc);
         ESMC_CHECK_THROW(localrc);
       
         if (elemConnCount != num_elem_conn) {
@@ -1115,7 +997,7 @@ class MBT {
       return rc;
     }
 
-    int test_get_presence(MBMesh *mesh, bool check_elem = true, bool check_node = true){
+    int test_get_presence(MeshCap *mesh, bool check_elem = true, bool check_node = true){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_get_presence()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1127,7 +1009,7 @@ class MBT {
 
         if (check_elem) {
           int elemMaskIsPresent, elemAreaIsPresent, elemCoordIsPresent;
-          MBMesh_GetElemInfoPresence(mesh, &elemMaskIsPresent, 
+          mesh->getElemInfoPresence(&elemMaskIsPresent, 
                                      NULL, NULL, &localrc);
           ESMC_CHECK_THROW(localrc);
     
@@ -1138,7 +1020,7 @@ class MBT {
             correct = false;
           } 
 
-          MBMesh_GetElemInfoPresence(mesh, NULL, &elemAreaIsPresent, 
+          mesh->getElemInfoPresence(NULL, &elemAreaIsPresent, 
                                      NULL, &localrc);
           ESMC_CHECK_THROW(localrc);
     
@@ -1149,7 +1031,7 @@ class MBT {
             correct = false;
           } 
 
-          MBMesh_GetElemInfoPresence(mesh, NULL, NULL, 
+          mesh->getElemInfoPresence(NULL, NULL, 
                                      &elemCoordIsPresent, &localrc);
           ESMC_CHECK_THROW(localrc);
     
@@ -1175,7 +1057,7 @@ class MBT {
         
         if (check_node) {
           int nodeMaskIsPresent;
-          MBMesh_GetNodeInfoPresence(mesh, &nodeMaskIsPresent, &localrc);
+          mesh->getNodeInfoPresence(&nodeMaskIsPresent, &localrc);
           ESMC_CHECK_THROW(localrc);
     
           if (nodeMaskIsPresent!=node_mask_present) {
@@ -1198,7 +1080,7 @@ class MBT {
       return rc;
     }
 
-    int test_get_node_info(MBMesh *mesh){
+    int test_get_node_info(MeshCap *mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_get_node_info()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1213,7 +1095,7 @@ class MBT {
 
       // get dimensions
       int local_pdim, local_sdim;
-      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, NULL, &localrc);
+      mesh->meshgetdimensions(&local_sdim, &local_pdim, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
 
       // /////////////////// node create info ////////////////////////////
@@ -1227,7 +1109,7 @@ class MBT {
       int nodeOwners[num_node];
       InterArray<int> *noi = new InterArray<int>(nodeOwners,num_node);
       
-      MBMesh_GetNodeCreateInfo(mesh, nii, NULL, NULL, NULL, &localrc);
+      mesh->getNodeCreateInfo(nii, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
 
       test = "nodeId";
@@ -1250,7 +1132,7 @@ class MBT {
         else std::cout << fail << test << std::endl;
       }
     
-      MBMesh_GetNodeCreateInfo(mesh, NULL, nci, NULL, NULL, &localrc);
+      mesh->getNodeCreateInfo(NULL, nci, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
     
       test = "nodeCoord";
@@ -1274,7 +1156,7 @@ class MBT {
         else std::cout << fail << test << std::endl;
       }
     
-      MBMesh_GetNodeCreateInfo(mesh, NULL, NULL, noi, NULL, &localrc);
+      mesh->getNodeCreateInfo(NULL, NULL, noi, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
     
       test = "nodeOwner";
@@ -1298,7 +1180,7 @@ class MBT {
       }
     
       if (node_mask_present) {
-        MBMesh_GetNodeCreateInfo(mesh, NULL, NULL, NULL, nmi, &localrc);
+        mesh->getNodeCreateInfo(NULL, NULL, NULL, nmi, &localrc);
         ESMC_CHECK_THROW(localrc);
       
         test = "nodeMask";
@@ -1332,7 +1214,7 @@ class MBT {
       return rc;
     }
 
-    int test_get_elem_info(MBMesh *mesh){
+    int test_get_elem_info(MeshCap *mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_get_elem_info()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1347,7 +1229,7 @@ class MBT {
 
       // get dimensions
       int local_pdim, local_sdim;
-      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, NULL, &localrc);
+      mesh->meshgetdimensions(&local_sdim, &local_pdim, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
 
       /////////////////// elem create info ////////////////////////////
@@ -1363,7 +1245,7 @@ class MBT {
       double elemCoord[num_elem*orig_sdim];
       InterArray<double> *eci = new InterArray<double>(elemCoord,num_elem*orig_sdim);
     
-      MBMesh_GetElemCreateInfo(mesh, eii, NULL, NULL, NULL, NULL, NULL, &localrc);
+      mesh->getElemCreateInfo(eii, NULL, NULL, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
     
       test = "ElemId";
@@ -1386,7 +1268,7 @@ class MBT {
         else std::cout << fail << test << std::endl;
       }
     
-      MBMesh_GetElemCreateInfo(mesh, NULL, eti, NULL, NULL, NULL, NULL, &localrc);
+      mesh->getElemCreateInfo(NULL, eti, NULL, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
     
       // NOTE: bypass for now, remove when elemType from ngons fixed
@@ -1413,7 +1295,7 @@ class MBT {
       }
     
       if (elem_area_present) {
-        MBMesh_GetElemCreateInfo(mesh, NULL, NULL, NULL, NULL, eai, NULL, &localrc);
+        mesh->getElemCreateInfo(NULL, NULL, NULL, NULL, eai, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
       
         test = "ElemArea";
@@ -1439,7 +1321,7 @@ class MBT {
       }
     
       if (elem_coord_present) {
-        MBMesh_GetElemCreateInfo(mesh, NULL, NULL, NULL, NULL, NULL, eci, &localrc);
+        mesh->getElemCreateInfo(NULL, NULL, NULL, NULL, NULL, eci, &localrc);
         ESMC_CHECK_THROW(localrc);
       
         test = "ElemCoord";
@@ -1465,7 +1347,7 @@ class MBT {
       }
     
       if (elem_mask_present) {
-        MBMesh_GetElemCreateInfo(mesh, NULL, NULL, NULL, emi, NULL, NULL, &localrc);
+        mesh->getElemCreateInfo(NULL, NULL, NULL, emi, NULL, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
       
         test = "ElemMask";
@@ -1502,7 +1384,7 @@ class MBT {
     }
 
 
-    int test_get_elem_conn_info(MBMesh *mesh){
+    int test_get_elem_conn_info(MeshCap *mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_get_elem_conn_info()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1517,7 +1399,7 @@ class MBT {
 
       // get dimensions
       int local_pdim, local_sdim;
-      MBMesh_GetDimensions(mesh, &local_sdim, &local_pdim, NULL, &localrc);
+      mesh->meshgetdimensions(&local_sdim, &local_pdim, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
 
       /////////////////// elem create info ////////////////////////////
@@ -1525,7 +1407,7 @@ class MBT {
       int elemConn[num_elem_conn];
       InterArray<int> *ecni = new InterArray<int>(elemConn,num_elem_conn);
     
-      MBMesh_GetElemCreateInfo(mesh, NULL, NULL, ecni, NULL, NULL, NULL, &localrc);
+      mesh->getElemCreateInfo(NULL, NULL, ecni, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
     
       test = "ElemConn";
@@ -1558,7 +1440,7 @@ class MBT {
       return rc;
     }
 
-    int test_get_info(MBMesh *mesh){
+    int test_get_info(MeshCap *mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_get_info()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1716,7 +1598,7 @@ class MBT {
       return rc;
     }
 
-    int test_redist_info(MBMesh *mesh, bool check_elem, bool check_node){
+    int test_redist_info(MeshCap *mesh, bool check_elem, bool check_node){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBT::test_redist_info()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1742,14 +1624,14 @@ class MBT {
       /////////////////// node create info ////////////////////////////
       if (check_node) {
         int nn = redist_nodeId_in.size();
-        MBMesh_checknodelist(&target, &nn, redist_nodeId_in.data(), &localrc);
+        target->meshchecknodelist(&nn, redist_nodeId_in.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
       }
 
       /////////////////// elem create info ////////////////////////////
       if (check_elem) {
         int ne = redist_elemId_in.size();
-        MBMesh_checkelemlist(&target, &ne, redist_elemId_in.data(), &localrc);
+        target->meshcheckelemlist(&ne, redist_elemId_in.data(), &localrc);
         ESMC_CHECK_THROW(localrc);
       }
 
@@ -1768,15 +1650,15 @@ class MBT {
 
       /////////////////// counts ////////////////////////////
       int nodeCount;
-      MBMesh_GetNodeCount(target,&nodeCount, &localrc);
+      target->getNodeCount(&nodeCount, &localrc);
       ESMC_CHECK_THROW(localrc);
       
       int elemCount;
-      MBMesh_GetElemCount(target,&elemCount, &localrc);
+      target->getElemCount(&elemCount, &localrc);
       ESMC_CHECK_THROW(localrc);
       
       int elemConnCount;
-      MBMesh_GetElemConnCount(target,&elemConnCount, &localrc);
+      target->getElemConnCount(&elemConnCount, &localrc);
       ESMC_CHECK_THROW(localrc);
     
       if (verbosity >= 2) {
@@ -1806,4 +1688,166 @@ class MBT {
       return rc;
     }
 };
+
+//     int regrid_rendezvous_center() {
+// #undef ESMC_METHOD
+// #define ESMC_METHOD "MBT::regrid_rendezvous_center()"
+//       // RETURN: rc : pass(0) fail(>0)
+//       int rc = ESMF_FAILURE;
+// 
+//       try {
+//         int localrc;
+// 
+//         // skip if run on one processor
+//         if (np == 1) {
+//           name = "SKIP - " + name;
+//           return ESMF_SUCCESS;
+//         }
+// 
+//         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_ELEMENT, NULL, &localrc);
+//         ESMC_CHECK_THROW(localrc);
+// 
+//         // Cartesian?
+//         int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+//         if (coord_sys == ESMC_COORDSYS_CART)
+//           map_type = MB_MAP_TYPE_CART_APPROX;
+// 
+//         MBMesh *mesh_rend=NULL;
+//         PointList *pl_rend=NULL;
+//         create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend, &map_type);
+// 
+//         // verify the original mesh is still valid
+//         localrc = test_get_info(mesh);
+//         ESMC_CHECK_THROW(localrc);
+// 
+//         // TODO: verify mesh_rend and pls
+//       }
+//       CATCH_MBT_RETURN_RC(&rc)
+// 
+//       rc = ESMF_SUCCESS;
+//       return rc;
+//     }
+// 
+//     int regrid_rendezvous_corner() {
+// #undef ESMC_METHOD
+// #define ESMC_METHOD "MBT::regrid_rendezvous_corner()"
+//       // RETURN: rc : pass(0) fail(>0)
+//       int rc = ESMF_FAILURE;
+// 
+//       try {
+//         int localrc;
+// 
+//         // skip if run on one processor
+//         if (np == 1) {
+//           name = "SKIP - " + name;
+//           return ESMF_SUCCESS;
+//         }
+// 
+//         pl = MBMesh_to_PointList(mesh, ESMC_MESHLOC_NODE, NULL, &localrc);
+//         ESMC_CHECK_THROW(localrc);
+// 
+//         // Cartesian?
+//         int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+//         if (coord_sys == ESMC_COORDSYS_CART)
+//           map_type = MB_MAP_TYPE_CART_APPROX;
+// 
+//         MBMesh *mesh_rend=NULL;
+//         PointList *pl_rend=NULL;
+//         create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend, &map_type);
+// 
+//         // verify the original mesh is still valid
+//         localrc = test_get_info(mesh);
+//         ESMC_CHECK_THROW(localrc);
+// 
+//         // TODO: verify mesh_rend and pls
+//       }
+//       CATCH_MBT_RETURN_RC(&rc)
+// 
+//       rc = ESMF_SUCCESS;
+//       return rc;
+//     }
+// 
+//     int regrid_search_center() {
+// #undef ESMC_METHOD
+// #define ESMC_METHOD "MBT::regrid_search_center()"
+//       // RETURN: rc : pass(0) fail(>0)
+//       int rc = ESMF_FAILURE;
+// 
+//       try {
+//         int localrc;
+// 
+//         // skip if run on one processor
+//         if (np == 1) {
+//           name = "SKIP - " + name;
+//           return ESMF_SUCCESS;
+//         }
+// 
+//         mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &pl, &localrc);
+//         ESMC_CHECK_THROW(localrc);
+// 
+//         // Cartesian?
+//         int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+//         if (coord_sys == ESMC_COORDSYS_CART)
+//           map_type = MB_MAP_TYPE_CART_APPROX;
+// 
+//         WMat dst_status;
+// 
+//         // search between mesh and pointlist
+//         MBMesh_Search_EToP_Result_List sr;
+//         MBMesh_Search_EToP(mesh, pl, ESMCI_UNMAPPEDACTION_IGNORE, &map_type,
+//                      10E-8, sr, false, dst_status, NULL, NULL);
+// 
+//         // verify the original mesh is still valid
+//         localrc = test_get_info(mesh);
+//         ESMC_CHECK_THROW(localrc);
+// 
+//         // TODO: verify sr and dst_status and pl
+//       }
+//       CATCH_MBT_RETURN_RC(&rc)
+// 
+//       rc = ESMF_SUCCESS;
+//       return rc;
+//     }
+// 
+//     int regrid_search_corner() {
+// #undef ESMC_METHOD
+// #define ESMC_METHOD "MBT::regrid_search_corner()"
+//       // RETURN: rc : pass(0) fail(>0)
+//       int rc = ESMF_FAILURE;
+// 
+//       try {
+//         int localrc;
+// 
+//         // skip if run on one processor
+//         if (np == 1) {
+//           name = "SKIP - " + name;
+//           return ESMF_SUCCESS;
+//         }
+// 
+//         mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &pl, &localrc);
+//         ESMC_CHECK_THROW(localrc);
+// 
+//         // Cartesian?
+//         int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+//         if (coord_sys == ESMC_COORDSYS_CART)
+//           map_type = MB_MAP_TYPE_CART_APPROX;
+// 
+//         WMat dst_status;
+// 
+//         // search between mesh and pointlist
+//         MBMesh_Search_EToP_Result_List sr;
+//         MBMesh_Search_EToP(mesh, pl, ESMCI_UNMAPPEDACTION_IGNORE, &map_type,
+//                      10E-8, sr, false, dst_status, NULL, NULL);
+// 
+//         // verify the original mesh is still valid
+//         localrc = test_get_info(mesh);
+//         ESMC_CHECK_THROW(localrc);
+// 
+//         // TODO: verify sr and dst_status and pl
+//       }
+//       CATCH_MBT_RETURN_RC(&rc)
+// 
+//       rc = ESMF_SUCCESS;
+//       return rc;
+//     }
 
