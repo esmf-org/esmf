@@ -160,9 +160,8 @@ int main(int argc, char *argv[]) {
     test_meshes_mbmesh.push_back("hex_3d_sph");
     test_meshes_mbmesh.push_back("mix_2d_cart");
     test_meshes_mbmesh.push_back("mix_2d_sph");
-    // ngons currently return the wrong counts
-    // test_meshes_mbmesh.push_back("ngon_2d_cart");
-    // test_meshes_mbmesh.push_back("ngon_2d_sph");
+    test_meshes_mbmesh.push_back("ngon_2d_cart");
+    test_meshes_mbmesh.push_back("ngon_2d_sph");
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
@@ -349,24 +348,24 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  140
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  150
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
+  //NEX_UTest
+  //NEX_UTest  140
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  150
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
