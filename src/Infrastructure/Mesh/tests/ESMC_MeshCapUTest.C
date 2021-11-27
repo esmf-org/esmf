@@ -101,6 +101,9 @@ int main(int argc, char *argv[]) {
   int localPet, petCount;
   ESMC_VM vm;
 
+  bool mbmesh = true;
+  bool native = true; 
+
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
 
@@ -182,30 +185,34 @@ int main(int argc, char *argv[]) {
   };
 
 
-  for (const auto api: test_apis_mbmesh) {
-    for (const auto mesh: test_meshes_mbmesh) {
-      // don't run cases that hang
-      auto skip_itr = std::find_if(skip_test_mbmesh.begin(), skip_test_mbmesh.end(), 
-                                       FindPair(api, mesh));
-
-      if (skip_itr != skip_test_mbmesh.end()) {
-        continue;
-      } else {
-        combine(api, mesh, "MBMesh");
+  if (mbmesh) {
+    for (const auto api: test_apis_mbmesh) {
+      for (const auto mesh: test_meshes_mbmesh) {
+        // don't run cases that hang
+        auto skip_itr = std::find_if(skip_test_mbmesh.begin(),   skip_test_mbmesh.end(), 
+                                         FindPair(api, mesh));
+  
+        if (skip_itr != skip_test_mbmesh.end()) {
+          continue;
+        } else {
+          combine(api, mesh, "MBMesh");
+        }
       }
     }
   }
 
-  for (const auto api: test_apis_native) {
-    for (const auto mesh: test_meshes_native) {
-      // don't run cases that hang
-      auto skip_itr = std::find_if(skip_test_native.begin(), skip_test_native.end(), 
-                                       FindPair(api, mesh));
-  
-      if (skip_itr != skip_test_native.end()) {
-        continue;
-      } else {
-        combine(api, mesh, "Native");
+  if (native) {
+    for (const auto api: test_apis_native) {
+      for (const auto mesh: test_meshes_native) {
+        // don't run cases that hang
+        auto skip_itr = std::find_if(skip_test_native.begin(),   skip_test_native.end(), 
+                                         FindPair(api, mesh));
+    
+        if (skip_itr != skip_test_native.end()) {
+          continue;
+        } else {
+          combine(api, mesh, "Native");
+        }
       }
     }
   }
