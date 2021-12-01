@@ -163,8 +163,7 @@ metadata:
             payload-type:
                 class: struct
                 fields:
-                    virtMem: uint32
-                    physMem: uint32
+                    rss: uint32                    
         clk:
             payload-type:
                 class: struct

@@ -56,7 +56,7 @@ def gen():
     f = open('src/ESMCI_TraceMetadata.C', 'w+')
     f.write(text)
     f.close()
-    print 'Generated src/ESMCI_TraceMetadata.C'
+    print('Generated src/ESMCI_TraceMetadata.C')
         
 if __name__ == '__main__':
     gen()

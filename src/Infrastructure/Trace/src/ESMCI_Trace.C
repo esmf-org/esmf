@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/resource.h>
 
 #ifndef ESMF_OS_MinGW
 #include <unistd.h>
@@ -1301,6 +1302,7 @@ namespace ESMCI {
       if (traceLocalPet) {
         esmftrc_default_trace_regionid_enter(esmftrc_platform_get_default_ctx(),
                                              currentRegionNode->getGlobalId());
+	TraceEventMemInfo();
       }
       TraceClockUnlatch(traceCtx);
 
@@ -1517,6 +1519,7 @@ namespace ESMCI {
       if (traceLocalPet) {
         esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
                                             currentRegionNode->getGlobalId());
+	TraceEventMemInfo();
       }
 
       currentRegionNode->exited(traceCtx->latch_ts);
@@ -1701,13 +1704,26 @@ namespace ESMCI {
 
   }
 
+  
+  static void ProbeMem(uint32_t *rss) {
 
+    *rss = 0;
+    
+    struct rusage usage;                     
+    if (getrusage (RUSAGE_SELF, &usage) == 0) {
+      *rss = (uint32_t) (usage.ru_maxrss); 
+    }
+    
+  }
+
+  
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceEventMemInfo()"
   void TraceEventMemInfo() {
 
     if (!traceLocalPet) return;
 
+    /*
     int localrc;
     VM *globalvm = VM::getGlobal(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -1717,9 +1733,13 @@ namespace ESMCI {
     int virtMem = -1;
     int physMem = -1;
     globalvm->getMemInfo(&virtMem, &physMem);
+    */
 
+    uint32_t rss = 0;
+    ProbeMem(&rss);
+    
     esmftrc_default_trace_mem(esmftrc_platform_get_default_ctx(),
-                              virtMem, physMem);
+                              rss);
 
   }
 
