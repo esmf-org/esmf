@@ -276,7 +276,6 @@ namespace ESMCI {
       int *map_type,
       int *norm_type,
       int *regridPoleType, int *regridPoleNPnts,
-      int *regridScheme,
       int *extrapMethod,
       int *extrapNumSrcPnts,
       ESMC_R8 *extrapDistExponent,
@@ -293,11 +292,11 @@ namespace ESMCI {
 
     static void regrid_getiwts(Grid **gridpp,
                                MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                               int *regridScheme, int*rc);
+                               int *rc);
 
     static void regrid_getarea(Grid **gridpp,
                                MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                               int *regridScheme, int*rc);
+                               int *rc);
 
 
     static void regrid_getfrac(Grid **gridpp,
