@@ -275,10 +275,8 @@ class MBT {
         // function_map["regrid_search_corner"] = std::bind(&MBT::regrid_search_corner, this);
         function_map["regrid_bilinear_center"] = std::bind(&MBT::regrid_bilinear_center, this);
         function_map["regrid_bilinear_corner"] = std::bind(&MBT::regrid_bilinear_corner, this);
-        // function_map["regrid_conserve_center"] = std::bind(&MBT::regrid_conserve_center, this);
-        // function_map["regrid_conserve_corner"] = std::bind(&MBT::regrid_conserve_corner, this);
+        function_map["regrid_conserve_center"] = std::bind(&MBT::regrid_conserve_center, this);
         // function_map["regrid_conserve_2nd_center"] = std::bind(&MBT::regrid_conserve_2nd_center, this);
-        // function_map["regrid_conserve_2nd_corner"] = std::bind(&MBT::regrid_conserve_2nd_corner, this);
         // function_map["regrid_nearest_d2s_center"] = std::bind(&MBT::regrid_nearest_d2s_center, this);
         // function_map["regrid_nearest_d2s_corner"] = std::bind(&MBT::regrid_nearest_d2s_corner, this);
         // function_map["regrid_nearest_s2d_center"] = std::bind(&MBT::regrid_nearest_s2d_center, this);
@@ -331,9 +329,60 @@ class MBT {
                            &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        int regridconserve = 0;
+        int regridconserve = 1;
         
         mesh->meshaddelements(&num_elem, elemId.data(), 
+                              elemType.data(), iie,
+                              &elem_area_present, elemArea.data(),
+                              &elem_coord_present, elemCoord.data(),
+                              &num_elem_conn, elemConn.data(),
+                              &regridconserve,
+                              &coord_sys, &orig_sdim, &localrc);
+        ESMC_CHECK_THROW(localrc);
+
+        delete iin;
+        delete iie;
+
+      }
+      CATCH_MBT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int build_target_as_copy() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBT::build()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+
+        int localrc;
+
+        // this->print();
+        node_mask_present = true;
+        elem_area_present = true;
+        elem_coord_present = true;
+        elem_mask_present = true;
+
+        InterArray<int> *iin = new InterArray<int>(nodeMask.data(),num_node);
+        InterArray<int> *iie = new InterArray<int>(elemMask.data(),num_elem);
+        
+        MeshCap::meshSetMOAB(&nativeormb, &localrc);
+        ESMC_CHECK_THROW(localrc);
+
+        target = MeshCap::meshcreate(&pdim, &sdim, &coord_sys, &localrc);
+        ESMC_CHECK_THROW(localrc);
+
+        target->meshaddnodes(&num_node, nodeId.data(), nodeCoord.data(), 
+                           nodeOwner.data(), iin, &coord_sys, 
+                           &orig_sdim, &localrc);
+        ESMC_CHECK_THROW(localrc);
+
+        int regridconserve = 1;
+        
+        target->meshaddelements(&num_elem, elemId.data(), 
                               elemType.data(), iie,
                               &elem_area_present, elemArea.data(),
                               &elem_coord_present, elemCoord.data(),
@@ -521,43 +570,84 @@ class MBT {
       try {
         int localrc;
         
+        if (regrid_method == 2) {
+          localrc = build_target_as_copy();
+          // localrc = dual();
+          ESMC_CHECK_THROW(localrc);
+        }
+        
+        // localrc = test_get_info(mesh);
+        // ESMC_CHECK_THROW(localrc);
+        // 
+        // localrc = print();
+        // ESMC_CHECK_THROW(localrc);
+
+        // mesh->meshwrite("mesh", &localrc, 4);
+        // target->meshwrite("target", &localrc, 6);
+
         // Cartesian?
         int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
         if (coord_sys == ESMC_COORDSYS_CART)
           map_type = MB_MAP_TYPE_CART_APPROX;
+        if (regrid_method == 2 or 4)
+          map_type = MB_MAP_TYPE_GREAT_CIRCLE;
 
         // hacks to appease the double pointers in this api
         MeshCap *dummy_mc = NULL;
+        if (regrid_method == 2) dummy_mc = target;
         ESMCI::Array *dummy_array = NULL;
         PointList *dummy_pl = NULL;
-        int has_status_array = 0;
-        ESMCI::Array *dummy_status_array = NULL;
-        int ignore_degenerate = 0;
-        int check_flag = 0;
+        // norm_type DSTAREA = 0, FRACAREA
+        int norm_type = 0;
+        // regrid_pole_type NONE = 0, ALL, NPNT, TEETH;
+        int regrid_pole_type = 0;
+        int regrid_pole_npnts = 0;
+        // regrid_scheme FULL3D = 0, NATIVE = 1, REGION3D = 2, FULLTOREG3D = 3,
+        // REGTOFULL3D = 4, DCON3D = 5, DCON3DWPOLE = 6
+        int regrid_scheme = 0;
+        // extrap_method NONE = 0 NEAREST_STOD, NEAREST_IDAVG, NEAREST_D, 
+        // CREEP, CREEP_NRST_D
         int extrap_method = 0;
-        int has_udl = 0;
+        int extrap_num_src_pts = 0;
+        ESMC_R8 extrap_dist_exponent = 0;
+        int extrap_num_levels = 0;
+        int extrap_num_input_levels = 0;
+        // unmapped_action ERROR = 0, IGNORE
         int unmapped_action = 1;
+        int ignore_degenerate = 0;
+        int src_term_processing = 0;
+        int pipeline_depth = 0;
+        ESMCI::RouteHandle *rh = NULL;
         int has_rh = 0;
-        int nentries = 0;
         int has_iw = 0;
+        int nentries = 0;
+        ESMCI::TempWeights *tweights = NULL;
+        int has_udl = 0;
         int num_udl = 0;
         ESMCI::TempUDL *tudl = NULL;
-        int regrid_pole_type = 0;
-        
+        int has_status_array = 0;
+        ESMCI::Array *dummy_status_array = NULL;
+        int check_flag = 0;
+
+        // mesh cap level routine to add pole information to a periodic
+        // meshSetPole();
+
         // calculate bilinear weights between mesh and pointlist
         MeshCap::regrid_create(&mesh, &dummy_array, &dummy_pl, 
                                &dummy_mc, &dummy_array, &pl, 
-                               &regrid_method, &map_type, 
-                               NULL, 
-                               &regrid_pole_type, NULL, 
-                               NULL, 
-                               &extrap_method, NULL, NULL, NULL, NULL, 
+                               &regrid_method, 
+                               &map_type, 
+                               &norm_type, 
+                               &regrid_pole_type, &regrid_pole_npnts, 
+                               &regrid_scheme, 
+                               &extrap_method, &extrap_num_src_pts,
+                               &extrap_dist_exponent, &extrap_num_levels,
+                               &extrap_num_input_levels,
                                &unmapped_action, 
                                &ignore_degenerate, 
-                               NULL, NULL, 
-                               NULL, &has_rh, 
-                               &has_iw, 
-                               &nentries, NULL, 
+                               &src_term_processing, &pipeline_depth, 
+                               &rh, &has_rh, 
+                               &has_iw, &nentries, &tweights, 
                                &has_udl, &num_udl, &tudl, 
                                &has_status_array, &dummy_status_array, 
                                &check_flag, &localrc);
@@ -618,6 +708,33 @@ class MBT {
         mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &pl, &localrc);
         ESMC_CHECK_THROW(localrc);
                 
+        localrc = regrid_generic(regrid_method);
+        ESMC_CHECK_THROW(localrc);
+        
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
+      }
+      CATCH_MBT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int regrid_conserve_center() {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBT::regrid_conserve_center()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_CONSERVE;
+        int regrid_method = 2;
+
         localrc = regrid_generic(regrid_method);
         ESMC_CHECK_THROW(localrc);
         

@@ -101,6 +101,9 @@ int main(int argc, char *argv[]) {
   int localPet, petCount;
   ESMC_VM vm;
 
+  bool mbmesh = false;
+  bool native = true; 
+
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
 
@@ -117,9 +120,7 @@ int main(int argc, char *argv[]) {
     test_apis_mbmesh.push_back("regrid_bilinear_center");
     test_apis_mbmesh.push_back("regrid_bilinear_corner");
     // test_apis_mbmesh.push_back("regrid_conserve_center");
-    // test_apis_mbmesh.push_back("regrid_conserve_corner");
     // test_apis_mbmesh.push_back("regrid_conserve_2nd_center");
-    // test_apis_mbmesh.push_back("regrid_conserve_2nd_corner");
     // test_apis_mbmesh.push_back("regrid_nearest_d2s_center");
     // test_apis_mbmesh.push_back("regrid_nearest_d2s_corner");
     // test_apis_mbmesh.push_back("regrid_nearest_s2d_center");
@@ -149,29 +150,27 @@ int main(int argc, char *argv[]) {
 
   // these are bound to MBT in constructor, must match!
   std::vector<std::string> test_apis_native;
-    test_apis_native.push_back("regrid_bilinear_center");
-    test_apis_native.push_back("regrid_bilinear_corner");
-    // test_apis_native.push_back("regrid_conserve_center");
-    // test_apis_native.push_back("regrid_conserve_corner");
+    // test_apis_native.push_back("regrid_bilinear_center");
+    // test_apis_native.push_back("regrid_bilinear_corner");
+    test_apis_native.push_back("regrid_conserve_center");
     // test_apis_native.push_back("regrid_conserve_2nd_center");
-    // test_apis_native.push_back("regrid_conserve_2nd_corner");
     // test_apis_native.push_back("regrid_nearest_d2s_center");
     // test_apis_native.push_back("regrid_nearest_d2s_corner");
     // test_apis_native.push_back("regrid_nearest_s2d_center");
     // test_apis_native.push_back("regrid_nearest_s2d_corner");
-    test_apis_native.push_back("regrid_patch_center");
-    test_apis_native.push_back("regrid_patch_corner");
+    // test_apis_native.push_back("regrid_patch_center");
+    // test_apis_native.push_back("regrid_patch_corner");
 
   // these are bound to MBTGen in constructor, must match!
   std::vector<std::string> test_meshes_native;
     test_meshes_native.push_back("quad_2d_cart");
-    test_meshes_native.push_back("quad_2d_sph");
-    test_meshes_native.push_back("tri_2d_cart");
-    test_meshes_native.push_back("tri_2d_sph");
-    test_meshes_native.push_back("hex_3d_cart");
-    test_meshes_native.push_back("hex_3d_sph");
-    test_meshes_native.push_back("mix_2d_cart");
-    test_meshes_native.push_back("mix_2d_sph");
+    // test_meshes_native.push_back("quad_2d_sph");
+    // test_meshes_native.push_back("tri_2d_cart");
+    // test_meshes_native.push_back("tri_2d_sph");
+    // test_meshes_native.push_back("hex_3d_cart");
+    // test_meshes_native.push_back("hex_3d_sph");
+    // test_meshes_native.push_back("mix_2d_cart");
+    // test_meshes_native.push_back("mix_2d_sph");
     // test_meshes_native.push_back("ngon_2d_cart");
     // test_meshes_native.push_back("ngon_2d_sph");
 
@@ -185,34 +184,38 @@ int main(int argc, char *argv[]) {
     // {"regrid_conserve_2nd", "hex_3d_sph"},
   };
   
-  for (const auto api: test_apis_mbmesh) {
-    for (const auto mesh: test_meshes_mbmesh) {    
-      
-      // don't run cases that hang
-      auto skip_itr = std::find_if(skip_test_mbmesh.begin(), 
-                                   skip_test_mbmesh.end(), 
-                                   FindPair(api, mesh));
-
-      // don't run cases that hang
-      if (skip_itr != skip_test_mbmesh.end()) {
-        continue;
-      } else {
-        combine(api, mesh, "MBMesh");
+  if (mbmesh) {
+    for (const auto api: test_apis_mbmesh) {
+      for (const auto mesh: test_meshes_mbmesh) {    
+        
+        // don't run cases that hang
+        auto skip_itr = std::find_if(skip_test_mbmesh.begin(), 
+                                     skip_test_mbmesh.end(), 
+                                     FindPair(api, mesh));
+  
+        // don't run cases that hang
+        if (skip_itr != skip_test_mbmesh.end()) {
+          continue;
+        } else {
+          combine(api, mesh, "MBMesh");
+        }
       }
     }
   }
 
-  for (const auto api: test_apis_native) {
-    for (const auto mesh: test_meshes_native) {
-      // don't run cases that hang
-      auto skip_itr = std::find_if(skip_test_native.begin(), 
-                                   skip_test_native.end(), 
-                                   FindPair(api, mesh));
-
-      if (skip_itr != skip_test_native.end()) {
-        continue;
-      } else {
-        combine(api, mesh, "Native");
+  if (native) {
+    for (const auto api: test_apis_native) {
+      for (const auto mesh: test_meshes_native) {
+        // don't run cases that hang
+        auto skip_itr = std::find_if(skip_test_native.begin(), 
+                                     skip_test_native.end(), 
+                                     FindPair(api, mesh));
+  
+        if (skip_itr != skip_test_native.end()) {
+          continue;
+        } else {
+          combine(api, mesh, "Native");
+        }
       }
     }
   }
