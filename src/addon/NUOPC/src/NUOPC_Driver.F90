@@ -3463,9 +3463,6 @@ module NUOPC_Driver
     integer                         :: i, j, phase, runPhase, runSeqIndex
     integer                         :: verbosity, profiling
     integer                         :: indentCount
-    integer                         :: loopLevel, loopLevelPrev
-    integer                         :: levelMember, levelMemberPrev
-    integer                         :: loopIteration, loopIterationPrev
 
     rc = ESMF_SUCCESS
 
