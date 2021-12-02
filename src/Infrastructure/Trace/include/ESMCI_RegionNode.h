@@ -43,8 +43,8 @@ namespace ESMCI {
       _pecount(0), _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
       _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {
-      if (isUserRegion){
-        int localrc;
+      int localrc;
+      if (VM::isInitialized(&localrc)){
         VM *vm = VM::getCurrent(&localrc);
         _pecount = vm->getNcpet(vm->getLocalPet());
       }
@@ -154,7 +154,7 @@ namespace ESMCI {
 
     
     RegionNode *getOrAddChild(uint16_t local_id, bool &wasAdded) {
-      return getOrAddChild(local_id, true, wasAdded);
+      return getOrAddChild(local_id, false, wasAdded);
     }
 
     RegionNode *getOrAddChild(uint16_t local_id, bool isUserRegion, bool &wasAdded) {
