@@ -329,14 +329,12 @@ class MBT {
                            &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 
-        int regridconserve = 1;
         
         mesh->meshaddelements(&num_elem, elemId.data(), 
                               elemType.data(), iie,
                               &elem_area_present, elemArea.data(),
                               &elem_coord_present, elemCoord.data(),
                               &num_elem_conn, elemConn.data(),
-                              &regridconserve,
                               &coord_sys, &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 

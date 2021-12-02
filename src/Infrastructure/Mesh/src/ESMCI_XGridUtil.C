@@ -2124,11 +2124,10 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
                   int *unmappedaction) {
 
   // Conservative regridding
-  // pole type and points, and scheme are not needed for cons. regridding
+  // pole type and points  are not needed for cons. regridding
   // This is the current layer cut off subroutine
   int regridPoleType = 0;
   int regridPoleNPnts = 1;
-  int regridScheme = 0;
   int map_type=0;
   bool tmp_set_dst_status=false;
   int tmpExtrapMethod=0;
@@ -2139,7 +2138,7 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
   IWeights tmp_dst_status;
 //WriteVTKMesh(srcmesh, "srcmesh");
 //WriteVTKMesh(dstmesh, "dstmesh");
-  if (!regrid(&srcmesh, NULL, &dstmesh, NULL, midmesh, wts, regridMethod, &regridScheme, 
+  if (!regrid(&srcmesh, NULL, &dstmesh, NULL, midmesh, wts, regridMethod,
               &regridPoleType, &regridPoleNPnts, &map_type, 
               &tmpExtrapMethod,
               &tmpExtrapNumSrcPnts, 

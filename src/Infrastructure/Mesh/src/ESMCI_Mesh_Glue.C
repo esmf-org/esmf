@@ -686,7 +686,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
                                               int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                                               int *_areaPresent, double *elemArea,
                                               int *_elemCoordsPresent, double *elemCoords,
-                                              int *_num_elemConn, int *elemConn, int *regridConserve,
+                                              int *_num_elemConn, int *elemConn, 
                                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                               int *rc)
 #undef  ESMC_METHOD
@@ -1273,14 +1273,14 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     } // for e
 
 
-  // Register the frac field
-  if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
-    Context ctxt; ctxt.flip();
-     MEField<> *elem_frac = mesh.RegisterField("elem_frac",
-                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-     MEField<> *elem_frac2 = mesh.RegisterField("elem_frac2",
-                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-  }
+    // Register the frac field
+    {
+      Context ctxt; ctxt.flip();
+      MEField<> *elem_frac = mesh.RegisterField("elem_frac",
+                                                MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+      MEField<> *elem_frac2 = mesh.RegisterField("elem_frac2",
+                                                 MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    }
 
 
   // Handle element masking
@@ -1348,10 +1348,11 @@ void ESMCI_meshaddelements(Mesh **meshpp,
   mesh.Commit();
 
   // Set Frac values
-  if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
+  {
     // Get Fields
     MEField<> *elem_frac2=mesh.GetField("elem_frac2");
 
+    // Init frac2 to 1.0
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     int count = 0;
     for (; ei != ee; ++ei) {
@@ -6372,15 +6373,12 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
        elem_conns[i]=i+1;
      }
 
-     // Set regrid conserve flag
-     int regridConserve = ESMC_REGRID_CONSERVE_ON;
-
      // Create elements using internal mesh add elements method
      ESMCI_meshaddelements(meshpp,
                            &num_elems, elem_ids, elemTypes, elemMaskII ,
                            has_elemArea, elemArea,
                            has_elemCoords, elemCoords,
-                           &num_elem_conns, elem_conns, &regridConserve,
+                           &num_elem_conns, elem_conns, 
                            coordSys, &sdim,
                            &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
