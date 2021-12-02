@@ -79,7 +79,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
                            int *_coordsPresent, double *elemCoords,
                            int *_num_elemConn, int *elemConn, 
                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                           i 
+                           int *rc);
 
 /**
  * Routines for reading in a test VTK mesh to fortran arrays (for testing the array interface)

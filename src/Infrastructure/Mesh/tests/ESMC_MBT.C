@@ -377,15 +377,12 @@ class MBT {
                            nodeOwner.data(), iin, &coord_sys, 
                            &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
-
-        int regridconserve = 1;
         
         target->meshaddelements(&num_elem, elemId.data(), 
                               elemType.data(), iie,
                               &elem_area_present, elemArea.data(),
                               &elem_coord_present, elemCoord.data(),
                               &num_elem_conn, elemConn.data(),
-                              &regridconserve,
                               &coord_sys, &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 
@@ -600,9 +597,6 @@ class MBT {
         // regrid_pole_type NONE = 0, ALL, NPNT, TEETH;
         int regrid_pole_type = 0;
         int regrid_pole_npnts = 0;
-        // regrid_scheme FULL3D = 0, NATIVE = 1, REGION3D = 2, FULLTOREG3D = 3,
-        // REGTOFULL3D = 4, DCON3D = 5, DCON3DWPOLE = 6
-        int regrid_scheme = 0;
         // extrap_method NONE = 0 NEAREST_STOD, NEAREST_IDAVG, NEAREST_D, 
         // CREEP, CREEP_NRST_D
         int extrap_method = 0;
@@ -637,7 +631,6 @@ class MBT {
                                &map_type, 
                                &norm_type, 
                                &regrid_pole_type, &regrid_pole_npnts, 
-                               &regrid_scheme, 
                                &extrap_method, &extrap_num_src_pts,
                                &extrap_dist_exponent, &extrap_num_levels,
                                &extrap_num_input_levels,
