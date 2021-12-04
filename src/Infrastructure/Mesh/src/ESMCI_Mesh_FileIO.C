@@ -179,6 +179,97 @@ void _divide_ids_evenly_as_possible(int num_ids, int local_pet, int pet_count, i
 }
 
 
+void _get_coordDim_from_ESMFMesh_file(int pioFileDesc, char *filename, PIO_Offset &coordDim) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "_get_coordDim_from_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int dimid;
+  int localrc;
+  int piorc;
+
+  // Get global coordDim
+  piorc = PIOc_inq_dimid(pioFileDesc, "coordDim", &dimid);
+  if (!CHECKPIOERROR(piorc, std::string("Error reading coordDim from file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+  
+  piorc = PIOc_inq_dim(pioFileDesc, dimid, NULL, &coordDim);
+  if (!CHECKPIOERROR(piorc, std::string("Error reading coordDim length from file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+}
+
+void _get_coordsys_from_ESMFMesh_file(int pioFileDesc, char *filename, ESMC_CoordSys_Flag &coord_sys) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "_get_coordsys_from_ESMFMesh_file()"
+
+
+  // Declare some useful vars
+  int dimid;
+  int varid;
+  int localrc;
+  int piorc;
+
+  // Get variable id for nodeCoords
+  piorc = PIOc_inq_varid(pioFileDesc, "nodeCoords", &varid);
+  if (!CHECKPIOERROR(piorc, std::string("Error with finding nodeCoords variable in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+
+  // Get information about the units attribute
+  nc_type type;
+  PIO_Offset len;
+  piorc = PIOc_inq_att(pioFileDesc, varid, "units", &type, &len);
+  if (!CHECKPIOERROR(piorc, std::string("Error with getting units attribute from nodeCoords in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Debug
+  //printf("units len=%d\n",len);
+
+  // Get units attribute
+  char *units=new char[len+1]; // +1 for NULL terminator (sometimes the len from PIO doesn't seem to include that so adding just in case)
+  piorc = PIOc_get_att_text(pioFileDesc, varid, "units", units);
+  if (!CHECKPIOERROR(piorc, std::string("Error with getting units attribute from nodeCoords in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+  // Add null terminator
+  units[len]='\0'; 
+
+  // Debug
+  //printf("units value=%s\n",units);
+
+
+  // Look at units to determine coordinate system
+  // Using strncmp to only compare chars that match
+  // the unit name because sometimes the units can
+  // have garbage on the end.
+  if (strncmp(units,"degrees",7) == 0) {
+    coord_sys=ESMC_COORDSYS_SPH_DEG;
+  } else if (strncmp(units,"radians",7) == 0) {
+    coord_sys=ESMC_COORDSYS_SPH_RAD;
+  } else if (strncmp(units,"km",2) == 0) {
+    coord_sys=ESMC_COORDSYS_CART;
+  } else if (strncmp(units,"kilometers",10) == 0) {
+    coord_sys=ESMC_COORDSYS_CART;
+  } else if (strncmp(units,"m",1) == 0) {
+    coord_sys=ESMC_COORDSYS_CART;
+  } else if (strncmp(units,"meters",6) == 0) {
+    coord_sys=ESMC_COORDSYS_CART;
+  } else {
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
+                                      " unrecognized units for nodeCoords",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+
+  // Debug
+  //printf("coordsys=%d\n",coord_sys);
+
+  // Get rid of units string
+  delete [] units;
+
+}
+
+
 // INPUTS: 
 //  filename - file name in NULL delimited form
 //  fileformat - the format of the file
@@ -345,6 +436,11 @@ void ESMCI_mesh_create_from_file(char *filename,
       elem_ids=&elem_ids_vec[0];
     } 
 
+    // Get coordsys
+    ESMC_CoordSys_Flag coord_sys;
+    _get_coordsys_from_ESMFMesh_file(pioFileDesc, filename, coord_sys);
+
+
     // Variable declarations for PIO
     int rearr = PIO_REARR_SUBSET;
     int varid;
@@ -360,18 +456,6 @@ void ESMCI_mesh_create_from_file(char *filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
 
-    // Get global coordDim
-    piorc = PIOc_inq_dimid(pioFileDesc, "coordDim", &dimid);
-    if (!CHECKPIOERROR(piorc, std::string("Error reading coordDim from file ") + filename,
-                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
-
-    PIO_Offset coordDim;
-    piorc = PIOc_inq_dim(pioFileDesc, dimid, NULL, &coordDim);
-    if (!CHECKPIOERROR(piorc, std::string("Error reading coordDim length from file ") + filename,
-                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-    
-    //printf("coordDim=%d\n",coordDim);
-
 
     // Get global nodeCount
     piorc = PIOc_inq_dimid(pioFileDesc, "nodeCount", &dimid);
@@ -382,6 +466,10 @@ void ESMCI_mesh_create_from_file(char *filename,
     piorc = PIOc_inq_dim(pioFileDesc, dimid, NULL, &nodeCount);
     if (!CHECKPIOERROR(piorc, std::string("Error reading nodeCount dimension length from file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+    // Get coordDim
+    PIO_Offset coordDim;
+    _get_coordDim_from_ESMFMesh_file(pioFileDesc, filename, coordDim);
 
 
     // Define offsets for elementConn decomp
@@ -488,6 +576,8 @@ void ESMCI_mesh_create_from_file(char *filename,
 
 
 
+
+
     // Convert global elem info
     int num_nodes;
     int *node_ids=NULL;
@@ -541,20 +631,20 @@ void ESMCI_mesh_create_from_file(char *filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
 
-    // Create Mesh    
-    int pdim, sdim;
+    // Convert file coordDim into pdim and orig_sdim to use in mesh create
+    int pdim, orig_sdim;
     if (coordDim == 2) {
-      pdim=2;
-      sdim=2;
+      pdim=orig_sdim=2;
     } else if (coordDim == 3) {
-      pdim=3;
-      sdim=3;
+      pdim=orig_sdim=3;
     } else {
       Throw() << "Meshes can only be created with dim=2 or 3.";
     }
-    ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_SPH_DEG;
+
+
+    // Create Mesh    
     ESMCI_meshcreate(out_mesh,
-                     &pdim, &sdim, &coord_sys, &localrc);
+                     &pdim, &orig_sdim, &coord_sys, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
 
@@ -562,7 +652,7 @@ void ESMCI_mesh_create_from_file(char *filename,
     // Add nodes
     ESMCI_meshaddnodes(out_mesh, &num_nodes, node_ids,
                        nodeCoords, NULL, NULL,
-                       &coord_sys, &sdim,
+                       &coord_sys, &orig_sdim,
                        &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
@@ -727,7 +817,7 @@ void ESMCI_mesh_create_from_file(char *filename,
                           &areaPresent, elementArea,
                           &centerCoordsPresent, centerCoords, 
                           &num_local_elem_conn, local_elem_conn, &regridConserve,
-                          &coord_sys, &sdim, &localrc);
+                          &coord_sys, &orig_sdim, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
 
