@@ -229,10 +229,6 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
   int cpresent = 0;
   if (elementCoords != nullptr) cpresent = 1;
 
-  // default to 1 so all native meshes are created with frac fields
-  // this could be handled better
-  int regridconserve = 1;
-  
   // convert elementMask to InterArray for transfer to MeshCap
   InterArray<int> *em = new InterArray<int> (elementMask, elementCount);
   
@@ -242,7 +238,6 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
                       &apresent, elementArea, 
                       &cpresent, elementCoords, 
                       &ec, elementConn,
-                      &regridconserve, 
                       &(mc->coordsys_mc), &(mc->sdim_mc),
                       &localrc);
                       // elementConn, elementMask, elementArea, elementCoords);

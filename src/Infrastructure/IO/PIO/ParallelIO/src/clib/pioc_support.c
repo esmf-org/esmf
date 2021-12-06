@@ -825,7 +825,7 @@ find_mpi_type(int pio_type, MPI_Datatype *mpi_type, int *type_size)
     switch(pio_type)
     {
     case PIO_BYTE:
-        my_mpi_type = MPI_BYTE;
+        my_mpi_type = MPI_SIGNED_CHAR;
         my_type_size = NETCDF_CHAR_SIZE;
         break;
     case PIO_CHAR:

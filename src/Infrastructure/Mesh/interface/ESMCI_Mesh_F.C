@@ -430,7 +430,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp,
                                               int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                                               int *_areaPresent, double *elemArea,
                                               int *_coordsPresent, double *elemCoords,
-                                              int *_num_elemConn, int *elemConn, int *regridConserve,
+                                              int *_num_elemConn, int *elemConn, 
                                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                               int *rc)
 {
@@ -438,7 +438,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp,
   (*meshpp)->meshaddelements(_num_elems, elemId, elemType, _elemMaskII ,
                          _areaPresent, elemArea,
                          _coordsPresent, elemCoords,
-                         _num_elemConn, elemConn, regridConserve,
+                         _num_elemConn, elemConn,
                          _coordSys, _orig_sdim,
                          rc);
 }

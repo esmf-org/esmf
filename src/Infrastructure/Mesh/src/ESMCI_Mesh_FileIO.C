@@ -810,13 +810,12 @@ void ESMCI_mesh_create_from_file(char *filename,
 
 
     // Add elements
-    int regridConserve=1;
     ESMCI_meshaddelements(out_mesh,
                           &num_elems, elem_ids, numElementConn,
                           &elementMaskIA,
                           &areaPresent, elementArea,
                           &centerCoordsPresent, centerCoords, 
-                          &num_local_elem_conn, local_elem_conn, &regridConserve,
+                          &num_local_elem_conn, local_elem_conn, 
                           &coord_sys, &orig_sdim, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;

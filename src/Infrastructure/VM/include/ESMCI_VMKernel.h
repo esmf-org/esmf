@@ -241,7 +241,7 @@ class VMK{
       mpireq = MPI_REQUEST_NULL;
       firstFlag = true;
     }
-    void clear();
+    bool clear(bool justTest=false);
   };
     
   struct recvBuffer{
@@ -559,10 +559,10 @@ class VMK{
     int unlock();
 
     // Epoch support
-    void epochSetFirst();
+    void epochSetFirst(bool testAndClearBuffers=false);
     void epochInit();
     void epochFinal();
-    void epochEnter(vmEpoch epoch, int throttle=10);
+    void epochEnter(vmEpoch epoch, bool keepAlloc=true, int throttle=10);
     void epochExit(bool keepAlloc=true);
     vmEpoch getEpoch() const {return epoch;}
         

@@ -646,7 +646,6 @@ end subroutine
     integer :: numNode, numElem
     type(ESMF_CoordSys_Flag):: coordSys
     integer :: num_elems, num_elementConn
-    type(ESMF_RegridConserve) :: lregridConserve
     type(ESMF_InterArray) :: elementMaskII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
@@ -669,21 +668,6 @@ end subroutine
        return
     endif
 
-    ! Handle optional conserve argument
-! Passing the regridConserve flag into add elements is a fix for source masking
-! with patch interpolation.  Right now the Regrid does not support source masking
-! on a Mesh.  So this option is defaulting to CONSERVE_ON to make things more simple
-! because of the mulitple entry points when creating a Mesh.  When this option is
-! added to the pulic API, (when mesh source masking is enabled) this flag will
-! need to be defaulted to CONSERVE_OFF, and documentation should be added to tell
-! the users that if they are doing conservative with a mesh created in the three
-! step process they should make sure to turn CONSERVE_ON in the add element call.
-
-!    if (present(regridConserve)) then
-!       lregridConserve=regridConserve
-!    else
-       lregridConserve=ESMF_REGRID_CONSERVE_ON
-!    endif
 
     ! If we're at the wrong stage then complain
     call C_ESMC_MeshGetStatus(mesh, status)
@@ -728,7 +712,6 @@ end subroutine
                areaPresent, elementArea, &
                coordsPresent, elementCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSys, sdim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -740,7 +723,6 @@ end subroutine
                areaPresent, tmpArea, &
                coordsPresent, elementCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve,&
                coordSys, sdim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -754,7 +736,6 @@ end subroutine
                areaPresent, elementArea, &
                coordsPresent, tmpCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSys, sdim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -766,7 +747,6 @@ end subroutine
                areaPresent, tmpArea, &
                coordsPresent, tmpCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSys, sdim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -784,7 +764,7 @@ end subroutine
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
-       call C_ESMC_MeshSetElemDistGrid(mesh%this, elementDistgrid, localrc)
+       call C_ESMC_MeshSetElemDistGrid(mesh, elementDistgrid, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1233,7 +1213,6 @@ end subroutine
     integer :: numNode, numElem
     integer :: num_nodes
     integer :: num_elems, num_elementConn
-    type(ESMF_RegridConserve) :: lregridConserve
     type(ESMF_InterArray) :: elementMaskII, nodeMaskII
     type(ESMF_InterArray) :: nodeOwnersII
     real(ESMF_KIND_R8) :: tmpArea(2)
@@ -1251,23 +1230,6 @@ end subroutine
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, nodalDistgrid, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, elementDistgrid, rc)
-
-    ! Handle optional conserve argument
-! Passing the regridConserve flag into add elements is a fix for source masking
-! with patch interpolation.  Right now the Regrid does not support source masking
-! on a Mesh.  So this option is defaulting to CONSERVE_ON to make things more simple
-! because of the mulitple entry points when creating a Mesh.  When this option is
-! added to the pulic API, (when mesh source masking is enabled) this flag will
-! need to be defaulted to CONSERVE_OFF, and documentation should be added to tell
-! the users that if they are doing conservative with a mesh created in the three
-! step process they should make sure to turn CONSERVE_ON in the add element call.
-
-!    if (present(regridConserve)) then
-!       lregridConserve=regridConserve
-!    else
-       lregridConserve=ESMF_REGRID_CONSERVE_ON
-!    endif
-
 
    ! Set Default coordSys
    if (present(coordSys)) then
@@ -1352,7 +1314,7 @@ end subroutine
 num_elems, &
                              elementIds, elementTypes, elementMaskII, &
                              num_elementConn, elementConn, &
-                             lregridConserve%regridconserve, localrc)
+                             localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
@@ -1369,7 +1331,6 @@ num_elems, &
                areaPresent, elementArea, &
                coordsPresent, elementCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve,&
                coordSysLocal, spatialDim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1382,7 +1343,6 @@ num_elems, &
                areaPresent, tmpArea, &
                coordsPresent, elementCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSysLocal, spatialDim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1397,7 +1357,6 @@ num_elems, &
                areaPresent, elementArea, &
                coordsPresent, tmpCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSysLocal, spatialDim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1410,7 +1369,6 @@ num_elems, &
                areaPresent, tmpArea, &
                coordsPresent, tmpCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSysLocal, spatialDim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
