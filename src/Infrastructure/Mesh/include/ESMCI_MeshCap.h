@@ -137,7 +137,7 @@ namespace ESMCI {
     void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                          int *_coordsPresent, double *elemCoords,
-                         int *_num_elemConn, int *elemConn, int *regridConserve,
+                         int *_num_elemConn, int *elemConn, 
                          ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                          int *rc);
 
@@ -276,7 +276,6 @@ namespace ESMCI {
       int *map_type,
       int *norm_type,
       int *regridPoleType, int *regridPoleNPnts,
-      int *regridScheme,
       int *extrapMethod,
       int *extrapNumSrcPnts,
       ESMC_R8 *extrapDistExponent,
@@ -293,11 +292,11 @@ namespace ESMCI {
 
     static void regrid_getiwts(Grid **gridpp,
                                MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                               int *regridScheme, int*rc);
+                               int *rc);
 
     static void regrid_getarea(Grid **gridpp,
                                MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                               int *regridScheme, int*rc);
+                               int *rc);
 
 
     static void regrid_getfrac(Grid **gridpp,

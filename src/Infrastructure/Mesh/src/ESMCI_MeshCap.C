@@ -562,7 +562,6 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                               int *_areaPresent, double *elemArea,
                               int *_coordsPresent, double *elemCoords,
                               int *_num_elemConn, int *elemConn, 
-                              int *regridConserve,
                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                               int *rc)
 {
@@ -577,7 +576,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                           _num_elems, elemId, elemType, _elemMaskII ,
                           _areaPresent, elemArea,
                           _coordsPresent, elemCoords,
-                          _num_elemConn, elemConn, regridConserve,
+                          _num_elemConn, elemConn, 
                           _coordSys, _orig_sdim,
                           &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
@@ -589,7 +588,7 @@ void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, Inter
                        _num_elems, elemId, elemType, _elemMaskII,
                        _areaPresent, elemArea,
                        _coordsPresent, elemCoords,
-                       _num_elemConn, elemConn, regridConserve,
+                       _num_elemConn, elemConn,
                        _coordSys, _orig_sdim,
                        &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,ESMC_CONTEXT, rc);
@@ -1402,7 +1401,7 @@ void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
 
 void MeshCap::regrid_getiwts(Grid **gridpp,
                              MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                             int *regridScheme, int*rc) {
+                             int*rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::regrid_getiwts()"
 
@@ -1414,7 +1413,7 @@ void MeshCap::regrid_getiwts(Grid **gridpp,
     int localrc;
     ESMCI_regrid_getiwts(gridpp,
                          &((*meshpp)->mesh), arraypp, staggerLoc,
-                         regridScheme, &localrc);
+                          &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
   } else {
@@ -1427,7 +1426,7 @@ void MeshCap::regrid_getiwts(Grid **gridpp,
 
 void MeshCap::regrid_getarea(Grid **gridpp,
                              MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                             int *regridScheme, int*rc) {
+                             int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::regrid_getarea()"
 
@@ -1439,7 +1438,7 @@ void MeshCap::regrid_getarea(Grid **gridpp,
     int localrc;
     ESMCI_regrid_getarea(gridpp,
                          &((*meshpp)->mesh), arraypp, staggerLoc,
-                         regridScheme, &localrc);
+                         &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return;
   } else {
@@ -1489,7 +1488,6 @@ void MeshCap::regrid_create(
     int *map_type,
     int *norm_type,
     int *regridPoleType, int *regridPoleNPnts,
-    int *regridScheme,
     int *extrapMethod,
     int *extrapNumSrcPnts,
     ESMC_R8 *extrapDistExponent,
@@ -1581,7 +1579,6 @@ void MeshCap::regrid_create(
                         map_type,
                         norm_type,
                         regridPoleType, regridPoleNPnts,
-                        regridScheme,
                         extrapMethod,
                         extrapNumSrcPnts,
                         extrapDistExponent,
@@ -1608,7 +1605,6 @@ void MeshCap::regrid_create(
                          map_type,
                          norm_type,
                          regridPoleType, regridPoleNPnts,
-                         regridScheme,
                          extrapMethod,
                          extrapNumSrcPnts,
                          extrapDistExponent,

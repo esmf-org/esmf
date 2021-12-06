@@ -95,7 +95,6 @@ void ESMCI_regrid_create(
                       int *map_type,
                      int *norm_type,
                      int *regridPoleType, int *regridPoleNPnts,
-                     int *regridScheme,
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
                      ESMC_R8 *extrapDistExponent,
@@ -237,7 +236,7 @@ void ESMCI_regrid_create(
 
       if(!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, 
                  NULL, *wts, 
-                 regridMethod, regridScheme, 
+                 regridMethod, 
                  regridPoleType, regridPoleNPnts,
                  map_type,
                  extrapMethod,
@@ -255,7 +254,7 @@ void ESMCI_regrid_create(
 
       if(!regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, 
                  NULL, *wts,
-                 &tempRegridMethod, regridScheme, 
+                 &tempRegridMethod, 
                  regridPoleType, regridPoleNPnts,
                   map_type,
                  extrapMethod,
@@ -574,7 +573,7 @@ void ESMCI_regrid_create(
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()"
   Trace __trace(" FTN_X(regrid_getiwts)()");
@@ -590,7 +589,7 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
     if (!iwts) Throw() << "Could not find integration weights field on this mesh"
                              <<std::endl;
 
-    if(!get_iwts(mesh, iwts, regridScheme))
+    if(!get_iwts(mesh, iwts))
       Throw() << "Online regridding error" << std::endl;
 
     CpMeshDataToArray(grid, *staggerLoc, mesh, array, iwts);
@@ -624,7 +623,7 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
 
 void ESMCI_regrid_getarea(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getarea()"
   Trace __trace(" FTN_X(regrid_getarea)()");

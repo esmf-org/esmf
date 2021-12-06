@@ -60,7 +60,7 @@ void MBMesh_addelements(MBMesh **mbmpp,
                         int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                         int *_coordsPresent, double *elemCoords,
-                        int *_num_elemConn, int *elemConn, int *regridConserve,
+                        int *_num_elemConn, int *elemConn, 
                         ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                         int *rc);
 
