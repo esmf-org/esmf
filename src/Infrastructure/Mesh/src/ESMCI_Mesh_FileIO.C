@@ -642,6 +642,54 @@ void ESMCI_mesh_create_from_file(char *filename,
     }
 
 
+    // Get nodeMask, if present in file
+    int *nodeMask=NULL;
+
+    // Check if mask is present
+    piorc = PIOc_inq_varid(pioFileDesc, "nodeMask", &varid);
+
+
+    // If mask is present, then get it
+    if (piorc == PIO_NOERR) {
+
+      // Define offsets for nodeMask decomp
+      PIO_Offset *nm_offsets=new PIO_Offset[num_nodes];
+      for (int i=0; i<num_nodes; i++) {
+        nm_offsets[i] = (PIO_Offset)node_ids[i];
+      }
+
+      // Init nodeMask decomp
+      int nm_iodesc;
+      int nm_gdimlen = (int) nodeCount;
+      piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 1, &nm_gdimlen, num_nodes, nm_offsets, &nm_iodesc, 
+                              &rearr, NULL, NULL);
+      if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for nodeMask ") + filename,
+                         ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+      // Get rid of offsets
+      delete [] nm_offsets;
+
+      // Allocate space
+      nodeMask=new int[num_nodes];
+
+      // Get mask from file
+      piorc = PIOc_read_darray(pioFileDesc, varid, nm_iodesc, num_nodes, nodeMask);
+      if (!CHECKPIOERROR(piorc, std::string("Error reading nodeMask variable from file ") + filename,
+                         ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+      // Get rid of nodeMask decomp
+      piorc = PIOc_freedecomp(pioSystemDesc, nm_iodesc);
+      if (!CHECKPIOERROR(piorc, std::string("Error freeing nodeMask decomp "),
+                         ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+    }
+
+    // Set up variables for nodeMask
+    // Note, that is present for InterArray checks if the array is NULL, so it works to just create the InterArray and pass that
+    InterArray<int> nodeMaskIA(nodeMask, num_nodes);
+
+
+
+
     // Create Mesh    
     ESMCI_meshcreate(out_mesh,
                      &pdim, &orig_sdim, &coord_sys, &localrc);
@@ -651,7 +699,7 @@ void ESMCI_mesh_create_from_file(char *filename,
 
     // Add nodes
     ESMCI_meshaddnodes(out_mesh, &num_nodes, node_ids,
-                       nodeCoords, NULL, NULL,
+                       nodeCoords, NULL, &nodeMaskIA,
                        &coord_sys, &orig_sdim,
                        &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -660,8 +708,7 @@ void ESMCI_mesh_create_from_file(char *filename,
     // Get rid of things used for adding nodes
     delete [] node_ids;
     delete [] nodeCoords;
-
-
+    if (nodeMask != NULL) delete [] nodeMask;
 
 
     // Get elementMask, if present in file

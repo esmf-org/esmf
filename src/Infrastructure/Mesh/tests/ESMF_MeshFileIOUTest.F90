@@ -338,9 +338,9 @@ subroutine  check_mesh_from_sph_3x3_EM_file(correct, rc)
 
      !! node Mask
      allocate(nodeMask(numNodes))
-     nodeMask=(/1,2,0,0,0,0,0,0, &
-                0,0,0,0,0,0,&
-                0,3/)
+     nodeMask=(/1,0,1,0,1,0,1,0, &
+                1,0,1,0,1,0,&
+                1,0/)
 
 
      !! node Coords
@@ -441,7 +441,7 @@ subroutine  check_mesh_from_sph_3x3_EM_file(correct, rc)
 
      !! node Mask
      allocate(nodeMask(numNodes))
-     nodeMask=(/1,2,0,0/)
+     nodeMask=(/1,0,1,0/)
 
 
      !! node Coords
@@ -498,7 +498,7 @@ subroutine  check_mesh_from_sph_3x3_EM_file(correct, rc)
 
      !! node Mask
      allocate(nodeMask(numNodes))
-     nodeMask=(/2,0,0,0,0,0/)
+     nodeMask=(/0,1,0,0,1,0/)
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -570,9 +570,9 @@ subroutine  check_mesh_from_sph_3x3_EM_file(correct, rc)
 
      !! node Mask
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0, &
-                0,0,0, &
-                0,0,0/)
+     nodeMask=(/1,0,1, &
+                1,0,1, &
+                1,0,1/)
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -652,8 +652,7 @@ subroutine  check_mesh_from_sph_3x3_EM_file(correct, rc)
 
      !! node Mask
      allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0, &
-                0,0,3/)
+     nodeMask=(/1,0,1,0,1,0/)
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -782,7 +781,7 @@ subroutine  check_mesh_from_sph_3x3_EM_file(correct, rc)
    ! write(*,*) "elemCoordsIsPresent=",elemCoordsIsPresentTst
 
    ! Check is present info
-!   if (.not. nodeMaskIsPresentTst) correct=.false.
+   if (.not. nodeMaskIsPresentTst) correct=.false.
    if (.not. elemMaskIsPresentTst) correct=.false.
    if (.not. elemAreaIsPresentTst) correct=.false.
    if (.not. elemCoordsIsPresentTst) correct=.false.
@@ -806,7 +805,7 @@ subroutine  check_mesh_from_sph_3x3_EM_file(correct, rc)
         nodeIds=nodeIdsTst, &
         nodeCoords=nodeCoordsTst, &
         nodeOwners=nodeOwnersTst, &
-!        nodeMask=nodeMaskTst, &
+        nodeMask=nodeMaskTst, &
         elementIds=elemIdsTst, &
         elementTypes=elemTypesTst, &
         elementConn=elemConnTst, &
@@ -840,13 +839,13 @@ subroutine  check_mesh_from_sph_3x3_EM_file(correct, rc)
       if (nodeOwners(i) .ne. nodeOwnersTst(i)) correct=.false.
    enddo
 
-!!   ! Check node Mask
-!!   do i=1,numNodesTst
-!!      if (nodeMask(i) .ne. nodeMaskTst(i)) correct=.false.
-!!   enddo
+   ! Check node Mask
+   do i=1,numNodesTst
+      if (nodeMask(i) .ne. nodeMaskTst(i)) correct=.false.
+   enddo
 
 
-   ! Debugging
+   ! Debug output
    ! write(*,*) "nodeMask   =",nodeMask
    ! write(*,*) "nodeMaskTst=",nodeMaskTst
 
@@ -884,7 +883,7 @@ subroutine  check_mesh_from_sph_3x3_EM_file(correct, rc)
       enddo
    enddo
 
-   ! Debugging
+   ! Debug output
    ! write(*,*) "elemCoords   =",elemCoords
    ! write(*,*) "elemCoordsTst=",elemCoordsTst
 
@@ -1050,12 +1049,6 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
                9,10,11,12,13,14,&
                15,16/)
 
-     !! node Mask
-     allocate(nodeMask(numNodes))
-     nodeMask=(/1,2,0,0,0,0,0,0, &
-                0,0,0,0,0,0,&
-                0,3/)
-
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -1153,10 +1146,6 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
      allocate(nodeIds(numNodes))
      nodeIds=(/1,2,5,6/)
 
-     !! node Mask
-     allocate(nodeMask(numNodes))
-     nodeMask=(/1,2,0,0/)
-
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -1209,10 +1198,6 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
      !! node ids
      allocate(nodeIds(numNodes))
      nodeIds=(/2,3,4,6,7,8/)
-
-     !! node Mask
-     allocate(nodeMask(numNodes))
-     nodeMask=(/2,0,0,0,0,0/)
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -1281,12 +1266,6 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
      nodeIds=(/5,6,7,   &
                9,10,11, &
                13,14,15/)
-
-     !! node Mask
-     allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0, &
-                0,0,0, &
-                0,0,0/)
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -1364,10 +1343,6 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
      allocate(nodeIds(numNodes))
      nodeIds=(/7,8,11,12,15,16/)
 
-     !! node Mask
-     allocate(nodeMask(numNodes))
-     nodeMask=(/0,0,0, &
-                0,0,3/)
 
      !! node Coords
      allocate(nodeCoords(numNodes*2))
@@ -1496,7 +1471,7 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
    ! write(*,*) "elemCoordsIsPresent=",elemCoordsIsPresentTst
 
    ! Check is present info
-!   if (.not. nodeMaskIsPresentTst) correct=.false.
+   if (      nodeMaskIsPresentTst) correct=.false.  ! There isn't a nodeMask in the file
    if (.not. elemMaskIsPresentTst) correct=.false.
    if (.not. elemAreaIsPresentTst) correct=.false.
    if (.not. elemCoordsIsPresentTst) correct=.false.
@@ -1506,7 +1481,6 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
    allocate(nodeIdsTst(numNodesTst))
    allocate(nodeCoordsTst(2*numNodesTst))
    allocate(nodeOwnersTst(numNodesTst))
-   allocate(nodeMaskTst(numNodesTst))
    allocate(elemIdsTst(numElemsTst))
    allocate(elemTypesTst(numElemsTst))
    allocate(elemConnTst(numElemConnsTst))
@@ -1520,7 +1494,6 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
         nodeIds=nodeIdsTst, &
         nodeCoords=nodeCoordsTst, &
         nodeOwners=nodeOwnersTst, &
-!        nodeMask=nodeMaskTst, &
         elementIds=elemIdsTst, &
         elementTypes=elemTypesTst, &
         elementConn=elemConnTst, &
@@ -1553,16 +1526,6 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
    do i=1,numNodesTst
       if (nodeOwners(i) .ne. nodeOwnersTst(i)) correct=.false.
    enddo
-
-!!   ! Check node Mask
-!!   do i=1,numNodesTst
-!!      if (nodeMask(i) .ne. nodeMaskTst(i)) correct=.false.
-!!   enddo
-
-
-   ! Debugging
-   ! write(*,*) "nodeMask   =",nodeMask
-   ! write(*,*) "nodeMaskTst=",nodeMaskTst
 
    ! Check elem ids
    do i=1,numElemsTst
@@ -1606,7 +1569,6 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-   deallocate(nodeMask)
 
    ! deallocate elem data
    deallocate(elemIds)
@@ -1620,7 +1582,6 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
    deallocate(nodeIdsTst)
    deallocate(nodeCoordsTst)
    deallocate(nodeOwnersTst)
-   deallocate(nodeMaskTst)
    deallocate(elemIdsTst)
    deallocate(elemTypesTst)
    deallocate(elemConnTst)
