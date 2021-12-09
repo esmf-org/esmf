@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
   int localPet, petCount;
   ESMC_VM vm;
 
-  bool mbmesh = false;
+  bool mbmesh = true;
   bool native = true; 
 
   //----------------------------------------------------------------------------
@@ -119,27 +119,30 @@ int main(int argc, char *argv[]) {
   std::vector<std::string> test_apis_mbmesh;
     test_apis_mbmesh.push_back("regrid_bilinear_center");
     test_apis_mbmesh.push_back("regrid_bilinear_corner");
-    // test_apis_mbmesh.push_back("regrid_conserve_center");
+    test_apis_mbmesh.push_back("regrid_conserve_center");
     // test_apis_mbmesh.push_back("regrid_conserve_2nd_center");
-    // test_apis_mbmesh.push_back("regrid_nearest_d2s_center");
-    // test_apis_mbmesh.push_back("regrid_nearest_d2s_corner");
-    // test_apis_mbmesh.push_back("regrid_nearest_s2d_center");
-    // test_apis_mbmesh.push_back("regrid_nearest_s2d_corner");
+    test_apis_mbmesh.push_back("regrid_nearest_d2s");
+    test_apis_mbmesh.push_back("regrid_nearest_s2d");
     // test_apis_mbmesh.push_back("regrid_patch_center");
     // test_apis_mbmesh.push_back("regrid_patch_corner");
 
   // these are bound to MBTGen in constructor, must match!
   std::vector<std::string> test_meshes_mbmesh;
     test_meshes_mbmesh.push_back("quad_2d_cart");
-    test_meshes_mbmesh.push_back("quad_2d_sph");
+    test_meshes_mbmesh.push_back("quad_2d_sph_deg");
+    test_meshes_mbmesh.push_back("quad_2d_sph_rad");
     test_meshes_mbmesh.push_back("tri_2d_cart");
-    test_meshes_mbmesh.push_back("tri_2d_sph");
+    test_meshes_mbmesh.push_back("tri_2d_sph_deg");
+    test_meshes_mbmesh.push_back("tri_2d_sph_rad");
     test_meshes_mbmesh.push_back("hex_3d_cart");
-    test_meshes_mbmesh.push_back("hex_3d_sph");
+    test_meshes_mbmesh.push_back("hex_3d_sph_deg");
+    test_meshes_mbmesh.push_back("hex_3d_sph_rad");
     test_meshes_mbmesh.push_back("mix_2d_cart");
-    test_meshes_mbmesh.push_back("mix_2d_sph");
-    // test_meshes_mbmesh.push_back("ngon_2d_cart");
-    // test_meshes_mbmesh.push_back("ngon_2d_sph");
+    test_meshes_mbmesh.push_back("mix_2d_sph_deg");
+    test_meshes_mbmesh.push_back("mix_2d_sph_rad");
+    test_meshes_mbmesh.push_back("ngon_2d_cart");
+    test_meshes_mbmesh.push_back("ngon_2d_sph_deg");
+    test_meshes_mbmesh.push_back("ngon_2d_sph_rad");
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
@@ -150,29 +153,32 @@ int main(int argc, char *argv[]) {
 
   // these are bound to MBT in constructor, must match!
   std::vector<std::string> test_apis_native;
-    // test_apis_native.push_back("regrid_bilinear_center");
-    // test_apis_native.push_back("regrid_bilinear_corner");
+    test_apis_native.push_back("regrid_bilinear_center");
+    test_apis_native.push_back("regrid_bilinear_corner");
     test_apis_native.push_back("regrid_conserve_center");
-    // test_apis_native.push_back("regrid_conserve_2nd_center");
-    // test_apis_native.push_back("regrid_nearest_d2s_center");
-    // test_apis_native.push_back("regrid_nearest_d2s_corner");
-    // test_apis_native.push_back("regrid_nearest_s2d_center");
-    // test_apis_native.push_back("regrid_nearest_s2d_corner");
-    // test_apis_native.push_back("regrid_patch_center");
-    // test_apis_native.push_back("regrid_patch_corner");
+    test_apis_native.push_back("regrid_conserve_2nd_center");
+    test_apis_native.push_back("regrid_nearest_d2s");
+    test_apis_native.push_back("regrid_nearest_s2d");
+    test_apis_native.push_back("regrid_patch_center");
+    test_apis_native.push_back("regrid_patch_corner");
 
   // these are bound to MBTGen in constructor, must match!
   std::vector<std::string> test_meshes_native;
     test_meshes_native.push_back("quad_2d_cart");
-    // test_meshes_native.push_back("quad_2d_sph");
-    // test_meshes_native.push_back("tri_2d_cart");
-    // test_meshes_native.push_back("tri_2d_sph");
-    // test_meshes_native.push_back("hex_3d_cart");
-    // test_meshes_native.push_back("hex_3d_sph");
-    // test_meshes_native.push_back("mix_2d_cart");
-    // test_meshes_native.push_back("mix_2d_sph");
-    // test_meshes_native.push_back("ngon_2d_cart");
-    // test_meshes_native.push_back("ngon_2d_sph");
+    test_meshes_native.push_back("quad_2d_sph_deg");
+    test_meshes_native.push_back("quad_2d_sph_rad");
+    test_meshes_native.push_back("tri_2d_cart");
+    test_meshes_native.push_back("tri_2d_sph_deg");
+    test_meshes_native.push_back("tri_2d_sph_rad");
+    test_meshes_native.push_back("hex_3d_cart");
+    test_meshes_native.push_back("hex_3d_sph_deg");
+    test_meshes_native.push_back("hex_3d_sph_rad");
+    test_meshes_native.push_back("mix_2d_cart");
+    test_meshes_native.push_back("mix_2d_sph_deg");
+    test_meshes_native.push_back("mix_2d_sph_rad");
+    test_meshes_native.push_back("ngon_2d_cart");
+    test_meshes_native.push_back("ngon_2d_sph_deg");
+    test_meshes_native.push_back("ngon_2d_sph_rad");
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test_native = {\
@@ -183,6 +189,44 @@ int main(int argc, char *argv[]) {
     // {"regrid_conserve_2nd", "hex_3d_cart"},
     // {"regrid_conserve_2nd", "hex_3d_sph"},
   };
+
+  // // combinatorial regrid options to explore
+  // // these are bound to MBTGen in constructor, must match!
+  // std::vector<std::string> test_regrid_maptype_native;
+  //   test_regrid_maptype_native.push_back("MB_MAP_TYPE_CART_APPROX");
+  //   test_regrid_maptype_native.push_back("MB_MAP_TYPE_GREAT_CIRCLE");
+  // 
+  // // these are bound to MBTGen in constructor, must match!
+  // std::vector<std::string> test_regrid_normtype_native;
+  //   test_regrid_normtype_native.push_back("DSTAREA");
+  //   test_regrid_normtype_native.push_back("FRACAREA");
+  // 
+  // // the following require special handling
+  // // these are bound to MBTGen in constructor, must match!
+  // std::vector<std::string> test_regrid_poletype_native;
+  //   test_regrid_poletype_native.push_back("NONE");
+  //   test_regrid_poletype_native.push_back("ALL");
+  //   test_regrid_poletype_native.push_back("NPNT");
+  //   test_regrid_poletype_native.push_back("TEETH");
+  // 
+  // // these are bound to MBTGen in constructor, must match!
+  // std::vector<std::string> test_regrid_extrapmethod_native;
+  //   test_regrid_extrapmethod_native.push_back("NONE");
+  //   test_regrid_extrapmethod_native.push_back("NEAREST_STOD");
+  //   test_regrid_extrapmethod_native.push_back("NEAREST_IDAVG");
+  //   test_regrid_extrapmethod_native.push_back("NEAREST_D");
+  //   test_regrid_extrapmethod_native.push_back("CREEP");
+  //   test_regrid_extrapmethod_native.push_back("CREEP_NRST_D");
+  // 
+  // // these are bound to MBTGen in constructor, must match!
+  // std::vector<std::string> test_regrid_unmappedaction_native;
+  //   test_regrid_unmappedaction_native.push_back("ERROR");
+  //   test_regrid_unmappedaction_native.push_back("IGNORE");
+  // 
+  // // these are bound to MBTGen in constructor, must match!
+  // std::vector<std::string> test_regrid_ignoredegenerate_native;
+  //   test_regrid_ignoredegenerate_native.push_back("False");
+  //   test_regrid_ignoredegenerate_native.push_back("True");
   
   if (mbmesh) {
     for (const auto api: test_apis_mbmesh) {
