@@ -23,7 +23,7 @@
 #if defined ESMF_MOAB
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
-#include "ESMC_MBTGen.C"
+#include "ESMC_MCTGen.C"
 #endif
 
 #include "ESMCI_MeshCap.h"
@@ -57,7 +57,7 @@ void combine(const std::string &api, const std::string &mesh,
     int result = 0;
 
 #if defined ESMF_MOAB
-    MBTGen *generate = new MBTGen();
+    MCTGen *generate = new MCTGen();
 #endif
 
     int nvmb = 1;
@@ -67,7 +67,7 @@ void combine(const std::string &api, const std::string &mesh,
 
 #if defined ESMF_MOAB
       try {
-        MBT *test = generate->mesh_map[mesh](localrc);
+        MCT *test = generate->mesh_map[mesh](localrc);
         
         test->name = name;
         test->nativeormb = nvmb;
@@ -80,7 +80,7 @@ void combine(const std::string &api, const std::string &mesh,
         
         delete test;
       }
-      CATCH_MBT_FAIL(&rc)
+      CATCH_MCT_FAIL(&rc)
 #else
     rc = ESMF_SUCCESS;
 #endif
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                 (int *)NULL, (int *)NULL);
 
-  // these are bound to MBT in constructor, must match!
+  // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis_native;
     test_apis_native.push_back("createget");
     test_apis_native.push_back("dual");
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
     test_apis_native.push_back("to_pointlist_node");
     test_apis_native.push_back("write_vtk");
 
-  // these are bound to MBTGen in constructor, must match!
+  // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes_native;
     test_meshes_native.push_back("quad_2d_cart");
     test_meshes_native.push_back("quad_2d_sph_deg");
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
     // test_meshes_native.push_back("ngon_2d_cart");
     // test_meshes_native.push_back("ngon_2d_sph");
 
-  // these are bound to MBT in constructor, must match!
+  // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis_mbmesh;
     test_apis_mbmesh.push_back("createget");
     test_apis_mbmesh.push_back("dual");
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
     test_apis_mbmesh.push_back("to_pointlist_node");
     test_apis_mbmesh.push_back("write_vtk");
 
-  // these are bound to MBTGen in constructor, must match!
+  // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes_mbmesh;
     test_meshes_mbmesh.push_back("quad_2d_cart");
     test_meshes_mbmesh.push_back("quad_2d_sph_deg");

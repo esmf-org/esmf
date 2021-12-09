@@ -61,7 +61,7 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
 }
 
 // use when pointer *rc is returned
-#define CATCH_MBT_RETURN_NULL(rc) \
+#define CATCH_MCT_RETURN_NULL(rc) \
   catch(int localrc){ \
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
     return NULL; \
@@ -85,7 +85,7 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
     return NULL; }
 
 // for MBMesh routines, when integer is returned
-#define CATCH_MBT_RETURN_RC(rc) \
+#define CATCH_MCT_RETURN_RC(rc) \
   catch(int localrc){ \
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
     return (*rc); \
@@ -105,7 +105,7 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
     return (*rc); }
 
 // for MBMesh routines, when integer is returned
-#define CATCH_MBT_FAIL(rc) \
+#define CATCH_MCT_FAIL(rc) \
   catch(int localrc){ \
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc); \
   } catch(std::string errstr){ \
@@ -120,7 +120,7 @@ typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, msg, ESMC_CONTEXT, rc);}
 
 
-class MBT {
+class MCT {
   public:
     int verbosity = 0;
     double tol = 1.e-15;
@@ -201,9 +201,9 @@ class MBT {
 
     std::map<std::string, std::function<int(void)>>  function_map;
 
-    MBT(int _pdim, int _sdim, ESMC_CoordSys_Flag _coord_sys, int _num_node, int _num_elem, int _num_elem_conn, int _redist_num_node, int _redist_num_elem, int _redist_num_elem_conn) {
+    MCT(int _pdim, int _sdim, ESMC_CoordSys_Flag _coord_sys, int _num_node, int _num_elem, int _num_elem_conn, int _redist_num_node, int _redist_num_elem, int _redist_num_elem_conn) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT()"
+#define ESMC_METHOD "MCT()"
       try {
         mesh = new MeshCap();
 
@@ -268,33 +268,33 @@ class MBT {
           std::generate_n(redist_elemArea.begin(), _redist_num_elem, generator_real);
         }
         
-        function_map["createget"] = std::bind(&MBT::createget, this);
-        function_map["dual"] = std::bind(&MBT::dual, this);
-        function_map["redist_elem"] = std::bind(&MBT::redist_elem, this);
-        function_map["redist_node"] = std::bind(&MBT::redist_node, this);
-        function_map["redist_elno"] = std::bind(&MBT::redist_elno, this);
-        // function_map["regrid_rendezvous_center"] = std::bind(&MBT::regrid_rendezvous_center, this);
-        // function_map["regrid_rendezvous_corner"] = std::bind(&MBT::regrid_rendezvous_corner, this);
-        // function_map["regrid_search_center"] = std::bind(&MBT::regrid_search_center, this);
-        // function_map["regrid_search_corner"] = std::bind(&MBT::regrid_search_corner, this);
-        function_map["regrid_bilinear_center"] = std::bind(&MBT::regrid_bilinear_center, this);
-        function_map["regrid_bilinear_corner"] = std::bind(&MBT::regrid_bilinear_corner, this);
-        function_map["regrid_conserve_center"] = std::bind(&MBT::regrid_conserve_center, this);
-        function_map["regrid_conserve_2nd_center"] = std::bind(&MBT::regrid_conserve_2nd_center, this);
-        function_map["regrid_nearest_d2s"] = std::bind(&MBT::regrid_nearest_d2s, this);
-        function_map["regrid_nearest_s2d"] = std::bind(&MBT::regrid_nearest_s2d, this);
-        function_map["regrid_patch_center"] = std::bind(&MBT::regrid_patch_center, this);
-        function_map["regrid_patch_corner"] = std::bind(&MBT::regrid_patch_corner, this);
-        function_map["serialize"] = std::bind(&MBT::serialize, this);
-        function_map["to_pointlist_elem"] = std::bind(&MBT::to_pointlist_elem, this);
-        function_map["to_pointlist_node"] = std::bind(&MBT::to_pointlist_node, this);
-        function_map["write_vtk"] = std::bind(&MBT::write_vtk, this);
+        function_map["createget"] = std::bind(&MCT::createget, this);
+        function_map["dual"] = std::bind(&MCT::dual, this);
+        function_map["redist_elem"] = std::bind(&MCT::redist_elem, this);
+        function_map["redist_node"] = std::bind(&MCT::redist_node, this);
+        function_map["redist_elno"] = std::bind(&MCT::redist_elno, this);
+        // function_map["regrid_rendezvous_center"] = std::bind(&MCT::regrid_rendezvous_center, this);
+        // function_map["regrid_rendezvous_corner"] = std::bind(&MCT::regrid_rendezvous_corner, this);
+        // function_map["regrid_search_center"] = std::bind(&MCT::regrid_search_center, this);
+        // function_map["regrid_search_corner"] = std::bind(&MCT::regrid_search_corner, this);
+        function_map["regrid_bilinear_center"] = std::bind(&MCT::regrid_bilinear_center, this);
+        function_map["regrid_bilinear_corner"] = std::bind(&MCT::regrid_bilinear_corner, this);
+        function_map["regrid_conserve_center"] = std::bind(&MCT::regrid_conserve_center, this);
+        function_map["regrid_conserve_2nd_center"] = std::bind(&MCT::regrid_conserve_2nd_center, this);
+        function_map["regrid_nearest_d2s"] = std::bind(&MCT::regrid_nearest_d2s, this);
+        function_map["regrid_nearest_s2d"] = std::bind(&MCT::regrid_nearest_s2d, this);
+        function_map["regrid_patch_center"] = std::bind(&MCT::regrid_patch_center, this);
+        function_map["regrid_patch_corner"] = std::bind(&MCT::regrid_patch_corner, this);
+        function_map["serialize"] = std::bind(&MCT::serialize, this);
+        function_map["to_pointlist_elem"] = std::bind(&MCT::to_pointlist_elem, this);
+        function_map["to_pointlist_node"] = std::bind(&MCT::to_pointlist_node, this);
+        function_map["write_vtk"] = std::bind(&MCT::write_vtk, this);
 
       }
       CATCH_MBMESH_RETHROW
     }
 
-    ~MBT(){
+    ~MCT(){
       if (mesh) delete mesh;
       if (target) delete target;
       if (pl) delete pl;
@@ -304,7 +304,7 @@ class MBT {
     
     int build() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::build()"
+#define ESMC_METHOD "MCT::build()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -345,7 +345,7 @@ class MBT {
         delete iie;
 
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -353,7 +353,7 @@ class MBT {
 
     int build_target_as_copy() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::build_target_as_copy()"
+#define ESMC_METHOD "MCT::build_target_as_copy()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -393,7 +393,7 @@ class MBT {
         delete iie;
 
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -401,7 +401,7 @@ class MBT {
 
     int createget(){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::createget()"
+#define ESMC_METHOD "MCT::createget()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -412,7 +412,7 @@ class MBT {
         ESMC_CHECK_THROW(localrc);
 
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -420,7 +420,7 @@ class MBT {
 
     int dual() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::dual()"
+#define ESMC_METHOD "MCT::dual()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -447,7 +447,7 @@ class MBT {
         // localrc = test_dual_info(target);
         ESMC_CHECK_THROW(localrc);
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -455,7 +455,7 @@ class MBT {
 
     int redist_elem() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::redist_elem()"
+#define ESMC_METHOD "MCT::redist_elem()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -482,7 +482,7 @@ class MBT {
         localrc = test_redist_info(target, true, false);
         ESMC_CHECK_THROW(localrc);
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -490,7 +490,7 @@ class MBT {
 
     int redist_node() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::redist_node()"
+#define ESMC_METHOD "MCT::redist_node()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -517,7 +517,7 @@ class MBT {
         localrc = test_redist_info(target, false, true);
         ESMC_CHECK_THROW(localrc);
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -525,7 +525,7 @@ class MBT {
 
     int redist_elno() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::redist_elno()"
+#define ESMC_METHOD "MCT::redist_elno()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -553,7 +553,7 @@ class MBT {
         rc = test_redist_info(target, true, true);
         ESMC_CHECK_THROW(localrc);
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -561,7 +561,7 @@ class MBT {
 
     int regrid_generic(int regrid_method) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_generic()"
+#define ESMC_METHOD "MCT::regrid_generic()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -633,7 +633,7 @@ class MBT {
         // IWeights wts, dst_status;
         // calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -642,7 +642,7 @@ class MBT {
 
     int regrid_bilinear_center() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_bilinear_center()"
+#define ESMC_METHOD "MCT::regrid_bilinear_center()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -664,7 +664,7 @@ class MBT {
 
         // TODO: verify the wts and dst_status
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -672,7 +672,7 @@ class MBT {
 
     int regrid_bilinear_corner() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_bilinear_corner()"
+#define ESMC_METHOD "MCT::regrid_bilinear_corner()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -694,7 +694,7 @@ class MBT {
 
         // TODO: verify the wts and dst_status
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -702,7 +702,7 @@ class MBT {
 
     int regrid_conserve_center() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_conserve_center()"
+#define ESMC_METHOD "MCT::regrid_conserve_center()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -724,7 +724,7 @@ class MBT {
 
         // TODO: verify the wts and dst_status
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -732,7 +732,7 @@ class MBT {
 
     int regrid_conserve_2nd_center() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_conserve_center()"
+#define ESMC_METHOD "MCT::regrid_conserve_center()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -754,7 +754,7 @@ class MBT {
 
         // TODO: verify the wts and dst_status
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -762,7 +762,7 @@ class MBT {
 
     int regrid_patch_center() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_patch_center()"
+#define ESMC_METHOD "MCT::regrid_patch_center()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -784,7 +784,7 @@ class MBT {
 
         // TODO: verify the wts and dst_status
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -792,7 +792,7 @@ class MBT {
 
     int regrid_patch_corner() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_patch_corner()"
+#define ESMC_METHOD "MCT::regrid_patch_corner()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -814,7 +814,7 @@ class MBT {
 
         // TODO: verify the wts and dst_status
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -822,7 +822,7 @@ class MBT {
 
     int regrid_nearest_d2s() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_nearest_d2s()"
+#define ESMC_METHOD "MCT::regrid_nearest_d2s()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -848,7 +848,7 @@ class MBT {
 
         // TODO: verify the wts and dst_status
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -856,7 +856,7 @@ class MBT {
 
     int regrid_nearest_s2d() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::regrid_nearest_s2d()"
+#define ESMC_METHOD "MCT::regrid_nearest_s2d()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -882,7 +882,7 @@ class MBT {
 
         // TODO: verify the wts and dst_status
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -890,7 +890,7 @@ class MBT {
 
     int serialize() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::serialize()"
+#define ESMC_METHOD "MCT::serialize()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -944,7 +944,7 @@ class MBT {
 
     int to_pointlist_elem() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::to_pointlist_elem()"
+#define ESMC_METHOD "MCT::to_pointlist_elem()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -968,7 +968,7 @@ class MBT {
 
     int to_pointlist_node() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::to_pointlist_node()"
+#define ESMC_METHOD "MCT::to_pointlist_node()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -993,7 +993,7 @@ class MBT {
 
     int write_vtk() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::write_vtk()"
+#define ESMC_METHOD "MCT::write_vtk()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -1039,12 +1039,12 @@ class MBT {
 
     int print() {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::print()"
+#define ESMC_METHOD "MCT::print()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
       try {
-        std::cout << "MBT Print:"<< std::endl;
+        std::cout << "MCT Print:"<< std::endl;
         std::cout << "pdim" << pdim << std::endl;
         std::cout << "sdim"<< sdim << std::endl;
         std::cout << "orig_sdim"<< orig_sdim << std::endl;
@@ -1093,7 +1093,7 @@ class MBT {
         // for (const auto i: node_gids)
         //   std::cout << i << ' ';
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -1101,7 +1101,7 @@ class MBT {
 
     int test_get_counts(MeshCap *mesh){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::test_get_counts()"
+#define ESMC_METHOD "MCT::test_get_counts()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
       bool correct = true;
@@ -1186,7 +1186,7 @@ class MBT {
       }
 
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       if(correct == true) rc = ESMF_SUCCESS;
       return rc;
@@ -1194,7 +1194,7 @@ class MBT {
 
     int test_get_presence(MeshCap *mesh, bool check_elem = true, bool check_node = true){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::test_get_presence()"
+#define ESMC_METHOD "MCT::test_get_presence()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
       bool correct = true;
@@ -1269,7 +1269,7 @@ class MBT {
           }
         }
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       if(correct == true) rc = ESMF_SUCCESS;
       return rc;
@@ -1277,7 +1277,7 @@ class MBT {
 
     int test_get_node_info(MeshCap *mesh){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::test_get_node_info()"
+#define ESMC_METHOD "MCT::test_get_node_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
       bool correct = true;
@@ -1403,7 +1403,7 @@ class MBT {
       if (node_mask_present) delete nmi;
 
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       if(correct == true) rc = ESMF_SUCCESS;
       return rc;
@@ -1411,7 +1411,7 @@ class MBT {
 
     int test_get_elem_info(MeshCap *mesh){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::test_get_elem_info()"
+#define ESMC_METHOD "MCT::test_get_elem_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
       bool correct = true;
@@ -1572,7 +1572,7 @@ class MBT {
       if (elem_mask_present) delete emi;
     
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       if(correct == true) rc = ESMF_SUCCESS;
       return rc;
@@ -1581,7 +1581,7 @@ class MBT {
 
     int test_get_elem_conn_info(MeshCap *mesh){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::test_get_elem_conn_info()"
+#define ESMC_METHOD "MCT::test_get_elem_conn_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
       bool correct = true;
@@ -1629,7 +1629,7 @@ class MBT {
       delete ecni;
     
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       if(correct == true) rc = ESMF_SUCCESS;
       return rc;
@@ -1637,7 +1637,7 @@ class MBT {
 
     int test_get_info(MeshCap *mesh){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::test_get_info()"
+#define ESMC_METHOD "MCT::test_get_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -1663,7 +1663,7 @@ class MBT {
         }
 
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -1671,7 +1671,7 @@ class MBT {
 
     int transfer_dual_info(){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::transfer_dual_info()"
+#define ESMC_METHOD "MCT::transfer_dual_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -1705,7 +1705,7 @@ class MBT {
         // elemConn = ;
 
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -1714,7 +1714,7 @@ class MBT {
 
     int test_dual_info(MBMesh *mesh){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::test_dual_info()"
+#define ESMC_METHOD "MCT::test_dual_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -1745,7 +1745,7 @@ class MBT {
         // ESMC_CHECK_THROW(localrc);
 
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -1753,7 +1753,7 @@ class MBT {
     
     int transfer_redist_info(){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::transfer_redist_info()"
+#define ESMC_METHOD "MCT::transfer_redist_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -1787,7 +1787,7 @@ class MBT {
         elemConn = redist_elemConn;
 
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -1795,7 +1795,7 @@ class MBT {
 
     int test_redist_info(MeshCap *mesh, bool check_elem, bool check_node){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBT::test_redist_info()"
+#define ESMC_METHOD "MCT::test_redist_info()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -1810,7 +1810,7 @@ class MBT {
         // NOTE: bypass for now, remove when elemType from ngons fixed
         if (name.find("ngon") == std::string::npos) {
           // in the node redist case there are more elements created
-          // really need to subclass MBT to allow different specs
+          // really need to subclass MCT to allow different specs
           if (!(check_node and !check_elem))
             localrc = test_get_counts(target);
         }
@@ -1877,7 +1877,7 @@ class MBT {
       }
 
       }
-      CATCH_MBT_RETURN_RC(&rc)
+      CATCH_MCT_RETURN_RC(&rc)
 
       rc = ESMF_SUCCESS;
       return rc;
@@ -1886,7 +1886,7 @@ class MBT {
 
 //     int regrid_rendezvous_center() {
 // #undef ESMC_METHOD
-// #define ESMC_METHOD "MBT::regrid_rendezvous_center()"
+// #define ESMC_METHOD "MCT::regrid_rendezvous_center()"
 //       // RETURN: rc : pass(0) fail(>0)
 //       int rc = ESMF_FAILURE;
 // 
@@ -1917,7 +1917,7 @@ class MBT {
 // 
 //         // TODO: verify mesh_rend and pls
 //       }
-//       CATCH_MBT_RETURN_RC(&rc)
+//       CATCH_MCT_RETURN_RC(&rc)
 // 
 //       rc = ESMF_SUCCESS;
 //       return rc;
@@ -1925,7 +1925,7 @@ class MBT {
 // 
 //     int regrid_rendezvous_corner() {
 // #undef ESMC_METHOD
-// #define ESMC_METHOD "MBT::regrid_rendezvous_corner()"
+// #define ESMC_METHOD "MCT::regrid_rendezvous_corner()"
 //       // RETURN: rc : pass(0) fail(>0)
 //       int rc = ESMF_FAILURE;
 // 
@@ -1956,7 +1956,7 @@ class MBT {
 // 
 //         // TODO: verify mesh_rend and pls
 //       }
-//       CATCH_MBT_RETURN_RC(&rc)
+//       CATCH_MCT_RETURN_RC(&rc)
 // 
 //       rc = ESMF_SUCCESS;
 //       return rc;
@@ -1964,7 +1964,7 @@ class MBT {
 // 
 //     int regrid_search_center() {
 // #undef ESMC_METHOD
-// #define ESMC_METHOD "MBT::regrid_search_center()"
+// #define ESMC_METHOD "MCT::regrid_search_center()"
 //       // RETURN: rc : pass(0) fail(>0)
 //       int rc = ESMF_FAILURE;
 // 
@@ -1998,7 +1998,7 @@ class MBT {
 // 
 //         // TODO: verify sr and dst_status and pl
 //       }
-//       CATCH_MBT_RETURN_RC(&rc)
+//       CATCH_MCT_RETURN_RC(&rc)
 // 
 //       rc = ESMF_SUCCESS;
 //       return rc;
@@ -2006,7 +2006,7 @@ class MBT {
 // 
 //     int regrid_search_corner() {
 // #undef ESMC_METHOD
-// #define ESMC_METHOD "MBT::regrid_search_corner()"
+// #define ESMC_METHOD "MCT::regrid_search_corner()"
 //       // RETURN: rc : pass(0) fail(>0)
 //       int rc = ESMF_FAILURE;
 // 
@@ -2040,7 +2040,7 @@ class MBT {
 // 
 //         // TODO: verify sr and dst_status and pl
 //       }
-//       CATCH_MBT_RETURN_RC(&rc)
+//       CATCH_MCT_RETURN_RC(&rc)
 // 
 //       rc = ESMF_SUCCESS;
 //       return rc;

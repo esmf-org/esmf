@@ -23,7 +23,7 @@
 
 #if defined ESMF_MOAB
 #include "ESMCI_MBMesh.h"
-#include "ESMC_MBT.C"
+#include "ESMC_MCT.C"
 #endif
 
 #include "ESMCI_MeshCap.h"
@@ -37,35 +37,35 @@
 
 #if defined ESMF_MOAB
 
-class MBTGen {
+class MCTGen {
 public:
   
   double UNINITVAL = -42;
 
-  std::map<std::string, std::function<MBT*(int&)>>  mesh_map;
+  std::map<std::string, std::function<MCT*(int&)>>  mesh_map;
 
-MBTGen() {
+MCTGen() {
   try {
-    mesh_map["quad_2d_cart"] = std::bind(&MBTGen::quad_2d_cart, this, std::placeholders::_1);
-    mesh_map["quad_2d_sph_deg"] = std::bind(&MBTGen::quad_2d_sph_deg, this, std::placeholders::_1);
-    mesh_map["quad_2d_sph_rad"] = std::bind(&MBTGen::quad_2d_sph_rad, this, std::placeholders::_1);
-    mesh_map["tri_2d_cart"] = std::bind(&MBTGen::tri_2d_cart, this, std::placeholders::_1);
-    mesh_map["tri_2d_sph_deg"] = std::bind(&MBTGen::tri_2d_sph_deg, this, std::placeholders::_1);
-    mesh_map["tri_2d_sph_rad"] = std::bind(&MBTGen::tri_2d_sph_rad, this, std::placeholders::_1);
-    mesh_map["hex_3d_cart"] = std::bind(&MBTGen::hex_3d_cart, this, std::placeholders::_1);
-    mesh_map["hex_3d_sph_deg"] = std::bind(&MBTGen::hex_3d_sph_deg, this, std::placeholders::_1);
-    mesh_map["hex_3d_sph_rad"] = std::bind(&MBTGen::hex_3d_sph_rad, this, std::placeholders::_1);
-    mesh_map["mix_2d_cart"] = std::bind(&MBTGen::mix_2d_cart, this, std::placeholders::_1);
-    mesh_map["mix_2d_sph_deg"] = std::bind(&MBTGen::mix_2d_sph_deg, this, std::placeholders::_1);
-    mesh_map["mix_2d_sph_rad"] = std::bind(&MBTGen::mix_2d_sph_rad, this, std::placeholders::_1);
-    mesh_map["ngon_2d_cart"] = std::bind(&MBTGen::ngon_2d_cart, this, std::placeholders::_1);
-    mesh_map["ngon_2d_sph_deg"] = std::bind(&MBTGen::ngon_2d_sph_deg, this, std::placeholders::_1);
-    mesh_map["ngon_2d_sph_rad"] = std::bind(&MBTGen::ngon_2d_sph_rad, this, std::placeholders::_1);
+    mesh_map["quad_2d_cart"] = std::bind(&MCTGen::quad_2d_cart, this, std::placeholders::_1);
+    mesh_map["quad_2d_sph_deg"] = std::bind(&MCTGen::quad_2d_sph_deg, this, std::placeholders::_1);
+    mesh_map["quad_2d_sph_rad"] = std::bind(&MCTGen::quad_2d_sph_rad, this, std::placeholders::_1);
+    mesh_map["tri_2d_cart"] = std::bind(&MCTGen::tri_2d_cart, this, std::placeholders::_1);
+    mesh_map["tri_2d_sph_deg"] = std::bind(&MCTGen::tri_2d_sph_deg, this, std::placeholders::_1);
+    mesh_map["tri_2d_sph_rad"] = std::bind(&MCTGen::tri_2d_sph_rad, this, std::placeholders::_1);
+    mesh_map["hex_3d_cart"] = std::bind(&MCTGen::hex_3d_cart, this, std::placeholders::_1);
+    mesh_map["hex_3d_sph_deg"] = std::bind(&MCTGen::hex_3d_sph_deg, this, std::placeholders::_1);
+    mesh_map["hex_3d_sph_rad"] = std::bind(&MCTGen::hex_3d_sph_rad, this, std::placeholders::_1);
+    mesh_map["mix_2d_cart"] = std::bind(&MCTGen::mix_2d_cart, this, std::placeholders::_1);
+    mesh_map["mix_2d_sph_deg"] = std::bind(&MCTGen::mix_2d_sph_deg, this, std::placeholders::_1);
+    mesh_map["mix_2d_sph_rad"] = std::bind(&MCTGen::mix_2d_sph_rad, this, std::placeholders::_1);
+    mesh_map["ngon_2d_cart"] = std::bind(&MCTGen::ngon_2d_cart, this, std::placeholders::_1);
+    mesh_map["ngon_2d_sph_deg"] = std::bind(&MCTGen::ngon_2d_sph_deg, this, std::placeholders::_1);
+    mesh_map["ngon_2d_sph_rad"] = std::bind(&MCTGen::ngon_2d_sph_rad, this, std::placeholders::_1);
   }
   CATCH_MBMESH_RETHROW
 }
 
-MBT *quad_2d_cart(int &rc){
+MCT *quad_2d_cart(int &rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "quad_2d_cart"
   //
@@ -84,7 +84,7 @@ MBT *quad_2d_cart(int &rc){
   //
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -149,118 +149,118 @@ MBT *quad_2d_cart(int &rc){
       }
     }
 
-    mbt = new MBT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
     if (petCount == 1) {
-      mbt->nodeId = {1,2,3,4,5,6,7,8,9};
-      mbt->nodeCoord = {0.0,0.0, 1.0,0.0, 2.0,0.0,
+      mct->nodeId = {1,2,3,4,5,6,7,8,9};
+      mct->nodeCoord = {0.0,0.0, 1.0,0.0, 2.0,0.0,
                         0.0,1.0, 1.0,1.0, 2.0,1.0,
                         0.0,2.0, 1.0,2.0, 2.0,2.0};
-      mbt->nodeOwner = {0,0,0,0,0,0,0,0,0};
+      mct->nodeOwner = {0,0,0,0,0,0,0,0,0};
   
-      mbt->elemId = {1,2,3,4};
-      mbt->elemType = {ESMC_MESHELEMTYPE_QUAD,
+      mct->elemId = {1,2,3,4};
+      mct->elemType = {ESMC_MESHELEMTYPE_QUAD,
                        ESMC_MESHELEMTYPE_QUAD,
                        ESMC_MESHELEMTYPE_QUAD,
                        ESMC_MESHELEMTYPE_QUAD};
-      mbt->elemConn = {1,2,5,4,
+      mct->elemConn = {1,2,5,4,
                        2,3,6,5,
                        4,5,8,7,
                        5,6,9,8};
-      mbt->elemCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+      mct->elemCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
 
     } else if (petCount == 4) {
       if (localPet == 0) {
-        mbt->nodeId ={1,2,4,5};
-        mbt->nodeCoord = {0.0,0.0, 1.0,0.0, 0.0,1.0, 1.0,1.0};
-        mbt->nodeOwner = {0,0,0,0};
-        mbt->elemId = {1};
-        mbt->elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mbt->elemConn = {1,2,4,3};
-        mbt->elemCoord = {0.5,0.5};
+        mct->nodeId ={1,2,4,5};
+        mct->nodeCoord = {0.0,0.0, 1.0,0.0, 0.0,1.0, 1.0,1.0};
+        mct->nodeOwner = {0,0,0,0};
+        mct->elemId = {1};
+        mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->elemConn = {1,2,4,3};
+        mct->elemCoord = {0.5,0.5};
 
       } else if (localPet == 1) {
-        mbt->nodeId = {2,3,5,6};
-        mbt->nodeCoord = {1.0,0.0, 2.0,0.0, 1.0,1.0, 2.0,1.0};
-        mbt->nodeOwner = {0,1,0,1};
-        mbt->elemId = {2};
-        mbt->elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mbt->elemConn = {1,2,4,3};
-        mbt->elemCoord = {1.5,0.5};
+        mct->nodeId = {2,3,5,6};
+        mct->nodeCoord = {1.0,0.0, 2.0,0.0, 1.0,1.0, 2.0,1.0};
+        mct->nodeOwner = {0,1,0,1};
+        mct->elemId = {2};
+        mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->elemConn = {1,2,4,3};
+        mct->elemCoord = {1.5,0.5};
       } else if (localPet == 2) {
-        mbt->nodeId = {4,5,7,8};
-        mbt->nodeCoord = {0.0,1.0, 1.0,1.0, 0.0,2.0, 1.0,2.0};
-        mbt->nodeOwner = {0,0,2,2};
-        mbt->elemId = {3};
-        mbt->elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mbt->elemConn = {1,2,4,3};
-        mbt->elemCoord = {0.5,1.5};
+        mct->nodeId = {4,5,7,8};
+        mct->nodeCoord = {0.0,1.0, 1.0,1.0, 0.0,2.0, 1.0,2.0};
+        mct->nodeOwner = {0,0,2,2};
+        mct->elemId = {3};
+        mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->elemConn = {1,2,4,3};
+        mct->elemCoord = {0.5,1.5};
       } else if (localPet == 3) {
-        mbt->nodeId = {5,6,8,9};
-        mbt->nodeCoord = {1.0,1.0, 2.0,1.0, 1.0,2.0, 2.0,2.0};
-        mbt->nodeOwner = {0,1,2,3};
-        mbt->elemId = {4};
-        mbt->elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mbt->elemConn = {1,2,4,3};
-        mbt->elemCoord = {1.5,1.5};
+        mct->nodeId = {5,6,8,9};
+        mct->nodeCoord = {1.0,1.0, 2.0,1.0, 1.0,2.0, 2.0,2.0};
+        mct->nodeOwner = {0,1,2,3};
+        mct->elemId = {4};
+        mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->elemConn = {1,2,4,3};
+        mct->elemCoord = {1.5,1.5};
       }
 
       if (localPet == 0) {
-        mbt->redist_nodeId_in ={5,6,8,9};
-        mbt->redist_elemId_in = {4};
+        mct->redist_nodeId_in ={5,6,8,9};
+        mct->redist_elemId_in = {4};
 
-        mbt->redist_nodeId = {5,6,8,9};
-        mbt->redist_nodeCoord = {1.0,1.0, 2.0,1.0, 1.0,2.0, 2.0,2.0};
-        mbt->redist_nodeOwner = {0,0,0,0};
-        mbt->redist_elemId = {4};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mbt->redist_elemConn = {1,2,4,3};
-        mbt->redist_elemCoord = {1.5,1.5};
+        mct->redist_nodeId = {5,6,8,9};
+        mct->redist_nodeCoord = {1.0,1.0, 2.0,1.0, 1.0,2.0, 2.0,2.0};
+        mct->redist_nodeOwner = {0,0,0,0};
+        mct->redist_elemId = {4};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->redist_elemConn = {1,2,4,3};
+        mct->redist_elemCoord = {1.5,1.5};
       } else if (localPet == 1) {
-        mbt->redist_nodeId_in ={4,7};
-        mbt->redist_elemId_in = {3};
+        mct->redist_nodeId_in ={4,7};
+        mct->redist_elemId_in = {3};
 
-        mbt->redist_nodeId = {4,5,7,8};
-        mbt->redist_nodeCoord = {0.0,1.0, 1.0,1.0, 0.0,2.0, 1.0,2.0};
-        mbt->redist_nodeOwner = {1,0,1,0};
-        mbt->redist_elemId = {3};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mbt->redist_elemConn = {1,2,4,3};
-        mbt->redist_elemCoord = {0.5,1.5};
+        mct->redist_nodeId = {4,5,7,8};
+        mct->redist_nodeCoord = {0.0,1.0, 1.0,1.0, 0.0,2.0, 1.0,2.0};
+        mct->redist_nodeOwner = {1,0,1,0};
+        mct->redist_elemId = {3};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->redist_elemConn = {1,2,4,3};
+        mct->redist_elemCoord = {0.5,1.5};
       } else if (localPet == 2) {
-        mbt->redist_nodeId_in ={2,3};
-        mbt->redist_elemId_in = {2};
+        mct->redist_nodeId_in ={2,3};
+        mct->redist_elemId_in = {2};
 
-        mbt->redist_nodeId = {2,3,5,6};
-        mbt->redist_nodeCoord = {1.0,0.0, 2.0,0.0, 1.0,1.0, 2.0,1.0};
-        mbt->redist_nodeOwner = {2,2,0,0};
-        mbt->redist_elemId = {2};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mbt->redist_elemConn = {1,2,4,3};
-        mbt->redist_elemCoord = {1.5,0.5};
+        mct->redist_nodeId = {2,3,5,6};
+        mct->redist_nodeCoord = {1.0,0.0, 2.0,0.0, 1.0,1.0, 2.0,1.0};
+        mct->redist_nodeOwner = {2,2,0,0};
+        mct->redist_elemId = {2};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->redist_elemConn = {1,2,4,3};
+        mct->redist_elemCoord = {1.5,0.5};
       } else if (localPet == 3) {
-        mbt->redist_nodeId_in ={1};
-        mbt->redist_elemId_in = {1};
+        mct->redist_nodeId_in ={1};
+        mct->redist_elemId_in = {1};
 
-        mbt->redist_nodeId ={1,2,4,5};
-        mbt->redist_nodeCoord = {0.0,0.0, 1.0,0.0, 0.0,1.0, 1.0,1.0};
-        mbt->redist_nodeOwner = {3,2,1,0};
-        mbt->redist_elemId = {1};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mbt->redist_elemConn = {1,2,4,3};
-        mbt->redist_elemCoord = {0.5,0.5};
+        mct->redist_nodeId ={1,2,4,5};
+        mct->redist_nodeCoord = {0.0,0.0, 1.0,0.0, 0.0,1.0, 1.0,1.0};
+        mct->redist_nodeOwner = {3,2,1,0};
+        mct->redist_elemId = {1};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->redist_elemConn = {1,2,4,3};
+        mct->redist_elemCoord = {0.5,0.5};
       }
     }
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *quad_2d_sph_deg(int &rc){
+MCT *quad_2d_sph_deg(int &rc){
   //
   //  20.0  7 ------- 8 -------- 9
   //        |         |          |
@@ -278,7 +278,7 @@ MBT *quad_2d_sph_deg(int &rc){
 #define ESMC_METHOD "quad_2d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -299,26 +299,26 @@ MBT *quad_2d_sph_deg(int &rc){
     double c2s = 10.0;
 
     int localrc;
-    mbt = quad_2d_cart(localrc);
+    mct = quad_2d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
-    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
+    mct->coord_sys=ESMC_COORDSYS_SPH_DEG;
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *quad_2d_sph_rad(int &rc){
+MCT *quad_2d_sph_rad(int &rc){
   //
   //  pi/5  7 ------- 8 -------- 9
   //        |         |          |
@@ -336,7 +336,7 @@ MBT *quad_2d_sph_rad(int &rc){
 #define ESMC_METHOD "quad_2d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -358,26 +358,26 @@ MBT *quad_2d_sph_rad(int &rc){
     double c2s = pi/10.;
 
     int localrc;
-    mbt = quad_2d_cart(localrc);
+    mct = quad_2d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
-    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    mbt->coord_sys=ESMC_COORDSYS_SPH_RAD;
+    mct->coord_sys=ESMC_COORDSYS_SPH_RAD;
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT* tri_2d_cart(int &rc) {
+MCT* tri_2d_cart(int &rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "tri_2d_cart"
   //
@@ -395,7 +395,7 @@ MBT* tri_2d_cart(int &rc) {
   //
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -460,18 +460,18 @@ MBT* tri_2d_cart(int &rc) {
       }
     }
 
-    mbt = new MBT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
     if (petCount == 1) {
-        mbt->nodeId = {1,2,3,4,5,6,7,8,9};
-        mbt->nodeCoord = {0.0,0.0, 1.0,0.0, 2.0,0.0,
+        mct->nodeId = {1,2,3,4,5,6,7,8,9};
+        mct->nodeCoord = {0.0,0.0, 1.0,0.0, 2.0,0.0,
                           0.0,1.0, 1.0,1.0, 2.0,1.0,
                           0.0,2.0, 1.0,2.0, 2.0,2.0};
-        mbt->nodeOwner = {0,0,0,0,0,0,0,0,0};
-        mbt->elemId = {1,2,3,4,5,6,7,8};
-        mbt->elemType = {ESMC_MESHELEMTYPE_TRI,
+        mct->nodeOwner = {0,0,0,0,0,0,0,0,0};
+        mct->elemId = {1,2,3,4,5,6,7,8};
+        mct->elemType = {ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI,
@@ -479,7 +479,7 @@ MBT* tri_2d_cart(int &rc) {
                          ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI};
-        mbt->elemConn = {1,5,4,
+        mct->elemConn = {1,5,4,
                          1,2,5,
                          3,5,2,
                          3,6,5,
@@ -487,124 +487,124 @@ MBT* tri_2d_cart(int &rc) {
                          5,8,7,
                          9,8,5,
                          9,5,6};
-        mbt->elemCoord = {0.1,0.9, 0.9,0.1, 1.1,0.1, 1.9,0.9,
+        mct->elemCoord = {0.1,0.9, 0.9,0.1, 1.1,0.1, 1.9,0.9,
                           0.1,1.1, 0.9,1.9, 1.1,1.9, 1.9,0.9};
 
     } else if (petCount == 4) {
       if (localPet == 0) {
-        mbt->nodeId = {1,2,4,5};
-        mbt->nodeCoord = {0.0,0.0, 1.0,0.0,
+        mct->nodeId = {1,2,4,5};
+        mct->nodeCoord = {0.0,0.0, 1.0,0.0,
                           0.0,1.0, 1.0,1.0};
-        mbt->nodeOwner = {0,0,0,0};
-        mbt->elemId = {1,2};
-        mbt->elemType = {ESMC_MESHELEMTYPE_TRI,
+        mct->nodeOwner = {0,0,0,0};
+        mct->elemId = {1,2};
+        mct->elemType = {ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI};
-        mbt->elemConn = {1,2,3,
+        mct->elemConn = {1,2,3,
                          2,4,3};
-        mbt->elemCoord = {0.9,0.1, 0.1,0.9};
+        mct->elemCoord = {0.9,0.1, 0.1,0.9};
       } else if (localPet == 1) {
-        mbt->nodeId = {2,3,5,6};
-        mbt->nodeCoord = {1.0,0.0, 2.0,0.0,
+        mct->nodeId = {2,3,5,6};
+        mct->nodeCoord = {1.0,0.0, 2.0,0.0,
                           1.0,1.0, 2.0,1.0};
-        mbt->nodeOwner = {0,1,0,1};
-        mbt->elemId = {3,4};
-        mbt->elemType = {ESMC_MESHELEMTYPE_TRI,
+        mct->nodeOwner = {0,1,0,1};
+        mct->elemId = {3,4};
+        mct->elemType = {ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI};
-        mbt->elemConn = {1,2,3,
+        mct->elemConn = {1,2,3,
                          2,4,3};
-        mbt->elemCoord = {1.1,0.1, 1.9,0.9};
+        mct->elemCoord = {1.1,0.1, 1.9,0.9};
       } else if (localPet == 2) {
-        mbt->nodeId = {4,5,7,8};
-        mbt->nodeCoord = {0.0,1.0, 1.0,1.0,
+        mct->nodeId = {4,5,7,8};
+        mct->nodeCoord = {0.0,1.0, 1.0,1.0,
                           0.0,2.0, 1.0,2.0};
-        mbt->nodeOwner = {0,0,2,2};
-        mbt->elemId = {5,6};
-        mbt->elemType = {ESMC_MESHELEMTYPE_TRI,
+        mct->nodeOwner = {0,0,2,2};
+        mct->elemId = {5,6};
+        mct->elemType = {ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI};
-        mbt->elemConn = {1,2,3,
+        mct->elemConn = {1,2,3,
                          2,4,3};
-        mbt->elemCoord = {0.1,1.1, 0.9,1.9};
+        mct->elemCoord = {0.1,1.1, 0.9,1.9};
       } else if (localPet == 3) {
-        mbt->nodeId = {5,6,8,9};
-        mbt->nodeCoord = {1.0,1.0, 2.0,1.0,
+        mct->nodeId = {5,6,8,9};
+        mct->nodeCoord = {1.0,1.0, 2.0,1.0,
                           1.0,2.0, 2.0,2.0};
-        mbt->nodeOwner = {0,1,2,3};
-        mbt->elemId = {7,8};
-        mbt->elemType = {ESMC_MESHELEMTYPE_TRI,
+        mct->nodeOwner = {0,1,2,3};
+        mct->elemId = {7,8};
+        mct->elemType = {ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI};
-        mbt->elemConn = {1,2,3,
+        mct->elemConn = {1,2,3,
                          2,4,3};
-        mbt->elemCoord = {1.1,1.9, 1.9,0.9};
+        mct->elemCoord = {1.1,1.9, 1.9,0.9};
       }
 
       // redist
       if (localPet == 0) {
-        mbt->redist_nodeId_in ={5,6,8,9};
-        mbt->redist_elemId_in = {7,8};
+        mct->redist_nodeId_in ={5,6,8,9};
+        mct->redist_elemId_in = {7,8};
 
-        mbt->redist_nodeId = {5,6,8,9};
-        mbt->redist_nodeCoord = {1.0,1.0, 2.0,1.0,
+        mct->redist_nodeId = {5,6,8,9};
+        mct->redist_nodeCoord = {1.0,1.0, 2.0,1.0,
                                  1.0,2.0, 2.0,2.0};
-        mbt->redist_nodeOwner = {0,0,0,0};
-        mbt->redist_elemId = {7,8};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
+        mct->redist_nodeOwner = {0,0,0,0};
+        mct->redist_elemId = {7,8};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
                                 ESMC_MESHELEMTYPE_TRI};
-        mbt->redist_elemConn = {1,2,3,
+        mct->redist_elemConn = {1,2,3,
                                 2,4,3};
-        mbt->redist_elemCoord = {1.1,1.9, 1.9,0.9};
+        mct->redist_elemCoord = {1.1,1.9, 1.9,0.9};
       } else if (localPet == 1) {
-        mbt->redist_nodeId_in ={4,7};
-        mbt->redist_elemId_in = {5,6};
+        mct->redist_nodeId_in ={4,7};
+        mct->redist_elemId_in = {5,6};
 
-        mbt->redist_nodeId = {4,5,7,8};
-        mbt->redist_nodeCoord = {0.0,1.0, 1.0,1.0,
+        mct->redist_nodeId = {4,5,7,8};
+        mct->redist_nodeCoord = {0.0,1.0, 1.0,1.0,
                                  0.0,2.0, 1.0,2.0};
-        mbt->redist_nodeOwner = {1,0,1,0};
-        mbt->redist_elemId = {5,6};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
+        mct->redist_nodeOwner = {1,0,1,0};
+        mct->redist_elemId = {5,6};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
                                 ESMC_MESHELEMTYPE_TRI};
-        mbt->redist_elemConn = {1,2,3,
+        mct->redist_elemConn = {1,2,3,
                                 2,4,3};
-        mbt->redist_elemCoord = {0.1,1.1, 0.9,1.9};
+        mct->redist_elemCoord = {0.1,1.1, 0.9,1.9};
       } else if (localPet == 2) {
-        mbt->redist_nodeId_in ={2,3};
-        mbt->redist_elemId_in = {3,4};
+        mct->redist_nodeId_in ={2,3};
+        mct->redist_elemId_in = {3,4};
 
-        mbt->redist_nodeId = {2,3,5,6};
-        mbt->redist_nodeCoord = {1.0,0.0, 2.0,0.0,
+        mct->redist_nodeId = {2,3,5,6};
+        mct->redist_nodeCoord = {1.0,0.0, 2.0,0.0,
                                  1.0,1.0, 2.0,1.0};
-        mbt->redist_nodeOwner = {2,2,0,0};
-        mbt->redist_elemId = {3,4};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
+        mct->redist_nodeOwner = {2,2,0,0};
+        mct->redist_elemId = {3,4};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
                                 ESMC_MESHELEMTYPE_TRI};
-        mbt->redist_elemConn = {1,2,3,
+        mct->redist_elemConn = {1,2,3,
                                 2,4,3};
-        mbt->redist_elemCoord = {0.1,0.9, 0.9,0.1, 1.1,0.1, 1.9,0.9,
+        mct->redist_elemCoord = {0.1,0.9, 0.9,0.1, 1.1,0.1, 1.9,0.9,
                                  0.1,1.1, 0.9,1.9, 1.1,1.9, 1.9,0.9};
       } else if (localPet == 3) {
-        mbt->redist_nodeId_in ={1};
-        mbt->redist_elemId_in = {1,2};
+        mct->redist_nodeId_in ={1};
+        mct->redist_elemId_in = {1,2};
 
-        mbt->redist_nodeId = {1,2,4,5};
-        mbt->redist_nodeCoord = {0.0,0.0, 1.0,0.0,
+        mct->redist_nodeId = {1,2,4,5};
+        mct->redist_nodeCoord = {0.0,0.0, 1.0,0.0,
                                  0.0,1.0, 1.0,1.0};
-        mbt->redist_nodeOwner = {3,2,1,0};
-        mbt->redist_elemId = {1,2};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
+        mct->redist_nodeOwner = {3,2,1,0};
+        mct->redist_elemId = {1,2};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
                                 ESMC_MESHELEMTYPE_TRI};
-        mbt->redist_elemConn = {1,2,3,
+        mct->redist_elemConn = {1,2,3,
                                 2,4,3};
-        mbt->redist_elemCoord = {0.1,0.9, 0.9,0.1};
+        mct->redist_elemCoord = {0.1,0.9, 0.9,0.1};
       }
     }
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *tri_2d_sph_deg(int &rc){
+MCT *tri_2d_sph_deg(int &rc){
   //
   //  20    7 ------- 8 -------- 9
   //        |  \   6  |  7    /  |
@@ -622,7 +622,7 @@ MBT *tri_2d_sph_deg(int &rc){
 #define ESMC_METHOD "tri_2d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -643,26 +643,26 @@ MBT *tri_2d_sph_deg(int &rc){
     double c2s = 10.;
 
     int localrc;
-    mbt = tri_2d_cart(localrc);
+    mct = tri_2d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
-    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
+    mct->coord_sys=ESMC_COORDSYS_SPH_DEG;
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *tri_2d_sph_rad(int &rc){
+MCT *tri_2d_sph_rad(int &rc){
   //
   //  pi/5  7 ------- 8 -------- 9
   //        |  \   6  |  7    /  |
@@ -680,7 +680,7 @@ MBT *tri_2d_sph_rad(int &rc){
 #define ESMC_METHOD "tri_2d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -702,31 +702,31 @@ MBT *tri_2d_sph_rad(int &rc){
     double c2s = pi/10.;
 
     int localrc;
-    mbt = tri_2d_cart(localrc);
+    mct = tri_2d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
-    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    mbt->coord_sys=ESMC_COORDSYS_SPH_RAD;
+    mct->coord_sys=ESMC_COORDSYS_SPH_RAD;
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *hex_3d_cart(int &rc) {
+MCT *hex_3d_cart(int &rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "hex_3d_cart"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -791,13 +791,13 @@ MBT *hex_3d_cart(int &rc) {
       }
     }
 
-    mbt = new MBT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
     if (petCount == 1) {
-      mbt->nodeId = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18};
-      mbt->nodeCoord = {1.0 , 1.0 , 1.0, // 1
+      mct->nodeId = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18};
+      mct->nodeCoord = {1.0 , 1.0 , 1.0, // 1
                         10.0, 1.0 , 1.0, // 2
                         20.0, 1.0 , 1.0, // 3
                         1.0 , 10.0, 1.0, // 4
@@ -815,13 +815,13 @@ MBT *hex_3d_cart(int &rc) {
                         1.0 , 20.0, 2.0, // 16
                         10.0, 20.0, 2.0, // 17
                         20.0, 20.0, 2.0}; // 18
-      mbt->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-      mbt->elemId = {1,2,3,4};
-      mbt->elemType = {ESMC_MESHELEMTYPE_HEX,
+      mct->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+      mct->elemId = {1,2,3,4};
+      mct->elemType = {ESMC_MESHELEMTYPE_HEX,
                        ESMC_MESHELEMTYPE_HEX,
                        ESMC_MESHELEMTYPE_HEX,
                        ESMC_MESHELEMTYPE_HEX};
-      mbt->elemConn = {1,  2,   5,   4,
+      mct->elemConn = {1,  2,   5,   4,
                        10, 11,  14,  13,
                        2,  3,   6,   5,
                        11, 12,  15,  14,
@@ -832,8 +832,8 @@ MBT *hex_3d_cart(int &rc) {
 
     } else if (petCount == 4) {
       if (localPet == 0) {
-        mbt->nodeId = {1,2,4,5,10,11,13,14};
-        mbt->nodeCoord = {1.0 , 1.0 , 1.0,  //1
+        mct->nodeId = {1,2,4,5,10,11,13,14};
+        mct->nodeCoord = {1.0 , 1.0 , 1.0,  //1
                           10.0, 1.0 , 1.0,  //2
                           1.0 , 10.0, 1.0,  //4
                           10.0, 10.0, 1.0,  //5
@@ -841,14 +841,14 @@ MBT *hex_3d_cart(int &rc) {
                           10.0, 1.0 , 2.0,  //11
                           1.0 , 10.0, 2.0,  //13
                           10.0, 10.0, 2.0}; //14
-        mbt->nodeOwner = {0,0,0,0,0,0,0,0};
-        mbt->elemId = {1};
-        mbt->elemType = {ESMC_MESHELEMTYPE_HEX};
-        mbt->elemConn = {1,2,4,3,5,6,8,7};
-        mbt->elemCoord = {5,5,0.5};
+        mct->nodeOwner = {0,0,0,0,0,0,0,0};
+        mct->elemId = {1};
+        mct->elemType = {ESMC_MESHELEMTYPE_HEX};
+        mct->elemConn = {1,2,4,3,5,6,8,7};
+        mct->elemCoord = {5,5,0.5};
       } else if (localPet == 1) {
-        mbt->nodeId = {2,3,5,6,11,12,14,15};
-        mbt->nodeCoord = {10.0, 1.0 , 1.0,  //2
+        mct->nodeId = {2,3,5,6,11,12,14,15};
+        mct->nodeCoord = {10.0, 1.0 , 1.0,  //2
                           20.0, 1.0 , 1.0,  //3
                           10.0, 10.0, 1.0,  //5
                           20.0, 10.0, 1.0,  //6
@@ -859,14 +859,14 @@ MBT *hex_3d_cart(int &rc) {
                           20.0, 1.0 , 2.0,  //12
                           10.0, 10.0, 2.0,  //14
                           20.0, 10.0, 2.0}; //15
-        mbt->nodeOwner = {0,1,0,1,0,1,0,1};
-        mbt->elemId = {2};
-        mbt->elemType = {ESMC_MESHELEMTYPE_HEX};
-        mbt->elemConn = {1,2,4,3,5,6,8,7};
-        mbt->elemCoord = {15,5,0.5};
+        mct->nodeOwner = {0,1,0,1,0,1,0,1};
+        mct->elemId = {2};
+        mct->elemType = {ESMC_MESHELEMTYPE_HEX};
+        mct->elemConn = {1,2,4,3,5,6,8,7};
+        mct->elemCoord = {15,5,0.5};
       } else if (localPet == 2) {
-        mbt->nodeId = {4,5,7,8,13,14,16,17};
-        mbt->nodeCoord = {1.0 , 10.0, 1.0,  //4
+        mct->nodeId = {4,5,7,8,13,14,16,17};
+        mct->nodeCoord = {1.0 , 10.0, 1.0,  //4
                           10.0, 10.0, 1.0,  //5
                           1.0 , 20.0, 1.0,  //7
                           10.0, 20.0, 1.0,  //8
@@ -874,14 +874,14 @@ MBT *hex_3d_cart(int &rc) {
                           10.0, 10.0, 2.0,  //14
                           1.0 , 20.0, 2.0,  //16
                           10.0, 20.0, 2.0}; //17
-        mbt->nodeOwner = {0,0,2,2,0,0,2,2};
-        mbt->elemId = {3};
-        mbt->elemType = {ESMC_MESHELEMTYPE_HEX};
-        mbt->elemConn = {1,2,4,3,5,6,8,7};
-        mbt->elemCoord = {5,15,0.5};
+        mct->nodeOwner = {0,0,2,2,0,0,2,2};
+        mct->elemId = {3};
+        mct->elemType = {ESMC_MESHELEMTYPE_HEX};
+        mct->elemConn = {1,2,4,3,5,6,8,7};
+        mct->elemCoord = {5,15,0.5};
       } else if (localPet == 3) {
-        mbt->nodeId = {5,6,8,9,14,15,17,18};
-        mbt->nodeCoord = {10.0, 10.0, 1.0,  //5
+        mct->nodeId = {5,6,8,9,14,15,17,18};
+        mct->nodeCoord = {10.0, 10.0, 1.0,  //5
                           20.0, 10.0, 1.0,  //6
                           10.0, 20.0, 1.0,  //8
                           20.0, 20.0, 1.0,  //9
@@ -889,20 +889,20 @@ MBT *hex_3d_cart(int &rc) {
                           20.0, 10.0, 2.0,  //15
                           10.0, 20.0, 2.0,  //17
                           20.0, 20.0, 2.0}; //18
-        mbt->nodeOwner = {0,1,2,3,0,1,2,3};
-        mbt->elemId = {4};
-        mbt->elemType = {ESMC_MESHELEMTYPE_HEX};
-        mbt->elemConn = {1,2,4,3,5,6,8,7};
-        mbt->elemCoord = {15,15,0.5};
+        mct->nodeOwner = {0,1,2,3,0,1,2,3};
+        mct->elemId = {4};
+        mct->elemType = {ESMC_MESHELEMTYPE_HEX};
+        mct->elemConn = {1,2,4,3,5,6,8,7};
+        mct->elemCoord = {15,15,0.5};
       }
 
       // total redist case
       if (localPet == 0) {
-        mbt->redist_nodeId_in ={5,6,8,9,14,15,17,18};
-        mbt->redist_elemId_in = {4};
+        mct->redist_nodeId_in ={5,6,8,9,14,15,17,18};
+        mct->redist_elemId_in = {4};
 
-        mbt->redist_nodeId = {5,6,8,9,14,15,17,18};
-        mbt->redist_nodeCoord = {10.0, 10.0, 1.0,  //5
+        mct->redist_nodeId = {5,6,8,9,14,15,17,18};
+        mct->redist_nodeCoord = {10.0, 10.0, 1.0,  //5
                                  20.0, 10.0, 1.0,  //6
                                  10.0, 20.0, 1.0,  //8
                                  20.0, 20.0, 1.0,  //9
@@ -910,17 +910,17 @@ MBT *hex_3d_cart(int &rc) {
                                  20.0, 10.0, 2.0,  //15
                                  10.0, 20.0, 2.0,  //17
                                  20.0, 20.0, 2.0}; //18
-        mbt->redist_nodeOwner = {0,0,0,0,0,0,0,0};
-        mbt->redist_elemId = {4};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
-        mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
-        mbt->redist_elemCoord = {15,15,0.5};
+        mct->redist_nodeOwner = {0,0,0,0,0,0,0,0};
+        mct->redist_elemId = {4};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
+        mct->redist_elemConn = {1,2,4,3,5,6,8,7};
+        mct->redist_elemCoord = {15,15,0.5};
       } else if (localPet == 1) {
-        mbt->redist_nodeId_in ={4,7,13,16};
-        mbt->redist_elemId_in = {3};
+        mct->redist_nodeId_in ={4,7,13,16};
+        mct->redist_elemId_in = {3};
 
-        mbt->redist_nodeId = {4,5,7,8,13,14,16,17};
-        mbt->redist_nodeCoord = {1.0 , 10.0, 1.0,  //4
+        mct->redist_nodeId = {4,5,7,8,13,14,16,17};
+        mct->redist_nodeCoord = {1.0 , 10.0, 1.0,  //4
                                  10.0, 10.0, 1.0,  //5
                                  1.0 , 20.0, 1.0,  //7
                                  10.0, 20.0, 1.0,  //8
@@ -928,17 +928,17 @@ MBT *hex_3d_cart(int &rc) {
                                  10.0, 10.0, 2.0,  //14
                                  1.0 , 20.0, 2.0,  //16
                                  10.0, 20.0, 2.0}; //17
-        mbt->redist_nodeOwner = {1,0,1,0,1,0,1,0};
-        mbt->redist_elemId = {3};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
-        mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
-        mbt->redist_elemCoord = {5,15,0.5};
+        mct->redist_nodeOwner = {1,0,1,0,1,0,1,0};
+        mct->redist_elemId = {3};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
+        mct->redist_elemConn = {1,2,4,3,5,6,8,7};
+        mct->redist_elemCoord = {5,15,0.5};
       } else if (localPet == 2) {
-        mbt->redist_nodeId_in ={2,3,11,12};
-        mbt->redist_elemId_in = {2};
+        mct->redist_nodeId_in ={2,3,11,12};
+        mct->redist_elemId_in = {2};
 
-        mbt->redist_nodeId = {2,3,5,6,11,12,14,15};
-        mbt->redist_nodeCoord = {10.0, 1.0 , 1.0,  //2
+        mct->redist_nodeId = {2,3,5,6,11,12,14,15};
+        mct->redist_nodeCoord = {10.0, 1.0 , 1.0,  //2
                                  20.0, 1.0 , 1.0,  //3
                                  10.0, 10.0, 1.0,  //5
                                  20.0, 10.0, 1.0,  //6
@@ -949,17 +949,17 @@ MBT *hex_3d_cart(int &rc) {
                                  20.0, 1.0 , 2.0,  //12
                                  10.0, 10.0, 2.0,  //14
                                  20.0, 10.0, 2.0}; //15
-        mbt->redist_nodeOwner = {2,2,0,0,2,2,0,0};
-        mbt->redist_elemId = {2};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
-        mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
-        mbt->redist_elemCoord = {15,5,0.5};
+        mct->redist_nodeOwner = {2,2,0,0,2,2,0,0};
+        mct->redist_elemId = {2};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
+        mct->redist_elemConn = {1,2,4,3,5,6,8,7};
+        mct->redist_elemCoord = {15,5,0.5};
       } else if (localPet == 3) {
-        mbt->redist_nodeId_in ={1,10};
-        mbt->redist_elemId_in = {1};
+        mct->redist_nodeId_in ={1,10};
+        mct->redist_elemId_in = {1};
 
-        mbt->redist_nodeId = {1,2,4,5,10,11,13,14};
-        mbt->redist_nodeCoord = {1.0 , 1.0 , 1.0,  //1
+        mct->redist_nodeId = {1,2,4,5,10,11,13,14};
+        mct->redist_nodeCoord = {1.0 , 1.0 , 1.0,  //1
                     10.0, 1.0 , 1.0,  //2
                     1.0 , 10.0, 1.0,  //4
                     10.0, 10.0, 1.0,  //5
@@ -967,26 +967,26 @@ MBT *hex_3d_cart(int &rc) {
                     10.0, 1.0 , 2.0,  //11
                     1.0 , 10.0, 2.0,  //13
                     10.0, 10.0, 2.0}; //14
-        mbt->redist_nodeOwner = {3,2,1,0,3,2,1,0};
-        mbt->redist_elemId = {1};
-        mbt->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
-        mbt->redist_elemConn = {1,2,4,3,5,6,8,7};
-        mbt->redist_elemCoord = {5,5,0.5};
+        mct->redist_nodeOwner = {3,2,1,0,3,2,1,0};
+        mct->redist_elemId = {1};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_HEX};
+        mct->redist_elemConn = {1,2,4,3,5,6,8,7};
+        mct->redist_elemCoord = {5,5,0.5};
       }
     }
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *hex_3d_sph_deg(int &rc) {
+MCT *hex_3d_sph_deg(int &rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "hex_3d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -1007,33 +1007,33 @@ MBT *hex_3d_sph_deg(int &rc) {
     double c2s = 1.0;
 
     int localrc;
-    mbt = hex_3d_cart(localrc);
+    mct = hex_3d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
-    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
 
-    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
+    mct->coord_sys=ESMC_COORDSYS_SPH_DEG;
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *hex_3d_sph_rad(int &rc) {
+MCT *hex_3d_sph_rad(int &rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "hex_3d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -1055,28 +1055,28 @@ MBT *hex_3d_sph_rad(int &rc) {
     double c2s = pi/100;
 
     int localrc;
-    mbt = hex_3d_cart(localrc);
+    mct = hex_3d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
-    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
 
-    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    mbt->coord_sys=ESMC_COORDSYS_SPH_RAD;
+    mct->coord_sys=ESMC_COORDSYS_SPH_RAD;
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *mix_2d_cart(int &rc) {
+MCT *mix_2d_cart(int &rc) {
   //
   //
   //  3.0   13 ------ 14 ------- 15 ------ 16
@@ -1099,7 +1099,7 @@ MBT *mix_2d_cart(int &rc) {
 #define ESMC_METHOD "mix_2d_cart_par"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -1164,19 +1164,19 @@ MBT *mix_2d_cart(int &rc) {
       }
     }
 
-    mbt = new MBT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
     if (petCount == 1) {
-      mbt->nodeId ={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-      mbt->nodeCoord ={0.0,0.0, 1.5,0.0, 2.0,0.0, 3.0,0.0,
+      mct->nodeId ={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+      mct->nodeCoord ={0.0,0.0, 1.5,0.0, 2.0,0.0, 3.0,0.0,
                        0.0,1.5, 1.5,1.5, 2.0,1.5, 3.0,1.5,
                        0.0,2.0, 1.5,2.0, 2.0,2.0, 3.0,2.0,
                        0.0,3.0, 1.5,3.0, 2.0,3.0, 3.0,3.0};
-      mbt->nodeOwner ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-      mbt->elemId ={1,2,3,4,5,6,7,8,9,10};
-      mbt->elemType ={ESMC_MESHELEMTYPE_QUAD,
+      mct->nodeOwner ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+      mct->elemId ={1,2,3,4,5,6,7,8,9,10};
+      mct->elemType ={ESMC_MESHELEMTYPE_QUAD,
                       ESMC_MESHELEMTYPE_TRI,
                       ESMC_MESHELEMTYPE_TRI,
                       ESMC_MESHELEMTYPE_QUAD,
@@ -1186,7 +1186,7 @@ MBT *mix_2d_cart(int &rc) {
                       ESMC_MESHELEMTYPE_QUAD,
                       ESMC_MESHELEMTYPE_QUAD,
                       ESMC_MESHELEMTYPE_QUAD};
-      mbt->elemConn ={1,2,6,5,
+      mct->elemConn ={1,2,6,5,
                       2,3,6,
                       3,7,6,
                       3,4,8,7,
@@ -1196,7 +1196,7 @@ MBT *mix_2d_cart(int &rc) {
                       9,10,14,13,
                       10,11,15,14,
                       11,12,16,15};
-      mbt->elemCoord ={1.0,1.0,  1.6, 0.1,  1.9,1.4, 2.5,1.0,
+      mct->elemCoord ={1.0,1.0,  1.6, 0.1,  1.9,1.4, 2.5,1.0,
                        1.0,1.75, 1.75,1.75, 2.5,1.75,
                        1.0,2.5,  1.75,2.5,  2.5,2.5};
 
@@ -1231,95 +1231,95 @@ MBT *mix_2d_cart(int &rc) {
       //
 
       if (localPet == 0){
-        mbt->nodeId = {1,2,3,5,6,7,9,10,11};
-        mbt->nodeCoord = {1.0,1.0,1.5,1.0,2.0,1.0,1.0,1.5,1.5,1.5,2.0,1.5,1.0,2.0,1.5,2.0,2.0,2.0};
-        mbt->nodeOwner = {0,0,0,0,0,0,0,0,0};
-        mbt->elemType = {4,3,3,4,4};
-        mbt->elemId = {1,2,3,5,6};
-        mbt->elemConn = {1,2,5,4,2,3,5,3,6,5,4,5,8,7,5,6,9,8};
-        mbt->elemCoord ={1.0,1.0,1.6,0.1,1.9,1.4,
+        mct->nodeId = {1,2,3,5,6,7,9,10,11};
+        mct->nodeCoord = {1.0,1.0,1.5,1.0,2.0,1.0,1.0,1.5,1.5,1.5,2.0,1.5,1.0,2.0,1.5,2.0,2.0,2.0};
+        mct->nodeOwner = {0,0,0,0,0,0,0,0,0};
+        mct->elemType = {4,3,3,4,4};
+        mct->elemId = {1,2,3,5,6};
+        mct->elemConn = {1,2,5,4,2,3,5,3,6,5,4,5,8,7,5,6,9,8};
+        mct->elemCoord ={1.0,1.0,1.6,0.1,1.9,1.4,
                     1.0,1.75,1.75, 1.75};
       } else if (localPet == 1) {
-        mbt->nodeId = {3,4,7,8,11,12};
-        mbt->nodeCoord = {2.0,1.0,3.0,1.0,2.0,1.5,3.0,1.5,2.0,2.0,3.0,2.0};
-        mbt->nodeOwner = {0,1,0,1,0,1};
-        mbt->elemId = {4,7};
-        mbt->elemType = {4,4};
-        mbt->elemConn = {1,2,4,3,3,4,6,5};
-        mbt->elemCoord ={2.5,1.0, 2.5, 1.75};
+        mct->nodeId = {3,4,7,8,11,12};
+        mct->nodeCoord = {2.0,1.0,3.0,1.0,2.0,1.5,3.0,1.5,2.0,2.0,3.0,2.0};
+        mct->nodeOwner = {0,1,0,1,0,1};
+        mct->elemId = {4,7};
+        mct->elemType = {4,4};
+        mct->elemConn = {1,2,4,3,3,4,6,5};
+        mct->elemCoord ={2.5,1.0, 2.5, 1.75};
       } else if (localPet == 2) {
-        mbt->nodeId = {9,10,11,13,14,15};
-        mbt->nodeCoord = {1.0,2.0,1.5,2.0,2.0,2.0,1.0,3.0,1.5,3.0,2.0,3.0};
-        mbt->nodeOwner = {0,0,0,2,2,2};
-        mbt->elemId = {8,9};
-        mbt->elemType = {4,4};
-        mbt->elemConn = {1,2,5,4,2,3,6,5};
-        mbt->elemCoord ={1.0, 2.5, 1.75, 2.5};
+        mct->nodeId = {9,10,11,13,14,15};
+        mct->nodeCoord = {1.0,2.0,1.5,2.0,2.0,2.0,1.0,3.0,1.5,3.0,2.0,3.0};
+        mct->nodeOwner = {0,0,0,2,2,2};
+        mct->elemId = {8,9};
+        mct->elemType = {4,4};
+        mct->elemConn = {1,2,5,4,2,3,6,5};
+        mct->elemCoord ={1.0, 2.5, 1.75, 2.5};
       } else if (localPet == 3) {
-        mbt->nodeId = {11,12,15,16};
-        mbt->nodeCoord = {2.0,2.0,3.0,2.0,2.0,3.0,3.0,3.0};
-        mbt->nodeOwner = {0,1,2,3};
-        mbt->elemId = {10};
-        mbt->elemType = {4};
-        mbt->elemConn = {1,2,4,3};
-        mbt->elemCoord ={2.5, 2.5};
+        mct->nodeId = {11,12,15,16};
+        mct->nodeCoord = {2.0,2.0,3.0,2.0,2.0,3.0,3.0,3.0};
+        mct->nodeOwner = {0,1,2,3};
+        mct->elemId = {10};
+        mct->elemType = {4};
+        mct->elemConn = {1,2,4,3};
+        mct->elemCoord ={2.5, 2.5};
       }
 
       if (localPet == 0) {
-        mbt->redist_nodeId_in ={11,12,15,16};
-        mbt->redist_elemId_in = {10};
+        mct->redist_nodeId_in ={11,12,15,16};
+        mct->redist_elemId_in = {10};
 
-        mbt->redist_nodeId = {11,12,15,16};
-        mbt->redist_nodeCoord = {2.0,2.0,3.0,2.0,2.0,3.0,3.0,3.0};
-        mbt->redist_nodeOwner = {0,0,0,0};
-        mbt->redist_elemId = {10};
-        mbt->redist_elemType = {4};
-        mbt->redist_elemConn = {1,2,4,3};
-        mbt->redist_elemCoord ={2.5, 2.5};
+        mct->redist_nodeId = {11,12,15,16};
+        mct->redist_nodeCoord = {2.0,2.0,3.0,2.0,2.0,3.0,3.0,3.0};
+        mct->redist_nodeOwner = {0,0,0,0};
+        mct->redist_elemId = {10};
+        mct->redist_elemType = {4};
+        mct->redist_elemConn = {1,2,4,3};
+        mct->redist_elemCoord ={2.5, 2.5};
       } else if (localPet == 1) {
-        mbt->redist_nodeId_in ={9,10,13,14};
-        mbt->redist_elemId_in = {8,9};
+        mct->redist_nodeId_in ={9,10,13,14};
+        mct->redist_elemId_in = {8,9};
 
-        mbt->redist_nodeId = {9,10,11,13,14,15};
-        mbt->redist_nodeCoord = {1.0,2.0,1.5,2.0,2.0,2.0,1.0,3.0,1.5,3.0,2.0,3.0};
-        mbt->redist_nodeOwner = {1,1,0,1,1,0};
-        mbt->redist_elemId = {8,9};
-        mbt->redist_elemType = {4,4};
-        mbt->redist_elemConn = {1,2,5,4,2,3,6,5};
-        mbt->redist_elemCoord ={1.0, 2.5, 1.75, 2.5};
+        mct->redist_nodeId = {9,10,11,13,14,15};
+        mct->redist_nodeCoord = {1.0,2.0,1.5,2.0,2.0,2.0,1.0,3.0,1.5,3.0,2.0,3.0};
+        mct->redist_nodeOwner = {1,1,0,1,1,0};
+        mct->redist_elemId = {8,9};
+        mct->redist_elemType = {4,4};
+        mct->redist_elemConn = {1,2,5,4,2,3,6,5};
+        mct->redist_elemCoord ={1.0, 2.5, 1.75, 2.5};
       } else if (localPet == 2) {
-        mbt->redist_nodeId_in ={3,4,7,8};
-        mbt->redist_elemId_in = {4,7};
+        mct->redist_nodeId_in ={3,4,7,8};
+        mct->redist_elemId_in = {4,7};
 
-        mbt->redist_nodeId = {3,4,7,8,11,12};
-        mbt->redist_nodeCoord = {2.0,1.0,3.0,1.0,2.0,1.5,3.0,1.5,2.0,2.0,3.0,2.0};
-        mbt->redist_nodeOwner = {2,2,2,2,0,0};
-        mbt->redist_elemId = {4,7};
-        mbt->redist_elemType = {4,4};
-        mbt->redist_elemConn = {1,2,4,3,3,4,6,5};
-        mbt->redist_elemCoord ={2.5,1.0, 2.5, 1.75};
+        mct->redist_nodeId = {3,4,7,8,11,12};
+        mct->redist_nodeCoord = {2.0,1.0,3.0,1.0,2.0,1.5,3.0,1.5,2.0,2.0,3.0,2.0};
+        mct->redist_nodeOwner = {2,2,2,2,0,0};
+        mct->redist_elemId = {4,7};
+        mct->redist_elemType = {4,4};
+        mct->redist_elemConn = {1,2,4,3,3,4,6,5};
+        mct->redist_elemCoord ={2.5,1.0, 2.5, 1.75};
       } else if (localPet == 3) {
-        mbt->redist_nodeId_in ={1,2,5,6};
-        mbt->redist_elemId_in = {1,2,3,5,6};
+        mct->redist_nodeId_in ={1,2,5,6};
+        mct->redist_elemId_in = {1,2,3,5,6};
 
-        mbt->redist_nodeId = {1,2,3,5,6,7,9,10,11};
-        mbt->redist_nodeCoord = {1.0,1.0,1.5,1.0,2.0,1.0,1.0,1.5,1.5,1.5,2.0,1.5,1.0,2.0,1.5,2.0,2.0,2.0};
-        mbt->redist_nodeOwner = {3,3,2,3,3,2,1,1,0};
-        mbt->redist_elemType = {4,3,3,4,4};
-        mbt->redist_elemId = {1,2,3,5,6};
-        mbt->redist_elemConn = {1,2,5,4,2,3,5,3,6,5,4,5,8,7,5,6,9,8};
-        mbt->redist_elemCoord ={1.0,1.0,1.6,0.1,1.9,1.4,
+        mct->redist_nodeId = {1,2,3,5,6,7,9,10,11};
+        mct->redist_nodeCoord = {1.0,1.0,1.5,1.0,2.0,1.0,1.0,1.5,1.5,1.5,2.0,1.5,1.0,2.0,1.5,2.0,2.0,2.0};
+        mct->redist_nodeOwner = {3,3,2,3,3,2,1,1,0};
+        mct->redist_elemType = {4,3,3,4,4};
+        mct->redist_elemId = {1,2,3,5,6};
+        mct->redist_elemConn = {1,2,5,4,2,3,5,3,6,5,4,5,8,7,5,6,9,8};
+        mct->redist_elemCoord ={1.0,1.0,1.6,0.1,1.9,1.4,
                                 1.0,1.75,1.75, 1.75};
       }
     }
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *mix_2d_sph_deg(int &rc) {
+MCT *mix_2d_sph_deg(int &rc) {
   //
   //  3.0   13 ------ 14 ------- 15 ------ 16
   //        |         |          |         |
@@ -1341,7 +1341,7 @@ MBT *mix_2d_sph_deg(int &rc) {
 #define ESMC_METHOD "mix_2d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -1362,28 +1362,28 @@ MBT *mix_2d_sph_deg(int &rc) {
     double c2s = 10.;
 
     int localrc;
-    mbt = mix_2d_cart(localrc);
+    mct = mix_2d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
-    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
 
-    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
+    mct->coord_sys=ESMC_COORDSYS_SPH_DEG;
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *mix_2d_sph_rad(int &rc) {
+MCT *mix_2d_sph_rad(int &rc) {
   //
   //  3.0   13 ------ 14 ------- 15 ------ 16
   //        |         |          |         |
@@ -1405,7 +1405,7 @@ MBT *mix_2d_sph_rad(int &rc) {
 #define ESMC_METHOD "mix_2d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -1427,28 +1427,28 @@ MBT *mix_2d_sph_rad(int &rc) {
     double c2s = pi/15.;
 
     int localrc;
-    mbt = mix_2d_cart(localrc);
+    mct = mix_2d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
-    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
 
-    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    mbt->coord_sys=ESMC_COORDSYS_SPH_RAD;
+    mct->coord_sys=ESMC_COORDSYS_SPH_RAD;
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *ngon_2d_cart(int &rc) {
+MCT *ngon_2d_cart(int &rc) {
   //
   //  3.1                    / -- 15 -- \
   //  3.0    13 ------ 14 --             -- 16
@@ -1471,7 +1471,7 @@ MBT *ngon_2d_cart(int &rc) {
 #define ESMC_METHOD "ngon_2d_cart"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -1536,13 +1536,13 @@ MBT *ngon_2d_cart(int &rc) {
       }
     }
 
-    mbt = new MBT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
     if (petCount == 1) {
-      mbt->nodeId = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-      mbt->nodeCoord = {0.1,0.1, // 1
+      mct->nodeId = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+      mct->nodeCoord = {0.1,0.1, // 1
                         1.5,0.0, // 2
                         2.0,0.1, // 3
                         3.0,0.1, // 4
@@ -1558,15 +1558,15 @@ MBT *ngon_2d_cart(int &rc) {
                         1.5,3.0, // 14
                         2.2,3.0, // 15
                         3.0,3.0};// 16
-      mbt->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-      mbt->elemId = {1,2,3,4,5};
-      mbt->elemType = {5,5,6,6,6};
-      mbt->elemConn = {1,2,3,6,5,
+      mct->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+      mct->elemId = {1,2,3,4,5};
+      mct->elemType = {5,5,6,6,6};
+      mct->elemConn = {1,2,3,6,5,
                        3,7,11,10,6,
                        3,4,8,12,11,7,
                        5,6,10,14,13,9,
                        10,11,12,16,15,14};
-      mbt->elemCoord = {1.0, 1.0,    // 1
+      mct->elemCoord = {1.0, 1.0,    // 1
                         1.74,1.76,  // 2
                         2.4, 1.6,    // 3
                         1.01,2.042, // 4
@@ -1574,20 +1574,20 @@ MBT *ngon_2d_cart(int &rc) {
 
     } else if (petCount == 4) {
       if (localPet == 0) {
-        mbt->nodeId = {1,2,3,5,6};
-        mbt->nodeCoord = {0.1,0.1, // 1
+        mct->nodeId = {1,2,3,5,6};
+        mct->nodeCoord = {0.1,0.1, // 1
                           1.5,0.0, // 2
                           2.0,0.1, // 3
                           0.1,1.5, // 5
                           1.5,1.5};// 6
-        mbt->nodeOwner = {0,0,0,0,0};
-        mbt->elemId = {1};
-        mbt->elemType = {5};
-        mbt->elemConn = {1,2,3,5,4};
-        mbt->elemCoord = {1.0,1.0};
+        mct->nodeOwner = {0,0,0,0,0};
+        mct->elemId = {1};
+        mct->elemType = {5};
+        mct->elemConn = {1,2,3,5,4};
+        mct->elemCoord = {1.0,1.0};
       } else if (localPet == 1) {
-        mbt->nodeId = {3,4,6,7,8,10,11,12};
-        mbt->nodeCoord = {2.0,0.1, // 3
+        mct->nodeId = {3,4,6,7,8,10,11,12};
+        mct->nodeCoord = {2.0,0.1, // 3
                           3.0,0.1, // 4
                           1.5,1.5, // 6
                           2.0,1.5, // 7
@@ -1595,79 +1595,79 @@ MBT *ngon_2d_cart(int &rc) {
                           1.6,2.0, // 10
                           2.2,1.9, // 11
                           3.1,2.0};// 12
-        mbt->nodeOwner = {0,1,0,1,1,1,1,1};
-        mbt->elemId = {2,3};
-        mbt->elemType = {5,6};
-        mbt->elemConn = {1,4,7,6,3,
+        mct->nodeOwner = {0,1,0,1,1,1,1,1};
+        mct->elemId = {2,3};
+        mct->elemType = {5,6};
+        mct->elemConn = {1,4,7,6,3,
                          1,2,5,8,7,4};
-        mbt->elemCoord = {1.74,1.76,
+        mct->elemCoord = {1.74,1.76,
                           2.4, 1.6,};
       } else if (localPet == 2) {
-        mbt->nodeId = {5,6,9,10,13,14};
-        mbt->nodeCoord = {0.1,1.5, // 5
+        mct->nodeId = {5,6,9,10,13,14};
+        mct->nodeCoord = {0.1,1.5, // 5
                           1.5,1.5, // 6
                           0.0,2.0, // 9
                           1.6,2.0, // 10
                           0.1,3.0, // 13
                           1.5,3.0};// 14
-        mbt->nodeOwner = {0,0,2,1,2,2};
-        mbt->elemId = {4};
-        mbt->elemType = {6};
-        mbt->elemConn = {1,2,4,6,5,3};
-        mbt->elemCoord = {1.01,2.042};
+        mct->nodeOwner = {0,0,2,1,2,2};
+        mct->elemId = {4};
+        mct->elemType = {6};
+        mct->elemConn = {1,2,4,6,5,3};
+        mct->elemCoord = {1.01,2.042};
       } else if (localPet == 3) {
-        mbt->nodeId = {10,11,12,14,15,16};
-        mbt->nodeCoord = {1.6,2.0, // 10
+        mct->nodeId = {10,11,12,14,15,16};
+        mct->nodeCoord = {1.6,2.0, // 10
                           2.2,1.9, // 11
                           3.1,2.0, // 12
                           1.5,3.0, // 14
                           2.2,3.0, // 15
                           3.0,3.0};// 16
-        mbt->nodeOwner = {1,1,1,2,3,3};
-        mbt->elemId = {5};
-        mbt->elemType = {6};
-        mbt->elemConn = {1,2,3,6,5,4};
-        mbt->elemCoord = {2.1, 2.5};
+        mct->nodeOwner = {1,1,1,2,3,3};
+        mct->elemId = {5};
+        mct->elemType = {6};
+        mct->elemConn = {1,2,3,6,5,4};
+        mct->elemCoord = {2.1, 2.5};
       }
 
       if (localPet == 0) {
-        mbt->redist_nodeId_in ={10,11,12,14,15,16};
-        mbt->redist_elemId_in = {5};
+        mct->redist_nodeId_in ={10,11,12,14,15,16};
+        mct->redist_elemId_in = {5};
 
-        mbt->redist_nodeId = {10,11,12,14,15,16};
-        mbt->redist_nodeCoord = {1.6,2.0, // 10
+        mct->redist_nodeId = {10,11,12,14,15,16};
+        mct->redist_nodeCoord = {1.6,2.0, // 10
                           2.2,1.9, // 11
                           3.1,2.0, // 12
                           1.5,3.0, // 14
                           2.2,3.0, // 15
                           3.0,3.0};// 16
-        mbt->redist_nodeOwner = {0,0,0,0,0,0};
-        mbt->redist_elemId = {5};
-        mbt->redist_elemType = {6};
-        mbt->redist_elemConn = {1,2,3,6,5,4};
-        mbt->redist_elemCoord = {2.1, 2.5};
+        mct->redist_nodeOwner = {0,0,0,0,0,0};
+        mct->redist_elemId = {5};
+        mct->redist_elemType = {6};
+        mct->redist_elemConn = {1,2,3,6,5,4};
+        mct->redist_elemCoord = {2.1, 2.5};
       } else if (localPet == 1) {
-        mbt->redist_nodeId_in ={5,6,9,13};
-        mbt->redist_elemId_in = {4};
+        mct->redist_nodeId_in ={5,6,9,13};
+        mct->redist_elemId_in = {4};
 
-        mbt->redist_nodeId = {5,6,9,10,13,14};
-        mbt->redist_nodeCoord = {0.1,1.5, // 5
+        mct->redist_nodeId = {5,6,9,10,13,14};
+        mct->redist_nodeCoord = {0.1,1.5, // 5
                           1.5,1.5, // 6
                           0.0,2.0, // 9
                           1.6,2.0, // 10
                           0.1,3.0, // 13
                           1.5,3.0};// 14
-        mbt->redist_nodeOwner = {1,1,1,0,1,0};
-        mbt->redist_elemId = {4};
-        mbt->redist_elemType = {6};
-        mbt->redist_elemConn = {1,2,4,6,5,3};
-        mbt->redist_elemCoord = {1.01,2.042};
+        mct->redist_nodeOwner = {1,1,1,0,1,0};
+        mct->redist_elemId = {4};
+        mct->redist_elemType = {6};
+        mct->redist_elemConn = {1,2,4,6,5,3};
+        mct->redist_elemCoord = {1.01,2.042};
       } else if (localPet == 2) {
-        mbt->redist_nodeId_in ={3,4,7,8};
-        mbt->redist_elemId_in = {2,3};
+        mct->redist_nodeId_in ={3,4,7,8};
+        mct->redist_elemId_in = {2,3};
 
-        mbt->redist_nodeId = {3,4,6,7,8,10,11,12};
-        mbt->redist_nodeCoord = {2.0,0.1, // 3
+        mct->redist_nodeId = {3,4,6,7,8,10,11,12};
+        mct->redist_nodeCoord = {2.0,0.1, // 3
                           3.0,0.1, // 4
                           1.5,1.5, // 6
                           2.0,1.5, // 7
@@ -1675,38 +1675,38 @@ MBT *ngon_2d_cart(int &rc) {
                           1.6,2.0, // 10
                           2.2,1.9, // 11
                           3.1,2.0};// 12
-        mbt->redist_nodeOwner = {2,2,1,2,2,0,0,0};
-        mbt->redist_elemId = {2,3};
-        mbt->redist_elemType = {5,6};
-        mbt->redist_elemConn = {1,4,7,6,3,
+        mct->redist_nodeOwner = {2,2,1,2,2,0,0,0};
+        mct->redist_elemId = {2,3};
+        mct->redist_elemType = {5,6};
+        mct->redist_elemConn = {1,4,7,6,3,
                         1,2,5,8,7,4};
-        mbt->redist_elemCoord = {1.74,1.76,
+        mct->redist_elemCoord = {1.74,1.76,
                           2.4, 1.6,};
       } else if (localPet == 3) {
-        mbt->redist_nodeId_in ={1,2};
-        mbt->redist_elemId_in = {1};
+        mct->redist_nodeId_in ={1,2};
+        mct->redist_elemId_in = {1};
 
-        mbt->redist_nodeId = {1,2,3,5,6};
-        mbt->redist_nodeCoord = {0.1,0.1, // 1
+        mct->redist_nodeId = {1,2,3,5,6};
+        mct->redist_nodeCoord = {0.1,0.1, // 1
                           1.5,0.0, // 2
                           2.0,0.1, // 3
                           0.1,1.5, // 5
                           1.5,1.5};// 6
-        mbt->redist_nodeOwner = {3,3,2,1,1};
-        mbt->redist_elemId = {1};
-        mbt->redist_elemType = {5};
-        mbt->redist_elemConn = {1,2,3,5,4};
-        mbt->redist_elemCoord = {1.0,1.0};
+        mct->redist_nodeOwner = {3,3,2,1,1};
+        mct->redist_elemId = {1};
+        mct->redist_elemType = {5};
+        mct->redist_elemConn = {1,2,3,5,4};
+        mct->redist_elemCoord = {1.0,1.0};
       }
     }
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *ngon_2d_sph_deg(int &rc) {
+MCT *ngon_2d_sph_deg(int &rc) {
   //
   //  3.1                    / -- 15 -- \
   //  3.0    13 ------ 14 --             -- 16
@@ -1729,7 +1729,7 @@ MBT *ngon_2d_sph_deg(int &rc) {
 #define ESMC_METHOD "ngon_2d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -1750,29 +1750,29 @@ MBT *ngon_2d_sph_deg(int &rc) {
     double c2s = 10.;
 
     int localrc;
-    mbt = ngon_2d_cart(localrc);
+    mct = ngon_2d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
-    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
 
 
-    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    mbt->coord_sys=ESMC_COORDSYS_SPH_DEG;
+    mct->coord_sys=ESMC_COORDSYS_SPH_DEG;
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
-MBT *ngon_2d_sph_rad(int &rc) {
+MCT *ngon_2d_sph_rad(int &rc) {
   //
   //  3.1                    / -- 15 -- \
   //  3.0    13 ------ 14 --             -- 16
@@ -1795,7 +1795,7 @@ MBT *ngon_2d_sph_rad(int &rc) {
 #define ESMC_METHOD "ngon_2d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MBT *mbt = NULL;
+  MCT *mct = NULL;
 
   try {
 
@@ -1817,26 +1817,26 @@ MBT *ngon_2d_sph_rad(int &rc) {
     double c2s = pi/15.;
 
     int localrc;
-    mbt = ngon_2d_cart(localrc);
+    mct = ngon_2d_cart(localrc);
     ESMC_CHECK_THROW(localrc)
 
-    mbt->name = ESMC_METHOD;
+    mct->name = ESMC_METHOD;
 
-    std::for_each(mbt->nodeCoord.begin(), mbt->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->elemCoord.begin(), mbt->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
 
 
-    std::for_each(mbt->redist_nodeCoord.begin(), mbt->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
-    std::for_each(mbt->redist_elemCoord.begin(), mbt->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
-    mbt->coord_sys=ESMC_COORDSYS_SPH_RAD;
+    mct->coord_sys=ESMC_COORDSYS_SPH_RAD;
 
-  } CATCH_MBT_RETURN_NULL(&rc)
+  } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mbt;
+  return mct;
 }
 
 // MBMesh* create_mesh_tet(int &rc) {
