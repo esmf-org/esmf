@@ -120,9 +120,11 @@ int main(int argc, char *argv[]) {
     test_apis_mbmesh.push_back("regrid_bilinear_center");
     test_apis_mbmesh.push_back("regrid_bilinear_corner");
     test_apis_mbmesh.push_back("regrid_conserve_center");
+    // Not yet available with MBMesh
     // test_apis_mbmesh.push_back("regrid_conserve_2nd_center");
     test_apis_mbmesh.push_back("regrid_nearest_d2s");
     test_apis_mbmesh.push_back("regrid_nearest_s2d");
+    // Not yet available with MBMesh
     // test_apis_mbmesh.push_back("regrid_patch_center");
     // test_apis_mbmesh.push_back("regrid_patch_corner");
 
@@ -146,9 +148,14 @@ int main(int argc, char *argv[]) {
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
-    // regrid_conserve_2nd doesn't work in 3d
+    // regrid_conserve doesn't work with ngons
+    {"regrid_conserve_center", "ngon_2d_cart"},
+    {"regrid_conserve_center", "ngon_2d_sph_deg"},
+    {"regrid_conserve_center", "ngon_2d_sph_rad"},
+    // // regrid_conserve_2nd doesn't work in 3d
     // {"regrid_conserve_2nd", "hex_3d_cart"},
-    // {"regrid_conserve_2nd", "hex_3d_sph"},
+    // {"regrid_conserve_2nd", "hex_3d_sph_deg"},
+    // {"regrid_conserve_2nd", "hex_3d_sph_rad"},
   };
 
   // these are bound to MBT in constructor, must match!
@@ -186,8 +193,28 @@ int main(int argc, char *argv[]) {
     {"regrid_patch_center", "hex_3d_cart"},
     {"regrid_patch_corner", "hex_3d_cart"},
     // regrid_conserve_2nd doesn't work in 3d
-    // {"regrid_conserve_2nd", "hex_3d_cart"},
-    // {"regrid_conserve_2nd", "hex_3d_sph"},
+    {"regrid_conserve_2nd_center", "hex_3d_cart"},
+    {"regrid_conserve_2nd_center", "hex_3d_sph_deg"},
+    {"regrid_conserve_2nd_center", "hex_3d_sph_rad"},
+    // meshes with ngons return incorrect element count with native
+    {"regrid_bilinear_center", "ngon_2d_cart"},
+    {"regrid_bilinear_center", "ngon_2d_sph_deg"},
+    {"regrid_bilinear_center", "ngon_2d_sph_rad"},
+    {"regrid_bilinear_corner", "ngon_2d_cart"},
+    {"regrid_bilinear_corner", "ngon_2d_sph_deg"},
+    {"regrid_bilinear_corner", "ngon_2d_sph_rad"},
+    {"regrid_conserve_center", "ngon_2d_cart"},
+    {"regrid_conserve_center", "ngon_2d_sph_deg"},
+    {"regrid_conserve_center", "ngon_2d_sph_rad"},
+    {"regrid_conserve_2nd_center", "ngon_2d_cart"},
+    {"regrid_conserve_2nd_center", "ngon_2d_sph_deg"},
+    {"regrid_conserve_2nd_center", "ngon_2d_sph_rad"},
+    {"regrid_patch_center", "ngon_2d_cart"},
+    {"regrid_patch_center", "ngon_2d_sph_deg"},
+    {"regrid_patch_center", "ngon_2d_sph_rad"},
+    {"regrid_patch_corner", "ngon_2d_cart"},
+    {"regrid_patch_corner", "ngon_2d_sph_deg"},
+    {"regrid_patch_corner", "ngon_2d_sph_rad"},
   };
 
   // // combinatorial regrid options to explore
@@ -310,60 +337,138 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  // 50
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  // 60
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  // 70
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest 
+  //NEX_UTest
+  //NEX_UTest // 80
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest 
+  //NEX_UTest
+  //NEX_UTest // 90
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest // 100
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest // 110
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest // 120
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest // 130
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest // 140
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest // 150
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest // 160
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_disable_UTest // 170
   //NEX_disable_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
-  //NEX_disable_UTest  // 50
   //NEX_disable_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  // 60
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  // 70
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest 
-  //NEX_disable_UTest
-  //NEX_disable_UTest // 80
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest 
-  //NEX_disable_UTest
-  //NEX_disable_UTest // 90
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest // 100
   //NEX_disable_UTest
 
 

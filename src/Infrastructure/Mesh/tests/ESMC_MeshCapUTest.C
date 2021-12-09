@@ -130,13 +130,17 @@ int main(int argc, char *argv[]) {
   // these are bound to MBTGen in constructor, must match!
   std::vector<std::string> test_meshes_native;
     test_meshes_native.push_back("quad_2d_cart");
-    test_meshes_native.push_back("quad_2d_sph");
+    test_meshes_native.push_back("quad_2d_sph_deg");
+    test_meshes_native.push_back("quad_2d_sph_rad");
     test_meshes_native.push_back("tri_2d_cart");
-    test_meshes_native.push_back("tri_2d_sph");
+    test_meshes_native.push_back("tri_2d_sph_deg");
+    test_meshes_native.push_back("tri_2d_sph_rad");
     test_meshes_native.push_back("hex_3d_cart");
-    test_meshes_native.push_back("hex_3d_sph");
+    test_meshes_native.push_back("hex_3d_sph_deg");
+    test_meshes_native.push_back("hex_3d_sph_rad");
     test_meshes_native.push_back("mix_2d_cart");
-    test_meshes_native.push_back("mix_2d_sph");
+    test_meshes_native.push_back("mix_2d_sph_deg");
+    test_meshes_native.push_back("mix_2d_sph_rad");
     // ngons currently return the wrong counts
     // test_meshes_native.push_back("ngon_2d_cart");
     // test_meshes_native.push_back("ngon_2d_sph");
@@ -156,24 +160,31 @@ int main(int argc, char *argv[]) {
   // these are bound to MBTGen in constructor, must match!
   std::vector<std::string> test_meshes_mbmesh;
     test_meshes_mbmesh.push_back("quad_2d_cart");
-    test_meshes_mbmesh.push_back("quad_2d_sph");
+    test_meshes_mbmesh.push_back("quad_2d_sph_deg");
+    test_meshes_mbmesh.push_back("quad_2d_sph_rad");
     test_meshes_mbmesh.push_back("tri_2d_cart");
-    test_meshes_mbmesh.push_back("tri_2d_sph");
+    test_meshes_mbmesh.push_back("tri_2d_sph_deg");
+    test_meshes_mbmesh.push_back("tri_2d_sph_rad");
     test_meshes_mbmesh.push_back("hex_3d_cart");
-    test_meshes_mbmesh.push_back("hex_3d_sph");
+    test_meshes_mbmesh.push_back("hex_3d_sph_deg");
+    test_meshes_mbmesh.push_back("hex_3d_sph_rad");
     test_meshes_mbmesh.push_back("mix_2d_cart");
-    test_meshes_mbmesh.push_back("mix_2d_sph");
+    test_meshes_mbmesh.push_back("mix_2d_sph_deg");
+    test_meshes_mbmesh.push_back("mix_2d_sph_rad");
     test_meshes_mbmesh.push_back("ngon_2d_cart");
-    test_meshes_mbmesh.push_back("ngon_2d_sph");
+    test_meshes_mbmesh.push_back("ngon_2d_sph_deg");
+    test_meshes_mbmesh.push_back("ngon_2d_sph_rad");
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
     // dual not implemented in 3d
     {"dual", "hex_3d_cart"},
-    {"dual", "hex_3d_sph"},
+    {"dual", "hex_3d_sph_deg"},
+    {"dual", "hex_3d_sph_rad"},
     // ESMCI_MBMesh_Redist.C, line:2336:Could not find a suitable processor for this element
     {"redist_node", "tri_2d_cart"},
-    {"redist_node", "tri_2d_sph"},
+    {"redist_node", "tri_2d_sph_deg"},
+    {"redist_node", "tri_2d_sph_rad"},
 
   };
 
@@ -181,7 +192,8 @@ int main(int argc, char *argv[]) {
     // dual not implemented in 3d
     // Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 3.
     {"dual", "hex_3d_cart"},
-    {"dual", "hex_3d_sph"},
+    {"dual", "hex_3d_sph_deg"},
+    {"dual", "hex_3d_sph_rad"},
   };
 
 
@@ -373,10 +385,120 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   //NEX_UTest
   //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  160
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  170
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  180
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  190
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  200
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  210
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  220
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest  230
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
+  //NEX_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
-  //NEX_disable_UTest  160
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest  240
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest  250
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest  260
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest  270
   //NEX_disable_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest  
@@ -386,7 +508,7 @@ int main(int argc, char *argv[]) {
   //NEX_disable_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
-  //NEX_disable_UTest  170
+  //NEX_disable_UTest  280
   //NEX_disable_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
@@ -396,7 +518,16 @@ int main(int argc, char *argv[]) {
   //NEX_disable_UTest
   //NEX_disable_UTest
   //NEX_disable_UTest
-  //NEX_disable_UTest  180
+  //NEX_disable_UTest  290
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
+  //NEX_disable_UTest
 
 
   //----------------------------------------------------------------------------
