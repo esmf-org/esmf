@@ -135,6 +135,7 @@ class MCT {
     MeshCap *target = nullptr;
     PointList *pl = nullptr;
     PointList *target_pl = nullptr;
+  
     std::string name = "Mesh";
     
     // dummy array for regrid tests, could create two to use for verification?
@@ -200,6 +201,14 @@ class MCT {
     std::vector<int> redist_elemId_in;
 
     std::map<std::string, std::function<int(void)>>  function_map;
+    std::map<std::string, std::function<int(int, int, int, int, int, int)>>  regrid_map;
+
+    std::map<std::string, int> MapType;
+    std::map<std::string, int> NormType;
+    std::map<std::string, int> PoleType;
+    std::map<std::string, int> ExtrapMethod;
+    std::map<std::string, int> UnmappedAction;
+    std::map<std::string, int> IgnoreDegenerate;
 
     MCT(int _pdim, int _sdim, ESMC_CoordSys_Flag _coord_sys, int _num_node, int _num_elem, int _num_elem_conn, int _redist_num_node, int _redist_num_elem, int _redist_num_elem_conn) {
 #undef ESMC_METHOD
@@ -273,22 +282,59 @@ class MCT {
         function_map["redist_elem"] = std::bind(&MCT::redist_elem, this);
         function_map["redist_node"] = std::bind(&MCT::redist_node, this);
         function_map["redist_elno"] = std::bind(&MCT::redist_elno, this);
-        // function_map["regrid_rendezvous_center"] = std::bind(&MCT::regrid_rendezvous_center, this);
-        // function_map["regrid_rendezvous_corner"] = std::bind(&MCT::regrid_rendezvous_corner, this);
-        // function_map["regrid_search_center"] = std::bind(&MCT::regrid_search_center, this);
-        // function_map["regrid_search_corner"] = std::bind(&MCT::regrid_search_corner, this);
-        function_map["regrid_bilinear_center"] = std::bind(&MCT::regrid_bilinear_center, this);
-        function_map["regrid_bilinear_corner"] = std::bind(&MCT::regrid_bilinear_corner, this);
-        function_map["regrid_conserve_center"] = std::bind(&MCT::regrid_conserve_center, this);
-        function_map["regrid_conserve_2nd_center"] = std::bind(&MCT::regrid_conserve_2nd_center, this);
-        function_map["regrid_nearest_d2s"] = std::bind(&MCT::regrid_nearest_d2s, this);
-        function_map["regrid_nearest_s2d"] = std::bind(&MCT::regrid_nearest_s2d, this);
-        function_map["regrid_patch_center"] = std::bind(&MCT::regrid_patch_center, this);
-        function_map["regrid_patch_corner"] = std::bind(&MCT::regrid_patch_corner, this);
         function_map["serialize"] = std::bind(&MCT::serialize, this);
         function_map["to_pointlist_elem"] = std::bind(&MCT::to_pointlist_elem, this);
         function_map["to_pointlist_node"] = std::bind(&MCT::to_pointlist_node, this);
         function_map["write_vtk"] = std::bind(&MCT::write_vtk, this);
+
+        regrid_map["bilinear_center"] = std::bind(&MCT::bilinear_center, this,
+          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+          std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+        regrid_map["bilinear_corner"] = std::bind(&MCT::bilinear_corner, this,
+          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+          std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+        regrid_map["conserve_center"] = std::bind(&MCT::conserve_center, this,
+          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+          std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+        regrid_map["conserve_2nd_center"] = std::bind(&MCT::conserve_2nd_center, this,
+          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+          std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+        regrid_map["nearest_d2s"] = std::bind(&MCT::nearest_d2s, this,
+          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+          std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+        regrid_map["nearest_s2d"] = std::bind(&MCT::nearest_s2d, this,
+          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+          std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+        regrid_map["patch_center"] = std::bind(&MCT::patch_center, this,
+          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+          std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+        regrid_map["patch_corner"] = std::bind(&MCT::patch_corner, this,
+          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+          std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
+
+        MapType["MAP_CARTAPPROX"] = 0;
+        MapType["MAP_GREATCIRCLE"] = 1;
+
+        NormType["NORM_DSTAREA"] = 0;
+        NormType["NORM_FRACAREA"] = 1;
+
+        PoleType["POLE_NONE"] = 0;
+        PoleType["POLE_ALL"] = 1;
+        PoleType["POLE_NPNT"] = 2;
+        PoleType["POLE_TEETH"] = 3;
+        
+        ExtrapMethod["EXTRAP_NONE"] = 0;
+        ExtrapMethod["EXTRAP_NEAREST_STOD"] = 1;
+        ExtrapMethod["EXTRAP_NEAREST_IDAVG"] = 2;
+        ExtrapMethod["EXTRAP_NEAREST_D"] = 3;
+        ExtrapMethod["EXTRAP_CREEP"] = 4;
+        ExtrapMethod["EXTRAP_CREEP_NRST_D"] = 5;
+        
+        UnmappedAction["UNMAPPED_THROWERROR"] = 0;
+        UnmappedAction["UNMAPPED_IGNORE"] = 1;
+        
+        IgnoreDegenerate["DONOT_IGNORE_DEGENERATE"] = 0;
+        IgnoreDegenerate["IGNORE_DEGENERATE"] = 1;
 
       }
       CATCH_MBMESH_RETHROW
@@ -559,335 +605,6 @@ class MCT {
       return rc;
     }
 
-    int regrid_generic(int regrid_method) {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::regrid_generic()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // if ((regrid_method == 2) || (regrid_method == 5)) dummy_mc = target;
-        if ((regrid_method == 3) || (regrid_method == 4)) mesh = NULL;
-        // above would be to let nearest use the pls only.. will that work?
-        
-        
-        // regrid_method == 2 or 4 requires GREAT_CIRCLE, also the default
-        int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
-        if (coord_sys == ESMC_COORDSYS_CART)
-          map_type = MB_MAP_TYPE_CART_APPROX;
-
-        // norm_type DSTAREA = 0, FRACAREA
-        int norm_type = 0;
-        // regrid_pole_type NONE = 0, ALL, NPNT, TEETH;
-        int regrid_pole_type = 0;
-        int regrid_pole_npnts = 0;
-        // extrap_method NONE = 0 NEAREST_STOD, NEAREST_IDAVG, NEAREST_D, 
-        // CREEP, CREEP_NRST_D
-        int extrap_method = 0;
-        int extrap_num_src_pts = 0;
-        ESMC_R8 extrap_dist_exponent = 0;
-        int extrap_num_levels = 0;
-        int extrap_num_input_levels = 0;
-        // unmapped_action ERROR = 0, IGNORE
-        int unmapped_action = 1;
-        int ignore_degenerate = 0;
-        int src_term_processing = 0;
-        int pipeline_depth = 0;
-        ESMCI::RouteHandle *rh = NULL;
-        int has_rh = 0;
-        int has_iw = 0;
-        int nentries = 0;
-        ESMCI::TempWeights *tweights = NULL;
-        int has_udl = 0;
-        int num_udl = 0;
-        ESMCI::TempUDL *tudl = NULL;
-        int has_status_array = 0;
-        ESMCI::Array *dummy_status_array = NULL;
-        int check_flag = 0;
-
-        // mesh cap level routine to add pole information to a periodic
-        // meshSetPole();
-
-        // calculate bilinear weights between mesh and pointlist
-        MeshCap::regrid_create(&mesh, &array, &pl, 
-                               &target, &array, &target_pl, 
-                               &regrid_method, 
-                               &map_type, 
-                               &norm_type, 
-                               &regrid_pole_type, &regrid_pole_npnts, 
-                               &extrap_method, &extrap_num_src_pts,
-                               &extrap_dist_exponent, &extrap_num_levels,
-                               &extrap_num_input_levels,
-                               &unmapped_action, 
-                               &ignore_degenerate, 
-                               &src_term_processing, &pipeline_depth, 
-                               &rh, &has_rh, 
-                               &has_iw, &nentries, &tweights, 
-                               &has_udl, &num_udl, &tudl, 
-                               &has_status_array, &dummy_status_array, 
-                               &check_flag, &localrc);
-        ESMC_CHECK_THROW(localrc);
-
-        // IWeights wts, dst_status;
-        // calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-
-    int regrid_bilinear_center() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::regrid_bilinear_center()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_BILINEAR;
-        int regrid_method = 0;
-
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &target_pl, &localrc);
-        ESMC_CHECK_THROW(localrc);
-                
-        localrc = regrid_generic(regrid_method);
-        ESMC_CHECK_THROW(localrc);
-        
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify the wts and dst_status
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int regrid_bilinear_corner() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::regrid_bilinear_corner()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_BILINEAR;
-        int regrid_method = 0;
-
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
-        ESMC_CHECK_THROW(localrc);
-                
-        localrc = regrid_generic(regrid_method);
-        ESMC_CHECK_THROW(localrc);
-        
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify the wts and dst_status
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int regrid_conserve_center() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::regrid_conserve_center()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_CONSERVE;
-        int regrid_method = 2;
-
-        localrc = build_target_as_copy();
-        ESMC_CHECK_THROW(localrc);
-
-        localrc = regrid_generic(regrid_method);
-        ESMC_CHECK_THROW(localrc);
-        
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify the wts and dst_status
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int regrid_conserve_2nd_center() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::regrid_conserve_center()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_CONSERVE_2ND;
-        int regrid_method = 5;
-
-        localrc = build_target_as_copy();
-        ESMC_CHECK_THROW(localrc);
-
-        localrc = regrid_generic(regrid_method);
-        ESMC_CHECK_THROW(localrc);
-        
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify the wts and dst_status
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int regrid_patch_center() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::regrid_patch_center()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_PATCH;
-        int regrid_method = 1;
-
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &target_pl, &localrc);
-        ESMC_CHECK_THROW(localrc);
-        
-        localrc = regrid_generic(regrid_method);
-        ESMC_CHECK_THROW(localrc);
-        
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify the wts and dst_status
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int regrid_patch_corner() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::regrid_patch_corner()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_PATCH;
-        int regrid_method = 1;
-
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
-        ESMC_CHECK_THROW(localrc);
-        
-        localrc = regrid_generic(regrid_method);
-        ESMC_CHECK_THROW(localrc);
-        
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify the wts and dst_status
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int regrid_nearest_d2s() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::regrid_nearest_d2s()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_DTOS;
-        int regrid_method = 4;
-
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &pl, &localrc);
-        ESMC_CHECK_THROW(localrc);
-        
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
-        ESMC_CHECK_THROW(localrc);
-        
-        localrc = regrid_generic(regrid_method);
-        ESMC_CHECK_THROW(localrc);
-        
-        // verify the original mesh is still valid
-        // mesh has been NULLED for regrid_generic
-        // localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify the wts and dst_status
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int regrid_nearest_s2d() {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::regrid_nearest_s2d()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_STOD;
-        int regrid_method = 3;
-
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &pl, &localrc);
-        ESMC_CHECK_THROW(localrc);
-
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &target_pl, &localrc);
-        ESMC_CHECK_THROW(localrc);
-
-        localrc = regrid_generic(regrid_method);
-        ESMC_CHECK_THROW(localrc);
-        
-        // verify the original mesh is still valid
-        // mesh has been NULLED for regrid_generic
-        // localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify the wts and dst_status
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
     int serialize() {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MCT::serialize()"
@@ -1092,6 +809,376 @@ class MCT {
         // std::cout << std::endl << "node_gids"<< std::endl;
         // for (const auto i: node_gids)
         //   std::cout << i << ' ';
+      }
+      CATCH_MCT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int regrid_generic(int regrid_method, 
+                       int map_type, int norm_type, 
+                       int pole_type, int extrap_method,
+                       int unmapped_action, int ignore_degenerate) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MCT::regrid_generic()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        if ((regrid_method == 3) || (regrid_method == 4)) mesh = NULL;
+        
+        // regrid_method == 2 or 4 requires GREAT_CIRCLE, also the default
+        // int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+        // if (coord_sys == ESMC_COORDSYS_CART)
+        //   map_type = MB_MAP_TYPE_CART_APPROX;
+
+        // // norm_type DSTAREA = 0, FRACAREA
+        // int norm_type = 0;
+        // // regrid_pole_type NONE = 0, ALL, NPNT, TEETH;
+        // int regrid_pole_type = 0;
+        int regrid_pole_npnts = 0;
+        // // extrap_method NONE = 0 NEAREST_STOD, NEAREST_IDAVG, NEAREST_D, 
+        // // CREEP, CREEP_NRST_D
+        // int extrap_method = 0;
+        int extrap_num_src_pts = 0;
+        ESMC_R8 extrap_dist_exponent = 0;
+        int extrap_num_levels = 0;
+        int extrap_num_input_levels = 0;
+        // // unmapped_action ERROR = 0, IGNORE
+        // int unmapped_action = 1;
+        // int ignore_degenerate = 0;
+
+        int src_term_processing = 0;
+        int pipeline_depth = 0;
+        ESMCI::RouteHandle *rh = NULL;
+        int has_rh = 0;
+        int has_iw = 0;
+        int nentries = 0;
+        ESMCI::TempWeights *tweights = NULL;
+        int has_udl = 0;
+        int num_udl = 0;
+        ESMCI::TempUDL *tudl = NULL;
+        int has_status_array = 0;
+        ESMCI::Array *dummy_status_array = NULL;
+        int check_flag = 0;
+
+        // mesh cap level routine to add pole information to a periodic
+        // meshSetPole();
+
+        // calculate bilinear weights between mesh and pointlist
+        MeshCap::regrid_create(&mesh, &array, &pl, 
+                               &target, &array, &target_pl, 
+                               &regrid_method, 
+                               &map_type, 
+                               &norm_type, 
+                               &pole_type, &regrid_pole_npnts, 
+                               &extrap_method, &extrap_num_src_pts,
+                               &extrap_dist_exponent, &extrap_num_levels,
+                               &extrap_num_input_levels,
+                               &unmapped_action, 
+                               &ignore_degenerate, 
+                               &src_term_processing, &pipeline_depth, 
+                               &rh, &has_rh, 
+                               &has_iw, &nentries, &tweights, 
+                               &has_udl, &num_udl, &tudl, 
+                               &has_status_array, &dummy_status_array, 
+                               &check_flag, &localrc);
+        ESMC_CHECK_THROW(localrc);
+
+        // IWeights wts, dst_status;
+        // calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, dst_status);
+      }
+      CATCH_MCT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+
+    int bilinear_center(int map_type, int norm_type, 
+                        int pole_type, int extrap_method,
+                        int unmapped_action, int ignore_degenerate) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MCT::bilinear_center()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_BILINEAR;
+        int regrid_method = 0;
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &target_pl, &localrc);
+        ESMC_CHECK_THROW(localrc);
+                
+        localrc = regrid_generic(regrid_method, 
+                                 map_type, norm_type,
+                                 pole_type, extrap_method,
+                                 unmapped_action, ignore_degenerate);
+        ESMC_CHECK_THROW(localrc);
+        
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
+      }
+      CATCH_MCT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int bilinear_corner(int map_type, int norm_type, 
+                        int pole_type, int extrap_method,
+                        int unmapped_action, int ignore_degenerate) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MCT::bilinear_corner()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_BILINEAR;
+        int regrid_method = 0;
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
+        ESMC_CHECK_THROW(localrc);
+                
+        localrc = regrid_generic(regrid_method, 
+                                 map_type, norm_type,
+                                 pole_type, extrap_method,
+                                 unmapped_action, ignore_degenerate);
+        ESMC_CHECK_THROW(localrc);
+        
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
+      }
+      CATCH_MCT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int conserve_center(int map_type, int norm_type, 
+                        int pole_type, int extrap_method,
+                        int unmapped_action, int ignore_degenerate) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MCT::conserve_center()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+      
+      try {
+        int localrc;
+        
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_CONSERVE;
+        int regrid_method = 2;
+
+        localrc = build_target_as_copy();
+        ESMC_CHECK_THROW(localrc);
+
+        localrc = regrid_generic(regrid_method, 
+                                 map_type, norm_type,
+                                 pole_type, extrap_method,
+                                 unmapped_action, ignore_degenerate);
+        ESMC_CHECK_THROW(localrc);
+        
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
+      }
+      CATCH_MCT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int conserve_2nd_center(int map_type, int norm_type, 
+                            int pole_type, int extrap_method,
+                            int unmapped_action, int ignore_degenerate) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MCT::conserve_center()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_CONSERVE_2ND;
+        int regrid_method = 5;
+
+        localrc = build_target_as_copy();
+        ESMC_CHECK_THROW(localrc);
+
+        localrc = regrid_generic(regrid_method, 
+                                 map_type, norm_type,
+                                 pole_type, extrap_method,
+                                 unmapped_action, ignore_degenerate);
+        ESMC_CHECK_THROW(localrc);
+        
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
+      }
+      CATCH_MCT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int patch_center(int map_type, int norm_type, 
+                     int pole_type, int extrap_method,
+                     int unmapped_action, int ignore_degenerate) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MCT::patch_center()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_PATCH;
+        int regrid_method = 1;
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &target_pl, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        localrc = regrid_generic(regrid_method, 
+                                 map_type, norm_type,
+                                 pole_type, extrap_method,
+                                 unmapped_action, ignore_degenerate);
+        ESMC_CHECK_THROW(localrc);
+        
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
+      }
+      CATCH_MCT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int patch_corner(int map_type, int norm_type, 
+                     int pole_type, int extrap_method,
+                     int unmapped_action, int ignore_degenerate) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MCT::patch_corner()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_PATCH;
+        int regrid_method = 1;
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        localrc = regrid_generic(regrid_method, 
+                                 map_type, norm_type,
+                                 pole_type, extrap_method,
+                                 unmapped_action, ignore_degenerate);
+        ESMC_CHECK_THROW(localrc);
+        
+        // verify the original mesh is still valid
+        localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
+      }
+      CATCH_MCT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int nearest_d2s(int map_type, int norm_type, 
+                    int pole_type, int extrap_method,
+                    int unmapped_action, int ignore_degenerate) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MCT::nearest_d2s()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_DTOS;
+        int regrid_method = 4;
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &pl, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
+        ESMC_CHECK_THROW(localrc);
+        
+        localrc = regrid_generic(regrid_method, 
+                                 map_type, norm_type,
+                                 pole_type, extrap_method,
+                                 unmapped_action, ignore_degenerate);
+        ESMC_CHECK_THROW(localrc);
+        
+        // verify the original mesh is still valid
+        // mesh has been NULLED for regrid_generic
+        // localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
+      }
+      CATCH_MCT_RETURN_RC(&rc)
+
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int nearest_s2d(int map_type, int norm_type, 
+                    int pole_type, int extrap_method,
+                    int unmapped_action, int ignore_degenerate) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MCT::nearest_s2d()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+
+      try {
+        int localrc;
+        
+        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_STOD;
+        int regrid_method = 3;
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &pl, &localrc);
+        ESMC_CHECK_THROW(localrc);
+
+        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &target_pl, &localrc);
+        ESMC_CHECK_THROW(localrc);
+
+        localrc = regrid_generic(regrid_method, 
+                                 map_type, norm_type,
+                                 pole_type, extrap_method,
+                                 unmapped_action, ignore_degenerate);
+        ESMC_CHECK_THROW(localrc);
+        
+        // verify the original mesh is still valid
+        // mesh has been NULLED for regrid_generic
+        // localrc = test_get_info(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        // TODO: verify the wts and dst_status
       }
       CATCH_MCT_RETURN_RC(&rc)
 

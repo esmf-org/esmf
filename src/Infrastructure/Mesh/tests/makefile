@@ -23,7 +23,7 @@ TESTS_BUILD	  = \
                 $(ESMF_TESTDIR)/ESMC_Proj4UTest
 
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapUTest
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest
+# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
 
 TESTS_RUN    =  \
@@ -127,10 +127,28 @@ RUN_ESMC_MeshCapUTestUNI:
 
 
 RUN_ESMC_MeshCapRegridUTest:
-	$(MAKE) TNAME=MeshCapRegrid NP=4 ctest
+	# copy executable to name of proxy test (in execution directory)
+	cp $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest $(ESMF_TESTDIR)/ESMC_MeshCapRegridProxyUTest
+	# remove the old proxy test file in the source directory
+	rm $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridProxyUTest.C
+	# copy the source file to the execution directory under the proxy name
+	cp $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridUTest.C $(ESMF_TESTDIR)/ESMC_MeshCapRegridProxyUTest.C
+	# run the test
+	$(MAKE) TNAME=MeshCapRegridProxy NP=4 ctest
+	# move the updated proxy source file from the execution directory to the source directory
+	mv $(ESMF_TESTDIR)/ESMC_MeshCapRegridProxyUTest.C $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridProxyUTest.C
 
 RUN_ESMC_MeshCapRegridUTestUNI:
+	# copy executable to name of proxy test (in execution directory)
+	cp $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest $(ESMF_TESTDIR)/ESMC_MeshCapRegridProxyUTest
+	# remove the old proxy test file in the source directory
+	rm $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridProxyUTest.C
+	# copy the source file to the execution directory under the proxy name
+	cp $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridUTest.C $(ESMF_TESTDIR)/ESMC_MeshCapRegridProxyUTest.C
+	# run the test
 	$(MAKE) TNAME=MeshCapRegrid NP=1 ctest
+	# move the updated proxy source file from the execution directory to the source directory
+	mv $(ESMF_TESTDIR)/ESMC_MeshCapRegridProxyUTest.C $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridProxyUTest.C
 
 
 RUN_ESMC_MBMesh_ExtrapolateUTest:
