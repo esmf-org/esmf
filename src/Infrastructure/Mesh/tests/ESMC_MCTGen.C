@@ -61,9 +61,12 @@ MCTGen() {
     mesh_map["ngon_2d_cart"] = std::bind(&MCTGen::ngon_2d_cart, this, std::placeholders::_1);
     mesh_map["ngon_2d_sph_deg"] = std::bind(&MCTGen::ngon_2d_sph_deg, this, std::placeholders::_1);
     mesh_map["ngon_2d_sph_rad"] = std::bind(&MCTGen::ngon_2d_sph_rad, this, std::placeholders::_1);
+    mesh_map["periodic_2d_sph_deg"] = std::bind(&MCTGen::periodic_2d_sph_deg, this, std::placeholders::_1);
+    mesh_map["periodic_2d_sph_rad"] = std::bind(&MCTGen::periodic_2d_sph_rad, this, std::placeholders::_1);
   }
   CATCH_MBMESH_RETHROW
 }
+
 
 MCT *quad_2d_cart(int &rc){
 #undef ESMC_METHOD
@@ -116,7 +119,6 @@ MCT *quad_2d_cart(int &rc){
       num_elem = 4;
       num_node = 9;
       num_elem_conn = 4*num_elem;
-
     } else if (petCount == 4) {
       if (localPet == 0) {
         num_elem = 1;
@@ -1827,6 +1829,460 @@ MCT *ngon_2d_sph_rad(int &rc) {
     std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
                   [&c2s](double &d) {d*=c2s;});
 
+
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+
+    mct->coord_sys=ESMC_COORDSYS_SPH_RAD;
+
+  } CATCH_MCT_RETURN_NULL(&rc)
+
+  rc = ESMF_SUCCESS;
+  return mct;
+}
+
+MCT *periodic_2d_sph_deg(int &rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "periodic_2d_sph_deg"
+  //
+  //
+  //  80    29----- 30----- 31----- 32----- 33    ----- 34----- 35----- 29
+  //        |       |       |       |       |           |       |       |
+  //  69    |   22  |   23  |   24  |   25  |       26  |   27  |   28  |  p
+  //        |       |       |       |       |           |       |       |  e
+  //  45    22----- 23----- 24----- 25----- 26    ----- 27----- 28----- 22 r
+  //        |       |       |       |       |           |       |       |  i
+  //  22    |   15  |   16  |   17  |   18  |       19  |   20  |   21  |  o
+  //        |       |       |       |       |           |       |       |  d
+  //                                                                       i
+  //                                                                       c
+  //                                                                        
+  //  0.0   15----- 16----- 17----- 18----- 19    ----- 20----- 21----- 15 b
+  //        |       |       |       |       |           |       |       |  o
+  //  -22   |   8   |   9   |   10  |   11  |       12  |   13  |   14  |  u
+  //        |       |       |       |       |           |       |       |  n
+  //  -45   8 ----- 9 ----- 10----- 11----- 12    ----- 13----- 14----- 8  d
+  //        |       |       |       |       |           |       |       |  a
+  //  -69   |   1   |   2   |   3   |   4   |       5   |   6   |   7   |  r
+  //        |       |       |       |       |           |       |       |  y
+  //  -80   1 ----- 2 ----- 3 ----- 4 ----- 5     ----- 6 ----- 7 ----- 1
+  //    
+  //       0.0      50      100     150     200         250     300     360/0
+  //
+
+  rc = ESMF_RC_NOT_IMPL;
+  MCT *mct = NULL;
+
+  try {
+
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    ESMC_CHECK_THROW(rc)
+
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    ESMC_CHECK_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      Throw () << "Must be run with 1 or 4 cores.";
+
+    int pdim = 2;
+    int sdim = 2;
+    ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_SPH_DEG;
+
+    int num_node = 0;
+    int num_elem = 0;
+    int num_elem_conn = 0;
+    int redist_num_node = 0;
+    int redist_num_elem = 0;
+    int redist_num_elem_conn = 0;
+
+    if (petCount == 1) {
+      num_elem = 28;
+      num_node = 35;
+      num_elem_conn = 4*num_elem;
+
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        num_elem = 8;
+        num_node = 15;
+        num_elem_conn = 32;
+        redist_num_elem = 6;
+        redist_num_node = 12;
+        redist_num_elem_conn = 24;
+      } else if (localPet == 1) {
+        num_elem = 6;
+        num_node = 12;
+        num_elem_conn = 24;
+        redist_num_elem = 8;
+        redist_num_node = 15;
+        redist_num_elem_conn = 32;
+      } else if (localPet == 2) {
+        num_elem = 8;
+        num_node = 15;
+        num_elem_conn = 32;
+        redist_num_elem = 6;
+        redist_num_node = 12;
+        redist_num_elem_conn = 24;
+      } else if (localPet == 3) {
+        num_elem = 6;
+        num_node = 12;
+        num_elem_conn = 24;
+        redist_num_elem = 8;
+        redist_num_node = 15;
+        redist_num_elem_conn = 32;
+      }
+    }
+
+    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+
+    mct->name = ESMC_METHOD;
+
+    if (petCount == 1) {
+      mct->nodeId = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+                     21,22,23,24,25,26,27,28,29,30,31,32,33,34,35};
+      mct->nodeCoord = {\
+          0,-80, 50,-80, 100,-80, 150,-80, 200,-80, 250,-80, 300,-80,
+          0,-45, 50,-45, 100,-45, 150,-45, 200,-45, 250,-45, 300,-45,
+          0,0,   50,0,   100,0,   150,0,   200,0,   250,0,   300,0,
+          0,45,  50,45,  100,45,  150,45,  200,45,  250,45,  300,45,
+          0,80,  50,80,  100,80,  150,80,  200,80,  250,80,  300,80};
+      mct->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0};
+  
+      mct->elemId = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+                     21,22,23,24,25,26,27,28};
+      mct->elemType = {ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD,
+                       ESMC_MESHELEMTYPE_QUAD};
+      mct->elemConn = {1,2,9,8,
+                       2,3,10,9,
+                       3,4,11,10,
+                       4,5,12,11,
+                       5,6,13,12,
+                       6,7,14,13,
+                       7,1,8,14,
+                       8,9,16,15,
+                       9,10,17,16,
+                       10,11,18,17,
+                       11,12,19,18,
+                       12,13,20,19,
+                       13,14,21,20,
+                       14,8,15,21,
+                       15,16,23,22,
+                       16,17,24,23,
+                       17,18,25,24,
+                       18,19,26,25,
+                       19,20,27,26,
+                       20,21,28,27,
+                       21,15,22,28,
+                       22,23,30,29,
+                       23,24,31,30,
+                       24,25,32,31,
+                       25,26,33,32,
+                       26,27,34,33,
+                       27,28,35,34,
+                       28,22,29,35};
+      mct->elemCoord = {25,-69, 75,-69, 125,-69, 175,-69, 225,-69, 275,-69, 330,-69,
+                        25,-22, 75,-22, 125,-22, 175,-22, 225,-22, 275,-22, 330,-22,
+                        25,22, 75,22, 125,22, 175,22, 225,22, 275,22, 330,22,
+                        25,69, 75,69, 125,69, 175,69, 225,69, 275,69, 330,69};
+
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        mct->nodeId ={1,2,3,4,5,8,9,10,11,12,15,16,17,18,19};
+        mct->nodeCoord = {0,-80, 50,-80, 100,-80, 150,-80, 200,-80,
+                          0,-45, 50,-45, 100,-45, 150,-45, 200,-45,
+                          0,0, 50,0, 100,0, 150,0, 200,0};
+        mct->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        mct->elemId = {1,2,3,4,8,9,10,11};
+        mct->elemType = {ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD};
+        mct->elemConn = {1,2,7,6,
+                         2,3,8,7,
+                         3,4,9,8,
+                         4,5,10,9,
+                         6,7,12,11,
+                         7,8,13,12,
+                         8,9,14,13,
+                         9,10,15,14};
+        mct->elemCoord = {25,-69, 75,-69, 125,-69, 175,-69,
+                          25,-22, 75,-22, 125,-22, 175,-22};
+      } else if (localPet == 1) {
+        mct->nodeId = {5,6,7,1,12,13,14,8,19,20,21,15};
+        mct->nodeCoord = {200,-80, 250,-80, 300,-80, 0,-80,
+                          200,-45, 250,-45, 300,-45, 0,-45,
+                          200,0, 250,0, 300,0, 0,0};
+        mct->nodeOwner = {0,1,1,1,0,1,1,1,0,1,1,1};
+        mct->elemId = {5,6,7,12,13,14};
+        mct->elemType = {ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD};
+        mct->elemConn = {1,2,6,5,
+                         2,3,7,6,
+                         3,4,8,7,
+                         5,6,10,9,
+                         6,7,11,10,
+                         7,8,12,11};
+        mct->elemCoord = {225,-69, 275,-69, 330,-69,
+                          225,-22, 275,-22, 330,-22,
+                          225,0, 275,0, 330,0};
+      } else if (localPet == 2) {
+        mct->nodeId = {15,16,17,18,19,22,23,24,25,26,29,30,31,32,33};
+        mct->nodeCoord = {0,0, 50,0, 100,0, 150,0, 200,0,
+                          0,45, 50,45, 100,45, 150,45, 200,45,
+                          0,80, 50,80, 100,80, 150,80, 200,80};
+        mct->nodeOwner = {0,0,0,0,0,2,2,2,2,2,2,2,2,2,2};
+        mct->elemId = {15,16,17,18,22,23,24,25};
+        mct->elemType = {ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD};
+        mct->elemConn = {1,2,7,6,
+                         2,3,8,7,
+                         3,4,9,8,
+                         4,5,10,9,
+                         6,7,12,11,
+                         7,8,13,12,
+                         8,9,14,13,
+                         9,10,15,14};
+        mct->elemCoord = {25,22, 75,22, 125,22, 175,22,
+                          25,69, 75,69, 125,69, 175,69};
+      } else if (localPet == 3) {
+        mct->nodeId = {19,20,21,15,26,27,28,22,33,34,35,29};
+        mct->nodeCoord = {200,0, 250,0, 300,0, 0,0,
+                          200,45, 250,45, 300,45, 0,45,
+                          200,80, 250,80, 300,80, 0,80};
+        mct->nodeOwner = {0,1,1,1,2,3,3,3,2,3,3,3};
+        mct->elemId = {19,20,21,26,27,28};
+        mct->elemType = {ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD,
+                         ESMC_MESHELEMTYPE_QUAD};
+        mct->elemConn = {1,2,6,5,
+                         2,3,7,6,
+                         3,4,8,7,
+                         5,6,10,9,
+                         6,7,11,10,
+                         7,8,12,11};
+        mct->elemCoord = {225,22, 275,22, 330,22,
+                          225,69, 275,69, 330,69};
+      }
+
+      if (localPet == 0) {
+        mct->redist_nodeId_in ={19,20,21,15,26,27,28,22,33,34,35,29};
+        mct->redist_elemId_in = {19,20,21,26,27,28};
+
+        mct->redist_nodeId = {19,20,21,15,26,27,28,22,33,34,35,29};
+        mct->redist_nodeCoord = {200,0, 250,0, 300,0, 0,0,
+                                 200,45, 250,45, 300,45, 0,45,
+                                 200,80, 250,80, 300,80, 0,80};
+        mct->redist_nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0};
+        mct->redist_elemId = {19,20,21,26,27,28};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD};
+        mct->redist_elemConn = {1,2,6,5,
+                                2,3,7,6,
+                                3,4,8,7,
+                                5,6,10,9,
+                                6,7,11,10,
+                                7,8,12,11};
+        mct->redist_elemCoord = {225,22, 275,22, 330,22,
+                                 225,69, 275,69, 330,69};
+      } else if (localPet == 1) {
+        mct->redist_nodeId_in ={15,16,17,18,22,23,24,25,29,30,31,32};
+        mct->redist_elemId_in = {15,16,17,18,22,23,24,25};
+
+        mct->redist_nodeId = {15,16,17,18,19,22,23,24,25,26,29,30,31,32,33};
+        mct->redist_nodeCoord = {0,0, 50,0, 100,0, 150,0, 200,0,
+                                 0,45, 50,45, 100,45, 150,45, 200,45,
+                                 0,80, 50,80, 100,80, 150,80, 200,80};
+        mct->redist_nodeOwner = {1,1,1,1,0,1,1,1,1,0,1,1,1,1,0};
+        mct->redist_elemId = {15,16,17,18,22,23,24,25};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD};
+        mct->redist_elemConn = {1,2,7,6,
+                                2,3,8,7,
+                                3,4,9,8,
+                                4,5,10,9,
+                                6,7,12,11,
+                                7,8,13,12,
+                                8,9,14,13,
+                                9,10,15,14};
+        mct->redist_elemCoord = {25,22, 75,22, 125,22, 175,22,
+                                 25,69, 75,69, 125,69, 175,69};
+      } else if (localPet == 2) {
+        mct->redist_nodeId_in ={5,6,7,1,12,13,14,8};
+        mct->redist_elemId_in = {5,6,7,12,13,14};
+
+        mct->redist_nodeId = {5,6,7,1,12,13,14,8,19,20,21,15};
+        mct->redist_nodeCoord = {200,-80, 250,-80, 300,-80, 0,-80,
+                                 200,-45, 250,-45, 300,-45, 0,-45,
+                                 200,0, 250,0, 300,0, 0,0};
+        mct->redist_nodeOwner = {2,2,2,2,2,2,2,2,0,0,0,0};
+        mct->redist_elemId = {5,6,7,12,13,14};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD};
+        mct->redist_elemConn = {1,2,6,5,
+                                2,3,7,6,
+                                3,4,8,7,
+                                5,6,10,9,
+                                6,7,11,10,
+                                7,8,12,11};
+        mct->redist_elemCoord = {225,-69, 275,-69, 330,-69,
+                                 225,-22, 275,-22, 330,-22,
+                                 225,0, 275,0, 330,0};
+      } else if (localPet == 3) {
+        mct->redist_nodeId_in ={2,3,4,9,10,11};
+        mct->redist_elemId_in = {1,2,3,4,8,9,10,11};
+
+        mct->redist_nodeId ={1,2,3,4,5,8,9,10,11,12,15,16,17,18,19};
+        mct->redist_nodeCoord = {0,-80, 50,-80, 100,-80, 150,-80, 200,-80,
+                                 0,-45, 50,-45, 100,-45, 150,-45, 200,-45,
+                                 0,0, 50,0, 100,0, 150,0, 200,0};
+        mct->redist_nodeOwner = {2,3,3,3,2,2,3,3,3,2,1,1,1,1,0};
+        mct->redist_elemId = {1,2,3,4,8,9,10,11};
+        mct->redist_elemType = {ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD,
+                                ESMC_MESHELEMTYPE_QUAD};
+        mct->redist_elemConn = {1,2,7,6,
+                                2,3,8,7,
+                                3,4,9,8,
+                                4,5,10,9,
+                                6,7,12,11,
+                                7,8,13,12,
+                                8,9,14,13,
+                                9,10,15,14};
+        mct->redist_elemCoord = {25,-69, 75,-69, 125,-69, 175,-69,
+                                 25,-22, 75,-22, 125,-22, 175,-22};
+      }
+    }
+
+  } CATCH_MCT_RETURN_NULL(&rc)
+
+  rc = ESMF_SUCCESS;
+  return mct;
+}
+
+MCT *periodic_2d_sph_rad(int &rc){
+  //
+  //
+  //  80    29----- 30----- 31----- 32----- 33    ----- 34----- 35----- 29
+  //        |       |       |       |       |           |       |       |
+  //  69    |   22  |   23  |   24  |   25  |       26  |   27  |   28  |
+  //        |       |       |       |       |           |       |       |
+  //  pi/2  22----- 23----- 24----- 25----- 26    ----- 27----- 28----- 22
+  //        |       |       |       |       |           |       |       |
+  //  22    |   15  |   16  |   17  |   18  |       19  |   20  |   21  |
+  //        |       |       |       |       |           |       |       |
+    
+    
+  //  0.0   15----- 16----- 17----- 18----- 19    ----- 20----- 21----- 15
+  //        |       |       |       |       |           |       |       |
+  //  -22   |   8   |   9   |   10  |   11  |       12  |   13  |   14  |
+  //        |       |       |       |       |           |       |       |
+  //  -pi/2 8 ----- 9 ----- 10----- 11----- 12    ----- 13----- 14----- 8
+  //        |       |       |       |       |           |       |       |
+  //  -69   |   1   |   2   |   3   |   4   |       5   |   6   |   7   |
+  //        |       |       |       |       |           |       |       |
+  //  -80   1 ----- 2 ----- 3 ----- 4 ----- 5     ----- 6 ----- 7 ----- 1
+  //    
+  //       0.0      50      100     150     200         250     300     2pi/0
+  //
+#undef ESMC_METHOD
+#define ESMC_METHOD "periodic_2d_sph_rad"
+
+  rc = ESMF_RC_NOT_IMPL;
+  MCT *mct = NULL;
+
+  try {
+
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    ESMC_CHECK_THROW(rc)
+
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    ESMC_CHECK_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      Throw () << "Must be run with 1 or 4 cores.";
+
+    // Cartesian to spherical coordinate transformation - radians (suitable for c:[0:2pi])
+    double pi = 3.14159;
+    double c2s = pi/180.;
+
+    int localrc;
+    mct = periodic_2d_sph_deg(localrc);
+    ESMC_CHECK_THROW(localrc)
+
+    mct->name = ESMC_METHOD;
+
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
 
     std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
     std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});

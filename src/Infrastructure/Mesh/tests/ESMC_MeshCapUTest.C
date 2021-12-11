@@ -144,6 +144,8 @@ int main(int argc, char *argv[]) {
     // ngons currently return the wrong counts
     // test_meshes_native.push_back("ngon_2d_cart");
     // test_meshes_native.push_back("ngon_2d_sph");
+    // test_meshes_native.push_back("periodic_2d_sph_deg");
+    // test_meshes_native.push_back("periodic_2d_sph_rad");
 
   // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis_mbmesh;

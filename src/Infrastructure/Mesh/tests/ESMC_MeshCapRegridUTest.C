@@ -142,6 +142,7 @@ int main(int argc, char *argv[]) {
   bool native = true; 
 
   //----------------------------------------------------------------------------
+  // Start the test with a proxy name with which to create log and stdout files
   ESMC_TestStart("ESMC_MeshCapRegridProxyUTest.C", __LINE__, 0);
 
   //----------------------------------------------------------------------------
@@ -152,6 +153,7 @@ int main(int argc, char *argv[]) {
   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                 (int *)NULL, (int *)NULL);
 
+  // output stream to write test tag to the proxy source file
   std::ofstream tagfile;
   tagfile.open("ESMC_MeshCapRegridProxyUTest.C", std::ios_base::app);
 
@@ -194,7 +196,45 @@ int main(int argc, char *argv[]) {
     test_meshes.push_back("ngon_2d_cart");
     test_meshes.push_back("ngon_2d_sph_deg");
     test_meshes.push_back("ngon_2d_sph_rad");
+    test_meshes.push_back("periodic_2d_sph_deg");
+    test_meshes.push_back("periodic_2d_sph_rad");
 
+  // method dependent, and mesh dependent 
+  std::vector<std::string> test_regrid_maptype;
+    test_regrid_maptype.push_back("MAP_CARTAPPROX");
+    test_regrid_maptype.push_back("MAP_GREATCIRCLE");
+    
+  // only conservative methods, all meshes
+  std::vector<std::string> test_regrid_normtype;
+    test_regrid_normtype.push_back("NORM_DSTAREA");
+    test_regrid_normtype.push_back("NORM_FRACAREA");
+  
+  // all methods, but only for periodic grids
+  std::vector<std::string> test_regrid_poletype;
+    test_regrid_poletype.push_back("POLE_NONE");
+    test_regrid_poletype.push_back("POLE_ALL");
+    test_regrid_poletype.push_back("POLE_NPNT");
+    test_regrid_poletype.push_back("POLE_TEETH");
+  
+  // all methods except nn, but only for meshes with destination larger than source
+  std::vector<std::string> test_regrid_extrapmethod;
+    test_regrid_extrapmethod.push_back("EXTRAP_NONE");
+    // test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_STOD");
+    // test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_IDAVG");
+    // test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_D");
+    // test_regrid_extrapmethod.push_back("EXTRAP_CREEP");
+    // test_regrid_extrapmethod.push_back("EXTRAP_CREEP_NRST_D");
+  
+  // all methods except nn, but only for meshes with destination larger than source
+  std::vector<std::string> test_regrid_unmappedaction;
+    test_regrid_unmappedaction.push_back("UNMAPPED_THROWERROR");
+    test_regrid_unmappedaction.push_back("UNMAPPED_IGNORE");
+  
+  // all methods except nn, but only meshes with degenerate, clockwise or concave elements
+  std::vector<std::string> test_regrid_ignoredegenerate;
+    test_regrid_ignoredegenerate.push_back("DONOT_IGNORE_DEGENERATE");
+    test_regrid_ignoredegenerate.push_back("IGNORE_DEGENERATE");
+  
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
     // conserve doesn't work with ngons
     {"conserve_center", "ngon_2d_cart"},
@@ -236,6 +276,54 @@ int main(int argc, char *argv[]) {
   };
 
   std::vector<std::pair<std::string, std::string>> skip_test_common = {\
+    // bilinear corner and patch corner hang with periodic
+    {"bilinear_corner", "periodic_2d_sph_deg"},
+    {"bilinear_corner", "periodic_2d_sph_rad"},
+    {"patch_corner", "periodic_2d_sph_deg"},
+    {"patch_corner", "periodic_2d_sph_rad"},
+    // unmapped action error finds unmapped points with the following
+    {"bilinear_center", "hex_3d_cart"},
+    {"bilinear_center", "hex_3d_cart"},
+    {"bilinear_center", "hex_3d_sph_deg"},
+    {"bilinear_center", "hex_3d_sph_deg"},
+    {"bilinear_center", "hex_3d_sph_rad"},
+    {"bilinear_center", "hex_3d_sph_rad"},
+    {"bilinear_center", "mix_2d_cart"},
+    {"bilinear_center", "mix_2d_cart"},
+    {"bilinear_center", "mix_2d_sph_deg"},
+    {"bilinear_center", "mix_2d_sph_deg"},
+    {"bilinear_center", "mix_2d_sph_rad"},
+    {"bilinear_center", "mix_2d_sph_rad"},
+    {"bilinear_corner", "hex_3d_cart"},
+    {"bilinear_corner", "hex_3d_cart"},
+    {"bilinear_corner", "hex_3d_sph_deg"},
+    {"bilinear_corner", "hex_3d_sph_deg"},
+    {"bilinear_corner", "hex_3d_sph_rad"},
+    {"bilinear_corner", "hex_3d_sph_rad"},
+    {"bilinear_corner", "mix_2d_cart"},
+    {"bilinear_corner", "mix_2d_cart"},
+    {"bilinear_corner", "mix_2d_sph_deg"},
+    {"bilinear_corner", "mix_2d_sph_deg"},
+    {"bilinear_corner", "mix_2d_sph_rad"},
+    {"bilinear_corner", "mix_2d_sph_rad"},
+    {"patch_center", "hex_3d_cart"},
+    {"patch_center", "hex_3d_cart"},
+    {"patch_center", "hex_3d_sph_deg"},
+    {"patch_center", "hex_3d_sph_deg"},
+    {"patch_center", "hex_3d_sph_rad"},
+    {"patch_center", "hex_3d_sph_rad"},
+    {"patch_center", "mix_2d_cart"},
+    {"patch_center", "mix_2d_cart"},
+    {"patch_center", "mix_2d_sph_deg"},
+    {"patch_center", "mix_2d_sph_deg"},
+    {"patch_center", "mix_2d_sph_rad"},
+    {"patch_center", "mix_2d_sph_rad"},
+    {"conserve_center", "hex_3d_cart"},
+    {"conserve_center", "hex_3d_cart"},
+    {"conserve_center", "hex_3d_sph_deg"},
+    {"conserve_center", "hex_3d_sph_deg"},
+    {"conserve_center", "hex_3d_sph_rad"},
+    {"conserve_center", "hex_3d_sph_rad"},
     // the following are exceptions due to design, do not represent limitations per se
     // conservative only works with great circles
     {"conserve_center", "MAP_CARTAPPROX"},
@@ -269,46 +357,55 @@ int main(int argc, char *argv[]) {
     {"nearest_s2d", "UNMAPPED_IGNORE"},
     {"nearest_d2s", "IGNORE_DEGENERATE"},
     {"nearest_s2d", "IGNORE_DEGENERATE"},
+    // only run pole options with periodic meshes
+    {"quad_2d_cart", "POLE_ALL"},
+    {"quad_2d_sph_deg", "POLE_ALL"},
+    {"quad_2d_sph_rad", "POLE_ALL"},
+    {"tri_2d_cart", "POLE_ALL"},
+    {"tri_2d_sph_deg", "POLE_ALL"},
+    {"tri_2d_sph_rad", "POLE_ALL"},
+    {"hex_3d_cart", "POLE_ALL"},
+    {"hex_3d_sph_deg", "POLE_ALL"},
+    {"hex_3d_sph_rad", "POLE_ALL"},
+    {"mix_2d_cart", "POLE_ALL"},
+    {"mix_2d_sph_deg", "POLE_ALL"},
+    {"mix_2d_sph_rad", "POLE_ALL"},
+    {"ngon_2d_cart", "POLE_ALL"},
+    {"ngon_2d_sph_deg", "POLE_ALL"},
+    {"ngon_2d_sph_rad", "POLE_ALL"},
+    {"quad_2d_cart", "POLE_NPNT"},
+    {"quad_2d_sph_deg", "POLE_NPNT"},
+    {"quad_2d_sph_rad", "POLE_NPNT"},
+    {"tri_2d_cart", "POLE_NPNT"},
+    {"tri_2d_sph_deg", "POLE_NPNT"},
+    {"tri_2d_sph_rad", "POLE_NPNT"},
+    {"hex_3d_cart", "POLE_NPNT"},
+    {"hex_3d_sph_deg", "POLE_NPNT"},
+    {"hex_3d_sph_rad", "POLE_NPNT"},
+    {"mix_2d_cart", "POLE_NPNT"},
+    {"mix_2d_sph_deg", "POLE_NPNT"},
+    {"mix_2d_sph_rad", "POLE_NPNT"},
+    {"ngon_2d_cart", "POLE_NPNT"},
+    {"ngon_2d_sph_deg", "POLE_NPNT"},
+    {"ngon_2d_sph_rad", "POLE_NPNT"},
+    {"quad_2d_cart", "POLE_TEETH"},
+    {"quad_2d_sph_deg", "POLE_TEETH"},
+    {"quad_2d_sph_rad", "POLE_TEETH"},
+    {"tri_2d_cart", "POLE_TEETH"},
+    {"tri_2d_sph_deg", "POLE_TEETH"},
+    {"tri_2d_sph_rad", "POLE_TEETH"},
+    {"hex_3d_cart", "POLE_TEETH"},
+    {"hex_3d_sph_deg", "POLE_TEETH"},
+    {"hex_3d_sph_rad", "POLE_TEETH"},
+    {"mix_2d_cart", "POLE_TEETH"},
+    {"mix_2d_sph_deg", "POLE_TEETH"},
+    {"mix_2d_sph_rad", "POLE_TEETH"},
+    {"ngon_2d_cart", "POLE_TEETH"},
+    {"ngon_2d_sph_deg", "POLE_TEETH"},
+    {"ngon_2d_sph_rad", "POLE_TEETH"},
   };
 
 
-
-  // method dependent, and mesh dependent 
-  std::vector<std::string> test_regrid_maptype;
-    test_regrid_maptype.push_back("MAP_CARTAPPROX");
-    test_regrid_maptype.push_back("MAP_GREATCIRCLE");
-    
-  // only conservative methods, all meshes
-  std::vector<std::string> test_regrid_normtype;
-    test_regrid_normtype.push_back("NORM_DSTAREA");
-    test_regrid_normtype.push_back("NORM_FRACAREA");
-  
-  // all methods, but only for periodic grids
-  std::vector<std::string> test_regrid_poletype;
-    test_regrid_poletype.push_back("POLE_NONE");
-    // test_regrid_poletype.push_back("POLE_ALL");
-    // test_regrid_poletype.push_back("POLE_NPNT");
-    // test_regrid_poletype.push_back("POLE_TEETH");
-  
-  // all methods except nn, but only for meshes with destination larger than source
-  std::vector<std::string> test_regrid_extrapmethod;
-    test_regrid_extrapmethod.push_back("EXTRAP_NONE");
-    // test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_STOD");
-    // test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_IDAVG");
-    // test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_D");
-    // test_regrid_extrapmethod.push_back("EXTRAP_CREEP");
-    // test_regrid_extrapmethod.push_back("EXTRAP_CREEP_NRST_D");
-  
-  // all methods except nn, but only for meshes with destination larger than source
-  std::vector<std::string> test_regrid_unmappedaction;
-    // test_regrid_unmappedaction.push_back("UNMAPPED_THROWERROR");
-    test_regrid_unmappedaction.push_back("UNMAPPED_IGNORE");
-  
-  // all methods except nn, but only meshes with degenerate, clockwise or concave elements
-  std::vector<std::string> test_regrid_ignoredegenerate;
-    test_regrid_ignoredegenerate.push_back("DONOT_IGNORE_DEGENERATE");
-    test_regrid_ignoredegenerate.push_back("IGNORE_DEGENERATE");
-  
   if (mbmesh) {
     for (const auto api: test_apis_mbmesh) {
       for (const auto mesh: test_meshes) {
