@@ -417,6 +417,9 @@ extern "C" {
     /* Stop a timer. */
     int pio_stop_timer(const char *name);
 
+    bool check_compmap(iosystem_desc_t *ios, io_desc_t *iodesc,const PIO_Offset *compmap);
+
+
 #if defined(__cplusplus)
 }
 #endif

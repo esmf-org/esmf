@@ -161,6 +161,9 @@ PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
     pioassert(iodesc->rearranger == PIO_REARR_BOX || iodesc->rearranger == PIO_REARR_SUBSET,
               "unknown rearranger", __FILE__, __LINE__);
 
+    pioassert(iodesc->readonly == 0,"Multiple sources in map for a single destination",__FILE__,__LINE__);
+
+
     /* Check the types of all the vars. They must match the type of
      * the decomposition. */
     for (int v = 0; v < nvars; v++)
@@ -669,6 +672,8 @@ PIOc_write_darray(int ncid, int varid, int ioid, PIO_Offset arraylen, void *arra
     /* Get decomposition information. */
     if (!(iodesc = pio_get_iodesc_from_id(ioid)))
         return pio_err(ios, file, PIO_EBADID, __FILE__, __LINE__);
+
+    pioassert(iodesc->readonly == 0,"Multiple sources in map for a single destination",__FILE__,__LINE__);
 
     /* Check that the local size of the variable passed in matches the
      * size expected by the io descriptor. Fail if arraylen is too
