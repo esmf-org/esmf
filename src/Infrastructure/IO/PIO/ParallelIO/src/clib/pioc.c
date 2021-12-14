@@ -595,6 +595,10 @@ PIOc_InitDecomp(int iosysid, int pio_type, int ndims, const int *gdimlen, int ma
     /* Remember the maplen. */
     iodesc->maplen = maplen;
 
+    /* check if the decomp is valid for write or is read-only */
+    /* this check is expensive and memory intensive on compute task 0 */
+//    iodesc->readonly = check_compmap(ios, iodesc, compmap);
+
     /* Remember the map. */
     if (!(iodesc->map = malloc(sizeof(PIO_Offset) * maplen)))
         return pio_err(ios, NULL, PIO_ENOMEM, __FILE__, __LINE__);

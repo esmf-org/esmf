@@ -292,7 +292,7 @@ typedef struct io_desc_t
     /** The actual number of IO tasks participating. */
     int num_aiotasks;
 
-    /** The rearranger in use for this variable. */
+    /** The rearranger in use for this decomposition. */
     int rearranger;
 
     /** Maximum number of regions in the decomposition. */
@@ -305,6 +305,10 @@ typedef struct io_desc_t
     /** If the map is not monotonically increasing we will need to
      * sort it. */
     bool needssort;
+
+    /** If the decomp has repeated values it can only be used for reading 
+        since it doesn't make sense to write a single value from more than one location. */
+    bool readonly;
 
     /** The maximum number of bytes of this iodesc before flushing. */
     int maxbytes;
@@ -327,6 +331,10 @@ typedef struct io_desc_t
      * nodes), each io task contains data from the compmap of one or
      * more compute tasks in the iomap array. */
     PIO_Offset llen;
+
+    /** Actual length of the iobuffer on this task for a case where values
+        are repeated in the compmap - used for darray read only. */
+    PIO_Offset rllen;
 
     /** Maximum llen participating. */
     int maxiobuflen;
