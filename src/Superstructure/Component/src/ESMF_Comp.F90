@@ -333,7 +333,7 @@ module ESMF_CompMod
   public ESMF_CompWait
 
   public ESMF_CWrapSetInitCreated
-  
+
   public ESMF_CompStatusGet
 
 !EOPI
@@ -363,7 +363,6 @@ module ESMF_CompMod
     module procedure ESMF_ctne
   end interface
 !------------------------------------------------------------------------------
-
 
 !------------------------------------------------------------------------------
 

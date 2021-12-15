@@ -60,7 +60,7 @@ void MBMesh_addelements(MBMesh **mbmpp,
                         int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                         int *_coordsPresent, double *elemCoords,
-                        int *_num_elemConn, int *elemConn, int *regridConserve,
+                        int *_num_elemConn, int *elemConn, 
                         ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                         int *rc);
 
@@ -71,9 +71,9 @@ void MBMesh_write(MBMesh **mbmpp, char *fname, int *rc,
                   ESMCI_FortranStrLenArg nlen);
 
 
-void MBMesh_createnodedistgrid(MBMesh **meshpp, int *ngrid, int *num_lnodes, int *rc);
+void MBMesh_createnodedistgrid(MBMesh **meshpp, DistGrid **dg, int *rc);
 
-void MBMesh_createelemdistgrid(MBMesh **meshpp, int *egrid, int *num_lelems, int *rc);
+void MBMesh_createelemdistgrid(MBMesh **meshpp, DistGrid **dg, int *rc);
 
 void MBMesh_createredistelems(MBMesh **src_meshpp, int *num_elem_gids, int *elem_gids,
                               MBMesh **output_meshpp, int *rc);
@@ -97,7 +97,8 @@ void MBMesh_getarea(MBMesh **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
 void MBMesh_GetCentroid(MBMesh *meshp, int *num_elem, double *elem_centroid, int *rc);
 
-void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, int *rc);
+void MBMesh_GetDimensions(MBMesh *meshp, int *sdim, int *pdim, 
+                          ESMC_CoordSys_Flag *coordsys, int *rc);
 
 void MBMesh_GetElemCount(MBMesh *meshp, int *elemCount, int *rc);
 

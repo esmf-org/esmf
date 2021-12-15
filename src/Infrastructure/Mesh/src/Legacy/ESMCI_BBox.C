@@ -137,6 +137,136 @@ BBox &BBox::operator=(const BBox &rhs) {
   }
 
 
+  // Unless we are experimenting with the new smaller box for 3D sph, then use the old method (from before 8.2)
+#ifndef BBOX_SMALLER_FOR_SPH3D
+
+  // TODO: take normexp out of parameter list because it's reset inside
+  BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp, bool is_sph) :
+ isempty(false)
+{
+  if (obj.get_type() != MeshObj::ELEMENT) Throw() << "Not able to create BBOx for non element";
+  const MeshObjTopo &topo = *GetMeshObjTopo(obj);
+  const UInt npe = topo.num_nodes;
+
+  dim = topo.spatial_dim;
+
+  // Is a shell? TODO expand shell in normal directions
+  if (topo.spatial_dim != topo.parametric_dim) {
+    // Shell, expand by normexp in normal direction
+    for (UInt i =0; i < dim; i++) {
+      min[i] = std::numeric_limits<double>::max();
+       max[i] = -std::numeric_limits<double>::max();
+    }
+
+    double nr[3];
+    MasterElement<> *me = GetME(coords, obj)(METraits<>());
+    std::vector<double> cd(3*me->num_functions());
+    GatherElemData<>(*me, coords, obj, &cd[0]);
+
+    double pc[] = {0,0};
+    const Mapping<> *mp = GetMapping(obj)(MPTraits<>());
+    mp->normal(1,&cd[0], &pc[0], &nr[0]);
+   
+    double ns = std::sqrt(nr[0]*nr[0]+nr[1]*nr[1]+nr[2]*nr[2]);
+
+    // Only normalize if bigger than 0.0
+    if (ns >1.0E-19) {
+       nr[0] /= ns; nr[1] /= ns; nr[2] /= ns;
+    } else {
+      nr[0] =0.0; nr[1] =0.0; nr[2] =0.0;
+    }
+
+    /*
+    if (obj.get_id() == 2426) {
+      std::cout << "elem 2426 coords:";
+       std::copy(&cd[0], &cd[0] + 3*me->num_functions(), std::ostream_iterator<double>(std::cout, " "));
+      std::cout << std::endl;
+    }*/
+    // Get cell diameter
+    double diam = 0;
+    for (UInt n = 1; n < me->num_functions(); n++) {
+      double dist = std::sqrt( (cd[0]-cd[3*n])*(cd[0]-cd[3*n]) +
+               (cd[1]-cd[3*n+1])*(cd[1]-cd[3*n+1])
+               + (cd[2]-cd[3*n+2])*(cd[2]-cd[3*n+2]));
+      
+      if (dist > diam) diam = dist;
+    }
+    
+    // Orig:   normexp *= diam;    
+    // Drop to 1.0. 1.0 is still overkill, but 2.0 seems like way overkill
+    // normexp=2.0*diam;
+    normexp=1.0*diam;
+
+
+    for (UInt n = 0; n < npe; n++) {
+      for (UInt j = 0; j < dim; j++) {
+        double lm;
+        if ((lm = (cd[n*dim + j] + normexp*nr[j])) < min[j]) min[j] = lm;
+        if ((lm =(cd[n*dim + j] - normexp*nr[j])) < min[j]) min[j] = lm;
+
+        if ((lm=(cd[n*dim + j] + normexp*nr[j])) > max[j]) max[j] = lm;
+         if ((lm=(cd[n*dim + j] - normexp*nr[j])) > max[j]) max[j] = lm;
+      }
+    } // for n
+  } else {
+    // Good old fashioned element
+    for (UInt i =0; i < dim; i++) {
+      min[i] = std::numeric_limits<double>::max();
+      max[i] = -std::numeric_limits<double>::max();
+    }
+
+    // Loop the nodes
+    for (UInt n = 0; n < topo.num_nodes; n++) {
+      const MeshObj &node = *(obj.Relations[n].obj);
+      const double *coord = coords.data(node);
+      for (UInt j = 0; j < dim; j++) {
+        if (coord[j] < min[j]) min[j] = coord[j];
+        if (coord[j] > max[j]) max[j] = coord[j];
+      }
+    }
+
+    // If this is on a 3D sphere then extend outward to include the bulge
+    // Spatial dimension is assumed to be 3, because we don't allow sdim<pdim
+    if ((topo.parametric_dim==3) && is_sph) {
+      // Compute diameter of min max box
+      // (as an easy stand in for diameter of the cell)
+      double diam=std::sqrt((max[0]-min[0])*(max[0]-min[0])+
+                            (max[1]-min[1])*(max[1]-min[1])+
+                            (max[2]-min[2])*(max[2]-min[2]));
+
+      // Reduce the diameter by 1/2 because
+      // that's the most it can be (in the case that the cell is the diameter of the whole sphere)
+      diam *=0.5;
+
+      // Loop through extending the min max box if necessary
+      for (UInt n = 0; n < topo.num_nodes; n++) {
+        const MeshObj &node = *(obj.Relations[n].obj);
+        const double *coord = coords.data(node);
+        
+        // Compute unit vector in direction of point 
+        double len=std::sqrt(coord[0]*coord[0]+coord[1]*coord[1]+coord[2]*coord[2]);
+        double uvec[3];
+        uvec[0]=coord[0]/len;
+        uvec[1]=coord[1]/len;
+        uvec[2]=coord[2]/len;
+        
+        // Compute new point
+        double new_pnt[3];
+        new_pnt[0]=coord[0]+diam*uvec[0];
+        new_pnt[1]=coord[1]+diam*uvec[1];
+        new_pnt[2]=coord[2]+diam*uvec[2];
+        
+        for (UInt j = 0; j < 3; j++) {
+          if (new_pnt[j] < min[j]) min[j] = new_pnt[j];
+          if (new_pnt[j] > max[j]) max[j] = new_pnt[j];
+        }
+      }
+    }
+  } // nonshell
+}
+
+#else
+
   // TODO: take normexp out of parameter list because it's reset inside
   BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp, bool is_sph) :
  isempty(false)
@@ -273,7 +403,7 @@ BBox &BBox::operator=(const BBox &rhs) {
     }
   } // nonshell
 }
-
+#endif
 
 
   BBox::BBox(const MEField<> &coords, const MeshDB &mesh, bool is_sph) :

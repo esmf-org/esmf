@@ -2517,18 +2517,53 @@ void VM::logMemInfo(
   char msg[800];
   std::stringstream info;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-  // access /proc/self
   char line[128];
-  FILE* file = fopen("/proc/self/status", "r");
+  FILE* file;
+  // access /proc/meminfo
+  long ssiTotal, ssiCommitted;
+  file = fopen("/proc/meminfo", "r");
   while (fgets(line, 128, file) != NULL){
-    if (strncmp(line, "Vm", 2) == 0){
+    bool outFlag = false;
+    if (strncmp(line, "MemTotal:", 9) == 0){
+      outFlag = true;
+      sscanf(line+9, "%ld", &ssiTotal);
+    }
+    if (strncmp(line, "Mem", 3) == 0){
+      outFlag = true;
+    }
+    if (strncmp(line, "Committed_AS:", 13) == 0){
+      outFlag = true;
+      sscanf(line+13, "%ld", &ssiCommitted);
+    }
+    if (outFlag){
       int len = strlen(line);
       line[len-1] = '\0'; // replace the newline with null
-      sprintf(msg, "%s - MemInfo: \t%s", prefix.c_str(), line);
+      sprintf(msg, "%s - MemInfo: [/proc/meminfo - SSI]\t%s",prefix.c_str(),line);
       log->Write(msg, msgType);
     }
   }
   fclose(file);
+  sprintf(msg, "%s - MemInfo: [/proc/meminfo - SSI]\tCommittedPercent: %g %%",
+    prefix.c_str(), ssiCommitted/(double)ssiTotal * 100.);
+  log->Write(msg, msgType);
+  // access /proc/self
+  long vmRss;
+  file = fopen("/proc/self/status", "r");
+  while (fgets(line, 128, file) != NULL){
+    if (strncmp(line, "Vm", 2) == 0){
+      int len = strlen(line);
+      line[len-1] = '\0'; // replace the newline with null
+      sprintf(msg, "%s - MemInfo: [/proc/self/status]\t%s",prefix.c_str(),line);
+      log->Write(msg, msgType);
+    }
+    if (strncmp(line, "VmRSS:", 6) == 0){
+      sscanf(line+6, "%ld", &vmRss);
+    }
+  }
+  fclose(file);
+  sprintf(msg, "%s - MemInfo: [/proc/self/status]\tVmRSSPercent: %g %%",
+    prefix.c_str(), vmRss/(double)ssiTotal * 100.);
+  log->Write(msg, msgType);
   // access mallinfo
   struct mallinfo m = mallinfo();
   info << "[malloc] Non-mmapped space allocated:        " <<setw(16)<< m.arena;
@@ -2561,7 +2596,6 @@ void VM::logMemInfo(
   long total = 0; // init
   if (m.hblkhd>=0 && m.uordblks>=0){
     total = (long)m.hblkhd+(long)m.uordblks;
-//    total /= (long)1024;  // scale to KiB
   }
   info.str(""); // clear info
   info << "[malloc] Total space in use, mmap + non-mmap:" <<setw(16)<< total;
@@ -2586,7 +2620,6 @@ void VM::logMemInfo(
   size_t pos = malloc_stats_output.rfind("system bytes     =");
   pos += 18;
   long system = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
-//  system /= (long)1024;  // scale to KiB
   info.str(""); // clear info
   info << "[malloc] Total space held (mmap + non-mmap): " <<setw(16)<< system;
   sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
@@ -2594,7 +2627,6 @@ void VM::logMemInfo(
   pos = malloc_stats_output.rfind("in use bytes     =");
   pos += 18;
   long in_use = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
-//  in_use /= (long)1024;  // scale to KiB
   info.str(""); // clear info
   info << "[malloc] Total space used (mmap + non-mmap): " <<setw(16)<< in_use;
   sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
@@ -3058,6 +3090,7 @@ VM *VM::initialize(
 // !ARGUMENTS:
 //
   MPI_Comm mpiCommunicator,
+  bool globalResourceControl,
   int *rc){   // return code
 //
 // !DESCRIPTION:
@@ -3075,7 +3108,9 @@ VM *VM::initialize(
       "- GlobalVM allocation failure", ESMC_CONTEXT, rc);
     return NULL;
   }
-  GlobalVM->VMK::init(mpiCommunicator);  // set up default VMK (all MPI)
+
+  // set up default VMK (all MPI)
+  GlobalVM->VMK::init(mpiCommunicator, globalResourceControl);
 
   // allocate the VM association table
 //gjtNotYet  matchTable_tid = new esmf_pthread_t[ESMC_VM_MATCHTABLEMAX];
@@ -3225,6 +3260,57 @@ VM *VM::initialize(
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return GlobalVM;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::set()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::set
+//
+// !INTERFACE:
+void VM::set(
+//
+// !RETURN VALUE:
+//    void
+//
+// !ARGUMENTS:
+//
+  bool globalResourceControl,
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//    Set properties of global virtual machine after initialize().
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  if (GlobalVM==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid GlobalVM", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  try{
+    GlobalVM->VMK::set(globalResourceControl);
+  }catch(int catchrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc);
+    return;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 

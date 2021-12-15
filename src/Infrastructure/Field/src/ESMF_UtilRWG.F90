@@ -150,48 +150,22 @@ subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
   integer (ESMF_KIND_I4) :: localCount(1)
   integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
   integer :: totalCount
-  logical :: hasSplitElem
 
-  ! Find out if elements are split
-  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)
+   ! Get local size of mesh areas
+   call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
+          rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! allocate space for areas
+  allocate(localArea(localElemCount))
+
+  ! Get local Areas
+  call ESMF_MeshGetElemArea(mesh, areaList=localArea, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Get area depending on split elements
-  if (hasSplitElem) then
-     ! Get local size of mesh areas before split
-     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
-            rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! allocate space for areas
-    allocate(localArea(localElemCount))
-
-    ! Get local Areas
-    call ESMF_MeshGetOrigElemArea(mesh, areaList=localArea, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  else
-     ! Get local size of mesh areas
-     call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
-            rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! allocate space for areas
-    allocate(localArea(localElemCount))
-
-    ! Get local Areas
-    call ESMF_MeshGetElemArea(mesh, areaList=localArea, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  endif
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Allocate List of counts
   allocate(globalCount(petCnt))

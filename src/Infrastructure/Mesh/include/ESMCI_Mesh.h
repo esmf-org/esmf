@@ -139,6 +139,7 @@ void resolve_cspec_delete_owners(UInt obj_type);
 
  // Save original dimension
  int orig_spatial_dim;
+ ESMC_CoordSys_Flag coordsys;
 
  // Temp XGrid info
  int side; // 1=A, 2=B, 3= middle

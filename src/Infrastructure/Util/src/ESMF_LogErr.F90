@@ -1910,6 +1910,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(rc)) then
         rc=localrc
       endif
+      alog%deferredOpenFlag = .false.
     else
       alog%deferredOpenFlag = .true.
     end if

@@ -3,7 +3,7 @@
 ALL: build_here 
 
 SOURCEC	  = ESMCI_FTable.C ESMCI_MethodTable.C ESMCI_CompTunnel.C
-SOURCEF	  = ESMF_Comp.F90 ESMF_GridComp.F90 ESMF_CplComp.F90 ESMF_SciComp.F90
+SOURCEF	  = ESMF_Comp.F90 ESMF_GridComp.F90 ESMF_CplComp.F90 ESMF_SciComp.F90 ESMF_InternalState.F90
 SOURCEH	  = 
 
 # If you have public .h files in this dir, list them here

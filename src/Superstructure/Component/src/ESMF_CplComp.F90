@@ -1011,8 +1011,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Only the {\em last} data block set via
 ! {\tt ESMF\_CplCompSetInternalState} will be accessible.
 !
-! CAUTION: This method does not have an explicit Fortran interface. Do not
-! specify argument keywords when calling this method!
+! CAUTION: If you are working with a compiler that does not support Fortran 2018
+! assumed-type dummy arguments, then this method does not have an explicit
+! Fortran interface. In this case do not specify argument keywords when calling
+! this method!
 !
 ! The arguments are:
 ! \begin{description}
@@ -2041,8 +2043,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Only the {\em last} data block set via
 ! {\tt ESMF\_CplCompSetInternalState} will be accessible.
 !
-! CAUTION: This method does not have an explicit Fortran interface. Do not
-! specify argument keywords when calling this method!
+! CAUTION: If you are working with a compiler that does not support Fortran 2018
+! assumed-type dummy arguments, then this method does not have an explicit
+! Fortran interface. In this case do not specify argument keywords when calling
+! this method!
 !
 ! The arguments are:
 ! \begin{description}

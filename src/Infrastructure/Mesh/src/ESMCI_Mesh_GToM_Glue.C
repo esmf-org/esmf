@@ -139,6 +139,7 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
 
  // original spatial dim is the same as grid dimension
  mesh.orig_spatial_dim=pdim;
+ mesh.coordsys=grid.getCoordSys();
 
  // See if this is for conservative regridding
  bool isConserve=false;
@@ -2095,6 +2096,7 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
 
  // original spatial dim is the same as grid dimension
  mesh->orig_spatial_dim=pdim;
+ mesh->coordsys=grid->getCoordSys();
 
  // Get distgrid for the center staggerloc
  DistGrid *centerDistgrid;

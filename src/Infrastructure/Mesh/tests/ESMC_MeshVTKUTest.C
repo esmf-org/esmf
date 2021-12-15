@@ -151,20 +151,6 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
-  strcpy(name, "MeshGetLocalNodeCount before MeshAddNodes");
-  strcpy(failMsg, "Incorrect result");
-  rc = ESMF_SUCCESS;
-
-  // Get the number of local nodes
-  rc = ESMC_MeshGetLocalNodeCount(mesh, &num_node_out);
-
-  // Note != below to negate success
-  ESMC_Test((rc!=ESMF_SUCCESS),
-            name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
   // Add node information to the mesh
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -189,20 +175,6 @@ int main(void){
   }
 
   ESMC_Test((rc==ESMF_SUCCESS) && correct==true,
-            name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
-  strcpy(name, "MeshGetLocalElementCount before MeshAddElements");
-  strcpy(failMsg, "Incorrect result");
-  rc = ESMF_SUCCESS;
-
-  // Get the number of local elements
-  rc = ESMC_MeshGetLocalElementCount(mesh, &num_elem_out);
-
-  // Note != below to negate success
-  ESMC_Test((rc!=ESMF_SUCCESS),
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

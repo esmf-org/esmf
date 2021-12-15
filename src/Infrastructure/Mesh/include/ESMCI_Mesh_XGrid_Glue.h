@@ -35,6 +35,7 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
                               int *compute_midmesh,
                               int *regridMethod, 
                               int *unmappedaction,
+                              ESMC_CoordSys_Flag *coordSys,
                               int *nentries, ESMCI::TempWeights **tweights,
                               int*rc);
 

@@ -71,8 +71,8 @@ program ESMF_LocStreamCreateUTest
   integer :: numNodes, numElems
   integer, allocatable :: elemIds(:),elemTypes(:),elemConn(:)
   logical:: locstreamBool
-
-
+  type(ESMF_CoordSys_Flag) :: coordSys
+  
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -945,7 +945,8 @@ program ESMF_LocStreamCreateUTest
   rc=ESMF_SUCCESS
 
   ! Create Grid
-  locstream=ESMF_LocStreamCreate(maxIndex=20, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+  locstream=ESMF_LocStreamCreate(maxIndex=20, indexflag=ESMF_INDEX_GLOBAL, coordSys=ESMF_COORDSYS_SPH_DEG, &
+       rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      
   ! Add key A1
@@ -982,12 +983,14 @@ program ESMF_LocStreamCreateUTest
 
 
   ! Check loc stream info
-  call ESMF_LocStreamGet(locstream2, keyCount=keyCount, indexflag=indexflag, rc=localrc)
+  call ESMF_LocStreamGet(locstream2, keyCount=keyCount, indexflag=indexflag, coordSys=coordSys, &
+       rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! check info
   if (keyCount .ne. 2) correct=.false.
   if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) correct=.false.
+  if (.not. (coordSys .eq. ESMF_COORDSYS_SPH_DEG)) correct=.false.
 
   ! Get info for A1
   call ESMF_LocStreamGetKey(locstream2, keyName="A1", keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)

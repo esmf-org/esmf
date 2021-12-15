@@ -15,7 +15,9 @@ Changes made after the #1 release:}
 \newcommand{\apiStatusCompatibleVersionExceptions}[1]{This interface is backward compatible with ESMF versions starting at #1 - {\em except those arguments indicated below}.}
 \newcommand{\apiStatusCompatibleException}{{\sc Status:}{\em This argument is excluded from the backward compatibility statement}.\\}
 
-\newcommand{\apiDeprecatedArg}{DEPRECATED ARGUMENT!}
-\newcommand{\apiDeprecatedArgWithReplacement}[1]{DEPRECATED ARGUMENT! Please use the argument {\tt #1} instead.}
+\newcommand{\apiDeprecatedArg}{\sf DEPRECATED ARGUMENT!}
+\newcommand{\apiDeprecatedArgWithReplacement}[1]{{\bf DEPRECATED ARGUMENT!} Please use the argument {\tt #1} instead.}
 
-\newcommand{\apiDeprecatedMethodWithReplacement}[3]{DEPRECATED METHOD as of ESMF #1. Please use {\tt #2 \ref{#3}} instead.}
+\newcommand{\apiDeprecatedMethodWithReplacement}[3]{{\bf DEPRECATED METHOD} as of ESMF #1. Please use {\tt #2}, section {\tt \ref{#3}} instead.}
+
+\newcommand{\apiDeprecatedClassWithTargetReleaseAndReplacement}[4]{{\bf DEPRECATED CLASS!}\\ The entire #1 class has been deprecated and is scheduled for removal with ESMF #2. This includes all of the class derived types, named constants, and methods. Please use the replacment class {\tt #3}, section {\tt \ref{#4}} instead!\\}
