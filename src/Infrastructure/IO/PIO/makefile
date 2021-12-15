@@ -8,7 +8,6 @@ LOCDIR	  = src/Infrastructure/IO/PIO
 
 # Leave this line alone.
 include $(ESMF_DIR)/makefile
-
 PIO_CMAKE_OPTS = -DPIO_ENABLE_TIMING=OFF -DPIO_ENABLE_EXAMPLES=OFF -DPIO_ENABLE_FORTRAN=OFF
 
 ifeq ("$(ESMF_BOPT)","g")
@@ -25,7 +24,9 @@ ifdef ESMF_PNETCDF_INCLUDE
   PIO_CMAKE_OPTS += -DPnetCDF_PATH=$(ESMF_PNETCDF_INCLUDE)/..
 else
   PIO_CMAKE_OPTS += -DWITH_PNETCDF=off
+  PIO_CONF_OPTS += --disable-pnetcdf
 endif
+
 
 ifdef PIO_CMAKE_BUILD
 # Use the PIO native cmake build system to build and install
@@ -43,7 +44,7 @@ tree_lib:
 	mkdir -p Install
 	cd ParallelIO; \
 	cp -f ../configure . ;\
-	./configure CC=$(ESMF_CCOMPILER) CFLAGS="$(ESMF_COPTFLAG) $(ESMF_SO_CCOMPILEOPTS)" --prefix=$(ESMF_DIR)/src/Infrastructure/IO/PIO/Install ;\
+	./configure CC=$(ESMF_CCOMPILER) CFLAGS="$(ESMF_COPTFLAG) $(ESMF_SO_CCOMPILEOPTS)" $PIO_CONF_OPTS --prefix=$(ESMF_DIR)/src/Infrastructure/IO/PIO/Install ;\
 	make -f ./Makefile ;\
 	make -f ./Makefile install ;\
 	cp -fp ../Install/include/* $(ESMF_INCDIR); \
