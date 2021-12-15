@@ -287,16 +287,13 @@ class MCT {
         function_map["to_pointlist_node"] = std::bind(&MCT::to_pointlist_node, this);
         function_map["write_vtk"] = std::bind(&MCT::write_vtk, this);
 
-        regrid_map["bilinear_center"] = std::bind(&MCT::bilinear_center, this,
+        regrid_map["bilinear"] = std::bind(&MCT::bilinear, this,
           std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
           std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
-        regrid_map["bilinear_corner"] = std::bind(&MCT::bilinear_corner, this,
+        regrid_map["conservative"] = std::bind(&MCT::conservative, this,
           std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
           std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
-        regrid_map["conserve_center"] = std::bind(&MCT::conserve_center, this,
-          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-          std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
-        regrid_map["conserve_2nd_center"] = std::bind(&MCT::conserve_2nd_center, this,
+        regrid_map["conservative_2nd"] = std::bind(&MCT::conservative_2nd, this,
           std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
           std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
         regrid_map["nearest_d2s"] = std::bind(&MCT::nearest_d2s, this,
@@ -305,10 +302,7 @@ class MCT {
         regrid_map["nearest_s2d"] = std::bind(&MCT::nearest_s2d, this,
           std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
           std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
-        regrid_map["patch_center"] = std::bind(&MCT::patch_center, this,
-          std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-          std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
-        regrid_map["patch_corner"] = std::bind(&MCT::patch_corner, this,
+        regrid_map["patch"] = std::bind(&MCT::patch, this,
           std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
           std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
 
@@ -865,10 +859,7 @@ class MCT {
         ESMCI::Array *dummy_status_array = NULL;
         int check_flag = 0;
 
-        // mesh cap level routine to add pole information to a periodic
-        // meshSetPole();
-
-        // calculate bilinear weights between mesh and pointlist
+        // calculate weights between mesh and pointlist
         MeshCap::regrid_create(&mesh, &array, &pl, 
                                &target, &array, &target_pl, 
                                &regrid_method, 
@@ -898,46 +889,11 @@ class MCT {
     }
 
 
-    int bilinear_center(int map_type, int norm_type, 
+    int bilinear(int map_type, int norm_type, 
                         int pole_type, int extrap_method,
                         int unmapped_action, int ignore_degenerate) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MCT::bilinear_center()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_BILINEAR;
-        int regrid_method = 0;
-
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &target_pl, &localrc);
-        ESMC_CHECK_THROW(localrc);
-                
-        localrc = regrid_generic(regrid_method, 
-                                 map_type, norm_type,
-                                 pole_type, extrap_method,
-                                 unmapped_action, ignore_degenerate);
-        ESMC_CHECK_THROW(localrc);
-        
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify the wts and dst_status
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int bilinear_corner(int map_type, int norm_type, 
-                        int pole_type, int extrap_method,
-                        int unmapped_action, int ignore_degenerate) {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::bilinear_corner()"
+#define ESMC_METHOD "MCT::bilinear()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -949,7 +905,15 @@ class MCT {
 
         mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
         ESMC_CHECK_THROW(localrc);
-                
+
+        // only build target as copy of mesh for creep or will fail at
+        //   line 177 of ESMCI_MBMesh_Extrapolation due to mesh != NULL
+        if ((extrap_method == ExtrapMethod["EXTRAP_CREEP"]) || 
+            (extrap_method == ExtrapMethod["EXTRAP_CREEP_NRST_D"])) {
+          localrc = build_target_as_copy();
+          ESMC_CHECK_THROW(localrc);
+        }
+
         localrc = regrid_generic(regrid_method, 
                                  map_type, norm_type,
                                  pole_type, extrap_method,
@@ -968,11 +932,11 @@ class MCT {
       return rc;
     }
 
-    int conserve_center(int map_type, int norm_type, 
+    int conservative(int map_type, int norm_type, 
                         int pole_type, int extrap_method,
                         int unmapped_action, int ignore_degenerate) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MCT::conserve_center()"
+#define ESMC_METHOD "MCT::conservative()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
       
@@ -1003,11 +967,11 @@ class MCT {
       return rc;
     }
 
-    int conserve_2nd_center(int map_type, int norm_type, 
+    int conservative_2nd(int map_type, int norm_type, 
                             int pole_type, int extrap_method,
                             int unmapped_action, int ignore_degenerate) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MCT::conserve_center()"
+#define ESMC_METHOD "MCT::conservative()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -1038,46 +1002,11 @@ class MCT {
       return rc;
     }
 
-    int patch_center(int map_type, int norm_type, 
+    int patch(int map_type, int norm_type, 
                      int pole_type, int extrap_method,
                      int unmapped_action, int ignore_degenerate) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MCT::patch_center()"
-      // RETURN: rc : pass(0) fail(>0)
-      int rc = ESMF_FAILURE;
-
-      try {
-        int localrc;
-        
-        // ESMC_RegridMethod_Flag regrid_method = ESMC_REGRIDMETHOD_PATCH;
-        int regrid_method = 1;
-
-        mesh->MeshCap_to_PointList(ESMC_MESHLOC_ELEMENT, NULL, &target_pl, &localrc);
-        ESMC_CHECK_THROW(localrc);
-        
-        localrc = regrid_generic(regrid_method, 
-                                 map_type, norm_type,
-                                 pole_type, extrap_method,
-                                 unmapped_action, ignore_degenerate);
-        ESMC_CHECK_THROW(localrc);
-        
-        // verify the original mesh is still valid
-        localrc = test_get_info(mesh);
-        ESMC_CHECK_THROW(localrc);
-
-        // TODO: verify the wts and dst_status
-      }
-      CATCH_MCT_RETURN_RC(&rc)
-
-      rc = ESMF_SUCCESS;
-      return rc;
-    }
-
-    int patch_corner(int map_type, int norm_type, 
-                     int pole_type, int extrap_method,
-                     int unmapped_action, int ignore_degenerate) {
-#undef ESMC_METHOD
-#define ESMC_METHOD "MCT::patch_corner()"
+#define ESMC_METHOD "MCT::patch()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
 
@@ -1089,7 +1018,15 @@ class MCT {
 
         mesh->MeshCap_to_PointList(ESMC_MESHLOC_NODE, NULL, &target_pl, &localrc);
         ESMC_CHECK_THROW(localrc);
-        
+
+        // only build target as copy of mesh for creep or will fail at
+        //   line 177 of ESMCI_MBMesh_Extrapolation due to mesh != NULL
+        if ((extrap_method == ExtrapMethod["EXTRAP_CREEP"]) || 
+            (extrap_method == ExtrapMethod["EXTRAP_CREEP_NRST_D"])) {
+          localrc = build_target_as_copy();
+          ESMC_CHECK_THROW(localrc);
+        }
+
         localrc = regrid_generic(regrid_method, 
                                  map_type, norm_type,
                                  pole_type, extrap_method,

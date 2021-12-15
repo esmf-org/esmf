@@ -138,9 +138,6 @@ int main(int argc, char *argv[]) {
   int localPet, petCount;
   ESMC_VM vm;
 
-  bool mbmesh = true;
-  bool native = true; 
-
   //----------------------------------------------------------------------------
   // Start the test with a proxy name with which to create log and stdout files
   ESMC_TestStart("ESMC_MeshCapRegridProxyUTest.C", __LINE__, 0);
@@ -157,27 +154,28 @@ int main(int argc, char *argv[]) {
   std::ofstream tagfile;
   tagfile.open("ESMC_MeshCapRegridProxyUTest.C", std::ios_base::app);
 
+
+  bool mbmesh = false;
+  mbmesh = true;
+  bool native = false; 
+  native = true; 
+
   std::vector<std::string> test_apis_mbmesh;
-    test_apis_mbmesh.push_back("bilinear_center");
-    test_apis_mbmesh.push_back("bilinear_corner");
-    test_apis_mbmesh.push_back("conserve_center");
-    // Not yet available with MBMesh
-    // test_apis_mbmesh.push_back("conserve_2nd_center");
+    test_apis_mbmesh.push_back("bilinear");
+    test_apis_mbmesh.push_back("conservative");
     test_apis_mbmesh.push_back("nearest_d2s");
     test_apis_mbmesh.push_back("nearest_s2d");
     // Not yet available with MBMesh
-    // test_apis_mbmesh.push_back("patch_center");
-    // test_apis_mbmesh.push_back("patch_corner");
+    // test_apis_mbmesh.push_back("conservative_2nd");
+    // test_apis_mbmesh.push_back("patch");
 
   std::vector<std::string> test_apis_native;
-    test_apis_native.push_back("bilinear_center");
-    test_apis_native.push_back("bilinear_corner");
-    test_apis_native.push_back("conserve_center");
-    test_apis_native.push_back("conserve_2nd_center");
+    test_apis_native.push_back("bilinear");
+    test_apis_native.push_back("conservative");
+    test_apis_native.push_back("conservative_2nd");
     test_apis_native.push_back("nearest_d2s");
     test_apis_native.push_back("nearest_s2d");
-    test_apis_native.push_back("patch_center");
-    test_apis_native.push_back("patch_corner");
+    test_apis_native.push_back("patch");
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes;
@@ -219,11 +217,11 @@ int main(int argc, char *argv[]) {
   // all methods except nn, but only for meshes with destination larger than source
   std::vector<std::string> test_regrid_extrapmethod;
     test_regrid_extrapmethod.push_back("EXTRAP_NONE");
-    // test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_STOD");
-    // test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_IDAVG");
-    // test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_D");
-    // test_regrid_extrapmethod.push_back("EXTRAP_CREEP");
-    // test_regrid_extrapmethod.push_back("EXTRAP_CREEP_NRST_D");
+    test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_STOD");
+    test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_IDAVG");
+    test_regrid_extrapmethod.push_back("EXTRAP_NEAREST_D");
+    test_regrid_extrapmethod.push_back("EXTRAP_CREEP");
+    test_regrid_extrapmethod.push_back("EXTRAP_CREEP_NRST_D");
   
   // all methods except nn, but only for meshes with destination larger than source
   std::vector<std::string> test_regrid_unmappedaction;
@@ -235,99 +233,83 @@ int main(int argc, char *argv[]) {
     test_regrid_ignoredegenerate.push_back("DONOT_IGNORE_DEGENERATE");
     test_regrid_ignoredegenerate.push_back("IGNORE_DEGENERATE");
   
+  
+  
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
-    // conserve doesn't work with ngons
-    {"conserve_center", "ngon_2d_cart"},
-    {"conserve_center", "ngon_2d_sph_deg"},
-    {"conserve_center", "ngon_2d_sph_rad"},
-    // // conserve_2nd doesn't work in 3d, but not yet enabled for mbmesh
-    // {"conserve_2nd", "hex_3d_cart"},
-    // {"conserve_2nd", "hex_3d_sph_deg"},
-    // {"conserve_2nd", "hex_3d_sph_rad"},
+    // conservative doesn't work with ngons
+    {"conservative", "ngon_2d_cart"},
+    {"conservative", "ngon_2d_sph_deg"},
+    {"conservative", "ngon_2d_sph_rad"},
+    // extrapolation methods not yet supported with moab
+    {"bilinear", "EXTRAP_NEAREST_D"},
+    {"bilinear", "EXTRAP_CREEP"},
+    {"bilinear", "EXTRAP_CREEP_NRST_D"},
+    {"patch", "EXTRAP_NEAREST_D"},
+    {"patch", "EXTRAP_CREEP"},
+    {"patch", "EXTRAP_CREEP_NRST_D"},
+
   };
 
   std::vector<std::pair<std::string, std::string>> skip_test_native = {\
-    // node coord counts on PET 1 are off with native
-    {"patch_center", "hex_3d_cart"},
-    {"patch_corner", "hex_3d_cart"},
-    // conserve_2nd doesn't work in 3d
-    {"conserve_2nd_center", "hex_3d_cart"},
-    {"conserve_2nd_center", "hex_3d_sph_deg"},
-    {"conserve_2nd_center", "hex_3d_sph_rad"},
     // meshes with ngons return incorrect element count with native
-    {"bilinear_center", "ngon_2d_cart"},
-    {"bilinear_center", "ngon_2d_sph_deg"},
-    {"bilinear_center", "ngon_2d_sph_rad"},
-    {"bilinear_corner", "ngon_2d_cart"},
-    {"bilinear_corner", "ngon_2d_sph_deg"},
-    {"bilinear_corner", "ngon_2d_sph_rad"},
-    {"conserve_center", "ngon_2d_cart"},
-    {"conserve_center", "ngon_2d_sph_deg"},
-    {"conserve_center", "ngon_2d_sph_rad"},
-    {"conserve_2nd_center", "ngon_2d_cart"},
-    {"conserve_2nd_center", "ngon_2d_sph_deg"},
-    {"conserve_2nd_center", "ngon_2d_sph_rad"},
-    {"patch_center", "ngon_2d_cart"},
-    {"patch_center", "ngon_2d_sph_deg"},
-    {"patch_center", "ngon_2d_sph_rad"},
-    {"patch_corner", "ngon_2d_cart"},
-    {"patch_corner", "ngon_2d_sph_deg"},
-    {"patch_corner", "ngon_2d_sph_rad"},
+    {"bilinear", "ngon_2d_cart"},
+    {"bilinear", "ngon_2d_sph_deg"},
+    {"bilinear", "ngon_2d_sph_rad"},
+    {"conservative", "ngon_2d_cart"},
+    {"conservative", "ngon_2d_sph_deg"},
+    {"conservative", "ngon_2d_sph_rad"},
+    {"conservative_2nd", "ngon_2d_cart"},
+    {"conservative_2nd", "ngon_2d_sph_deg"},
+    {"conservative_2nd", "ngon_2d_sph_rad"},
+    {"patch", "ngon_2d_cart"},
+    {"patch", "ngon_2d_sph_deg"},
+    {"patch", "ngon_2d_sph_rad"},
   };
 
   std::vector<std::pair<std::string, std::string>> skip_test_common = {\
+    // patch not supported in 3d, node coord counts on PET 1 are off
+    {"patch", "hex_3d_cart"},
+    {"patch", "hex_3d_sph_deg"},
+    {"patch", "hex_3d_sph_rad"},
+    // conservative_2nd not supported in 3d
+    {"conservative_2nd", "hex_3d_cart"},
+    {"conservative_2nd", "hex_3d_sph_deg"},
+    {"conservative_2nd", "hex_3d_sph_rad"},
+    // conservative is not supported with extrapolation
+    {"conservative", "EXTRAP_NEAREST_STOD"},
+    {"conservative", "EXTRAP_NEAREST_IDAVG"},
+    {"conservative", "EXTRAP_NEAREST_D"},
+    {"conservative", "EXTRAP_CREEP"},
+    {"conservative", "EXTRAP_CREEP_NRST_D"},
+    {"conservative_2nd", "EXTRAP_NEAREST_STOD"},
+    {"conservative_2nd", "EXTRAP_NEAREST_IDAVG"},
+    {"conservative_2nd", "EXTRAP_NEAREST_D"},
+    {"conservative_2nd", "EXTRAP_CREEP"},
+    {"conservative_2nd", "EXTRAP_CREEP_NRST_D"},
+    // BOB look at the following section, these hang (uncomment to allow to run)
     // bilinear corner and patch corner hang with periodic
-    {"bilinear_corner", "periodic_2d_sph_deg"},
-    {"bilinear_corner", "periodic_2d_sph_rad"},
-    {"patch_corner", "periodic_2d_sph_deg"},
-    {"patch_corner", "periodic_2d_sph_rad"},
+    {"bilinear", "periodic_2d_sph_deg"},
+    {"bilinear", "periodic_2d_sph_rad"},
+    {"patch", "periodic_2d_sph_deg"},
+    {"patch", "periodic_2d_sph_rad"},
+    // BOB look at the following section, these fail (uncomment to allow to run)
     // unmapped action error finds unmapped points with the following
-    {"bilinear_center", "hex_3d_cart"},
-    {"bilinear_center", "hex_3d_cart"},
-    {"bilinear_center", "hex_3d_sph_deg"},
-    {"bilinear_center", "hex_3d_sph_deg"},
-    {"bilinear_center", "hex_3d_sph_rad"},
-    {"bilinear_center", "hex_3d_sph_rad"},
-    {"bilinear_center", "mix_2d_cart"},
-    {"bilinear_center", "mix_2d_cart"},
-    {"bilinear_center", "mix_2d_sph_deg"},
-    {"bilinear_center", "mix_2d_sph_deg"},
-    {"bilinear_center", "mix_2d_sph_rad"},
-    {"bilinear_center", "mix_2d_sph_rad"},
-    {"bilinear_corner", "hex_3d_cart"},
-    {"bilinear_corner", "hex_3d_cart"},
-    {"bilinear_corner", "hex_3d_sph_deg"},
-    {"bilinear_corner", "hex_3d_sph_deg"},
-    {"bilinear_corner", "hex_3d_sph_rad"},
-    {"bilinear_corner", "hex_3d_sph_rad"},
-    {"bilinear_corner", "mix_2d_cart"},
-    {"bilinear_corner", "mix_2d_cart"},
-    {"bilinear_corner", "mix_2d_sph_deg"},
-    {"bilinear_corner", "mix_2d_sph_deg"},
-    {"bilinear_corner", "mix_2d_sph_rad"},
-    {"bilinear_corner", "mix_2d_sph_rad"},
-    {"patch_center", "hex_3d_cart"},
-    {"patch_center", "hex_3d_cart"},
-    {"patch_center", "hex_3d_sph_deg"},
-    {"patch_center", "hex_3d_sph_deg"},
-    {"patch_center", "hex_3d_sph_rad"},
-    {"patch_center", "hex_3d_sph_rad"},
-    {"patch_center", "mix_2d_cart"},
-    {"patch_center", "mix_2d_cart"},
-    {"patch_center", "mix_2d_sph_deg"},
-    {"patch_center", "mix_2d_sph_deg"},
-    {"patch_center", "mix_2d_sph_rad"},
-    {"patch_center", "mix_2d_sph_rad"},
-    {"conserve_center", "hex_3d_cart"},
-    {"conserve_center", "hex_3d_cart"},
-    {"conserve_center", "hex_3d_sph_deg"},
-    {"conserve_center", "hex_3d_sph_deg"},
-    {"conserve_center", "hex_3d_sph_rad"},
-    {"conserve_center", "hex_3d_sph_rad"},
+    {"bilinear", "hex_3d_cart"},
+    {"bilinear", "hex_3d_cart"},
+    {"bilinear", "hex_3d_sph_deg"},
+    {"bilinear", "hex_3d_sph_deg"},
+    {"bilinear", "hex_3d_sph_rad"},
+    {"bilinear", "hex_3d_sph_rad"},
+    {"conservative", "hex_3d_cart"},
+    {"conservative", "hex_3d_cart"},
+    {"conservative", "hex_3d_sph_deg"},
+    {"conservative", "hex_3d_sph_deg"},
+    {"conservative", "hex_3d_sph_rad"},
+    {"conservative", "hex_3d_sph_rad"},
     // the following are exceptions due to design, do not represent limitations per se
     // conservative only works with great circles
-    {"conserve_center", "MAP_CARTAPPROX"},
-    {"conserve_2nd_center", "MAP_CARTAPPROX"},
+    {"conservative", "MAP_CARTAPPROX"},
+    {"conservative_2nd", "MAP_CARTAPPROX"},
     // cartesian only works with straight lines
     {"quad_2d_cart", "MAP_GREATCIRCLE"},
     {"tri_2d_cart", "MAP_GREATCIRCLE"},
@@ -336,26 +318,26 @@ int main(int argc, char *argv[]) {
     {"ngon_2d_cart", "MAP_GREATCIRCLE"},
     // nearest doesn't touch on any of the regrid options, only allow defaults
     {"nearest_d2s", "MAP_GREATCIRCLE"},
-    {"nearest_s2d", "MAP_GREATCIRCLE"},
     {"nearest_d2s", "POLE_ALL"},
-    {"nearest_s2d", "POLE_ALL"},
     {"nearest_d2s", "POLE_NPNT"},
-    {"nearest_s2d", "POLE_NPNT"},
     {"nearest_d2s", "POLE_TEETH"},
-    {"nearest_s2d", "POLE_TEETH"},
     {"nearest_d2s", "EXTRAP_NEAREST_STOD"},
-    {"nearest_s2d", "EXTRAP_NEAREST_STOD"},
     {"nearest_d2s", "EXTRAP_NEAREST_IDAVG"},
-    {"nearest_s2d", "EXTRAP_NEAREST_IDAVG"},
     {"nearest_d2s", "EXTRAP_NEAREST_D"},
-    {"nearest_s2d", "EXTRAP_NEAREST_D"},
     {"nearest_d2s", "EXTRAP_CREEP"},
-    {"nearest_s2d", "EXTRAP_CREEP"},
     {"nearest_d2s", "EXTRAP_CREEP_NRST_D"},
-    {"nearest_s2d", "EXTRAP_CREEP_NRST_D"},
     {"nearest_d2s", "UNMAPPED_IGNORE"},
-    {"nearest_s2d", "UNMAPPED_IGNORE"},
     {"nearest_d2s", "IGNORE_DEGENERATE"},
+    {"nearest_s2d", "MAP_GREATCIRCLE"},
+    {"nearest_s2d", "POLE_ALL"},
+    {"nearest_s2d", "POLE_NPNT"},
+    {"nearest_s2d", "POLE_TEETH"},
+    {"nearest_s2d", "EXTRAP_NEAREST_STOD"},
+    {"nearest_s2d", "EXTRAP_NEAREST_IDAVG"},
+    {"nearest_s2d", "EXTRAP_NEAREST_D"},
+    {"nearest_s2d", "EXTRAP_CREEP"},
+    {"nearest_s2d", "EXTRAP_CREEP_NRST_D"},
+    {"nearest_s2d", "UNMAPPED_IGNORE"},
     {"nearest_s2d", "IGNORE_DEGENERATE"},
     // only run pole options with periodic meshes
     {"quad_2d_cart", "POLE_ALL"},
