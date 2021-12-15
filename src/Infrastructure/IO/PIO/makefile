@@ -44,7 +44,7 @@ tree_lib:
 	mkdir -p Install
 	cd ParallelIO; \
 	cp -f ../configure . ;\
-	./configure CC=$(ESMF_CCOMPILER) CFLAGS="$(ESMF_COPTFLAG) $(ESMF_SO_CCOMPILEOPTS)" $PIO_CONF_OPTS --prefix=$(ESMF_DIR)/src/Infrastructure/IO/PIO/Install ;\
+	./configure CC=$(ESMF_CCOMPILER) CFLAGS="$(ESMF_COPTFLAG) $(ESMF_SO_CCOMPILEOPTS)" $(PIO_CONF_OPTS) --prefix=$(ESMF_DIR)/src/Infrastructure/IO/PIO/Install ;\
 	make -f ./Makefile ;\
 	make -f ./Makefile install ;\
 	cp -fp ../Install/include/* $(ESMF_INCDIR); \
