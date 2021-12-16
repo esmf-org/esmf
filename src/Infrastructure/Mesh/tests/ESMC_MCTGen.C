@@ -2046,7 +2046,8 @@ MCT *periodic_2d_sph_deg(int &rc){
         mct->nodeCoord = {200,-80, 250,-80, 300,-80, 0,-80,
                           200,-45, 250,-45, 300,-45, 0,-45,
                           200,0, 250,0, 300,0, 0,0};
-        mct->nodeOwner = {0,1,1,1,0,1,1,1,0,1,1,1};
+        // FIXED OWNERS   mct->nodeOwner = {0,1,1,1,0,1,1,1,0,1,1,1};
+        mct->nodeOwner = {0,1,1,0,0,1,1,0,0,1,1,0};
         mct->elemId = {5,6,7,12,13,14};
         mct->elemType = {ESMC_MESHELEMTYPE_QUAD,
                          ESMC_MESHELEMTYPE_QUAD,
@@ -2093,7 +2094,8 @@ MCT *periodic_2d_sph_deg(int &rc){
         mct->nodeCoord = {200,0, 250,0, 300,0, 0,0,
                           200,45, 250,45, 300,45, 0,45,
                           200,80, 250,80, 300,80, 0,80};
-        mct->nodeOwner = {0,1,1,1,2,3,3,3,2,3,3,3};
+        //  FIXED OWNERS   mct->nodeOwner = {0,1,1,1,2,3,3,3,2,3,3,3};
+        mct->nodeOwner = {0,1,1,0,2,3,3,2,2,3,3,2};
         mct->elemId = {19,20,21,26,27,28};
         mct->elemType = {ESMC_MESHELEMTYPE_QUAD,
                          ESMC_MESHELEMTYPE_QUAD,
