@@ -1895,9 +1895,31 @@ void ESMCI_MeshGetElemCount(Mesh *mesh, int *elemCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetElemCount()"
 
-    *elemCount = mesh->num_elems();
+  // If split, only count orig elements
+  if (mesh->is_split) {
 
-    if(rc != NULL) *rc = ESMF_SUCCESS;
+    // Count non-split elements
+    int num_nonsplit_elems=0;
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj *elem = &(*ei);
+      
+      // If it's a split element, then skip
+      if (elem->get_id() > mesh->max_non_split_id) continue;
+      
+      // Count
+      num_nonsplit_elems++;
+    }
+    
+    // Set in output
+    *elemCount = num_nonsplit_elems;
+
+  } else { // ...otherwise, just get usual elem count
+    *elemCount = mesh->num_elems();
+  }
+
+  // return success
+  if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
 
