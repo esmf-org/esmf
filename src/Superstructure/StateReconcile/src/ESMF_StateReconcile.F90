@@ -2064,6 +2064,7 @@ contains
     character(ESMF_MAXSTR) :: msgstring
 
     logical, parameter :: debug = .false.
+    logical, parameter :: profile = .true.
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2142,6 +2143,14 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': calling VMAllToAll')
     end if
+
+    if (profile) then 
+      call ESMF_TraceRegionEnter("ESMF_VMAllToAllV", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
     call ESMF_VMAllToAllV (vm,  &
         sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send, &
         recvData=buffer_recv, recvCounts=counts_recv, recvOffsets=offsets_recv, &
@@ -2149,6 +2158,13 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    if (profile) then 
+      call ESMF_TraceRegionExit("ESMF_VMAllToAllV", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     ! Copy recv buffers into recv_needs
 
