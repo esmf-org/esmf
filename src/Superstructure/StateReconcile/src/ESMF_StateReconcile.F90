@@ -65,6 +65,8 @@ module ESMF_StateReconcileMod
   use ESMF_FieldBundleMod
   use ESMF_RHandleMod
 
+  use ESMF_TraceMod
+
   use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoUpdate
   use ESMF_InfoCacheMod
 
