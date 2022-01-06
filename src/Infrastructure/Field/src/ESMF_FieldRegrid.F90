@@ -1155,7 +1155,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   lregridmethod, &
                                   localLineType,localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
-                                  ESMF_REGRID_SCHEME_NATIVE, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, localExtrapDistExponent, &
@@ -1187,7 +1186,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   lregridmethod, &
                                   localLineType, localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
-                                  ESMF_REGRID_SCHEME_NATIVE, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, localExtrapDistExponent, &
@@ -2764,7 +2762,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localLineType, &
                                   localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
-                                  ESMF_REGRID_SCHEME_NATIVE, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, &
@@ -2802,7 +2799,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localLineType, &
                                   localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
-                                  ESMF_REGRID_SCHEME_NATIVE, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, &
@@ -3995,7 +3991,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
         integer :: localrc
-        integer              :: lregridScheme
         type(ESMF_GeomType_Flag)  :: geomtype
 
         type(ESMF_Grid)      :: Grid
@@ -4031,20 +4026,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
 
-        ! TODO: Get rid of this
-        lregridScheme = ESMF_REGRID_SCHEME_NATIVE
-          
-        ! Set interpretation of grid based on regridScheme
-        if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) then
-           isSphere = 1
-           isLatLonDeg=.true.
-        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_REGION3D) then
-           isSphere = 0
-           isLatLonDeg=.true.
-        else  
-           isSphere = 0
-           isLatLonDeg=.false.
-        endif
 
         ! If grids, then convert to a mesh to do the regridding
         if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
@@ -4099,7 +4080,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
 
           ! call into the Regrid GetareaField interface
-          call ESMF_RegridGetArea(Grid, Mesh, Array, staggerlocG2M, lregridScheme, rc=localrc)
+          call ESMF_RegridGetArea(Grid, Mesh, Array, staggerlocG2M, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4158,7 +4139,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridGetIwts()
-      subroutine ESMF_FieldRegridGetIwts(Field, Iwts, MaskValues, regridScheme, rc)
+      subroutine ESMF_FieldRegridGetIwts(Field, Iwts, MaskValues, rc)
 !
 ! !RETURN VALUE:
 !      
@@ -4166,7 +4147,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Field), intent(inout)                    :: Field
       type(ESMF_Field), intent(inout)                 :: Iwts
       integer(ESMF_KIND_I4), intent(in), optional     :: MaskValues(:)
-      integer, intent(in), optional                   :: regridScheme
       integer, intent(out), optional                  :: rc 
 !
 ! !DESCRIPTION:
@@ -4175,11 +4155,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [Field]
 !           The Field.
-!     \item [{[regridScheme]}]
-!           Whether to convert to spherical coordinates 
-!           ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
-!           or to leave in native coordinates 
-!           ({\tt ESMF\_REGRID\_SCHEME\_NATIVE}). 
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4187,7 +4162,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
         integer :: localrc
         integer              :: isSphere
-        integer              :: lregridScheme
         type(ESMF_GeomType_Flag)  :: geomtype
 
         type(ESMF_Grid)      :: Grid
@@ -4213,13 +4187,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Will eventually determine scheme either as a parameter or from properties
-        ! of the source grid
-        if (present(regridScheme)) then
-          lregridScheme = regridScheme
-        else
-          lregridScheme = ESMF_REGRID_SCHEME_NATIVE
-        endif
 
         ! If grids, then convert to a mesh to do the regridding
         if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
@@ -4246,7 +4213,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         ! call into the Regrid GetIwts interface
-        call ESMF_RegridGetIwts(Grid, Mesh, Array, staggerLoc, lregridScheme, rc=localrc)
+        call ESMF_RegridGetIwts(Grid, Mesh, Array, staggerLoc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

@@ -54,7 +54,6 @@ void ESMCI_regrid_create(Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Poi
                          int *map_type,
                          int *norm_type,
                          int *regridPoleType, int *regridPoleNPnts,
-                         int *regridScheme,
                          int *extrapMethod,
                          int *extrapNumSrcPnts,
                          ESMC_R8 *extrapDistExponent,
@@ -70,12 +69,12 @@ void ESMCI_regrid_create(Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Poi
                          int*rc);
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
-                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                          int *regridScheme, int*rc);
+                          Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
+                          int*rc);
 
 void ESMCI_regrid_getarea(Grid **gridpp,
-                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                          int *regridScheme, int*rc);
+                          Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
+                          int*rc);
 
 void ESMCI_regrid_getfrac(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,

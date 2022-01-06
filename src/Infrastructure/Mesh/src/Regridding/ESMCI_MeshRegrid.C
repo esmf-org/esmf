@@ -29,7 +29,7 @@ namespace ESMCI {
 
  int regrid(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,
             Mesh *midmesh, IWeights &wts,
-            int *regridMethod, int *regridScheme,
+            int *regridMethod, 
             int *regridPoleType, int *regridPoleNPnts,
             int *map_type,
             int *extrapMethod,
@@ -233,7 +233,7 @@ namespace ESMCI {
 
 
   // to generate the iwts again, and return to Fortran
-  int get_iwts(Mesh &mesh, MEField<> *iwts, int *regridScheme) {
+  int get_iwts(Mesh &mesh, MEField<> *iwts) {
 
     // generate integration weights
     Integrate ig(mesh);
@@ -243,11 +243,10 @@ namespace ESMCI {
 
     // Add weights to meshes before poles
     // so all the weights are on user data points
-    if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
-        (*regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
-        (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
-      for (UInt i = 1; i <= 7; ++i)
+    if (mesh.coordsys != ESMC_COORDSYS_CART) {
+      for (UInt i = 1; i <= 7; ++i) {
         ig.AddPoleWeights(mesh,i,iwts);
+      }
     }
 
     // Add in other none-pole weights
