@@ -1170,6 +1170,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
 
+      ! provide complete ESMF profile region
+      call ESMF_TraceRegionExit("[ESMF]", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
       ! Write final message to the log
       call ESMF_LogWrite("Finalizing ESMF", &
         ESMF_LOGMSG_INFO, rc=localrc)
@@ -1219,11 +1224,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
               ": Error flushing log file: ", errmsg(:errmsg_l)
       end if
-
-      ! provide complete ESMF profile region
-      call ESMF_TraceRegionExit("[ESMF]", rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
 
       abortFlag = .false.
       keepMpiFlag = ESMF_FALSE
