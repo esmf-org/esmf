@@ -253,7 +253,7 @@ application.
 \label{sec:pio}
 ESMF provides the ability to read and write data in both binary and
 NetCDF formats through \htmladdnormallink{ParallelIO (PIO)}
-{http://code.google.com/p/parallelio/}, a third-party I/O software
+{https://github.com/NCAR/ParallelIO}, a third-party I/O software
 library that is integrated in the ESMF library. The following environment
 variable enables PIO functionalities inside of ESMF.
 
@@ -266,7 +266,7 @@ being enabled.
 
 \begin{description}
 \item[ESMF\_PIO] Possible value: {\it not set} (default), {\tt "internal"},
-{\tt "OFF"}.
+{\tt "external"}, {\tt "OFF"}.
 
 \begin{description}
 \item[{\it not set} (default)] PIO-dependent features will be enabled on platforms where
@@ -275,6 +275,12 @@ compilers support these features.
 
 \item[{\tt "internal"}] PIO-dependent features will be enabled and will use the
 PIO library that is included and built with ESMF.
+
+\item[{\tt "external"}] PIO-dependent features will be enabled and will use an
+external PIO library.  The additional parameters {\tt ESMF_PIO_INCLUDE} 
+(path to PIO include files) and {\tt ESMF_PIO_LIBPATH} (path to PIO library files)
+should also be set when using this option. The minimum version of PIO for
+this option is 2.5.5. 
 
 \item[{\tt "OFF"}] Disables PIO-dependent code.
 
