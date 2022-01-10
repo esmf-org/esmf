@@ -28,7 +28,7 @@ else
 endif
 
 
-ifdef PIO_CMAKE_BUILD
+ifndef PIO_AUTOTOOLS_BUILD
 # Use the PIO native cmake build system to build and install
 tree_lib:
 	mkdir -p Build
