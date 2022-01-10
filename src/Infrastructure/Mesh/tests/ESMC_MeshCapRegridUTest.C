@@ -129,18 +129,19 @@ int main(int argc, char *argv[]) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBMeshRegidUTest::main()"
 
+  int rc, localrc;
+  int localPet, petCount;
+  ESMC_VM vm;
+
   std::string failMsg = "FAIL";
   // break this up so it doesn't count as an additional test
   std::string nex_test_tag = "//NEX_";
   nex_test_tag.append("UTest\n");
   int result = 0;
-  int rc, localrc;
-  int localPet, petCount;
-  ESMC_VM vm;
 
   //----------------------------------------------------------------------------
-  // Start the test with a proxy name with which to create log and stdout files
-  ESMC_TestStart("ESMC_MeshCapRegridProxyUTest.C", __LINE__, 0);
+  // Start the test with an alternate name for log and stdout files
+  ESMC_TestStart("ESMC_MeshCapRegridGenUTest.C", __LINE__, 0);
 
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
@@ -150,11 +151,11 @@ int main(int argc, char *argv[]) {
   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                 (int *)NULL, (int *)NULL);
 
-  // output stream to write test tag to the proxy source file
+  // output stream to write test tag to the generated source file
   std::ofstream tagfile;
-  tagfile.open("ESMC_MeshCapRegridProxyUTest.C", std::ios_base::app);
+  tagfile.open("ESMC_MeshCapRegridGenUTest.C", std::ios_base::app);
 
-
+  // this is an easy way to comment a single line to toggle mbmesh/native
   bool mbmesh = false;
   mbmesh = true;
   bool native = false; 
@@ -236,18 +237,17 @@ int main(int argc, char *argv[]) {
   
   
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
-    // conservative doesn't work with ngons
+    // conservative not supported with ngons
     {"conservative", "ngon_2d_cart"},
     {"conservative", "ngon_2d_sph_deg"},
     {"conservative", "ngon_2d_sph_rad"},
-    // extrapolation methods not yet supported with moab
+    // extrapolation methods not supported (why do EXTRAP_NEAREST_STOD, EXTRAP_NEAREST_IDAVG work?)
     {"bilinear", "EXTRAP_NEAREST_D"},
     {"bilinear", "EXTRAP_CREEP"},
     {"bilinear", "EXTRAP_CREEP_NRST_D"},
     {"patch", "EXTRAP_NEAREST_D"},
     {"patch", "EXTRAP_CREEP"},
     {"patch", "EXTRAP_CREEP_NRST_D"},
-
   };
 
   std::vector<std::pair<std::string, std::string>> skip_test_native = {\
@@ -255,19 +255,19 @@ int main(int argc, char *argv[]) {
     {"bilinear", "ngon_2d_cart"},
     {"bilinear", "ngon_2d_sph_deg"},
     {"bilinear", "ngon_2d_sph_rad"},
+    {"patch", "ngon_2d_cart"},
+    {"patch", "ngon_2d_sph_deg"},
+    {"patch", "ngon_2d_sph_rad"},
     {"conservative", "ngon_2d_cart"},
     {"conservative", "ngon_2d_sph_deg"},
     {"conservative", "ngon_2d_sph_rad"},
     {"conservative_2nd", "ngon_2d_cart"},
     {"conservative_2nd", "ngon_2d_sph_deg"},
     {"conservative_2nd", "ngon_2d_sph_rad"},
-    {"patch", "ngon_2d_cart"},
-    {"patch", "ngon_2d_sph_deg"},
-    {"patch", "ngon_2d_sph_rad"},
   };
 
   std::vector<std::pair<std::string, std::string>> skip_test_common = {\
-    // patch not supported in 3d, node coord counts on PET 1 are off
+    // patch not supported in 3d
     {"patch", "hex_3d_cart"},
     {"patch", "hex_3d_sph_deg"},
     {"patch", "hex_3d_sph_rad"},
@@ -275,6 +275,13 @@ int main(int argc, char *argv[]) {
     {"conservative_2nd", "hex_3d_cart"},
     {"conservative_2nd", "hex_3d_sph_deg"},
     {"conservative_2nd", "hex_3d_sph_rad"},
+    // creep fill extrapolation not supported in 3D
+    {"hex_3d_cart", "EXTRAP_CREEP"},
+    {"hex_3d_sph_deg", "EXTRAP_CREEP"},
+    {"hex_3d_sph_rad", "EXTRAP_CREEP"},
+    {"hex_3d_cart", "EXTRAP_CREEP_NRST_D"},
+    {"hex_3d_sph_deg", "EXTRAP_CREEP_NRST_D"},
+    {"hex_3d_sph_rad", "EXTRAP_CREEP_NRST_D"},
     // conservative is not supported with extrapolation
     {"conservative", "EXTRAP_NEAREST_STOD"},
     {"conservative", "EXTRAP_NEAREST_IDAVG"},
@@ -286,26 +293,6 @@ int main(int argc, char *argv[]) {
     {"conservative_2nd", "EXTRAP_NEAREST_D"},
     {"conservative_2nd", "EXTRAP_CREEP"},
     {"conservative_2nd", "EXTRAP_CREEP_NRST_D"},
-    // BOB look at the following section, these hang (uncomment to allow to run)
-    // bilinear corner and patch corner hang with periodic
-    {"bilinear", "periodic_2d_sph_deg"},
-    {"bilinear", "periodic_2d_sph_rad"},
-    {"patch", "periodic_2d_sph_deg"},
-    {"patch", "periodic_2d_sph_rad"},
-    // BOB look at the following section, these fail (uncomment to allow to run)
-    // unmapped action error finds unmapped points with the following
-    {"bilinear", "hex_3d_cart"},
-    {"bilinear", "hex_3d_cart"},
-    {"bilinear", "hex_3d_sph_deg"},
-    {"bilinear", "hex_3d_sph_deg"},
-    {"bilinear", "hex_3d_sph_rad"},
-    {"bilinear", "hex_3d_sph_rad"},
-    {"conservative", "hex_3d_cart"},
-    {"conservative", "hex_3d_cart"},
-    {"conservative", "hex_3d_sph_deg"},
-    {"conservative", "hex_3d_sph_deg"},
-    {"conservative", "hex_3d_sph_rad"},
-    {"conservative", "hex_3d_sph_rad"},
     // the following are exceptions due to design, do not represent limitations per se
     // conservative only works with great circles
     {"conservative", "MAP_CARTAPPROX"},
@@ -469,7 +456,7 @@ int main(int argc, char *argv[]) {
   tagfile.close();
 
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(__FILE__, __LINE__, 0);
+  ESMC_TestEnd("ESMC_MeshCapRegridGenUTest.C", __LINE__, 0);
 
   return 0;
 }
