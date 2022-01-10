@@ -289,7 +289,7 @@ contains
     integer :: i
 
     logical, parameter :: debug = .false.
-    logical, parameter :: meminfo = .true.
+    logical, parameter :: meminfo = .false.
     logical, parameter :: trace = .false.
 
     character(160)  :: prefixStr
@@ -1561,7 +1561,7 @@ contains
     integer, allocatable :: id_recv(:), vm_intids_recv(:)
 
     logical, parameter :: debug = .false.
-    logical, parameter :: meminfo = .true.
+    logical, parameter :: meminfo = .false.
     character(len=ESMF_MAXSTR) :: logmsg
 
     localrc = ESMF_RC_NOT_IMPL
@@ -1848,7 +1848,7 @@ contains
     logical, parameter :: debug = .false.
 
     character(len=ESMF_MAXSTR) :: logmsg
-    logical, parameter :: meminfo = .true.
+    logical, parameter :: meminfo = .false.
 
     ! -------------------------------------------------------------------------
 
