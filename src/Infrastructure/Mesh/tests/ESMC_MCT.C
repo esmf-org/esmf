@@ -1464,6 +1464,12 @@ class MCT {
       double elemCoord[num_elem*orig_sdim];
       InterArray<double> *eci = new InterArray<double>(elemCoord,num_elem*orig_sdim);
     
+      if (verbosity >= 3)
+        std::cout << localPet << "# " << name  << " - "
+                  << "local_sdim" << local_sdim << std::endl
+                  << "local_pdim" << local_pdim << std::endl
+                  << "orig_sdim" << orig_sdim << std::endl;
+    
       mesh->getElemCreateInfo(eii, NULL, NULL, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
     
