@@ -1697,17 +1697,28 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 
   // Field to record original mesh ind per elem
   MEField<> *side1_mesh_ind = NULL;
+  MEField<> *side1_orig_elem_id = NULL;
   MEField<> *side2_mesh_ind = NULL;
+  MEField<> *side2_orig_elem_id = NULL;
   if (side == 1) {
     side1_mesh_ind = meshmid.RegisterField("side1_mesh_ind",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    side1_orig_elem_id = meshmid.RegisterField("side1_orig_elem_id",
 					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
   } else if (side == 2) {
     side2_mesh_ind = meshmid.RegisterField("side2_mesh_ind",
 					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    side2_orig_elem_id = meshmid.RegisterField("side2_orig_elem_id",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
   } else if (side == 3) {
     side1_mesh_ind = meshmid.RegisterField("side1_mesh_ind",
 					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    side1_orig_elem_id = meshmid.RegisterField("side1_orig_elem_id",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
     side2_mesh_ind = meshmid.RegisterField("side2_mesh_ind",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    side2_orig_elem_id = meshmid.RegisterField("side2_orig_elem_id",
 					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);  
   } 
 
@@ -1734,15 +1745,23 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 
     if (side == 1) {
       double *side1_mesh_ind_ptr = side1_mesh_ind->data(*(elem_list[i]));
-      *side1_mesh_ind_ptr=sintd_cells[i]->side1_mesh_ind;
+      *side1_mesh_ind_ptr=sintd_cells[i]->get_side1_mesh_ind();
+      double *side1_orig_elem_id_ptr = side1_orig_elem_id->data(*(elem_list[i]));
+      *side1_orig_elem_id_ptr=sintd_cells[i]->get_side1_orig_elem_id();
     } else if (side == 2) {
       double *side2_mesh_ind_ptr = side2_mesh_ind->data(*(elem_list[i]));
-      *side2_mesh_ind_ptr=sintd_cells[i]->side2_mesh_ind;
+      *side2_mesh_ind_ptr=sintd_cells[i]->get_side2_mesh_ind();
+      double *side2_orig_elem_id_ptr = side2_orig_elem_id->data(*(elem_list[i]));
+      *side2_orig_elem_id_ptr=sintd_cells[i]->get_side2_orig_elem_id();
     } else if (side == 3) {
       double *side1_mesh_ind_ptr = side1_mesh_ind->data(*(elem_list[i]));
-      *side1_mesh_ind_ptr=sintd_cells[i]->side1_mesh_ind;
+      *side1_mesh_ind_ptr=sintd_cells[i]->get_side1_mesh_ind();
+      double *side1_orig_elem_id_ptr = side1_orig_elem_id->data(*(elem_list[i]));
+      *side1_orig_elem_id_ptr=sintd_cells[i]->get_side1_orig_elem_id();
       double *side2_mesh_ind_ptr = side2_mesh_ind->data(*(elem_list[i]));
-      *side2_mesh_ind_ptr=sintd_cells[i]->side2_mesh_ind;
+      *side2_mesh_ind_ptr=sintd_cells[i]->get_side2_mesh_ind();
+      double *side2_orig_elem_id_ptr = side2_orig_elem_id->data(*(elem_list[i]));
+      *side2_orig_elem_id_ptr=sintd_cells[i]->get_side2_orig_elem_id();
     }
 
   }
@@ -1769,7 +1788,8 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
 #if BOB_XGRID_DEBUG
                                int s_id, int d_id, 
 #endif
-                               int side1_mesh_ind, int side2_mesh_ind){
+                               int side1_mesh_ind, int side1_orig_elem_id,
+                               int side2_mesh_ind, int side2_orig_elem_id){
 
   // bubble up the nodes and cells
   // cross reference the nodes and cells
@@ -1825,8 +1845,8 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
 #if BOB_XGRID_DEBUG
                   s_id, d_id, 
 #endif
-                  side1_mesh_ind, side2_mesh_ind);
-
+                  side1_mesh_ind, side1_orig_elem_id,
+                  side2_mesh_ind, side2_orig_elem_id);
 }
 
 void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
@@ -1834,7 +1854,9 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 #if BOB_XGRID_DEBUG
                      int s_id, int d_id,
 #endif
-		     int side1_mesh_ind, int side2_mesh_ind){
+		     int side1_mesh_ind, int side1_orig_elem_id,
+                     int side2_mesh_ind, int side2_orig_elem_id
+                     ){
 
   // Get rid of degenerate edges
   if(sdim == 2)
@@ -1885,8 +1907,16 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
       cell->s_id=s_id;
       cell->d_id=d_id;
 #endif
-      cell->side1_mesh_ind=side1_mesh_ind;
-      cell->side2_mesh_ind=side2_mesh_ind;
+
+      // Set side1 info
+      cell->set_side1_mesh_ind(side1_mesh_ind);
+      cell->set_side1_orig_elem_id(side1_orig_elem_id);
+
+      // Set side2 info
+      cell->set_side2_mesh_ind(side2_mesh_ind);
+      cell->set_side2_orig_elem_id(side2_orig_elem_id);
+
+      // Add new cell to list
       sintd_cells->push_back(cell);
 
       for(int in = 0; in < 3; in ++)
@@ -1990,8 +2020,16 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
     cell->s_id=s_id;
     cell->d_id=d_id;
 #endif
-    cell->side1_mesh_ind=side1_mesh_ind;
-    cell->side2_mesh_ind=side2_mesh_ind;
+
+    // Set side1 info
+    cell->set_side1_mesh_ind(side1_mesh_ind);
+    cell->set_side1_orig_elem_id(side1_orig_elem_id);
+
+    // Set side2 info
+    cell->set_side2_mesh_ind(side2_mesh_ind);
+    cell->set_side2_orig_elem_id(side2_orig_elem_id);
+    
+    // Add new cell to list
     sintd_cells->push_back(cell);
 
     // every node associated with this genesis cell refers to it

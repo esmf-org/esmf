@@ -47,7 +47,8 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
 #ifdef BOB_XGRID_DEBUG
                                int s_id=-1, int d_id=-1, 
 #endif
-                               int side1_mesh_ind=-1, int side2_mesh_ind=-1);
+                               int side1_mesh_ind=-1, int side1_orig_cell_id=-1, 
+                               int side2_mesh_ind=-1, int side2_orig_cell_id=-1);
 
 /**
  *\brief compute intersecting cell and nodes from a polygon
@@ -61,11 +62,11 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
  */
 void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
 		     std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, 
-#ifdef BOB_XGRID_DEBUG
+#if BOB_XGRID_DEBUG
                      int s_id=-1, int d_id=-1,
 #endif
-                     int side1_mesh_ind=-1, int side2_mesh_ind=-1);
-
+		     int side1_mesh_ind=-1, int side1_orig_elem_id=-1,
+                     int side2_mesh_ind=-1, int side2_orig_elem_id=-1);
 
 /**
  *\brief compute mesh in the middle from meshes on side A and B

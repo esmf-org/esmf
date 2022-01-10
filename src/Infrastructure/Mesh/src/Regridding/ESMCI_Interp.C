@@ -1493,6 +1493,20 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
   MEField<> *dst_area_field = dstmesh.GetField("elem_area");
   MEField<> *src_area_field = srcmesh.GetField("elem_area");
 
+  // If an XGrid is being created, then set things up appropriately
+  // (These fields shouldn't be needed unless an XGrid is being created)
+  MEField<> *src_side1_mesh_ind_field=NULL;
+  MEField<> *src_side1_orig_elem_id_field=NULL;
+  MEField<> *dst_side2_mesh_ind_field=NULL;
+  MEField<> *dst_side2_orig_elem_id_field=NULL;
+  if (midmesh != NULL) {
+   src_side1_mesh_ind_field=srcmesh.GetField("side1_mesh_ind");
+   src_side1_orig_elem_id_field=srcmesh.GetField("side1_orig_elem_id");
+
+   dst_side2_mesh_ind_field=dstmesh.GetField("side2_mesh_ind");
+   dst_side2_orig_elem_id_field=dstmesh.GetField("side2_orig_elem_id");
+  }
+
 
   // determine if we should use the dst_frac variable
   bool use_dst_frac=false;
@@ -1574,10 +1588,12 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
     std::vector<sintd_node *> tmp_nodes;
     std::vector<sintd_cell *> tmp_cells;
      calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,
-                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
-                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
-                                      &tmp_valid, &tmp_areas, &tmp_dst_areas,
-                                      midmesh, &tmp_nodes, &tmp_cells, 0, zz);
+                                       sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+                                       &src_elem_area, &valid, &wgts, &areas, &dst_areas,
+                                       &tmp_valid, &tmp_areas, &tmp_dst_areas,
+                                       midmesh, &tmp_nodes, &tmp_cells, 0, zz,
+                                       src_side1_mesh_ind_field, src_side1_orig_elem_id_field, 
+                                       dst_side2_mesh_ind_field, dst_side2_orig_elem_id_field);
 
 
     // Invalidate masked destination elements
@@ -1779,13 +1795,19 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   MEField<> *dst_area_field = dstmesh.GetField("elem_area");
   MEField<> *src_area_field = srcmesh.GetField("elem_area");
 
+  // If an XGrid is being created, then set things up appropriately
+  // (These fields shouldn't be needed unless an XGrid is being created)
+  MEField<> *src_side1_mesh_ind_field=NULL;
+  MEField<> *src_side1_orig_elem_id_field=NULL;
+  MEField<> *dst_side2_mesh_ind_field=NULL;
+  MEField<> *dst_side2_orig_elem_id_field=NULL;
+  if (midmesh != NULL) {
+   src_side1_mesh_ind_field=srcmesh.GetField("side1_mesh_ind");
+   src_side1_orig_elem_id_field=srcmesh.GetField("side1_orig_elem_id");
 
-  // Get src and dst side fields
-  MEField<> *dst_side_field=dstmesh.GetField("side1_mesh_ind");
-  if (!dst_side_field) dst_side_field=dstmesh.GetField("side2_mesh_ind");
-
-  MEField<> *src_side_field=srcmesh.GetField("side1_mesh_ind");
-  if (!src_side_field) src_side_field=srcmesh.GetField("side2_mesh_ind");
+   dst_side2_mesh_ind_field=dstmesh.GetField("side2_mesh_ind");
+   dst_side2_orig_elem_id_field=dstmesh.GetField("side2_orig_elem_id");
+  }
 
   // Figure out interpolation to XGrid information
   MEField<> *src_xgrid_ind_field=NULL;
@@ -1904,7 +1926,9 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
                                      &tmp_valid, &tmp_areas, &tmp_dst_areas,
-				     midmesh, &tmp_nodes, &tmp_cells, 0, zz, src_side_field, dst_side_field);
+				     midmesh, &tmp_nodes, &tmp_cells, 0, zz, 
+                                     src_side1_mesh_ind_field, src_side1_orig_elem_id_field, 
+                                     dst_side2_mesh_ind_field, dst_side2_orig_elem_id_field);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {

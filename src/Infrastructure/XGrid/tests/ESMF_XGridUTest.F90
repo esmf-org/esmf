@@ -58,6 +58,16 @@
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Don't know if I should keep this turned on as an actual unit test, but it's useful for debugging
+  write(name, *) "Testing XGrid side and elem info."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+!  call test_side_and_elem_info(rc)  
+  call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+#if 0
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Testing XGrid IsCreated for uncreated object"
   write(failMsg, *) "Did not return .false."
   isCreated = ESMF_XGridIsCreated(xgrid)
@@ -191,9 +201,9 @@
     write(failMsg, *) ""
     write(name, *) "Test 2nd order on an XGrid with a cubed sphere Grid"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
-
-    call ESMF_TestEnd(ESMF_SRCLINE)
+ call ESMF_TestEnd(ESMF_SRCLINE)
   
 contains 
 #define ESMF_METHOD "ESMF_TESTS"
@@ -5208,5 +5218,71 @@ end subroutine test_CSGridToGrid_2nd
     if(present(rc)) rc = ESMF_SUCCESS
 
   end subroutine flux_exchange_sph_mesh
+
+
+ subroutine test_side_and_elem_info(rc)
+#undef ESMF_METHOD 
+#define ESMF_METHOD "test_side_and_elem_info"
+  integer, intent(out)  :: rc
+  integer :: localrc
+  type(ESMF_VM) :: vm
+  type(ESMF_Grid) :: srcGrid
+  type(ESMF_Grid) :: dstGrid
+  type(ESMF_XGrid) :: xgrid
+  integer :: localPet, petCount
+
+  
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+#if 0
+  call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CORNER, &
+        filename="srcGridCnrb4", &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
+#if 0
+   ! Create XGrid
+   xgrid = ESMF_XGridCreate(sideAGrid=(/srcGrid/), &
+        sideBGrid=(/dstGrid/), &
+        storeOverlay = .true., &
+        rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+   
+
+  ! Free the grids
+  call ESMF_GridDestroy(srcGrid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_GridDestroy(dstGrid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
+  ! Return success
+  rc=ESMF_SUCCESS
+
+end subroutine test_side_and_elem_info
+
 
 end program ESMF_XGridUTest
