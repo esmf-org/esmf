@@ -3971,8 +3971,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Serialize other locstream items
-      call c_ESMC_LocStreamSerialize(lstypep%indexflag, lstypep%keyCount, &
-              buffer, length, offset, linquireflag, localrc)
+      call c_ESMC_LocStreamSerialize(lstypep%indexflag, &
+                                     lstypep%keyCount, &
+                                     lstypep%coordSys, &
+                                     buffer, length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4082,8 +4084,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
       ! Deserialize other locstream items
-      call c_ESMC_LocStreamDeserialize(lstypep%indexflag, lstypep%keyCount, &
-              buffer, offset, localrc)
+      call c_ESMC_LocStreamDeserialize(lstypep%indexflag, &
+                                       lstypep%keyCount, &
+                                       lstypep%coordSys, &
+                                       buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return

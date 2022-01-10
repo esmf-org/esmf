@@ -236,6 +236,8 @@ contains
 
         type(ESMF_XGrid)                    :: xgridAlias
         logical                             :: xgridBool
+        
+        type(ESMF_CoordSys_Flag)            :: coordSys
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -417,6 +419,7 @@ contains
             sideAGridCount=sideAGC, sideBGridCount=sideBGC, &
             sideAMeshCount=sideAMC, sideBMeshCount=sideBMC, &
             sideAGrid=l_sideA, sideBGrid=l_sideB, area=l_area, &
+            coordSys=coordSys, &
             elementCount=eleCount, &
             centroid=l_centroid, distgridA=l_sideAdg, &
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
@@ -511,6 +514,13 @@ contains
         write(failMsg, *) "Did not return ESMF_SUCCESS"
         xgridBool = (xgridAlias/=xgrid)
         call ESMF_Test(xgridBool, name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !NEX_UTest
+        ! Testing coordSys
+        write(name, *) "XGrid coordSys test"
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        call ESMF_Test((coordSys .eq. ESMF_COORDSYS_SPH_DEG), name, failMsg, result, ESMF_SRCLINE)
 
         do i = 1, 2
             call ESMF_GridDestroy(sideA(i), rc = localrc)

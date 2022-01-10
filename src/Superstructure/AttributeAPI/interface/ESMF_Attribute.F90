@@ -865,6 +865,10 @@ contains  !====================================================================
 !     type(ESMF_AttPack),  intent(out),   optional :: attpack
 !     integer,             intent(inout), optional :: rc
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Add an ESMF Attribute package.
 !
@@ -910,6 +914,10 @@ contains  !====================================================================
 !     character (len = *), intent(in)     optional :: nestPurpose
 !     type(ESMF_AttPack),  intent(out),   optional :: attpack
 !     integer,             intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Add an ESMF Attribute package containing a nested Attribute package.
@@ -969,6 +977,10 @@ contains  !====================================================================
 !     type(ESMF_AttCopy_Flag), intent(in),  optional :: attcopy
 !     integer,                 intent(out), optional :: rc
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Copy an Attribute hierarchy from \texttt{src} to \texttt{dst}.
 !
@@ -1022,6 +1034,10 @@ contains  !====================================================================
 !     type(ESMF_AttNest_Flag),intent(in),  optional   :: attnestflag
 !     logical,                intent(out), optional   :: isPresent
 !     integer,                intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the \texttt{target}, or from an Attribute
@@ -1099,6 +1115,10 @@ contains  !====================================================================
 !     integer,                intent(out), optional   :: itemCount
 !     logical,                intent(out), optional   :: isPresent
 !     integer,                intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the \texttt{target}, or from an
@@ -1182,6 +1202,10 @@ contains  !====================================================================
 !     \begin{itemize}
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the \texttt{target}, or from an Attribute
@@ -1268,6 +1292,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the \texttt{target}, or from an
 !     Attribute package on the \texttt{target}, specified by {\tt convention}
@@ -1346,6 +1374,10 @@ contains  !====================================================================
 !     type(ESMF_AttNest_Flag),    intent(in),    optional :: attnestflag
 !     integer,                    intent(inout), optional :: rc
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Return the Attribute count for \texttt{target}.
 !
@@ -1412,6 +1444,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Return the Attribute count for \texttt{target}.
 !
@@ -1475,6 +1511,10 @@ contains  !====================================================================
 !     integer,                  intent(out),   optional :: itemCount
 !     logical,                  intent(out),   optional :: isPresent
 !     integer,                  intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Return information associated with an Attribute in an Attribute package,
@@ -1549,6 +1589,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Return information associated with the named Attribute,
 !     including {\tt typekind} and {\tt itemCount}.
@@ -1616,6 +1660,10 @@ contains  !====================================================================
 !     integer,                  intent(out), optional :: itemCount
 !     logical,                  intent(out), optional :: isPresent
 !     integer,                  intent(out), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute,
@@ -1694,6 +1742,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute,
 !     including {\tt name}, {\tt typekind} and {\tt itemCount}.  Keep in
@@ -1770,6 +1822,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Get an ESMF Attribute package object.
 !
@@ -1831,6 +1887,10 @@ contains  !====================================================================
 !     \item \texttt{ schemaFileName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Read Attributes for \texttt{target} from \texttt{fileName}, whose format is JSON.
 !
@@ -1876,6 +1936,10 @@ contains  !====================================================================
 !     type(ESMF_AttPack),      intent(inout), optional :: attpack
 !     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
 !     integer,                 intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Remove an Attribute, or Attribute package on \texttt{target}.
@@ -1944,6 +2008,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Remove an Attribute, or Attribute package on \texttt{target}.
 !
@@ -2008,6 +2076,10 @@ contains  !====================================================================
 !     integer,                 intent(in),    optional :: itemcount
 !     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
 !     integer,                 intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
@@ -2080,6 +2152,10 @@ contains  !====================================================================
 !     integer,                 intent(in),    optional :: itemcount
 !     type(ESMF_AttNest_Flag), intent(in),    optional :: attnestflag
 !     integer,                 intent(inout), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
@@ -2160,6 +2236,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
@@ -2239,6 +2319,10 @@ contains  !====================================================================
 !     \item \texttt{ attPackInstanceName }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Attach an Attribute to \texttt{target}, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and a
@@ -2314,6 +2398,10 @@ contains  !====================================================================
 !     \item \texttt{ reconcile }
 !     \end{itemize}
 !
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
+!
 ! !DESCRIPTION:
 !     Update an Attribute hierarchy during runtime. The information from
 !     the PETs in the {\tt rootList} is transferred to the PETs that are not
@@ -2362,6 +2450,10 @@ contains  !====================================================================
 !     character (len = *),     intent(in),  optional :: purpose
 !     type(ESMF_AttWriteFlag), intent(in),  optional :: attwriteflag
 !     integer,                 intent(out), optional :: rc
+!
+! !STATUS:
+! \apiDeprecatedClassWithTargetReleaseAndReplacement{ESMF\_Attribute}{9.0.0}
+! {ESMF\_Info}{esmf_info_class}
 !
 ! !DESCRIPTION:
 !     Write the Attribute package to file for \texttt{target}. JSON is the

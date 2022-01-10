@@ -3,6 +3,23 @@
 \label{sec:bundlerest}
 
 \begin{enumerate}
+
+\item{\bf No enforcement of the {\em same} Grid, Mesh, LocStream, or XGrid 
+restriction.}
+While the documentation indicates in several places (including the Design and
+Implementation Notes) that a FieldBundle can only contain Fields that are built
+on the same Grid, Mesh, LocStream, or XGrid, and all Fields must have the same
+distribution, the actual FieldBundle implementation is more general and
+supports bundling of any Fields. The documentation, however, is
+in line with the long term plan of making the restrictive FieldBundle definition
+the default behavior. The more general bundling option would then be retained
+as a special case that requires explicit specification by the user.
+There is currently no functional difference in the FieldBundle implementation
+that profits from the documented restrictive approach. In addition, the general
+bundling option has been supported for a long time. Note however that the
+documented restrictive behavior is the anticipated long term default for
+FieldBundles.
+
 \item{\bf No mathematical operators.}
 The FieldBundle class does not support differential or other
 mathematical operators.  We do not anticipate providing this 

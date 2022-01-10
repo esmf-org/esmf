@@ -59,6 +59,61 @@ typedef struct{
 
 //------------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_MeshGetMOAB - Query if the MOAB mesh backend is enabled
+//
+// !INTERFACE:
+void ESMC_MeshGetMOAB(
+  bool *moabOn,
+  int *rc
+);
+// !RETURN VALUE:
+//  None
+//
+// !DESCRIPTION:
+//
+//  This call will query whether or not the MOAB mesh backend is enabled.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[moabOn]
+//    This parameter will receive a boolean value indicating if MOAB is enabled.
+//  \item[rc]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshSetMOAB - Toggle the MOAB mesh backend
+//
+// !INTERFACE:
+void ESMC_MeshSetMOAB(
+  bool moabOn,
+  int *rc
+);
+// !RETURN VALUE:
+//  None
+//
+// !DESCRIPTION:
+//
+//  This call will toggle the MOAB mesh backend.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[moabOn]
+//    This parameter will hold a boolean value to indicate the setting for the
+//    MOAB mesh back end (on or off).
+//  \item[rc]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_MeshAddElements - Add elements to a Mesh \label{sec:mesh:capi:meshaddelements}
 //
 // !INTERFACE:
@@ -425,44 +480,6 @@ void ESMC_MeshGetConnectivity(
 // \end{description}
 //
 //EOP
-//-----------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-//BOPI
-// !IROUTINE: ESMC_MeshCreateDistGrids - Create Dist Grids in a Mesh
-//
-// !INTERFACE:
-int ESMC_MeshCreateDistGrids(
-  ESMC_Mesh mesh,             // in
-  int *nodeDistGrid,          // in
-  int *elemDistGrid,          // in
-  int *nodeCount,             // in
-  int *elementCount           // in
-);
-
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Description to be added.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[mesh]
-//    Mesh object.
-//  \item[nodeDistGrid]
-//  Description to be added.
-//  \item[elemDistGrid]
-//  Description to be added.
-//  \item[nodeCount]
-//  Description to be added.
-//  \item[elementCount]
-//  Description to be added.
-//  \end{description}
-//
-//EOPI
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------

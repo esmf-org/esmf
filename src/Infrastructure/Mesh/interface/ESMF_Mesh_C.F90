@@ -150,7 +150,7 @@
        if (mnpresent == 1 .and. mfpresent == 1 .and. vnpresent == 1) then
                   mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
                                          maskFlag=maskFlag, &
-                                 varname=varname, rc=rc)
+                                         varname=varname, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
        elseif (mnpresent == 1) then
@@ -180,16 +180,16 @@
    else
    endif
 
-   ! Get internal pointer
+    ! Get internal pointer (to native mesh ... )
    call ESMF_MeshGetIntPtr(mesh, meshp, rc=rc)
    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
    ! Get other information
    call ESMF_MeshGet(mesh, &
-                   parametricDim=parametricDim, &
-                   spatialDim=spatialDim, &
-                   coordSys=coordSys, rc=rc)
+                     parametricDim=parametricDim, &
+                     spatialDim=spatialDim, &
+                     coordSys=coordSys, rc=rc)
    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -198,33 +198,44 @@
 
    end subroutine f_esmf_meshcreatefromfile
 
-   subroutine f_esmf_getmeshdistgrid(dgrid, count, indices, rc)
-     use ESMF_UtilTypesMod    ! ESMF base class
-     use ESMF_BaseMod    ! ESMF base class
-     use ESMF_DistGridMod
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_getmeshdistgrid"
+    subroutine f_esmf_getmeshdistgrid(dgrid, count, indices, rc)
+      use ESMF_UtilTypesMod
+      use ESMF_LogErrMod
+      use ESMF_BaseMod
+      use ESMF_DistGridMod
 
-     implicit none
+      implicit none
 
-     type(ESMF_DistGrid), intent(inout) :: dgrid
-     integer, intent(in)               :: count
-     integer, intent(inout)            :: indices(count)
-     integer, intent(out)              :: rc
+      type(ESMF_DistGrid)    :: dgrid
+      integer, intent(in)    :: count
+      integer, intent(inout) :: indices(count)
+      integer, intent(out)   :: rc
 
-     integer, allocatable :: indicesLocal(:)
+      integer :: localrc
+      integer, allocatable :: indicesLocal(:)
 
-   ! initialize return code; assume routine not implemented
-     rc = ESMF_RC_NOT_IMPL
+      ! initialize return code; assume routine not implemented
+      rc = ESMF_RC_NOT_IMPL
 
-     allocate(indicesLocal(count))
+      allocate(indicesLocal(count))
 
+      if (count > 0) then
+        indicesLocal(1:count) = indices(1:count)
+      endif
+ 
+      dgrid = ESMF_DistGridCreate(indicesLocal, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) then
+          deallocate(indicesLocal)
+          return
+      endif
 
-     if (count > 0) then
-       indicesLocal(1:count) = indices(1:count)
-     endif
+      deallocate(indicesLocal)
 
-     dgrid = ESMF_DistGridCreate(indicesLocal, rc=rc)
+      ! Return success
+      rc = ESMF_SUCCESS
 
-     deallocate(indicesLocal)
-
-   end subroutine f_esmf_getmeshdistgrid
+    end subroutine f_esmf_getmeshdistgrid
 

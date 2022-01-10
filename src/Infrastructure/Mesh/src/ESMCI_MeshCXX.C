@@ -779,9 +779,6 @@ int MeshCXX::addElements(int num_elems, int *elemId,
   int num_elemConn=expected_conn_size;
 #endif
 
-  int regridConserve = 1; // Set this to 1 to force the frac field to be
-                          // added (required for conservative regridding.
-
   InterArray<int> *elemMaskII = NULL;
   if (elemMask) {
     int extent[1];
@@ -790,7 +787,7 @@ int MeshCXX::addElements(int num_elems, int *elemId,
   }
   ESMCI_meshaddelements(&meshPointer, &num_elems, elemId, elemType, elemMaskII,
                         &areaPresent, elemArea, &coordsPresent, elemCoords,
-                        &num_elemConn, elemConn, &regridConserve,
+                        &num_elemConn, elemConn, 
                         &coordSys, &spatial_dim, &localrc);
 
   // Set the local number of nodes and elements

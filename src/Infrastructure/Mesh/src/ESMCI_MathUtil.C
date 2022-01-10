@@ -878,6 +878,42 @@ bool is_smashed_quad3D(int num_p, double *p) {
   }
 
 
+  void write_3D_hex_to_vtk(const char *filename, int id, double *hex) {
+#define MAX_STR_LEN 1000
+    char new_filename[MAX_STR_LEN];
+
+    if (((double)strlen(filename))+log10((double)id)+1.0 > ((double)MAX_STR_LEN)) {
+       printf("ERROR: filename too long!!!\n");
+       return;
+    }
+
+    sprintf(new_filename,"%s%dx",filename,id);
+ 
+     write_3D_hex_woid_to_vtk(new_filename, hex);
+
+#undef MAX_STR_LEN
+  }
+
+  void write_3D_minmax_to_vtk(const char *filename, int id, double *min, double *max) {
+    double hex[24];
+
+    // Use min max to construct hex
+    hex[0]=min[0]; hex[1]=min[1]; hex[2]=min[2]; // 1
+    hex[3]=max[0]; hex[4]=min[1]; hex[5]=min[2]; // 2
+    hex[6]=max[0]; hex[7]=max[1]; hex[8]=min[2]; // 3
+    hex[9]=min[0]; hex[10]=max[1]; hex[11]=min[2]; // 4
+    hex[12]=min[0]; hex[13]=min[1]; hex[14]=max[2]; // 5
+    hex[15]=max[0]; hex[16]=min[1]; hex[17]=max[2]; // 6
+    hex[18]=max[0]; hex[19]=max[1]; hex[20]=max[2]; // 7
+    hex[21]=min[0]; hex[22]=max[1]; hex[23]=max[2]; // 8
+
+    // Write to vtk
+    write_3D_hex_to_vtk(filename, id, hex);
+  }
+
+
+
+
   // Write a single point to a vtk file
   // The point should be 3 doubles
   void write_3D_pnt_woid_to_vtk(const char *filename, double *pnt) {
@@ -1453,6 +1489,23 @@ void convert_cart_to_sph(double x, double y, double z,
   *lat=acos(z/(*r));
 }
 
+// calculates spherical coords in radians
+// lon -> (-pi to pi)
+// lat -> (-pi/2  to pi/2)
+void convert_cart_to_sph_rad(double x, double y, double z,
+                             double *lon, double *lat, double *r) {
+
+  const double half_pi=0.5*M_PI;
+  double lon_r,lat_r;
+
+  convert_cart_to_sph(x, y, z,
+                      lon, lat, r);
+
+  // Make lat range -pi/2 to pi/2
+  *lat=half_pi-*lat;
+}
+
+
 
 // calculates spherical coords in degs
 // lon -> (-180 to 180)
@@ -1469,6 +1522,7 @@ void convert_cart_to_sph_deg(double x, double y, double z,
   *lon=lon_r*RAD2DEG;
   *lat=90.0-(lat_r*RAD2DEG);
 }
+
 
 
 // Assumes pnt1, pnt2, pnt3 are of size 3
@@ -3778,5 +3832,147 @@ bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_i
 
   template bool is_pnt_in_polygon<GEOM_CART2D>(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti, bool *success);
   template bool is_pnt_in_polygon<GEOM_SPH2D3D>(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti, bool * success);
+
+  // Calculate centroid for a polygon on a sphere 
+  // Input:
+  //  num_p  - number of points in the polygon
+  //  p      - 3*num_p doubles representing the points making up the polygon
+  // tri_ind - should be of size 3*(num_p-2)
+  // td      -  be num_p doubles 
+  // ti      - should be num_p ints
+  // Output:
+  //  centroid - 3 doubles representing the centroid
+  // TODO: eventually hook this into a GEOM tmeplate like the above, although you'll probably 
+  //  need to make the CART_2D and SPH_2D3D ones separate because they're differnt. 
+  void calc_poly_centroid_sph2D3D(int num_p, double *p, int *tri_ind, double *td, int *ti, 
+                                  double *centroid) {
+
+    // Triangulate p
+    int ret_p=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td, ti, tri_ind);  
+
+    // If couldn't triangulate, then just return average of corners, because
+    // that's usually a reasonable approximation
+    if (ret_p != ESMCI_TP_SUCCESS) {
+
+      // Compute sum of points
+      centroid[0]=0.0; centroid[1]=0.0; centroid[2]=0.0;
+      for (int i=0; i<num_p; i++) {
+        double *pnt=p+3*i;
+        MU_ADD_VEC3D(centroid, centroid, pnt);
+      }
+
+      // Divide by num points to get average
+      if (num_p != 0) {
+        double div_num_p=1.0/((double)num_p);
+        MU_MULT_BY_SCALAR_VEC3D(centroid, centroid, div_num_p);
+      }
+
+      // Move to surface of sphere
+      double rad=MU_LEN_VEC3D(centroid);
+      if (rad != 0.0) {
+        double div_rad=1.0/rad;
+        MU_MULT_BY_SCALAR_VEC3D(centroid, centroid, div_rad);
+      }
+      return;
+    }
+
+
+    // Compute centroid by finding weighted average of triangle centroids 
+    // Where weight is the area of the given triangle
+
+    // Loop over triangles
+    double tot_area=0;
+    centroid[0]=0.0; centroid[1]=0.0; centroid[2]=0.0;
+    for (int tri_pos=0, i=0; i<num_p-2; i++) {
+
+      // Setup current tri
+      double *t0=p+3*tri_ind[tri_pos];
+      double *t1=p+3*tri_ind[tri_pos+1];
+      double *t2=p+3*tri_ind[tri_pos+2];
+
+      // Advance to next tri
+      tri_pos +=3;
+
+      // Calculate area of triangle
+      double tarea=tri_area(t0, t1, t2);
+
+      // Sum area 
+      tot_area += tarea;
+      
+      // Compute centroid of triangle
+      double tcentroid[3]={0.0, 0.0, 0.0};
+      const double one_third=1.0/3.0;
+
+      MU_ASSIGN_VEC3D(tcentroid, t0);
+      MU_ADD_VEC3D(tcentroid, tcentroid, t1);
+      MU_ADD_VEC3D(tcentroid, tcentroid, t2);
+      
+      MU_MULT_BY_SCALAR_VEC3D(tcentroid, tcentroid, one_third);
+
+      // Multiply triangle centroid by it's area
+      MU_MULT_BY_SCALAR_VEC3D(tcentroid, tcentroid, tarea);
+
+      // Sum tcentroid weighted by area of triangle into centroid
+      MU_ADD_VEC3D(centroid, centroid, tcentroid);
+    }
+
+    // Divide centroid by total area
+    if (tot_area != 0.0) {
+      double div_tot_area=1.0/tot_area;
+      MU_MULT_BY_SCALAR_VEC3D(centroid, centroid, div_tot_area);
+    }
+
+    // Move to surface of sphere
+    double rad=MU_LEN_VEC3D(centroid);
+    if (rad != 0.0) {
+      double div_rad=1.0/rad;
+      MU_MULT_BY_SCALAR_VEC3D(centroid, centroid, div_rad);
+    }
+  }
+
+  // Calculate centroid for a polygon in 2D Cart. space
+  // Input:
+  //  num_p  - number of points in the polygon
+  //  p      - 2*num_p doubles representing the points making up the polygon
+  // Output:
+  //  centroid - 2 doubles representing the centroid
+  // TODO: eventually hook this into a GEOM tmeplate like triangulation, although you'll probably 
+  //  need to make the CART_2D and SPH_2D3D ones separate because they're differnt. 
+  void calc_poly_centroid_cart2D2D(int num_p, double *p, double *centroid) {
+
+    
+
+
+    // Loop doing calculations
+    double area=0.0;
+    for (int i=0; i<num_p; i++) {
+      double *p0=p+2*i;
+      double *p1=p+2*((i+1)%num_p);
+
+      // Signed area
+      area += (p0[0]*p1[1] - p1[0]*p0[1]);
+
+      // common factor
+      double tmp=(p0[0]*p1[1] - p1[0]*p0[1]);
+
+      // Centroid 
+      centroid[0] += (p0[0] + p1[0])*tmp;
+      centroid[1] += (p0[1] + p1[1])*tmp;
+    }
+
+    // Final area
+    area = 0.5*area;
+
+    // factor used for centroid calc
+    double inv_area_factor=1.0;
+    if (area != 0.0) {
+      inv_area_factor=1.0/(6.0*area);
+    }
+
+    // Finalize centroid
+    MU_MULT_BY_SCALAR_VEC2D(centroid, centroid, inv_area_factor);
+  }
+
+
 
 } // namespace

@@ -402,8 +402,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmepochenter)(ESMCI::VM **vm, vmEpoch *epoch, int *throttle,
-    int *rc){
+  void FTN_X(c_esmc_vmepochenter)(ESMCI::VM **vm, vmEpoch *epoch,
+    ESMC_Logical *keepAlloc, int *throttle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmepochenter()"
     // Initialize return code; assume routine not implemented
@@ -413,11 +413,15 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(vm, rc)
     ESMCI_NULL_CHECK_PRC(*vm, rc)
+    // convert to bool
+    bool keepAllocOpt = true; // default
+    if (ESMC_NOT_PRESENT_FILTER(keepAlloc) != ESMC_NULL_POINTER)
+      if (*keepAlloc == ESMF_FALSE) keepAllocOpt = false;
     try{
       if (ESMC_NOT_PRESENT_FILTER(throttle) != ESMC_NULL_POINTER)
-        (*vm)->epochEnter(*epoch, *throttle);
+        (*vm)->epochEnter(*epoch, keepAllocOpt, *throttle);
       else
-        (*vm)->epochEnter(*epoch);  // let throttle default
+        (*vm)->epochEnter(*epoch, keepAllocOpt);  // let throttle default
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))
@@ -435,7 +439,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmepochexit)(ESMCI::VM **vm, ESMC_Logical *keepAlloc, 
+  void FTN_X(c_esmc_vmepochexit)(ESMCI::VM **vm, ESMC_Logical *keepAlloc,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmepochexit()"
@@ -1119,7 +1123,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vminitialize)(ESMCI::VM **vm, int *mpiCommunicator, int *rc){
+  void FTN_X(c_esmc_vminitialize)(ESMCI::VM **vm, int *mpiCommunicator,
+    ESMC_Logical *globalResourceControl, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vminitialize()"
     // Initialize return code; assume routine not implemented
@@ -1139,9 +1144,30 @@ extern "C" {
       *rc = ESMC_RC_INTNRL_BAD;
       return;
     }
-    *vm = ESMCI::VM::initialize(localMpiComm, &localrc);
+    bool globalResourceControlOpt = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(globalResourceControl) != ESMC_NULL_POINTER)
+      globalResourceControlOpt = (*globalResourceControl == ESMF_TRUE);
+    // call into C++ method
+    *vm = ESMCI::VM::initialize(localMpiComm, globalResourceControlOpt, &localrc);
     // Cannot use LogErr here because LogErr initializes _after_ VM
     if (rc!=NULL) *rc = localrc;
+  }
+
+  void FTN_X(c_esmc_vmset)(ESMC_Logical *globalResourceControl, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmset()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    bool globalResourceControlOpt = false; // default
+    if (ESMC_NOT_PRESENT_FILTER(globalResourceControl) != ESMC_NULL_POINTER)
+      globalResourceControlOpt = (*globalResourceControl == ESMF_TRUE);
+    // call into C++ method
+    ESMCI::VM::set(globalResourceControlOpt, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmc_vmfinalize)(ESMC_Logical *keepMpiFlag, int *rc){

@@ -95,7 +95,6 @@ void ESMCI_regrid_create(
                       int *map_type,
                      int *norm_type,
                      int *regridPoleType, int *regridPoleNPnts,
-                     int *regridScheme,
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
                      ESMC_R8 *extrapDistExponent,
@@ -139,6 +138,14 @@ void ESMCI_regrid_create(
 
   try {
 
+    // Declare local return code
+    int localrc;
+
+    // Initialize the parallel environment for mesh
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;  // bail out with exception
+    
+
     // transalate ignoreDegenerate to C++ bool
     bool ignoreDegenerate=false;
     if (*_ignoreDegenerate == 1) ignoreDegenerate=true;
@@ -179,7 +186,6 @@ void ESMCI_regrid_create(
 
       // Degenerate
       if (degenerate) {
-        int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Src contains a cell that has corners close enough that the cell "
         "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -194,7 +200,6 @@ void ESMCI_regrid_create(
 
         // Degenerate
         if (degenerate) {
-          int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Dst contains a cell which has corners close enough that the cell "
         "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -231,7 +236,7 @@ void ESMCI_regrid_create(
 
       if(!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, 
                  NULL, *wts, 
-                 regridMethod, regridScheme, 
+                 regridMethod, 
                  regridPoleType, regridPoleNPnts,
                  map_type,
                  extrapMethod,
@@ -249,7 +254,7 @@ void ESMCI_regrid_create(
 
       if(!regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, 
                  NULL, *wts,
-                 &tempRegridMethod, regridScheme, 
+                 &tempRegridMethod, 
                  regridPoleType, regridPoleNPnts,
                   map_type,
                  extrapMethod,
@@ -302,7 +307,6 @@ void ESMCI_regrid_create(
           (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
         int missing_id;
         if (!all_mesh_elem_ids_in_wmat(dstmesh, *wts, &missing_id)) {
-          int localrc;
           char msg[1024];
           sprintf(msg,"- There exist destination cells (e.g. id=%d) which don't overlap with any "
             "source cell",missing_id);
@@ -313,7 +317,6 @@ void ESMCI_regrid_create(
         // CURRENTLY DOESN'T WORK!!!
 #if 0
         if (!all_mesh_node_ids_in_wmat(srcmesh, *wts)) {
-          int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- There exist source points which can't be mapped to any "
             "destination point", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -324,7 +327,6 @@ void ESMCI_regrid_create(
         int missing_id;
 
         if (!all_mesh_node_ids_in_wmat(dstpointlist, *wts, &missing_id)) {
-          int localrc;
           char msg[1024];
           sprintf(msg,"- There exist destination points (e.g. id=%d) which can't be mapped to any "
             "source cell",missing_id);
@@ -474,7 +476,6 @@ void ESMCI_regrid_create(
 
     // Build the ArraySMM
     if (*has_rh != 0) {
-      int localrc;
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
       FTN_X(c_esmc_arraysmmstoreind4)(arraysrcpp, arraydstpp, rh, &tk, factors,
@@ -572,7 +573,7 @@ void ESMCI_regrid_create(
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()"
   Trace __trace(" FTN_X(regrid_getiwts)()");
@@ -588,7 +589,7 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
     if (!iwts) Throw() << "Could not find integration weights field on this mesh"
                              <<std::endl;
 
-    if(!get_iwts(mesh, iwts, regridScheme))
+    if(!get_iwts(mesh, iwts))
       Throw() << "Online regridding error" << std::endl;
 
     CpMeshDataToArray(grid, *staggerLoc, mesh, array, iwts);
@@ -622,7 +623,7 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
 
 void ESMCI_regrid_getarea(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getarea()"
   Trace __trace(" FTN_X(regrid_getarea)()");
