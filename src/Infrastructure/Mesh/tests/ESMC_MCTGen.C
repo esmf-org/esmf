@@ -2133,14 +2133,14 @@ MCT *periodic_2d_sph_deg(int &rc){
         mct->redist_elemCoord = {225,22, 275,22, 330,22,
                                  225,69, 275,69, 330,69};
       } else if (localPet == 1) {
-        mct->redist_nodeId_in ={15,16,17,18,22,23,24,25,29,30,31,32};
+        mct->redist_nodeId_in ={16,17,18,23,24,25,30,31,32};
         mct->redist_elemId_in = {15,16,17,18,22,23,24,25};
 
         mct->redist_nodeId = {15,16,17,18,19,22,23,24,25,26,29,30,31,32,33};
         mct->redist_nodeCoord = {0,0, 50,0, 100,0, 150,0, 200,0,
                                  0,45, 50,45, 100,45, 150,45, 200,45,
                                  0,80, 50,80, 100,80, 150,80, 200,80};
-        mct->redist_nodeOwner = {1,1,1,1,0,1,1,1,1,0,1,1,1,1,0};
+        mct->redist_nodeOwner = {0,1,1,1,0,0,1,1,1,0,0,1,1,1,0};
         mct->redist_elemId = {15,16,17,18,22,23,24,25};
         mct->redist_elemType = {ESMC_MESHELEMTYPE_QUAD,
                                 ESMC_MESHELEMTYPE_QUAD,
