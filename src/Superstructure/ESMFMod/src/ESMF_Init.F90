@@ -1173,7 +1173,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! provide complete ESMF profile region
       call ESMF_TraceRegionExit("[ESMF]", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) then
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": TraceRegionExit() error." 
+      endif
 
       ! Write final message to the log
       call ESMF_LogWrite("Finalizing ESMF", &
