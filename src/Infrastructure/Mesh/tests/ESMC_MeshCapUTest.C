@@ -95,17 +95,21 @@ void combine(const std::string &api, const std::string &mesh,
 
 int main(int argc, char *argv[]) {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MBMeshUTest::main()"
+#define ESMC_METHOD "MeshCapUTest::main()"
 
   int rc;
   int localPet, petCount;
   ESMC_VM vm;
 
-  bool mbmesh = true;
-  bool native = true; 
+  std::string failMsg = "FAIL";
+  // break this up so it doesn't count as an additional test
+  std::string nex_test_tag = "//NEX_";
+  nex_test_tag.append("UTest\n");
+  int result = 0;
 
   //----------------------------------------------------------------------------
-  ESMC_TestStart(__FILE__, __LINE__, 0);
+  // Start the test with an alternate name for log and stdout files
+  ESMC_TestStart("ESMC_MeshCapGenUTest.C", __LINE__, 0);
 
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
@@ -115,17 +119,27 @@ int main(int argc, char *argv[]) {
   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                 (int *)NULL, (int *)NULL);
 
+  // output stream to write test tag to the generated source file
+  std::ofstream tagfile;
+  tagfile.open("ESMC_MeshCapGenUTest.C", std::ios_base::app);
+
+  // this is an easy way to comment a single line to toggle mbmesh/native
+  bool mbmesh = false;
+  mbmesh = true;
+  bool native = false; 
+  native = true; 
+
   // these are bound to MCT in constructor, must match!
-  std::vector<std::string> test_apis_native;
-    test_apis_native.push_back("createget");
-    test_apis_native.push_back("dual");
-    test_apis_native.push_back("redist_elem");
-    test_apis_native.push_back("redist_node");
-    test_apis_native.push_back("redist_elno");
-    test_apis_native.push_back("serialize");
-    test_apis_native.push_back("to_pointlist_elem");
-    test_apis_native.push_back("to_pointlist_node");
-    test_apis_native.push_back("write_vtk");
+  std::vector<std::string> test_apis;
+    test_apis.push_back("createget");
+    test_apis.push_back("dual");
+    test_apis.push_back("redist_elem");
+    test_apis.push_back("redist_node");
+    test_apis.push_back("redist_elno");
+    test_apis.push_back("serialize");
+    test_apis.push_back("to_pointlist_elem");
+    test_apis.push_back("to_pointlist_node");
+    test_apis.push_back("write_vtk");
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes_native;
@@ -141,23 +155,12 @@ int main(int argc, char *argv[]) {
     test_meshes_native.push_back("mix_2d_cart");
     test_meshes_native.push_back("mix_2d_sph_deg");
     test_meshes_native.push_back("mix_2d_sph_rad");
-    // ngons currently return the wrong counts
+    test_meshes_native.push_back("periodic_2d_sph_deg");
+    test_meshes_native.push_back("periodic_2d_sph_rad");
+    // cannot get info from ngons
     // test_meshes_native.push_back("ngon_2d_cart");
-    // test_meshes_native.push_back("ngon_2d_sph");
-    // test_meshes_native.push_back("periodic_2d_sph_deg");
-    // test_meshes_native.push_back("periodic_2d_sph_rad");
-
-  // these are bound to MCT in constructor, must match!
-  std::vector<std::string> test_apis_mbmesh;
-    test_apis_mbmesh.push_back("createget");
-    test_apis_mbmesh.push_back("dual");
-    test_apis_mbmesh.push_back("redist_elem");
-    test_apis_mbmesh.push_back("redist_node");
-    test_apis_mbmesh.push_back("redist_elno");
-    test_apis_mbmesh.push_back("serialize");
-    test_apis_mbmesh.push_back("to_pointlist_elem");
-    test_apis_mbmesh.push_back("to_pointlist_node");
-    test_apis_mbmesh.push_back("write_vtk");
+    // test_meshes_native.push_back("ngon_2d_sph_deg");
+    // test_meshes_native.push_back("ngon_2d_sph_rad");
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes_mbmesh;
@@ -176,6 +179,8 @@ int main(int argc, char *argv[]) {
     test_meshes_mbmesh.push_back("ngon_2d_cart");
     test_meshes_mbmesh.push_back("ngon_2d_sph_deg");
     test_meshes_mbmesh.push_back("ngon_2d_sph_rad");
+    test_meshes_mbmesh.push_back("periodic_2d_sph_deg");
+    test_meshes_mbmesh.push_back("periodic_2d_sph_rad");
 
   // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
@@ -200,7 +205,7 @@ int main(int argc, char *argv[]) {
 
 
   if (mbmesh) {
-    for (const auto api: test_apis_mbmesh) {
+    for (const auto api: test_apis) {
       for (const auto mesh: test_meshes_mbmesh) {
         // don't run cases that hang
         auto skip_itr = std::find_if(skip_test_mbmesh.begin(),   skip_test_mbmesh.end(), 
@@ -210,13 +215,15 @@ int main(int argc, char *argv[]) {
           continue;
         } else {
           combine(api, mesh, "MBMesh");
+          // only print one tag per test (so only on root)
+          if (localPet == 0) tagfile << nex_test_tag;
         }
       }
     }
   }
 
   if (native) {
-    for (const auto api: test_apis_native) {
+    for (const auto api: test_apis) {
       for (const auto mesh: test_meshes_native) {
         // don't run cases that hang
         auto skip_itr = std::find_if(skip_test_native.begin(),   skip_test_native.end(), 
@@ -226,314 +233,17 @@ int main(int argc, char *argv[]) {
           continue;
         } else {
           combine(api, mesh, "Native");
+          // only print one tag per test (so only on root)
+          if (localPet == 0) tagfile << nex_test_tag;
         }
       }
     }
   }
 
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  10
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  20
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  30
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  40
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  50
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  60
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  70
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  80
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  90
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  100
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  110
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  120
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  130
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  140
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  150
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  160
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  170
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  180
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  190
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  200
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  210
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  220
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest  230
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  240
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  250
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  260
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  270
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  280
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest  290
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-  //NEX_disable_UTest
-
+  tagfile.close();
 
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(__FILE__, __LINE__, 0);
+  ESMC_TestEnd("ESMC_MeshCapGenUTest.C", __LINE__, 0);
 
   return 0;
 }
