@@ -31,6 +31,7 @@ endif
 ifndef PIO_AUTOTOOLS_BUILD
 # Use the PIO native cmake build system to build and install
 tree_lib:
+	cmake --version
 	mkdir -p Build
 	cd Build; \
 	env CC=$(ESMF_CCOMPILER) FC=$(ESMF_F90COMPILER) CFLAGS="$(ESMF_COPTFLAG) $(ESMF_SO_CCOMPILEOPTS)" cmake -DCMAKE_INSTALL_PREFIX=../Install $(PIO_CMAKE_OPTS) ../ParallelIO; \
