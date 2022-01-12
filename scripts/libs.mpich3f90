@@ -1,8 +1,8 @@
 #!/bin/sh
 # this scripts determines the correct MPICH3 Fortran bindings library to
 # use when mpicxx is used for linking.
-MPICHVERSION=`mpichversion | grep Version | tr -d "\t " | cut -f2 -d":" | cut -f1,2 -d"."`
-if [ $MPICHVERSION = 3.0 ] || [ $MPICHVERSION = 3.1 ] || [ $MPICHVERSION = 3.2 ] || [ $MPICHVERSION = 3.3 ]; then
+MPICHVERSION=`mpichversion | grep Version | tr -d "\t " | cut -f2 -d":" | cut -f1 -d"."`
+if [ $MPICHVERSION = 3 ]; then
   echo -lmpichf90;
 else
   echo -lmpifort;
