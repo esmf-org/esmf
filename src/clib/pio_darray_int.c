@@ -20,7 +20,7 @@
 #endif
 
 /** 10MB default limit. */
-extern PIO_Offset pio_buffer_size_limit;
+extern PIO_Offset pio_pnetcdf_buffer_size_limit;
 
 /** Initial size of compute buffer. */
 long pio_cnbuffer_limit = 33554432;
@@ -1179,7 +1179,7 @@ pio_read_darray_nc(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf)
         PIO_Offset *startlist[iodesc->maxregions];
         PIO_Offset *countlist[iodesc->maxregions];
 #endif
-	
+
         /* buffer is incremented by byte and loffset is in terms of
            the iodessc->mpitype so we need to multiply by the size of
            the mpitype. */
@@ -1342,13 +1342,15 @@ pio_read_darray_nc(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf)
                         return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
 
 #else
+                    //printf("rllen %d mpitype %d\n",iodesc->rllen, iodesc->mpitype);
                     /* Read a list of subarrays. */
                     ierr = ncmpi_get_varn_all(file->fh, vid, rrlen, startlist,
-                                              countlist, iobuf, iodesc->llen, iodesc->mpitype);
+                                              countlist, iobuf, iodesc->rllen, iodesc->mpitype);
 #endif
                     /* Release the start and count arrays. */
                     for (int i = 0; i < rrlen; i++)
                     {
+                        PLOG((3,"startlist %d %d countlist %d %d",startlist[i][0],startlist[i][1],countlist[i][0],countlist[i][1]));
                         free(startlist[i]);
                         free(countlist[i]);
                     }
@@ -1735,7 +1737,7 @@ flush_output_buffer(file_desc_t *file, bool force, PIO_Offset addsize)
     PLOG((2, "flush_output_buffer usage=%ld force=%d",usage, force));
     /* If the user forces it, or the buffer has exceeded the size
      * limit, then flush to disk. */
-    if (force || (usage >= pio_buffer_size_limit))
+    if (force || (usage >= pio_pnetcdf_buffer_size_limit))
     {
         int rcnt;
         int  maxreq;
@@ -2154,7 +2156,7 @@ compute_maxaggregate_bytes(iosystem_desc_t *ios, io_desc_t *iodesc)
 
     /* Determine the max bytes that can be held on IO task. */
     if (ios->ioproc && iodesc->maxiobuflen > 0)
-        maxbytesoniotask = pio_buffer_size_limit / iodesc->maxiobuflen;
+        maxbytesoniotask = pio_pnetcdf_buffer_size_limit / iodesc->maxiobuflen;
 
     /* Determine the max bytes that can be held on computation task. */
     if (ios->comp_rank >= 0 && iodesc->ndof > 0)

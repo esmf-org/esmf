@@ -859,7 +859,7 @@ PIOc_get_var_tc(int ncid, int varid, nc_type xtype, void *buf)
 
     /* Scalar vars (which have ndims == 0) should just pass NULLs for
      * start/count. */
-    if (ndims)
+    if (ndims > 0)
     {
         /* Find the dimension IDs. */
         int dimids[ndims];

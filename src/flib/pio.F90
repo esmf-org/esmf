@@ -81,7 +81,7 @@ module pio
        PIO_inq_var_fill => inq_var_fill
   use pionfput_mod, only : PIO_put_var   => put_var
   use pionfget_mod, only : PIO_get_var   => get_var
-  use pio_support, only: pio_writedof
+  use pio_support, only: pio_writedof, pio_readdof, pio_write_nc_dof, pio_read_nc_dof
   use iso_c_binding
 
   implicit none

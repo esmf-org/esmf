@@ -924,7 +924,11 @@ PIOc_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
             {
                 char my_name[NC_MAX_NAME + 1];
                 nc_type my_xtype;
-                int my_ndims = 0, my_dimids[ndims], my_natts = 0;
+                int my_ndims = 0, *my_dimids, my_natts = 0;
+                if (ndims > 0)
+                  my_dimids = (int *) malloc(ndims * sizeof(int));
+                else
+                  my_dimids = NULL;
                 ierr = nc_inq_var(file->fh, varid, my_name, &my_xtype, &my_ndims, my_dimids,
                                   &my_natts);
                 PLOG((3, "my_name = %s my_xtype = %d my_ndims = %d my_natts = %d",  my_name,
@@ -942,6 +946,8 @@ PIOc_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
                         for (int d = 0; d < ndims; d++)
                             dimidsp[d] = my_dimids[d];
                     }
+                    if (my_dimids != NULL)
+                      free(my_dimids);
                     if (nattsp)
                         *nattsp = my_natts;
                 }
@@ -1251,12 +1257,12 @@ PIOc_inq_att_eh(int ncid, int varid, const char *name, int eh,
 
         if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
             ierr = nc_inq_att(file->fh, varid, name, xtypep, (size_t *)lenp);
-        PLOG((2, "PIOc_inq_att netcdf call %s returned %d", name,ierr));
     }
 
     /* Broadcast and check the return code. */
     if ((mpierr = MPI_Bcast(&ierr, 1, MPI_INT, ios->ioroot, ios->my_comm)))
         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+    PLOG((2, "PIOc_inq_att netcdf call %s returned %d eh %d", name,ierr,eh));
     if (eh && ierr)
         return check_netcdf(file, ierr, __FILE__, __LINE__);
 

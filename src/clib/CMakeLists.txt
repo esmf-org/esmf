@@ -133,6 +133,21 @@ if (NOT PnetCDF_C_FOUND AND NOT NetCDF_C_FOUND)
   message (FATAL_ERROR "Must have PnetCDF and/or NetCDF C libraries")
 endif ()
 
+#===== MPI =====
+if (PIO_USE_MPISERIAL)
+  if (MPISERIAL_C_FOUND)
+    target_compile_definitions (pioc
+      PRIVATE _MPISERIAL)
+    target_include_directories (pioc
+      PUBLIC ${MPISERIAL_C_INCLUDE_DIRS})
+    target_link_libraries (pioc
+      PUBLIC ${MPISERIAL_C_LIBRARIES})
+
+    set (WITH_PNETCDF FALSE)
+    set (MPI_C_INCLUDE_PATH ${MPISERIAL_C_INCLUDE_DIRS})
+  endif ()
+endif ()
+
 include(CheckTypeSize)
 check_type_size("size_t" SIZEOF_SIZE_T)
 CHECK_TYPE_SIZE("long long" SIZEOF_LONG_LONG)

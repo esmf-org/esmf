@@ -557,7 +557,7 @@ piodie(const char *msg, const char *fname, int line)
             msg ? msg : "_", fname ? fname : "_", line);
 
     print_trace(stderr);
-#ifdef MPI_SERIAL
+#ifdef _MPISERIAL
     abort();
 #else
     MPI_Abort(MPI_COMM_WORLD, -1);
@@ -825,7 +825,11 @@ find_mpi_type(int pio_type, MPI_Datatype *mpi_type, int *type_size)
     switch(pio_type)
     {
     case PIO_BYTE:
+#ifdef _MPISERIAL
         my_mpi_type = MPI_BYTE;
+#else
+        my_mpi_type = MPI_SIGNED_CHAR;
+#endif
         my_type_size = NETCDF_CHAR_SIZE;
         break;
     case PIO_CHAR:
@@ -945,6 +949,7 @@ malloc_iodesc(iosystem_desc_t *ios, int piotype, int ndims,
     (*iodesc)->maxregions = 1;
     (*iodesc)->ioid = -1;
     (*iodesc)->ndims = ndims;
+    (*iodesc)->readonly = 0;
 
     /* Allocate space for, and initialize, the first region. */
     if ((ret = alloc_region2(ios, ndims, &((*iodesc)->firstregion))))
@@ -1241,7 +1246,7 @@ PIOc_readmap_from_f90(const char *file, int *ndims, int **gdims, PIO_Offset *map
  * @param filename the filename to be used.
  * @param cmode for PIOc_create(). Will be bitwise or'd with NC_WRITE.
  * @param ioid the ID of the IO description.
- * @param title optial title attribute for the file. Must be less than
+ * @param title optional title attribute for the file. Must be less than
  * PIO_MAX_NAME + 1 if provided. Ignored if NULL.
  * @param history optial history attribute for the file. Must be less
  * than PIO_MAX_NAME + 1 if provided. Ignored if NULL.
@@ -1667,6 +1672,7 @@ pioc_read_nc_decomp_int(int iosysid, const char *filename, int *ndims, int **glo
     iosystem_desc_t *ios;
     int ncid;
     int ret;
+    int peh;
 
     /* Get the IO system info. */
     if (!(ios = pio_get_iosystem_from_id(iosysid)))
@@ -1677,7 +1683,8 @@ pioc_read_nc_decomp_int(int iosysid, const char *filename, int *ndims, int **glo
         return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
 
     PLOG((1, "pioc_read_nc_decomp_int iosysid = %d filename = %s", iosysid, filename));
-
+    
+    
     /* Open the netCDF decomp file. */
     if ((ret = PIOc_open(iosysid, filename, NC_WRITE, &ncid)))
         return pio_err(ios, NULL, ret, __FILE__, __LINE__);
@@ -1714,6 +1721,7 @@ pioc_read_nc_decomp_int(int iosysid, const char *filename, int *ndims, int **glo
         *max_maplen = max_maplen_in;
 
     /* Read title attribute, if it is in the file. */
+    peh = PIOc_Set_File_Error_Handling(ncid, PIO_BCAST_ERROR);
     char title_in[PIO_MAX_NAME + 1];
     ret = PIOc_get_att_text(ncid, NC_GLOBAL, DECOMP_TITLE_ATT_NAME, title_in);
     if (ret == PIO_NOERR)
@@ -1751,11 +1759,21 @@ pioc_read_nc_decomp_int(int iosysid, const char *filename, int *ndims, int **glo
 
     /* Read source attribute. */
     char source_in[PIO_MAX_NAME + 1];
-    if ((ret = PIOc_get_att_text(ncid, NC_GLOBAL, DECOMP_SOURCE_ATT_NAME, source_in)))
+    ret = PIOc_get_att_text(ncid, NC_GLOBAL, DECOMP_SOURCE_ATT_NAME, source_in);
+    if (ret == PIO_NOERR)
+    {
+        if (source)
+            strncpy(source, source_in, PIO_MAX_NAME + 1);
+    }
+    else if (ret == PIO_ENOTATT)
+    {
+        if (source)
+            source[0] = '\0';
+    }
+    else
         return pio_err(ios, NULL, ret, __FILE__, __LINE__);
-    if (source)
-        strncpy(source, source_in, PIO_MAX_NAME + 1);
 
+    PIOc_Set_File_Error_Handling(ncid, peh);
     /* Read dimension for the dimensions in the data. (Example: for 4D
      * data we will need to store 4 dimension IDs.) */
     int dim_dimid;
@@ -2137,7 +2155,7 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
             PLOG((2, "Calling ncmpi_create mode = %d", mode));
             ierr = ncmpi_create(ios->io_comm, filename, mode, ios->info, &file->fh);
             if (!ierr)
-                ierr = ncmpi_buffer_attach(file->fh, pio_buffer_size_limit);
+                ierr = ncmpi_buffer_attach(file->fh, pio_pnetcdf_buffer_size_limit);
             break;
 #endif
         }
@@ -2745,8 +2763,8 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
             {
                 if (ios->iomaster == MPI_ROOT)
                     PLOG((2, "%d Setting IO buffer %ld", __LINE__,
-                          pio_buffer_size_limit));
-                ierr = ncmpi_buffer_attach(file->fh, pio_buffer_size_limit);
+                          pio_pnetcdf_buffer_size_limit));
+                ierr = ncmpi_buffer_attach(file->fh, pio_pnetcdf_buffer_size_limit);
             }
             PLOG((2, "ncmpi_open(%s) : fd = %d", filename, file->fh));
 
@@ -3226,4 +3244,94 @@ determine_procs(int num_io_procs, int component_count, int *num_procs_per_comp,
         }
     }
     return PIO_NOERR;
+}
+
+/**
+ * Used in check_compmap to sort the compmap in accending order.
+ * 
+ * @param a pointer to an offset
+ * @param b pointer to another offset
+ * @returns 0 if offsets are the same or if either pointer is NULL
+ * @author Jim Edwards
+ */
+
+int offsetsort(const void *a,const void *b)
+{
+    return (*(PIO_Offset *)a - *(PIO_Offset *)b);
+}
+
+/**
+ * check_compmap gathers the entire compmap to comp task 0, sorts it into accending order
+ * then looks for repeated values > 0.  If any repeated values are found the iodesc is marked 
+ * read only.
+ *
+ * @param ios pointer to the iosystem_desc_t struct.
+ * @param iodesc a pointer to the io_desc_t struct.
+ * @param compmap a 1 based array of offsets into the array record on
+ * file. A 0 in this array indicates a value which should not be
+ * transfered.
+ * @returns True if a repeated value is found, False otherwise.
+ * @author Jim Edwards
+ */
+
+
+bool check_compmap(iosystem_desc_t *ios, io_desc_t *iodesc,const PIO_Offset *compmap)
+{
+    int ierr;
+    bool readonly = 0;
+
+    if(ios->compproc) 
+    {
+        int *gmaplen;
+        if(ios->compmaster)
+            gmaplen = malloc(ios->num_comptasks * sizeof(int));
+        else
+            gmaplen = NULL;
+        /* First gather the array lengths from all compute tasks */
+        if ((ierr = MPI_Gather(&(iodesc->maplen), 1, MPI_INT, gmaplen, 1, MPI_INT, 0, ios->comp_comm)))
+            return check_mpi(ios, NULL, ierr, __FILE__,__LINE__);
+
+        int *displs;
+        int gcompmaplen;
+        int *gcompmaps;
+        if(ios->compmaster)
+        {
+            displs = malloc(ios->num_comptasks * sizeof(int));
+            displs[0] = 0;
+            for(int i=1; i<ios->num_comptasks; i++)
+            {
+                displs[i] = displs[i-1] + gmaplen[i-1];
+            }
+            gcompmaplen = displs[ios->num_comptasks-1] + gmaplen[ios->num_comptasks-1];
+            gcompmaps = malloc(gcompmaplen * sizeof(PIO_Offset)); 
+            printf("gcompmaplen %d\n",gcompmaplen);
+            for(int i=0;i<ios->num_comptasks; i++)
+                printf("gmaplen=%d displs[%d]=%d\n",gmaplen[i], i,displs[i]);
+        }
+        
+        /* next gather the compmap arrays */
+        if ((ierr = MPI_Gatherv(compmap, iodesc->maplen, MPI_OFFSET, gcompmaps, gmaplen, displs, MPI_OFFSET, 0, ios->comp_comm)))
+            return check_mpi(ios, NULL, ierr, __FILE__,__LINE__);
+
+        if(ios->compmaster)
+        {
+            /* sort */
+            qsort(gcompmaps, gcompmaplen, sizeof(MPI_OFFSET), offsetsort);
+            /* look for duplicate values > 0 (0 dups are okay) */
+            for(int i=1; i < gcompmaplen; i++)
+            {
+                if(gcompmaps[i] > 0 && gcompmaps[i] == gcompmaps[i-1])
+                {
+                    readonly = 1;
+                    break;
+                }
+            }
+            free(gmaplen);
+            free(displs);
+            free(gcompmaps);
+        }
+        
+    }
+    MPI_Bcast(&readonly, 1, MPI_CHAR, ios->compmaster, ios->intercomm);
+    return readonly;
 }

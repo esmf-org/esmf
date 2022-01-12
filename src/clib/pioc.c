@@ -595,6 +595,10 @@ PIOc_InitDecomp(int iosysid, int pio_type, int ndims, const int *gdimlen, int ma
     /* Remember the maplen. */
     iodesc->maplen = maplen;
 
+    /* check if the decomp is valid for write or is read-only */
+    /* this check is expensive and memory intensive on compute task 0 */
+//    iodesc->readonly = check_compmap(ios, iodesc, compmap);
+
     /* Remember the map. */
     if (!(iodesc->map = malloc(sizeof(PIO_Offset) * maplen)))
         return pio_err(ios, NULL, PIO_ENOMEM, __FILE__, __LINE__);
@@ -967,12 +971,13 @@ PIOc_Init_Intracomm(MPI_Comm comp_comm, int num_iotasks, int stride, int base,
     if ((mpierr = MPI_Comm_size(comp_comm, &num_comptasks)))
         return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
 
+    PLOG((1, "PIOc_Init_Intracomm comp_comm = %d num_iotasks = %d stride = %d base = %d "
+          "rearr = %d", comp_comm, num_iotasks, stride, base, rearr));
+
     /* Check the inputs. */
     if (!iosysidp || num_iotasks < 1 || num_iotasks * stride > num_comptasks)
         return pio_err(NULL, NULL, PIO_EINVAL, __FILE__, __LINE__);
 
-    PLOG((1, "PIOc_Init_Intracomm comp_comm = %d num_iotasks = %d stride = %d base = %d "
-          "rearr = %d", comp_comm, num_iotasks, stride, base, rearr));
 
     /* Allocate memory for the iosystem info. */
     if (!(ios = calloc(1, sizeof(iosystem_desc_t))))
@@ -1409,9 +1414,10 @@ PIOc_free_iosystem(int iosysid)
         ios->my_comm = MPI_COMM_NULL;
 
     /* Free the MPI Info object. */
+#ifndef _MPISERIAL
     if (ios->info != MPI_INFO_NULL)
         MPI_Info_free(&ios->info);
-
+#endif
     /* Delete the iosystem_desc_t data associated with this id. */
     PLOG((2, "About to delete iosysid %d.", iosysid));
     if ((ierr = pio_delete_iosystem_from_list(iosysid)))
