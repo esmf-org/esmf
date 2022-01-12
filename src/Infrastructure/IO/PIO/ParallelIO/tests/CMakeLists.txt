@@ -16,10 +16,12 @@ project (PIOTests C Fortran)
 #  INCLUDE SOURCE DIRECTORIES
 #==============================================================================
 add_subdirectory (cunit)
+add_subdirectory (cperf)
 
 if (PIO_ENABLE_FORTRAN)
   add_subdirectory (unit)
   add_subdirectory (general)
+  add_subdirectory (doftests)
   if (PIO_ENABLE_TIMING)
     add_subdirectory (performance)
   else ()

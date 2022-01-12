@@ -528,7 +528,7 @@ int test_find_mpi_type()
     /* Try every atomic type. */
     if ((ret = find_mpi_type(PIO_BYTE, &mpi_type, &type_size)))
         return ret;
-    if (mpi_type != MPI_BYTE || type_size != 1)
+    if (mpi_type != MPI_SIGNED_CHAR || type_size != 1)
         return ERR_WRONG;
 
     if ((ret = find_mpi_type(PIO_CHAR, &mpi_type, &type_size)))

@@ -557,7 +557,7 @@ piodie(const char *msg, const char *fname, int line)
             msg ? msg : "_", fname ? fname : "_", line);
 
     print_trace(stderr);
-#ifdef MPI_SERIAL
+#ifdef _MPISERIAL
     abort();
 #else
     MPI_Abort(MPI_COMM_WORLD, -1);
@@ -825,7 +825,11 @@ find_mpi_type(int pio_type, MPI_Datatype *mpi_type, int *type_size)
     switch(pio_type)
     {
     case PIO_BYTE:
+#ifdef _MPISERIAL
         my_mpi_type = MPI_BYTE;
+#else
+        my_mpi_type = MPI_SIGNED_CHAR;
+#endif
         my_type_size = NETCDF_CHAR_SIZE;
         break;
     case PIO_CHAR:
@@ -2151,7 +2155,7 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
             PLOG((2, "Calling ncmpi_create mode = %d", mode));
             ierr = ncmpi_create(ios->io_comm, filename, mode, ios->info, &file->fh);
             if (!ierr)
-                ierr = ncmpi_buffer_attach(file->fh, pio_buffer_size_limit);
+                ierr = ncmpi_buffer_attach(file->fh, pio_pnetcdf_buffer_size_limit);
             break;
 #endif
         }
@@ -2759,8 +2763,8 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
             {
                 if (ios->iomaster == MPI_ROOT)
                     PLOG((2, "%d Setting IO buffer %ld", __LINE__,
-                          pio_buffer_size_limit));
-                ierr = ncmpi_buffer_attach(file->fh, pio_buffer_size_limit);
+                          pio_pnetcdf_buffer_size_limit));
+                ierr = ncmpi_buffer_attach(file->fh, pio_pnetcdf_buffer_size_limit);
             }
             PLOG((2, "ncmpi_open(%s) : fd = %d", filename, file->fh));
 

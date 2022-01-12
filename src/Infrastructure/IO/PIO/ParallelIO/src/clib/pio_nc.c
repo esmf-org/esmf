@@ -924,7 +924,11 @@ PIOc_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
             {
                 char my_name[NC_MAX_NAME + 1];
                 nc_type my_xtype;
-                int my_ndims = 0, my_dimids[ndims], my_natts = 0;
+                int my_ndims = 0, *my_dimids, my_natts = 0;
+                if (ndims > 0)
+                  my_dimids = (int *) malloc(ndims * sizeof(int));
+                else
+                  my_dimids = NULL;
                 ierr = nc_inq_var(file->fh, varid, my_name, &my_xtype, &my_ndims, my_dimids,
                                   &my_natts);
                 PLOG((3, "my_name = %s my_xtype = %d my_ndims = %d my_natts = %d",  my_name,
@@ -942,6 +946,8 @@ PIOc_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
                         for (int d = 0; d < ndims; d++)
                             dimidsp[d] = my_dimids[d];
                     }
+                    if (my_dimids != NULL)
+                      free(my_dimids);
                     if (nattsp)
                         *nattsp = my_natts;
                 }
