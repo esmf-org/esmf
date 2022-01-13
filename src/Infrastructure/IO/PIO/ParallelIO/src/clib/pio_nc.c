@@ -1251,12 +1251,12 @@ PIOc_inq_att_eh(int ncid, int varid, const char *name, int eh,
 
         if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
             ierr = nc_inq_att(file->fh, varid, name, xtypep, (size_t *)lenp);
-        PLOG((2, "PIOc_inq_att netcdf call %s returned %d", name,ierr));
     }
 
     /* Broadcast and check the return code. */
     if ((mpierr = MPI_Bcast(&ierr, 1, MPI_INT, ios->ioroot, ios->my_comm)))
         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+    PLOG((2, "PIOc_inq_att netcdf call %s returned %d eh %d", name,ierr,eh));
     if (eh && ierr)
         return check_netcdf(file, ierr, __FILE__, __LINE__);
 

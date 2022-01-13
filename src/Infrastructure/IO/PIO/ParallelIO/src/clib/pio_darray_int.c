@@ -1179,7 +1179,7 @@ pio_read_darray_nc(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf)
         PIO_Offset *startlist[iodesc->maxregions];
         PIO_Offset *countlist[iodesc->maxregions];
 #endif
-	
+
         /* buffer is incremented by byte and loffset is in terms of
            the iodessc->mpitype so we need to multiply by the size of
            the mpitype. */
@@ -1342,13 +1342,15 @@ pio_read_darray_nc(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf)
                         return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
 
 #else
+                    printf("rllen %d mpitype %d\n",iodesc->rllen, iodesc->mpitype);
                     /* Read a list of subarrays. */
                     ierr = ncmpi_get_varn_all(file->fh, vid, rrlen, startlist,
-                                              countlist, iobuf, iodesc->llen, iodesc->mpitype);
+                                              countlist, iobuf, iodesc->rllen, iodesc->mpitype);
 #endif
                     /* Release the start and count arrays. */
                     for (int i = 0; i < rrlen; i++)
                     {
+                        PLOG((3,"startlist %d %d countlist %d %d",startlist[i][0],startlist[i][1],countlist[i][0],countlist[i][1]));
                         free(startlist[i]);
                         free(countlist[i]);
                     }

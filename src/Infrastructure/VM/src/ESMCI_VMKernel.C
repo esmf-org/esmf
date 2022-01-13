@@ -1553,6 +1553,9 @@ void *VMK::startup(class VMKPlan *vmp,
 #if (VERBOSITY > 9)
   vmp->vmkplan_print();
 #endif
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():1.0"));
+#endif
   // enter a vm derived from current vm according to the VMKPlan
   // need as many spawn_args as there are threads to be spawned from this pet
   // this is so that each spawned thread does not have to be worried about this
@@ -1570,6 +1573,9 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[0].cargo = cargo;
     return sarg;
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():2.0"));
+#endif
   // now:
   //    sarg[] has as many elements as mypet spawns threads, but at least one
   // next, allocate as many vm objects off the heap as there will be spawned
@@ -1581,6 +1587,9 @@ void *VMK::startup(class VMKPlan *vmp,
     }
     sarg[i].myvm = vmp->myvms[i];
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():3.0"));
+#endif
   // next, determine new_npets and new_mypet_base ...
   int new_mypet_base=0;
   int new_npets=0;
@@ -1593,16 +1602,19 @@ void *VMK::startup(class VMKPlan *vmp,
       new_mypet_base += vmp->spawnflag[i];
     }
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():4.0"));
+#endif
   // now:
   //    new_npets is equal to the total number of pets in the new VMK
   //    new_mypet_base is the index of the first new pet that mypet will spawn
   // next, allocate temporary arrays ...
-  int *new_lpid = new int[new_npets];
-  int *new_pid = new int[new_npets];
-  int *new_tid = new int[new_npets];
-  int *new_ncpet = new int[new_npets];
-  int *new_nadevs = new int[new_npets];
-  int *new_ncontributors = new int[new_npets];
+  vector<int> new_lpid(new_npets);
+  vector<int> new_pid(new_npets);
+  vector<int> new_tid(new_npets);
+  vector<int> new_ncpet(new_npets);
+  vector<int> new_nadevs(new_npets);
+  vector<int> new_ncontributors(new_npets);
   int **new_cid = new int*[new_npets];
   contrib_id **new_contributors = new contrib_id*[new_npets];
   // local variables, unallocated yet...
@@ -1619,6 +1631,9 @@ void *VMK::startup(class VMKPlan *vmp,
   int new_petid=0;      // used for keeping track of new_petid in loop
   // next, run through all current pets and check the VMKPlan ...
   // inside the following loop pet "i" will be refered to as "this pet"
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():5.0"));
+#endif
   for (int ii=0; ii<npets; ii++){
     int i = vmp->petlist[ii];   // indirection to preserve petlist order
     // get the last max_tid count of a pet with same pid
@@ -1775,6 +1790,9 @@ void *VMK::startup(class VMKPlan *vmp,
     // keep record of how high local_tid counted for the pid of this pet
     keep_max_tid[i] = local_tid;
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():6.0"));
+#endif
   // collect garbage of temporary arrays from previous i-loop
   delete [] keep_max_tid;
   // now:
@@ -1790,16 +1808,18 @@ void *VMK::startup(class VMKPlan *vmp,
   printf(">>>>>>>>> num_diff_pids for new VMK = %d\n", num_diff_pids);
 #endif
   //
-  // next, set up temporary arrays lpid_list and pet_list to facititate 
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():7.0"));
+#endif
+  // next, set up temporary arrays lpid_list and pet_list to facilitate 
   // MPI_Comm creation and shared memory allocation for new VMK
-  int **lpid_list = new int*[2];
-  lpid_list[0] = new int[num_diff_pids]; // this dimension holds lpids
-  lpid_list[1] = new int[num_diff_pids]; // this dimension holds number of pets
-  int **pet_list = new int*[num_diff_pids];
+  vector<vector<int>> lpid_list(2);
+  lpid_list[0].resize(num_diff_pids); // this dimension holds lpids
+  lpid_list[1].resize(num_diff_pids); // this dimension holds number of pets
+  vector<vector<int>> pet_list(num_diff_pids);
   for (int i=0; i<num_diff_pids; i++){
     lpid_list[0][i] = -1;  // invalidate the lpid entry
     lpid_list[1][i] = 0;   // no pets associated yet
-    pet_list[i] = new int[npets];  // npets is maximum possible number here!
   }
   for (int ii=0; ii<npets; ii++){
     int i = vmp->petlist[ii];     // indirection to preserve petlist order
@@ -1809,11 +1829,14 @@ void *VMK::startup(class VMKPlan *vmp,
       for (j=0; j<num_diff_pids; j++)
         if (lpid_list[0][j]==lpid[i] || lpid_list[0][j]==-1) break;
       lpid_list[0][j] = lpid[i];  // store lpid (does not matter to overwrite)
-      pet_list[j][lpid_list[1][j]] = i;  //enter the current pet id
+      pet_list[j].push_back(i);
       ++lpid_list[1][j];         // increment pet count for this pid
     }
   }
 
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():8.0"));
+#endif
 #if (VERBOSITY > 9)
   printf("finished setting up lpid_list and pet_list\n");
 #endif
@@ -1836,6 +1859,9 @@ void *VMK::startup(class VMKPlan *vmp,
     }
   }
   
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():9.0"));
+#endif
   // A new_commarray will be allocated for every PET that runs in a VAS
   // that is going to have threads in the new VMK.
   // The new_commarray is a temporary data structure that will be deleted
@@ -1850,6 +1876,9 @@ void *VMK::startup(class VMKPlan *vmp,
     }
   }
   
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():10.0"));
+#endif
   // the new MPI group will be derived from the mpi_g_part group so there is an
   // additional level of indirection here
   int *grouplist = new int[num_diff_pids];
@@ -1857,6 +1886,9 @@ void *VMK::startup(class VMKPlan *vmp,
     grouplist[i] = vmp->lpid_mpi_g_part_map[lpid_list[0][i]];
   }
   
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():11.0"));
+#endif
   // setting up MPI communicators is a collective MPI communication call
   // thus it requires that exactly one pet of each process running in the 
   // current VMK makes that call, even if this process will not participate
@@ -1866,6 +1898,9 @@ void *VMK::startup(class VMKPlan *vmp,
   MPI_Comm new_mpi_c_ssi;
 #endif
   
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():12.0"));
+#endif
   int foundfirstflag=0;
   int foundfirstpet;
   int mylpid = lpid[mypet];
@@ -1960,6 +1995,9 @@ void *VMK::startup(class VMKPlan *vmp,
   printf("now valid new_mpi_c exists\n");
 #endif
 
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():13.0"));
+#endif
   // now:
   //    new_mpi_c is the valid MPI_Comm for the new VMK
   // Next, setting up intra-process shared memory connection between
@@ -2112,6 +2150,9 @@ void *VMK::startup(class VMKPlan *vmp,
       }
     } // at least one PET of the current VMK will spawn from this lpid
   } // i
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():14.0"));
+#endif
   // now:
   //    new_pth_mutex2 is valid pthread_mutex
   //    new_pth_mutex is valid pthread_mutex
@@ -2215,31 +2256,25 @@ void *VMK::startup(class VMKPlan *vmp,
       if (*rc) return NULL;  // could not create pthread -> bail out
     }
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():15.0"));
+#endif
   // free all the temporary arrays.... (not sarg array!!!)
-  delete [] new_lpid;
-  delete [] new_pid;
-  delete [] new_tid;
-  delete [] new_ncpet;
-  delete [] new_nadevs;
-  delete [] new_ncontributors;
   for (int i=0; i<new_npets; i++){
     delete [] new_cid[i];
     delete [] new_contributors[i];
   }
   delete [] new_cid;
   delete [] new_contributors;
-  delete [] lpid_list[0];
-  delete [] lpid_list[1];
-  delete [] lpid_list;
-  for (int i=0; i<num_diff_pids; i++)
-    delete [] pet_list[i];
-  delete [] pet_list;
   if (new_commarray_delete_flag){
     // mypet must deallocate its new_commarray
     for (int ii=0; ii<mypetNewThreadGroupSize; ii++)
       delete [] new_commarray[ii];
     delete [] new_commarray;
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():16.0"));
+#endif
   // return info that is associated with the new VMK...
   return sarg;
 }
