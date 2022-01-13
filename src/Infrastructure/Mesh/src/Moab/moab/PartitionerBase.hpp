@@ -16,7 +16,7 @@
 #ifndef __partitioner_base_hpp__
 #define __partitioner_base_hpp__
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <vector>
 
 #include "moab/MOABConfig.h"
@@ -27,99 +27,95 @@
 #include "moab_mpi.h"
 #include "moab/ParallelComm.hpp"
 #endif
-namespace moab {
+namespace moab
+{
 
-  class Interface;
-}
+class Interface;
+}  // namespace moab
 
 using namespace moab;
 
-  template <typename T>
-  class PartitionerBase 
-  {
+template < typename T >
+class PartitionerBase
+{
 
   public:
-    PartitionerBase( Interface *impl = NULL,
-                      const bool use_coords = false);
-    
+    PartitionerBase( Interface* impl = NULL, const bool use_coords = false );
+
     virtual ~PartitionerBase();
 
-    virtual ErrorCode partition_mesh_and_geometry(const double part_geom_mesh_size,
-                                                  const T nparts,
-                                                  const char *zmethod,
-                                                  const char *other_method,
-                                                  double imbal_tol,
-                                                  const int part_dim = 3,
-                                                  const bool write_as_sets = true,
-                                                  const bool write_as_tags = false,
-                                                  const int obj_weight = 0,
-                                                  const int edge_weight = 0,
-                                                  const bool part_surf = false,
-                                                  const bool ghost = false,
-                                                  const bool spherical_coords = false,
-                                                  const bool print_time = false) = 0;
+    virtual ErrorCode partition_mesh_and_geometry(
+        const double part_geom_mesh_size, const T nparts, const char* zmethod, const char* other_method,
+        double imbal_tol, const int part_dim = 3, const bool write_as_sets = true, const bool write_as_tags = false,
+        const int obj_weight = 0, const int edge_weight = 0, const bool part_surf = false, const bool ghost = false,
+        const int projection_type = 0, const bool recompute_rcb_box = false, const bool print_time = false ) = 0;
 
-    virtual ErrorCode partition_mesh( const T nparts,
-                                      const char *method,
-                                      const int part_dim = 3, 
-                                      const bool write_as_sets = true,
-                                      const bool write_as_tags = false,
+    virtual ErrorCode partition_mesh( const T nparts, const char* method, const int part_dim = 3,
+                                      const bool write_as_sets = true, const bool write_as_tags = false,
                                       const bool partition_tagged_sets = false,
-                                      const bool partition_tagged_ents = false,
-                                      const char *aggregating_tag = NULL,
-                                      const bool print_time = false) = 0;
+                                      const bool partition_tagged_ents = false, const char* aggregating_tag = NULL,
+                                      const bool print_time = false ) = 0;
 
-    virtual ErrorCode write_partition(const T nparts, Range &elems, 
-                                const T *assignment,
-                                const bool write_as_sets,
-                                const bool write_as_tags) = 0;
+    virtual ErrorCode write_partition( const T nparts, Range& elems, const T* assignment, const bool write_as_sets,
+                                       const bool write_as_tags ) = 0;
 
-      // put closure of entities in the part sets too
+    // put closure of entities in the part sets too
     virtual ErrorCode include_closure() = 0;
 
-    Range &part_sets() {return partSets;};
-    
-    const Range &part_sets() const {return partSets;};
+    Range& part_sets()
+    {
+        return partSets;
+    };
+
+    const Range& part_sets() const
+    {
+        return partSets;
+    };
+
+    void set_global_id_option( bool id_opt )
+    {
+        assign_global_ids = id_opt;
+    }
+
+    bool get_global_id_option()
+    {
+        return assign_global_ids;
+    }
 
   protected:
-
-    Interface *mbImpl;
+    Interface* mbImpl;
 #ifdef MOAB_HAVE_MPI
-    ParallelComm *mbpc;
+    ParallelComm* mbpc;
 #endif
     bool write_output;
     bool useCoords;
     bool newComm;
+    bool assign_global_ids;
 
     Range partSets;
+};
 
-  };
-
-template <typename T>
-inline
-PartitionerBase<T>::PartitionerBase(Interface *impl,
-                                  const bool use_coords)
-    : mbImpl(impl), useCoords(use_coords), newComm(false)
+template < typename T >
+inline PartitionerBase< T >::PartitionerBase( Interface* impl, const bool use_coords )
+    : mbImpl( impl ), useCoords( use_coords ), newComm( false )
 {
 #ifdef MOAB_HAVE_MPI
-  mbpc = ParallelComm::get_pcomm(mbImpl, 0);
-  if (!mbpc) {
-    mbpc = new ParallelComm(impl, MPI_COMM_WORLD, 0);
-    newComm = true;
-  }
+    mbpc = ParallelComm::get_pcomm( mbImpl, 0 );
+    if( !mbpc )
+    {
+        mbpc    = new ParallelComm( impl, MPI_COMM_WORLD, 0 );
+        newComm = true;
+    }
 #endif
 }
 
-template <typename T>
-inline
-PartitionerBase<T>::~PartitionerBase()
+template < typename T >
+inline PartitionerBase< T >::~PartitionerBase()
 {
 #ifdef MOAB_HAVE_MPI
-  if (newComm)
-    delete mbpc;
+    if( newComm ) delete mbpc;
 #endif
-  mbImpl = NULL;
+    mbImpl = NULL;
 }
 
 #endif
-

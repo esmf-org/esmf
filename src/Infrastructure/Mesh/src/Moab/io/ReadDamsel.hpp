@@ -26,7 +26,8 @@
 
 #include "damsel.h"
 
-namespace moab {
+namespace moab
+{
 
 class ReadUtilIface;
 class ParallelComm;
@@ -34,100 +35,93 @@ class Error;
 
 class ReadDamsel : public ReaderIface
 {
-public:
+  public:
+    static ReaderIface* factory( Interface* );
 
-  static ReaderIface* factory(Interface*);
+    //! Load an NC file
+    ErrorCode load_file( const char* file_name, const EntityHandle* file_set, const FileOptions& opts,
+                         const SubsetList* subset_list = 0, const Tag* file_id_tag = 0 );
 
-  //! Load an NC file
-  ErrorCode load_file(const char* file_name,
-                      const EntityHandle* file_set,
-                      const FileOptions& opts,
-                      const SubsetList* subset_list = 0,
-                      const Tag* file_id_tag = 0);
+    //! Constructor
+    ReadDamsel( Interface* impl = NULL );
 
-   //! Constructor
-   ReadDamsel(Interface* impl = NULL);
+    //! Destructor
+    virtual ~ReadDamsel();
 
-  //! Destructor
-  virtual ~ReadDamsel();
+    virtual ErrorCode read_tag_values( const char* file_name, const char* tag_name, const FileOptions& opts,
+                                       std::vector< int >& tag_values_out, const SubsetList* subset_list = 0 );
 
-  virtual ErrorCode read_tag_values(const char* file_name,
-                                    const char* tag_name,
-                                    const FileOptions& opts,
-                                    std::vector<int>& tag_values_out,
-                                    const SubsetList* subset_list = 0);
+  private:
+    //! Get contents of the container (containing file-side handles) and translate to moab-side
+    //! handles
+    ErrorCode get_contents( damsel_model m, damsel_container c, Range& ents );
 
-private:
+    //! Get contents of the container (containing file-side handles) and translate to moab-side
+    //! handles ents argument should point to already-allocated space
+    ErrorCode get_contents( damsel_model m, damsel_container c, EntityHandle* ents );
 
-  //! Get contents of the container (containing file-side handles) and translate to moab-side handles
-  ErrorCode get_contents(damsel_model m, damsel_container c, Range &ents);
+    ErrorCode init();
 
-  //! Get contents of the container (containing file-side handles) and translate to moab-side handles
-  //! ents argument should point to already-allocated space
-  ErrorCode get_contents(damsel_model m, damsel_container c, EntityHandle *ents);
+    ErrorCode parse_options( const FileOptions& opts, bool& parallel );
 
-  ErrorCode init();
+    ErrorCode process_tags( std::vector< damsel_tag_buf_type >& tag_infos );
 
-  ErrorCode parse_options(const FileOptions &opts,
-                          bool &parallel);
+    ErrorCode process_ent_info( const damsel_entity_buf_type& einfo );
 
-  ErrorCode process_tags(std::vector<damsel_tag_buf_type> &tag_infos);
+    ErrorCode process_entity_tags( int count, damsel_container tag_container, damsel_container app_cont,
+                                   Range& these_ents );
 
-  ErrorCode process_ent_info(const damsel_entity_buf_type &einfo);
+    ErrorCode process_coll_infos( std::vector< damsel_collection_buf_type >& coll_infos );
 
-  ErrorCode process_entity_tags(int count, damsel_container tag_container,
-                                damsel_container app_cont, Range &these_ents);
+    //! Convert handles in a container into handle pairs, one pair per contiguous sequence of
+    //! handles in the container
+    ErrorCode container_to_handle_pairs( damsel_container& cont, std::vector< damsel_handle >& handle_pairs );
 
-  ErrorCode process_coll_infos(std::vector<damsel_collection_buf_type> &coll_infos);
+    //! Store MOAB handles starting from start_handle, corresponding to store handles in
+    //! handle_pairs, into the entity map
+    ErrorCode insert_into_map( std::vector< damsel_handle >& handle_pairs, EntityHandle start_handle );
 
-  //! Convert handles in a container into handle pairs, one pair per contiguous sequence of handles in the container
-  ErrorCode container_to_handle_pairs(damsel_container &cont, std::vector<damsel_handle> &handle_pairs);
+    class subrange
+    {
+      public:
+        subrange( damsel_handle ch, EntityHandle s, int c ) : collh( ch ), seth( s ), count( c ) {}
+        damsel_handle collh;
+        EntityHandle seth;
+        int count;
+    };
 
-  //! Store MOAB handles starting from start_handle, corresponding to store handles in handle_pairs, into the
-  //! entity map
-  ErrorCode insert_into_map(std::vector<damsel_handle> &handle_pairs, EntityHandle start_handle);
+    //------------member variables ------------//
 
-  class subrange
-  {
-   public:
-    subrange(damsel_handle ch, EntityHandle s, int c) : collh(ch), seth(s), count(c) {}
-    damsel_handle collh;
-    EntityHandle seth;
-    int count;
-  };
+    //! Interface instance
+    Interface* mbImpl;
 
-//------------member variables ------------//
+    //! UtilIface
+    ReadUtilIface* readMeshIface;
 
-  //! Interface instance
-  Interface* mbImpl;
+    //! File name
+    std::string fileName;
 
-  //! UtilIface
-  ReadUtilIface *readMeshIface;
+    //! Whether this reader natively supports parallel semantics
+    bool nativeParallel;
 
-  //! File name
-  std::string fileName;
+    //! Parallel info
+    ParallelComm* myPcomm;
 
-  //! Whether this reader natively supports parallel semantics
-  bool nativeParallel;
+    //! Used to track file handles
+    Tag mGlobalIdTag;
 
-  //! Parallel info
-  ParallelComm *myPcomm;
+    //! map from damsel to moab handles
+    RangeMap< damsel_handle, EntityHandle, 0 > dmHandleRMap;
 
-  //! Used to track file handles
-  Tag mGlobalIdTag;
-
-  //! map from damsel to moab handles
-  RangeMap<damsel_handle, EntityHandle, 0> dmHandleRMap;
-
-  //! Keep various damsel data
-  DamselUtil dU;
+    //! Keep various damsel data
+    DamselUtil dU;
 };
 
-inline const bool operator==(const damsel_err_t &lhs, const damsel_err_t &rhs)
+inline const bool operator==( const damsel_err_t& lhs, const damsel_err_t& rhs )
 {
-  return lhs.id == rhs.id;
+    return lhs.id == rhs.id;
 }
 
-} // namespace moab
+}  // namespace moab
 
 #endif

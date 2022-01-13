@@ -11,27 +11,30 @@
 
 #include "NCWriteHelper.hpp"
 
-namespace moab {
-
-class NCWriteHOMME: public UcdNCWriteHelper
+namespace moab
 {
-public:
-  NCWriteHOMME(WriteNC* writeNC, int fileId, const FileOptions& opts, EntityHandle fileSet)
-: UcdNCWriteHelper(writeNC, fileId, opts, fileSet) {}
 
-  virtual ~NCWriteHOMME();
+class NCWriteHOMME : public UcdNCWriteHelper
+{
+  public:
+    NCWriteHOMME( WriteNC* writeNC, int fileId, const FileOptions& opts, EntityHandle fileSet )
+        : UcdNCWriteHelper( writeNC, fileId, opts, fileSet )
+    {
+    }
 
-private:
-  //! Implementation of NCWriteHelper::collect_mesh_info()
-  virtual ErrorCode collect_mesh_info();
+    virtual ~NCWriteHOMME();
 
-  //! Collect data for specified variables
-  virtual ErrorCode collect_variable_data(std::vector<std::string>& var_names, std::vector<int>& tstep_nums);
+  private:
+    //! Implementation of NCWriteHelper::collect_mesh_info()
+    virtual ErrorCode collect_mesh_info();
 
-  //! Implementation of NCWriteHelper::write_nonset_variables()
-  virtual ErrorCode write_nonset_variables(std::vector<WriteNC::VarData>& vdatas, std::vector<int>& tstep_nums);
+    //! Collect data for specified variables
+    virtual ErrorCode collect_variable_data( std::vector< std::string >& var_names, std::vector< int >& tstep_nums );
+
+    //! Implementation of NCWriteHelper::write_nonset_variables()
+    virtual ErrorCode write_nonset_variables( std::vector< WriteNC::VarData >& vdatas, std::vector< int >& tstep_nums );
 };
 
-} // namespace moab
+}  // namespace moab
 
 #endif

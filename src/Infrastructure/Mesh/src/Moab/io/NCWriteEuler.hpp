@@ -11,17 +11,20 @@
 
 #include "NCWriteHelper.hpp"
 
-namespace moab {
-
-class NCWriteEuler: public ScdNCWriteHelper
+namespace moab
 {
-public:
-  NCWriteEuler(WriteNC* writeNC, int fileId, const FileOptions& opts, EntityHandle fileSet)
-: ScdNCWriteHelper(writeNC, fileId, opts, fileSet) {}
 
-  virtual ~NCWriteEuler();
+class NCWriteEuler : public ScdNCWriteHelper
+{
+  public:
+    NCWriteEuler( WriteNC* writeNC, int fileId, const FileOptions& opts, EntityHandle fileSet )
+        : ScdNCWriteHelper( writeNC, fileId, opts, fileSet )
+    {
+    }
+
+    virtual ~NCWriteEuler();
 };
 
-} // namespace moab
+}  // namespace moab
 
 #endif
