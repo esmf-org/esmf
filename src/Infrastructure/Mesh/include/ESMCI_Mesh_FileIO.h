@@ -47,6 +47,7 @@ using namespace ESMCI;
 void ESMCI_mesh_create_from_file(char *filename, 
                                  ESMC_FileFormat_Flag fileformat, 
                                  bool convert_to_dual, bool add_user_area, 
+                                 ESMC_CoordSys_Flag coord_sys, 
                                  ESMCI::DistGrid *node_distgrid, 
                                  ESMCI::DistGrid *elem_distgrid, 
                                  Mesh **out_mesh, int *rc);

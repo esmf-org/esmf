@@ -54,5 +54,8 @@ void get_ids_from_distgrid(ESMCI::DistGrid *distgrid, std::vector<int> &ids);
 
 void get_ids_divided_evenly_across_pets(int num_ids, int local_pet, int pet_count, std::vector<int> &ids);
 
+void convert_coords_between_coord_sys(ESMC_CoordSys_Flag coord_sys_from, 
+                                      ESMC_CoordSys_Flag coord_sys_to, 
+                                      int coord_dim, int num_coords, double *coords);
 
 #endif // ESMCI_FILEIO_UTIL_H

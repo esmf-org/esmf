@@ -356,6 +356,7 @@ namespace ESMCI {
                                           ESMC_FileFormat_Flag fileformat,
                                           bool convert_to_dual, 
                                           bool add_user_area, 
+                                          ESMC_CoordSys_Flag coordSys, 
                                           ESMCI::DistGrid *node_distgrid,
                                           ESMCI::DistGrid *elem_distgrid,
                                           int *rc);

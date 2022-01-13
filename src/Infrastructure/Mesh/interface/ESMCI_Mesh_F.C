@@ -895,6 +895,7 @@ extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
                                                  ESMC_FileFormat_Flag *fileformat, 
                                                  ESMC_Logical *convertToDual,
                                                  ESMC_Logical *addUserArea,
+                                                 ESMC_CoordSys_Flag *coordSys, 
                                                  ESMCI::DistGrid **nodeDistgridpp,
                                                  ESMCI::DistGrid **elemDistgridpp,
                                                  int *rc, 
@@ -907,7 +908,15 @@ extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
   // Get C style filename
   char *C_filename = ESMC_F90toCstring(filename, filename_len);
 
+  // Convert Flags
+  bool C_convertToDual=false;
+  if (*convertToDual == ESMF_TRUE) C_convertToDual=true;
+
+  bool C_addUserArea=false;
+  if (*addUserArea == ESMF_TRUE) C_addUserArea=true;
+
   // Convert  Distgrids
+  // (Optional, so also handle that by checking for not present)
   ESMCI::DistGrid *nodeDistgrid=NULL;
   if (ESMC_NOT_PRESENT_FILTER(nodeDistgridpp) != ESMC_NULL_POINTER) {
     nodeDistgrid=*nodeDistgridpp;
@@ -918,22 +927,13 @@ extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
     elemDistgrid=*elemDistgridpp;
   }
 
-  // Convert Flags
-  bool C_convertToDual=false;
-  if (ESMC_NOT_PRESENT_FILTER(convertToDual) != ESMC_NULL_POINTER) {
-    if (*convertToDual == ESMF_TRUE) C_convertToDual=true;
-  }
-
-  bool C_addUserArea=false;
-  if (ESMC_NOT_PRESENT_FILTER(addUserArea) != ESMC_NULL_POINTER) {
-    if (*addUserArea == ESMF_TRUE) C_addUserArea=true;
-  }
 
   // Create Mesh from file
   *meshpp=MeshCap::meshcreatefromfilenew(C_filename,
-                                         *fileformat, // not optional, so not converted 
+                                         *fileformat,
                                          C_convertToDual,
                                          C_addUserArea,
+                                         *coordSys,
                                          nodeDistgrid,
                                          elemDistgrid,
                                          ESMC_NOT_PRESENT_FILTER(rc));

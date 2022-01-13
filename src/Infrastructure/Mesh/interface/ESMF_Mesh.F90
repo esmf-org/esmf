@@ -2010,7 +2010,8 @@ end function ESMF_MeshCreateFromFile
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFileNew(filename, fileformat, keywordEnforcer, &
                  convertToDual, addUserArea, maskFlag, varname, &
-                 nodalDistgrid, elementDistgrid, name, rc)
+                 nodalDistgrid, elementDistgrid, &
+                 coordSys, name, rc)
 !
 !
 ! !RETURN VALUE:
@@ -2025,6 +2026,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),           intent(in),  optional :: varname
     type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
     type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
+    type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
     character(len=*),           intent(in),  optional :: name
     integer,                    intent(out), optional :: rc
 !
@@ -2070,6 +2072,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[elementDistgrid]}]
 !         A Distgrid describing the user-specified distribution of
 !         the elements across the PETs.
+!   \item[{[coordSys]}]
+!         The coordinate system in which to store the mesh coordinate data.
+!         If this setting doesn't match the coordinate system in the file, then
+!         the coordinates in the file will be converted to this system during mesh
+!         creation. It is currently an error to convert Cartesian file coordinates
+!         into a spherical coordinate system.  
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified, then defaults to the coordinate system in the file.  
 !   \item [{[name]}]
 !         The name of the Mesh.
 !   \item [{[rc]}]
@@ -2082,6 +2092,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer::  localrc
     type(ESMF_Logical) :: localAddUserArea
     type(ESMF_Logical) :: localConvertToDual
+    type(ESMF_CoordSys_Flag) :: localCoordSys
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, nodalDistgrid, rc)
@@ -2106,13 +2117,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        localConvertToDual=convertToDual
     endif
 
+    localCoordSys=ESMF_COORDSYS_UNINIT
+    if (present(coordSys)) then
+       localCoordSys=coordSys
+    endif
+
 
     ! Call into C 
     call c_ESMC_MeshCreateFromFile(ESMF_MeshCreateFromFileNew%this, &
          filename, fileformat, &
          localConvertToDual, localAddUserArea, &
+         localCoordSys, &
          !  maskFlag, varname, & ! JUST DO STUFF FOR ESMFMESH format right now
-         nodalDistgrid, elementDistgrid, localrc)
+         nodalDistgrid, elementDistgrid, &
+         localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 

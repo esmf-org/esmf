@@ -210,3 +210,76 @@ void get_ids_divided_evenly_across_pets(int num_ids, int local_pet, int pet_coun
 }
 
 
+void convert_coords_between_coord_sys(ESMC_CoordSys_Flag coord_sys_from, 
+                                               ESMC_CoordSys_Flag coord_sys_to, 
+                                               int coord_dim, int num_coords, double *coords) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "convert_coords_between_coord_sys()"
+
+
+  // Declare handy variables
+  int localrc;
+
+  // If going to the same coord_sys nothing to do, so leave
+  if (coord_sys_from == coord_sys_to) return;
+  
+  // Get conversion factor based on from and to
+  double convert_factor=0.0; // Init to 0.0, so it's obvious if it hasn't been changed
+  if (coord_sys_from == ESMC_COORDSYS_CART) {
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                      " Currently can't convert from Cartesian coordinates",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+    
+  } else if (coord_sys_from == ESMC_COORDSYS_SPH_DEG) {
+    if (coord_sys_to == ESMC_COORDSYS_CART) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                        " Currently can't convert to Cartesian coordinates",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;
+
+    } else if (coord_sys_to == ESMC_COORDSYS_SPH_DEG) {
+      convert_factor=1.0;      
+    } else if (coord_sys_to == ESMC_COORDSYS_SPH_RAD) {
+      convert_factor=ESMC_CoordSys_Deg2Rad;      
+    } else {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                        " Unrecognized coordinate system.",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;      
+    }
+  } else if (coord_sys_from == ESMC_COORDSYS_SPH_RAD) {
+    if (coord_sys_to == ESMC_COORDSYS_CART) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                        " Currently can't convert to Cartesian coordinates",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;
+
+    } else if (coord_sys_to == ESMC_COORDSYS_SPH_DEG) {
+      convert_factor=ESMC_CoordSys_Rad2Deg;      
+    } else if (coord_sys_to == ESMC_COORDSYS_SPH_RAD) {
+      convert_factor=1.0;      
+    } else {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                        " Unrecognized coordinate system.",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;      
+    }
+  } else {
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                      " Unrecognized coordinate system.",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+
+  // Sanity check that coord_dim is at least than 2, so we don't run into problems below
+  ThrowRequire(coord_dim >= 2);
+
+  // Convert using the factor
+  double *pnt=coords; // Point at start of coords
+  for (int i=0; i<num_coords; i++) {
+
+    // Coords to convert are lat and lon in first two positions
+    pnt[0] *= convert_factor;
+    pnt[1] *= convert_factor;
+
+    // Advance to next pnt
+    pnt += coord_dim;
+  }
+}
+             
+                             

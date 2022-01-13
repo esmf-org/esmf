@@ -67,9 +67,9 @@ using namespace ESMCI;
 //  filename - file name in NULL delimited form
 //  fileformat - the format of the file
 //  convert_to_dual - specifies if mesh should be converted to dual before returning
-//                    if NULL, then user didn't speficify so default to NOT
 //  add_user_area - specifies if areas should be added to mesh. 
-//                  If NULL, then user didn't specify, so don't
+//  coord_sys - The coordsys to create the mesh with. If ESMC_COORDSYS_UNINIT, then 
+//              use the one from the file.
 //  node_distgrid - If not NULL, redist so nodes are on this distgrid
 //  elem_distgrid - If not NULL, redist so elems are on this distgrid
 //
@@ -80,6 +80,7 @@ using namespace ESMCI;
 void ESMCI_mesh_create_from_file(char *filename, 
                                  ESMC_FileFormat_Flag fileformat, 
                                  bool convert_to_dual, bool add_user_area, 
+                                 ESMC_CoordSys_Flag coord_sys, 
                                  ESMCI::DistGrid *node_distgrid, 
                                  ESMCI::DistGrid *elem_distgrid, 
                                  Mesh **out_mesh, int *rc){
@@ -197,9 +198,18 @@ void ESMCI_mesh_create_from_file(char *filename,
 
     //// Create Mesh 
 
-    // Get coordsys
-    ESMC_CoordSys_Flag coord_sys;
-    get_coordsys_from_ESMFMesh_file(pioFileDesc, filename, coord_sys);
+    // Get coordsys from file
+    ESMC_CoordSys_Flag coord_sys_file;
+    get_coordsys_from_ESMFMesh_file(pioFileDesc, filename, coord_sys_file);
+
+    // Decide which coord_sys the mesh should be created with
+    ESMC_CoordSys_Flag coord_sys_mesh;
+    if (coord_sys == ESMC_COORDSYS_UNINIT) {
+      coord_sys_mesh = coord_sys_file;
+    } else {
+      coord_sys_mesh = coord_sys;
+    }
+
 
     // Get coordDim
     PIO_Offset coordDim;
@@ -217,7 +227,7 @@ void ESMCI_mesh_create_from_file(char *filename,
 
     // Create Mesh    
     ESMCI_meshcreate(out_mesh,
-                     &pdim, &orig_sdim, &coord_sys, &localrc);
+                     &pdim, &orig_sdim, &coord_sys_mesh, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
 
@@ -253,6 +263,12 @@ void ESMCI_mesh_create_from_file(char *filename,
                                       num_node, node_ids, 
                                       nodeCoords);
 
+    // If file in different coordinate system than mesh, convert
+    if (coord_sys_file != coord_sys_mesh) {
+      convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
+                                       coordDim, num_node, nodeCoords);
+    }
+
     // Get nodeMask
     // (If not present in file, nodeMask variable will be NULL)
     int *nodeMask=NULL;
@@ -269,7 +285,7 @@ void ESMCI_mesh_create_from_file(char *filename,
     // Add nodes
     ESMCI_meshaddnodes(out_mesh, &num_node, node_ids,
                        nodeCoords, NULL, &nodeMaskIA,
-                       &coord_sys, &orig_sdim,
+                       &coord_sys_mesh, &orig_sdim,
                        &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
@@ -315,6 +331,14 @@ void ESMCI_mesh_create_from_file(char *filename,
                                         num_elem, elem_ids, 
                                         centerCoordsPresent, centerCoords);
 
+    // If center coords exist and
+    //  file in different coordinate system than mesh, convert
+    if ((centerCoords != NULL) && (coord_sys_file != coord_sys_mesh)) {
+      convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
+                                       coordDim, num_elem, centerCoords);
+    }
+    
+
     // Add elements
     ESMCI_meshaddelements(out_mesh,
                           &num_elem, elem_ids, numElementConn,
@@ -322,7 +346,7 @@ void ESMCI_mesh_create_from_file(char *filename,
                           &areaPresent, elementArea,
                           &centerCoordsPresent, centerCoords, 
                           &totNumElementConn, local_elem_conn, 
-                          &coord_sys, &orig_sdim, &localrc);
+                          &coord_sys_mesh, &orig_sdim, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       &localrc)) throw localrc;
 
