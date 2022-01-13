@@ -15,7 +15,11 @@ ifeq ("$(ESMF_BOPT)","g")
 endif
 
 ifdef ESMF_NETCDF_INCLUDE
-  PIO_CMAKE_OPTS += -DNetCDF_C_INCLUDE_DIR=$(ESMF_NETCDF_INCLUDE)/.. -DNetCDF_C_LIBRARY=$(ESMF_NETCDF_LIBPATH)/libnetcdf.a
+  ifneq ("$(wildcard $(ESMF_NETCDF_LIBPATH)/libnetcdf.a)","")
+    PIO_CMAKE_OPTS += -DNetCDF_C_INCLUDE_DIR=$(ESMF_NETCDF_INCLUDE)/.. -DNetCDF_C_LIBRARY=$(ESMF_NETCDF_LIBPATH)/libnetcdf.a
+  else
+    PIO_CMAKE_OPTS += -DNetCDF_C_INCLUDE_DIR=$(ESMF_NETCDF_INCLUDE)/.. -DNetCDF_C_LIBRARY=$(ESMF_NETCDF_LIBPATH)/libnetcdf.so
+  endif
 else
   $(error PIO requires NetCDF!!!)
 endif
