@@ -133,6 +133,20 @@ program ESMF_MeshFileIOUTest
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test coordSys conversion for ESMFMesh file."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+  
+  call check_coordSys_convert_EM_file(correct, rc)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
 #endif
@@ -997,7 +1011,7 @@ end subroutine check_mesh_from_sph_3x3_EM_file
   !
   ! 
 
-  ! This is a more through test that reads in a spherical 3x3 mesh file 
+  ! This is a more through test that reads in a Cartesian 3x3 mesh file 
   ! (that creates the mesh drawn above) and verifies that every part
   ! is correct. 
 subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
@@ -1617,6 +1631,8 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
    rc=ESMF_SUCCESS
 
 end subroutine check_mesh_from_cart_3x3_EM_file
+
+
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !
@@ -2340,6 +2356,335 @@ subroutine  check_mesh_sph_1DeC_EM_file(correct, rc)
 
 end subroutine check_mesh_sph_1DeC_EM_file
 
+! This test checks the coordinate system conversion functionality
+! It reads in a small 3x3 spherical grid specified in degrees
+! in the file and converts it to radians. The file used
+! it the same 3x3 spherical one used for other tests in this file.  
+subroutine  check_coordSys_convert_EM_file(correct, rc)
+  type(ESMF_Mesh) :: mesh
+  logical :: correct
+  integer :: rc
+  integer, pointer :: nodeIds(:),nodeOwners(:),nodeMask(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+  integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+  integer :: numElems,numOwnedElemsTst
+  integer :: numElemConns, numTriElems, numQuadElems
+  real(ESMF_KIND_R8), pointer :: elemCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, allocatable :: elemMask(:)
+  real(ESMF_KIND_R8),allocatable :: elemArea(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  type(ESMF_DistGrid) :: elemDistgrid
+  type(ESMF_Field) :: nodeField, elemField
+  integer :: i,j,k
+  integer :: numNodesTst, numElemsTst,numElemConnsTst
+  integer,allocatable :: elemIdsTst(:)
+  integer,allocatable :: elemTypesTst(:)
+  integer,allocatable :: elemConnTst(:)
+  real(ESMF_KIND_R8),allocatable :: elemAreaTst(:)
+  integer,allocatable :: nodeIdsTst(:)
+  real(ESMF_KIND_R8),allocatable :: nodeCoordsTst(:)
+  integer,allocatable :: nodeOwnersTst(:)
+  integer,allocatable :: nodeMaskTst(:)
+  integer,allocatable :: elemMaskTst(:)
+  real(ESMF_KIND_R8), allocatable :: elemCoordsTst(:)
+  logical :: nodeMaskIsPresentTst
+  logical :: elemMaskIsPresentTst
+  logical :: elemAreaIsPresentTst
+  logical :: elemCoordsIsPresentTst             
+  integer :: pdim, sdim
+  type(ESMF_CoordSys_Flag) :: coordSys
 
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+
+  ! return with an error if not 1 or 4 PETs
+  if ((petCount /= 1) .and. (petCount /=4)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+
+  ! Setup mesh info depending on the
+  ! number of PETs
+  if (petCount .eq. 1) then
+
+     ! Fill in node data
+     numNodes=16
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.0,0.0, & ! 1
+                 1.0,0.0, &  ! 2
+                 2.0,0.0, &  ! 3
+                 3.0,0.0, &  ! 4
+                 0.0,1.0, &  ! 5
+                 1.0,1.0, &  ! 6
+                 2.0,1.0, &  ! 7
+                 3.0,1.0, &  ! 8
+                 0.0,2.0, &  ! 9
+                 1.0,2.0, &  ! 10
+                 2.0,2.0, &  ! 11
+                 3.0,2.0, &  ! 12
+                  0.0,3.0, &  ! 13
+                 1.0,3.0, &  ! 14
+                 2.0,3.0, &  ! 15
+                 3.0,3.0 /)  ! 16
+
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=8
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,2,3,4,5,6,7,8,9,10/)
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.5,0.5, & ! 1
+                   1.5,0.5, & ! 2
+                   2.5,0.5, & ! 3
+                   0.5,1.5, & ! 4
+                   1.5,1.5, & ! 5
+                   2.5,1.5, & ! 6
+                   0.5,2.5, & ! 7
+                   1.5,2.5, & ! 8
+                   2.75,2.25,& ! 9
+                   2.25,2.75/)  ! 10
+
+   else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+
+     ! Fill in node data
+     numNodes=4
+
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.0,0.0, & ! 1
+                 1.0,0.0, &  ! 2
+                 0.0,1.0, &  ! 5
+                 1.0,1.0 /)  ! 6
+
+
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1/)
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.5,0.5/)  ! 1
+
+     else if (localPet .eq. 1) then
+
+     ! Fill in node data
+     numNodes=6
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/1.0,0.0, &  ! 2
+                   2.0,0.0, &  ! 3
+                  3.0,0.0, &  ! 4
+                  1.0,1.0, &  ! 6
+                  2.0,1.0, &  ! 7
+                  3.0,1.0 /)  ! 8
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=2
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/2,3/)
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/1.5,0.5, & ! 2
+                   2.5,0.5/)  ! 3
+
+
+     else if (localPet .eq. 2) then
+
+     ! Fill in node data
+     numNodes=9
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.0,1.0, &  ! 5
+                   1.0,1.0, &  ! 6
+                  2.0,1.0, &  ! 7
+                  0.0,2.0, &  ! 9
+                  1.0,2.0, &  ! 10
+                  2.0,2.0, &  ! 11
+                  0.0,3.0, &  ! 13
+                  1.0,3.0, &  ! 14
+                  2.0,3.0/)  ! 15
+
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=4
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+       !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/4,5,7,8/)
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.5,1.5, & ! 4
+                   1.5,1.5, & ! 5
+                   0.5,2.5, & ! 7
+                   1.5,2.5/)  ! 8
+
+
+     else if (localPet .eq. 3) then
+
+     ! Fill in node data
+     numNodes=6
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/2.0,1.0, &  ! 7
+                  3.0,1.0, &  ! 8
+                  2.0,2.0, &  ! 11
+                  3.0,2.0, &  ! 12
+                  2.0,3.0, &  ! 15
+                  3.0,3.0 /)  ! 16
+
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/6,9,10/)
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/2.5,1.5, & ! 6
+                   2.75,2.25,& ! 9
+                   2.25,2.75/)  ! 10
+
+     endif
+   endif
+
+
+   ! Create distgrid to ensure that elements are created on the
+   ! same PET as described above
+   elemdistgrid=ESMF_DistGridCreate(elemIds, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+  
+
+   ! Read mesh from file that's the same as the one described by info set up above
+   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_3x3_esmf.nc", &
+        fileformat=ESMF_FILEFORMAT_ESMFMESH, &
+        addUserArea=.true., &
+        coordSys=ESMF_COORDSYS_SPH_RAD, &
+        elementDistgrid=elemDistgrid, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+
+   ! Init correct to true before looking for problems
+   correct=.true.
+
+   ! Get dim and coord info
+   call ESMF_MeshGet(mesh, &
+        parametricDim=pdim, &
+        spatialDim=sdim, &
+        coordSys=coordSys, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Check Counts
+   if (pdim .ne. 2) correct=.false.
+   if (sdim .ne. 2) correct=.false.
+   if (coordSys .ne. ESMF_COORDSYS_SPH_RAD) correct=.false.
+
+   ! Allocate space for tst arrays
+   allocate(nodeCoordsTst(2*numNodes))
+   allocate(elemCoordsTst(2*numElems))
+
+ ! XMRKX
+   ! Get Information
+   call ESMF_MeshGet(mesh, &
+        nodeCoords=nodeCoordsTst, &
+        elementCoords=elemCoordsTst, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Check node coords
+   k=1
+   do i=1,numNodes ! Loop over nodes
+      do j=1,2 ! Loop over coord spatial dim
+         if (nodeCoords(k)*ESMF_COORDSYS_DEG2RAD .ne. nodeCoordsTst(k)) correct=.false.
+         k=k+1
+      enddo
+   enddo
+
+  ! check elem coords
+   k=1
+   do i=1,numElems ! Loop over nodes
+      do j=1,2 ! Loop over coord spatial dim
+         if (elemCoords(k)*ESMF_COORDSYS_DEG2RAD .ne. elemCoordsTst(k)) correct=.false.
+         k=k+1
+      enddo
+   enddo
+
+   ! Debug output
+   !write(*,*) "elemCoords   =",elemCoords
+   !write(*,*) "elemCoordsTst=",elemCoordsTst
+
+   ! deallocate node data
+   deallocate(nodeCoords)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemCoords)
+
+   ! Deallocate tst Arrays
+   deallocate(nodeCoordsTst)
+   deallocate(elemCoordsTst)
+
+
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+  ! Get rid of elemDistgrid
+  call ESMF_DistGridDestroy(elemDistgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine check_coordSys_convert_EM_file
 
 end program ESMF_MeshFileIOUTest
