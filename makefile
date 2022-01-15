@@ -88,6 +88,8 @@ endif
 	-@echo "--------------------------------------------------------------"
 	-@echo "Make version:"; $(MAKE) -v; echo ""
 	-@echo "--------------------------------------------------------------"
+	-@echo "CMake version:"; cmake --version; echo ""
+	-@echo "--------------------------------------------------------------"
 	-@echo "Fortran Compiler version:"; $(ESMF_F90COMPILER_VERSION); echo ""
 	-@echo "--------------------------------------------------------------"
 	-@echo "C++ Compiler version:"; $(ESMF_CXXCOMPILER_VERSION); echo "" 
