@@ -83,7 +83,7 @@ program ESMF_FieldIOUTest
   integer      :: localPet, petCount, tlb(2), tub(2)
   integer :: elem_tlb(1), elem_tub(1), elem_tc(1)
   integer :: tlb3(3), tub3(3), tlb4(3), tub4(3)
-  integer :: i, j, t, endtime, k, ii, jj
+  integer :: i, j, t, endtime, k
   logical :: failed
   real(ESMF_KIND_R8) :: Maxvalue, diff
 #if defined ESMF_NETCDF
@@ -416,7 +416,7 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "unexpected dimensions for field"
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))  
   ncstat = nf90_inquire_variable(ncid, varid, ndims=ndims, dimids=dimids)
-  call ESMF_Test((.not.ESMF_LogFoundNetCDFError(ncstat) .and. ndims==2 .and. dimids(1)==dim2id .and. dimids(2)==dim1id), &
+  call ESMF_Test((.not.ESMF_LogFoundNetCDFError(ncstat) .and. ndims==2 .and. dimids(1)==dim1id .and. dimids(2)==dim2id), &
        name, failMsg, result, ESMF_SRCLINE)
 #else
   call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE) 
@@ -426,30 +426,21 @@ program ESMF_FieldIOUTest
   write(name, *) "Confirm NetCDF data - check data for field"
   write(failMsg, *) "unexpected data for field"
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))  
-  allocate(ncdata(30,15))
+  allocate(ncdata(15,30))
   ncstat = nf90_get_var(ncid, varid, ncdata)
   if (ESMF_LogFoundNetCDFError(ncstat, file=ESMF_FILENAME, rcToReturn=rc)) &
        call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! reconstruct expected data
   maxvalue = 0.0
-  jj=0
   do j = lbound(ncdata, 2), ubound(ncdata, 2)
-     ii=0
      do i = lbound(ncdata, 1), ubound(ncdata, 1)
-        ii=ii+1
-        if (i==1 .or. i==16) then
-           jj=jj+1
-        endif
-        if (i==16) then
-           ii=1
-        endif
-        !print *, "i, j=", i, j, " ii, jj", ii, jj, "val = ", ncdata(i,j) , " expected = ", ii*100.0 + jj
-        diff = abs(ncdata(i,j) - (ii*100 + jj))
+        !print *, "i, j = (", i, j, ") val = ", ncdata(i,j), " expected", i*100 + j
+        diff = abs(ncdata(i,j) - (i*100 + j))
         if (maxvalue .le. diff) maxvalue = diff
      enddo
   enddo
-  
+     
   deallocate(ncdata)
   call ESMF_Test((maxvalue .lt. 1.e-14), name, failMsg, result, ESMF_SRCLINE)
 #else
