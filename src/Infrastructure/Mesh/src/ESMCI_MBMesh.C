@@ -575,6 +575,14 @@ void MBMesh::get_sorted_orig_elems(std::vector<EntityHandle> &orig_elems) {
       // Skip ones with orig_pos<0 (they are not from original creation)
       if (orig_pos < ORIG_POS_MIN_OUTPUT) continue;
 
+      // Get Owner
+      int owner;
+      merr=mesh->tag_get_data(owner_tag, &elem, 1, &owner);
+      ESMC_CHECK_MOAB_THROW(merr);
+
+      // Skip elements not owned
+      if (owner != localPet) continue;
+
       // Stick in list
       pos_and_elems.push_back(std::make_pair(orig_pos,elem));
     }
