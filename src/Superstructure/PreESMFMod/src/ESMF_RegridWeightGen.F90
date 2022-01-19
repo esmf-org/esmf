@@ -54,6 +54,8 @@ module ESMF_RegridWeightGenMod
 
   implicit none
 
+  private
+
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
