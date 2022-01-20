@@ -26,7 +26,18 @@ program ESMF_ArrayIOUTest
 ! !USES:
   use ESMF_TestMod     ! test methods
   use ESMF
-  
+
+! -------------------------------------------------------------------------
+! -- The sole purpose of the netcdf/pnetcdf use statements is to trigger a
+! -- compile-time error in case the ESMF module above were to "leak" NetCDF
+! -- symbols.
+#if (defined ESMF_NETCDF)
+  use netcdf, only: nf90_nowrite, nf90_noerr
+#elif (defined ESMF_PNETCDF)
+  use pnetcdf, only: nf90_nowrite, nf90_noerr
+#endif
+! -------------------------------------------------------------------------
+
   implicit none
 
 !-------------------------------------------------------------------------

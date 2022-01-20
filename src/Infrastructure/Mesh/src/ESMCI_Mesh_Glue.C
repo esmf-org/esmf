@@ -683,12 +683,12 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
 
 
 void ESMCI_meshaddelements(Mesh **meshpp,
-                                              int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
-                                              int *_areaPresent, double *elemArea,
-                                              int *_elemCoordsPresent, double *elemCoords,
-                                              int *_num_elemConn, int *elemConn, 
-                                              ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                                              int *rc)
+                           int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
+                           int *_areaPresent, double *elemArea,
+                           int *_elemCoordsPresent, double *elemCoords,
+                           int *_num_elemConn, int *elemConn, 
+                           ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
+                           int *rc)
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshaddelements()"
 
@@ -1895,9 +1895,31 @@ void ESMCI_MeshGetElemCount(Mesh *mesh, int *elemCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetElemCount()"
 
-    *elemCount = mesh->num_elems();
+  // If split, only count orig elements
+  if (mesh->is_split) {
 
-    if(rc != NULL) *rc = ESMF_SUCCESS;
+    // Count non-split elements
+    int num_nonsplit_elems=0;
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj *elem = &(*ei);
+      
+      // If it's a split element, then skip
+      if (elem->get_id() > mesh->max_non_split_id) continue;
+      
+      // Count
+      num_nonsplit_elems++;
+    }
+    
+    // Set in output
+    *elemCount = num_nonsplit_elems;
+
+  } else { // ...otherwise, just get usual elem count
+    *elemCount = mesh->num_elems();
+  }
+
+  // return success
+  if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
 
@@ -2006,16 +2028,22 @@ void ESMCI_MeshGetElemInfoPresence(Mesh *mesh,
 #define ESMC_METHOD "ESMCI_MeshGetElemInfoPresence()"
 
   // Check if element mask is present
-  *elemMaskIsPresent=0;
-  if (mesh->GetField("elem_mask_val")) *elemMaskIsPresent=1;
+  if (elemMaskIsPresent) {
+    *elemMaskIsPresent=0;
+    if (mesh->GetField("elem_mask_val")) *elemMaskIsPresent=1;
+  }
 
   // Check if element area is present
-  *elemAreaIsPresent=0;
-  if (mesh->GetField("elem_area")) *elemAreaIsPresent=1;
+  if (elemAreaIsPresent) {
+    *elemAreaIsPresent=0;
+    if (mesh->GetField("elem_area")) *elemAreaIsPresent=1;
+  }
 
   // Check if element coords are present
-  *elemCoordsIsPresent=0;
-  if (mesh->GetField("elem_coordinates")) *elemCoordsIsPresent=1;
+  if (elemCoordsIsPresent) {
+    *elemCoordsIsPresent=0;
+    if (mesh->GetField("elem_coordinates")) *elemCoordsIsPresent=1;
+  }
 
   // return success
   if (rc != NULL) *rc = ESMF_SUCCESS;
