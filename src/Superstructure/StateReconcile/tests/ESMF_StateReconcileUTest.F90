@@ -28,15 +28,15 @@ subroutine comp_dummy(gcomp, rc)
 end subroutine comp_dummy
 
 
-! Initialize routine which creates "field1" on PETs 0 and 1
+! Initialize routine that sets "istate" on PETs 0 and 1
 subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: istate, ostate
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field
-    type(ESMF_State) :: neststate
+    type(ESMF_Field)      :: field
+    type(ESMF_State)      :: neststate
     type(ESMF_FieldBundle):: fb
     type(ESMF_Grid)       :: grid
     integer               :: i
@@ -44,7 +44,7 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
 
     print *, "i am comp1_init"
 
-    rc = ESMF_FAILURE
+    rc = ESMF_SUCCESS
 
     field = ESMF_FieldEmptyCreate(name="Comp1 Field", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -95,22 +95,22 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
       file=FILENAME)) &
       return  ! bail out
 
-do i=1,FB_MEMBER_COUNT
-    write(fieldName,'("Comp1 Field ", I2, " in FB")') i
+    do i=1,FB_MEMBER_COUNT
+      write(fieldName,'("Comp1 Field ", I2, " in FB")') i
 
-    field = ESMF_FieldCreate(name=trim(fieldName), grid=grid, &
-      typekind=ESMF_TYPEKIND_R8, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      field = ESMF_FieldCreate(name=trim(fieldName), grid=grid, &
+        typekind=ESMF_TYPEKIND_R8, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
 
-    call ESMF_FieldBundleAdd(fb, (/field/), rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-enddo
+      call ESMF_FieldBundleAdd(fb, (/field/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    enddo
 
     call ESMF_StateAdd(istate, (/fb/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -118,16 +118,23 @@ enddo
       file=FILENAME)) &
       return  ! bail out
 
+    ! store the grid inside gcomp to provide access during run method for check
+    call ESMF_GridCompSet(gcomp, grid=grid, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
 end subroutine comp1_init
 
-! Initialize routine which creates "field2" on PETs 2 and 3
+! Initialize routine that sets "istate" on PETs 2 and 3
 subroutine comp2_init(gcomp, istate, ostate, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: istate, ostate
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field
+    type(ESMF_Field)      :: field
     type(ESMF_FieldBundle):: fb
     type(ESMF_Grid)       :: grid
     integer               :: i
@@ -135,7 +142,7 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
 
     print *, "i am comp2_init"
 
-    rc = ESMF_FAILURE
+    rc = ESMF_SUCCESS
 
     field = ESMF_FieldEmptyCreate(name="Comp2 Field", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -162,22 +169,22 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
       file=FILENAME)) &
       return  ! bail out
 
-do i=1,FB_MEMBER_COUNT
-    write(fieldName,'("Comp2 Field ", I2, " in FB")') i
+    do i=1,FB_MEMBER_COUNT
+      write(fieldName,'("Comp2 Field ", I2, " in FB")') i
 
-    field = ESMF_FieldCreate(name=trim(fieldName), grid=grid, &
-      typekind=ESMF_TYPEKIND_R8, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      field = ESMF_FieldCreate(name=trim(fieldName), grid=grid, &
+        typekind=ESMF_TYPEKIND_R8, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
 
-    call ESMF_FieldBundleAdd(fb, (/field/), rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-enddo
+      call ESMF_FieldBundleAdd(fb, (/field/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    enddo
 
     call ESMF_StateAdd(istate, (/fb/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -185,9 +192,126 @@ enddo
       file=FILENAME)) &
       return  ! bail out
 
+    ! store the grid inside gcomp to provide access during run method for check
+    call ESMF_GridCompSet(gcomp, grid=grid, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
 end subroutine comp2_init
 
-! Finalize routine which destroys "field1" on PETs 0 and 1
+! Run routine to tests "istate" on PETs 0 and 1
+subroutine comp1_run(gcomp, istate, ostate, clock, rc)
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: istate, ostate
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_Field)      :: field
+    type(ESMF_FieldBundle):: fb
+    type(ESMF_Grid)       :: grid, gridCheck
+    integer               :: i
+    character(40)         :: fieldName
+
+    print *, "i am comp1_run"
+
+    rc = ESMF_SUCCESS
+
+    call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_StateGet(istate, "Comp1 FieldBundle", fb, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    do i=1,FB_MEMBER_COUNT
+      write(fieldName,'("Comp1 Field ", I2, " in FB")') i
+
+      call ESMF_FieldBundleGet(fb, fieldName=trim(fieldName), field=field, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
+      call ESMF_FieldGet(field, grid=gridCheck, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
+      if (gridCheck /= grid) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+          msg="The actual grid object has been changed!", &
+          line=__LINE__, file=FILENAME, &
+          rcToReturn=rc)
+        return
+      endif
+    enddo
+
+end subroutine comp1_run
+
+! Run routine to tests "istate" on PETs 2 and 3
+subroutine comp2_run(gcomp, istate, ostate, clock, rc)
+    type(ESMF_GridComp)  :: gcomp
+    type(ESMF_State)     :: istate, ostate
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    type(ESMF_Field)      :: field
+    type(ESMF_FieldBundle):: fb
+    type(ESMF_Grid)       :: grid, gridCheck
+    integer               :: i
+    character(40)         :: fieldName
+
+    print *, "i am comp2_run"
+
+    rc = ESMF_SUCCESS
+
+    call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_StateGet(istate, "Comp2 FieldBundle", fb, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    do i=1,FB_MEMBER_COUNT
+      write(fieldName,'("Comp2 Field ", I2, " in FB")') i
+
+      call ESMF_FieldBundleGet(fb, fieldName=trim(fieldName), field=field, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
+      call ESMF_FieldGet(field, grid=gridCheck, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
+      if (gridCheck /= grid) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+          msg="The actual grid object has been changed!", &
+          line=__LINE__, file=FILENAME, &
+          rcToReturn=rc)
+        return
+      endif
+    enddo
+
+end subroutine comp2_run
+
+! Initialize routine that destroys members of "istate" on PETs 0 and 1
 subroutine comp1_final(gcomp, istate, ostate, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: istate, ostate
@@ -253,7 +377,7 @@ subroutine comp1_final(gcomp, istate, ostate, clock, rc)
 
 end subroutine comp1_final
 
-! Finalize routine which destroys "field2" on PETs 2 and 3
+! Initialize routine that destroys members of "istate" on PETs 0 and 1
 subroutine comp2_final(gcomp, istate, ostate, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: istate, ostate
@@ -307,7 +431,7 @@ subroutine comp1_sg_init(gcomp, istate, ostate, clock, rc)
 
     print *, "comp1_sg_init: entered"
 
-    rc = ESMF_FAILURE
+    rc = ESMF_SUCCESS
 
 print *, 'comp1_sg_init: creating grid1'
     grid1 = ESMF_GridCreateNoPeriDim(  &
@@ -683,6 +807,22 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_RUN, &
+      userRoutine=comp1_run, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetEntryPoint"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_METHOD_RUN, &
+      userRoutine=comp2_run, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompSetEntryPoint"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_FINALIZE, &
       userRoutine=comp1_final, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -764,6 +904,20 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompRun(comp1, importState=state1, userrc=urc, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompRun"
+    call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompRun(comp2, importState=state1, userrc=urc, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompRun"
+    call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
     call ESMF_StateValidate(state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateValidate"
@@ -814,6 +968,20 @@ if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 call StateLog(state1, rc=rc)
 if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompRun(comp1, importState=state1, userrc=urc, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompRun"
+    call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_GridCompRun(comp2, importState=state1, userrc=urc, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling GridCompRun"
+    call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(urc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
