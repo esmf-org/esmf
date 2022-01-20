@@ -34,25 +34,28 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field1, field1nest
+    type(ESMF_Field) :: field
     type(ESMF_State) :: neststate
+    type(ESMF_FieldBundle):: fb
+    type(ESMF_Grid)       :: grid
 
     print *, "i am comp1_init"
 
     rc = ESMF_FAILURE
-    field1 = ESMF_FieldEmptyCreate(name="Comp1 Field", rc=rc)
+
+    field = ESMF_FieldEmptyCreate(name="Comp1 Field", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    call ESMF_StateAdd(istate, (/field1/), rc=rc)
+    call ESMF_StateAdd(istate, (/field/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    neststate = ESMF_StateCreate(name="Nested State", rc=rc)
+    neststate = ESMF_StateCreate(name="Comp1 Nested State", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -64,13 +67,45 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
       file=FILENAME)) &
       return  ! bail out
 
-    field1nest = ESMF_FieldEmptyCreate(name="Comp1 Field in nested State", rc=rc)
+    field = ESMF_FieldEmptyCreate(name="Comp1 Field in Nested State", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    call ESMF_StateAdd(neststate, (/field1nest/), rc=rc)
+    call ESMF_StateAdd(neststate, (/field/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    grid = ESMF_GridCreateNoPeriDim(name="Comp1 Grid", regDecomp=(/2,1/), &
+      minIndex=(/1,1/), maxIndex=(/10,20/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    field = ESMF_FieldCreate(name="Comp1 Field in FB", grid=grid, &
+      typekind=ESMF_TYPEKIND_R8, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    fb = ESMF_FieldBundleCreate(name="Comp1 FieldBundle", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_FieldBundleAdd(fb, (/field/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_StateAdd(istate, (/fb/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -85,18 +120,53 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field2
+    type(ESMF_Field) :: field
+    type(ESMF_FieldBundle):: fb
+    type(ESMF_Grid)       :: grid
 
     print *, "i am comp2_init"
 
     rc = ESMF_FAILURE
-    field2 = ESMF_FieldEmptyCreate(name="Comp2 Field", rc=rc)
+
+    field = ESMF_FieldEmptyCreate(name="Comp2 Field", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    
-    call ESMF_StateAdd(istate, (/field2/), rc=rc)
+
+    call ESMF_StateAdd(istate, (/field/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    grid = ESMF_GridCreateNoPeriDim(name="Comp2 Grid", regDecomp=(/1,2/), &
+      minIndex=(/1,1/), maxIndex=(/20,10/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    field = ESMF_FieldCreate(name="Comp2 Field in FB", grid=grid, &
+      typekind=ESMF_TYPEKIND_R8, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    fb = ESMF_FieldBundleCreate(name="Comp2 FieldBundle", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_FieldBundleAdd(fb, (/field/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_StateAdd(istate, (/fb/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -111,42 +181,68 @@ subroutine comp1_final(gcomp, istate, ostate, clock, rc)
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field1, field1nest
+    type(ESMF_Field) :: field
     type(ESMF_State) :: neststate
+    type(ESMF_FieldBundle):: fb
+    type(ESMF_Grid)       :: grid
 
     print *, "i am comp1_final"
 
-    call ESMF_StateGet(istate, "Comp1 Field", field1,  rc=rc)
+    call ESMF_StateGet(istate, "Comp1 Field", field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    call ESMF_FieldDestroy(field1, rc=rc)
+    call ESMF_FieldDestroy(field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    call ESMF_StateGet(istate, "Nested State", neststate,  rc=rc)
+    call ESMF_StateGet(istate, "Comp1 Nested State", neststate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    call ESMF_StateGet(neststate, "Comp1 Field in nested State", field1nest,  rc=rc)
+    call ESMF_StateGet(neststate, "Comp1 Field in Nested State", field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    call ESMF_FieldDestroy(field1nest, rc=rc)
+    call ESMF_FieldDestroy(field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
     call ESMF_StateDestroy(neststate, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_StateGet(istate, "Comp1 FieldBundle", fb, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_FieldBundleGet(fb, "Comp1 Field in FB", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_FieldDestroy(field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_FieldBundleDestroy(fb, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -161,24 +257,50 @@ subroutine comp2_final(gcomp, istate, ostate, clock, rc)
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field2
+    type(ESMF_Field) :: field
+    type(ESMF_FieldBundle):: fb
+    type(ESMF_Grid)       :: grid
 
     print *, "i am comp2_final"
 
-    call ESMF_StateGet(istate, "Comp2 Field", field2,  rc=rc)
+    call ESMF_StateGet(istate, "Comp2 Field", field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    call ESMF_FieldDestroy(field2, rc=rc)
+    call ESMF_FieldDestroy(field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_StateGet(istate, "Comp2 FieldBundle", fb, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_FieldBundleGet(fb, "Comp2 Field in FB", field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_FieldDestroy(field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_FieldBundleDestroy(fb, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
 end subroutine comp2_final
-    
+
 
 ! Initialize routine which creates "field1"and "field2" - sharing a Grid
 subroutine comp1_sg_init(gcomp, istate, ostate, clock, rc)
@@ -256,7 +378,7 @@ subroutine comp1_sg_final(gcomp, istate, ostate, clock, rc)
 
     print *, "i am comp1_sg_final"
 
-    call ESMF_StateGet(istate, "Field_sg1", field1,  rc=rc)
+    call ESMF_StateGet(istate, "Field_sg1", field1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -268,7 +390,7 @@ subroutine comp1_sg_final(gcomp, istate, ostate, clock, rc)
       file=FILENAME)) &
       return  ! bail out
 
-    call ESMF_StateGet(istate, "Field_sg2", field2,  rc=rc)
+    call ESMF_StateGet(istate, "Field_sg2", field2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
