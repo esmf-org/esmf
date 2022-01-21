@@ -60,6 +60,7 @@ module ESMF_InternalStateMod
   public ESMF_GridCompGetInternalState, ESMF_GridCompSetInternalState
   public ESMF_CplCompGetInternalState,  ESMF_CplCompSetInternalState
   public ESMF_UserCompGetInternalState, ESMF_UserCompSetInternalState
+  public c_ESMC_InternalStateGetInfo, c_ESMC_InternalStateGetLabels
 #endif
 
 !==============================================================================
@@ -122,6 +123,19 @@ module ESMF_InternalStateMod
       type(*)                 :: table
       character(*), optional  :: label
       type(*)                 :: internalState
+      integer                 :: rc
+    end subroutine
+
+    subroutine c_ESMC_InternalStateGetInfo(table, count, maxLen, rc)
+      type(*)                 :: table
+      integer                 :: count
+      integer                 :: maxLen
+      integer                 :: rc
+    end subroutine
+
+    subroutine c_ESMC_InternalStateGetLabels(table, labelList, rc)
+      type(*)                 :: table
+      character(*)            :: labelList(*)
       integer                 :: rc
     end subroutine
 
