@@ -19,6 +19,7 @@ SOURCEC	  = \
             ESMCI_MeshCXX.C \
             ESMCI_MeshDual.C \
             ESMCI_MeshRedist.C \
+            ESMCI_Mesh_SplitMerge.C \
             ESMCI_OTree.C \
             ESMCI_Regrid_Nearest.C \
             ESMCI_Rendez_Nearest.C \
