@@ -148,7 +148,7 @@ subroutine ESMF_InfoCacheUpdateFields(self, target, vmIdMap, rc)
   type(ESMF_InfoDescribe) :: idesc
 
   call idesc%Initialize(createInfo=.true., addBaseAddress=.true., vmIdMap=vmIdMap, &
-    vmIdMapGeomExc=.true., rc=rc)
+    vmIdMapGeomExc=.false., rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call idesc%Update(target, "", rc=rc)

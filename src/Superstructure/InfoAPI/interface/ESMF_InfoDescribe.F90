@@ -390,9 +390,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (vmids_are_equal) exit
       end do
 
-      if (.not. vmids_are_equal) then
-        if (ESMF_LogFoundError(ESMF_FAILURE, msg="VMId not found", ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
+    else
+      vmids_are_equal = .false.
     end if
 
     if (l_base_is_valid) then
@@ -401,7 +400,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       call itoa(id_base, c_id_base)
 
-      if (should_search_for_vmid) then
+      if (vmids_are_equal) then
         call itoa(vmid_int, c_vmid)
         l_uname = trim(c_vmid)//"-"//trim(c_id_base)//"-"//trim(name)
       else
