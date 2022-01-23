@@ -678,6 +678,7 @@ void PIO_Handler::arrayRead(
       frame = -1;
     }
     if (unlim >= 0 && frame > 0) {
+        PRINTMSG("calling setframe for read_darray, frame = " << frame);
         PIOc_setframe(pioFileDesc, vardesc, frame-1);
     }
   }
@@ -928,12 +929,12 @@ void PIO_Handler::arrayWrite(
     MPI_Offset dimLen;
     int ioDimNum = 0;
     for (int i = 0; i < nDims; i++) {
-      PRINTMSG("pio_cpp_inq_dimlen for dim = " << i);
       piorc = PIOc_inq_dimlen(pioFileDesc, dimIds[i], &dimLen);
       if (!CHECKPIOERROR(piorc, "Error retrieving dimension information",
           ESMF_RC_FILE_WRITE, (*rc))) {
         return;
       }
+      PRINTMSG("PIOc_inq_dimlen for dim = " << i << " dimLen="<<dimLen);
 
       if (dimIds[i] == unlim) {
         if (timeFrame <= 0) {
@@ -951,7 +952,8 @@ void PIO_Handler::arrayWrite(
             return;
           }
         }
-      } else if (dimLen != ioDims[ioDimNum]) {
+      } else if (dimLen != ioDims[nDims - ioDimNum - 1 - int(hasTimeDim)]) {
+          PRINTMSG("dimLen = "<<dimLen<<", ioDims["<<nDims-ioDimNum-1-int(hasTimeDim)<<"]="<<ioDims[nDims-ioDimNum-1 - int(hasTimeDim)]);
           if (ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_UNEXPECTED,
               "Variable dimension in file does not match array",
               ESMC_CONTEXT, rc)) {
@@ -1017,11 +1019,11 @@ void PIO_Handler::arrayWrite(
             return;
           }
         }
-        ncDims[i] = dimid_existing;
+        ncDims[nioDims - i - 1] = dimid_existing;
       } else {
         PRINTMSG("Defining dimension " << i);
         piorc = PIOc_def_dim(pioFileDesc, axis.c_str(),
-                                ioDims[i], &ncDims[i]);
+                                ioDims[i], &ncDims[nioDims - i - 1]);
         if (!CHECKPIOERROR(piorc, std::string("Defining dimension: ") + axis,
             ESMF_RC_FILE_WRITE, (*rc))) {
           return;
@@ -1055,6 +1057,7 @@ void PIO_Handler::arrayWrite(
   if ((getFormat() != ESMF_IOFMT_BIN) && !varExists) {
     PRINTMSG("niodims = " << nioDims);
     PRINTMSG("basepiotype = " << basepiotype);
+     
     piorc = PIOc_def_var(pioFileDesc, varname.c_str(), basepiotype,
                          nioDims, ncDims, &vardesc);
     if (!CHECKPIOERROR(piorc, "Attempting to define PIO vardesc for: " + varname,
@@ -1066,9 +1069,13 @@ void PIO_Handler::arrayWrite(
 #ifdef ESMFIO_DEBUG
     int nvdims;
     PIOc_inq_varndims(pioFileDesc, vardesc, &nvdims);
-    PRINTMSG("calling setframe, ndims = " << nvdims);
+    PRINTMSG("calling setframe, timeFrame = " << timeFrame);
 #endif // ESMFIO_DEBUG
-    PIOc_setframe(pioFileDesc, vardesc, timeFrame-1);
+    piorc = PIOc_setframe(pioFileDesc, vardesc, timeFrame-1);
+    if (!CHECKPIOERROR(piorc, "Attempting to setframe for: " + varname,
+        ESMF_RC_FILE_WRITE, (*rc))) {
+      return;
+    }
   }
 #ifdef ESMFIO_DEBUG
   else if (getFormat() != ESMF_IOFMT_BIN) {
@@ -2072,10 +2079,12 @@ int PIO_IODescHandler::constructPioDecomp(
   }
   PIOc_set_log_level(PIO_DEBUG_LEVEL);
 #endif // ESMFIO_DEBUG
-
+  int ddims[handle->nDims];
+  for(int i=0; i<handle->nDims; i++)
+      ddims[i] = handle->dims[handle->nDims - i - 1];
   // Create the decomposition
   PIOc_InitDecomp(iosys, handle->basepiotype, handle->nDims,
-                  handle->dims, pioDofCount, pioDofList,
+                  ddims, pioDofCount, pioDofList,
                   &(handle->io_descriptor), &rearr, NULL, NULL);
   PRINTMSG("after call to PIOc_initdecomp_dof");
 #ifdef ESMFIO_DEBUG

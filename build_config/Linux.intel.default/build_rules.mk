@@ -40,6 +40,7 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lmpi++
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
+ESMF_MPILAUNCHOPTIONS   = -p "%g: "
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
@@ -274,7 +275,7 @@ ESMF_CXXLINKRPATHS += \
 ############################################################
 # Determine where icpc's libraries are located
 #
-ESMF_F90LINKPATHS += 
+ESMF_F90LINKPATHS +=
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
@@ -287,7 +288,7 @@ ESMF_F90LINKLIBS += -cxxlib -lrt -ldl
 ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") -lrt -ldl
 
 ############################################################
-# Linker option that ensures that the specified libraries are 
+# Linker option that ensures that the specified libraries are
 # used to also resolve symbols needed by other libraries.
 #
 ESMF_F90LINKOPTS          += -Wl,--no-as-needed

@@ -150,8 +150,8 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! Verifying that a Grid can be created
   grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
-    regDecomp=(/2,2/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-    name="landgrid", rc=rc)
+       regDecomp=(/2,2/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+       name="landgrid", rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Creating a Grid to use in Field Tests"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -172,6 +172,13 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! Create Field
   field_w=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
+           totalLWidth=(/1,1/), totalUWidth=(/1,2/), &
+           name="temperature",  rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Create a field from grid and fortran dummy array"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! Create Field
+  field_r=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
            totalLWidth=(/1,1/), totalUWidth=(/1,2/), &
            name="temperature",  rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -213,7 +220,7 @@ program ESMF_FieldIOUTest
        iofmt=ESMF_IOFMT_NETCDF_64BIT_OFFSET,  &
        overwrite=.true.,  &
        status=ESMF_FILESTATUS_UNKNOWN, rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "Did not return ESMF_SUCCESS: ", rc
   write(name, *) "Write Fortran array in Field"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -221,8 +228,36 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+!  call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!  stop
 
-  
+  write(failMsg, *) ""
+  write(name, *) "Read data just written to field_r"
+  call ESMF_FieldRead(field_r, fileName="field.nc", rc=rc)
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+
+  call ESMF_FieldGet(field_r, localDe=0, farrayPtr=Farray_r, &
+      exclusiveLBound=exclusiveLBound, &
+      exclusiveUBound=exclusiveUBound, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Get Farray_r from field"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  diff = 0.0
+  do j=exclusiveLBound(2),exclusiveUBound(2)
+  do i=exclusiveLBound(1),exclusiveUBound(1)
+     diff = diff + abs(Farray_w(i,j) - Farray_r(i,j))
+  enddo
+  enddo
+  write(failMsg, *) "Field read did not match field write"
+  write(name, *) "Compare field read to field write"
+  call ESMF_Test(diff == 0.0, name, failMsg, result, ESMF_SRCLINE)
+
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Create Field without halo region
@@ -516,9 +551,9 @@ program ESMF_FieldIOUTest
            overwrite=.true., rc=rc)
     end select
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-    if(rc.ne.ESMF_SUCCESS) then
-      countfail = countfail + 1
-    endif
+    write(name, *) "Write field_time.nc at time t=",t," in a loop"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     if(rc.ne.ESMF_RC_LIB_NOT_PRESENT) then
       countfail = countfail + 1
@@ -546,9 +581,10 @@ program ESMF_FieldIOUTest
     call ESMF_FieldWrite(field_s, fileName="fieldNoHalo_time.nc", timeslice=t,   &
          status=statusFlag, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-    if(rc.ne.ESMF_SUCCESS) then
-      countfail = countfail + 1
-    endif
+    ! Loop of time is ended. Check for failure.
+    write(name, *) "Write fieldNoHalo_time.nc at time t=",t," in a loop"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     if(rc.ne.ESMF_RC_LIB_NOT_PRESENT) then
       countfail = countfail + 1
@@ -560,10 +596,6 @@ program ESMF_FieldIOUTest
 
   enddo  ! t
 
-! Loop of time is ended. Check for failure.
-  write(name, *) "Write Farray_tw at different time t in a loop"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_Test((countfail==0), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
