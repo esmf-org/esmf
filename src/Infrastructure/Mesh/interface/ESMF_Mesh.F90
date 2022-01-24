@@ -39,6 +39,8 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 
   ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -422,6 +424,27 @@ module ESMF_MeshMod
     module procedure ESMF_MeshNE
 
   end interface
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine C_ESMC_MeshSetElemDistGrid(mesh, distgrid, rc)
+      use ESMF_DistGridMod
+      type(*)               :: mesh
+      type(ESMF_DistGrid)   :: distgrid
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+#endif
+
 !------------------------------------------------------------------------------
 
 
