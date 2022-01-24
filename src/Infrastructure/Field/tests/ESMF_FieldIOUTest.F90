@@ -26,10 +26,6 @@ program ESMF_FieldIOUTest
 ! !USES:
   use ESMF_TestMod     ! test methods
   use ESMF
-#if defined ESMF_NETCDF
-  use netcdf
-#endif
-
 
   implicit none
 
@@ -47,18 +43,16 @@ program ESMF_FieldIOUTest
   type(ESMF_Field) :: field_w_nohalo, field_multi
   type(ESMF_Field) :: field_gw, field_gr, field_gr2, field_gr3
   type(ESMF_Field) :: field_r2de, field_w2de
-  type(ESMF_Field) :: field_md
   real(ESMF_KIND_R8), pointer :: Farray_w(:,:) => null (), Farray_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_tw(:,:) => null (), Farray_tr(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_sw(:,:) => null (), Farray_sr(:,:) => null ()
   real(ESMF_KIND_R4), pointer :: fptr(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: t_ptr(:,:,:) => null (), t_ptr2(:,:,:) => null ()
-  real(ESMF_KIND_R8), pointer :: Farray_md(:,:) => null ()
   ! Note: 
   ! field_w---Farray_w; field_r---Farray_r; 
   ! field_t---Farray_tw; field_tr---Farray_tr 
   ! field_s---Farray_sw; field_sr---Farray_sr
-  type(ESMF_Grid) :: grid, grid_g, grid_2DE, grid_gblind, grid_md
+  type(ESMF_Grid) :: grid, grid_g, grid_2DE, grid_gblind
 
   type(ESMF_Field) :: elem_field
   type(ESMF_DistGrid) :: elem_dg
@@ -76,7 +70,7 @@ program ESMF_FieldIOUTest
   real(ESMF_KIND_R8), pointer :: Farray_DE0_w(:,:) => null (), Farray_DE0_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_DE1_w(:,:) => null (), Farray_DE1_r(:,:) => null ()
 
-  integer              :: rc, ncstat, ncid
+  integer                                 :: rc
   integer, allocatable :: computationalLBound(:),computationalUBound(:)
   integer, allocatable :: exclusiveLBound(:), exclusiveUBound(:)
   integer, allocatable :: arbseqlist(:)
@@ -86,12 +80,7 @@ program ESMF_FieldIOUTest
   integer :: i, j, t, endtime, k
   logical :: failed
   real(ESMF_KIND_R8) :: Maxvalue, diff
-#if defined ESMF_NETCDF
-  integer :: dim1id, dim2id, dim1len, dim2len, varid, ndims
-  integer, dimension(nf90_max_var_dims) :: dimids 
-  real(ESMF_KIND_R8), pointer :: ncdata(:,:) => null()
-#endif
-  
+
   character(16), parameter :: apConv = 'Attribute_IO'
   character(16), parameter :: apPurp = 'attributes'
 #if !defined (ESMF_PNETCDF)
@@ -150,8 +139,8 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! Verifying that a Grid can be created
   grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
-       regDecomp=(/2,2/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-       name="landgrid", rc=rc)
+    regDecomp=(/2,2/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+    name="landgrid", rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Creating a Grid to use in Field Tests"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -177,13 +166,6 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Create a field from grid and fortran dummy array"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  ! Create Field
-  field_r=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
-           totalLWidth=(/1,1/), totalUWidth=(/1,2/), &
-           name="temperature",  rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Create a field from grid and fortran dummy array"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
@@ -195,7 +177,6 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Get Farray_w from field"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 !------------------------------------------------------------------------
 
   !print '(a,2(a,i0.1,a,i0.1),a)', 'field_w Farray_w bounds = ',  &
@@ -208,7 +189,7 @@ program ESMF_FieldIOUTest
   Farray_w = 0.02  ! halo points will have value 0.02
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
-     Farray_w(i,j) = sin(dble(i)/5.0)*tan(dble(j)/5.0)
+    Farray_w(i,j) = sin(dble(i)/5.0)*tan(dble(j)/5.0)
   enddo
   enddo
 
@@ -220,7 +201,7 @@ program ESMF_FieldIOUTest
        iofmt=ESMF_IOFMT_NETCDF_64BIT_OFFSET,  &
        overwrite=.true.,  &
        status=ESMF_FILESTATUS_UNKNOWN, rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS: ", rc
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Write Fortran array in Field"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -228,35 +209,6 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
-!  call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!  stop
-
-  write(failMsg, *) ""
-  write(name, *) "Read data just written to field_r"
-  call ESMF_FieldRead(field_r, fileName="field.nc", rc=rc)
-#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
-
-
-  call ESMF_FieldGet(field_r, localDe=0, farrayPtr=Farray_r, &
-      exclusiveLBound=exclusiveLBound, &
-      exclusiveUBound=exclusiveUBound, rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Get Farray_r from field"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  diff = 0.0
-  do j=exclusiveLBound(2),exclusiveUBound(2)
-  do i=exclusiveLBound(1),exclusiveUBound(1)
-     diff = diff + abs(Farray_w(i,j) - Farray_r(i,j))
-  enddo
-  enddo
-  write(failMsg, *) "Field read did not match field write"
-  write(name, *) "Compare field read to field write"
-  call ESMF_Test(diff == 0.0, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -329,174 +281,8 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
-
-!------------------------------------------------------------------------
-!
-!  Test field metadata in output NetCDF files
-!
 !------------------------------------------------------------------------
 
-  !NEX_UTest_Multi_Proc_Only
-  grid_md = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/15,30/), &
-    regDecomp=(/2,2/), name="mygrid", indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Create grid for field metadata test"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Create field with global indices"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  field_md = ESMF_FieldCreate(grid_md, arrayspec=arrayspec, &
-       name="bananas", indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  !NEX_UTest_Multi_Proc_Only
-  call ESMF_FieldGet(field_md, localDe=0, farrayPtr=Farray_md, &
-      exclusiveLBound=exclusiveLBound, &
-      exclusiveUBound=exclusiveUBound, rc=rc)
-  write(name, *) "Get Farray_md from field"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-  !print '(a,2(a,i0.1,a,i0.1),a)', 'field_md Farray_md bounds = ',  &
-  !    '(', lbound (Farray_md,1), ':', ubound (Farray_md,1),  &
-  !    ',', lbound (Farray_md,2), ':', ubound (Farray_md,2),')'
-  !print '(a,2(a,i0.1,a,i0.1),a)', 'field_md exclusive bounds = ',  &
-  !    '(', exclusiveLBound(1), ':', exclusiveUBound(1),  &
-  !    ',', exclusiveLBound(2), ':', exclusiveUBound(2),')'
-
-  Farray_md = -1.0  
-  do j = exclusiveLBound(2), exclusiveUBound(2)
-     do i = exclusiveLBound(1), exclusiveUBound(1)
-        Farray_md(i,j) = i*100 + j
-     enddo
-  enddo
-  
-  !NEX_UTest_Multi_Proc_Only
-  call ESMF_FieldWrite(field_md, fileName="field_md.nc",  &
-       iofmt=ESMF_IOFMT_NETCDF_64BIT_OFFSET,  &
-       overwrite=.true.,  &
-       status=ESMF_FILESTATUS_UNKNOWN, rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Write Field to NetCDF file"
-#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
-   
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Confirm NetCDF metadata - open file"
-  write(failMsg, *) "Failed to open netcdf file"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  ncstat = nf90_open("field_md.nc", NF90_NOWRITE, ncid)
-  call ESMF_Test((.not.ESMF_LogFoundNetCDFError(ncstat)), name, failMsg, result, ESMF_SRCLINE)
-#else
-  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE) 
-#endif
-
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Confirm NetCDF metadata - check dim 1"
-  write(failMsg, *) "dim 1 not found"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))  
-  ncstat = nf90_inq_dimid(ncid, "bananas_dim001", dim1id)
-  call ESMF_Test((.not.ESMF_LogFoundNetCDFError(ncstat)), name, failMsg, result, ESMF_SRCLINE)
-#else
-  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE) 
-#endif
-
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Confirm NetCDF metadata - check dim 1 len"
-  write(failMsg, *) "dim 1 has unexpected length"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))  
-  ncstat = nf90_inquire_dimension(ncid, dim1id, len=dim1len)
-  call ESMF_Test((dim1len==15), name, failMsg, result, ESMF_SRCLINE)
-#else
-  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE) 
-#endif
-  
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Confirm NetCDF metadata - check dim 2"
-  write(failMsg, *) "dim 2 not found"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))  
-  ncstat = nf90_inq_dimid(ncid, "bananas_dim002", dim2id)
-  call ESMF_Test((.not.ESMF_LogFoundNetCDFError(ncstat)), name, failMsg, result, ESMF_SRCLINE)
-#else
-  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE) 
-#endif
-
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Confirm NetCDF metadata - check dim 2 len"
-  write(failMsg, *) "dim 2 has unexpected length"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))  
-  ncstat = nf90_inquire_dimension(ncid, dim2id, len=dim2len)
-  call ESMF_Test((dim2len==30), name, failMsg, result, ESMF_SRCLINE)
-#else
-  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE) 
-#endif
-  
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Confirm NetCDF metadata - variable exists"
-  write(failMsg, *) "failed to find variable"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))  
-  ncstat = nf90_inq_varid(ncid, "bananas", varid)
-  call ESMF_Test((.not.ESMF_LogFoundNetCDFError(ncstat)), name, failMsg, result, ESMF_SRCLINE)
-#else
-  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE) 
-#endif
-
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Confirm NetCDF metadata - variable has expected dims"
-  write(failMsg, *) "unexpected dimensions for field"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))  
-  ncstat = nf90_inquire_variable(ncid, varid, ndims=ndims, dimids=dimids)
-  call ESMF_Test((.not.ESMF_LogFoundNetCDFError(ncstat) .and. ndims==2 .and. dimids(1)==dim1id .and. dimids(2)==dim2id), &
-       name, failMsg, result, ESMF_SRCLINE)
-#else
-  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE) 
-#endif
-
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Confirm NetCDF data - check data for field"
-  write(failMsg, *) "unexpected data for field"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))  
-  allocate(ncdata(15,30))
-  ncstat = nf90_get_var(ncid, varid, ncdata)
-  if (ESMF_LogFoundNetCDFError(ncstat, file=ESMF_FILENAME, rcToReturn=rc)) &
-       call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  ! reconstruct expected data
-  maxvalue = 0.0
-  do j = lbound(ncdata, 2), ubound(ncdata, 2)
-     do i = lbound(ncdata, 1), ubound(ncdata, 1)
-        !print *, "i, j = (", i, j, ") val = ", ncdata(i,j), " expected", i*100 + j
-        diff = abs(ncdata(i,j) - (i*100 + j))
-        if (maxvalue .le. diff) maxvalue = diff
-     enddo
-  enddo
-     
-  deallocate(ncdata)
-  call ESMF_Test((maxvalue .lt. 1.e-14), name, failMsg, result, ESMF_SRCLINE)
-#else
-  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE) 
-#endif
-
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Confirm NetCDF data - close file"
-  write(failMsg, *) "error closing file"
-#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))  
-  ncstat = nf90_close(ncid)
-  call ESMF_Test((.not.ESMF_LogFoundNetCDFError(ncstat)), &
-       name, failMsg, result, ESMF_SRCLINE)
-#else
-  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE) 
-#endif
-
-
-  
-  
-!------------------------------------------------------------------------
 !
 ! Test multiple time slices that making use of NETCDF's unlimited dimension
 !
@@ -508,7 +294,6 @@ program ESMF_FieldIOUTest
   endtime = 5
   ! The first time through, we need to replace these files
   statusFlag = ESMF_FILESTATUS_REPLACE
-  countfail = 0
   
   do t = 1, endtime
 
@@ -531,7 +316,6 @@ program ESMF_FieldIOUTest
     Farray_tw = 0.02  ! halo points will have value 0.02
     do j=exclusiveLBound(2),exclusiveUBound(2)
     do i=exclusiveLBound(1),exclusiveUBound(1)
-!      Farray_tw(i,j) = 100.0 + localpet
       Farray_tw(i,j) = dble(t)*(sin(i/5.0d0)*tan(j/5.0d0))
     enddo
     enddo
@@ -551,9 +335,9 @@ program ESMF_FieldIOUTest
            overwrite=.true., rc=rc)
     end select
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-    write(name, *) "Write field_time.nc at time t=",t," in a loop"
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    if(rc.ne.ESMF_SUCCESS) then
+      countfail = countfail + 1
+    endif
 #else
     if(rc.ne.ESMF_RC_LIB_NOT_PRESENT) then
       countfail = countfail + 1
@@ -581,10 +365,9 @@ program ESMF_FieldIOUTest
     call ESMF_FieldWrite(field_s, fileName="fieldNoHalo_time.nc", timeslice=t,   &
          status=statusFlag, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-    ! Loop of time is ended. Check for failure.
-    write(name, *) "Write fieldNoHalo_time.nc at time t=",t," in a loop"
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    if(rc.ne.ESMF_SUCCESS) then
+      countfail = countfail + 1
+    endif
 #else
     if(rc.ne.ESMF_RC_LIB_NOT_PRESENT) then
       countfail = countfail + 1
@@ -596,6 +379,10 @@ program ESMF_FieldIOUTest
 
   enddo  ! t
 
+! Loop of time is ended. Check for failure.
+  write(name, *) "Write Farray_tw at different time t in a loop"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test((countfail==0), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
@@ -705,7 +492,7 @@ program ESMF_FieldIOUTest
   Farray_tw = 0.02d0  ! halo points will have value 0.02
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
-      Farray_tw(i,j) = dble(t)*(sin(i/5.0d0)*tan(j/5.0d0))
+    Farray_tw(i,j) = dble(t)*(sin(i/5.0d0)*tan(j/5.0d0))
   enddo
   enddo
 
@@ -1692,9 +1479,8 @@ program ESMF_FieldIOUTest
   write(name, *) "Create Field from Grid (from deBlockList)  test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   field_debl = ESMF_FieldCreate(name="field_3d_3dbl", grid=grid_debl, &
-    !TODO: restore ungriddedUBound=(/50/), which currently fails inside PIO
-    typekind=ESMF_TYPEKIND_R8, ungriddedLBound=(/1/), ungriddedUBound=(/10/),  &
-    rc=rc)
+      typekind=ESMF_TYPEKIND_R8, ungriddedLBound=(/1/), ungriddedUBound=(/50/),  &
+      rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
@@ -1741,8 +1527,6 @@ program ESMF_FieldIOUTest
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_w, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
-  call ESMF_FieldDestroy(field_md, rc=rc)
-  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_gw, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_w2DE, rc=rc)
@@ -1762,8 +1546,6 @@ program ESMF_FieldIOUTest
   call ESMF_FieldDestroy(field_debl, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_GridDestroy(grid_debl, rc=rc)
-  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
-  call ESMF_GridDestroy(grid_md, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_DistGridDestroy(elem_dg, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
