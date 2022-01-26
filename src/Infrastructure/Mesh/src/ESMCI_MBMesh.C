@@ -196,7 +196,7 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
 
   // Set cartesian spatial dim in struct
   sdim=cart_sdim;
-  
+    
   // Create MOAB Mesh
   mesh=new Core();
 
@@ -204,9 +204,7 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   int int_def_val=0;
 
   // Setup global id tag
-  int_def_val=0;
-  merr=mesh->tag_get_handle(GLOBAL_ID_TAG_NAME, 1, MB_TYPE_INTEGER, gid_tag, MB_TAG_DENSE, &int_def_val);
-  ESMC_CHECK_MOAB_THROW(merr);
+  gid_tag=mesh->globalId_tag();
   
   // Setup orig_pos tag
   int_def_val=ORIG_POS_AFTERCREATE; // Default to AFTERCREATE, so that if objects
@@ -219,7 +217,6 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   int_def_val=-1;
   merr=mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
   ESMC_CHECK_MOAB_THROW(merr);
-
   
   // Setup node_orig_coord tag
   has_node_orig_coords=false;

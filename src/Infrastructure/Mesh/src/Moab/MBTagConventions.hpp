@@ -1,18 +1,18 @@
 /**
  * MOAB, a Mesh-Oriented datABase, is a software component for creating,
  * storing and accessing finite element mesh data.
- * 
+ *
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
  * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  */
- 
+
 #ifndef MB_TAG_CONVENTIONS_HPP
 #define MB_TAG_CONVENTIONS_HPP
 
@@ -26,7 +26,7 @@
  * value = integer id for this set (block id from ExodusII)
  * default value = -1
  */
-#define MATERIAL_SET_TAG_NAME  "MATERIAL_SET"
+#define MATERIAL_SET_TAG_NAME "MATERIAL_SET"
 
 /* DIRICHLET_SET_TAG_NAME tag:
  * Represents dirichlet-type boundary condition, usually contains only mesh vertices
@@ -47,7 +47,7 @@
  * value = integer id for this set (sideset id from ExodusII)
  * default value = -1
  */
-#define NEUMANN_SET_TAG_NAME   "NEUMANN_SET"
+#define NEUMANN_SET_TAG_NAME "NEUMANN_SET"
 
 /* HAS_MID_NODES_TAG_NAM tag:
  * Flags telling whether elements in a given set have mid-(edge, face, region) vertices/nodes;
@@ -60,11 +60,11 @@
  */
 #define HAS_MID_NODES_TAG_NAME "HAS_MID_NODES"
 
-/* GEOM_DIMENSION tag: 
+/* GEOM_DIMENSION tag:
  * Represents entities "owned" by a given topological entity in a geometric model
  * size = sizeof(int)
  * type = int
- * value = dimension of geom entity 
+ * value = dimension of geom entity
  * default value = -1
  */
 #define GEOM_DIMENSION_TAG_NAME "GEOM_DIMENSION"
@@ -90,7 +90,7 @@
 
 /* CATEGORY tag:
  * String name indicating generic "category" if the entity to which it is assigned (usually
- * sets); used e.g. to indicate a set represents geometric vertex/edge/face/region, 
+ * sets); used e.g. to indicate a set represents geometric vertex/edge/face/region,
  * dual surface/curve, etc.
  * size = CATEGORY_TAG_NAME_LENGTH (defined below)
  * type = char[CATEGORY_TAG_NAME_LENGTH]
@@ -143,7 +143,7 @@
  * this tag.  The value of the tag is an integer "part identifier".
  */
 #define PARALLEL_PARTITION_TAG_NAME "PARALLEL_PARTITION"
-#define PARALLEL_PART_TAG_NAME PARALLEL_PARTITION_TAG_NAME
+#define PARALLEL_PART_TAG_NAME      PARALLEL_PARTITION_TAG_NAME
 
 /** \brief Tag that groups the set of parts/partitions that are
  *         a covering of the mesh.
@@ -164,7 +164,7 @@
  * This single-valued tag implies an entity is shared with one other proc
  */
 #define PARALLEL_SHARED_PROC_TAG_NAME "__PARALLEL_SHARED_PROC"
- 
+
 /** \brief Tag storing which other processorS a given entity is shared with
  *
  * This multiple-valued tag implies an entity is shared with multiple
@@ -172,13 +172,13 @@
  * what the maximum number of processors is which share an entity
  */
 #define PARALLEL_SHARED_PROCS_TAG_NAME "__PARALLEL_SHARED_PROCS"
- 
+
 /** \brief Tag storing the handle of a shared entity on the other proc
  *
  * This single-valued tag implies an entity is shared with one other proc
  */
 #define PARALLEL_SHARED_HANDLE_TAG_NAME "__PARALLEL_SHARED_HANDLE"
- 
+
 /** \brief Tag storing handles of a shared entity on other processors
  *
  * This multiple-valued tag implies an entity is shared with multiple
@@ -186,10 +186,10 @@
  * what the maximum number of processors is which share an entity
  */
 #define PARALLEL_SHARED_HANDLES_TAG_NAME "__PARALLEL_SHARED_HANDLES"
- 
+
 /** \brief Tag storing parallel status (as bits in this tag)
  *
- * This tag stores various aspects of parallel status in bits; see also 
+ * This tag stores various aspects of parallel status in bits; see also
  * #define's following, to be used in bit mask operations.  If an entity is
  * not shared with any other processors, the pstatus is 0, otherwise it's > 0
  *
@@ -202,15 +202,15 @@
  */
 #define PARALLEL_STATUS_TAG_NAME "__PARALLEL_STATUS"
 
-#define PSTATUS_NOT_OWNED 0x1
-#define PSTATUS_SHARED 0x2
+#define PSTATUS_NOT_OWNED   0x1
+#define PSTATUS_SHARED      0x2
 #define PSTATUS_MULTISHARED 0x4
-#define PSTATUS_INTERFACE 0x8
+#define PSTATUS_INTERFACE   0x8
 // note, these numbers are in hex, so 0x10 is the 4th bit, or 2^4.
 #define PSTATUS_GHOST 0x10
 
 #define PSTATUS_AND 0x1
-#define PSTATUS_OR 0x2
+#define PSTATUS_OR  0x2
 #define PSTATUS_NOT 0x3
 #endif
 

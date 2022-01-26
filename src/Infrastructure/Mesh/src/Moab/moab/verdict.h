@@ -346,7 +346,7 @@ struct TriMetricVals
 #define V_HEX_MED_ASPECT_FROBENIUS   262144 /*!< \hideinitializer */
 #define V_HEX_ALL                    524287 /*!< \hideinitializer */
 /*!< \hideinitializer */
-#define V_HEX_TRADITIONAL            V_HEX_MAX_EDGE_RATIO + \
+#define V_HEX_TRADITIONAL            (V_HEX_MAX_EDGE_RATIO + \
                                      V_HEX_SKEW            + \
                                      V_HEX_TAPER           + \
                                      V_HEX_STRETCH         + \
@@ -355,19 +355,19 @@ struct TriMetricVals
                                      V_HEX_CONDITION       + \
                                      V_HEX_JACOBIAN        + \
                                      V_HEX_SCALED_JACOBIAN + \
-                                     V_HEX_DIMENSION
+                                     V_HEX_DIMENSION)
 
 /*!< \hideinitializer */
 #define V_HEX_DIAGNOSTIC             V_HEX_VOLUME
 /*!< \hideinitializer */
-#define V_HEX_ALGEBRAIC              V_HEX_SHAPE                  + \
+#define V_HEX_ALGEBRAIC              (V_HEX_SHAPE                  + \
                                      V_HEX_SHEAR                  + \
                                      V_HEX_RELATIVE_SIZE_SQUARED  + \
                                      V_HEX_SHAPE_AND_SIZE         + \
-                                     V_HEX_SHEAR_AND_SIZE
+                                     V_HEX_SHEAR_AND_SIZE)
 /*!< \hideinitializer */
-#define V_HEX_ROBINSON               V_HEX_SKEW + \
-                                     V_HEX_TAPER    
+#define V_HEX_ROBINSON               (V_HEX_SKEW + \
+                                     V_HEX_TAPER)    
 //@}
                                      
 //! \name Tet bit fields
@@ -391,17 +391,17 @@ struct TriMetricVals
 #define V_TET_COLLAPSE_RATIO         32768   /*!< \hideinitializer */
 #define V_TET_ALL                    65535   /*!< \hideinitializer */
 /*!< \hideinitializer */
-#define V_TET_TRADITIONAL            V_TET_ASPECT_BETA + \
+#define V_TET_TRADITIONAL            (V_TET_ASPECT_BETA + \
                                      V_TET_ASPECT_GAMMA + \
                                      V_TET_CONDITION + \
                                      V_TET_JACOBIAN + \
-                                     V_TET_SCALED_JACOBIAN  
+                                     V_TET_SCALED_JACOBIAN)  
 /*!< \hideinitializer */
 #define V_TET_DIAGNOSTIC             V_TET_VOLUME
 /*!< \hideinitializer */
-#define V_TET_ALGEBRAIC              V_TET_SHAPE                  + \
+#define V_TET_ALGEBRAIC              (V_TET_SHAPE                  + \
                                      V_TET_RELATIVE_SIZE_SQUARED  + \
-                                     V_TET_SHAPE_AND_SIZE
+                                     V_TET_SHAPE_AND_SIZE)
 //@}
 
  
@@ -451,7 +451,7 @@ struct TriMetricVals
 #define V_QUAD_MAX_ASPECT_FROBENIUS  4194304  /*!< \hideinitializer */
 #define V_QUAD_ALL                   8388607  /*!< \hideinitializer */
 /*!< \hideinitializer */
-#define V_QUAD_TRADITIONAL           V_QUAD_MAX_EDGE_RATIO + \
+#define V_QUAD_TRADITIONAL           (V_QUAD_MAX_EDGE_RATIO + \
                                      V_QUAD_SKEW            + \
                                      V_QUAD_TAPER           + \
                                      V_QUAD_WARPAGE         + \
@@ -461,18 +461,18 @@ struct TriMetricVals
                                      V_QUAD_ODDY            + \
                                      V_QUAD_CONDITION       + \
                                      V_QUAD_JACOBIAN        + \
-                                     V_QUAD_SCALED_JACOBIAN 
+                                     V_QUAD_SCALED_JACOBIAN) 
 /*!< \hideinitializer */
 #define V_QUAD_DIAGNOSTIC            V_QUAD_AREA
 /*!< \hideinitializer */
-#define V_QUAD_ALGEBRAIC             V_QUAD_SHEAR                 + \
+#define V_QUAD_ALGEBRAIC             (V_QUAD_SHEAR                 + \
                                      V_QUAD_SHAPE                 + \
                                      V_QUAD_RELATIVE_SIZE_SQUARED + \
-                                     V_QUAD_SHAPE_AND_SIZE     
+                                     V_QUAD_SHAPE_AND_SIZE)     
 /*!< \hideinitializer */
-#define V_QUAD_ROBINSON              V_QUAD_MAX_EDGE_RATIO + \
+#define V_QUAD_ROBINSON              (V_QUAD_MAX_EDGE_RATIO + \
                                      V_QUAD_SKEW   + \
-                                     V_QUAD_TAPER
+                                     V_QUAD_TAPER)
 //@}
 
 
@@ -493,17 +493,17 @@ struct TriMetricVals
 #define V_TRI_EDGE_RATIO             2048   /*!< \hideinitializer */
 #define V_TRI_ALL                    4095   /*!< \hideinitializer */
 /*!< \hideinitializer */
-#define V_TRI_TRADITIONAL            V_TRI_ASPECT_FROBENIUS + \
+#define V_TRI_TRADITIONAL            (V_TRI_ASPECT_FROBENIUS + \
                                      V_TRI_MINIMUM_ANGLE + \
                                      V_TRI_MAXIMUM_ANGLE + \
                                      V_TRI_CONDITION + \
-                                     V_TRI_SCALED_JACOBIAN 
+                                     V_TRI_SCALED_JACOBIAN) 
 /*!< \hideinitializer */
 #define V_TRI_DIAGNOSTIC             V_TRI_AREA
 /*!< \hideinitializer */
-#define V_TRI_ALGEBRAIC              V_TRI_SHAPE + \
+#define V_TRI_ALGEBRAIC              (V_TRI_SHAPE + \
                                      V_TRI_SHAPE_AND_SIZE + \
-                                     V_TRI_RELATIVE_SIZE_SQUARED
+                                     V_TRI_RELATIVE_SIZE_SQUARED)
  
 #define V_EDGE_LENGTH                1   /*!< \hideinitializer */
 //@}
