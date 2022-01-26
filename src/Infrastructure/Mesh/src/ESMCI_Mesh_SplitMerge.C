@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -9,63 +9,35 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/Legacy/ESMCI_MeshVTK.h>
-#include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/Legacy/ESMCI_MEField.h>
-#include <Mesh/include/Legacy/ESMCI_MeshObjTopo.h>
-#include <Mesh/include/Legacy/ESMCI_ParEnv.h>
-#include <Mesh/include/Legacy/ESMCI_IOField.h>
-#include "ESMCI_Array.h"
-#include "ESMCI_LocalArray.h"
+
+#include <Mesh/include/ESMCI_Mesh_SplitMerge.h>
 
 #include <iostream>
 #include <fstream>
 #include <map>
 #include <cstdio>
 
-//-----------------------------------------------------------------------------
-// leave the following line as-is; it will insert the cvs ident string
-// into the object file for tracking purposes.
-static const char *const version = "$Id$";
-//-----------------------------------------------------------------------------
+using namespace ESMCI;
 
-namespace ESMCI {
-
-  // structure holding original and split elems
-  struct OSE{
-    const MeshObj *orig_elem;
-    const MeshObj *split_elem;
-
-    OSE() : orig_elem(NULL), split_elem(NULL) {};
-    OSE(const MeshObj *_orig_elem, const MeshObj *_split_elem) :
-       orig_elem(_orig_elem), split_elem(_split_elem) {};
-
-    bool operator<(const OSE &rhs) const { 
-      if ((orig_elem == NULL) || (split_elem == NULL)) Throw() << "Members shouldn't be NULL.";
-      if ((rhs.orig_elem == NULL) || (rhs.split_elem == NULL)) Throw() << "Members shouldn't be NULL.";
-      if (orig_elem->get_data_index() != rhs.orig_elem->get_data_index()) return (orig_elem->get_data_index() < rhs.orig_elem->get_data_index());
-      if (orig_elem->get_id() != rhs.orig_elem->get_id()) return (orig_elem->get_id() < rhs.orig_elem->get_id());
-      return (split_elem->get_id() < rhs.split_elem->get_id());
-    }
-
-  };
-
-  static void _get_elem_merged_connlist(const Mesh &mesh, 
-                                        std::vector<OSE>::iterator beg_elem_range, std::vector<OSE>::iterator end_elem_range, 
-                                        std::vector<int> &used, std::vector<int> &elem_merged_nids) {
+void get_elem_merged_connlist(const Mesh &mesh, 
+                              std::vector<OSE>::iterator beg_elem_range, 
+                              std::vector<OSE>::iterator end_elem_range, 
+                              std::vector<int> &used, 
+                              std::vector<int> &elem_merged_nids) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "get_elem_merged_connlist()"
 
 
-
-    // DEBUG output
-    {
-      printf("orig_elem=%d ::",beg_elem_range->orig_elem->get_id());
-      std::vector<OSE>::iterator osei=beg_elem_range;
-      std::vector<OSE>::iterator osee=end_elem_range;
-      for (; osei != osee; ++osei) {
-        printf("%d ",osei->split_elem->get_id());
-      }    
-      printf("\n");
-    }
+    // // DEBUG output
+    // {
+    //   printf("orig_elem=%d ::",beg_elem_range->orig_elem->get_id());
+    //   std::vector<OSE>::iterator osei=beg_elem_range;
+    //   std::vector<OSE>::iterator osee=end_elem_range;
+    //   for (; osei != osee; ++osei) {
+    //     printf("%d ",osei->split_elem->get_id());
+    //   }    
+    //   printf("\n");
+    // }
 
     // Get number of items in range
     int size_range=std::distance(beg_elem_range, end_elem_range);
@@ -152,18 +124,20 @@ namespace ESMCI {
       } // Loop over split elem range 
     } // while not all used
 
-    // DEBUG
-    printf("orig_elem=%d :: nids= ",beg_elem_range->orig_elem->get_id());    
-    for (int i=0; i<elem_merged_nids.size(); i++) {
-      printf(" %d",elem_merged_nids[i]);
-    }
-    printf("\n");
+    // // DEBUG
+    // printf("orig_elem=%d :: nids= ",beg_elem_range->orig_elem->get_id());    
+    // for (int i=0; i<elem_merged_nids.size(); i++) {
+    //   printf(" %d",elem_merged_nids[i]);
+    // }
+    // printf("\n");
 
   }
 
   // Create a connection list for a mesh that has the original >4 sided connections
-  static void _get_mesh_merged_connlist(const Mesh &mesh, std::vector<int> &num_merged_nids, std::vector<int> &merged_nids) {
-
+void get_mesh_merged_connlist(const Mesh &mesh, std::vector<int> &num_merged_nids, std::vector<int> &merged_nids) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "get_mesh_merged_connlist()"
+    
     // Clear output arrays
     num_merged_nids.clear();
     merged_nids.clear();
@@ -211,10 +185,10 @@ namespace ESMCI {
     // Sort vector to put all split elems next to each other
     std::sort(ose_sorted.begin(), ose_sorted.end());
 
-    // DEBUG OUTPUT
-    for (int i=0; i<ose_sorted.size(); i++) {
-      printf("orig elem index=%d orig_elem=%d split_elem=%d\n",ose_sorted[i].orig_elem->get_data_index(),ose_sorted[i].orig_elem->get_id(),ose_sorted[i].split_elem->get_id());
-    }
+    // // DEBUG OUTPUT
+    // for (int i=0; i<ose_sorted.size(); i++) {
+    //   printf("orig elem index=%d orig_elem=%d split_elem=%d\n",ose_sorted[i].orig_elem->get_data_index(),ose_sorted[i].orig_elem->get_id(),ose_sorted[i].split_elem->get_id());
+    // }
 
     // Put these outside loop so we allocate/deallocate less
     std::vector<int> used;
@@ -230,15 +204,15 @@ namespace ESMCI {
       if (beg_elem_range->orig_elem->get_id() != osei->orig_elem->get_id()) {
 
         // Turn range of split elems into merged conn list
-        _get_elem_merged_connlist(mesh, 
-                                  beg_elem_range, osei, 
-                                  used,elem_merged_nids);
+        get_elem_merged_connlist(mesh, 
+                                 beg_elem_range, osei, 
+                                 used,elem_merged_nids);
 
         // Add to the outgoing lists
         num_merged_nids.push_back(elem_merged_nids.size());
         for (int i=0; i<elem_merged_nids.size(); i++) {
           merged_nids.push_back(elem_merged_nids[i]);
-        }        
+        }
 
         // Start a new range
         beg_elem_range=osei;
@@ -246,10 +220,15 @@ namespace ESMCI {
     }
 
     // Do the last range
-    _get_elem_merged_connlist(mesh, 
+    get_elem_merged_connlist(mesh, 
                               beg_elem_range, osee, 
                               used, elem_merged_nids);
     
+    // Add to the outgoing lists
+    num_merged_nids.push_back(elem_merged_nids.size());
+    for (int i=0; i<elem_merged_nids.size(); i++) {
+      merged_nids.push_back(elem_merged_nids[i]);
+    }
 
 #if 0
     // Loop through the elems
@@ -273,6 +252,3 @@ namespace ESMCI {
 #endif
 
   }
-
-
-} // namespace
