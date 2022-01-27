@@ -77,9 +77,9 @@ module ESMF_InternalStateMod
     module procedure ESMF_InternalStateCplCompGetL
   end interface
 
-  interface
-
 #ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
 
     !TODO: DEPRECATED -> transition to ESMF_InternalState API
     subroutine ESMF_GridCompSetInternalState(table, internalState, rc)
@@ -125,9 +125,22 @@ module ESMF_InternalStateMod
       integer                 :: rc
     end subroutine
 
-#endif
+    subroutine c_ESMC_InternalStateGetInfo(table, count, maxLen, rc)
+      type(*)                 :: table
+      integer                 :: count
+      integer                 :: maxLen
+      integer                 :: rc
+    end subroutine
+
+    subroutine c_ESMC_InternalStateGetLabels(table, labelList, rc)
+      type(*)                 :: table
+      character(*)            :: labelList(*)
+      integer                 :: rc
+    end subroutine
 
   end interface
+
+#endif
 
 !------------------------------------------------------------------------------
 
