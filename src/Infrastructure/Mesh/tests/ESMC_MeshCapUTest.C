@@ -71,7 +71,7 @@ void combine(const std::string &api, const std::string &mesh,
         
         test->name = name;
         test->nativeormb = nvmb;
-        // test->verbosity = 3;
+        test->verbosity = 3;
         // test->tol = 1.e-15;
         // test->print();
         

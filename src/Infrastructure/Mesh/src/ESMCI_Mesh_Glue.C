@@ -2069,6 +2069,22 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     int num_elems=mesh->num_elems();
     int orig_sdim=mesh->orig_spatial_dim;
 
+    if (mesh->is_split) {
+    //   int localrc;
+    //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+    //      " Can't currently get element info from a mesh containing >4 elements.",
+    //                                    ESMC_CONTEXT, &localrc)) throw localrc;
+      try {
+        std::vector<int> num_merged_nids;
+        std::vector<int> merged_nids;
+        get_mesh_merged_connlist(**(&mesh), num_merged_nids, merged_nids);        
+        num_elems = num_merged_nids.size();
+      } catch(...){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+              " SplitMerge fail", ESMC_CONTEXT, rc);
+        return;
+      }
+    }
 
     ////// Error check input arrays //////
 
@@ -2113,39 +2129,8 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           " elementConn array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
       }
-      if (elemConn->extent[0] != num_elem_conn) {
-        int localrc;
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        " elementConn array must be of size elementConnCount", ESMC_CONTEXT, &localrc)) throw localrc;
-      }
-
-        
-      if (mesh->is_split) {
-      //   int localrc;
-      //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-      //      " Can't currently get element info from a mesh containing >4 elements.",
-      //                                    ESMC_CONTEXT, &localrc)) throw localrc;
-        try {
-          std::vector<int> num_merged_nids;
-          std::vector<int> merged_nids;
-          get_mesh_merged_connlist(**(&mesh), num_merged_nids, merged_nids);
-          
-          std::cout << "num_merged_nids = [";
-          for (const auto nid: num_merged_nids)
-            std::cout << nid << " ";
-          std::cout<< "]" <<std::endl;
-          std::cout << "merged_nids = [";
-          for (const auto mid: merged_nids)
-            std::cout << mid << " ";
-          std::cout << "]" << std::endl;
-          
-        } catch(...){
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                " SplitMerge fail", ESMC_CONTEXT, rc);
-          return;
-        }
-      } else {
       
+      if (!mesh->is_split) {
         // Loop summing number of nodes per element
         int num_elem_conn=0;
         Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
@@ -2158,7 +2143,12 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
           // Add number of nodes for this elem to connection count
           num_elem_conn += topo->num_nodes;
         }
-
+        
+        if (elemConn->extent[0] != num_elem_conn) {
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          " elementConn array must be of size elementConnCount", ESMC_CONTEXT, &localrc)) throw localrc;
+        }
       }
     }
 
@@ -2297,27 +2287,54 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       }
     }
 
- /* XMRKX */    
-
     // If it was passed in, fill elementIds array
     if (present(elemConn)) {
-      // Get array into which to put ids
-      int *elemConn_array=elemConn->array;
+      if (mesh->is_split) {
+      //   int localrc;
+      //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+      //      " Can't currently get element info from a mesh containing >4 elements.",
+      //                                    ESMC_CONTEXT, &localrc)) throw localrc;
+        try {
+          std::vector<int> num_merged_nids;
+          std::vector<int> merged_nids;
+          get_mesh_merged_connlist(**(&mesh), num_merged_nids, merged_nids);
+          
+          std::cout << "num_merged_nids = [";
+          for (const auto nid: num_merged_nids)
+            std::cout << nid << " ";
+          std::cout<< "]" <<std::endl;
+          std::cout << "merged_nids = [";
+          for (const auto mid: merged_nids)
+            std::cout << mid << " ";
+          std::cout << "]" << std::endl;
+          
+          
+          
+        } catch(...){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                " SplitMerge fail", ESMC_CONTEXT, rc);
+          return;
+        }
+      } else {
       
-      // Loop through elems
-      int j=0;
-      for (int i=0; i<sorted_elems.size(); i++) {
-        // get element
-        MeshObj *elem=sorted_elems[i].second;
-
-        // Get topology of elem
-        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
-
-        // Loop getting the indices of the nodes surrouding elem
-        for (int n = 0; n < topo->num_nodes; n++){
-          const MeshObj *node = elem->Relations[n].obj;
-          elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
-          j++;
+        // Get array into which to put ids
+        int *elemConn_array=elemConn->array;
+        
+        // Loop through elems
+        int j=0;
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // get element
+          MeshObj *elem=sorted_elems[i].second;
+  
+          // Get topology of elem
+          const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+  
+          // Loop getting the indices of the nodes surrouding elem
+          for (int n = 0; n < topo->num_nodes; n++){
+            const MeshObj *node = elem->Relations[n].obj;
+            elemConn_array[j]=node->get_data_index()+1; // Add one because F90 node indices are base 1
+            j++;
+          }
         }
       }
     }
@@ -2369,7 +2386,6 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
     // If it was passed in, fill elemCoords array
     if (present(elemCoords)) {
-/* XMRKX */
       // Get pointer to mesh elem coords data
       MEField<> *elem_coords=mesh->GetField("elem_orig_coordinates");
       if (!elem_coords) {
