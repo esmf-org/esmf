@@ -1492,12 +1492,18 @@ class MCT {
         if (!fail_print) std::cout<< pass << test << std::endl;
         else std::cout << fail << test << std::endl;
       }
+      if (verbosity >= 3) {
+        std::cout << "elem_ids = [";
+        for (int i=0; i<eii->extent[0]; ++i)
+          std::cout << eii->array[i] << " ";
+        std::cout << "]" << std::endl;
+      }
     
       mesh->getElemCreateInfo(NULL, eti, NULL, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
     
-      // NOTE: bypass for now, remove when elemType from ngons fixed
-      if (name.find("ngon") == std::string::npos) {
+      // // NOTE: bypass for now, remove when elemType from ngons fixed
+      // if (name.find("ngon") == std::string::npos) {
         test = "ElemType";
         fail_print = false;
         for (int i=0; i<eti->extent[0]; ++i) {
@@ -1517,6 +1523,11 @@ class MCT {
           if (!fail_print) std::cout<< pass << test << std::endl;
           else std::cout << fail << test << std::endl;
         }
+      if (verbosity >= 3) {
+        std::cout << "elem_types = [";
+        for (int i=0; i<eti->extent[0]; ++i)
+          std::cout << eti->array[i] << " ";
+        std::cout << "]" << std::endl;
       }
     
       if (elem_area_present) {
@@ -1542,6 +1553,12 @@ class MCT {
         if (verbosity >= 1) {
           if (!fail_print) std::cout<< pass << test << std::endl;
           else std::cout << fail << test << std::endl;
+        }
+        if (verbosity >= 3) {
+          std::cout << "elem_areas = [";
+          for (int i=0; i<eai->extent[0]; ++i)
+            std::cout << eai->array[i] << " ";
+          std::cout << "]" << std::endl;
         }
       }
     
@@ -1569,6 +1586,12 @@ class MCT {
           if (!fail_print) std::cout<< pass << test << std::endl;
           else std::cout << fail << test << std::endl;
         }
+        if (verbosity >= 3) {
+          std::cout << "elem_coords = [";
+          for (int i=0; i<eci->extent[0]; ++i)
+            std::cout << eci->array[i] << " ";
+          std::cout << "]" << std::endl;
+        }
       }
     
       if (elem_mask_present) {
@@ -1593,6 +1616,12 @@ class MCT {
         if (verbosity >= 1) {
           if (!fail_print) std::cout<< pass << test << std::endl;
           else std::cout << fail << test << std::endl;
+        }
+        if (verbosity >= 3) {
+          std::cout << "elem_mask = [";
+          for (int i=0; i<emi->extent[0]; ++i)
+            std::cout << emi->array[i] << " ";
+          std::cout << "]" << std::endl;
         }
       }
 

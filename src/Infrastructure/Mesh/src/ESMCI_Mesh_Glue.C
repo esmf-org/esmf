@@ -2251,6 +2251,14 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     // sort by data index
     std::sort(sorted_elems.begin(), sorted_elems.end());
 
+    std::cout << "sorted_elems  = [";
+    for (const auto i: sorted_elems)
+      std::cout << i.second->get_id() << " ";
+    std::cout << "]" << std::endl;
+    std::cout << "sorted_dataid = [";
+    for (const auto i: sorted_elems)
+      std::cout << i.first << " ";
+    std::cout << "]" << std::endl;
     
     ////// Fill info in arrays using sorted_elems //////
 
