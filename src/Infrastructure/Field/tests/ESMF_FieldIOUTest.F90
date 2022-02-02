@@ -1660,8 +1660,7 @@ program ESMF_FieldIOUTest
   write(name, *) "Create Field from Grid (from deBlockList)  test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   field_debl = ESMF_FieldCreate(name="field_3d_3dbl", grid=grid_debl, &
-    !TODO: restore ungriddedUBound=(/50/), which currently fails inside PIO
-    typekind=ESMF_TYPEKIND_R8, ungriddedLBound=(/1/), ungriddedUBound=(/10/),  &
+    typekind=ESMF_TYPEKIND_R8, ungriddedLBound=(/1/), ungriddedUBound=(/50/),  &
     rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
