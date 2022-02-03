@@ -2169,8 +2169,9 @@ subroutine  check_mesh_sph_1DeC_EM_file(correct, rc)
         rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
-   call ESMF_MeshWrite(mesh,"mesh_1Dec",rc=rc)
-   if (rc .ne. ESMF_SUCCESS) return
+   ! DEBUG OUTPUT
+   !call ESMF_MeshWrite(mesh,"mesh_1Dec",rc=rc)
+   !if (rc .ne. ESMF_SUCCESS) return
 
    ! Init correct to true before looking for problems
    correct=.true.
@@ -3167,12 +3168,11 @@ subroutine  check_mesh_from_sph_3x3_UG_file(correct, rc)
    if (rc /= ESMF_SUCCESS) return
 
    ! DEBUG OUTPUT
-   call ESMF_MeshWrite(mesh,"mesh_3x3_ugrid",rc=rc)
-   if (rc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+   !call ESMF_MeshWrite(mesh,"mesh_3x3_ugrid",rc=rc)
+   !if (rc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
    ! Init correct to true before looking for problems
    correct=.true.
-
 
    ! Get dim and coord info
    call ESMF_MeshGet(mesh, &
