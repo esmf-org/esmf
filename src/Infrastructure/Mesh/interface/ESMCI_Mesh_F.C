@@ -896,10 +896,13 @@ extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
                                                  ESMC_Logical *convertToDual,
                                                  ESMC_Logical *addUserArea,
                                                  ESMC_CoordSys_Flag *coordSys, 
+                                                 ESMC_MeshLoc_Flag *maskFlag, 
+                                                 char *maskVarName, 
                                                  ESMCI::DistGrid **nodeDistgridpp,
                                                  ESMCI::DistGrid **elemDistgridpp,
                                                  int *rc, 
-                                                 ESMCI_FortranStrLenArg filename_len)
+                                                 ESMCI_FortranStrLenArg filename_len,
+                                                 ESMCI_FortranStrLenArg maskVarName_len)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreatefromfile()"
@@ -907,6 +910,12 @@ extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
 
   // Get C style filename
   char *C_filename = ESMC_F90toCstring(filename, filename_len);
+
+  // Get C style maskVarName
+  char *C_maskVarName = NULL;
+  if (ESMC_NOT_PRESENT_FILTER(maskVarName) != ESMC_NULL_POINTER) {
+    C_maskVarName=ESMC_F90toCstring(maskVarName, maskVarName_len);
+  }
 
   // Convert Flags
   bool C_convertToDual=false;
@@ -934,12 +943,17 @@ extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
                                          C_convertToDual,
                                          C_addUserArea,
                                          *coordSys,
+                                         *maskFlag, 
+                                         C_maskVarName, 
                                          nodeDistgrid,
                                          elemDistgrid,
                                          ESMC_NOT_PRESENT_FILTER(rc));
 
   // Get rid C style filename
   delete [] C_filename;
+
+  // If present, get rid C style maskVarName
+  if (C_maskVarName != NULL)   delete [] C_maskVarName;
 
 } // meshcreate
 

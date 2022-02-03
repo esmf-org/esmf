@@ -48,6 +48,8 @@ void ESMCI_mesh_create_from_file(char *filename,
                                  ESMC_FileFormat_Flag fileformat, 
                                  bool convert_to_dual, bool add_user_area, 
                                  ESMC_CoordSys_Flag coord_sys, 
+                                 ESMC_MeshLoc_Flag maskFlag, 
+                                 char *maskVarName,
                                  ESMCI::DistGrid *node_distgrid, 
                                  ESMCI::DistGrid *elem_distgrid, 
                                  Mesh **out_mesh, int *rc);

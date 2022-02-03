@@ -46,6 +46,7 @@
 #include "IO/include/ESMCI_PIO_Handler.h"
 #include "Mesh/include/ESMCI_FileIO_Util.h"
 #include "Mesh/include/ESMCI_ESMFMesh_Util.h"
+#include "Mesh/include/ESMCI_UGRID_Util.h"
 
 #ifdef ESMF_PNETCDF
 # define _PNETCDF
@@ -61,6 +62,26 @@
  static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 using namespace ESMCI;
+
+
+// Prototypes of per format mesh creates from below
+void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
+                                          char *filename, 
+                                          bool add_user_area, 
+                                          ESMC_CoordSys_Flag coord_sys, 
+                                          ESMCI::DistGrid *elem_distgrid, 
+                                          Mesh **out_mesh);
+
+void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
+                                       char *filename, 
+                                       bool add_user_area, 
+                                       ESMC_CoordSys_Flag coord_sys, 
+                                       ESMC_MeshLoc_Flag maskFlag, 
+                                       char *maskVarName,
+                                       ESMCI::DistGrid *elem_distgrid, 
+                                       Mesh **out_mesh);
+
+
 
 
 // INPUTS: 
@@ -81,6 +102,8 @@ void ESMCI_mesh_create_from_file(char *filename,
                                  ESMC_FileFormat_Flag fileformat, 
                                  bool convert_to_dual, bool add_user_area, 
                                  ESMC_CoordSys_Flag coord_sys, 
+                                 ESMC_MeshLoc_Flag maskFlag, 
+                                 char *maskVarName,
                                  ESMCI::DistGrid *node_distgrid, 
                                  ESMCI::DistGrid *elem_distgrid, 
                                  Mesh **out_mesh, int *rc){
@@ -96,13 +119,6 @@ void ESMCI_mesh_create_from_file(char *filename,
     int localrc;
 
     //// Error check some unhandled options
-
-    // Only support ESMFMesh right now
-    if (fileformat != ESMC_FILEFORMAT_ESMFMESH) {
-      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          " Only ESMFMesh format files supported right now.",
-                           ESMC_CONTEXT, &localrc)) throw localrc;
-    }    
 
     // Don't currently support redisting to node_distgrid
     if (node_distgrid != NULL) {
@@ -121,13 +137,6 @@ void ESMCI_mesh_create_from_file(char *filename,
 
 
     //// Set up PIO
-
-    // Set pio_type based on what's available
-#ifdef ESMF_PNETCDF
-    int pio_type = PIO_IOTYPE_PNETCDF;
-#else
-    int pio_type = PIO_IOTYPE_NETCDF;
-#endif
 
     // Get VM 
     ESMCI::VM *vm=VM::getCurrent(&localrc);
@@ -150,6 +159,112 @@ void ESMCI_mesh_create_from_file(char *filename,
     if (!CHECKPIOERROR(piorc, std::string("Unable to init PIO Intracomm for file: ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
+
+    // Create Mesh based on the file format
+    if (fileformat == ESMC_FILEFORMAT_ESMFMESH) {
+      ESMCI_mesh_create_from_ESMFMesh_file(pioSystemDesc, filename, 
+                                           add_user_area, coord_sys, elem_distgrid, 
+                                           out_mesh);
+
+    } else if (fileformat == ESMC_FILEFORMAT_UGRID) {
+      ESMCI_mesh_create_from_UGRID_file(pioSystemDesc, filename, 
+                                        add_user_area, coord_sys, 
+                                        maskFlag, maskVarName,
+                                        elem_distgrid, 
+                                        out_mesh);
+
+    } else if (fileformat == ESMC_FILEFORMAT_SCRIP) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+         " Mesh files in SCRIP format are currently not supported via this interface.",
+           ESMC_CONTEXT, &localrc)) throw localrc;
+
+    } else {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+         " Unrecognized file format.",
+           ESMC_CONTEXT, &localrc)) throw localrc;
+    }    
+
+    // Free IO system
+    piorc = PIOc_free_iosystem(pioSystemDesc);
+    if (!CHECKPIOERROR(piorc, std::string("Error freeing pio file system description "),
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+
+    // Create Dual here
+
+
+    // Do node redist here
+
+    
+
+  } catch(std::exception &x) {
+
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT,rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT,rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // We've gotten to bottom successfully, so return success
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+
+// INPUTS: 
+//  filename - file name in NULL delimited form
+//  add_user_area - specifies if areas should be added to mesh. 
+//  coord_sys - The coordsys to create the mesh with. If ESMC_COORDSYS_UNINIT, then 
+//              use the one from the file.
+//  elem_distgrid - If not NULL, redist so elems are on this distgrid
+//
+// OUTPUTS:
+//   out_mesh - the new mesh created from the file
+//
+void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
+                                          char *filename, 
+                                          bool add_user_area, 
+                                          ESMC_CoordSys_Flag coord_sys, 
+                                          ESMCI::DistGrid *elem_distgrid, 
+                                          Mesh **out_mesh){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_mesh_create_from_ESMFMesh_file()"
+
+  // Declare some handy variables
+  int localrc;
+  int rc;
+  int piorc;
+
+  // Init output
+  *out_mesh=NULL;
+
+
+  // Try-catch block around main part of method
+  try {
+
+    //// Open file via PIO
+
+    // Set pio_type based on what's available
+#ifdef ESMF_PNETCDF
+    int pio_type = PIO_IOTYPE_PNETCDF;
+#else
+    int pio_type = PIO_IOTYPE_NETCDF;
+#endif
+
     // Open file
     int pioFileDesc;
     int mode = 0;
@@ -160,6 +275,18 @@ void ESMCI_mesh_create_from_file(char *filename,
     piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
     //    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
     //                   ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+
+    //// Get VM Info
+
+    // Get VM 
+    ESMCI::VM *vm=VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+    
+    // Get info
+    int local_pet = vm->getLocalPet();  
+    int pet_count = vm->getPetCount();
 
 
 
@@ -187,10 +314,10 @@ void ESMCI_mesh_create_from_file(char *filename,
     }
 
     // Assign vector info to pointer, because PIO and mesh calls don't accept vectors
-    int num_elem=0;
+    int num_elems=0;
     int *elem_ids=NULL;
     if (!elem_ids_vec.empty()) {
-      num_elem=elem_ids_vec.size();
+      num_elems=elem_ids_vec.size();
       elem_ids=&elem_ids_vec[0];
     } 
 
@@ -238,15 +365,15 @@ void ESMCI_mesh_create_from_file(char *filename,
     // Get element connection info
     int totNumElementConn=0;
     int *numElementConn=NULL, *elementConn=NULL;
-    get_elemConn_info_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, elementCount, num_elem, elem_ids, 
+    get_elemConn_info_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, elementCount, num_elems, elem_ids, 
                                           totNumElementConn, numElementConn, elementConn);
 
     // Convert global elem info into node info
-    int num_node;
+    int num_nodes;
     int *node_ids=NULL;
     int *local_elem_conn=NULL;
-    convert_global_elem_conn_to_local_node_and_elem_info(num_elem, totNumElementConn, numElementConn, elementConn,
-                                                          num_node, node_ids, local_elem_conn);
+    convert_global_elem_conn_to_local_node_and_elem_info(num_elems, totNumElementConn, numElementConn, elementConn,
+                                                          num_nodes, node_ids, local_elem_conn);
 
     // Free element connection info, because we don't need it any more
     delete [] elementConn;
@@ -260,13 +387,13 @@ void ESMCI_mesh_create_from_file(char *filename,
     double *nodeCoords;
     get_nodeCoords_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
                                       nodeCount, coordDim, 
-                                      num_node, node_ids, 
+                                      num_nodes, node_ids, 
                                       nodeCoords);
 
     // If file in different coordinate system than mesh, convert
     if (coord_sys_file != coord_sys_mesh) {
       convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
-                                       coordDim, num_node, nodeCoords);
+                                       coordDim, num_nodes, nodeCoords);
     }
 
     // Get nodeMask
@@ -274,16 +401,16 @@ void ESMCI_mesh_create_from_file(char *filename,
     int *nodeMask=NULL;
     get_nodeMask_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
                                     nodeCount, 
-                                    num_node, node_ids, 
+                                    num_nodes, node_ids, 
                                     nodeMask);
 
 
     // Set up InterArray variable for nodeMask
     // Note that present() for InterArray checks if the array is NULL, so it works to just create the InterArray and pass that
-    InterArray<int> nodeMaskIA(nodeMask, num_node);
+    InterArray<int> nodeMaskIA(nodeMask, num_nodes);
 
     // Add nodes
-    ESMCI_meshaddnodes(out_mesh, &num_node, node_ids,
+    ESMCI_meshaddnodes(out_mesh, &num_nodes, node_ids,
                        nodeCoords, NULL, &nodeMaskIA,
                        &coord_sys_mesh, &orig_sdim,
                        &localrc);
@@ -304,12 +431,12 @@ void ESMCI_mesh_create_from_file(char *filename,
     int *elementMask=NULL;
     get_elementMask_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
                                        elementCount, 
-                                       num_elem, elem_ids, 
+                                       num_elems, elem_ids, 
                                        elementMask);
 
     // Set up InterArray variable for elementMask
     // Note, that present() for InterArray checks if the array is NULL, so it works to just create the InterArray and pass that
-    InterArray<int> elementMaskIA(elementMask, num_elem);
+    InterArray<int> elementMaskIA(elementMask, num_elems);
 
 
     // Get elementArea, if requested and if present in file
@@ -318,7 +445,7 @@ void ESMCI_mesh_create_from_file(char *filename,
     if (add_user_area) {
       get_elementArea_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
                                          elementCount, 
-                                         num_elem, elem_ids, 
+                                         num_elems, elem_ids, 
                                          areaPresent, elementArea);
     }
 
@@ -328,20 +455,20 @@ void ESMCI_mesh_create_from_file(char *filename,
     int centerCoordsPresent=0;
     get_centerCoords_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
                                         elementCount, coordDim, 
-                                        num_elem, elem_ids, 
+                                        num_elems, elem_ids, 
                                         centerCoordsPresent, centerCoords);
 
     // If center coords exist and
     //  file in different coordinate system than mesh, convert
     if ((centerCoords != NULL) && (coord_sys_file != coord_sys_mesh)) {
       convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
-                                       coordDim, num_elem, centerCoords);
+                                       coordDim, num_elems, centerCoords);
     }
     
 
     // Add elements
     ESMCI_meshaddelements(out_mesh,
-                          &num_elem, elem_ids, numElementConn,
+                          &num_elems, elem_ids, numElementConn,
                           &elementMaskIA,
                           &areaPresent, elementArea,
                           &centerCoordsPresent, centerCoords, 
@@ -358,45 +485,356 @@ void ESMCI_mesh_create_from_file(char *filename,
     delete [] local_elem_conn;
 
 
-    //// Close down PIO
-
-    // Close file
+    //// Close file using PIO
     piorc = PIOc_closefile(pioFileDesc);
     if (!CHECKPIOERROR(piorc, std::string("Error closing file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
 
-    // maybe free the iosystem here?
-    piorc = PIOc_free_iosystem(pioSystemDesc);
-    if (!CHECKPIOERROR(piorc, std::string("Error freeing pio file system description "),
-                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-
-    
 
   } catch(std::exception &x) {
 
     // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT,rc);
+                                          x.what(), ESMC_CONTEXT,&rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT,rc);
+                                          "UNKNOWN", ESMC_CONTEXT,&rc);
     }
+    throw rc; // To be caught one level up so we know where the error came from
 
-    return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
-    return;
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,&rc);
+    throw rc; // To be caught one level up so we know where the error came from
+
   } catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
+      "Caught unknown exception", ESMC_CONTEXT, &rc);
+    throw rc; // To be caught one level up so we know where the error came from
   }
+}
 
-  // We've gotten to bottom successfully, so return success
-  if(rc != NULL) *rc = ESMF_SUCCESS;
+
+// INPUTS: 
+//  filename - file name in NULL delimited form
+//  add_user_area - specifies if areas should be added to mesh. 
+//  coord_sys - The coordsys to create the mesh with. If ESMC_COORDSYS_UNINIT, then 
+//              use the one from the file.
+//  elem_distgrid - If not NULL, redist so elems are on this distgrid
+//
+// OUTPUTS:
+//   out_mesh - the new mesh created from the file
+//
+void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
+                                       char *filename, 
+                                       bool add_user_area, 
+                                       ESMC_CoordSys_Flag coord_sys, 
+                                       ESMC_MeshLoc_Flag maskFlag, 
+                                       char *maskVarName,
+                                       ESMCI::DistGrid *elem_distgrid, 
+                                       Mesh **out_mesh){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_mesh_create_from_UGRID_file()"
+
+  // Declare some handy variables
+  int localrc;
+  int rc;
+  int piorc;
+
+  // Init output
+  *out_mesh=NULL;
+
+  // Try-catch block around main part of method
+  try {
+
+    //// Open file via PIO
+
+    // Set pio_type based on what's available
+#ifdef ESMF_PNETCDF
+    int pio_type = PIO_IOTYPE_PNETCDF;
+#else
+    int pio_type = PIO_IOTYPE_NETCDF;
+#endif
+
+    // Open file
+    int pioFileDesc;
+    int mode = 0;
+    piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
+    if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+    piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
+    //    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
+    //                   ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+
+    //// Get VM Info
+
+    // Get VM 
+    ESMCI::VM *vm=VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+    
+    // Get info
+    int local_pet = vm->getLocalPet();  
+    int pet_count = vm->getPetCount();
+
+
+    // Get id of mesh topo varaible
+    int mesh_topo_id;
+    get_mesh_topo_id_from_UGRID_file(pioFileDesc, filename, mesh_topo_id);
+
+
+    // Get dim of mesh in file
+    // (This dim is both pdim and orig_sdim)
+    int dim;
+    get_dim_from_UGRID_file(pioFileDesc, filename, mesh_topo_id, dim);
+
+
+    // Get the element connection array id from the file
+    int elementConn_id;
+    get_elementConn_id_from_UGRID_file(pioFileDesc, filename, mesh_topo_id, dim, elementConn_id);
+
+
+    //// Get information about element distribution 
+
+    // Get global elementCount
+    PIO_Offset elementCount;
+    get_elementCount_from_UGRID_file(pioFileDesc, filename, elementConn_id, elementCount);
+
+    // Don't currently support more pets than elements
+    if (pet_count > elementCount) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          " Can't create a Mesh from a file in a VM when that VM contains more PETs than elements in the file.",
+                           ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // Get positions at which to read element information
+    std::vector<int> elem_ids_vec;
+    if (elem_distgrid == NULL) {
+      get_ids_divided_evenly_across_pets(elementCount, local_pet, pet_count, elem_ids_vec);
+    } else {
+      // Have elem_distgrid, so get ids from that
+      get_ids_from_distgrid(elem_distgrid, elem_ids_vec);
+    }
+
+    // Assign vector info to pointer, because PIO and mesh calls don't accept vectors
+    int num_elems=0;
+    int *elem_ids=NULL;
+    if (!elem_ids_vec.empty()) {
+      num_elems=elem_ids_vec.size();
+      elem_ids=&elem_ids_vec[0];
+    } 
+
+
+
+    //// Create Mesh 
+
+    // Get the variable ids of the node coord variables
+    int nodeCoord_ids[ESMF_MAXDIM];
+    get_nodeCoord_ids_from_UGRID_file(pioFileDesc, filename, mesh_topo_id, dim, nodeCoord_ids);    
+
+    // Get coordsys from file
+    ESMC_CoordSys_Flag coord_sys_file=ESMC_COORDSYS_SPH_DEG;
+    get_coordsys_from_UGRID_file(pioFileDesc, filename, dim, nodeCoord_ids, coord_sys_file);
+
+    // Decide which coord_sys the mesh should be created with
+    ESMC_CoordSys_Flag coord_sys_mesh;
+    if (coord_sys == ESMC_COORDSYS_UNINIT) {
+      coord_sys_mesh = coord_sys_file;
+    } else {
+      coord_sys_mesh = coord_sys;
+    }
+
+    // Convert mesh dim from file into pdim and orig_sdim to use in mesh create
+    int pdim, orig_sdim;
+    if (dim == 2) {
+      pdim=orig_sdim=2;
+    } else if (dim == 3) {
+      pdim=orig_sdim=3;
+    } else {
+      Throw() << "Meshes can only be created with dim=2 or 3.";
+    }
+
+    // Create Mesh    
+    ESMCI_meshcreate(out_mesh,
+                     &pdim, &orig_sdim, &coord_sys_mesh, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
+
+
+    //// Add nodes to Mesh
+
+    // Get element connection info
+    int totNumElementConn=0;
+    int *numElementConn=NULL, *elementConn=NULL;
+    get_elementConn_info_from_UGRID_file(pioSystemDesc, pioFileDesc, filename, elementConn_id, 
+                                      elementCount, num_elems, elem_ids, 
+                                      totNumElementConn, numElementConn, elementConn);
+
+
+    // Convert global elem info into node info
+    int num_nodes;
+    int *node_ids=NULL;
+    int *local_elem_conn=NULL;
+    convert_global_elem_conn_to_local_node_and_elem_info(num_elems, totNumElementConn, numElementConn, elementConn,
+                                                          num_nodes, node_ids, local_elem_conn);
+
+    // Free element connection info, because we don't need it any more
+    delete [] elementConn;
+
+
+    // Get global nodeCount
+    PIO_Offset nodeCount;
+    get_nodeCount_from_UGRID_file(pioFileDesc, filename, dim, nodeCoord_ids, nodeCount);
+
+    // Get nodeCoords at positions indicated by node_ids
+    double *nodeCoords=NULL;
+    get_coords_from_UGRID_file(pioSystemDesc, pioFileDesc, filename, 
+                                   dim, nodeCoord_ids, 
+                                   nodeCount, 
+                                   num_nodes, node_ids, 
+                                   nodeCoords);
+
+
+    // If file in different coordinate system than mesh, convert
+    if (coord_sys_file != coord_sys_mesh) {
+      convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
+                                       dim, num_nodes, nodeCoords);
+    }
+
+
+    // Get nodeMask
+    // (If not present in file, nodeMask variable will be NULL)
+    int *nodeMask=NULL;
+    if (maskFlag == ESMC_MESHLOC_NODE) {
+      get_mask_from_UGRID_file(pioSystemDesc, pioFileDesc, filename, 
+                               maskVarName, 
+                               nodeCount, 
+                               num_nodes, node_ids, 
+                               nodeMask);
+    }
+
+    // Set up InterArray variable for nodeMask
+    // Note that present() for InterArray checks if the array is NULL, so it works to just create the InterArray and pass that
+    InterArray<int> nodeMaskIA(nodeMask, num_nodes);
+
+
+    // Add nodes
+    ESMCI_meshaddnodes(out_mesh, &num_nodes, node_ids,
+                       nodeCoords, NULL, &nodeMaskIA,
+                       &coord_sys_mesh, &orig_sdim,
+                       &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
+    // Get rid of things used for adding nodes
+    delete [] node_ids;
+    delete [] nodeCoords;
+    if (nodeMask != NULL) delete [] nodeMask;
+
+
+
+    //// Add elements to Mesh and finish it up
+
+    // Get elementMask
+    // (If not present in file, elementMask variable will be NULL)
+    int *elementMask=NULL;
+    if (maskFlag == ESMC_MESHLOC_ELEMENT) {
+      get_mask_from_UGRID_file(pioSystemDesc, pioFileDesc, filename, 
+                                    maskVarName, 
+                                    elementCount, 
+                                    num_elems, elem_ids, 
+                                    elementMask);
+    }
+
+    // Set up InterArray variable for elementMask
+    // Note, that present() for InterArray checks if the array is NULL, so it works to just create the InterArray and pass that
+    InterArray<int> elementMaskIA(elementMask, num_elems);
+
+    // Get elementArea, if requested and if present in file
+    double *elementArea=NULL;
+    int areaPresent=0;
+    if (add_user_area) {
+      // User areas are not supported in UGRID format
+      ESMC_LogDefault.Write("UGRID format does not support element areas, so no user areas will be read or used.",ESMC_LOGMSG_WARN);
+    }
+
+
+    // Get centerCoords, if present in file
+    double *centerCoords=NULL;
+    int elemCoord_ids[ESMF_MAXDIM];
+    int centerCoordsPresent=0;
+    get_elemCoord_ids_from_UGRID_file(pioFileDesc, filename, mesh_topo_id, 
+                                      dim, elemCoord_ids, centerCoordsPresent);
+    if (centerCoordsPresent) {
+      get_coords_from_UGRID_file(pioSystemDesc, pioFileDesc, filename, 
+                                     dim, elemCoord_ids, 
+                                     elementCount, 
+                                     num_elems, elem_ids, 
+                                     centerCoords);
+      
+      // If center coords exist and
+      // file in different coordinate system than mesh, convert
+      if ((centerCoords != NULL) && (coord_sys_file != coord_sys_mesh)) {
+        convert_coords_between_coord_sys(coord_sys_file, coord_sys_mesh, 
+                                         dim, num_elems, centerCoords);
+      }
+    }
+    
+
+    // Add elements
+    ESMCI_meshaddelements(out_mesh,
+                          &num_elems, elem_ids, numElementConn,
+                          &elementMaskIA,
+                          &areaPresent, elementArea,
+                          &centerCoordsPresent, centerCoords, 
+                          &totNumElementConn, local_elem_conn, 
+                          &coord_sys_mesh, &orig_sdim, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+
+    // Free things used for element creation
+    delete [] numElementConn;
+    if (elementMask != NULL) delete [] elementMask;
+    if (elementArea != NULL) delete [] elementArea;
+    if (centerCoords != NULL) delete [] centerCoords;
+    delete [] local_elem_conn;
+
+
+    //// Close file using PIO
+    piorc = PIOc_closefile(pioFileDesc);
+    if (!CHECKPIOERROR(piorc, std::string("Error closing file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+    //    Throw() << "Not finished with UGRID yet!";
+
+
+  } catch(std::exception &x) {
+
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT,&rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT,&rc);
+    }
+    throw rc; // To be caught one level up so we know where the error came from
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,&rc);
+    throw rc; // To be caught one level up so we know where the error came from
+
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught unknown exception", ESMC_CONTEXT, &rc);
+    throw rc; // To be caught one level up so we know where the error came from
+  }
 }
 
 

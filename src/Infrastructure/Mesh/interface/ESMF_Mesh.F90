@@ -2093,18 +2093,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical) :: localAddUserArea
     type(ESMF_Logical) :: localConvertToDual
     type(ESMF_CoordSys_Flag) :: localCoordSys
+    type(ESMF_MeshLoc) :: localMaskFlag
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, nodalDistgrid, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, elementDistgrid, rc)
 
-    ! Only doing ESMFMesh format right now
-    if (fileformat .ne. ESMF_FILEFORMAT_ESMFMESH) then
-       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
-            msg=" only ESMFMesh format supported through this interface right now.", &
-            ESMF_CONTEXT, rcToReturn=rc)
-       return
-    endif
 
     ! Process optional arguments and at the same time convert to a format to go through to C
     localAddUserArea=ESMF_FALSE
@@ -2122,13 +2116,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        localCoordSys=coordSys
     endif
 
+    localMaskFlag=ESMF_MESHLOC_NONE
+    if (present(maskFlag)) then
+       localMaskFlag=maskFlag
+    endif
+
 
     ! Call into C 
     call c_ESMC_MeshCreateFromFile(ESMF_MeshCreateFromFileNew%this, &
          filename, fileformat, &
          localConvertToDual, localAddUserArea, &
          localCoordSys, &
-         !  maskFlag, varname, & ! JUST DO STUFF FOR ESMFMESH format right now
+         localMaskFlag, varname, & 
          nodalDistgrid, elementDistgrid, &
          localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

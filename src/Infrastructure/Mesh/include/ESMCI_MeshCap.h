@@ -357,6 +357,8 @@ namespace ESMCI {
                                           bool convert_to_dual, 
                                           bool add_user_area, 
                                           ESMC_CoordSys_Flag coordSys, 
+                                          ESMC_MeshLoc_Flag maskFlag, 
+                                          char *maskVarName, 
                                           ESMCI::DistGrid *node_distgrid,
                                           ESMCI::DistGrid *elem_distgrid,
                                           int *rc);
