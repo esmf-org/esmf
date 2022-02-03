@@ -276,18 +276,17 @@ int PIO_Handler::initializeVM (void
       my_rank = vm->getLocalPet();
 
       // Figure out the inputs for the initialize call
-#if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
-      num_iotasks = vm->getPetCount();
-      //num_iotasks = 2;
-      stride = 1;
-      rearr = PIO_REARR_SUBSET;
+      int numtasks =  vm->getPetCount();
+      stride = vm->getSsiLocalPetCount();
       base = 0;
-#else // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
-      num_iotasks = 1;
-      stride = 1;
-      rearr = PIO_REARR_SUBSET;
-      base = 0;
-#endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
+      if (numtasks > stride){
+          num_iotasks = int(numtasks/stride);
+          rearr = PIO_REARR_SUBSET;
+      }else{
+          stride = 1;
+          num_iotasks = 1;
+          rearr = PIO_REARR_BOX;
+      }
 
       // Call the static function
       PIO_Handler::initialize(my_rank, communicator, num_iotasks,
