@@ -19,120 +19,78 @@
 #ifndef __metispartitioner_hpp__
 #define __metispartitioner_hpp__
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "moab/PartitionerBase.hpp"
 #include "metis.h"
 
-namespace moab {
+namespace moab
+{
 
-  class Interface;
-  class Range;
-}
+class Interface;
+class Range;
+}  // namespace moab
 
 using namespace moab;
 
-  class MetisPartitioner : public PartitionerBase<idx_t>
-  {
+class MetisPartitioner : public PartitionerBase< idx_t >
+{
 
   public:
-    MetisPartitioner( Interface *impl = NULL,
-                          const bool use_coords = false);
-    
+    MetisPartitioner( Interface* impl = NULL, const bool use_coords = false );
+
     virtual ~MetisPartitioner();
 
-    virtual ErrorCode partition_mesh_and_geometry(const double part_geom_mesh_size,
-                                                  const idx_t nparts,
-                                                  const char *zmethod,
-                                                  const char *other_method,
-                                                  double imbal_tol,
-                                                  const int part_dim = 3,
-                                                  const bool write_as_sets = true,
-                                                  const bool write_as_tags = false,
-                                                  const int obj_weight = 0,
-                                                  const int edge_weight = 0,
-                                                  const bool part_surf = false,
-                                                  const bool ghost = false,
-                                                  const bool spherical_coords = false,
-                                                  const bool print_time = false);
+    virtual ErrorCode partition_mesh_and_geometry(
+        const double part_geom_mesh_size, const idx_t nparts, const char* zmethod, const char* other_method,
+        double imbal_tol, const int part_dim = 3, const bool write_as_sets = true, const bool write_as_tags = false,
+        const int obj_weight = 0, const int edge_weight = 0, const bool part_surf = false, const bool ghost = false,
+        const int projection_type = 0, const bool recompute_rcb_box = false, const bool print_time = false );
 
-    virtual ErrorCode partition_mesh( const idx_t nparts,
-                                      const char *method,
-                                      const int part_dim = 3, 
-                                      const bool write_as_sets = true,
-                                      const bool write_as_tags = false,
+    virtual ErrorCode partition_mesh( const idx_t nparts, const char* method, const int part_dim = 3,
+                                      const bool write_as_sets = true, const bool write_as_tags = false,
                                       const bool partition_tagged_sets = false,
-                                      const bool partition_tagged_ents = false,
-                                      const char *aggregating_tag = NULL,
-                                      const bool print_time=false);
+                                      const bool partition_tagged_ents = false, const char* aggregating_tag = NULL,
+                                      const bool print_time = false );
 
-    virtual ErrorCode write_partition(const idx_t nparts, Range &elems, 
-                                const idx_t *assignment,
-                                const bool write_as_sets,
-                                const bool write_as_tags);
-    
-    ErrorCode write_aggregationtag_partition(const idx_t nparts, Range &elems, 
-                                             const idx_t *assignment,
-                                             const bool write_as_sets,
-                                             const bool write_as_tags);
+    virtual ErrorCode write_partition( const idx_t nparts, Range& elems, const idx_t* assignment,
+                                       const bool write_as_sets, const bool write_as_tags );
 
-      // put closure of entities in the part sets too
+    ErrorCode write_aggregationtag_partition( const idx_t nparts, Range& elems, const idx_t* assignment,
+                                              const bool write_as_sets, const bool write_as_tags );
+
+    // put closure of entities in the part sets too
     virtual ErrorCode include_closure();
 
     // virtual ErrorCode write_file(const char *filename, const char *out_file);
-  
-  private:
 
-    ErrorCode assemble_graph(const int dimension, 
-                             std::vector<double> &coords,
-                             std::vector<idx_t> &moab_ids,
-                             std::vector<idx_t> &adjacencies, 
-                             std::vector<idx_t> &length,
-                             Range &elems);
-    
-    ErrorCode assemble_taggedsets_graph(const int dimension, 
-                                        std::vector<double> &coords,
-                                        std::vector<idx_t> &moab_ids,
-                                        std::vector<idx_t> &adjacencies, 
-                                        std::vector<idx_t> &length,
-                                        Range &elems,
-                                        const char *aggregating_tag);
-    
-    ErrorCode assemble_taggedents_graph(const int dimension, 
-                                        std::vector<double> &coords,
-                                        std::vector<idx_t> &moab_ids,
-                                        std::vector<idx_t> &adjacencies, 
-                                        std::vector<idx_t> &length,
-                                        Range &elems,
-                                        const char *aggregating_tag);
-  };
+  private:
+    ErrorCode assemble_graph( const int dimension, std::vector< double >& coords, std::vector< idx_t >& moab_ids,
+                              std::vector< idx_t >& adjacencies, std::vector< idx_t >& length, Range& elems );
+
+    ErrorCode assemble_taggedsets_graph( const int dimension, std::vector< double >& coords,
+                                         std::vector< idx_t >& moab_ids, std::vector< idx_t >& adjacencies,
+                                         std::vector< idx_t >& length, Range& elems, const char* aggregating_tag );
+
+    ErrorCode assemble_taggedents_graph( const int dimension, std::vector< double >& coords,
+                                         std::vector< idx_t >& moab_ids, std::vector< idx_t >& adjacencies,
+                                         std::vector< idx_t >& length, Range& elems, const char* aggregating_tag );
+};
 
 // Inline functions
 
-inline
-ErrorCode MetisPartitioner::partition_mesh_and_geometry(const double ,
-                                                  const idx_t nparts,
-                                                  const char *zmethod,
-                                                  const char *,
-                                                  double ,
-                                                  const int part_dim,
-                                                  const bool write_as_sets,
-                                                  const bool write_as_tags,
-                                                  const int ,
-                                                  const int ,
-                                                  const bool ,
-                                                  const bool ,
-                                                  const bool ,
-                                                  const bool print_time)
+inline ErrorCode MetisPartitioner::partition_mesh_and_geometry( const double, const idx_t nparts, const char* zmethod,
+                                                                const char*, double, const int part_dim,
+                                                                const bool write_as_sets, const bool write_as_tags,
+                                                                const int, const int, const bool, const bool, const int,
+                                                                const bool, const bool print_time )
 {
-  // Only partition the mesh - no geometric partition available
-  return partition_mesh( nparts, zmethod, part_dim, write_as_sets, write_as_tags, false, false, NULL, print_time);
+    // Only partition the mesh - no geometric partition available
+    return partition_mesh( nparts, zmethod, part_dim, write_as_sets, write_as_tags, false, false, NULL, print_time );
 }
 
-inline
-ErrorCode MetisPartitioner::include_closure()
+inline ErrorCode MetisPartitioner::include_closure()
 {
-  return MB_NOT_IMPLEMENTED;
+    return MB_NOT_IMPLEMENTED;
 }
 
 #endif
-

@@ -31,7 +31,9 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
+#ifdef ESMF_PIO
 #include "ESMCI_PIO_Handler.h"
+#endif
 
 #define ROOT_PET (0)
 
@@ -63,7 +65,7 @@ namespace ESMCI
 IO_Handler::IO_Handler (
 //
 // !RETURN VALUE:
-//    
+//
 //
 // !ARGUMENTS:
   ESMC_IOFmt_Flag fmtArg               // (in)  - the desired I/O format

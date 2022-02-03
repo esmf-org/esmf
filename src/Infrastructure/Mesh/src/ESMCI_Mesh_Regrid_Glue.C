@@ -170,6 +170,18 @@ void ESMCI_regrid_create(
                             ESMC_LOGMSG_WARN);
     }
 
+    ////// Sanity checks /////
+
+    // extrapolation not supported with conservative methods
+    if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Extrapolation is not currently supported with conservative regrid methods.",
+             ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+
     
      //// Precheck Meshes for errors
     bool degenerate=false;
@@ -206,6 +218,7 @@ void ESMCI_regrid_create(
         }
       }
     }
+
 
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);

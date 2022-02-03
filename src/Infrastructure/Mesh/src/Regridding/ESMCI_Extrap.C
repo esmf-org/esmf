@@ -885,6 +885,9 @@ template void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dt
                            int extrapNumInputLevels, 
                            bool set_dst_status, WMat &dst_status) {
 
+    // Sanity checks
+    ThrowRequire(dstmesh != NULL);
+
      // Set info for calling into interp
      IWeights extrap_wts;
      WMat extrap_dst_status;
@@ -913,6 +916,9 @@ template void _merge_dst_to_dst_wts_into_src_to_dst_wts(PointList &dst, WMat &dt
                                   int extrapNumLevels,
                                   int extrapNumInputLevels, 
                                   bool set_dst_status, WMat &dst_status) {
+
+    // Sanity checks
+    ThrowRequire(dstmesh != NULL);
 
      // Call into Creep fill/merge weights/merge status
      // (Inside braces so weights, etc. go away when not needed)

@@ -88,6 +88,8 @@ endif
 	-@echo "--------------------------------------------------------------"
 	-@echo "Make version:"; $(MAKE) -v; echo ""
 	-@echo "--------------------------------------------------------------"
+	-@echo "CMake version:"; cmake --version; echo ""
+	-@echo "--------------------------------------------------------------"
 	-@echo "Fortran Compiler version:"; $(ESMF_F90COMPILER_VERSION); echo ""
 	-@echo "--------------------------------------------------------------"
 	-@echo "C++ Compiler version:"; $(ESMF_CXXCOMPILER_VERSION); echo "" 
@@ -694,6 +696,9 @@ install:
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	cp -f $(ESMF_LIBDIR)/libesmf*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+ifeq ($(ESMF_PIO),internal)
+	cp -f $(ESMF_LIBDIR)/libpioc.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+endif
 	@for lib in $(wildcard $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf*.dylib) foo ; do \
 	  if [ $$lib != "foo" ]; then \
 	    install_name_tool -id "$$lib" $$lib ; \

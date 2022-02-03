@@ -709,7 +709,7 @@ void MeshCap::meshfreememory(int *rc) {
   isfree = true;
   
   // return successfully
-  rc = ESMF_SUCCESS;
+  if (rc) *rc = ESMF_SUCCESS;
 }
 
 void MeshCap::meshgetdimensions(int *sdim, int *pdim, 
@@ -723,6 +723,9 @@ void MeshCap::meshgetdimensions(int *sdim, int *pdim,
     *pdim = this->pdim_mc;
   if (coordsys)
     *coordsys = this->coordsys_mc;
+    
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
 }
 
 void MeshCap::getNodeCount(int *nodeCount, int *rc){
@@ -1500,7 +1503,7 @@ void MeshCap::regrid_create(
     int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
     int *has_statusArray, ESMCI::Array **statusArray,
     int *checkFlag, 
-    int*rc) {
+    int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::regrid_create()"
 
@@ -1826,7 +1829,6 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
   // printf("serialize - elem_distgrid_set = %d\n", elem_distgrid_set);
   // printf("serialize - baseOnly = %d\n", baseOnly);
 
-
   // Adjust offset
   *offset += size;
   
@@ -1841,7 +1843,7 @@ void MeshCap::meshserialize(char *buffer, int *length, int *offset,
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
   }
-    
+
   // Serialize the Base class,
   localrc = ESMC_Base::ESMC_Serialize(buffer, length, offset, attreconflag,
     *inquireflag);
@@ -1899,32 +1901,33 @@ void MeshCap::meshdeserialize(char *buffer, int *offset,
   // Get pointer
   int *ip= (int *)(buffer + *offset);
 
+  int debug = 0;
+
   // Get values
   local_is_esmf_mesh=*ip++;
+  if(debug) printf("deserialize - local_is_esmf_mesh = %d\n", local_is_esmf_mesh);
   local_isfree=*ip++;
+  if(debug) printf("deserialize - local_isfree = %d\n", local_isfree);
   local_status=*ip++;
+  if(debug) printf("deserialize - local_status = %d\n", local_status);
   sdim_mc=*ip++;
+  if(debug) printf("deserialize - sdim_mc = %d\n", sdim_mc);
   pdim_mc=*ip++;
+  if(debug) printf("deserialize - pdim_mc = %d\n", pdim_mc);
   local_coordsys=*ip++;
+  if(debug) printf("deserialize - local_coordsys = %d\n", local_coordsys);
   num_owned_node_mc=*ip++;
+  if(debug) printf("deserialize - num_owned_node_mc = %d\n", num_owned_node_mc);
   num_owned_elem_mc=*ip++;
+  if(debug) printf("deserialize - num_owned_elem_mc = %d\n", num_owned_elem_mc);
   local_node_distgrid_set=*ip++;
+  if(debug) printf("deserialize - local_node_distgrid_set = %d\n", local_node_distgrid_set);
   local_elem_distgrid_set=*ip++;
+  if(debug) printf("deserialize - local_elem_distgrid_set = %d\n", local_elem_distgrid_set);
+  if(debug) printf("deserialize - baseOnly = %d\n", baseOnly);
 
   // Adjust offset
   *offset += size;
-
-  // printf("deserialize - local_is_esmf_mesh = %d\n", local_is_esmf_mesh);
-  // printf("deserialize - local_isfree = %d\n", local_isfree);
-  // printf("deserialize - local_status = %d\n", local_status);
-  // printf("deserialize - sdim_mc = %d\n", sdim_mc);
-  // printf("deserialize - pdim_mc = %d\n", pdim_mc);
-  // printf("deserialize - local_coordsys = %d\n", local_coordsys);
-  // printf("deserialize - num_owned_node_mc = %d\n", num_owned_node_mc);
-  // printf("deserialize - num_owned_elem_mc = %d\n", num_owned_elem_mc);
-  // printf("deserialize - local_node_distgrid_set = %d\n", local_node_distgrid_set);
-  // printf("deserialize - local_elem_distgrid_set = %d\n", local_elem_distgrid_set);
-  // printf("deserialize - baseOnly = %d\n", baseOnly);
 
   // get the DistGrids
   if (local_node_distgrid_set)
@@ -1959,7 +1962,7 @@ void MeshCap::meshdeserialize(char *buffer, int *offset,
     // Set member variables
     this->mesh=mesh;
     this->mbmesh=mbmesh;
-    
+
   }
 
   // Set member variables

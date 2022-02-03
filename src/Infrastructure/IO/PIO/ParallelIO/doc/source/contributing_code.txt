@@ -121,7 +121,7 @@ all issues have been resolved.
 master.
 
 <li>When a branch is ready, it is submitted to code review via pull
-request. Travis CI testing is automatically run on the PR.
+request. A number of Github tests will be run automatically. 
 
 <li>When code review is complete, and the changes are approved, the PR
 is merged into the master branch.

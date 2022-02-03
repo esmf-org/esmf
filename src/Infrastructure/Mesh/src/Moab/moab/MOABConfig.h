@@ -10,12 +10,12 @@
 
 /* Configuration command along with user-specified options. */
 #ifndef MOAB_CONFIGURE_COMMAND
-#define MOAB_CONFIGURE_COMMAND "./configure  '--enable-shared' '--enable-debug' '--with-mpi=/usr/local' '--with-netcdf=/usr/local' '--prefix=/home/ryan/sandbox/MOAB510'"
+#define MOAB_CONFIGURE_COMMAND "./configure  '--enable-shared' '--enable-debug' '--with-mpi=/usr/local/lib' '--with-lapack=-L/usr/local/lib/openblas -lopenblas' '--prefix=/home/ryan/sandbox/MOAB531' 'CC=/usr/local/bin/mpicc' 'CXX=/usr/local/bin/mpicxx' 'F77=/usr/local/bin/mpif77' 'FC=/usr/local/bin/mpif90'"
 #endif
 
 /* Configuration information. */
 #ifndef MOAB_CONFIGURE_INFO
-#define MOAB_CONFIGURE_INFO "./configure run on Sun Jun 23 09:56:23 MDT 2019"
+#define MOAB_CONFIGURE_INFO "./configure run on Wed Jan  5 15:21:58 PST 2022"
 #endif
 
 /* Define to alternate name for `main' routine that is called from a `main' in
@@ -50,9 +50,11 @@
 /* Enable use of AHF data-structures for querying adjacency information */
 /* #undef HAVE_AHF */
 
+#if defined ESMF_LAPACK
 /* Define if you have a BLAS library. */
 #ifndef MOAB_HAVE_BLAS
 #define MOAB_HAVE_BLAS 1
+#endif
 #endif
 
 /* Define if cbrt is available. */
@@ -90,6 +92,11 @@
 #define MOAB_HAVE_CLOCK 1
 #endif
 
+/* define if the compiler supports basic C++11 syntax */
+#ifndef MOAB_HAVE_CXX11
+#define MOAB_HAVE_CXX11 1
+#endif
+
 /* "Define if configured with Damsel I/O format support." */
 /* #undef HAVE_DAMSEL */
 
@@ -102,7 +109,7 @@
 #endif
 
 /* Flag indicating whether the library will be compiled with Eigen support */
-/* #undef HAVE_EIGEN */
+/* #undef HAVE_EIGEN3 */
 
 /* Define if configured with FBiGeom interfaces. */
 /* #undef HAVE_FBIGEOM */
@@ -113,7 +120,9 @@
 #endif
 
 /* define if compiler has finite */
-/* #undef MOAB_HAVE_FINITE */
+#ifndef MOAB_HAVE_FINITE
+#define MOAB_HAVE_FINITE 1
+#endif
 
 /* Configure with tool: GSETS */
 #ifndef MOAB_HAVE_GSETS
@@ -162,9 +171,11 @@
 /* define if compiler has isfinite */
 /* #undef HAVE_ISFINITE */
 
+#if defined ESMF_LAPACK
 /* Define if you have LAPACK library. */
 #ifndef MOAB_HAVE_LAPACK
 #define MOAB_HAVE_LAPACK 1
+#endif
 #endif
 
 /* Define to 1 if you have the `lmpe' library (-llmpe). */
@@ -262,8 +273,14 @@
 /* "Define if configured with NetCDF support." */
 /* #undef HAVE_NETCDF */
 
+/* MOAB is configured with MPI enabled NetCDF */
+/* #undef HAVE_NETCDFPAR */
+
 /* Define to 1 if you have the <netcdf.h> header file. */
 /* #undef HAVE_NETCDF_H */
+
+/* Define to 1 if you have the <netcdf_par.h> header file. */
+/* #undef HAVE_NETCDF_PAR_H */
 
 /* Flag indicating whether the library will be compiled with ParMetis support
    */
@@ -274,6 +291,16 @@
 
 /* Define to 1 if you have the <pnetcdf.h> header file. */
 /* #undef HAVE_PNETCDF_H */
+
+/* Define if you have POSIX threads libraries and header files. */
+#ifndef MOAB_HAVE_PTHREAD
+#define MOAB_HAVE_PTHREAD 1
+#endif
+
+/* Have PTHREAD_PRIO_INHERIT. */
+#ifndef MOAB_HAVE_PTHREAD_PRIO_INHERIT
+#define MOAB_HAVE_PTHREAD_PRIO_INHERIT 1
+#endif
 
 /* System provides ptrdiff_t typedef */
 #ifndef MOAB_HAVE_PTRDIFF_T
@@ -311,24 +338,9 @@
 #endif
 
 /* define if compiler has std::isfinite */
-#if defined (ESMF_OS_Darwin) || defined (ESMF_OS_Cygwin) || defined (ESMF_OS_MinGW)
 #ifndef MOAB_HAVE_STDISFINITE
 #define MOAB_HAVE_STDISFINITE 1
 #endif
-#endif
-
-#if defined (ESMF_PGIVERSION_MAJOR)
-#if (ESMF_PGIVERSION_MAJOR >= 16)
-#ifndef MOAB_HAVE_STDISFINITE
-#define MOAB_HAVE_STDISFINITE 1
-#endif
-#else
-#ifndef MOAB_HAVE_ISFINITE
-#define MOAB_HAVE_ISFINITE 1
-#endif
-#endif
-#endif
-/*#undef MOAB_HAVE_STDISFINITE */
 
 /* MOAB qualified HAVE_STDLIB_H */
 #ifndef MOAB_HAVE_STDLIB_H
@@ -452,7 +464,7 @@
 
 /* Define to the full name and version of this package. */
 #ifndef MOAB_PACKAGE_STRING
-#define MOAB_PACKAGE_STRING "MOAB 5.1.0"
+#define MOAB_PACKAGE_STRING "MOAB 5.3.1"
 #endif
 
 /* Define to the one symbol short name of this package. */
@@ -467,8 +479,12 @@
 
 /* Define to the version of this package. */
 #ifndef MOAB_PACKAGE_VERSION
-#define MOAB_PACKAGE_VERSION "5.1.0"
+#define MOAB_PACKAGE_VERSION "5.3.1"
 #endif
+
+/* Define to necessary symbol if this constant uses a non-standard name on
+   your system. */
+/* #undef PTHREAD_CREATE_JOINABLE */
 
 /* "Value of C SEEK_CUR" */
 /* #undef SEEK_CUR */
@@ -512,7 +528,7 @@
 
 /* MOAB Version */
 #ifndef MOAB_VERSION
-#define MOAB_VERSION "5.1.0"
+#define MOAB_VERSION "5.3.1"
 #endif
 
 /* MOAB Major Version */
@@ -522,17 +538,17 @@
 
 /* MOAB Minor Version */
 #ifndef MOAB_VERSION_MINOR
-#define MOAB_VERSION_MINOR 1
+#define MOAB_VERSION_MINOR 3
 #endif
 
 /* MOAB Patch Level */
 #ifndef MOAB_VERSION_PATCH
-#define MOAB_VERSION_PATCH 0
+#define MOAB_VERSION_PATCH 1
 #endif
 
 /* MOAB Version String */
 #ifndef MOAB_VERSION_STRING
-#define MOAB_VERSION_STRING "MOAB 5.1.0"
+#define MOAB_VERSION_STRING "MOAB 5.3.1"
 #endif
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most

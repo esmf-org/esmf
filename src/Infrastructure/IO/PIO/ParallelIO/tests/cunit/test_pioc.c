@@ -1867,7 +1867,7 @@ int test_malloc_iodesc2(int iosysid, int my_rank)
     int test_type[NUM_NETCDF_TYPES] = {PIO_BYTE, PIO_CHAR, PIO_SHORT, PIO_INT,
                                        PIO_FLOAT, PIO_DOUBLE, PIO_UBYTE, PIO_USHORT,
                                        PIO_UINT, PIO_INT64, PIO_UINT64};
-    MPI_Datatype mpi_type[NUM_NETCDF_TYPES] = {MPI_BYTE, MPI_CHAR, MPI_SHORT, MPI_INT,
+    MPI_Datatype mpi_type[NUM_NETCDF_TYPES] = {MPI_SIGNED_CHAR, MPI_CHAR, MPI_SHORT, MPI_INT,
                                                MPI_FLOAT, MPI_DOUBLE, MPI_UNSIGNED_CHAR,
                                                MPI_UNSIGNED_SHORT, MPI_UNSIGNED, MPI_LONG_LONG,
                                                MPI_UNSIGNED_LONG_LONG, MPI_CHAR};

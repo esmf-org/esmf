@@ -22,7 +22,7 @@
  */
 
 /** 10MB default limit. */
-PIO_Offset pio_buffer_size_limit = PIO_BUFFER_SIZE;
+PIO_Offset pio_pnetcdf_buffer_size_limit = PIO_BUFFER_SIZE;
 
 /** Global buffer pool pointer. */
 void *CN_bpool = NULL;
@@ -46,7 +46,7 @@ extern int event_num[2][NUM_EVENTS];
 /**
  * Set the PIO IO node data buffer size limit.
  *
- * The pio_buffer_size_limit will only apply to files opened after
+ * The pio_pnetcdf_buffer_size_limit will only apply to files opened after
  * the setting is changed.
  *
  * @param limit the size of the buffer on the IO nodes
@@ -56,11 +56,11 @@ extern int event_num[2][NUM_EVENTS];
 PIO_Offset
 PIOc_set_buffer_size_limit(PIO_Offset limit)
 {
-    PIO_Offset oldsize = pio_buffer_size_limit;
+    PIO_Offset oldsize = pio_pnetcdf_buffer_size_limit;
 
     /* If the user passed a valid size, use it. */
     if (limit > 0)
-        pio_buffer_size_limit = limit;
+        pio_pnetcdf_buffer_size_limit = limit;
 
     return oldsize;
 }
@@ -821,8 +821,8 @@ PIOc_write_darray(int ncid, int varid, int ioid, PIO_Offset arraylen, void *arra
     bufptr = (void *)((char *)wmb->data + arraylen * iodesc->mpitype_size * wmb->num_arrays);
     if (arraylen > 0)
     {
+        PLOG((3, "copying %ld bytes of user data %d", arraylen * iodesc->mpitype_size, iodesc->mpitype_size));
         memcpy(bufptr, array, arraylen * iodesc->mpitype_size);
-        PLOG((3, "copied %ld bytes of user data", arraylen * iodesc->mpitype_size));
     }
 
     /* Add the unlimited dimension value of this variable to the frame

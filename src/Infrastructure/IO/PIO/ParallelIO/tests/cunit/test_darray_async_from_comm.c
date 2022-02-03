@@ -300,9 +300,9 @@ int run_darray_async_test(int iosysid, int my_rank, MPI_Comm test_comm, MPI_Comm
             continue;
 
         /* BYTE and CHAR don't work with pnetcdf. Don't know why yet. */
-        if (flavor[fmt] == PIO_IOTYPE_PNETCDF && (piotype == PIO_BYTE || piotype == PIO_CHAR))
+/*        if (flavor[fmt] == PIO_IOTYPE_PNETCDF && (piotype == PIO_BYTE || piotype == PIO_CHAR))
             continue;
-
+*/
         /* Select the correct data to write, depending on type. */
         switch (piotype)
         {

@@ -21,28 +21,23 @@
 namespace moab
 {
 
-  namespace internal
-  {
+namespace internal
+{
 
-// This module contains functions that are logically part of HYPRE, and might
-// become part of HYPRE at some point. In the meantime the module can be
-// thought of as an extension of HYPRE.
+    // This module contains functions that are logically part of HYPRE, and might
+    // become part of HYPRE at some point. In the meantime the module can be
+    // thought of as an extension of HYPRE.
 
     /** Parallel essential BC elimination from the system A*X = B.
         (Adapted from hypre_ParCSRMatrixEliminateRowsCols.) */
-    void hypre_ParCSRMatrixEliminateAXB(hypre_ParCSRMatrix *A,
-                                        HYPRE_Int num_rowscols_to_elim,
-                                        HYPRE_Int *rowscols_to_elim,
-                                        hypre_ParVector *X,
-                                        hypre_ParVector *B);
+    void hypre_ParCSRMatrixEliminateAXB( hypre_ParCSRMatrix* A, HYPRE_Int num_rowscols_to_elim,
+                                         HYPRE_Int* rowscols_to_elim, hypre_ParVector* X, hypre_ParVector* B );
 
     /** Parallel essential BC elimination from matrix A only. The eliminated
         elements are stored in a new matrix Ae, so that (A + Ae) equals the original
         matrix A. */
-    void hypre_ParCSRMatrixEliminateAAe(hypre_ParCSRMatrix *A,
-                                        hypre_ParCSRMatrix **Ae,
-                                        HYPRE_Int num_rowscols_to_elim,
-                                        HYPRE_Int *rowscols_to_elim);
+    void hypre_ParCSRMatrixEliminateAAe( hypre_ParCSRMatrix* A, hypre_ParCSRMatrix** Ae, HYPRE_Int num_rowscols_to_elim,
+                                         HYPRE_Int* rowscols_to_elim );
 
     /** Split matrix 'A' into nr x nc blocks, return nr x nc pointers to
         new parallel matrices. The array 'blocks' needs to be preallocated to hold
@@ -50,40 +45,29 @@ namespace moab
         blocks (AAABBBCCC) otherwise the blocks are interleaved (ABCABCABC).
         The local number of rows of A must be divisible by nr. The local number of
         columns of A must be divisible by nc. */
-    void hypre_ParCSRMatrixSplit(hypre_ParCSRMatrix *A,
-                                 HYPRE_Int nr, HYPRE_Int nc,
-                                 hypre_ParCSRMatrix **blocks,
-                                 int interleaved_rows, int interleaved_cols);
+    void hypre_ParCSRMatrixSplit( hypre_ParCSRMatrix* A, HYPRE_Int nr, HYPRE_Int nc, hypre_ParCSRMatrix** blocks,
+                                  int interleaved_rows, int interleaved_cols );
 
     typedef int HYPRE_Bool;
 #define HYPRE_MPI_BOOL MPI_INT
 
     /** The "Boolean" analog of y = alpha * A * x + beta * y, where elements in the
         sparsity pattern of the CSR matrix A are treated as "true". */
-    void hypre_CSRMatrixBooleanMatvec(hypre_CSRMatrix *A,
-                                      HYPRE_Bool alpha,
-                                      HYPRE_Bool *x,
-                                      HYPRE_Bool beta,
-                                      HYPRE_Bool *y);
+    void hypre_CSRMatrixBooleanMatvec( hypre_CSRMatrix* A, HYPRE_Bool alpha, HYPRE_Bool* x, HYPRE_Bool beta,
+                                       HYPRE_Bool* y );
 
-    hypre_ParCSRCommHandle *
-    hypre_ParCSRCommHandleCreate_bool(HYPRE_Int            job,
-                                      hypre_ParCSRCommPkg *comm_pkg,
-                                      HYPRE_Bool          *send_data,
-                                      HYPRE_Bool          *recv_data);
+    hypre_ParCSRCommHandle* hypre_ParCSRCommHandleCreate_bool( HYPRE_Int job, hypre_ParCSRCommPkg* comm_pkg,
+                                                               HYPRE_Bool* send_data, HYPRE_Bool* recv_data );
 
     /** The "Boolean" analog of y = alpha * A * x + beta * y, where elements in the
         sparsity pattern of the ParCSR matrix A are treated as "true". */
-    void hypre_ParCSRMatrixBooleanMatvec(hypre_ParCSRMatrix *A,
-                                         HYPRE_Bool alpha,
-                                         HYPRE_Bool *x,
-                                         HYPRE_Bool beta,
-                                         HYPRE_Bool *y);
+    void hypre_ParCSRMatrixBooleanMatvec( hypre_ParCSRMatrix* A, HYPRE_Bool alpha, HYPRE_Bool* x, HYPRE_Bool beta,
+                                          HYPRE_Bool* y );
 
-  } // namespace internal
+}  // namespace internal
 
-} // namespace MOAB
+}  // namespace moab
 
-#endif // MOAB_HAVE_MPI
+#endif  // MOAB_HAVE_MPI
 
 #endif

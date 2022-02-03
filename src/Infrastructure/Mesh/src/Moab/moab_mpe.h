@@ -11,18 +11,18 @@
 
 /* mpe_misc.h */
 
-#define MPE_Seq_begin( A, B ) {if (A || B) {}}
+#define MPE_Seq_begin( A, B ) {if ((A) || (B)) {}}
   
-#define MPE_Seq_end( A, B ) {if (A || B) {}}
+#define MPE_Seq_end( A, B ) {if ((A) || (B)) {}}
 
-#define MPE_DelTag( A, B, C, D ) ( {if (A || B || C || D) {}}, MPI_SUCCESS)
-#define MPE_GetTags( A, B, C, D ) (A = *C, *D = 0, if (B) {}, MPI_SUCCESS)
-#define MPE_ReturnTags( A, B, C ) ( {if (A || B || C) {}}, 0)
+#define MPE_DelTag( A, B, C, D ) ( {if ((A) || (B) || (C) || (D)) {}}, MPI_SUCCESS)
+#define MPE_GetTags( A, B, C, D ) ((A) = *(C), *(D) = 0, if (B) {}, MPI_SUCCESS)
+#define MPE_ReturnTags( A, B, C ) ( {if ((A) || (B) || (C)) {}}, 0)
 #define MPE_TagsEnd() (MPI_SUCCESS)
 
-#define MPE_IO_Stdout_to_file( A, B ) {if (A || B) {}}
+#define MPE_IO_Stdout_to_file( A, B ) {if ((A) || (B)) {}}
 
-#define MPE_GetHostName( A, B ) {if (A || B) {}}
+#define MPE_GetHostName( A, B ) {if ((A) || (B)) {}}
 
 #define MPI_Start_debugger()
 
@@ -65,12 +65,12 @@ void MPE_Comm_global_rank ( MPI_Comm, int, int * );
 #define MPE_Init_log() (MPI_SUCCESS)
 #define MPE_Initialized_logging() 1
 
-#define MPE_Describe_state( A, B, C, D ) {if (A || B || C || D) {}}
-#define MPE_Describe_event( A, B, C ) {if (A || B || C) {}}
+#define MPE_Describe_state( A, B, C, D ) {if ((A) || (B) || (C) || (D)) {}}
+#define MPE_Describe_event( A, B, C ) {if ((A) || (B) || (C)) {}}
 #define MPE_Log_get_event_number()
-#define MPE_Log_send( A, B, C ) {if (A || B || C) {}}
-#define MPE_Log_receive( A, B, C ) {if (A || B || C) {}}
-#define MPE_Log_event( A, B, C ) {if (A || B || C) {}}
+#define MPE_Log_send( A, B, C ) {if ((A) || (B) || (C)) {}}
+#define MPE_Log_receive( A, B, C ) {if ((A) || (B) || (C)) {}}
+#define MPE_Log_event( A, B, C ) {if ((A) || (B) || (C)) {}}
 #define MPE_Start_log()
 #define MPE_Stop_log()
 #define MPE_Finish_log( A ) {if (A) {}}

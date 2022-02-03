@@ -20,7 +20,7 @@
 #endif
 
 /** 10MB default limit. */
-extern PIO_Offset pio_buffer_size_limit;
+extern PIO_Offset pio_pnetcdf_buffer_size_limit;
 
 /** Initial size of compute buffer. */
 long pio_cnbuffer_limit = 33554432;
@@ -1737,7 +1737,7 @@ flush_output_buffer(file_desc_t *file, bool force, PIO_Offset addsize)
     PLOG((2, "flush_output_buffer usage=%ld force=%d",usage, force));
     /* If the user forces it, or the buffer has exceeded the size
      * limit, then flush to disk. */
-    if (force || (usage >= pio_buffer_size_limit))
+    if (force || (usage >= pio_pnetcdf_buffer_size_limit))
     {
         int rcnt;
         int  maxreq;
@@ -2156,7 +2156,7 @@ compute_maxaggregate_bytes(iosystem_desc_t *ios, io_desc_t *iodesc)
 
     /* Determine the max bytes that can be held on IO task. */
     if (ios->ioproc && iodesc->maxiobuflen > 0)
-        maxbytesoniotask = pio_buffer_size_limit / iodesc->maxiobuflen;
+        maxbytesoniotask = pio_pnetcdf_buffer_size_limit / iodesc->maxiobuflen;
 
     /* Determine the max bytes that can be held on computation task. */
     if (ios->comp_rank >= 0 && iodesc->ndof > 0)

@@ -17,22 +17,28 @@
 #endif
 #endif
 
-namespace moab {
+namespace moab
+{
 
 //! Child helper class for Eulerian Spectral grid (CAM_EUL)
 class NCHelperEuler : public ScdNCHelper
 {
-public:
-  NCHelperEuler(ReadNC* readNC, int fileId, const FileOptions& opts, EntityHandle fileSet)
-: ScdNCHelper(readNC, fileId, opts, fileSet) {}
+  public:
+    NCHelperEuler( ReadNC* readNC, int fileId, const FileOptions& opts, EntityHandle fileSet )
+        : ScdNCHelper( readNC, fileId, opts, fileSet )
+    {
+    }
 
-  static bool can_read_file(ReadNC* readNC, int fileId);
+    static bool can_read_file( ReadNC* readNC, int fileId );
 
-private:
-  virtual ErrorCode init_mesh_vals();
-  virtual std::string get_mesh_type_name() { return "CAM_EUL"; }
+  private:
+    virtual ErrorCode init_mesh_vals();
+    virtual std::string get_mesh_type_name()
+    {
+        return "CAM_EUL";
+    }
 };
 
-} // namespace moab
+}  // namespace moab
 
 #endif

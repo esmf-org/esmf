@@ -703,7 +703,9 @@ template void face_info<>(MeshObj** node_begin,
                int *rotation, // out
                bool
                );
+#if (__ICC==2021 && __INTEL_COMPILER_UPDATE>=3) || (__INTEL_LLVM_COMPILER >= 20210300)
 template void face_info<>(__gnu_cxx::__normal_iterator<ESMCI::MeshObj**, std::vector<ESMCI::MeshObj*, std::allocator<ESMCI::MeshObj*> > >, __gnu_cxx::__normal_iterator<ESMCI::MeshObj**, std::vector<ESMCI::MeshObj*, std::allocator<ESMCI::MeshObj*> > >, __gnu_cxx::__normal_iterator<ESMCI::MeshObj**, std::vector<ESMCI::MeshObj*, std::allocator<ESMCI::MeshObj*> > >, __gnu_cxx::__normal_iterator<ESMCI::MeshObj**, std::vector<ESMCI::MeshObj*, std::allocator<ESMCI::MeshObj*> > >, int*, int*, int*, bool);
+#endif
 
 template void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end, 
                  UInt rel_type, 

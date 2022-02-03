@@ -18,6 +18,8 @@ module pio_support
   public :: CheckMPIreturn
   public :: pio_readdof
   public :: pio_writedof
+  public :: pio_write_nc_dof
+  public :: pio_read_nc_dof
   public :: replace_c_null
 
   logical, public :: Debug=.FALSE.            !< debug mode
@@ -174,6 +176,76 @@ contains
   end subroutine pio_writedof
 
   !>
+  !! Fortran interface to write a netcdf format mapping file.
+  !!
+  !! @param ios : The iosystem structure
+  !! @param filename : The file where the decomp map will be written.
+  !! @param cmode : The netcdf creation mode.
+  !! @param iodesc : The io descriptor structure
+  !! @param title : An optional title to add to the netcdf attributes
+  !! @param history : An optional history to add to the netcdf attributes
+  !! @param fortran_order : Optional logical - Should multidimensional arrays be written in fortran order?
+  !! @param ret : Return code 0 if success
+  !<
+
+  subroutine pio_write_nc_dof(ios, filename, cmode, iodesc, ret, title, history, fortran_order)
+    use pio_types, only : iosystem_desc_t, io_desc_t
+    type(iosystem_desc_t) :: ios
+    character(len=*) :: filename
+    integer :: cmode
+    type(io_desc_t) :: iodesc
+    integer :: ret
+    character(len=*), optional :: title
+    character(len=*), optional :: history
+    logical, optional :: fortran_order
+    
+    interface
+       integer(c_int) function PIOc_write_nc_decomp(iosysid, filename, cmode, &
+            ioid, title, history, fortran_order) &
+            bind(C,name="PIOc_write_nc_decomp") 
+         use iso_c_binding
+         integer(C_INT), value :: iosysid
+         character(kind=c_char) :: filename
+         integer(C_INT), value :: cmode
+         integer(c_int), value :: ioid
+         character(kind=c_char) :: title
+         character(kind=c_char) :: history
+         integer(c_int), value :: fortran_order
+       end function PIOc_write_nc_decomp
+    end interface
+    character(len=:), allocatable :: ctitle, chistory
+    integer :: nl
+    integer :: forder
+    integer :: i
+
+    
+    if(present(title)) then
+       ctitle = trim(title)//C_NULL_CHAR
+    else
+       ctitle = C_NULL_CHAR
+    endif
+
+    if(present(history)) then
+       chistory = trim(history)//C_NULL_CHAR
+    else
+       chistory = C_NULL_CHAR
+    endif
+
+    if(present(fortran_order)) then
+       if(fortran_order) then
+          forder = 1
+       else
+          forder = 0
+       endif
+    endif
+    nl = len_trim(filename)
+    ret = PIOc_write_nc_decomp(ios%iosysid, filename(:nl)//C_NULL_CHAR, cmode, iodesc%ioid, ctitle, chistory, forder)
+    
+  end subroutine pio_write_nc_dof
+
+
+
+  !>
   !! Fortran interface to read a mapping file.
   !!
   !! @param file The file from where the decomp map is read.
@@ -216,5 +288,55 @@ contains
     call c_f_pointer(tmap, DOF, (/maplen/))
     !    DOF = DOF+1
   end subroutine pio_readdof
+
+  !>
+  !! Fortran interface to read a netcdf format mapping file.
+  !!
+  !! @param ios : The iosystem structure
+  !! @param filename : The file where the decomp map will be written.
+  !! @param iodesc : The io descriptor structure returned
+  !! @param ret : Return code 0 if success
+  !! @param title : An optional title to add to the netcdf attributes
+  !! @param history : An optional history to add to the netcdf attributes
+  !! @param fortran_order : An optional logical - should arrays be read in fortran order
+  !<
+
+  subroutine pio_read_nc_dof(ios, filename, iodesc, ret, title, history, fortran_order)
+    use pio_types, only : iosystem_desc_t, io_desc_t
+    type(iosystem_desc_t) :: ios
+    character(len=*) :: filename
+    type(io_desc_t) :: iodesc
+    integer :: ret
+    character(len=*), optional :: title
+    character(len=*), optional :: history
+    logical, optional :: fortran_order
+    
+    interface
+       integer(c_int) function PIOc_read_nc_decomp(iosysid, filename, ioid, &
+            title, history, fortran_order) &
+            bind(C,name="PIOc_read_nc_decomp") 
+         use iso_c_binding
+         integer(C_INT), value :: iosysid
+         character(kind=c_char) :: filename
+         integer(c_int)        :: ioid
+         character(kind=c_char) :: title
+         character(kind=c_char) :: history
+         integer(c_int), value :: fortran_order
+       end function PIOc_read_nc_decomp
+    end interface
+    character(len=:), allocatable :: ctitle, chistory
+    integer :: nl
+    integer :: forder
+
+    nl = len_trim(filename)
+    ret = PIOc_read_nc_decomp(ios%iosysid, filename(:nl)//C_NULL_CHAR, iodesc%ioid, title, history, forder)
+    if(present(fortran_order)) then
+       if(forder /= 0) then
+          fortran_order = .true.
+       else
+          fortran_order = .true.
+       endif
+    endif
+  end subroutine pio_read_nc_dof
 
 end module pio_support

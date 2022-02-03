@@ -103,7 +103,9 @@ int main(void){
   int num_iotasks=petCount;
   int num_aggregators=1;
   int stride=1;
+#if defined (ESMF_PIO)
   int rearr=PIO_REARR_SUBSET;
+#endif
   int iosys_handle;
   int base=0;
 #if defined (ESMF_PIO)

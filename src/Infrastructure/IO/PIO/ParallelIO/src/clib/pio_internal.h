@@ -131,7 +131,7 @@ void pio_log(int severity, const char *fmt, ...);
 extern "C" {
 #endif
 
-    extern PIO_Offset pio_buffer_size_limit;
+    extern PIO_Offset pio_pnetcdf_buffer_size_limit;
 
     /** Used to sort map points in the subset rearranger. */
     typedef struct mapsort
