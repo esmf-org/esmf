@@ -60,6 +60,9 @@ MCTGen() {
     mesh_map["mix_2d_sph_rad"] = std::bind(&MCTGen::mix_2d_sph_rad, this, std::placeholders::_1);
     mesh_map["ngon_2d_cart"] = std::bind(&MCTGen::ngon_2d_cart, this, std::placeholders::_1);
     mesh_map["ngon_2d_sph_deg"] = std::bind(&MCTGen::ngon_2d_sph_deg, this, std::placeholders::_1);
+    mesh_map["ngon_quad_2d_sph_rad"] = std::bind(&MCTGen::ngon_quad_2d_sph_rad, this, std::placeholders::_1);
+    mesh_map["ngon_quad_2d_cart"] = std::bind(&MCTGen::ngon_quad_2d_cart, this, std::placeholders::_1);
+    mesh_map["ngon_quad_2d_sph_deg"] = std::bind(&MCTGen::ngon_quad_2d_sph_deg, this, std::placeholders::_1);
     mesh_map["ngon_2d_sph_rad"] = std::bind(&MCTGen::ngon_2d_sph_rad, this, std::placeholders::_1);
     mesh_map["periodic_2d_sph_deg"] = std::bind(&MCTGen::periodic_2d_sph_deg, this, std::placeholders::_1);
     mesh_map["periodic_2d_sph_rad"] = std::bind(&MCTGen::periodic_2d_sph_rad, this, std::placeholders::_1);
@@ -1835,6 +1838,307 @@ MCT *ngon_2d_sph_rad(int &rc) {
   rc = ESMF_SUCCESS;
   return mct;
 }
+
+MCT *ngon_quad_2d_cart(int &rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ngon_quad_2d_cart"
+  //
+  //
+  //  4.0   17 - 18 - 19 - 20 - 21
+  //        |         |         |
+  //  3.0   14   3    15   4    16
+  //        |         |         |
+  //  2.0   9 -- 10 - 11 - 12 - 13
+  //        |         |         |
+  //  1.0   6    1    7    2    8
+  //        |         |         |
+  //  0.0   1 -- 2 -- 3 -- 4 -- 5
+  //
+  //       0.0  1.0   2.0  3.0  4.0
+  //
+
+  rc = ESMF_RC_NOT_IMPL;
+  MCT *mct = NULL;
+
+  try {
+
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    ESMC_CHECK_THROW(rc)
+
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    ESMC_CHECK_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      Throw () << "Must be run with 1 or 4 cores.";
+
+    int pdim = 2;
+    int sdim = 2;
+    ESMC_CoordSys_Flag coord_sys=ESMC_COORDSYS_CART;
+
+    int num_node = 0;
+    int num_elem = 0;
+    int num_elem_conn = 0;
+    int redist_num_node = 0;
+    int redist_num_elem = 0;
+    int redist_num_elem_conn = 0;
+
+    if (petCount == 1) {
+      num_elem = 4;
+      num_node = 21;
+      num_elem_conn = 8*num_elem;
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        num_elem = 1;
+        num_node = 8;
+        num_elem_conn = 8;
+        redist_num_elem = 1;
+        redist_num_node = 8;
+        redist_num_elem_conn = 8;
+      } else if (localPet == 1) {
+        num_elem = 1;
+        num_node = 8;
+        num_elem_conn = 8;
+        redist_num_elem = 1;
+        redist_num_node = 8;
+        redist_num_elem_conn = 8;
+      } else if (localPet == 2) {
+        num_elem = 1;
+        num_node = 8;
+        num_elem_conn = 8;
+        redist_num_elem = 1;
+        redist_num_node = 8;
+        redist_num_elem_conn = 8;
+      } else if (localPet == 3) {
+        num_elem = 1;
+        num_node = 8;
+        num_elem_conn = 8;
+        redist_num_elem = 1;
+        redist_num_node = 8;
+        redist_num_elem_conn = 8;
+      }
+    }
+
+    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+
+    mct->name = ESMC_METHOD;
+
+    if (petCount == 1) {
+      mct->nodeId = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21};
+      mct->nodeCoord = {0.0,0.0, 1.0,0.0, 2.0,0.0, 3.0,0.0, 4.0,0.0,
+                        0.0,1.0, 2.0,1.0, 4.0,1.0,
+                        0.0,2.0, 1.0,2.0, 2.0,2.0, 3.0,2.0, 4.0,2.0,
+                        0.0,3.0, 2.0,3.0, 4.0,3.0,
+                        0.0,4.0, 1.0,4.0, 2.0,4.0, 3.0,4.0, 4.0,4.0,};
+      mct->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  
+      mct->elemId = {1,2,3,4};
+      mct->elemType = {8,8,8,8};
+      mct->elemConn = {1,2,3,7,11,10,9,6,
+                       3,4,5,8,13,12,11,7,
+                       9,10,11,15,19,18,17,14,
+                       11,12,13,16,21,20,19,15};
+      mct->elemCoord = {1.0,1.0, 3.0,1.0, 1.0,3.0, 3.0,3.0};
+
+    } else if (petCount == 4) {
+      if (localPet == 0) {
+        mct->nodeId ={1,2,3,6,7,9,10,11};
+        mct->nodeCoord = {0.0,0.0, 1.0,0.0, 2.0,0.0,
+                          0.0,1.0, 2.0,1.0,
+                          0.0,2.0, 1.0,2.0, 2.0,2.0};
+        mct->nodeOwner = {0,0,0,0,0,0,0,0};
+        mct->elemId = {1};
+        mct->elemType = {8};
+        mct->elemConn = {1,2,3,5,8,7,6,4};
+        mct->elemCoord = {1.0,1.0};
+
+      } else if (localPet == 1) {
+        mct->nodeId = {3,4,5,7,8,11,12,13};
+        mct->nodeCoord = {2.0,0.0, 3.0,0.0, 4.0,0.0, 
+                          2.0,1.0, 4.0,1.0,
+                          2.0,2.0, 3.0,2.0, 4.0,2.0};
+        mct->nodeOwner = {0,1,1,0,1,0,1,1};
+        mct->elemId = {2};
+        mct->elemType = {8};
+        mct->elemConn = {1,2,3,5,8,7,6,4};
+        mct->elemCoord = {3.0,1.0};
+      } else if (localPet == 2) {
+        mct->nodeId = {9,10,11,14,15,17,18,19};
+        mct->nodeCoord = {0.0,2.0, 1.0,2.0, 2.0,2.0, 
+                          0.0,3.0, 2.0,3.0,
+                          0.0,4.0, 1.0,4.0, 2.0,4.0};
+        mct->nodeOwner = {0,0,0,2,2,2,2,2};
+        mct->elemId = {3};
+        mct->elemType = {8};
+        mct->elemConn = {1,2,3,5,8,7,6,4};
+        mct->elemCoord = {1.0,3.0};
+      } else if (localPet == 3) {
+        mct->nodeId = {11,12,13,15,16,19,20,21};
+        mct->nodeCoord = {2.0,2.0, 3.0,2.0, 4.0,2.0, 
+                          2.0,3.0, 4.0,3.0,
+                          2.0,4.0, 3.0,4.0, 4.0,4.0};
+        mct->nodeOwner = {0,1,1,2,3,2,3,3};
+        mct->elemId = {4};
+        mct->elemType = {8};
+        mct->elemConn = {1,2,3,5,8,7,6,4};
+        mct->elemCoord = {3.0,3.0};
+      }
+
+      if (localPet == 0) {
+        mct->redist_nodeId_in ={11,12,13,15,16,19,20,21};
+        mct->redist_elemId_in = {4};
+
+        mct->redist_nodeId = {11,12,13,15,16,19,20,21};
+        mct->redist_nodeCoord = {2.0,2.0, 3.0,2.0, 4.0,2.0, 
+                                 2.0,3.0, 4.0,3.0,
+                                 2.0,4.0, 3.0,4.0, 4.0,4.0};
+        mct->redist_nodeOwner = {0,0,0,0,0,0,0,0};
+        mct->redist_elemId = {4};
+        mct->redist_elemType = {8};
+        mct->redist_elemConn = {1,2,3,5,8,7,6,4};
+        mct->redist_elemCoord = {3.0,3.0};
+      } else if (localPet == 1) {
+        mct->redist_nodeId_in ={9,10,14,17,18};
+        mct->redist_elemId_in = {3};
+
+        mct->redist_nodeId = {9,10,11,14,15,17,18,19};
+        mct->redist_nodeCoord = {0.0,2.0, 1.0,2.0, 2.0,2.0, 
+                                 0.0,3.0, 2.0,3.0,
+                                 0.0,4.0, 1.0,4.0, 2.0,4.0};
+        mct->redist_nodeOwner = {1,1,0,1,0,1,1,0};
+        mct->redist_elemId = {3};
+        mct->redist_elemType = {8};
+        mct->redist_elemConn = {1,2,3,5,8,7,6,4};
+        mct->redist_elemCoord = {1.0,3.0};
+      } else if (localPet == 2) {
+        mct->redist_nodeId_in ={3,4,5,7,8};
+        mct->redist_elemId_in = {2};
+
+        mct->redist_nodeId = {3,4,5,7,8,11,12,13};
+        mct->redist_nodeCoord = {2.0,0.0, 3.0,0.0, 4.0,0.0, 
+                                 2.0,1.0, 4.0,1.0,
+                                 2.0,2.0, 3.0,2.0, 4.0,2.0};
+        mct->redist_nodeOwner = {2,2,2,2,2,0,0,0};
+        mct->redist_elemId = {2};
+        mct->redist_elemType = {8};
+        mct->redist_elemConn = {1,2,3,5,8,7,6,4};
+        mct->redist_elemCoord = {3.0,1.0};
+      } else if (localPet == 3) {
+        mct->redist_nodeId_in ={1,2,6};
+        mct->redist_elemId_in = {1};
+
+        mct->redist_nodeId ={1,2,3,6,7,9,10,11};
+        mct->redist_nodeCoord = {0.0,0.0, 1.0,0.0, 2.0,0.0,
+                                 0.0,1.0, 2.0,1.0,
+                                 0.0,2.0, 1.0,2.0, 2.0,2.0};
+        mct->redist_nodeOwner = {3,3,2,3,2,1,1,0};
+        mct->redist_elemId = {1};
+        mct->redist_elemType = {8};
+        mct->redist_elemConn = {1,2,3,5,8,7,6,4};
+        mct->redist_elemCoord = {1.0,1.0};
+      }
+    }
+
+  } CATCH_MCT_RETURN_NULL(&rc)
+
+  rc = ESMF_SUCCESS;
+  return mct;
+}
+
+MCT *ngon_quad_2d_sph_deg(int &rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ngon_quad_2d_sph_deg"
+
+  rc = ESMF_RC_NOT_IMPL;
+  MCT *mct = NULL;
+
+  try {
+
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    ESMC_CHECK_THROW(rc)
+
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    ESMC_CHECK_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      Throw () << "Must be run with 1 or 4 cores.";
+
+    // Cartesian to spherical coordinate transformation - radians (suitable for c:[0:20])
+    double c2s = 10.0;
+
+    int localrc;
+    mct = ngon_quad_2d_cart(localrc);
+    ESMC_CHECK_THROW(localrc)
+
+    mct->name = ESMC_METHOD;
+
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+
+    mct->coord_sys=ESMC_COORDSYS_SPH_DEG;
+
+  } CATCH_MCT_RETURN_NULL(&rc)
+
+  rc = ESMF_SUCCESS;
+  return mct;
+}
+
+MCT *ngon_quad_2d_sph_rad(int &rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ngon_quad_2d_sph_rad"
+
+  rc = ESMF_RC_NOT_IMPL;
+  MCT *mct = NULL;
+
+  try {
+
+    // Get parallel information
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    ESMC_CHECK_THROW(rc)
+
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+    ESMC_CHECK_THROW(rc)
+
+    if (petCount !=1 && petCount != 4)
+      Throw () << "Must be run with 1 or 4 cores.";
+
+    // Cartesian to spherical coordinate transformation - radians (suitable for c:[0:2])
+    double pi = 3.14159;
+    double c2s = pi/10.;
+
+    int localrc;
+    mct = ngon_quad_2d_cart(localrc);
+    ESMC_CHECK_THROW(localrc)
+
+    mct->name = ESMC_METHOD;
+
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+
+    std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
+    std::for_each(mct->redist_elemCoord.begin(), mct->redist_elemCoord.end(), [&c2s](double &d) {d*=c2s;});
+
+    mct->coord_sys=ESMC_COORDSYS_SPH_RAD;
+
+  } CATCH_MCT_RETURN_NULL(&rc)
+
+  rc = ESMF_SUCCESS;
+  return mct;
+}
+
 
 MCT *periodic_2d_sph_deg(int &rc){
 #undef ESMC_METHOD
