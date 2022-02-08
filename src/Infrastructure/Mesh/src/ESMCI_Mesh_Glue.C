@@ -1931,24 +1931,31 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
   // Init output
   *_elemConnCount = 0;
 
-  // Doesn't work with split meshes right now
-  if (mesh->is_split) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-       " Can't get elem connection count from mesh containing >4 elements.",
-                                       ESMC_CONTEXT, rc)) return;
-  }
-
-  // Loop summing number of nodes per element
   int elemConnCount=0;
-  Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-  for (; ei != ee; ++ei) {
-    MeshObj &elem = *ei;
 
-    // Get topology of element
-    const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
-
-    // Add number of nodes for this elem to connection count
-    elemConnCount += topo->num_nodes;
+  if (!mesh->is_split) {
+    // Loop summing number of nodes per element
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+  
+      // Get topology of element
+      const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
+  
+      // Add number of nodes for this elem to connection count
+      elemConnCount += topo->num_nodes;
+    }
+  } else {
+    try {
+      std::vector<int> num_merged_nids;
+      std::vector<int> merged_nids;
+      get_mesh_merged_connlist(**(&mesh), num_merged_nids, merged_nids);        
+      elemConnCount = merged_nids.size();
+    } catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            " SplitMerge fail", ESMC_CONTEXT, rc);
+      return;
+    }
   }
 
   // Output
@@ -2069,16 +2076,27 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     int num_elems=mesh->num_elems();
     int orig_sdim=mesh->orig_spatial_dim;
 
+    std::vector<int> num_merged_nids;
+    std::vector<int> merged_nids;
+
     if (mesh->is_split) {
     //   int localrc;
     //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
     //      " Can't currently get element info from a mesh containing >4 elements.",
     //                                    ESMC_CONTEXT, &localrc)) throw localrc;
       try {
-        std::vector<int> num_merged_nids;
-        std::vector<int> merged_nids;
         get_mesh_merged_connlist(**(&mesh), num_merged_nids, merged_nids);        
         num_elems = num_merged_nids.size();
+
+          // std::cout << "num_merged_nids = [";
+          // for (const auto nid: num_merged_nids)
+          //   std::cout << nid << " ";
+          // std::cout<< "]" <<std::endl;
+          // std::cout << "merged_nids = [";
+          // for (const auto mid: merged_nids)
+          //   std::cout << mid << " ";
+          // std::cout << "]" << std::endl;
+
       } catch(...){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
               " SplitMerge fail", ESMC_CONTEXT, rc);
@@ -2251,14 +2269,14 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     // sort by data index
     std::sort(sorted_elems.begin(), sorted_elems.end());
 
-    std::cout << "sorted_elems  = [";
-    for (const auto i: sorted_elems)
-      std::cout << i.second->get_id() << " ";
-    std::cout << "]" << std::endl;
-    std::cout << "sorted_dataid = [";
-    for (const auto i: sorted_elems)
-      std::cout << i.first << " ";
-    std::cout << "]" << std::endl;
+    // std::cout << "sorted_elems  = [";
+    // for (const auto i: sorted_elems)
+    //   std::cout << i.second->get_id() << " ";
+    // std::cout << "]" << std::endl;
+    // std::cout << "sorted_dataid = [";
+    // for (const auto i: sorted_elems)
+    //   std::cout << i.first << " ";
+    // std::cout << "]" << std::endl;
     
     ////// Fill info in arrays using sorted_elems //////
 
@@ -2267,10 +2285,26 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       // Get array into which to put ids
       int *elemIds_array=elemIds->array;
       
-      // Loop through elems
-      for (int i=0; i<sorted_elems.size(); i++) {
-        MeshObj *elem=sorted_elems[i].second;
-        elemIds_array[i]=elem->get_id();
+      if (!mesh->is_split) {
+       // Loop through elems
+       for (int i=0; i<sorted_elems.size(); i++) {
+         MeshObj *elem=sorted_elems[i].second;
+         elemIds_array[i]=elem->get_id();
+       }
+      } else {
+        int ind = 0;
+        int ind_meta = 0;
+        for (const auto i : num_merged_nids) {
+          // number of triangles created from ngon with i nodes
+          int n = i - 2;
+          
+          // get the id value and add to elemIds
+          elemIds_array[ind] = sorted_elems[ind_meta].second->get_id();
+          
+          // update indices
+          ind++;
+          ind_meta = ind_meta+n;
+        }
       }
     }
 
@@ -2282,52 +2316,30 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       // Get array into which to put types
       int *elemTypes_array=elemTypes->array;
       
-      // Loop through elems
-      for (int i=0; i<sorted_elems.size(); i++) {
-        // get element
-        MeshObj *elem=sorted_elems[i].second;
-
-        // Get topology of elem
-        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
-        
-        // Convert parametric dim and number of nodes to element type
-        elemTypes_array[i]=_num_nodes_to_elem_type(pdim, topo->num_nodes);
+      if (!mesh->is_split) {
+        // Loop through elems
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // get element
+          MeshObj *elem=sorted_elems[i].second;
+  
+          // Get topology of elem
+          const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+          
+          // Convert parametric dim and number of nodes to element type
+          elemTypes_array[i]=_num_nodes_to_elem_type(pdim, topo->num_nodes);
+        }
+      } else {
+        for (int i=0; i<num_merged_nids.size(); i++)
+          elemTypes_array[i] = num_merged_nids[i];
       }
     }
 
     // If it was passed in, fill elementIds array
     if (present(elemConn)) {
-      if (mesh->is_split) {
-      //   int localrc;
-      //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-      //      " Can't currently get element info from a mesh containing >4 elements.",
-      //                                    ESMC_CONTEXT, &localrc)) throw localrc;
-        try {
-          std::vector<int> num_merged_nids;
-          std::vector<int> merged_nids;
-          get_mesh_merged_connlist(**(&mesh), num_merged_nids, merged_nids);
-          
-          std::cout << "num_merged_nids = [";
-          for (const auto nid: num_merged_nids)
-            std::cout << nid << " ";
-          std::cout<< "]" <<std::endl;
-          std::cout << "merged_nids = [";
-          for (const auto mid: merged_nids)
-            std::cout << mid << " ";
-          std::cout << "]" << std::endl;
-          
-          
-          
-        } catch(...){
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                " SplitMerge fail", ESMC_CONTEXT, rc);
-          return;
-        }
-      } else {
-      
-        // Get array into which to put ids
-        int *elemConn_array=elemConn->array;
+      // Get array into which to put ids
+      int *elemConn_array=elemConn->array;
         
+      if (!mesh->is_split) {
         // Loop through elems
         int j=0;
         for (int i=0; i<sorted_elems.size(); i++) {
@@ -2344,28 +2356,75 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
             j++;
           }
         }
+      } else {
+        ////// Get ordered list of nodes ////// 
+        std::vector<std::pair<int,MeshObj *> > sorted_nodes;
+    
+        // Make a vector to sort nodes by original creation order
+        Mesh::iterator ni = mesh->node_begin(), ne = mesh->node_end();
+        for (; ni != ne; ++ni) {
+          MeshObj *node = &(*ni);
+          int index = node->get_data_index();
+          sorted_nodes.push_back(std::make_pair(index, node));      
+        }
+    
+        // sort by creation order
+        std::sort(sorted_nodes.begin(), sorted_nodes.end());
+        
+        int ind = 0;
+        for (const auto i : merged_nids) {
+          // find node id's position in map of sorted_nodes
+          auto it = std::find_if(sorted_nodes.begin(), sorted_nodes.end(),
+            [&i](const std::pair<int,MeshObj *>& x)
+            { return x.second->get_id() == i;} );
+          int conn_pos = it->first;
+
+          // add to elemConn
+          // NOTE: add 1 for Fortran indexing convention
+          elemConn_array[ind] = conn_pos + 1;
+          ind++;
+        }
       }
     }
 
     // If it was passed in, fill elementMask array
     if (present(elemMask)) {
-
       // Get element mask value field (presence of this is checked above)
       MEField<> *elem_mask_val=mesh->GetField("elem_mask_val");
-
+  
       // Get array into which to put types
       int *elemMask_array=elemMask->array;
       
-      // Loop through elems
-      for (int i=0; i<sorted_elems.size(); i++) {
-        // get element
-        MeshObj *elem=sorted_elems[i].second;
+      if (!mesh->is_split) {
+        // Loop through elems
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // get element
+          MeshObj *elem=sorted_elems[i].second;
+  
+          // Get elem's mask value
+          double *mv=elem_mask_val->data(*elem);
+          
+          // Set elem mask in output array
+          elemMask_array[i]=static_cast<int>(*mv);
+        }
+      } else {
+        int ind = 0;
+        int ind_meta = 0;
+        for (const auto i : num_merged_nids) {
+          // number of triangles created from ngon with i nodes
+          int n = i - 2;
+          
+          // get the mask value
+          MeshObj *elem = sorted_elems[ind_meta].second;
+          double *mv = elem_mask_val->data(*elem);
 
-        // Get elem's mask value
-        double *mv=elem_mask_val->data(*elem);
-        
-        // Set elem mask in output array
-        elemMask_array[i]=static_cast<int>(*mv);
+          // add to elemIds
+          elemMask_array[ind] = static_cast<int>(*mv);
+          
+          // update indices
+          ind++;
+          ind_meta = ind_meta+n;
+        }
       }
     }
 
@@ -2377,17 +2436,42 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
       // Get array into which to put types
       ESMC_R8 *elemArea_array=elemArea->array;
-      
-      // Loop through elems
-      for (int i=0; i<sorted_elems.size(); i++) {
-        // get element
-        MeshObj *elem=sorted_elems[i].second;
 
-        // Get elem's mask value
-        double *area=elem_area->data(*elem);
+      if (!mesh->is_split) {
+        // Loop through elems
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // get element
+          MeshObj *elem=sorted_elems[i].second;
+  
+          // Get elem's mask value
+          double *area=elem_area->data(*elem);
+          
+          // Set elem area in output array
+          elemArea_array[i]=*area;
+        }
+      } else {
         
-        // Set elem area in output array
-        elemArea_array[i]=*area;
+        int ind = 0;
+        int ind_meta = 0;
+        for (const auto i : num_merged_nids) {
+          // number of triangles created from ngon with i nodes
+          int n = i - 2;
+
+          // sum the area values of the triangles of the ngon
+          double temp_area = 0;
+          for (int j = 0; j < n; ++j) {
+            MeshObj *elem = sorted_elems[ind_meta+j].second;
+            double *area = elem_area->data(*elem);
+            temp_area += *area;
+          }
+
+          // add to elemIds
+          elemArea_array[ind] = temp_area;
+          
+          // update indices
+          ind++;
+          ind_meta = ind_meta+n;
+        }
       }
     }
 
@@ -2403,19 +2487,41 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       // Get array into which to put ids
       ESMC_R8 *elemCoords_array=elemCoords->array;
       
-      // Loop through nodes
-      int j=0;
-      for (int i=0; i<sorted_elems.size(); i++) {
-        // Get elem
-        MeshObj *elem=sorted_elems[i].second;
-
-        // Get coords for elem
-        double *coords = elem_coords->data(*elem);
-
-        // Copy to output array
-        for (int d=0; d<orig_sdim; d++) {
-          elemCoords_array[j]=coords[d];
-          j++;
+      if (!mesh->is_split) {
+        // Loop through nodes
+        int j=0;
+        for (int i=0; i<sorted_elems.size(); i++) {
+          // Get elem
+          MeshObj *elem=sorted_elems[i].second;
+  
+          // Get coords for elem
+          double *coords = elem_coords->data(*elem);
+  
+          // Copy to output array
+          for (int d=0; d<orig_sdim; d++) {
+            elemCoords_array[j]=coords[d];
+            j++;
+          }
+        }
+      } else {
+        int j= 0;
+        int ind_meta = 0;
+        for (const auto i : num_merged_nids) {
+          // number of triangles created from ngon with i nodes
+          int n = i - 2;
+        
+          // get the coords of the elems of this ngon
+          MeshObj *elem = sorted_elems[ind_meta].second;
+          double *coords = elem_coords->data(*elem);
+        
+          // Copy to output array
+          for (int d=0; d<orig_sdim; d++) {
+            elemCoords_array[j]=coords[d];
+            j++;
+          }
+          
+          // update indices
+          ind_meta = ind_meta+n;
         }
       }
     }

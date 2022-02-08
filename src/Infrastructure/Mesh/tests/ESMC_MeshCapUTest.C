@@ -71,7 +71,7 @@ void combine(const std::string &api, const std::string &mesh,
         
         test->name = name;
         test->nativeormb = nvmb;
-        test->verbosity = 3;
+        // test->verbosity = 1;
         // test->tol = 1.e-15;
         // test->print();
         
@@ -132,14 +132,14 @@ int main(int argc, char *argv[]) {
   // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis;
     test_apis.push_back("createget");
-    // test_apis.push_back("dual");
-    // test_apis.push_back("redist_elem");
-    // test_apis.push_back("redist_node");
-    // test_apis.push_back("redist_elno");
-    // test_apis.push_back("serialize");
-    // test_apis.push_back("to_pointlist_elem");
-    // test_apis.push_back("to_pointlist_node");
-    // test_apis.push_back("write_vtk");
+    test_apis.push_back("dual");
+    test_apis.push_back("redist_elem");
+    test_apis.push_back("redist_node");
+    test_apis.push_back("redist_elno");
+    test_apis.push_back("serialize");
+    test_apis.push_back("to_pointlist_elem");
+    test_apis.push_back("to_pointlist_node");
+    test_apis.push_back("write_vtk");
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes_native;
@@ -159,8 +159,8 @@ int main(int argc, char *argv[]) {
     // test_meshes_native.push_back("periodic_2d_sph_rad");
     // cannot get info from ngons
     test_meshes_native.push_back("ngon_2d_cart");
-    // test_meshes_native.push_back("ngon_2d_sph_deg");
-    // test_meshes_native.push_back("ngon_2d_sph_rad");
+    test_meshes_native.push_back("ngon_2d_sph_deg");
+    test_meshes_native.push_back("ngon_2d_sph_rad");
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes_mbmesh;

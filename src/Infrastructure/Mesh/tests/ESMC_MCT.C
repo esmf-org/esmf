@@ -372,6 +372,10 @@ class MCT {
                            &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 
+        // std::cout << "MCT::build: elemconn = [";
+        // for(const auto i : elemConn)
+        //   std::cout << i << " ";
+        // std::cout << "]" << std::endl;
         
         mesh->meshaddelements(&num_elem, elemId.data(), 
                               elemType.data(), iie,
@@ -448,6 +452,11 @@ class MCT {
       try {
         int localrc;
         
+        // std::cout << "MCT::createget: elemconn = [";
+        // for(const auto i : elemConn)
+        //   std::cout << i << " ";
+        // std::cout << "]" << std::endl;
+
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
 
@@ -1189,18 +1198,15 @@ class MCT {
         correct = false;
       }
     
-      // NOTE: bypass for now, remove when elemConn from ngons fixed
-      if (name.find("ngon") == std::string::npos) {
-        int elemConnCount;
-        mesh->getElemConnCount(&elemConnCount, &localrc);
-        ESMC_CHECK_THROW(localrc);
+      int elemConnCount;
+      mesh->getElemConnCount(&elemConnCount, &localrc);
+      ESMC_CHECK_THROW(localrc);
       
-        if (elemConnCount != num_elem_conn) {
-          std::cout << localPet << "# " << name  << " - "
-                    << "elemConnCount = " << elemConnCount
-                    << " (correct = " << num_elem_conn << ")" << std::endl;
-          correct = false;
-        }
+      if (elemConnCount != num_elem_conn) {
+        std::cout << localPet << "# " << name  << " - "
+                  << "elemConnCount = " << elemConnCount
+                  << " (correct = " << num_elem_conn << ")" << std::endl;
+        correct = false;
       }
 
       if (verbosity >= 2) {
@@ -1319,14 +1325,14 @@ class MCT {
 
       // /////////////////// node create info ////////////////////////////
     
-      int nodeIds[num_node];
-      InterArray<int> *nii = new InterArray<int>(nodeIds,num_node);
-      double nodeCoords[num_node*orig_sdim];
-      InterArray<double> *nci = new InterArray<double>(nodeCoords,num_node*orig_sdim);
-      int nodeMask[num_node];
-      InterArray<int> *nmi = new InterArray<int>(nodeMask,num_node);
-      int nodeOwners[num_node];
-      InterArray<int> *noi = new InterArray<int>(nodeOwners,num_node);
+      int temp_nodeId[num_node];
+      InterArray<int> *nii = new InterArray<int>(temp_nodeId,num_node);
+      double temp_nodeCoord[num_node*orig_sdim];
+      InterArray<double> *nci = new InterArray<double>(temp_nodeCoord,num_node*orig_sdim);
+      int temp_nodeMask[num_node];
+      InterArray<int> *nmi = new InterArray<int>(temp_nodeMask,num_node);
+      int temp_nodeOwner[num_node];
+      InterArray<int> *noi = new InterArray<int>(temp_nodeOwner,num_node);
       
       mesh->getNodeCreateInfo(nii, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
@@ -1349,6 +1355,12 @@ class MCT {
       if (verbosity >= 1) {
         if (!fail_print) std::cout<< pass << test << std::endl;
         else std::cout << fail << test << std::endl;
+      }
+      if (verbosity >= 3) {
+        std::cout << "node_id = [";
+        for (int i=0; i<nii->extent[0]; ++i)
+          std::cout << nii->array[i] << " ";
+        std::cout << "]" << std::endl;
       }
     
       mesh->getNodeCreateInfo(NULL, nci, NULL, NULL, &localrc);
@@ -1374,6 +1386,12 @@ class MCT {
         if (!fail_print) std::cout<< pass << test << std::endl;
         else std::cout << fail << test << std::endl;
       }
+      if (verbosity >= 3) {
+        std::cout << "node_coord = [";
+        for (int i=0; i<nci->extent[0]; ++i)
+          std::cout << nci->array[i] << " ";
+        std::cout << "]" << std::endl;
+      }
     
       mesh->getNodeCreateInfo(NULL, NULL, noi, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
@@ -1396,6 +1414,12 @@ class MCT {
       if (verbosity >= 1) {
         if (!fail_print) std::cout<< pass << test << std::endl;
         else std::cout << fail << test << std::endl;
+      }
+      if (verbosity >= 3) {
+        std::cout << "node_owner = [";
+        for (int i=0; i<noi->extent[0]; ++i)
+          std::cout << noi->array[i] << " ";
+        std::cout << "]" << std::endl;
       }
     
       if (node_mask_present) {
@@ -1421,6 +1445,12 @@ class MCT {
           if (!fail_print) std::cout<< pass << test << std::endl;
           else std::cout << fail << test << std::endl;
         }
+      }
+      if (verbosity >= 3) {
+        std::cout << "node_mask = [";
+        for (int i=0; i<nmi->extent[0]; ++i)
+          std::cout << nmi->array[i] << " ";
+        std::cout << "]" << std::endl;
       }
 
       delete nii, nci, noi;
@@ -1453,22 +1483,22 @@ class MCT {
 
       /////////////////// elem create info ////////////////////////////
     
-      int elemIds[num_elem];
-      InterArray<int> *eii = new InterArray<int>(elemIds,num_elem);
-      int elemTypes[num_elem];
-      InterArray<int> *eti = new InterArray<int>(elemTypes,num_elem);
-      int elemMask[num_elem];
-      InterArray<int> *emi = new InterArray<int>(elemMask,num_elem);
-      double elemArea[num_elem];
-      InterArray<double> *eai = new InterArray<double>(elemArea,num_elem);
-      double elemCoord[num_elem*orig_sdim];
-      InterArray<double> *eci = new InterArray<double>(elemCoord,num_elem*orig_sdim);
+      int temp_elemId[num_elem];
+      InterArray<int> *eii = new InterArray<int>(temp_elemId,num_elem);
+      int temp_elemType[num_elem];
+      InterArray<int> *eti = new InterArray<int>(temp_elemType,num_elem);
+      int temp_elemMask[num_elem];
+      InterArray<int> *emi = new InterArray<int>(temp_elemMask,num_elem);
+      double temp_elemArea[num_elem];
+      InterArray<double> *eai = new InterArray<double>(temp_elemArea,num_elem);
+      double temp_elemCoord[num_elem*orig_sdim];
+      InterArray<double> *eci = new InterArray<double>(temp_elemCoord,num_elem*orig_sdim);
     
       if (verbosity >= 3)
         std::cout << localPet << "# " << name  << " - "
-                  << "local_sdim" << local_sdim << std::endl
-                  << "local_pdim" << local_pdim << std::endl
-                  << "orig_sdim" << orig_sdim << std::endl;
+                  << "local_sdim " << local_sdim << " - "
+                  << "local_pdim " << local_pdim << " - "
+                  << "orig_sdim " << orig_sdim << std::endl;
     
       mesh->getElemCreateInfo(eii, NULL, NULL, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
@@ -1502,27 +1532,25 @@ class MCT {
       mesh->getElemCreateInfo(NULL, eti, NULL, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
     
-      // // NOTE: bypass for now, remove when elemType from ngons fixed
-      // if (name.find("ngon") == std::string::npos) {
-        test = "ElemType";
-        fail_print = false;
-        for (int i=0; i<eti->extent[0]; ++i) {
-          print = false;
-          if (eti->array[i] != elemType[i]) {
-            correct = false;
-            print = true;
-            fail_print = true;
-          }
-          if (print && verbosity >= 3)
-            std::cout << localPet << "# " << name  << " - "
-                      << "elem_type[" << i << "] = " 
-                      << eti->array[i] << " (correct = " << elemType[i] << ")"
-                      << std::endl;
+      test = "ElemType";
+      fail_print = false;
+      for (int i=0; i<eti->extent[0]; ++i) {
+        print = false;
+        if (eti->array[i] != elemType[i]) {
+          correct = false;
+          print = true;
+          fail_print = true;
         }
-        if (verbosity >= 1) {
-          if (!fail_print) std::cout<< pass << test << std::endl;
-          else std::cout << fail << test << std::endl;
-        }
+        if (print && verbosity >= 3)
+          std::cout << localPet << "# " << name  << " - "
+                    << "elem_type[" << i << "] = " 
+                    << eti->array[i] << " (correct = " << elemType[i] << ")"
+                    << std::endl;
+      }
+      if (verbosity >= 1) {
+        if (!fail_print) std::cout<< pass << test << std::endl;
+        else std::cout << fail << test << std::endl;
+      }
       if (verbosity >= 3) {
         std::cout << "elem_types = [";
         for (int i=0; i<eti->extent[0]; ++i)
@@ -1576,8 +1604,8 @@ class MCT {
             fail_print = true;
           }
         if (print && verbosity >= 3)
-          std::cout << localPet << name  << " - "
-                    << "# " << "elem_coord[" << i << "] = " 
+          std::cout << localPet << "# " << name  << " - "
+                    << "elem_coord[" << i << "] = " 
                     << std::setprecision(16) << eci->array[i] << " (correct = " 
                     << std::setprecision(16) << elemCoord[i] << ")"
                     << std::endl;
@@ -1658,8 +1686,9 @@ class MCT {
 
       /////////////////// elem create info ////////////////////////////
     
-      int elemConn[num_elem_conn];
-      InterArray<int> *ecni = new InterArray<int>(elemConn,num_elem_conn);
+      // temp array is only needed to allocate space, otherwise unused
+      int temp_elemConn[num_elem_conn];
+      InterArray<int> *ecni = new InterArray<int>(temp_elemConn,num_elem_conn);
     
       mesh->getElemCreateInfo(NULL, NULL, ecni, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
@@ -1675,7 +1704,7 @@ class MCT {
         }
         if (print && verbosity >= 3)
           std::cout << localPet << "# " << name  << " - "
-                    << "elem_connectivity[" << i << "] = " 
+                    << "elem_conn[" << i << "] = " 
                     << ecni->array[i] << " (correct = " << elemConn[i] << ")"
                     << std::endl;
       }
@@ -1683,7 +1712,12 @@ class MCT {
         if (!fail_print) std::cout<< pass << test << std::endl;
         else std::cout << fail << test << std::endl;
       }
-    
+      if (verbosity >= 3) {
+        std::cout << "elem_conn = [";
+        for (int i=0; i<ecni->extent[0]; ++i)
+          std::cout << ecni->array[i] << " ";
+        std::cout << "]" << std::endl;
+      }
 
       delete ecni;
     
@@ -1715,11 +1749,16 @@ class MCT {
         localrc = test_get_elem_info(mesh);
         ESMC_CHECK_THROW(localrc);
         
+        // std::cout << "MCT::test_get_info: elemconn = [";
+        // for(const auto i : elemConn)
+        //   std::cout << i << " ";
+        // std::cout << "]" << std::endl;
+
         // NOTE: bypass for now, remove when elemConn from ngons fixed
-        if (name.find("ngon") == std::string::npos) {
+        // if (name.find("ngon") == std::string::npos) {
           localrc = test_get_elem_conn_info(mesh);
           ESMC_CHECK_THROW(localrc);
-        }
+        // }
 
       }
       CATCH_MCT_RETURN_RC(&rc)

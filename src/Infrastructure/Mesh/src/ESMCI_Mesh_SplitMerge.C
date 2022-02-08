@@ -27,17 +27,18 @@ void get_elem_merged_connlist(const Mesh &mesh,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "get_elem_merged_connlist()"
 
+    bool debug = false;
 
-    // // DEBUG output
-    // {
-    //   printf("orig_elem=%d ::",beg_elem_range->orig_elem->get_id());
-    //   std::vector<OSE>::iterator osei=beg_elem_range;
-    //   std::vector<OSE>::iterator osee=end_elem_range;
-    //   for (; osei != osee; ++osei) {
-    //     printf("%d ",osei->split_elem->get_id());
-    //   }    
-    //   printf("\n");
-    // }
+    // DEBUG output
+    if (debug) {
+      printf("\norig_elem=%d ::",beg_elem_range->orig_elem->get_id());
+      std::vector<OSE>::iterator osei=beg_elem_range;
+      std::vector<OSE>::iterator osee=end_elem_range;
+      for (; osei != osee; ++osei) {
+        printf("%d ",osei->split_elem->get_id());
+      }    
+      printf("\n");
+    }
 
     // Get number of items in range
     int size_range=std::distance(beg_elem_range, end_elem_range);
@@ -53,12 +54,20 @@ void get_elem_merged_connlist(const Mesh &mesh,
     // Add first element to connection list
     const MeshObj *first_split_elem=beg_elem_range->split_elem;
     const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*first_split_elem);
+
+    if (debug) std::cout << "first split elem " 
+                         << first_split_elem->get_id() <<" with nodes ";
     for (ESMCI::UInt n = 0; n < topo->num_nodes; ++n) {
         const MeshObj *node = first_split_elem->Relations[n].obj;
 
         // Add node id to connection list
         elem_merged_nids.push_back(node->get_id());
+        
+        if (debug) std::cout << node->get_id() << " ";
+
     }
+
+    if (debug) std::cout << std::endl;
 
     // Mark the first elem as used
     used[0]=1;
@@ -86,12 +95,14 @@ void get_elem_merged_connlist(const Mesh &mesh,
         // Make sure that this is a triangle, because a split elem should be
         if (topo->num_nodes != 3) Throw() <<"split elements should always be triangles.";
 
+        // std::cout << "merging nodes of elem " << split_elem->get_id() << " nodes ";
         // Store Node ids
         int node_ids[3];
         for (ESMCI::UInt n = 0; n < topo->num_nodes; ++n) {
+          // std::cout << node_ids[n] << " ";
           const MeshObj *node = split_elem->Relations[n].obj;
           node_ids[n]=node->get_id();
-        }        
+        }
 
         // Loop through ids 
         bool found_node_id_to_merge=false;
@@ -104,6 +115,12 @@ void get_elem_merged_connlist(const Mesh &mesh,
               // See if the next merged id matches the id after next
               int next_pos_in_merged=(s+1)%elem_merged_nids.size();
               if (elem_merged_nids[next_pos_in_merged] == node_ids[(n+2)%3]) {
+                if (debug) std::cout << "node " 
+                          << node_ids[n] << " matched, so merging "
+                          << node_ids[(n+1)%3] << " at position "
+                          << next_pos_in_merged << " (before " 
+                          << elem_merged_nids[next_pos_in_merged] 
+                          << ")" << std::endl;
                 found_node_id_to_merge=true;
                 node_id_to_merge=node_ids[(n+1)%3]; // Merge the node id in the middle
                 pos_to_merge_before=next_pos_in_merged;
@@ -115,8 +132,14 @@ void get_elem_merged_connlist(const Mesh &mesh,
           }
         }
 
+
         // If found, then merge and mark used
         if (found_node_id_to_merge) {
+          if (debug) std::cout << "inserting node " 
+                               << node_id_to_merge << " at position " 
+                               << pos_to_merge_before << std::endl;
+
+          // std::cout << "merging " << node_id_to_merge << std::endl;
           elem_merged_nids.insert(elem_merged_nids.begin()+pos_to_merge_before,node_id_to_merge);
           used[i]=1;
         }
@@ -124,13 +147,37 @@ void get_elem_merged_connlist(const Mesh &mesh,
       } // Loop over split elem range 
     } // while not all used
 
-    // // DEBUG
-    // printf("orig_elem=%d :: nids= ",beg_elem_range->orig_elem->get_id());    
-    // for (int i=0; i<elem_merged_nids.size(); i++) {
-    //   printf(" %d",elem_merged_nids[i]);
-    // }
-    // printf("\n");
+    // now that we have a connectivity list for an original element
+    // put the first created node at the first position of the list
+    
+    std::vector<std::pair<int,int> > sorted_elem_merged_nids;
+    for (const auto i : elem_merged_nids) {
+      //  Find the corresponding Mesh node
+      Mesh::MeshObjIDMap::const_iterator mi =  mesh.map_find(MeshObj::NODE, i);
+      if (mi == mesh.map_end(MeshObj::NODE)) {
+        Throw() << "Node not in mesh";
+      }
 
+      sorted_elem_merged_nids.push_back(std::make_pair(mi->get_data_index(), i));
+    }
+
+    // sort the pairs by original creation order and get id of oldest node
+    std::sort(sorted_elem_merged_nids.begin(), sorted_elem_merged_nids.end());
+    int start_id = sorted_elem_merged_nids.begin()->second;
+  
+    // maintain order, but start with oldest node (O(n) operation)
+    while ( start_id != *elem_merged_nids.begin())
+      std::rotate(elem_merged_nids.begin(), elem_merged_nids.begin() + 1, 
+                  elem_merged_nids.end());
+
+    // DEBUG
+    if (debug) {
+      printf("orig_elem=%d :: nids= ",beg_elem_range->orig_elem->get_id());    
+      for (int i=0; i<elem_merged_nids.size(); i++) {
+        printf(" %d",elem_merged_nids[i]);
+      }
+      printf("\n");
+    }
   }
 
   // Create a connection list for a mesh that has the original >4 sided connections
