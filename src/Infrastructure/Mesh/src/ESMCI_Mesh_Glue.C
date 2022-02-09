@@ -2080,10 +2080,6 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     std::vector<int> merged_nids;
 
     if (mesh->is_split) {
-    //   int localrc;
-    //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-    //      " Can't currently get element info from a mesh containing >4 elements.",
-    //                                    ESMC_CONTEXT, &localrc)) throw localrc;
       try {
         get_mesh_merged_connlist(**(&mesh), num_merged_nids, merged_nids);        
         num_elems = num_merged_nids.size();

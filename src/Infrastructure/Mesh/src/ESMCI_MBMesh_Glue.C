@@ -41,6 +41,7 @@
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Redist.h"
 #include "Mesh/include/ESMCI_MBMesh_Util.h"
+#include "Mesh/include/ESMCI_MBMesh_SplitMerge.h"
 
 
 #include "MBTagConventions.hpp"
@@ -2369,10 +2370,30 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     int localPet = vm->getLocalPet();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
 
+    std::vector<int> num_merged_nids;
+    std::vector<int> merged_nids;
+
     // Doesn't work with split meshes right now
-    if (meshp->is_split)
-      if (elemConn) 
-        Throw () << "Can't get elem connection count from mesh containing >4 elements.";
+    if (meshp->is_split) {
+      try {
+        mbmesh_get_mesh_merged_connlist(*meshp, num_merged_nids, merged_nids);        
+        // num_elems = num_merged_nids.size();
+
+          std::cout << "num_merged_nids = [";
+          for (const auto nid: num_merged_nids)
+            std::cout << nid << " ";
+          std::cout<< "]" <<std::endl;
+          std::cout << "merged_nids = [";
+          for (const auto mid: merged_nids)
+            std::cout << mid << " ";
+          std::cout << "]" << std::endl;
+
+      } catch(...){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+              " SplitMerge fail", ESMC_CONTEXT, rc);
+        return;
+      }
+    }
     
     ////// Get some handy information //////
     int num_elems = meshp->num_orig_elem();

@@ -46,6 +46,7 @@ SOURCEC	  += ESMCI_MBMesh.C \
              ESMCI_MBMesh_Search_EtoE.C \
              ESMCI_MBMesh_Search_EtoP.C \
              ESMCI_MBMesh_ShapeFunc.C \
+             ESMCI_MBMesh_SplitMerge.C \
              ESMCI_MBMesh_Util.C
 
 endif
