@@ -81,15 +81,18 @@ int Test(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  char msgbuf[160];
+  std::string msgbuf;
   ESMCI::LogErr *whichLog;
 
   // TODO: this should be settable by the user
   whichLog = &ESMC_LogDefault;
 
   if (name == NULL || result == NULL || failMsg == NULL || file == NULL) {
-    sprintf(msgbuf, "FAIL %s, line %d, null pointer(s) passed to "
-      "ESMCI::Test()", __FILE__, __LINE__);
+    msgbuf = std::string("FAIL %s, line %d, null pointer(s) passed to ESMCI::Test()") +
+             std::string(__FILE__) + 
+             std::to_string(__LINE__);
+    // sprintf(msgbuf, "FAIL %s, line %d, null pointer(s) passed to "
+      // "ESMCI::Test()", __FILE__, __LINE__);
     whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s\n", msgbuf);
@@ -97,12 +100,24 @@ int Test(
   }
 
   if (condition) {
-    sprintf(msgbuf, "PASS %s, %s, line %d", name, file, line);
+    msgbuf = std::string("PASS ") + 
+             std::string(name) +
+             std::string(", ") +
+             std::string(file) +
+             std::string(", line ") +
+             std::to_string(line);
+    // sprintf(msgbuf, "PASS %s, %s, line %d", name, file, line);
     whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s\n", msgbuf);
   }else {
-    sprintf(msgbuf, "FAIL %s, %s, line %d, %s", name, file, line, failMsg);
+    msgbuf = std::string("FAIL ") + 
+             std::string(name) +
+             std::string(", ") +
+             std::string(file) +
+             std::string(", line ") +
+             std::to_string(line);
+    // sprintf(msgbuf, "FAIL %s, %s, line %d, %s", name, file, line, failMsg);
     whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s\n", msgbuf);
