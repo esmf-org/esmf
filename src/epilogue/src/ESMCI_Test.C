@@ -445,18 +445,16 @@ int TestStart(
     return(ESMF_FAILURE);
   }
 
-  char logFileName[160];
   const char *underScore = strchr(file, '_');
   if (underScore == NULL) underScore = file-1;
   const char *period = strrchr(file, '.');
   int numChars = period - underScore;
-  strncpy(logFileName, underScore+1, numChars);
-  strcpy(logFileName+numChars, "Log\0");
-
+  std::string logFileName = std::string(underScore+1, numChars) + "Log";
+  
   rc = ESMC_Initialize(&rc2,
     ESMC_InitArgDefaultConfigFilename(NULL),
     ESMC_InitArgDefaultCalKind(ESMC_CALKIND_NOCALENDAR),
-    ESMC_InitArgLogFilename(logFileName),
+    ESMC_InitArgLogFilename(logFileName.c_str()),
     ESMC_InitArgLogKindFlag(ESMC_LOGKIND_MULTI),
     ESMC_ArgLast);
   if (rc2 != ESMF_SUCCESS)
