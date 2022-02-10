@@ -47,6 +47,7 @@
 #include "Mesh/include/ESMCI_FileIO_Util.h"
 #include "Mesh/include/ESMCI_ESMFMesh_Util.h"
 #include "Mesh/include/ESMCI_UGRID_Util.h"
+#include "IO/include/ESMC_IOScrip2ESMF.h"
 
 #ifdef ESMF_PNETCDF
 # define _PNETCDF
@@ -81,6 +82,12 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
                                        ESMCI::DistGrid *elem_distgrid, 
                                        Mesh **out_mesh);
 
+void ESMCI_mesh_create_from_SCRIP_file(int pioSystemDesc,
+                                       char *filename, 
+                                       bool add_user_area, 
+                                       ESMC_CoordSys_Flag coord_sys, 
+                                       ESMCI::DistGrid *elem_distgrid, 
+                                       Mesh **out_mesh);
 
 
 
@@ -174,10 +181,9 @@ void ESMCI_mesh_create_from_file(char *filename,
                                         out_mesh);
 
     } else if (fileformat == ESMC_FILEFORMAT_SCRIP) {
-      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-         " Mesh files in SCRIP format are currently not supported via this interface.",
-           ESMC_CONTEXT, &localrc)) throw localrc;
-
+      ESMCI_mesh_create_from_SCRIP_file(pioSystemDesc, filename, 
+                                        add_user_area, coord_sys, elem_distgrid, 
+                                        out_mesh);
     } else {
       if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
          " Unrecognized file format.",
@@ -224,7 +230,9 @@ void ESMCI_mesh_create_from_file(char *filename,
 }
 
 
-
+//
+// Create a Mesh from an ESMFMesh format file
+//
 // INPUTS: 
 //  filename - file name in NULL delimited form
 //  add_user_area - specifies if areas should be added to mesh. 
@@ -516,12 +524,16 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
   }
 }
 
-
+//
+// Create a Mesh from a UGRID format file
+//
 // INPUTS: 
-//  filename - file name in NULL delimited form
+//  filename - file name in NULL delimited form.
 //  add_user_area - specifies if areas should be added to mesh. 
 //  coord_sys - The coordsys to create the mesh with. If ESMC_COORDSYS_UNINIT, then 
 //              use the one from the file.
+//  maskFlag  - gives the location of the mask.
+//  maskVarName - gives the name of the variable from which to create the mask.
 //  elem_distgrid - If not NULL, redist so elems are on this distgrid
 //
 // OUTPUTS:
@@ -837,6 +849,111 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
   }
 }
 
+//
+// Create a Mesh from a SCRIP format file
+//
+// INPUTS: 
+//  filename - file name in NULL delimited form
+//  add_user_area - specifies if areas should be added to mesh. 
+//  coord_sys - The coordsys to create the mesh with. If ESMC_COORDSYS_UNINIT, then 
+//              use the one from the file.
+//  elem_distgrid - If not NULL, redist so elems are on this distgrid
+//
+// OUTPUTS:
+//   out_mesh - the new mesh created from the file
+//
+void ESMCI_mesh_create_from_SCRIP_file(int pioSystemDesc,
+                                      char *filename, 
+                                      bool add_user_area, 
+                                      ESMC_CoordSys_Flag coord_sys, 
+                                      ESMCI::DistGrid *elem_distgrid, 
+                                      Mesh **out_mesh){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_mesh_create_from_SCRIP_file()"
 
+  // Declare some handy variables
+  int localrc;
+  int rc;
+  int piorc;
+
+  // Init output
+  *out_mesh=NULL;
+
+
+  // Try-catch block around main part of method
+  try {
+
+
+    // Get VM 
+    ESMCI::VM *vm=VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+    
+    // Get VM info
+    int local_pet = vm->getLocalPet();  
+    int pet_count = vm->getPetCount();
+
+    // ESMF Mesh format file name
+    char *esmfmesh_filename=".esmf.nc";
+
+    // Call into serial conversion subroutine on PET 0 
+    // to convert SCRIP to ESMF Mesh format
+    if (local_pet == 0) {
+      int dualflag=0; // Don't do dual
+      ESMCI_convert_SCRIP_to_ESMFMesh(filename,
+                                      esmfmesh_filename,
+                                      &dualflag,
+                                      &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &localrc)) throw localrc;
+    }
+
+    // Wait for conversion to finish
+    vm->barrier();
+
+    // Call into ESMFMesh format read to create mesh from converted file
+    ESMCI_mesh_create_from_ESMFMesh_file(pioSystemDesc,
+                                         esmfmesh_filename, 
+                                         add_user_area, 
+                                         coord_sys, 
+                                         elem_distgrid, 
+                                         out_mesh);
+
+    // Wait for read to finish
+    vm->barrier();
+    
+    // Get rid of converted file on PET 0
+    if (local_pet == 0) {
+      int ret=remove(esmfmesh_filename);
+      if (ret != 0) {
+        if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "Error deleting temporary file.",
+                                          ESMC_CONTEXT, &localrc)) throw localrc;        
+      }
+    }
+
+  } catch(std::exception &x) {
+
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT,&rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT,&rc);
+    }
+    throw rc; // To be caught one level up so we know where the error came from
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,&rc);
+    throw rc; // To be caught one level up so we know where the error came from
+
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught unknown exception", ESMC_CONTEXT, &rc);
+    throw rc; // To be caught one level up so we know where the error came from
+  }
+}
 
 

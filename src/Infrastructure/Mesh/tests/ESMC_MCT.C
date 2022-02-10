@@ -370,8 +370,9 @@ class MCT {
         // Wrap node_owners in IntArray
         InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
 
-        MBMesh_addnodes(&mesh, &num_node, nodeId.data(), nodeCoord.data(), 
-                        &nodeOwnerIA, iin, &coord_sys, &orig_sdim, &localrc);
+        // BOB THIS ISN'T COMPILING, BUT I DON'T NEED IT RIGHT NOW, SO COMMENT (I SUSPECT THIS IS FIXED IN DEVELOP)
+        //        MBMesh_addnodes(&mesh, &num_node, nodeId.data(), nodeCoord.data(), 
+        //                &nodeOwnerIA, iin, &coord_sys, &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         
@@ -411,6 +412,9 @@ class MCT {
 
         InterArray<int> *iin = new InterArray<int>(nodeMask.data(),num_node);
         InterArray<int> *iie = new InterArray<int>(elemMask.data(),num_elem);
+
+        // Wrap node_owners in IntArray
+        InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
         
         MeshCap::meshSetMOAB(&nativeormb, &localrc);
         ESMC_CHECK_THROW(localrc);
@@ -419,7 +423,7 @@ class MCT {
         ESMC_CHECK_THROW(localrc);
 
         target->meshaddnodes(&num_node, nodeId.data(), nodeCoord.data(), 
-                           nodeOwner.data(), iin, &coord_sys, 
+                           &nodeOwnerIA, iin, &coord_sys, 
                            &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
         
