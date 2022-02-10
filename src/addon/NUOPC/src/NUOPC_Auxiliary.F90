@@ -305,7 +305,7 @@ module NUOPC_Auxiliary
     
       call ESMF_FieldWrite(field, fileName=fileName, &
         variableName=standardName, overwrite=overwrite, status=status, &
-        timeslice=timeslice, rc=localrc)
+        iofmt=iofmt, timeslice=timeslice, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &

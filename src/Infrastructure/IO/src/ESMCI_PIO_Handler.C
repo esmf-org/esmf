@@ -40,6 +40,7 @@
 #include "ESMCI_ArrayBundle.h"
 #include "ESMCI_Info.h"
 #include "json.hpp"
+#include "ESMCI_TraceMacros.h"
 
 // Define PIO NetCDF and Parallel NetCDF flags
 #ifdef ESMF_PNETCDF
@@ -278,14 +279,14 @@ int PIO_Handler::initializeVM (void
       // Figure out the inputs for the initialize call
       int numtasks =  vm->getPetCount();
       stride = vm->getSsiLocalPetCount();
-      base = 0;
+      base = 0; // IO tasks start with base and are every stride tasks until num_iotasks.
       if (numtasks > stride){
           num_iotasks = int(numtasks/stride);
           rearr = PIO_REARR_SUBSET;
       }else{
           stride = 1;
-          num_iotasks = 1;
-          rearr = PIO_REARR_BOX;
+          num_iotasks = numtasks;
+          rearr = PIO_REARR_SUBSET;
       }
 
       // Call the static function
@@ -1122,6 +1123,7 @@ void PIO_Handler::arrayWrite(
   PIOc_set_log_level(0);
 #endif // ESMFIO_DEBUG
   // Write the array
+  ESMCI_IOREGION_ENTER("PIOc_write_darray", localrc);  
   piorc =  PIOc_write_darray(pioFileDesc, vardesc, iodesc, arrlen,
                              (void *)baseAddress, NULL);
   if (!CHECKPIOERROR(piorc, "Attempting to write file",
@@ -1129,6 +1131,8 @@ void PIO_Handler::arrayWrite(
       return;
   }
   new_file = false;
+  ESMCI_IOREGION_EXIT("PIOc_write_darray", localrc);
+
 
   // Cleanup & return
   PRINTMSG("cleanup and return");
@@ -1168,6 +1172,10 @@ void PIO_Handler::open(
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;         // local return code
   int piorc;                              // PIO error value
+  VM *vm = VM::getCurrent(&localrc);
+  int numtasks =  vm->getPetCount();
+  int petspernode = vm->getSsiLocalPetCount();
+
 
   struct iofmt_map_t {
     int esmf_iofmt;
@@ -1176,15 +1184,20 @@ void PIO_Handler::open(
 #if defined (ESMF_PNETCDF)
     { ESMF_IOFMT_NETCDF,   PIO_IOTYPE_PNETCDF }
     ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_IOTYPE_PNETCDF }
-    ,{ ESMF_IOFMT_NETCDF4,  PIO_IOTYPE_PNETCDF }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_DATA, PIO_IOTYPE_PNETCDF }
+    ,{ ESMF_IOFMT_NETCDF4,  PIO_IOTYPE_NETCDF }
+    ,{ ESMF_IOFMT_NETCDF4C, PIO_IOTYPE_NETCDF4C }
+    ,{ ESMF_IOFMT_NETCDF4P, PIO_IOTYPE_NETCDF4P }
 #elif defined (ESMF_NETCDF)
     { ESMF_IOFMT_NETCDF,   PIO_IOTYPE_NETCDF }
     ,{ ESMF_IOFMT_NETCDF_64BIT_OFFSET, PIO_IOTYPE_NETCDF }
+    ,{ ESMF_IOFMT_NETCDF_64BIT_DATA, PIO_IOTYPE_NETCDF }
     ,{ ESMF_IOFMT_NETCDF4,  PIO_IOTYPE_NETCDF }
     ,{ ESMF_IOFMT_NETCDF4C, PIO_IOTYPE_NETCDF4C }
     ,{ ESMF_IOFMT_NETCDF4P, PIO_IOTYPE_NETCDF4P }
 #endif
   };
+
   int iofmt_map_size = sizeof (iofmt_map)/sizeof (iofmt_map_t);
 
   if (rc != NULL) {
@@ -1266,7 +1279,7 @@ void PIO_Handler::open(
 
   // If file needs to be created, check for 64-bit or NETCDF4 for pre-create.
   // TODO: Revisit this as PIO, and our understanding of it, evolve...
-
+/*
   if (okToCreate) {
     if ((getFormat() == ESMF_IOFMT_NETCDF_64BIT_OFFSET) || (getFormat() == ESMF_IOFMT_NETCDF4)) {
       const char *fn = getFilename();
@@ -1362,23 +1375,39 @@ void PIO_Handler::open(
       okToCreate = false;
     }
   }
-
+*/
 
   if (okToCreate) {
-    // Looks like we are ready to try and create the file
 #ifdef ESMFIO_DEBUG
     std::string errmsg = "Calling PIOc_createfile";
     PIOc_set_log_level(PIO_DEBUG_LEVEL);
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_DEBUG
+    // Looks like we are ready to try and create the file
+    int mode = clobberMode;
+    switch (getFormat()){
+    case ESMF_IOFMT_NETCDF_64BIT_OFFSET: 
+    {
+        mode |= PIO_64BIT_OFFSET;
+        break;
+    }
+    case ESMF_IOFMT_NETCDF_64BIT_DATA: 
+    {
+        mode |= PIO_64BIT_DATA;
+        break;
+    }
+    }    
+    ESMCI_IOREGION_ENTER("PIOc_createfile", localrc);
+
     piorc = PIOc_createfile(pioSystemDesc, &pioFileDesc,
-                                 &iotype, getFilename(), clobberMode);
+                                 &iotype, getFilename(), mode);
+    ESMCI_IOREGION_EXIT("PIOc_createfile", localrc);
     if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ") + getFilename(),
       ESMF_RC_FILE_OPEN, (*rc))) {
       return;
     } else {
       new_file = true;
-      PRINTMSG("call to PIOc_createfile: success for " << getFilename());
+      PRINTMSG("call to PIOc_createfile: success for " << getFilename() << " iotype= "<< iotype << " Mode "<< mode << " ESMF FMT "<<getFormat() );
     }
 #ifdef ESMFIO_DEBUG
     PIOc_set_log_level(0);
@@ -1387,8 +1416,10 @@ void PIO_Handler::open(
     PRINTMSG(" calling PIOc_openfile with mode = " << mode <<
              ", file = \"" << getFilename() << "\"");
     // Looks like we are ready to go
+    ESMCI_IOREGION_ENTER("PIOc_openfile", localrc);
     piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc,
                                &iotype, getFilename(), mode);
+    ESMCI_IOREGION_EXIT("PIOc_openfile", localrc);
     PRINTMSG(", called PIOc_openfile on " << getFilename());
     if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + getFilename(),
         ESMF_RC_FILE_OPEN, (*rc))) {
@@ -1631,7 +1662,9 @@ void PIO_Handler::close(
   PRINTPOS;
   // Not open? No problem, just skip
   if (isOpen() == ESMF_TRUE) {
+      ESMCI_IOREGION_ENTER("PIOc_closefile", localrc);
     int piorc = PIOc_closefile(pioFileDesc);
+      ESMCI_IOREGION_EXIT("PIOc_closefile", localrc);
     new_file = false;
     if (rc != NULL) *rc = piorc;
   }
@@ -1848,7 +1881,11 @@ PIO_IODescHandler::~PIO_IODescHandler (
 //
 //EOPI
 //-----------------------------------------------------------------------------
+    int localrc;
+    PRINTMSG("calling PIOc_freedecomp");
+  ESMCI_IOREGION_ENTER("PIOc_freedecomp", localrc);
   PIOc_freedecomp(ios, io_descriptor);
+  ESMCI_IOREGION_EXIT("PIOc_freedecomp", localrc);
   if (dims != (int *)NULL) {
     delete[] dims;
     dims = (int *)NULL;
@@ -2082,9 +2119,13 @@ int PIO_IODescHandler::constructPioDecomp(
   for(int i=0; i<handle->nDims; i++)
       ddims[i] = handle->dims[handle->nDims - i - 1];
   // Create the decomposition
+  int *rc;
+  ESMCI_IOREGION_ENTER("PIOc_InitDecomp", localrc);
   PIOc_InitDecomp(iosys, handle->basepiotype, handle->nDims,
                   ddims, pioDofCount, pioDofList,
                   &(handle->io_descriptor), &rearr, NULL, NULL);
+  ESMCI_IOREGION_EXIT("PIOc_InitDecomp", localrc);
+
   PRINTMSG("after call to PIOc_initdecomp_dof");
 #ifdef ESMFIO_DEBUG
   PIOc_set_log_level(0);

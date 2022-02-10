@@ -125,7 +125,6 @@ IO_Handler *IO_Handler::create (
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
 
-
   // call class constructor
   try {
     // Determine if we have the support for the requested I/O format
@@ -133,6 +132,8 @@ IO_Handler *IO_Handler::create (
     case ESMF_IOFMT_NETCDF:
       // No break
     case ESMF_IOFMT_NETCDF_64BIT_OFFSET:
+      // No break
+    case ESMF_IOFMT_NETCDF_64BIT_DATA:
       // No break
     case ESMF_IOFMT_NETCDF4:
       // No break

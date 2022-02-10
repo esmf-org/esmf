@@ -5,9 +5,14 @@ project (PIOC C)
 #==============================================================================
 #  DEFINE THE TARGET
 #==============================================================================
+# Adds profiling
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+#SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+#SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
+
 
 set (src topology.c pio_file.c pioc_support.c pio_lists.c
-  pioc.c pioc_sc.c pio_spmd.c pio_rearrange.c pio_nc4.c 
+  pioc.c pioc_sc.c pio_spmd.c pio_rearrange.c pio_nc4.c
   pio_nc.c pio_put_nc.c pio_get_nc.c pio_getput_int.c pio_msg.c
   pio_darray.c pio_darray_int.c pio_get_vard.c pio_put_vard.c pio_error.c)
 if (NETCDF_INTEGRATION)

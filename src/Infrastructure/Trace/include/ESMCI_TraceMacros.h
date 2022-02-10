@@ -31,6 +31,16 @@
 #define ESMCI_REGION_EXIT(name, localrc) 
 #endif
 
+#define ESMCI_IOREGION_ENTER(name, localrc)      VM::getCurrent(NULL)->barrier(); \
+    ESMCI::TraceEventRegionEnter(name, &(localrc)); \
+    int *enterrc; \  
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, enterrc);
+#define ESMCI_IOREGION_EXIT(name, localrc)       ESMCI::TraceEventRegionExit(name, &(localrc)); \
+    int *exitrc; \
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, exitrc);
+
+
+
 #ifdef ESMF_PROFILE_MESHCREATE
 #define ESMCI_MESHCREATE_TRACE_ENTER(name) {char before[100] = "before "; \
   VM::getCurrent(NULL)->logMemInfo(strcat(before, name)); \
