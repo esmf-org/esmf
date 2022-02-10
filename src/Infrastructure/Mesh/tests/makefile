@@ -56,7 +56,8 @@ include ${ESMF_DIR}/makefile
 CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD) \
               $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest \
-              $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest
+              $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest \
+              $(ESMF_DIR)/$(LOCDIR)/ESMC_*GenUTest.C
 CLOBBERDIRS =
 
 
