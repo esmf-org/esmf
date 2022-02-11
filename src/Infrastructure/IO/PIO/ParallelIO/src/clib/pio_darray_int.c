@@ -2178,3 +2178,54 @@ compute_maxaggregate_bytes(iosystem_desc_t *ios, io_desc_t *iodesc)
 
     return PIO_NOERR;
 }
+#ifdef CHUNKING
+int 
+find_hdf5_chunksize(int ncid, int varid, int ndims)
+{
+/* Code to find chunk size for writing hdf5 */
+/* Pick a chunk length for each dimension, if one has not already
+ * been picked above. */
+    int ret = PIO_NOERR;
+    PIO_Offset chunksize[ndims];
+    int storage;
+#define DEFAULT_CHUNK_SIZE 4194304
+    if ((ret = PIOc_inq_var_chunking(ncid, varid, &storage, chunksize)))
+        return pio_err(ncid, NULL, ierr, __FILE__,__LINE__);
+    if (storage == NC_CONTIGUOUS || storage == NC_COMPACT)
+        return;
+    storage = NC_CHUNKED;
+    for (int d = 0; d < ndims; d++)
+    {
+        if (!chunksize[d])
+        {
+            size_t suggested_size;
+            suggested_size = (pow((double)DEFAULT_CHUNK_SIZE/(num_values * type_size), 
+                                  1/(double)(ndims - num_set)) * var->dim[d]->len - .5);
+            if (suggested_size > var->dim[d]->len)
+                suggested_size = var->dim[d]->len;
+            chunksize[d] = suggested_size ? suggested_size : 1;
+            LOG((4, "nc_def_var_nc4: name %s dim %d DEFAULT_CHUNK_SIZE %d num_values %f type_size %d "
+                 "chunksize %ld", var->name, d, DEFAULT_CHUNK_SIZE, num_values, type_size, chunksize[d]));
+        }
+    }
+/* But did this add up to a chunk that is too big? */
+    retval = check_chunksizes(grp, var, chunksize);
+    if (retval)
+    {
+        /* Other error? */
+        if (retval != NC_EBADCHUNK)
+            return retval;
+        
+        /* Chunk is too big! Reduce each dimension by half and try again. */
+        for ( ; retval == NC_EBADCHUNK; retval = check_chunksizes(grp, var, chunksize))
+            for (d = 0; d < ndims; d++)
+                chunksize[d] = chunksize[d]/2 ? chunksize[d]/2 : 1;
+    }
+    
+    /* Do we have any big data overhangs? */
+#define NC_ALLOWED_OVERHANG .1
+    for (d = 0; d < ndims; d++)
+        for ( ; var->dim[d]->len % chunksize[d] > var->dim[d]->len * NC_ALLOWED_OVERHANG; )
+            chunksize[d] -= var->dim[d]->len * NC_ALLOWED_OVERHANG;
+}
+#endif

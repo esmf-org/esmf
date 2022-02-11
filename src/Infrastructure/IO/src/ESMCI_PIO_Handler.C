@@ -284,8 +284,8 @@ int PIO_Handler::initializeVM (void
           num_iotasks = int(numtasks/stride);
           rearr = PIO_REARR_SUBSET;
       }else{
-          stride = 1;
-          num_iotasks = numtasks;
+          num_iotasks = numtasks > 32 ? 32:numtasks;
+          stride = numtasks/num_iotasks;
           rearr = PIO_REARR_SUBSET;
       }
 
@@ -1619,7 +1619,9 @@ void PIO_Handler::flush(
   // Not open? No problem, just skip
   if (isOpen() == ESMF_TRUE) {
     PRINTMSG("calling sync");
+      ESMCI_IOREGION_ENTER("PIOc_sync", localrc);
     PIOc_sync(pioFileDesc);
+      ESMCI_IOREGION_EXIT("PIOc_sync", localrc);
   }
   // return successfully
   if (rc != NULL) {
