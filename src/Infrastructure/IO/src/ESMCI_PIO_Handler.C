@@ -197,7 +197,6 @@ void PIO_Handler::initialize (
                           stride, base, rearr, &instance);
       PRINTMSG("After PIOc_Init_Intracomm, instance = " << instance);
 #ifdef ESMFIO_LUSTRE_FILESYSTEM
-       make an error here
       PIOc_set_hint(instance, "romio_ds_read", "disable");
       PIOc_set_hint(instance, "romio_ds_write", "disable");
 #endif
