@@ -6,7 +6,7 @@ project (PIOC C)
 #  DEFINE THE TARGET
 #==============================================================================
 # Adds profiling
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
 #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 #SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 

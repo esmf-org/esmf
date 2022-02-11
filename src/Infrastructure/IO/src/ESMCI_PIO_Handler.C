@@ -196,17 +196,21 @@ void PIO_Handler::initialize (
       PIOc_Init_Intracomm(comp_comm, num_iotasks,
                           stride, base, rearr, &instance);
       PRINTMSG("After PIOc_Init_Intracomm, instance = " << instance);
-#ifdef ESMFIO_LUSTRE_FILESYSTEM
-      PIOc_set_hint(instance, "romio_ds_read", "disable");
-      PIOc_set_hint(instance, "romio_ds_write", "disable");
-#endif
       // If we get here, hopefully everything is OK.
       if (instance != 0) {
+#ifdef ESMFIO_FILESYSTEM_LUSTRE
+          PIOc_set_hint(instance, "romio_ds_read", "disable");
+          PIOc_set_hint(instance, "romio_ds_write", "disable");
+#endif
+#ifdef ESMFIO_FILESYSTEM_GPFS
+          PIOc_set_hint(instance, "ibm_largeblock_io", "true");
+#endif
+          localrc = PIOc_set_rearr_opts(instance, PIO_REARR_COMM_P2P, PIO_REARR_COMM_FC_2D_ENABLE, 0, 0, 0, 0, 0, 4);
+
         // Set the error handling to return PIO errors
         // Just return error (error code may be different on different PEs).
-        // pio_cpp_seterrorhandlingi(&instance, PIO_RETURN_ERROR);
         // Broadcast the error to all PEs (consistant error handling)
-        PIOc_Set_IOSystem_Error_Handling(instance, PIO_BCAST_ERROR);
+        PIOc_Set_IOSystem_Error_Handling(instance, PIO_RETURN_ERROR);
         PRINTMSG("After PIOc_Set_IOSystem_Error_Handling");
         // Add the instance to the global list
         PIO_Handler::activePioInstances.push_back(instance);

@@ -936,11 +936,11 @@ int IO::close(void
 
   // Check to make sure that a file is already open
   if (ioHandler->isOpen() != ESMF_FALSE) {
-    ioHandler->flush(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &rc)) {
-      return rc;
-    }
+      ioHandler->flush(&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &rc)) {
+          return rc;
+      }
     if (ESMF_SUCCESS == localrc) {
       ioHandler->close();
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
