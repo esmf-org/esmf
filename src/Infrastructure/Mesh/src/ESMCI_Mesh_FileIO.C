@@ -125,7 +125,8 @@ void ESMCI_mesh_create_from_file(char *filename,
     // local return code
     int localrc;
 
-    //// Error check some unhandled options
+
+    //// Error checking of arguments
 
     // Don't currently support redisting to node_distgrid
     if (node_distgrid != NULL) {
@@ -134,11 +135,12 @@ void ESMCI_mesh_create_from_file(char *filename,
                            ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
-    // Don't currently support converting to dual
-    if (convert_to_dual) {
+    // Can't convert to dual and add_user_areas
+    // (Conversion to dual swaps elements and nodes and nodes don't have areas)
+    if (convert_to_dual && add_user_area) {
       if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          " converting to dual currently not supported.",
-                           ESMC_CONTEXT, &localrc)) throw localrc;
+                                        "Can't simultaneously use areas from file in mesh and convert the mesh to its dual.",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
 
@@ -156,8 +158,7 @@ void ESMCI_mesh_create_from_file(char *filename,
     int pet_count = vm->getPetCount();
     int pets_per_Ssi = vm->getSsiLocalPetCount();
 
-
-    /// Initialize IO system
+    // Initialize IO system
     int num_iotasks = pet_count/pets_per_Ssi;
     int stride = pets_per_Ssi;
     int pioSystemDesc;
@@ -167,28 +168,39 @@ void ESMCI_mesh_create_from_file(char *filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
 
+    // Since we are swapping nodes and elems in convert_to_dual, 
+    // can't use elem_distgrid to read from file in that case. 
+    ESMCI::DistGrid *elem_distgrid_for_file_read=NULL;
+    if (!convert_to_dual) elem_distgrid_for_file_read=elem_distgrid;
+
+
     // Create Mesh based on the file format
+    Mesh *tmp_mesh;
     if (fileformat == ESMC_FILEFORMAT_ESMFMESH) {
       ESMCI_mesh_create_from_ESMFMesh_file(pioSystemDesc, filename, 
-                                           add_user_area, coord_sys, elem_distgrid, 
-                                           out_mesh);
+                                           add_user_area, coord_sys, 
+                                           elem_distgrid_for_file_read, 
+                                           &tmp_mesh);
 
     } else if (fileformat == ESMC_FILEFORMAT_UGRID) {
       ESMCI_mesh_create_from_UGRID_file(pioSystemDesc, filename, 
                                         add_user_area, coord_sys, 
                                         maskFlag, maskVarName,
-                                        elem_distgrid, 
-                                        out_mesh);
+                                        elem_distgrid_for_file_read, 
+                                        &tmp_mesh);
 
     } else if (fileformat == ESMC_FILEFORMAT_SCRIP) {
       ESMCI_mesh_create_from_SCRIP_file(pioSystemDesc, filename, 
-                                        add_user_area, coord_sys, elem_distgrid, 
-                                        out_mesh);
+                                        add_user_area, coord_sys, 
+                                        elem_distgrid_for_file_read, 
+                                        &tmp_mesh);
     } else {
       if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
          " Unrecognized file format.",
            ESMC_CONTEXT, &localrc)) throw localrc;
     }    
+
+
 
     // Free IO system
     piorc = PIOc_free_iosystem(pioSystemDesc);
@@ -196,11 +208,31 @@ void ESMCI_mesh_create_from_file(char *filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
 
-    // Create Dual here
+
+    // If requested, create dual from read in file
+    if (convert_to_dual) {
+
+      // Create dual from tmp_mesh created from file above
+      Mesh *dual_mesh;
+      ESMCI_meshcreatedual(&tmp_mesh, &dual_mesh, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &localrc)) throw localrc;
+      
+      // Get rid of tmp_mesh
+      ESMCI_meshdestroy(&tmp_mesh, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &localrc)) throw localrc;
+      
+      // Swap in dual mesh
+      tmp_mesh=dual_mesh;
+    }
 
 
     // Do node redist here
 
+
+    // Return final mesh
+    *out_mesh=tmp_mesh;
     
 
   } catch(std::exception &x) {
