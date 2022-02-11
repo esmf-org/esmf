@@ -676,6 +676,9 @@ extern double ESMC_MPI_Wtime(void);
 #define MPI_Comm_c2f(comm) ((int)comm)
 #define MPI_Comm_f2c(comm) ((MPI_Comm)comm)
 
+#define MPI_Group_c2f(group) ((int)group)
+#define MPI_Group_f2c(group) ((MPI_Group)group)
+
 /* MPI_T API */
 #define MPI_T_finalize() (MPI_SUCCESS)
 #define MPI_T_cvar_get_num(num) \
