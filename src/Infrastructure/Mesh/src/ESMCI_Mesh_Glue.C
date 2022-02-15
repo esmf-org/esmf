@@ -1949,7 +1949,8 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
     try {
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
-      get_mesh_merged_connlist(**(&mesh), num_merged_nids, merged_nids);        
+      native_get_mesh_merged_connlist(**(&mesh), num_merged_nids, 
+                                      merged_nids);
       elemConnCount = merged_nids.size();
     } catch(...){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -2075,14 +2076,26 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     ////// Get some handy information //////
     int num_elems=mesh->num_elems();
     int orig_sdim=mesh->orig_spatial_dim;
+    int num_elem_conn = 0;
+    int localrc;
+    ESMCI_MeshGetElemConnCount(mesh, &num_elem_conn, &localrc);
+    if(ESMC_LogDefault.MsgFoundError(localrc,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
 
     std::vector<int> num_merged_nids;
     std::vector<int> merged_nids;
 
     if (mesh->is_split) {
       try {
-        get_mesh_merged_connlist(**(&mesh), num_merged_nids, merged_nids);        
+        if (present(elemConn))
+          native_get_mesh_merged_connlist(**(&mesh), num_merged_nids, 
+                                          merged_nids, true);
+        else
+          native_get_mesh_merged_connlist(**(&mesh), num_merged_nids, 
+                                          merged_nids);
         num_elems = num_merged_nids.size();
+        num_elem_conn = merged_nids.size();
 
           // std::cout << "num_merged_nids = [";
           // for (const auto nid: num_merged_nids)
@@ -2099,6 +2112,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
         return;
       }
     }
+
 
     ////// Error check input arrays //////
 
@@ -2143,26 +2157,11 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           " elementConn array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
       }
-      
-      if (!mesh->is_split) {
-        // Loop summing number of nodes per element
-        int num_elem_conn=0;
-        Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
-        for (; ei != ee; ++ei) {
-          MeshObj &elem = *ei;
-          
-          // Get topology of element
-          const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
-          
-          // Add number of nodes for this elem to connection count
-          num_elem_conn += topo->num_nodes;
-        }
-        
-        if (elemConn->extent[0] != num_elem_conn) {
-          int localrc;
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          " elementConn array must be of size elementConnCount", ESMC_CONTEXT, &localrc)) throw localrc;
-        }
+              
+      if (elemConn->extent[0] != num_elem_conn) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        " elementConn array must be of size elementConnCount", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
 

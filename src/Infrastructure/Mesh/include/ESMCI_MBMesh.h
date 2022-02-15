@@ -118,10 +118,8 @@ namespace ESMCI {
     int _num_elem_conn;
     int _num_orig_node;
     int _num_orig_elem;
-    int _num_orig_elem_conn;
     int _num_owned_node;
     int _num_owned_elem;
-    int _num_owned_elem_conn;
     bool has_ghost;
 
   public:
@@ -336,11 +334,6 @@ namespace ESMCI {
       return _num_owned_elem;
     };
 
-    int num_owned_elem_conn(){
-      if (!elems_finalized) {Throw() << "Elements not finalized, so num_owned_elem_conn not set.";}
-      return _num_owned_elem_conn;
-    };
-
     int num_orig_node() {
       if (!nodes_finalized) {Throw() << "Nodes not finalized, so num_orig_node not set.";}
       return _num_orig_node;
@@ -349,11 +342,6 @@ namespace ESMCI {
     int num_orig_elem() {
       if (!elems_finalized) {Throw() << "Elems not finalized, so num_orig_elem not set.";}
       return _num_orig_elem;
-    }
-
-    int num_orig_elem_conn() {
-      if (!elems_finalized) {Throw() << "Elems not finalized, so num_orig_elem_conn not set.";}
-      return _num_orig_elem_conn;
     }
 
     void get_all_nodes(std::vector<EntityHandle> &all_nodes);

@@ -35,6 +35,7 @@
 
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
+#include "Mesh/include/ESMCI_MBMesh_SplitMerge.h"
 
 #include "MBTagConventions.hpp"
 #include "moab/ParallelComm.hpp"
@@ -140,10 +141,8 @@ MBMesh::MBMesh():
     _num_elem_conn = 0;
     _num_orig_node = 0;
     _num_orig_elem = 0;
-    _num_orig_elem_conn = 0;
     _num_owned_node = 0;
     _num_owned_elem = 0;
-    _num_owned_elem_conn = 0;
 } 
 
 // From inputs
@@ -182,10 +181,8 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   _num_elem_conn = 0;
   _num_orig_node = 0;
   _num_orig_elem = 0;
-  _num_orig_elem_conn = 0;
   _num_owned_node = 0;
   _num_owned_elem = 0;
-  _num_owned_elem_conn = 0;
 
   // Get cartesian dimension
   int cart_sdim;
@@ -602,28 +599,41 @@ void MBMesh::get_sorted_orig_elems(std::vector<EntityHandle> &orig_elems) {
 
 int MBMesh::get_num_elem_conn(std::vector<EntityHandle> elems){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "MBMesh::num_elem_conn()"
+#define ESMC_METHOD "MBMesh::get_num_elem_conn()"
   int elemConnCount=0;
   try {
     int merr;
-    // Doesn't work with split meshes right now
-    if (this->is_split)
-      Throw () << "Can't get elem connection count from mesh containing >4 elements.";
 
-    std::vector<EntityHandle>::const_iterator ei = elems.begin();
-    std::vector<EntityHandle>::const_iterator ee = elems.end();
-
-    // Loop summing number of nodes per element
-    for (ei; ei != ee; ++ei) {
-      EntityHandle elem=*ei;
-
-      // Get topology of element
-      std::vector<EntityHandle> nodes_on_elem;
-      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
-      ESMC_CHECK_MOAB_THROW(merr)
-
-      // Add number of nodes for this elem to connection count
-      elemConnCount += nodes_on_elem.size();
+    if (!is_split) {
+      std::vector<EntityHandle>::const_iterator ei = elems.begin();
+      std::vector<EntityHandle>::const_iterator ee = elems.end();
+  
+      // Loop summing number of nodes per element
+      for (ei; ei != ee; ++ei) {
+        EntityHandle elem=*ei;
+  
+        // Get topology of element
+        std::vector<EntityHandle> nodes_on_elem;
+        merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+        ESMC_CHECK_MOAB_THROW(merr)
+  
+        // Add number of nodes for this elem to connection count
+        elemConnCount += nodes_on_elem.size();
+      }
+    } else {
+      std::vector<int> num_merged_nids;
+      std::vector<int> merged_nids;
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids);        
+      elemConnCount = merged_nids.size();
+      
+      // std::cout << "num_merged_nids = [";
+      // for (const auto nid: num_merged_nids)
+      //   std::cout << nid << " ";
+      // std::cout<< "]" <<std::endl;
+      // std::cout << "merged_nids = [";
+      // for (const auto mid: merged_nids)
+      //   std::cout << mid << " ";
+      // std::cout << "]" << std::endl;
     }
   }
   CATCH_MBMESH_RETHROW
@@ -734,21 +744,6 @@ void MBMesh::get_elem_types(int *elem_types) {
 
       elem_types[i] = M2EType(type);
 
-      // // NOTE: old style
-      // Range nodes_on_elem;
-      // merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
-      // if (pdim == 2) {
-      //   if (nodes_on_elem.size() == 3) elem_types[i] = ESMC_MESHELEMTYPE_TRI;
-      //   else if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_QUAD;
-      //   else
-      //     Throw () << "Element type not recognized.";
-      // } else if (pdim == 3) {
-      //   if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_TETRA;
-      //   else if (nodes_on_elem.size() == 8) elem_types[i] = ESMC_MESHELEMTYPE_HEX;       
-      //   else
-      //     Throw () << "Element type not recognized.";
-      // } else
-      //   Throw () << "Parameteric dimension not recognized.";
       i++;
     }
 
@@ -763,43 +758,51 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
   try {
     int localrc, merr;
 
-    // get node ids in a vector, which we will need to search later
-    Range nodes;
-    merr=mesh->get_entities_by_dimension(0, 0, nodes);
-    ESMC_CHECK_MOAB_THROW(merr)
-    int *node_ids = new int[nodes.size()];
-    get_node_ids(node_ids);
-    std::vector<int> nodeids(node_ids, node_ids + nodes.size());
-    delete [] node_ids;
-
-    // now iterate through the elements
-    Range elems;
-    merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_THROW(merr)
-    
-    int elemConnCountTemp = 0;
-    for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
-      EntityHandle elem=*it;
-
-      // Get topology of element (ordered)
-      vector<EntityHandle> nodes_on_elem;
-      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+    if (!is_split) {
+      // get node ids in a vector, which we will need to search later
+      Range nodes;
+      merr=mesh->get_entities_by_dimension(0, 0, nodes);
       ESMC_CHECK_MOAB_THROW(merr)
-
-      int nid;
-      // add connectivity to output array
-      for (int i=0; i<nodes_on_elem.size(); ++i) {
-        // get the node id
-        merr=mesh->tag_get_data(gid_tag, &nodes_on_elem.at(i), 1, &nid);
+      int *node_ids = new int[nodes.size()];
+      get_node_ids(node_ids);
+      std::vector<int> nodeids(node_ids, node_ids + nodes.size());
+      delete [] node_ids;
+  
+      // now iterate through the elements
+      Range elems;
+      merr=mesh->get_entities_by_dimension(0, pdim, elems);
+      ESMC_CHECK_MOAB_THROW(merr)
+      
+      int elemConnCountTemp = 0;
+      for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+        EntityHandle elem=*it;
+  
+        // Get topology of element (ordered)
+        vector<EntityHandle> nodes_on_elem;
+        merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
         ESMC_CHECK_MOAB_THROW(merr)
-
-        std::vector<int>::iterator itr = std::find(nodeids.begin(), nodeids.end(), nid);
-        // add 1 for Fortran indexing
-        elem_conn[elemConnCountTemp+i] = std::distance(nodeids.begin(), itr) +1;
+  
+        int nid;
+        // add connectivity to output array
+        for (int i=0; i<nodes_on_elem.size(); ++i) {
+          // get the node id
+          merr=mesh->tag_get_data(gid_tag, &nodes_on_elem.at(i), 1, &nid);
+          ESMC_CHECK_MOAB_THROW(merr)
+  
+          std::vector<int>::iterator itr = std::find(nodeids.begin(), nodeids.end(),   nid);
+          // add 1 for Fortran indexing
+          elem_conn[elemConnCountTemp+i] = std::distance(nodeids.begin(), itr) +1;
+        }
+  
+        // Add number of nodes for this elem to connection count
+        elemConnCountTemp += nodes_on_elem.size();
       }
-
-      // Add number of nodes for this elem to connection count
-      elemConnCountTemp += nodes_on_elem.size();
+    } else {
+      std::vector<int> num_merged_nids;
+      std::vector<int> merged_nids;
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, 
+                                      merged_nids, true);
+      elem_conn = merged_nids.data();
     }
 
   }
@@ -848,45 +851,82 @@ void MBMesh::get_elem_connectivity(std::vector<EntityHandle> const &elems, int *
   try {
     int localrc, merr;
 
-    // get node ids in a vector, which we will need to search later
-    // Range nodes;
-    // merr=mesh->get_entities_by_dimension(0, 0, nodes);
-    // ESMC_CHECK_MOAB_THROW(merr)
-    // int *node_ids = new int[nodes.size()];
-    // get_node_ids(node_ids);
-    // std::vector<int> nodeids(node_ids, node_ids + nodes.size());
-    // delete [] node_ids;
-    std::vector<int> nodeids(num_node(), -1);
-    std::vector<EntityHandle> orig_nodes;
-    get_sorted_orig_nodes(orig_nodes);
-    get_gid(orig_nodes, nodeids.data());
+    if (!is_split) {
 
-    // now iterate through the elements
-    int elemConnCountTemp = 0;
-    for (std::vector<EntityHandle>::const_iterator it=elems.begin(); it != elems.end(); it++) {
-      EntityHandle elem=*it;
-
-      // Get topology of element (ordered)
-      vector<EntityHandle> nodes_on_elem;
-      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
-      ESMC_CHECK_MOAB_THROW(merr)
-
-      int nid;
-      // add connectivity to output array
-      for (int i=0; i<nodes_on_elem.size(); ++i) {
-        // get the node id
-        merr=mesh->tag_get_data(gid_tag, &nodes_on_elem.at(i), 1, &nid);
+      // get node ids in a vector, which we will need to search later
+      // Range nodes;
+      // merr=mesh->get_entities_by_dimension(0, 0, nodes);
+      // ESMC_CHECK_MOAB_THROW(merr)
+      // int *node_ids = new int[nodes.size()];
+      // get_node_ids(node_ids);
+      // std::vector<int> nodeids(node_ids, node_ids + nodes.size());
+      // delete [] node_ids;
+      std::vector<int> nodeids(num_node(), -1);
+      std::vector<EntityHandle> orig_nodes;
+      get_sorted_orig_nodes(orig_nodes);
+      get_gid(orig_nodes, nodeids.data());
+  
+      // now iterate through the elements
+      int elemConnCountTemp = 0;
+      for (std::vector<EntityHandle>::const_iterator it=elems.begin(); it !=   elems.end(); it++) {
+        EntityHandle elem=*it;
+  
+        // Get topology of element (ordered)
+        vector<EntityHandle> nodes_on_elem;
+        merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
         ESMC_CHECK_MOAB_THROW(merr)
-
-        std::vector<int>::iterator itr = std::find(nodeids.begin(), nodeids.end(), nid);
-        // add 1 for Fortran indexing
-        elem_conn[elemConnCountTemp+i] = std::distance(nodeids.begin(), itr) +1;
+  
+        int nid;
+        // add connectivity to output array
+        for (int i=0; i<nodes_on_elem.size(); ++i) {
+          // get the node id
+          merr=mesh->tag_get_data(gid_tag, &nodes_on_elem.at(i), 1, &nid);
+          ESMC_CHECK_MOAB_THROW(merr)
+  
+          std::vector<int>::iterator itr = std::find(nodeids.begin(), nodeids.end(),   nid);
+          // add 1 for Fortran indexing
+          elem_conn[elemConnCountTemp+i] = std::distance(nodeids.begin(), itr) +1;
+        }
+  
+        // Add number of nodes for this elem to connection count
+        elemConnCountTemp += nodes_on_elem.size();
       }
+    } else {
+      std::vector<int> num_merged_nids;
+      std::vector<int> merged_nids;
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, 
+                                      merged_nids, true);
+      elem_conn = merged_nids.data();
+    
+        // ////// Get ordered list of nodes ////// 
+        // std::vector<std::pair<int,MeshObj *> > sorted_nodes;
+        // 
+        // // Make a vector to sort nodes by original creation order
+        // Mesh::iterator ni = mesh->node_begin(), ne = mesh->node_end();
+        // for (; ni != ne; ++ni) {
+        //   MeshObj *node = &(*ni);
+        //   int index = node->get_data_index();
+        //   sorted_nodes.push_back(std::make_pair(index, node));      
+        // }
+        // 
+        // // sort by creation order
+        // std::sort(sorted_nodes.begin(), sorted_nodes.end());
+        // 
+        // int ind = 0;
+        // for (const auto i : merged_nids) {
+        //   // find node id's position in map of sorted_nodes
+        //   auto it = std::find_if(sorted_nodes.begin(), sorted_nodes.end(),
+        //     [&i](const std::pair<int,MeshObj *>& x)
+        //     { return x.second->get_id() == i;} );
+        //   int conn_pos = it->first;
+        // 
+        //   // add to elemConn
+        //   // NOTE: add 1 for Fortran indexing convention
+        //   elemConn_array[ind] = conn_pos + 1;
+        //   ind++;
+        // }
 
-      // Add number of nodes for this elem to connection count
-      elemConnCountTemp += nodes_on_elem.size();
     }
-
   }
   CATCH_MBMESH_RETHROW
 }
@@ -2676,12 +2716,7 @@ void MBMesh::finalize_elems() {
     _num_owned_elem = owned_elems.size();
     _num_orig_elem = orig_elems.size();
     
-    // NOTE: cannot get connectivity of ngons
-    if (!this->is_split) {
-      _num_elem_conn = get_num_elem_conn(all_elems);
-      _num_owned_elem_conn = get_num_elem_conn(owned_elems);
-      _num_orig_elem_conn = get_num_elem_conn(orig_elems);
-    }
+    _num_elem_conn = get_num_elem_conn(all_elems);
 
     // Mark elems as finalized, so things can be used
     elems_finalized=true;

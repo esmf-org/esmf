@@ -19,15 +19,14 @@
 
 using namespace ESMCI;
 
-void get_elem_merged_connlist(const Mesh &mesh, 
+void native_get_elem_merged_connlist(const Mesh &mesh, 
                               std::vector<OSE>::iterator beg_elem_range, 
                               std::vector<OSE>::iterator end_elem_range, 
                               std::vector<int> &used, 
-                              std::vector<int> &elem_merged_nids) {
+                              std::vector<int> &elem_merged_nids,
+                              bool debug) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "get_elem_merged_connlist()"
-
-    bool debug = false;
+#define ESMC_METHOD "native_get_elem_merged_connlist()"
 
     // DEBUG output
     if (debug) {
@@ -98,10 +97,17 @@ void get_elem_merged_connlist(const Mesh &mesh,
         // std::cout << "merging nodes of elem " << split_elem->get_id() << " nodes ";
         // Store Node ids
         int node_ids[3];
+        if (debug) std::cout << "iterate nodes_on_elem (size = 3) " << std::flush;
         for (ESMCI::UInt n = 0; n < topo->num_nodes; ++n) {
-          // std::cout << node_ids[n] << " ";
+          if (debug) std::cout << n << " " << std::flush;
           const MeshObj *node = split_elem->Relations[n].obj;
           node_ids[n]=node->get_id();
+        }
+        if (debug) {
+          std::cout << "node_ids " << std::flush;
+          for (const auto id : node_ids) 
+            std::cout << id << " " << std::flush;
+          std::cout<<std::endl;
         }
 
         // Loop through ids 
@@ -181,9 +187,11 @@ void get_elem_merged_connlist(const Mesh &mesh,
   }
 
   // Create a connection list for a mesh that has the original >4 sided connections
-void get_mesh_merged_connlist(const Mesh &mesh, std::vector<int> &num_merged_nids, std::vector<int> &merged_nids) {
+void native_get_mesh_merged_connlist(const Mesh &mesh, 
+  std::vector<int> &num_merged_nids, std::vector<int> &merged_nids, 
+  bool debug) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "get_mesh_merged_connlist()"
+#define ESMC_METHOD "native_get_mesh_merged_connlist()"
     
     // Clear output arrays
     num_merged_nids.clear();
@@ -232,10 +240,10 @@ void get_mesh_merged_connlist(const Mesh &mesh, std::vector<int> &num_merged_nid
     // Sort vector to put all split elems next to each other
     std::sort(ose_sorted.begin(), ose_sorted.end());
 
-    // // DEBUG OUTPUT
-    // for (int i=0; i<ose_sorted.size(); i++) {
-    //   printf("orig elem index=%d orig_elem=%d split_elem=%d\n",ose_sorted[i].orig_elem->get_data_index(),ose_sorted[i].orig_elem->get_id(),ose_sorted[i].split_elem->get_id());
-    // }
+    // DEBUG OUTPUT
+    for (int i=0; i<ose_sorted.size(); i++) {
+      printf("orig elem index=%d orig_elem=%d split_elem=%d\n",ose_sorted[i].orig_elem->get_data_index(),ose_sorted[i].orig_elem->get_id(),ose_sorted[i].split_elem->get_id());
+    }
 
     // Put these outside loop so we allocate/deallocate less
     std::vector<int> used;
@@ -251,9 +259,9 @@ void get_mesh_merged_connlist(const Mesh &mesh, std::vector<int> &num_merged_nid
       if (beg_elem_range->orig_elem->get_id() != osei->orig_elem->get_id()) {
 
         // Turn range of split elems into merged conn list
-        get_elem_merged_connlist(mesh, 
+        native_get_elem_merged_connlist(mesh, 
                                  beg_elem_range, osei, 
-                                 used,elem_merged_nids);
+                                 used,elem_merged_nids, debug);
 
         // Add to the outgoing lists
         num_merged_nids.push_back(elem_merged_nids.size());
@@ -267,35 +275,13 @@ void get_mesh_merged_connlist(const Mesh &mesh, std::vector<int> &num_merged_nid
     }
 
     // Do the last range
-    get_elem_merged_connlist(mesh, 
+    native_get_elem_merged_connlist(mesh, 
                               beg_elem_range, osee, 
-                              used, elem_merged_nids);
+                              used, elem_merged_nids, debug);
     
     // Add to the outgoing lists
     num_merged_nids.push_back(elem_merged_nids.size());
     for (int i=0; i<elem_merged_nids.size(); i++) {
       merged_nids.push_back(elem_merged_nids[i]);
     }
-
-#if 0
-    // Loop through the elems
-    std::vector<int> elem_conn;
-    std::vector<const MeshObj *>::iterator ei=sorted_elems.begin(), ee=sorted_elems.end();
-    for (; ei != ee; ++ei) {
-      const MeshObj &elem = **ei;
-
-      // Skip split elems
-      if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue;
-
-      // Clear connections to get new set
-      elem_conn.clear();
-
-      // Get merged connections for this element
-      _get_elem_merged_connlist(mesh, elem, elem_conn);
-
-      // copy elem connection information into mesh list
-
-    }
-#endif
-
   }

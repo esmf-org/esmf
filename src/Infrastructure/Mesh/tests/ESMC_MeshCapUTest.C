@@ -143,26 +143,26 @@ int main(int argc, char *argv[]) {
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes_native;
-    test_meshes_native.push_back("quad_2d_cart");
-    test_meshes_native.push_back("quad_2d_sph_deg");
-    test_meshes_native.push_back("quad_2d_sph_rad");
-    test_meshes_native.push_back("tri_2d_cart");
-    test_meshes_native.push_back("tri_2d_sph_deg");
-    test_meshes_native.push_back("tri_2d_sph_rad");
-    test_meshes_native.push_back("hex_3d_cart");
-    test_meshes_native.push_back("hex_3d_sph_deg");
-    test_meshes_native.push_back("hex_3d_sph_rad");
-    test_meshes_native.push_back("mix_2d_cart");
-    test_meshes_native.push_back("mix_2d_sph_deg");
-    test_meshes_native.push_back("mix_2d_sph_rad");
-    test_meshes_native.push_back("periodic_2d_sph_deg");
-    test_meshes_native.push_back("periodic_2d_sph_rad");
+    // test_meshes_native.push_back("quad_2d_cart");
+    // test_meshes_native.push_back("quad_2d_sph_deg");
+    // test_meshes_native.push_back("quad_2d_sph_rad");
+    // test_meshes_native.push_back("tri_2d_cart");
+    // test_meshes_native.push_back("tri_2d_sph_deg");
+    // test_meshes_native.push_back("tri_2d_sph_rad");
+    // test_meshes_native.push_back("hex_3d_cart");
+    // test_meshes_native.push_back("hex_3d_sph_deg");
+    // test_meshes_native.push_back("hex_3d_sph_rad");
+    // test_meshes_native.push_back("mix_2d_cart");
+    // test_meshes_native.push_back("mix_2d_sph_deg");
+    // test_meshes_native.push_back("mix_2d_sph_rad");
+    // test_meshes_native.push_back("periodic_2d_sph_deg");
+    // test_meshes_native.push_back("periodic_2d_sph_rad");
     test_meshes_native.push_back("ngon_2d_cart");
-    test_meshes_native.push_back("ngon_2d_sph_deg");
-    test_meshes_native.push_back("ngon_2d_sph_rad");
-    test_meshes_native.push_back("ngon_quad_2d_cart");
-    test_meshes_native.push_back("ngon_quad_2d_sph_deg");
-    test_meshes_native.push_back("ngon_quad_2d_sph_rad");
+    // test_meshes_native.push_back("ngon_2d_sph_deg");
+    // test_meshes_native.push_back("ngon_2d_sph_rad");
+    // test_meshes_native.push_back("ngon_quad_2d_cart");
+    // test_meshes_native.push_back("ngon_quad_2d_sph_deg");
+    // test_meshes_native.push_back("ngon_quad_2d_sph_rad");
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes_mbmesh;

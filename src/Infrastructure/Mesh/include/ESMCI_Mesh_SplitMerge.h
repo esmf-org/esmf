@@ -37,15 +37,17 @@ using namespace ESMCI;
 
   };
 
-  void get_elem_merged_connlist(const Mesh &mesh, 
+  void native_get_elem_merged_connlist(const Mesh &mesh, 
                                 std::vector<OSE>::iterator beg_elem_range, 
                                 std::vector<OSE>::iterator end_elem_range, 
                                 std::vector<int> &used, 
-                                std::vector<int> &elem_merged_nids);
+                                std::vector<int> &elem_merged_nids,
+                                bool debug=false);
                                           
   // Create a connection list for a mesh that has the original >4 sided connections
-  void get_mesh_merged_connlist(const Mesh &mesh, 
+  void native_get_mesh_merged_connlist(const Mesh &mesh, 
                                 std::vector<int> &num_merged_nids, 
-                                std::vector<int> &merged_nids);
+                                std::vector<int> &merged_nids,
+                                bool debug=false);
   
 #endif

@@ -2310,7 +2310,7 @@ void MBMesh_GetElemConnCount(MBMesh *meshp, int *elemConnCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetElemConnCount()"
   try {
-    *elemConnCount = meshp->num_orig_elem_conn();
+    *elemConnCount = meshp->num_elem_conn();
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -2369,34 +2369,10 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
-
-    std::vector<int> num_merged_nids;
-    std::vector<int> merged_nids;
-
-    // Doesn't work with split meshes right now
-    if (meshp->is_split) {
-      try {
-        mbmesh_get_mesh_merged_connlist(*meshp, num_merged_nids, merged_nids);        
-        // num_elems = num_merged_nids.size();
-
-          std::cout << "num_merged_nids = [";
-          for (const auto nid: num_merged_nids)
-            std::cout << nid << " ";
-          std::cout<< "]" <<std::endl;
-          std::cout << "merged_nids = [";
-          for (const auto mid: merged_nids)
-            std::cout << mid << " ";
-          std::cout << "]" << std::endl;
-
-      } catch(...){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              " SplitMerge fail", ESMC_CONTEXT, rc);
-        return;
-      }
-    }
     
     ////// Get some handy information //////
     int num_elems = meshp->num_orig_elem();
+    int num_elem_conn = meshp->num_elem_conn();
     int orig_sdim = meshp->orig_sdim;
 
     ////// Error check input arrays //////
@@ -2416,9 +2392,6 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     }
 
     if (present(elemConn)) {
-      // this is to allow calling for anything other than elemConn
-      // num_elem_conn can be moved back to top after elemconn from ngons fixed
-      int num_elem_conn = meshp->num_elem_conn();
       if (elemConn->dimCount !=1)
         Throw () << "elemConn array must be 1D";
       if (elemConn->extent[0] != num_elem_conn)
@@ -2470,9 +2443,6 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
 
     // If it was passed in, fill elementIds array
     if (present(elemConn)) {
-      // this is to allow calling for anything other than elemConn
-      // num_elem_conn can be moved back to top after elemconn from ngons fixed
-      int num_elem_conn = meshp->num_elem_conn();
       int *elemConn_array=elemConn->array;
       meshp->get_elem_connectivity(orig_elems, elemConn_array);
     }
