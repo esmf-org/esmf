@@ -264,6 +264,7 @@ int main(int argc, char *argv[]) {
     {"conservative_2nd", "ngon_2d_cart"},
     {"conservative_2nd", "ngon_2d_sph_deg"},
     {"conservative_2nd", "ngon_2d_sph_rad"},
+    {"conservative", "hex_3d_sph_rad"},
   };
 
   std::vector<std::pair<std::string, std::string>> skip_test_common = {\
