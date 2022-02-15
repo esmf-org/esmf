@@ -6,7 +6,7 @@ project (PIOC C)
 #  DEFINE THE TARGET
 #==============================================================================
 # Adds profiling
-#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -debug minimal")
 #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 #SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 
@@ -166,6 +166,8 @@ get_target_property(includes pioc INCLUDE_DIRECTORIES)
 foreach(x IN LISTS cppdefs)
   string(APPEND CPPFLAGS " -D${x}")
 endforeach()
+#string(APPEND CPPFLAGS " -DESMF_PROFILE")
+
 foreach(x IN LISTS includes)
   if (x)
     string(APPEND CPPFLAGS " -I${x}")

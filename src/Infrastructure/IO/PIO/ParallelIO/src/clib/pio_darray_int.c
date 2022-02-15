@@ -396,11 +396,13 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
 
     /* Get pointer to iosystem. */
     ios = file->iosystem;
+    ESMF_LOGMEMINFO("Enter: get_var_desc");
 
     /* Point to var description scruct for first var. */
     if ((ierr = get_var_desc(varids[0], &file->varlist, &vdesc)))
         return pio_err(NULL, file, ierr, __FILE__, __LINE__);
 
+    ESMF_LOGMEMINFO("Exit: get_var_desc");
     /* Set these differently for data and fill writing. */
     int num_regions = fill ? iodesc->maxfillregions: iodesc->maxregions;
     io_region *region = fill ? iodesc->fillregion : iodesc->firstregion;
@@ -432,10 +434,13 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
         /* Process each region of data to be written. */
         for (int regioncnt = 0; regioncnt < num_regions; regioncnt++)
         {
+            int loginfo=1;
+            ESMF_LOGMEMINFO("Enter: find_start_count");
             /* Fill the start/count arrays. */
             if ((ierr = find_start_count(iodesc->ndims, fndims, vdesc, region, frame,
                                          start, count)))
                 return pio_err(ios, file, ierr, __FILE__, __LINE__);
+            ESMF_LOGMEMINFO("Exit: find_start_count");
 
             /* IO tasks will run the netCDF/pnetcdf functions to write the data. */
             switch (file->iotype)
@@ -443,6 +448,7 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
 #ifdef _NETCDF4
             case PIO_IOTYPE_NETCDF4P:
                 /* For each variable to be written. */
+                ESMF_LOGMEMINFO("Enter: nc_put_vara");
                 for (int nv = 0; nv < nvars; nv++)
                 {
                     /* Set the start of the record dimension. (Hasn't
@@ -461,6 +467,7 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
                     if (!ierr)
                         ierr = nc_put_vara(file->fh, varids[nv], (size_t *)start, (size_t *)count, bufptr);
                 }
+                ESMF_LOGMEMINFO("Exit: nc_put_vara");
                 break;
 #endif
 #ifdef _PNETCDF
@@ -801,9 +808,10 @@ send_all_start_count(iosystem_desc_t *ios, io_desc_t *iodesc, PIO_Offset llen,
               "invalid inputs", __FILE__, __LINE__);
 
     /* Do a handshake. */
+#ifdef DO_HANDSHAKE
     if ((mpierr = MPI_Recv(&ierr, 1, MPI_INT, 0, 0, ios->io_comm, &status)))
         return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-
+#endif
     /* Send local length of iobuffer for each field (all
      * fields are the same length). */
     if ((mpierr = MPI_Send((void *)&llen, 1, MPI_OFFSET, 0, ios->io_rank, ios->io_comm)))
@@ -902,9 +910,10 @@ recv_and_write_data(file_desc_t *file, const int *varids, const int *frame,
         if (rtask)
         {
             /* handshake - tell the sending task I'm ready */
+#ifdef DO_HANDSHAKE
             if ((mpierr = MPI_Send(&ierr, 1, MPI_INT, rtask, 0, ios->io_comm)))
                 return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-
+#endif
             /* Get length of iobuffer for each field on this
              * task (all fields are the same length). */
             if ((mpierr = MPI_Recv(&rlen, 1, MPI_OFFSET, rtask, rtask, ios->io_comm,
@@ -1843,11 +1852,14 @@ flush_buffer(int ncid, wmulti_buffer *wmb, bool flushtodisk)
     /* If there are any variables in this buffer... */
     if (wmb->num_arrays > 0)
     {
+        int loginfo=1;
+        ESMF_LOGMEMINFO("Enter: write_multi");
         /* Write any data in the buffer. */
         ret = PIOc_write_darray_multi(ncid, wmb->vid,  wmb->ioid, wmb->num_arrays,
                                       wmb->arraylen, wmb->data, wmb->frame,
                                       wmb->fillvalue, flushtodisk);
         PLOG((2, "return from PIOc_write_darray_multi ret = %d", ret));
+        ESMF_LOGMEMINFO("Exit: write_multi");
 
         wmb->num_arrays = 0;
 

@@ -205,7 +205,7 @@ void PIO_Handler::initialize (
 #ifdef ESMFIO_FILESYSTEM_GPFS
           PIOc_set_hint(instance, "ibm_largeblock_io", "true");
 #endif
-          localrc = PIOc_set_rearr_opts(instance, PIO_REARR_COMM_P2P, PIO_REARR_COMM_FC_2D_ENABLE, 0, 0, 0, 0, 0, 4);
+//          localrc = PIOc_set_rearr_opts(instance, PIO_REARR_COMM_P2P, PIO_REARR_COMM_FC_2D_ENABLE, 0, 0, 0, 0, 0, 4);
 
         // Set the error handling to return PIO errors
         // Just return error (error code may be different on different PEs).
@@ -1434,6 +1434,11 @@ void PIO_Handler::open(
       return;
     }
   }
+  piorc = PIOc_set_fill(pioFileDesc, PIO_NOFILL, NULL);
+  if (!CHECKPIOWARN(piorc, std::string("Unable to set fill on file: ") + getFilename(),
+                    ESMF_RC_FILE_OPEN, (*rc))) {
+      return;
+  }
 
   // return successfully
   if (rc != NULL) {
@@ -1628,7 +1633,9 @@ void PIO_Handler::flush(
   if (isOpen() == ESMF_TRUE) {
     PRINTMSG("calling sync");
       ESMCI_IOREGION_ENTER("PIOc_sync", localrc);
+  ESMCI::VM::logMemInfo("PIOc_sync Enter");  
     PIOc_sync(pioFileDesc);
+  ESMCI::VM::logMemInfo("PIOc_sync Exit");  
       ESMCI_IOREGION_EXIT("PIOc_sync", localrc);
   }
   // return successfully
@@ -1894,7 +1901,9 @@ PIO_IODescHandler::~PIO_IODescHandler (
     int localrc;
     PRINTMSG("calling PIOc_freedecomp");
   ESMCI_IOREGION_ENTER("PIOc_freedecomp", localrc);
+  ESMCI::VM::logMemInfo("PIOc_freedecomp Enter");  
   PIOc_freedecomp(ios, io_descriptor);
+  ESMCI::VM::logMemInfo("PIOc_freedecomp Exit");  
   ESMCI_IOREGION_EXIT("PIOc_freedecomp", localrc);
   if (dims != (int *)NULL) {
     delete[] dims;
