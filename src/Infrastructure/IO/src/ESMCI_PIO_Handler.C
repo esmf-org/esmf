@@ -294,7 +294,7 @@ int PIO_Handler::initializeVM (void
       }else{
           num_iotasks = numtasks > 32 ? 32:numtasks;
           stride = numtasks/num_iotasks;
-          rearr = PIO_REARR_SUBSET;
+          rearr = PIO_REARR_BOX;
       }
 
       // Call the static function
@@ -2094,7 +2094,7 @@ int PIO_IODescHandler::constructPioDecomp(
   const int *maxIndexPDimPTile = distGrid->getMaxIndexPDimPTile();
   const int *totalLBound = arr_p->getTotalLBound();
   const int *totalUBound = arr_p->getTotalUBound();
-  int rearr = PIO_REARR_SUBSET;
+
 // NB: Is this part of the restrictions on Array I/O?
 //    nDims = arr_p->getRank();
   handle->nDims = distGrid->getDimCount();
@@ -2142,7 +2142,7 @@ int PIO_IODescHandler::constructPioDecomp(
   ESMCI_IOREGION_ENTER("PIOc_InitDecomp", localrc);
   PIOc_InitDecomp(iosys, handle->basepiotype, handle->nDims,
                   ddims, pioDofCount, pioDofList,
-                  &(handle->io_descriptor), &rearr, NULL, NULL);
+                  &(handle->io_descriptor), NULL, NULL, NULL);
   ESMCI_IOREGION_EXIT("PIOc_InitDecomp", localrc);
 
   PRINTMSG("after call to PIOc_initdecomp_dof");
