@@ -89,6 +89,11 @@ void ESMCI_mesh_create_from_SCRIP_file(int pioSystemDesc,
                                        ESMCI::DistGrid *elem_distgrid, 
                                        Mesh **out_mesh);
 
+void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh, 
+                                   ESMCI::DistGrid *node_distgrid, 
+                                   ESMCI::DistGrid *elem_distgrid, 
+                                   Mesh **out_mesh);
+
 
 
 // INPUTS: 
@@ -127,13 +132,7 @@ void ESMCI_mesh_create_from_file(char *filename,
 
 
     //// Error checking of arguments
-
-    // Don't currently support redisting to node_distgrid
-    if (node_distgrid != NULL) {
-      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          " redistribution to node DistGrid currently not supported.",
-                           ESMC_CONTEXT, &localrc)) throw localrc;
-    }
+    //// (More is done in format specific methods) 
 
     // Can't convert to dual and add_user_areas
     // (Conversion to dual swaps elements and nodes and nodes don't have areas)
@@ -142,6 +141,7 @@ void ESMCI_mesh_create_from_file(char *filename,
                                         "Can't simultaneously use areas from file in mesh and convert the mesh to its dual.",
                                         ESMC_CONTEXT, &localrc)) throw localrc;
     }
+
 
 
 
@@ -228,7 +228,26 @@ void ESMCI_mesh_create_from_file(char *filename,
     }
 
 
-    // Do node redist here
+    // If requested, redist to final distribution
+    // (Don't need to redist if just elem_distgrid, because
+    //  that happens during the reads (if not convert to dual))
+    if ((node_distgrid != NULL) ||
+        ((elem_distgrid != NULL) && convert_to_dual)) {
+
+      Mesh *redist_mesh;
+      ESMCI_mesh_create_redist_mesh(tmp_mesh, 
+                                    node_distgrid, 
+                                    elem_distgrid, 
+                                    &redist_mesh);
+      
+      // Get rid of tmp_mesh
+      ESMCI_meshdestroy(&tmp_mesh, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &localrc)) throw localrc;
+      
+      // Swap in redist mesh
+      tmp_mesh=redist_mesh;
+    }
 
 
     // Return final mesh
@@ -673,7 +692,6 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     } 
 
 
-
     //// Create Mesh 
 
     // Get the variable ids of the node coord variables
@@ -988,4 +1006,120 @@ void ESMCI_mesh_create_from_SCRIP_file(int pioSystemDesc,
   }
 }
 
+void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh, 
+                                   ESMCI::DistGrid *node_distgrid, 
+                                   ESMCI::DistGrid *elem_distgrid, 
+                                   Mesh **out_mesh){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_mesh_create_redist_mesh()"
 
+  // Return codess
+  int localrc, rc;
+
+  // Try-catch block around main part of method
+  try {
+
+    // Get VM 
+    ESMCI::VM *vm=VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+    
+    // Get VM info
+    int local_pet = vm->getLocalPet();  
+    int pet_count = vm->getPetCount();
+
+
+    // Get node ids from distgrid (if present)
+    int num_nodes=0;
+    int *node_ids=NULL;
+    std::vector<int> node_ids_vec;
+    if (node_distgrid != NULL) {      
+
+      // Get node ids from distgrid
+      get_ids_from_distgrid(node_distgrid, node_ids_vec);
+
+      // Get array to pass into redist code
+      if (!node_ids_vec.empty()) {
+        num_nodes=node_ids_vec.size();
+        node_ids=&node_ids_vec[0];
+      } 
+    }
+
+
+    // Get elem ids from distgrid (if present)
+    int num_elems=0;
+    int *elem_ids=NULL;
+    std::vector<int> elem_ids_vec;
+    if (elem_distgrid != NULL) {
+      
+      // Get elem ids from distgrid
+      get_ids_from_distgrid(elem_distgrid, elem_ids_vec);
+      
+      // Get elem array to pass into redist code
+      if (!elem_ids_vec.empty()) {
+        num_elems=elem_ids_vec.size();
+        elem_ids=&elem_ids_vec[0];
+      } 
+    }
+
+
+    // Redist based on which disgrids are present
+    if (node_distgrid != NULL) {      
+      if (elem_distgrid != NULL) {
+        
+        // Both node and elem distgrids present
+        ESMCI_meshcreateredist(&in_mesh, 
+                               &num_nodes, node_ids,
+                               &num_elems, elem_ids,  
+                               out_mesh, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &localrc)) throw localrc;        
+      } else {
+        
+        // Only node distgrid present
+        ESMCI_meshcreateredistnodes(&in_mesh, 
+                                    &num_nodes, node_ids,
+                                    out_mesh, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &localrc)) throw localrc;
+      }
+    } else {
+      if (elem_distgrid != NULL) {
+                
+        // Only elem distgrid present
+        ESMCI_meshcreateredistelems(&in_mesh, 
+                                    &num_elems, elem_ids,
+                                    out_mesh, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &localrc)) throw localrc;
+        
+      } else {
+        // Neither present, so nothing to do  
+      }
+    }
+
+    
+  } catch(std::exception &x) {
+
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT,&rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT,&rc);
+    }
+    throw rc; // To be caught one level up so we know where the error came from
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,&rc);
+    throw rc; // To be caught one level up so we know where the error came from
+
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught unknown exception", ESMC_CONTEXT, &rc);
+    throw rc; // To be caught one level up so we know where the error came from
+  }
+
+}

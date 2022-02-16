@@ -92,7 +92,7 @@ program ESMF_MeshFileIOUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test create Mesh from spherical 3x3 ESMFMesh file."
+  write(name, *) "Test create Mesh from spherical 3x3 ESMFMesh file with a given elem distribution."
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! initialize check variables
@@ -103,6 +103,21 @@ program ESMF_MeshFileIOUTest
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test create Mesh from spherical 3x3 ESMFMesh file with a given node distribution."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  call check_mesh_node_redist_from_file(correct, rc)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
   !-----------------------------------------------------------------------------
@@ -188,7 +203,6 @@ program ESMF_MeshFileIOUTest
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
 #endif
 
   !------------------------------------------------------------------------
@@ -4117,6 +4131,247 @@ subroutine  test_create_dual_from_file(correct, rc)
 
 end subroutine test_create_dual_from_file
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
+  ! if run on other than 1 or 4 PETs
+  !
+  !                     Mesh Ids
+  !
+  !   3.0   13 ------ 14 ------- 15 ------- 16
+  !         |         |          |  10    / |
+  !   2.5   |    7    |    8     |     /    |
+  !         |         |          |  /    9  |
+  !   2.0   9 ------- 10 ------- 11 ------- 12
+  !         |         |          |          |
+  !   1.5   |    4    |    5     |    6     |
+  !         |         |          |          |
+  !   1.0   5 ------- 6 -------- 7 -------- 8
+  !         |         |          |          |
+  !   0.5   |    1    |    2     |    3     |
+  !         |         |          |          |
+  !   0.0   1 ------- 2 -------- 3 -------- 4
+  !
+  !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
+   !
+  !               Node Ids at corners
+  !              Element Ids in centers
+  !
+   !!!!!
+  !
+  ! The owners for 1 PET are all Pet 0.
+  ! The owners for 4 PETs are as follows:
+  !
+  !                   Mesh Owners
+  !
+  !   3.0   2 ------- 2 -------- 3 -------- 3
+  !         |         |          |  3    /  |
+  !         |    2    |    2     |     /    |
+  !         |         |          |  /    3  |
+  !   2.0   2 ------- 2 -------- 3 -------- 3
+  !         |         |          |          |
+  !         |    2    |    2     |    3     |
+  !         |         |          |          |
+  !   1.0   0 ------- 0 -------- 1 -------- 1
+  !         |         |          |          |
+  !         |    0    |    1     |    1     |
+  !         |         |          |          |
+  !   0.0   0 ------- 0 -------- 1 -------- 1
+  !
+  !        0.0       1.0        2.0        3.0
+  !
+  !               Node Owners at corners
+  !              Element Owners in centers
+  !
+  ! 
+
+  ! This test reads in a mesh and then uses the mesh create from file's 
+  ! built in redist capability to redist to a node distribution 
+subroutine  check_mesh_node_redist_from_file(correct, rc)
+  type(ESMF_Mesh) :: mesh
+  logical :: correct
+  integer :: rc
+  integer, pointer :: nodeIds(:),nodeOwners(:),nodeMask(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+  integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+  integer :: numElems,numOwnedElemsTst
+  integer :: numElemConns, numTriElems, numQuadElems
+  real(ESMF_KIND_R8), pointer :: elemCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, allocatable :: elemMask(:)
+  real(ESMF_KIND_R8),allocatable :: elemArea(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  type(ESMF_DistGrid) :: nodeDistgrid
+  type(ESMF_Field) :: nodeField, elemField
+  integer :: i,j,k
+  integer :: numNodesTst, numElemsTst,numElemConnsTst
+  integer,allocatable :: elemIdsTst(:)
+  integer,allocatable :: elemTypesTst(:)
+  integer,allocatable :: elemConnTst(:)
+  real(ESMF_KIND_R8),allocatable :: elemAreaTst(:)
+  integer,allocatable :: nodeIdsTst(:)
+  real(ESMF_KIND_R8),allocatable :: nodeCoordsTst(:)
+  integer,allocatable :: nodeOwnersTst(:)
+  integer,allocatable :: nodeMaskTst(:)
+  integer,allocatable :: elemMaskTst(:)
+  real(ESMF_KIND_R8), allocatable :: elemCoordsTst(:)
+  logical :: nodeMaskIsPresentTst
+  logical :: elemMaskIsPresentTst
+  logical :: elemAreaIsPresentTst
+  logical :: elemCoordsIsPresentTst             
+  integer :: pdim, sdim
+  type(ESMF_CoordSys_Flag) :: coordSys
+  logical :: found
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+
+  ! return with an error if not 1 or 4 PETs
+  if ((petCount /= 1) .and. (petCount /=4)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+
+  ! Setup mesh info depending on the
+  ! number of PETs
+  if (petCount .eq. 1) then
+
+     ! Fill in node data
+     numNodes=16
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8, &
+               9,10,11,12,13,14,&
+               15,16/)
+
+
+   else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+
+        ! Fill in node data
+        numNodes=4
+
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/11,12,15,16/)
+        
+     else if (localPet .eq. 1) then
+
+        ! Fill in node data
+        numNodes=4
+        
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/9,10, &
+                  13,14/)
+
+     else if (localPet .eq. 2) then
+
+        ! Fill in node data
+        numNodes=4
+        
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/3,4,7,8/)
+
+
+     else if (localPet .eq. 3) then
+
+        ! Fill in node data
+        numNodes=4
+        
+        !! node ids
+        allocate(nodeIds(numNodes))
+        nodeIds=(/1,2,5,6/)
+     endif
+   endif
+
+
+   ! Create distgrid to test node redist
+   nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+  
+
+   ! Read mesh from file and redist to node distribution in distgrid
+   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_3x3_esmf.nc", &
+        fileformat=ESMF_FILEFORMAT_ESMFMESH, &
+        nodalDistgrid=nodeDistgrid, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+
+   ! Init correct to true before looking for problems
+   correct=.true.
+
+   ! Get counts 
+   call ESMF_MeshGet(mesh, &
+        nodeCount=numNodesTst, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Debug Output
+   !write(*,*) "numNodes=",numNodes,numNodesTst
+
+   ! Allocate space for tst arrays
+   allocate(nodeIdsTst(numNodesTst))
+   allocate(nodeOwnersTst(numNodesTst))
+
+ ! XMRKX
+   ! Get Information
+   call ESMF_MeshGet(mesh, &
+        nodeIds=nodeIdsTst, &
+        nodeOwners=nodeOwnersTst, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+
+   ! Loop over node ids that we specified should
+   ! be on this PET and make sure they are here
+   do i=1,numNodes
+
+      ! See if we can find in list of node ids from mesh
+      found=.false.
+      do j=1,numNodesTst
+         if (nodeIdsTst(j) == nodeIds(i)) then
+            found=.true.
+            exit
+         endif
+      enddo
+
+      ! If not found set correct to false
+      if (.not. found) correct=.false.
+   enddo
+
+
+   ! deallocate node data
+   deallocate(nodeIds)
+
+   ! Deallocate tst Arrays
+   deallocate(nodeIdsTst)
+   deallocate(nodeOwnersTst)
+
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+  ! Get rid of elemDistgrid
+  call ESMF_DistGridDestroy(nodeDistgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine check_mesh_node_redist_from_file
 
 
 
