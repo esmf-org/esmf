@@ -728,25 +728,32 @@ void MBMesh::get_elem_types(int *elem_types) {
 #define ESMC_METHOD "MBMesh::get_elem_types()"
   try {
     int merr;
-
-    std::vector<EntityHandle> elems;
-    get_owned_elems(elems);
-    ESMC_CHECK_MOAB_THROW(merr)
-
-    std::vector<EntityHandle>::const_iterator it = elems.begin();
-    int i = 0;
-    for (it; it != elems.end(); it++) {
-      EntityHandle elem=*it;
-  
-      // Get topology of element
-      int type = mesh->type_from_handle(elem);
+    
+    if (!is_split) {
+      std::vector<EntityHandle> elems;
+      get_owned_elems(elems);
       ESMC_CHECK_MOAB_THROW(merr)
-
-      elem_types[i] = M2EType(type);
-
-      i++;
+    
+      std::vector<EntityHandle>::const_iterator it = elems.begin();
+      int i = 0;
+      for (it; it != elems.end(); it++) {
+        EntityHandle elem=*it;
+      
+        // Get topology of element
+        int type = mesh->type_from_handle(elem);
+        ESMC_CHECK_MOAB_THROW(merr)
+    
+        elem_types[i] = M2EType(type);
+    
+        i++;
+      }
+    } else {
+      std::vector<int> num_merged_nids;
+      std::vector<int> merged_nids;
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids);
+      for (int i=0; i<num_merged_nids.size(); i++)
+        elem_types[i] = num_merged_nids[i];
     }
-
   }
   CATCH_MBMESH_RETHROW
 }
@@ -801,10 +808,9 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
       mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, 
-                                      merged_nids, true);
+                                      merged_nids, false);
       elem_conn = merged_nids.data();
     }
-
   }
   CATCH_MBMESH_RETHROW
 }
@@ -815,31 +821,38 @@ void MBMesh::get_elem_types(std::vector<EntityHandle> const &elems, int *elem_ty
   try {
     int merr;
   
-    int i = 0;
-    for (std::vector<EntityHandle>::const_iterator it=elems.begin(); it != elems.end(); it++) {
-      EntityHandle elem=*it;
+    if (!is_split) {
+      int i = 0;
+      for (std::vector<EntityHandle>::const_iterator it=elems.begin(); it !=   elems.end(); it++) {
+        EntityHandle elem=*it;
+    
+        // Get topology of element
+        Range nodes_on_elem;
+        merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
+        ESMC_CHECK_MOAB_THROW(merr)
   
-      // Get topology of element
-      Range nodes_on_elem;
-      merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
-      ESMC_CHECK_MOAB_THROW(merr)
-
-      elem_types[i] = 0;
-      if (pdim == 2) {
-        if (nodes_on_elem.size() == 3) elem_types[i] = ESMC_MESHELEMTYPE_TRI;
-        else if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_QUAD;
-        else
-          Throw () << "Element type not recognized.";
-      } else if (pdim == 3) {
-        if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_TETRA;
-        else if (nodes_on_elem.size() == 8) elem_types[i] = ESMC_MESHELEMTYPE_HEX;       
-        else
-          Throw () << "Element type not recognized.";
-      } else
-        Throw () << "Parameteric dimension not recognized.";
-      i++;
+        elem_types[i] = 0;
+        if (pdim == 2) {
+          if (nodes_on_elem.size() == 3) elem_types[i] = ESMC_MESHELEMTYPE_TRI;
+          else if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_QUAD;
+          else
+            Throw () << "Element type not recognized.";
+        } else if (pdim == 3) {
+          if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_TETRA;
+          else if (nodes_on_elem.size() == 8) elem_types[i] =   ESMC_MESHELEMTYPE_HEX;       
+          else
+            Throw () << "Element type not recognized.";
+        } else
+          Throw () << "Parameteric dimension not recognized.";
+        i++;
+      }
+    } else {
+      std::vector<int> num_merged_nids;
+      std::vector<int> merged_nids;
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids);
+      for (int i=0; i<num_merged_nids.size(); i++)
+        elem_types[i] = num_merged_nids[i];
     }
-
   }
   CATCH_MBMESH_RETHROW
 }
@@ -895,36 +908,55 @@ void MBMesh::get_elem_connectivity(std::vector<EntityHandle> const &elems, int *
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
       mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, 
-                                      merged_nids, true);
-      elem_conn = merged_nids.data();
-    
-        // ////// Get ordered list of nodes ////// 
-        // std::vector<std::pair<int,MeshObj *> > sorted_nodes;
-        // 
-        // // Make a vector to sort nodes by original creation order
-        // Mesh::iterator ni = mesh->node_begin(), ne = mesh->node_end();
-        // for (; ni != ne; ++ni) {
-        //   MeshObj *node = &(*ni);
-        //   int index = node->get_data_index();
-        //   sorted_nodes.push_back(std::make_pair(index, node));      
-        // }
-        // 
-        // // sort by creation order
-        // std::sort(sorted_nodes.begin(), sorted_nodes.end());
-        // 
-        // int ind = 0;
-        // for (const auto i : merged_nids) {
-        //   // find node id's position in map of sorted_nodes
-        //   auto it = std::find_if(sorted_nodes.begin(), sorted_nodes.end(),
-        //     [&i](const std::pair<int,MeshObj *>& x)
-        //     { return x.second->get_id() == i;} );
-        //   int conn_pos = it->first;
-        // 
-        //   // add to elemConn
-        //   // NOTE: add 1 for Fortran indexing convention
-        //   elemConn_array[ind] = conn_pos + 1;
-        //   ind++;
-        // }
+                                      merged_nids, false);
+                                          
+      // Get an ordered list of nodes
+      std::vector<std::pair<int,EntityHandle> > sorted_nodes;
+      
+      // Make a vector to sort nodes by original creation order
+      Range nodes;
+      get_all_nodes(nodes);
+      Range::iterator ni = nodes.begin(), ne = nodes.end();
+      for (; ni != ne; ++ni) {
+        EntityHandle node = *ni;
+        int orig_pos;
+        merr=mesh->tag_get_data(orig_pos_tag, &node, 1, &orig_pos);
+        ESMC_CHECK_MOAB_THROW(merr)
+
+        sorted_nodes.push_back(std::make_pair(orig_pos, node));      
+      }
+      
+      // sort by creation order
+      // std::sort(sorted_nodes.begin(), sorted_nodes.end());
+      
+      int ind = 0;
+      for (const auto i : merged_nids) {
+        int conn_pos;
+        // find node id's position in map of sorted_nodes
+        std::vector<std::pair<int,EntityHandle> >::iterator ni2 = sorted_nodes.begin(), ne2 = sorted_nodes.end();
+        for (; ni2 != ne2; ++ni2) {
+          EntityHandle node = ni2->second;
+          int nodeid;
+          merr=mesh->tag_get_data(gid_tag, &node, 1, &nodeid);
+          ESMC_CHECK_MOAB_THROW(merr)
+          if (nodeid == i) {
+            conn_pos = ni2->first;
+            break;
+          }
+        }
+        
+        if (ni2 == ne2) Throw();
+        
+        // auto it = std::find_if(sorted_nodes.begin(), sorted_nodes.end(),
+        //   [&i](const std::pair<int,EntityHandle>& x)
+        //   {  return nodeid == i;} );
+        // int conn_pos = it->first;
+      
+        // add to elemConn
+        // NOTE: add 1 for Fortran indexing convention
+        elem_conn[ind] = conn_pos + 1;
+        ind++;
+      }
 
     }
   }
@@ -1802,14 +1834,78 @@ void MBMesh::get_elem_area(std::vector<EntityHandle> const &elems, double *areas
   int localrc;
   int merr;
   
-  // If no area, complain
-  if (!has_elem_area) Throw() << "elem areas not present in mesh.";
+  try {
+    // If no area, complain
+    if (!has_elem_area) Throw() << "elem areas not present in mesh.";
 
-  // Set data in MOAB
-  if (elems.size() > 0) {
-    merr=mesh->tag_get_data(elem_area_tag, &elems[0], elems.size(), areas);
-    ESMC_CHECK_MOAB_THROW(merr);
-  }
+    if (!is_split) {
+      // Set data in MOAB
+      if (elems.size() > 0) {
+        merr=mesh->tag_get_data(elem_area_tag, &elems[0], elems.size(), areas);
+        ESMC_CHECK_MOAB_THROW(merr);
+      }
+    } else {
+      // get the ngon splitmerge info
+      std::vector<int> num_merged_nids;
+      std::vector<int> merged_nids;
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids);
+      
+      // get an ordered list of elems
+      std::vector<std::pair<int,EntityHandle> > sorted_elems;
+      sorted_elems.reserve(num_elem());
+
+      // Loop over elems
+      Range elems;
+      get_all_elems(elems);
+      Range::iterator ei = elems.begin(), ee = elems.end();
+      for (; ei != ee; ++ei) {
+        EntityHandle elem = *ei;
+        
+        int orig_pos;
+        merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &orig_pos);
+        ESMC_CHECK_MOAB_THROW(merr);
+        
+        // Add to list
+        sorted_elems.push_back(std::make_pair(orig_pos, elem));      
+      }
+
+      // sort by data index
+      // std::sort(sorted_elems.begin(), sorted_elems.end());
+
+      int ind = 0;
+      int ind_meta = 0;
+      for (const auto i : num_merged_nids) {
+        // number of triangles created from ngon with i nodes
+        int n = i - 2;
+      
+        // sum the area values of the triangles of the ngon
+        double temp_area = 0;
+        for (int j = 0; j < n; ++j) {
+          EntityHandle elem = sorted_elems[ind_meta+j].second;
+          double area = 0;
+          
+          int elemid;
+          merr=mesh->tag_get_data(gid_tag, &elem, 1, &elemid);
+          ESMC_CHECK_MOAB_THROW(merr);
+          
+          // std::cout << "elem " << elemid << " area " << std::flush;
+          
+          merr=mesh->tag_get_data(elem_area_tag, &elem, 1, &area);
+          ESMC_CHECK_MOAB_THROW(merr);
+          
+          // std::cout << area << std::endl;
+          temp_area += area;
+        }
+      
+        // add to elemIds
+        areas[ind] = temp_area;
+      
+        // update indices
+        ind++;
+        ind_meta = ind_meta+n;
+      }
+    }
+  } CATCH_MBMESH_RETHROW
 }
 
 // Add merge_split flag??

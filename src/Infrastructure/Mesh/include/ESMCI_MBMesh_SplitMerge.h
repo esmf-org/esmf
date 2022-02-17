@@ -22,43 +22,58 @@ using namespace ESMCI;
 #define ESMC_METHOD "MB_OSE()"
   struct MB_OSE{
     const MBMesh *mesh;
-    const EntityHandle *orig_elem;
-    const EntityHandle *split_elem;
+    EntityHandle orig_elem;
+    EntityHandle split_elem;
     int orig_id;
     int split_id;
     
     int orig_pos;
 
     MB_OSE() : mesh(NULL), orig_elem(NULL), split_elem(NULL) {};
-    MB_OSE(const MBMesh *_mesh, 
-           const EntityHandle *_orig_elem, 
-           const EntityHandle *_split_elem) {
-      mesh = _mesh;
-      orig_elem = _orig_elem;
-      split_elem = _split_elem;
-      
+    MB_OSE(const MBMesh &_mesh, 
+           const EntityHandle &_orig_elem, 
+           const EntityHandle &_split_elem) {
       int merr;
-      merr=mesh->mesh->tag_get_data(mesh->orig_pos_tag, _orig_elem, 1, &orig_pos);
-      merr=mesh->mesh->tag_get_data(mesh->gid_tag, _orig_elem, 1, &orig_id);
-      merr=mesh->mesh->tag_get_data(mesh->gid_tag, _split_elem, 1, &split_id);
+      try {
+        mesh = &_mesh;
+        orig_elem = _orig_elem;
+        split_elem = _split_elem;
+        
+        merr=mesh->mesh->tag_get_data(mesh->orig_pos_tag, &orig_elem, 1, &orig_pos);
+        ESMC_CHECK_MOAB_THROW(merr)
+        merr=mesh->mesh->tag_get_data(mesh->gid_tag, &orig_elem, 1, &orig_id);
+        ESMC_CHECK_MOAB_THROW(merr)
+        merr=mesh->mesh->tag_get_data(mesh->gid_tag, &split_elem, 1, &split_id);
+        ESMC_CHECK_MOAB_THROW(merr)
+      } CATCH_MBMESH_RETHROW
     };
 
     bool operator<(const MB_OSE &rhs) const {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MB_OSE::operator<"
       int merr;
       int rhs_orig_pos;
       int rhs_orig_id;
       int rhs_split_id;
-      merr=mesh->mesh->tag_get_data(mesh->orig_pos_tag, rhs.orig_elem, 1, &rhs_orig_pos);
-      merr=mesh->mesh->tag_get_data(mesh->gid_tag, rhs.orig_elem, 1, &rhs_orig_id);
-      merr=mesh->mesh->tag_get_data(mesh->gid_tag, rhs.split_elem, 1, &rhs_split_id);
-      if ((orig_elem == NULL) || (split_elem == NULL))
-        Throw() << "Members shouldn't be NULL.";
-      if ((rhs.orig_elem == NULL) || (rhs.split_elem == NULL))
-        Throw() << "Members shouldn't be NULL.";
-      if (orig_pos != rhs_orig_pos)
-        return (orig_pos < rhs_orig_pos);
-      if (orig_id != rhs_orig_id)
-        return (orig_id < rhs_orig_id);
+      try {
+        merr=mesh->mesh->tag_get_data(mesh->orig_pos_tag, &(rhs.orig_elem), 
+                                      1,   &rhs_orig_pos);
+        ESMC_CHECK_MOAB_THROW(merr)
+        merr=mesh->mesh->tag_get_data(mesh->gid_tag, &(rhs.orig_elem), 
+                                      1, &rhs_orig_id);
+        ESMC_CHECK_MOAB_THROW(merr)
+        merr=mesh->mesh->tag_get_data(mesh->gid_tag, &(rhs.split_elem), 
+                                      1, &rhs_split_id);
+        ESMC_CHECK_MOAB_THROW(merr)
+        if ((orig_elem == NULL) || (split_elem == NULL))
+          Throw() << "Members shouldn't be NULL.";
+        if ((rhs.orig_elem == NULL) || (rhs.split_elem == NULL))
+          Throw() << "Members shouldn't be NULL.";
+        if (orig_pos != rhs_orig_pos)
+          return (orig_pos < rhs_orig_pos);
+        if (orig_id != rhs_orig_id)
+          return (orig_id < rhs_orig_id);
+      } CATCH_MBMESH_RETHROW
         
       return (split_id < rhs_split_id);
     }

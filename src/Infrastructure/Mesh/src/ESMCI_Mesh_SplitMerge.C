@@ -240,10 +240,10 @@ void native_get_mesh_merged_connlist(const Mesh &mesh,
     // Sort vector to put all split elems next to each other
     std::sort(ose_sorted.begin(), ose_sorted.end());
 
-    // DEBUG OUTPUT
-    for (int i=0; i<ose_sorted.size(); i++) {
-      printf("orig elem index=%d orig_elem=%d split_elem=%d\n",ose_sorted[i].orig_elem->get_data_index(),ose_sorted[i].orig_elem->get_id(),ose_sorted[i].split_elem->get_id());
-    }
+    // // DEBUG OUTPUT
+    // for (int i=0; i<ose_sorted.size(); i++) {
+    //   printf("orig elem index=%d orig_elem=%d split_elem=%d\n",ose_sorted[i].orig_elem->get_data_index(),ose_sorted[i].orig_elem->get_id(),ose_sorted[i].split_elem->get_id());
+    // }
 
     // Put these outside loop so we allocate/deallocate less
     std::vector<int> used;

@@ -2090,7 +2090,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
       try {
         if (present(elemConn))
           native_get_mesh_merged_connlist(**(&mesh), num_merged_nids, 
-                                          merged_nids, true);
+                                          merged_nids, false);
         else
           native_get_mesh_merged_connlist(**(&mesh), num_merged_nids, 
                                           merged_nids);
