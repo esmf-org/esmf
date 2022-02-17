@@ -290,7 +290,11 @@ int PIO_Handler::initializeVM (void
       base = 0; // IO tasks start with base and are every stride tasks until num_iotasks.
       if (numtasks > stride){
           num_iotasks = int(numtasks/stride);
+#ifdef ESMF_PNETCDF
           rearr = PIO_REARR_SUBSET;
+#else
+          rearr = PIO_REARR_BOX;
+#endif
       }else{
           num_iotasks = numtasks > 32 ? 32:numtasks;
           stride = numtasks/num_iotasks;
@@ -306,6 +310,7 @@ int PIO_Handler::initializeVM (void
         pioSystemDesc = PIO_Handler::activePioInstances.back();
         PRINTMSG("Fetched PIO system descriptor, " << (void *)pioSystemDesc);
       }
+//      PIOc_set_blocksize(444444);
     }
   } catch (int catchrc) {
     // catch standard ESMF return code
@@ -1284,106 +1289,6 @@ void PIO_Handler::open(
     if (ESMC_LogDefault.MsgFoundError(localrc, "unknown file status argument", ESMC_CONTEXT, rc))
       return;
   }
-
-  // If file needs to be created, check for 64-bit or NETCDF4 for pre-create.
-  // TODO: Revisit this as PIO, and our understanding of it, evolve...
-/*
-  if (okToCreate) {
-    if ((getFormat() == ESMF_IOFMT_NETCDF_64BIT_OFFSET) || (getFormat() == ESMF_IOFMT_NETCDF4)) {
-      const char *fn = getFilename();
-      VM *vm = VM::getCurrent(&localrc);
-      if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-        return;
-
-      vm->barrier();
-      int comm_rc = ESMF_SUCCESS;
-      if (file_exists && (getFileStatusFlag() == ESMC_FILESTATUS_REPLACE)) {
-        if (my_rank == 0) {
-          if (unlink (fn)) {
-            comm_rc = ESMC_RC_FILE_OPEN;
-            std::string errmsg =
-                std::string ("could not delete file: ") + fn + " (" + strerror (errno) + ")";
-            ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-          }
-        }
-        vm->broadcast (&comm_rc, sizeof (int), 0);
-        if (ESMC_LogDefault.MsgFoundError (comm_rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-          return;
-      }
-      vm->barrier();
-
-      // Pre-create file with at least 64-bit offset set.
-#if defined (ESMF_PNETCDF)
-#if defined (NC_64BIT_DATA)
-      // If NETCDF4 was desired, enable HDF5.
-      int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
-#else
-      // Some PNetCDF builds do not support HDF5.  Punt with 64-bit offset.
-      if (getFormat() == ESMF_IOFMT_NETCDF4) {
-        std::string errmsg =
-            std::string ("Creating file ") + fn + " with 64-bit offset instead of NETCDF4/HDF5 format due to PNetCDF version or build limitation.";
-        ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      }
-      int ncmode = NC_64BIT_OFFSET;
-#endif
-      int ncid;
-      MPI_Info info = MPI_INFO_NULL;
-      int ncerr = ncmpi_create (communicator, fn, ncmode, info, &ncid);
-      if (ncerr != NC_NOERR) {
-        std::string errmsg =
-            std::string("could not pre-create file: ") + fn + " (" + ncmpi_strerror (ncerr) + ")";
-        localrc = ESMC_RC_FILE_OPEN;
-        if (ESMC_LogDefault.MsgFoundError(localrc, errmsg, ESMC_CONTEXT, rc))
-            return;
-      }
-      ncerr = ncmpi_close (ncid);
-      if (ncerr != NC_NOERR) {
-        std::string errmsg =
-            std::string("could not close pre-created file: ") + fn + " (" + ncmpi_strerror (ncerr) + ")";
-        localrc = ESMC_RC_FILE_OPEN;
-        if (ESMC_LogDefault.MsgFoundError(localrc, errmsg, ESMC_CONTEXT, rc))
-            return;
-      }
-#elif defined (ESMF_NETCDF)
-      comm_rc == ESMF_SUCCESS;
-      if (my_rank == 0) {
-#if defined (NC_64BIT_DATA)
-      // If NETCDF4 was desired, enable HDF5.
-        int ncmode = (getFormat() == ESMF_IOFMT_NETCDF4) ? NC_64BIT_DATA : NC_64BIT_OFFSET;
-#else
-      // Some NetCDF builds do not support HDF5.  Punt with 64-bit offset.
-        if (getFormat() == ESMF_IOFMT_NETCDF4) {
-          std::string errmsg =
-              std::string ("Creating file ") + fn + " with 64-bit offset instead of NETCDF4/HDF5 format due to NetCDF version or build limitation.";
-          ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-        }
-        int ncmode = NC_64BIT_OFFSET;
-#endif
-        int ncid;
-        int ncerr = nc_create (fn, ncmode, &ncid);
-        if (ncerr != NC_NOERR) {
-          comm_rc = ESMC_RC_FILE_OPEN;
-          std::string errmsg =
-              std::string("could not pre-create file: ") + fn + " (" + nc_strerror (ncerr) + ")";
-            ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-        }
-
-        ncerr = nc_close (ncid);
-        if (ncerr != NC_NOERR) {
-          comm_rc = ESMC_RC_FILE_OPEN;
-          std::string errmsg =
-              std::string ("could not close pre-created file: ") + fn + " (" + nc_strerror (ncerr) + ")";
-            ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-        }
-      }
-      vm->broadcast (&comm_rc, sizeof (int), 0);
-      if (ESMC_LogDefault.MsgFoundError (comm_rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
-        return;
-#endif
-      okToCreate = false;
-    }
-  }
-*/
 
   if (okToCreate) {
 #ifdef ESMFIO_DEBUG
