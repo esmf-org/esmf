@@ -246,11 +246,9 @@ module NUOPC_Auxiliary
 !     however, if the file already contains a time axis for the variable,
 !     a timeslice one greater than the maximum will be written.
 !   \item[{[iofmt]}]
-!    The I/O format.  Valid options are  {\tt ESMF\_IOFMT\_BIN} and
-!    {\tt ESMF\_IOFMT\_NETCDF}. If not present, file names with a {\tt .bin} 
-!    extension will use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc}
-!    extension will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
-!    {\tt ESMF\_IOFMT\_NETCDF}.
+!     The I/O format.  Supported options are {\tt ESMF\_IOFMT\_NETCDF},
+!     {\tt ESMF\_IOFMT\_NETCDF4P}, and {\tt ESMF\_IOFMT\_NETCDF4C}. If not
+!     present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
 !     the file due to library limitations, or because {\tt field} does not 
@@ -306,7 +304,7 @@ module NUOPC_Auxiliary
     
       call ESMF_FieldWrite(field, fileName=fileName, &
         variableName=standardName, overwrite=overwrite, status=status, &
-        timeslice=timeslice, rc=localrc)
+        timeslice=timeslice, iofmt=iofmt, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -324,7 +322,7 @@ module NUOPC_Auxiliary
 ! !INTERFACE:
   ! Private name; call using NUOPC_Write()
   subroutine NUOPC_StateWrite(state, fieldNameList, fileNamePrefix, overwrite, &
-    status, timeslice, relaxedflag, rc)
+    status, timeslice, iofmt, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_State),           intent(in)            :: state
     character(len=*),           intent(in),  optional :: fieldNameList(:)
@@ -332,6 +330,7 @@ module NUOPC_Auxiliary
     logical,                    intent(in),  optional :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice
+    type(ESMF_IOFmt_Flag),      intent(in),  optional :: iofmt
     logical,                    intent(in),  optional :: relaxedflag
     integer,                    intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -372,6 +371,10 @@ module NUOPC_Auxiliary
 !     provisions for time slicing are made in the output file,
 !     however, if the file already contains a time axis for the variable,
 !     a timeslice one greater than the maximum will be written.
+!   \item[{[iofmt]}]
+!     The I/O format.  Supported options are {\tt ESMF\_IOFMT\_NETCDF},
+!     {\tt ESMF\_IOFMT\_NETCDF4P}, and {\tt ESMF\_IOFMT\_NETCDF4C}. If not
+!     present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
 !     the file due to library limitations. Default is {\tt .false.}.
@@ -437,7 +440,7 @@ module NUOPC_Auxiliary
         endif
         call NUOPC_FieldWrite(field, fileName=trim(fileName), &
           overwrite=overwrite, status=status, timeslice=timeslice, &
-          relaxedflag=relaxedflag, rc=localrc)
+          iofmt=iofmt, relaxedflag=relaxedflag, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg="Failed writing file: "// &
           trim(fileName), &
           line=__LINE__, &
