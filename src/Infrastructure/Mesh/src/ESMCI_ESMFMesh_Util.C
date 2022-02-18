@@ -702,9 +702,11 @@ void get_nodeCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char 
 
     // Get nodeCoords
     nodeCoords= new double[num_nodes*coordDim];
+
     piorc = PIOc_read_darray(pioFileDesc, varid, node_iodesc, num_nodes*coordDim, nodeCoords);
-    if (!CHECKPIOERROR(piorc, std::string("Error reading variable nodeCoords from file ") + filename,
-                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+    if (!CHECKPIOERROR(piorc, std::string("Error with finding nodeCoords variable in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
 
     // Get rid of nodeCoords decomp
     piorc = PIOc_freedecomp(pioSystemDesc, node_iodesc);
@@ -971,6 +973,67 @@ void get_centerCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, cha
     // printf("%f %f\n",centerCoords[i*coordDim],centerCoords[i*coordDim+1]);
     //}
   }
+}
+
+void get_origGridRank_from_ESMFMesh_file(int pioFileDesc, char *filename, bool &has_origGridRank, PIO_Offset &origGridRank) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "_get_origGridRank_from_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int dimid;
+  int localrc;
+  int piorc;
+
+  // Init values
+  has_origGridRank=false;
+  origGridRank=0;
+
+  // Get id of origGridRank 
+  piorc = PIOc_inq_dimid(pioFileDesc, "origGridRank", &dimid);
+
+  // IF present, then get value
+  if (piorc == PIO_NOERR) {  
+
+    // Get value    
+    piorc = PIOc_inq_dim(pioFileDesc, dimid, NULL, &origGridRank);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading origGridRank from file ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+    // Mark as present
+    has_origGridRank=true;
+  }
+
+}
+
+// Get the original grid dimensions from the file (if present) 
+// origGridDims must be at least allocated to the size of origGridRank
+void get_origGridDims_from_ESMFMesh_file(int pioFileDesc, char *filename, bool &has_origGridDims, int *origGridDims) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "_get_origGridDims_from_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int varid;
+  int localrc;
+  int piorc;
+
+  // Init values
+  has_origGridDims=false;
+
+  // Get variable id for nodeCoords
+  piorc = PIOc_inq_varid(pioFileDesc, "origGridDims", &varid);
+ 
+  // If present, then get value
+  if (piorc == PIO_NOERR) {  
+
+    // Get value    
+    piorc = PIOc_get_var_int(pioFileDesc, varid, origGridDims);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading origGridDims from file ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+    // Mark as present
+    has_origGridDims=true;
+  }
+
 }
 
 

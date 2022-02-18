@@ -82,5 +82,9 @@ void get_centerCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, cha
                                          int num_elem, int *elem_ids, 
                                          int &centerCoordsPresent, double *&centerCoords);
 
+void get_origGridRank_from_ESMFMesh_file(int pioFileDesc, char *filename, bool &has_origGridRank, PIO_Offset &origGridRank);
+
+void get_origGridDims_from_ESMFMesh_file(int pioFileDesc, char *filename, bool &has_origGridDims, int *origGridDims);
+
 
 #endif // ESMCI_ESMFMESH_UTIL_H

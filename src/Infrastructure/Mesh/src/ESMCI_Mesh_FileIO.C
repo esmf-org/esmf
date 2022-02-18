@@ -280,6 +280,70 @@ void ESMCI_mesh_create_from_file(char *filename,
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
+// This method checks to see if optional pole info is in the file, and
+// if it is, then it uses it to mark the pole edges in the passed in mesh
+void ESMCI_mesh_mark_poles_from_ESMFMesh_file(int pioFileDesc, char *filename, Mesh *mesh) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_mesh_mark_poles_from_ESMFMesh_file()"
+
+  // Handy declarations
+  int localrc;
+
+  // Check if original grid rank is there, if it is, get it
+  bool has_origGridRank;
+  PIO_Offset origGridRank;
+  get_origGridRank_from_ESMFMesh_file(pioFileDesc, filename, has_origGridRank, origGridRank);
+
+  // If it's present, then get the dims
+  if (has_origGridRank) {
+
+    // We only handle rank 2 right now
+    if (origGridRank != 2) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                        " Only original grid rank 2 is currently supported.",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // Get original grid dims
+    bool has_origGridDims;
+    int origGridDims[ESMF_MAXDIM];
+    get_origGridDims_from_ESMFMesh_file(pioFileDesc, filename, has_origGridDims, origGridDims);
+
+    // If has original grid dims, then mark poles
+    if (has_origGridDims) {
+
+      // Declare pole info variables
+      int pole_val;
+      int pole_obj_type;
+      int min_pole_gid;
+      int max_pole_gid;
+
+      // Setup pole info for bottom pole
+      pole_val=4;
+      pole_obj_type=1; // Set elements
+      min_pole_gid=1;
+      max_pole_gid=origGridDims[0];
+ 
+      // Mark bottom pole
+      ESMCI_meshsetpoles(&mesh, &pole_obj_type, &pole_val, &min_pole_gid, &max_pole_gid, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &localrc)) throw localrc;
+
+      // Setup pole info for top pole
+      pole_val=5;
+      pole_obj_type=1; // Set elements
+      min_pole_gid=origGridDims[0]*origGridDims[1]-origGridDims[0]+1;
+      max_pole_gid=origGridDims[0]*origGridDims[1];
+ 
+      // Mark bottom pole
+      ESMCI_meshsetpoles(&mesh, &pole_obj_type, &pole_val, &min_pole_gid, &max_pole_gid, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &localrc)) throw localrc;
+
+    }
+  }
+}
+
 
 //
 // Create a Mesh from an ESMFMesh format file
@@ -542,6 +606,10 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     if (elementArea != NULL) delete [] elementArea;
     if (centerCoords != NULL) delete [] centerCoords;
     delete [] local_elem_conn;
+
+
+    //// Mark poles (if information is in the file)
+    ESMCI_mesh_mark_poles_from_ESMFMesh_file(pioFileDesc, filename, *out_mesh);
 
 
     //// Close file using PIO

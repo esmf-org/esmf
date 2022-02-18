@@ -292,6 +292,10 @@ void ESMCI_convert_SCRIP_to_ESMFMesh(
   double *nodelons,  *nodelats;
   int totalsize;
   int localrc;
+  int ogr_dimid, ogd_id;
+  int grid_dims_id;
+  int grid_dims[ESMF_MAXDIM];
+
 
   // Init return code
   *rc = 1;
@@ -528,6 +532,26 @@ void ESMCI_convert_SCRIP_to_ESMFMesh(
       // status = nc_copy_att(ncid1, maskid, "_FillValue", ncid2, cmid);
       // if (handle_error(status,__LINE__)) return; // bail out;
     }
+
+    // If originally 2D, then write the original grid rank and dims to file
+    if (grdim == 2)  {
+      // Define and write original grid rank variable
+      status = nc_def_dim(ncid2, "origGridRank", grdim, &ogr_dimid);
+      if (handle_error(status,__LINE__)) return; // bail out;
+
+      // Get grid dims from original file
+      status = nc_inq_varid(ncid1, "grid_dims", &grid_dims_id);
+      if (handle_error(status,__LINE__)) return; // bail out;
+      status = nc_get_var_int(ncid1, grid_dims_id, grid_dims);
+      if (handle_error(status,__LINE__)) return; // bail out;
+
+      // Define and write original grid dims
+      status = nc_def_var(ncid2,"origGridDims", NC_INT, 1, &ogr_dimid, &ogd_id);
+      if (handle_error(status,__LINE__)) return; // bail out;
+      status = nc_put_var_int(ncid2,ogd_id, grid_dims);
+      if (handle_error(status,__LINE__)) return; // bail out;
+    }
+
 
     // Global Attribute
     strbuf = "unstructured";
