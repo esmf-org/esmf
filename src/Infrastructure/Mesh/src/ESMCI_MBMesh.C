@@ -623,7 +623,7 @@ int MBMesh::get_num_elem_conn(std::vector<EntityHandle> elems){
     } else {
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
-      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids);        
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids, true);
       elemConnCount = merged_nids.size();
       
       // std::cout << "num_merged_nids = [";
@@ -712,13 +712,58 @@ void MBMesh::get_elem_mask(int *elem_mask) {
 
     if (!has_elem_mask) Throw () << "Element mask not present.";
 
-    Range elems;
-    merr=mesh->get_entities_by_dimension(0, pdim, elems);
-    ESMC_CHECK_MOAB_THROW(merr)
+    if (!is_split) {
+      Range elems;
+      merr=mesh->get_entities_by_dimension(0, pdim, elems);
+      ESMC_CHECK_MOAB_THROW(merr)
+  
+      merr=mesh->tag_get_data(elem_mask_val_tag, elems, elem_mask);
+      ESMC_CHECK_MOAB_THROW(merr)
+    } else {
+      std::vector<int> num_merged_nids;
+      std::vector<int> merged_nids;
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids);
 
-    merr=mesh->tag_get_data(elem_mask_val_tag, elems, elem_mask);
-    ESMC_CHECK_MOAB_THROW(merr)
+      // Get an ordered list of elems
+      std::vector<std::pair<int,EntityHandle> > sorted_elems;
+      
+      // Make a vector to sort elems by original creation order
+      Range elems;
+      get_all_elems(elems);
+      Range::iterator ei = elems.begin(), ee = elems.end();
+      for (; ei != ee; ++ei) {
+        EntityHandle elem = *ei;
+        int orig_pos;
+        merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &orig_pos);
+        ESMC_CHECK_MOAB_THROW(merr)
 
+        sorted_elems.push_back(std::make_pair(orig_pos, elem));      
+      }
+      
+      // sort by creation order
+      // std::sort(sorted_elems.begin(), sorted_elems.end());
+      
+      int ind = 0;
+      int ind_meta = 0;
+      for (const auto i : num_merged_nids) {
+        // number of triangles created from ngon with i nodes
+        int n = i - 2;
+        
+        // get the mask value
+        EntityHandle elem = sorted_elems[ind_meta].second;
+        
+        int mask;
+        merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &mask);
+        ESMC_CHECK_MOAB_THROW(merr)
+        
+        // add to elemIds
+        elem_mask[ind] = mask;
+        
+        // update indices
+        ind++;
+        ind_meta = ind_meta+n;
+      }
+    }
   }
   CATCH_MBMESH_RETHROW
 }

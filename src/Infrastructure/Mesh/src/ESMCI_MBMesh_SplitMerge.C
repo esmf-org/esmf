@@ -29,17 +29,24 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "mbmesh_get_elem_merged_connlist()"
 
+    int verbosity = 2;
+
     int merr;
 
+    int localrc;
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+
     // DEBUG output
-    if (debug) {
-      printf("\norig_elem=%d ::",beg_elem_range->orig_id);
+    if (debug && (verbosity > 1)) {
+      std::cout << localPet << "# orig_elem = "
+                << beg_elem_range->orig_id << " : " << std::flush;
       std::vector<MB_OSE>::iterator osei=beg_elem_range;
       std::vector<MB_OSE>::iterator osee=end_elem_range;
-      for (; osei != osee; ++osei) {
-        printf("%d ",osei->split_id);
-      }    
-      printf("\n");
+      for (; osei != osee; ++osei) 
+        std::cout << osei->split_id << " " << std::flush;
+      std::cout << std::endl;
     }
 
     // Get number of items in range
@@ -67,11 +74,10 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
     ESMC_CHECK_MOAB_THROW(merr)
 
 
-    if (debug) std::cout << "first split elem " 
-                         << beg_elem_range->split_id <<" with nodes ";
-    // for (ESMCI::UInt n = 0; n < topo->num_nodes; ++n) {
+    if (debug && (verbosity > 3)) std::cout << "first split elem " 
+                         << beg_elem_range->split_id 
+                         <<" with nodes " << std::flush;
     for (int i=0; i<nodes_on_elem.size(); ++i) {
-        // const MeshObj *node = first_split_elem->Relations[n].obj;
         int nid;
         merr=mesh.mesh->tag_get_data(mesh.gid_tag, &nodes_on_elem.at(i), 1, &nid);
         ESMC_CHECK_MOAB_THROW(merr)
@@ -79,11 +85,11 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
         // Add node id to connection list
         elem_merged_nids.push_back(nid);
         
-        if (debug) std::cout << nid << " ";
+        if (debug && (verbosity > 3)) std::cout << nid << " " << std::flush;
 
     }
 
-    if (debug) std::cout << std::endl;
+    if (debug && (verbosity > 3)) std::cout << std::endl;
 
     // Mark the first elem as used
     used[0]=1;
@@ -123,11 +129,11 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
         std::vector<EntityHandle>::const_iterator it=nodes_on_elem.begin();
         std::vector<EntityHandle>::const_iterator et=nodes_on_elem.end();
         int node_ids[3];
-        if (debug) std::cout << "iterate nodes_on_elem (size = " 
+        if (debug && (verbosity > 3)) std::cout << "iterate nodes_on_elem (size = " 
                              << nodes_on_elem.size() << ") " << std::flush;
         int j = 0;
         for (; it !=et; ++it) {
-          if (debug) std::cout << j << " " << std::flush;
+          if (debug && (verbosity > 3)) std::cout << j << " " << std::flush;
         // for (ESMCI::UInt n = 0; n < topo->num_nodes; ++n) {
           // const MeshObj *node = split_elem->Relations[n].obj;
           int id;
@@ -136,7 +142,7 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
           node_ids[j] = id;
           j++;
         }
-        if (debug) {
+        if (debug && (verbosity > 3)) {
           std::cout << "node_ids " << std::flush;
           for (const auto id : node_ids) std::cout << id << " " << std::flush;
           std::cout<<std::endl;
@@ -153,7 +159,7 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
               // See if the next merged id matches the id after next
               int next_pos_in_merged=(s+1)%elem_merged_nids.size();
               if (elem_merged_nids[next_pos_in_merged] == node_ids[(n+2)%3]) {
-                if (debug) std::cout << "node " 
+                if (debug && (verbosity > 3)) std::cout << "node " 
                           << node_ids[n] << " matched, so merging "
                           << node_ids[(n+1)%3] << " at position "
                           << next_pos_in_merged << " (before " 
@@ -173,7 +179,7 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
 
         // If found, then merge and mark used
         if (found_node_id_to_merge) {
-          if (debug) std::cout << "inserting node " 
+          if (debug && (verbosity > 3)) std::cout << "inserting node " 
                                << node_id_to_merge << " at position " 
                                << pos_to_merge_before << std::endl;
 
@@ -190,14 +196,51 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
     std::vector<std::pair<int,int> > sorted_elem_merged_nids;
     for (const auto i : elem_merged_nids) {
       EntityHandle node;
-      merr = mesh.mesh->handle_from_id(MBVERTEX, i, node);
-      ESMC_CHECK_MOAB_THROW(merr);
+      if (debug && (verbosity > 2)) {
+        std::cout << localPet << "# looking for node " << i << " ..." << std::endl;
+        std::cout << localPet << "# mesh nodes : " << std::endl;
+        Range nodes;
+        merr=mesh.mesh->get_entities_by_dimension(0, 0, nodes);
+        ESMC_CHECK_MOAB_THROW(merr)
+        for(const auto n  : nodes) {
+          int nid;
+          merr=mesh.mesh->tag_get_data(mesh.gid_tag, &n, 1, &nid);
+          ESMC_CHECK_MOAB_THROW(merr)
+          std::cout << localPet << "# " << nid << " " << std::endl;
+        }
+        std::cout << std::flush;
+      }
+
+      // NOTE:: handle_from_id doesn't always work, cannot find some nodes
+      //        when run in parallel..
+      // merr = mesh.mesh->handle_from_id(MBVERTEX, i, node);
+      // ESMC_CHECK_MOAB_THROW(merr);
+
+      Range nodes;
+      merr=mesh.mesh->get_entities_by_dimension(0, 0, nodes);
+      ESMC_CHECK_MOAB_THROW(merr)
+      Range::const_iterator it2=nodes.begin();
+      for (it2; it2 != nodes.end(); it2++) {
+        EntityHandle node=*it2;
+        int nid;
+        merr=mesh.mesh->tag_get_data(mesh.gid_tag, &node, 1, &nid);
       
-      int orig_pos;
-      merr=mesh.mesh->tag_get_data(mesh.orig_pos_tag, &node, 1, &orig_pos);
-      ESMC_CHECK_MOAB_THROW(merr);
+        if (nid == i) {
+          if (debug && (verbosity > 2)) 
+            std::cout << localPet << "# " << i << " FOUND" << std::endl;
+
+          int orig_pos;
+          merr=mesh.mesh->tag_get_data(mesh.orig_pos_tag, &node, 1, &orig_pos);
+          ESMC_CHECK_MOAB_THROW(merr);
+
+          sorted_elem_merged_nids.push_back(std::make_pair(orig_pos, i));
+
+          break;
+        }
+      }
       
-      sorted_elem_merged_nids.push_back(std::make_pair(orig_pos, i));
+      if (it2 == nodes.end()) Throw ();
+      
     }
 
     // sort the pairs by original creation order and get id of oldest node
@@ -210,12 +253,13 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
                   elem_merged_nids.end());
 
     // DEBUG
-    if (debug) {
-      printf("orig_elem=%d :: nids= ",beg_elem_range->orig_id);    
-      for (int i=0; i<elem_merged_nids.size(); i++) {
-        printf(" %d",elem_merged_nids[i]);
-      }
-      printf("\n");
+    if (debug && (verbosity > 1)) {
+      std::cout << localPet << "# orig_elem = " 
+                << beg_elem_range->orig_id
+                << " : nids = " << std::flush;
+      for (int i=0; i<elem_merged_nids.size(); i++)
+        std::cout << elem_merged_nids[i] << " " << std::flush;
+      std::cout << std::endl;
     }
   }
 
@@ -226,11 +270,17 @@ void mbmesh_get_mesh_merged_connlist(const MBMesh &mesh,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "mbmesh_get_mesh_merged_connlist()"
     
+    int verbosity = 2;
     int merr;
     
     // Clear output arrays
     num_merged_nids.clear();
     merged_nids.clear();
+
+    int localrc;
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
 
     Range elems;
     // this should probably only use owned elements right? 
@@ -304,20 +354,22 @@ void mbmesh_get_mesh_merged_connlist(const MBMesh &mesh,
       ose_sorted.push_back(tmp_ose);
     } 
 
-    // // Sort vector to put all split elems next to each other
-    // std::sort(ose_sorted.begin(), ose_sorted.end());
-    // 
+    // Sort vector to put all split elems next to each other
+    std::sort(ose_sorted.begin(), ose_sorted.end());
+    
     // std::cout << "ose_sorted 2" << std::endl;
     // for (const auto doo : ose_sorted)
     //   std::cout << doo.orig_pos << " " << doo.orig_id <<  " " 
     //             << doo.split_id << std::endl;
-    // 
     
-    if (debug) {
-      // DEBUG OUTPUT
-      for (int i=0; i<ose_sorted.size(); i++) {
-        printf("orig elem index=%d orig_elem=%d split_elem=%d\n",ose_sorted[i].orig_pos,ose_sorted[i].orig_id,ose_sorted[i].split_id);
-      }
+    
+    if (debug && (verbosity > 1)) {
+      for (int i=0; i<ose_sorted.size(); i++)
+        std::cout << localPet 
+                  << "# orig elem index = " << ose_sorted[i].orig_pos 
+                  << " orig_elem = " << ose_sorted[i].orig_id
+                  << " split_elem = " << ose_sorted[i].split_id
+                  << std::endl;
     }
 
     // Put these outside loop so we allocate/deallocate less

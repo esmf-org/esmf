@@ -1950,7 +1950,7 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
       native_get_mesh_merged_connlist(**(&mesh), num_merged_nids, 
-                                      merged_nids);
+                                      merged_nids, true);
       elemConnCount = merged_nids.size();
     } catch(...){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,

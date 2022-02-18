@@ -28,16 +28,24 @@ void native_get_elem_merged_connlist(const Mesh &mesh,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "native_get_elem_merged_connlist()"
 
+    int verbosity = 2;
+
+    int localrc;
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+
     // DEBUG output
-    if (debug) {
-      printf("\norig_elem=%d ::",beg_elem_range->orig_elem->get_id());
+    if (debug && (verbosity > 1)) {
+      std::cout << localPet << "# orig_elem = "
+                << beg_elem_range->orig_elem->get_id() << " : " << std::flush;
       std::vector<OSE>::iterator osei=beg_elem_range;
       std::vector<OSE>::iterator osee=end_elem_range;
-      for (; osei != osee; ++osei) {
-        printf("%d ",osei->split_elem->get_id());
-      }    
-      printf("\n");
+      for (; osei != osee; ++osei)
+        std::cout << osei->split_elem->get_id() << " " << std::flush;
+      std::cout << std::endl;
     }
+
 
     // Get number of items in range
     int size_range=std::distance(beg_elem_range, end_elem_range);
@@ -54,19 +62,20 @@ void native_get_elem_merged_connlist(const Mesh &mesh,
     const MeshObj *first_split_elem=beg_elem_range->split_elem;
     const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*first_split_elem);
 
-    if (debug) std::cout << "first split elem " 
-                         << first_split_elem->get_id() <<" with nodes ";
+    if (debug && (verbosity > 2)) std::cout << "first split elem " 
+                         << first_split_elem->get_id() 
+                         << " with nodes " << std::flush;
     for (ESMCI::UInt n = 0; n < topo->num_nodes; ++n) {
         const MeshObj *node = first_split_elem->Relations[n].obj;
 
         // Add node id to connection list
         elem_merged_nids.push_back(node->get_id());
         
-        if (debug) std::cout << node->get_id() << " ";
+        if (debug && (verbosity > 2)) std::cout << node->get_id() << " " << std::flush;
 
     }
 
-    if (debug) std::cout << std::endl;
+    if (debug && (verbosity > 2)) std::cout << std::endl;
 
     // Mark the first elem as used
     used[0]=1;
@@ -97,13 +106,14 @@ void native_get_elem_merged_connlist(const Mesh &mesh,
         // std::cout << "merging nodes of elem " << split_elem->get_id() << " nodes ";
         // Store Node ids
         int node_ids[3];
-        if (debug) std::cout << "iterate nodes_on_elem (size = 3) " << std::flush;
+        if (debug && (verbosity > 2)) 
+          std::cout << "iterate nodes_on_elem (size = 3) " << std::flush;
         for (ESMCI::UInt n = 0; n < topo->num_nodes; ++n) {
-          if (debug) std::cout << n << " " << std::flush;
+          if (debug && (verbosity > 2)) std::cout << n << " " << std::flush;
           const MeshObj *node = split_elem->Relations[n].obj;
           node_ids[n]=node->get_id();
         }
-        if (debug) {
+        if (debug && (verbosity > 2)) {
           std::cout << "node_ids " << std::flush;
           for (const auto id : node_ids) 
             std::cout << id << " " << std::flush;
@@ -121,7 +131,7 @@ void native_get_elem_merged_connlist(const Mesh &mesh,
               // See if the next merged id matches the id after next
               int next_pos_in_merged=(s+1)%elem_merged_nids.size();
               if (elem_merged_nids[next_pos_in_merged] == node_ids[(n+2)%3]) {
-                if (debug) std::cout << "node " 
+                if (debug && (verbosity > 2)) std::cout << "node " 
                           << node_ids[n] << " matched, so merging "
                           << node_ids[(n+1)%3] << " at position "
                           << next_pos_in_merged << " (before " 
@@ -141,7 +151,7 @@ void native_get_elem_merged_connlist(const Mesh &mesh,
 
         // If found, then merge and mark used
         if (found_node_id_to_merge) {
-          if (debug) std::cout << "inserting node " 
+          if (debug && (verbosity > 2)) std::cout << "inserting node " 
                                << node_id_to_merge << " at position " 
                                << pos_to_merge_before << std::endl;
 
@@ -177,12 +187,13 @@ void native_get_elem_merged_connlist(const Mesh &mesh,
                   elem_merged_nids.end());
 
     // DEBUG
-    if (debug) {
-      printf("orig_elem=%d :: nids= ",beg_elem_range->orig_elem->get_id());    
-      for (int i=0; i<elem_merged_nids.size(); i++) {
-        printf(" %d",elem_merged_nids[i]);
-      }
-      printf("\n");
+    if (debug && (verbosity > 1)) {
+      std::cout << localPet << "# orig_elem = " 
+                << beg_elem_range->orig_elem->get_id()
+                << " : nids = " << std::flush;
+      for (int i=0; i<elem_merged_nids.size(); i++)
+        std::cout << elem_merged_nids[i] << " " << std::flush;
+      std::cout << std::endl;
     }
   }
 
@@ -193,9 +204,16 @@ void native_get_mesh_merged_connlist(const Mesh &mesh,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "native_get_mesh_merged_connlist()"
     
+    int verbosity = 2;
+    
     // Clear output arrays
     num_merged_nids.clear();
     merged_nids.clear();
+
+    int localrc;
+    VM *vm = VM::getCurrent(&localrc);
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
 
     // Create list of elems with their originals
     std::vector<OSE> ose_sorted;
@@ -240,10 +258,14 @@ void native_get_mesh_merged_connlist(const Mesh &mesh,
     // Sort vector to put all split elems next to each other
     std::sort(ose_sorted.begin(), ose_sorted.end());
 
-    // // DEBUG OUTPUT
-    // for (int i=0; i<ose_sorted.size(); i++) {
-    //   printf("orig elem index=%d orig_elem=%d split_elem=%d\n",ose_sorted[i].orig_elem->get_data_index(),ose_sorted[i].orig_elem->get_id(),ose_sorted[i].split_elem->get_id());
-    // }
+    if (debug && (verbosity > 1)) {
+      for (int i=0; i<ose_sorted.size(); i++)
+        std::cout << localPet 
+                  << "# orig elem index = " << ose_sorted[i].orig_elem->get_data_index()
+                  << " orig_elem = " << ose_sorted[i].orig_elem->get_id()
+                  << " split_elem = " << ose_sorted[i].split_elem->get_id()
+                  << std::endl;
+    }
 
     // Put these outside loop so we allocate/deallocate less
     std::vector<int> used;

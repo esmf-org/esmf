@@ -1749,16 +1749,8 @@ class MCT {
         localrc = test_get_elem_info(mesh);
         ESMC_CHECK_THROW(localrc);
         
-        // std::cout << "MCT::test_get_info: elemconn = [";
-        // for(const auto i : elemConn)
-        //   std::cout << i << " ";
-        // std::cout << "]" << std::endl;
-
-        // NOTE: bypass for now, remove when elemConn from ngons fixed
-        // if (name.find("ngon") == std::string::npos) {
-          localrc = test_get_elem_conn_info(mesh);
-          ESMC_CHECK_THROW(localrc);
-        // }
+        localrc = test_get_elem_conn_info(mesh);
+        ESMC_CHECK_THROW(localrc);
 
       }
       CATCH_MCT_RETURN_RC(&rc)

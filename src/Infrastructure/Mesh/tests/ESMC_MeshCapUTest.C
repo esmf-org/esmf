@@ -71,7 +71,7 @@ void combine(const std::string &api, const std::string &mesh,
         
         test->name = name;
         test->nativeormb = nvmb;
-        // test->verbosity = 3;
+        test->verbosity = 1;
         // test->tol = 1.e-15;
         // test->print();
         
@@ -127,67 +127,53 @@ int main(int argc, char *argv[]) {
   bool mbmesh = false;
   mbmesh = true;
   bool native = false; 
-  native = true; 
+  // native = true; 
 
   // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis;
     test_apis.push_back("createget");
-    test_apis.push_back("dual");
-    test_apis.push_back("redist_elem");
-    test_apis.push_back("redist_node");
-    test_apis.push_back("redist_elno");
-    test_apis.push_back("serialize");
-    test_apis.push_back("to_pointlist_elem");
-    test_apis.push_back("to_pointlist_node");
-    test_apis.push_back("write_vtk");
+    // test_apis.push_back("dual");
+    // test_apis.push_back("redist_elem");
+    // test_apis.push_back("redist_node");
+    // test_apis.push_back("redist_elno");
+    // test_apis.push_back("serialize");
+    // test_apis.push_back("to_pointlist_elem");
+    // test_apis.push_back("to_pointlist_node");
+    // test_apis.push_back("write_vtk");
 
   // these are bound to MCTGen in constructor, must match!
-  std::vector<std::string> test_meshes_native;
-    // test_meshes_native.push_back("quad_2d_cart");
-    // test_meshes_native.push_back("quad_2d_sph_deg");
-    // test_meshes_native.push_back("quad_2d_sph_rad");
-    // test_meshes_native.push_back("tri_2d_cart");
-    // test_meshes_native.push_back("tri_2d_sph_deg");
-    // test_meshes_native.push_back("tri_2d_sph_rad");
-    // test_meshes_native.push_back("hex_3d_cart");
-    // test_meshes_native.push_back("hex_3d_sph_deg");
-    // test_meshes_native.push_back("hex_3d_sph_rad");
-    // test_meshes_native.push_back("mix_2d_cart");
-    // test_meshes_native.push_back("mix_2d_sph_deg");
-    // test_meshes_native.push_back("mix_2d_sph_rad");
-    // test_meshes_native.push_back("periodic_2d_sph_deg");
-    // test_meshes_native.push_back("periodic_2d_sph_rad");
-    test_meshes_native.push_back("ngon_2d_cart");
-    test_meshes_native.push_back("ngon_2d_sph_deg");
-    test_meshes_native.push_back("ngon_2d_sph_rad");
-    test_meshes_native.push_back("ngon_quad_2d_cart");
-    test_meshes_native.push_back("ngon_quad_2d_sph_deg");
-    test_meshes_native.push_back("ngon_quad_2d_sph_rad");
+  std::vector<std::string> test_meshes;
+    // test_meshes.push_back("quad_2d_cart");
+    // test_meshes.push_back("quad_2d_sph_deg");
+    // test_meshes.push_back("quad_2d_sph_rad");
+    // test_meshes.push_back("tri_2d_cart");
+    // test_meshes.push_back("tri_2d_sph_deg");
+    // test_meshes.push_back("tri_2d_sph_rad");
+    // test_meshes.push_back("hex_3d_cart");
+    // test_meshes.push_back("hex_3d_sph_deg");
+    // test_meshes.push_back("hex_3d_sph_rad");
+    // test_meshes.push_back("mix_2d_cart");
+    // test_meshes.push_back("mix_2d_sph_deg");
+    // test_meshes.push_back("mix_2d_sph_rad");
+    // test_meshes.push_back("periodic_2d_sph_deg");
+    // test_meshes.push_back("periodic_2d_sph_rad");
+    test_meshes.push_back("ngon_2d_cart");
+    // test_meshes.push_back("ngon_2d_sph_deg");
+    // test_meshes.push_back("ngon_2d_sph_rad");
+    // test_meshes.push_back("ngon_quad_2d_cart");
+    // test_meshes.push_back("ngon_quad_2d_sph_deg");
+    // test_meshes.push_back("ngon_quad_2d_sph_rad");
 
-  // these are bound to MCTGen in constructor, must match!
-  std::vector<std::string> test_meshes_mbmesh;
-    // test_meshes_mbmesh.push_back("quad_2d_cart");
-    // test_meshes_mbmesh.push_back("quad_2d_sph_deg");
-    // test_meshes_mbmesh.push_back("quad_2d_sph_rad");
-    // test_meshes_mbmesh.push_back("tri_2d_cart");
-    // test_meshes_mbmesh.push_back("tri_2d_sph_deg");
-    // test_meshes_mbmesh.push_back("tri_2d_sph_rad");
-    // test_meshes_mbmesh.push_back("hex_3d_cart");
-    // test_meshes_mbmesh.push_back("hex_3d_sph_deg");
-    // test_meshes_mbmesh.push_back("hex_3d_sph_rad");
-    // test_meshes_mbmesh.push_back("mix_2d_cart");
-    // test_meshes_mbmesh.push_back("mix_2d_sph_deg");
-    // test_meshes_mbmesh.push_back("mix_2d_sph_rad");
-    // test_meshes_mbmesh.push_back("periodic_2d_sph_deg");
-    // test_meshes_mbmesh.push_back("periodic_2d_sph_rad");
-    test_meshes_mbmesh.push_back("ngon_2d_cart");
-    test_meshes_mbmesh.push_back("ngon_2d_sph_deg");
-    test_meshes_mbmesh.push_back("ngon_2d_sph_rad");
-    test_meshes_mbmesh.push_back("ngon_quad_2d_cart");
-    test_meshes_mbmesh.push_back("ngon_quad_2d_sph_deg");
-    test_meshes_mbmesh.push_back("ngon_quad_2d_sph_rad");
+  std::vector<std::pair<std::string, std::string>> skip_test_common = {\
+    // dual meshes of ngons not supported
+    {"dual", "ngon_2d_cart"},
+    {"dual", "ngon_2d_sph_deg"},
+    {"dual", "ngon_2d_sph_rad"},
+    {"dual", "ngon_quad_2d_cart"},
+    {"dual", "ngon_quad_2d_sph_deg"},
+    {"dual", "ngon_quad_2d_sph_rad"},
+  };
 
-  // skip the following tests
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
     // dual not implemented in 3d
     {"dual", "hex_3d_cart"},
@@ -211,12 +197,17 @@ int main(int argc, char *argv[]) {
 
   if (mbmesh) {
     for (const auto api: test_apis) {
-      for (const auto mesh: test_meshes_mbmesh) {
-        // don't run cases that hang
-        auto skip_itr = std::find_if(skip_test_mbmesh.begin(),   skip_test_mbmesh.end(), 
-                                         FindPair(api, mesh));
+      for (const auto mesh: test_meshes) {
+        auto skip_itr_common = std::find_if(skip_test_common.begin(), 
+                                            skip_test_common.end(), 
+                                            FindPair(api, mesh));
+
+        auto skip_itr_mbmesh = std::find_if(skip_test_mbmesh.begin(),   
+                                            skip_test_mbmesh.end(), 
+                                            FindPair(api, mesh));
   
-        if (skip_itr != skip_test_mbmesh.end()) {
+        if ((skip_itr_common != skip_test_common.end()) ||
+            (skip_itr_mbmesh != skip_test_mbmesh.end())) {
           continue;
         } else {
           combine(api, mesh, "MBMesh");
@@ -229,12 +220,17 @@ int main(int argc, char *argv[]) {
 
   if (native) {
     for (const auto api: test_apis) {
-      for (const auto mesh: test_meshes_native) {
-        // don't run cases that hang
-        auto skip_itr = std::find_if(skip_test_native.begin(),   skip_test_native.end(), 
-                                         FindPair(api, mesh));
+      for (const auto mesh: test_meshes) {
+        auto skip_itr_common = std::find_if(skip_test_common.begin(), 
+                                            skip_test_common.end(), 
+                                            FindPair(api, mesh));
+
+        auto skip_itr_native = std::find_if(skip_test_native.begin(),   
+                                            skip_test_native.end(), 
+                                            FindPair(api, mesh));
     
-        if (skip_itr != skip_test_native.end()) {
+        if ((skip_itr_common != skip_test_common.end()) ||
+            (skip_itr_native != skip_test_native.end())) {
           continue;
         } else {
           combine(api, mesh, "Native");
