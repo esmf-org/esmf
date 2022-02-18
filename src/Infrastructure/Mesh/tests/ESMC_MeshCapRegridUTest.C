@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
     {"conservative_2nd", "ngon_2d_sph_deg"},
     {"conservative_2nd", "ngon_2d_sph_rad"},
     // BOB: these are the test giving segv on gaea/intel/O
-    {"conservative", "hex_3d_cart"},
+    // {"conservative", "hex_3d_cart"},
     {"conservative", "hex_3d_sph_deg"},
     {"conservative", "hex_3d_sph_rad"},
   };
