@@ -284,13 +284,13 @@ namespace ESMCI {
     void set_owner(EntityHandle eh, int owner);
 
     // Get owner
-    int get_owner(EntityHandle eh);
+    int get_owner(EntityHandle eh) const;
 
     // Get original position
-    int get_orig_pos(EntityHandle eh);
+    int get_orig_pos(EntityHandle eh) const;
 
     // Get gid
-    int get_gid(EntityHandle eh);
+    int get_gid(EntityHandle eh) const;
 
 
     // TODO:
@@ -344,24 +344,24 @@ namespace ESMCI {
       return _num_orig_elem;
     }
 
-    void get_all_nodes(std::vector<EntityHandle> &all_nodes);
-    void get_all_elems(std::vector<EntityHandle> &all_elems);
+    void get_all_nodes(std::vector<EntityHandle> &all_nodes) const;
+    void get_all_elems(std::vector<EntityHandle> &all_elems) const;
 
-    void get_owned_nodes(std::vector<EntityHandle> &owned_nodes);
-    void get_owned_elems(std::vector<EntityHandle> &owned_elems);
+    void get_owned_nodes(std::vector<EntityHandle> &owned_nodes) const;
+    void get_owned_elems(std::vector<EntityHandle> &owned_elems) const;
 
     // Return a a vector of EntityHandles for the original entities used for creation
     // on this processor sorted in the order they were used for creation
-    void get_sorted_orig_nodes(std::vector<EntityHandle> &owned_nodes);
-    void get_sorted_orig_elems(std::vector<EntityHandle> &owned_elems);
+    void get_sorted_orig_nodes(std::vector<EntityHandle> &owned_nodes) const;
+    void get_sorted_orig_elems(std::vector<EntityHandle> &owned_elems) const;
 
     // used in finalize
     int get_num_elem_conn(std::vector<EntityHandle> elems);
     
 
     // Get a Range of all nodes and elements on this processor
-    void get_all_nodes(Range &all_nodes);
-    void get_all_elems(Range &all_elems);
+    void get_all_nodes(Range &all_nodes) const;
+    void get_all_elems(Range &all_elems) const;
 
     // Range based accessors for required element tags
     void get_elem_connectivity(int *elem_conn);
@@ -427,11 +427,8 @@ namespace ESMCI {
 
     // Get elem coords for a vector of entities (e.g. using orig_elems)
     void get_elem_orig_coords(std::vector<EntityHandle> const &elems, double *orig_coords);
-
     void get_elem_connectivity(std::vector<EntityHandle> const &elems, int *elem_conn);
     void get_elem_types(std::vector<EntityHandle> const &elems, int *elem_conn);
-
-
 
 
     // Accessors for values from a single EntityHandle (avoid if possible, slow)

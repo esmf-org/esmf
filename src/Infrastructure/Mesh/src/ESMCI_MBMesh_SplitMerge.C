@@ -67,16 +67,15 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
     merr=mesh.mesh->tag_get_data(mesh.gid_tag, &first_split_elem, 1, &eid);
     ESMC_CHECK_MOAB_THROW(merr)
     
-    // Get topology of element (ordered)
-    // const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*first_split_elem);
+    // Get topology of element (vector is ordered, Range is not)
     std::vector<EntityHandle> nodes_on_elem;
     merr=mesh.mesh->get_connectivity(&first_split_elem, 1, nodes_on_elem);
     ESMC_CHECK_MOAB_THROW(merr)
 
-
     if (debug && (verbosity > 3)) std::cout << "first split elem " 
                          << beg_elem_range->split_id 
                          <<" with nodes " << std::flush;
+    
     for (int i=0; i<nodes_on_elem.size(); ++i) {
         int nid;
         merr=mesh.mesh->tag_get_data(mesh.gid_tag, &nodes_on_elem.at(i), 1, &nid);
@@ -115,8 +114,7 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
 
         // See if we can merge this element into the connection list
         const EntityHandle split_elem=(*osei).split_elem;
-        // Get topology of element (ordered)
-        // const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*split_elem);
+        // Get topology of element (vector is ordered, Range is not)
         std::vector<EntityHandle> nodes_on_elem;
         merr=mesh.mesh->get_connectivity(&split_elem, 1, nodes_on_elem);
         ESMC_CHECK_MOAB_THROW(merr)
@@ -134,8 +132,6 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
         int j = 0;
         for (; it !=et; ++it) {
           if (debug && (verbosity > 3)) std::cout << j << " " << std::flush;
-        // for (ESMCI::UInt n = 0; n < topo->num_nodes; ++n) {
-          // const MeshObj *node = split_elem->Relations[n].obj;
           int id;
           const EntityHandle node = *it;
           merr=mesh.mesh->tag_get_data(mesh.gid_tag, &node, 1, &id);
@@ -196,20 +192,6 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
     std::vector<std::pair<int,int> > sorted_elem_merged_nids;
     for (const auto i : elem_merged_nids) {
       EntityHandle node;
-      if (debug && (verbosity > 2)) {
-        std::cout << localPet << "# looking for node " << i << " ..." << std::endl;
-        std::cout << localPet << "# mesh nodes : " << std::endl;
-        Range nodes;
-        merr=mesh.mesh->get_entities_by_dimension(0, 0, nodes);
-        ESMC_CHECK_MOAB_THROW(merr)
-        for(const auto n  : nodes) {
-          int nid;
-          merr=mesh.mesh->tag_get_data(mesh.gid_tag, &n, 1, &nid);
-          ESMC_CHECK_MOAB_THROW(merr)
-          std::cout << localPet << "# " << nid << " " << std::endl;
-        }
-        std::cout << std::flush;
-      }
 
       // NOTE:: handle_from_id doesn't always work, cannot find some nodes
       //        when run in parallel..
@@ -217,8 +199,7 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
       // ESMC_CHECK_MOAB_THROW(merr);
 
       Range nodes;
-      merr=mesh.mesh->get_entities_by_dimension(0, 0, nodes);
-      ESMC_CHECK_MOAB_THROW(merr)
+      mesh.get_all_nodes(nodes);
       Range::const_iterator it2=nodes.begin();
       for (it2; it2 != nodes.end(); it2++) {
         EntityHandle node=*it2;
@@ -226,9 +207,6 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
         merr=mesh.mesh->tag_get_data(mesh.gid_tag, &node, 1, &nid);
       
         if (nid == i) {
-          if (debug && (verbosity > 2)) 
-            std::cout << localPet << "# " << i << " FOUND" << std::endl;
-
           int orig_pos;
           merr=mesh.mesh->tag_get_data(mesh.orig_pos_tag, &node, 1, &orig_pos);
           ESMC_CHECK_MOAB_THROW(merr);
@@ -238,9 +216,7 @@ void mbmesh_get_elem_merged_connlist(const MBMesh &mesh,
           break;
         }
       }
-      
-      if (it2 == nodes.end()) Throw ();
-      
+      if (it2 == nodes.end()) Throw () << "Node " << i << " not found.";
     }
 
     // sort the pairs by original creation order and get id of oldest node
@@ -282,11 +258,8 @@ void mbmesh_get_mesh_merged_connlist(const MBMesh &mesh,
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
 
-    Range elems;
-    // this should probably only use owned elements right? 
-    //   - do we want connectivity for ghost elements?
-    merr=mesh.mesh->get_entities_by_dimension(0, mesh.pdim, elems);
-    ESMC_CHECK_MOAB_THROW(merr)
+    std::vector<EntityHandle> elems;
+    mesh.get_owned_elems(elems);
 
     // Create list of elems with their originals
     std::vector<MB_OSE> ose_sorted;
@@ -296,8 +269,8 @@ void mbmesh_get_mesh_merged_connlist(const MBMesh &mesh,
     // for (const auto dealio : mesh.split_to_orig_id)
     //   std::cout << dealio.first << " " << dealio.second << std::endl;
     
-    
-    for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
+    std::vector<EntityHandle>::iterator it = elems.begin();
+    for (it; it != elems.end(); it++) {
       EntityHandle elem=*it;
 
       // If it's split, then find original
@@ -320,10 +293,10 @@ void mbmesh_get_mesh_merged_connlist(const MBMesh &mesh,
         // ESMC_CHECK_MOAB_THROW(merr);
         
         // double loop to find the original element, moab::handle_from_id doesn't work
-        Range elems2;
-        merr=mesh.mesh->get_entities_by_dimension(0, mesh.pdim, elems2);
-        ESMC_CHECK_MOAB_THROW(merr)
-        for (Range::const_iterator it2=elems2.begin(); it2 != elems2.end(); it2++) {
+        std::vector<EntityHandle> elems2;
+        mesh.get_owned_elems(elems2);
+        std::vector<EntityHandle>::iterator it2 = elems2.begin();
+        for (it2; it2 != elems2.end(); it2++) {
           EntityHandle elem2=*it2;
           int elem_id2;
           merr=mesh.mesh->tag_get_data(mesh.gid_tag, &elem2, 1, &elem_id2);
@@ -333,13 +306,6 @@ void mbmesh_get_mesh_merged_connlist(const MBMesh &mesh,
             break;
           }
         }
-        
-        // int elem_id_check;
-        // merr=mesh.mesh->tag_get_data(mesh.gid_tag, orig_elem, 1, &elem_id_check);
-        // 
-        // std::cout << "Elem " << elem_id << " --> " 
-        //                      << orig_id << " == " << elem_id_check 
-        //                      << "?" << std::endl;
         
         // Set orig and split elem
         split_elem=elem;
@@ -387,8 +353,8 @@ void mbmesh_get_mesh_merged_connlist(const MBMesh &mesh,
 
         // Turn range of split elems into merged conn list
         mbmesh_get_elem_merged_connlist(mesh, 
-                                 beg_elem_range, osei, 
-                                 used,elem_merged_nids, debug);
+                                        beg_elem_range, osei, 
+                                        used,elem_merged_nids, debug);
 
         // Add to the outgoing lists
         num_merged_nids.push_back(elem_merged_nids.size());

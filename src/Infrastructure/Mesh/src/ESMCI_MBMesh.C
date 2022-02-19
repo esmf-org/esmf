@@ -401,7 +401,7 @@ void MBMesh::setup_node_mask() {
 
 
 // Get a Range of all nodes on this processor
-void MBMesh::get_all_nodes(Range &all_nodes) {
+void MBMesh::get_all_nodes(Range &all_nodes) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_all_nodes()"
   try {
@@ -412,7 +412,7 @@ void MBMesh::get_all_nodes(Range &all_nodes) {
 }
 
 // Get a Range of all elems on this processor
-void MBMesh::get_all_elems(Range &all_elems) {
+void MBMesh::get_all_elems(Range &all_elems) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_all_elems()"
   try {
@@ -423,7 +423,7 @@ void MBMesh::get_all_elems(Range &all_elems) {
 }
 
 // Get a vector of owned nodes on this processor
-void MBMesh::get_all_nodes(std::vector<EntityHandle> &all_nodes) {
+void MBMesh::get_all_nodes(std::vector<EntityHandle> &all_nodes) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_all_nodes()"
   try {
@@ -434,7 +434,7 @@ void MBMesh::get_all_nodes(std::vector<EntityHandle> &all_nodes) {
 }
 
 // Get a vector of owned elements on this processor
-void MBMesh::get_all_elems(std::vector<EntityHandle> &all_elems) {
+void MBMesh::get_all_elems(std::vector<EntityHandle> &all_elems) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_all_elems()"
   try {
@@ -445,7 +445,7 @@ void MBMesh::get_all_elems(std::vector<EntityHandle> &all_elems) {
 }
 
 // Get a vector of owned nodes on this processor
-void MBMesh::get_owned_nodes(std::vector<EntityHandle> &owned_nodes) {
+void MBMesh::get_owned_nodes(std::vector<EntityHandle> &owned_nodes) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_owned_nodes()"
   try {
@@ -468,7 +468,7 @@ void MBMesh::get_owned_nodes(std::vector<EntityHandle> &owned_nodes) {
 }
 
 // Get a vector of owned elements on this processor
-void MBMesh::get_owned_elems(std::vector<EntityHandle> &owned_elems) {
+void MBMesh::get_owned_elems(std::vector<EntityHandle> &owned_elems) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_owned_elems()"
   try {
@@ -489,7 +489,7 @@ void MBMesh::get_owned_elems(std::vector<EntityHandle> &owned_elems) {
   CATCH_MBMESH_RETHROW
 }
 
-void MBMesh::get_sorted_orig_nodes(std::vector<EntityHandle> &orig_nodes) {
+void MBMesh::get_sorted_orig_nodes(std::vector<EntityHandle> &orig_nodes) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_sorted_orig_nodes()"
   try {
@@ -539,7 +539,7 @@ void MBMesh::get_sorted_orig_nodes(std::vector<EntityHandle> &orig_nodes) {
   CATCH_MBMESH_RETHROW
 }
 
-void MBMesh::get_sorted_orig_elems(std::vector<EntityHandle> &orig_elems) {
+void MBMesh::get_sorted_orig_elems(std::vector<EntityHandle> &orig_elems) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_sorted_orig_elems()"
   try {
@@ -623,7 +623,7 @@ int MBMesh::get_num_elem_conn(std::vector<EntityHandle> elems){
     } else {
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
-      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids, true);
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids, false);
       elemConnCount = merged_nids.size();
       
       // std::cout << "num_merged_nids = [";
@@ -741,7 +741,7 @@ void MBMesh::get_elem_mask(int *elem_mask) {
       }
       
       // sort by creation order
-      // std::sort(sorted_elems.begin(), sorted_elems.end());
+      std::sort(sorted_elems.begin(), sorted_elems.end());
       
       int ind = 0;
       int ind_meta = 0;
@@ -853,8 +853,56 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
       mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, 
-                                      merged_nids, false);
-      elem_conn = merged_nids.data();
+                                      merged_nids);
+                                          
+      // Get an ordered list of nodes
+      std::vector<std::pair<int,EntityHandle> > sorted_nodes;
+      
+      // Make a vector to sort nodes by original creation order
+      Range nodes;
+      get_all_nodes(nodes);
+      Range::iterator ni = nodes.begin(), ne = nodes.end();
+      for (; ni != ne; ++ni) {
+        EntityHandle node = *ni;
+        int orig_pos;
+        merr=mesh->tag_get_data(orig_pos_tag, &node, 1, &orig_pos);
+        ESMC_CHECK_MOAB_THROW(merr)
+
+        sorted_nodes.push_back(std::make_pair(orig_pos, node));      
+      }
+      
+      // sort by creation order
+      std::sort(sorted_nodes.begin(), sorted_nodes.end());
+      
+      int ind = 0;
+      for (const auto i : merged_nids) {
+        int conn_pos;
+        // find node id's position in map of sorted_nodes
+        std::vector<std::pair<int,EntityHandle> >::iterator ni2 = sorted_nodes.begin(), ne2 = sorted_nodes.end();
+        for (; ni2 != ne2; ++ni2) {
+          EntityHandle node = ni2->second;
+          int nodeid;
+          merr=mesh->tag_get_data(gid_tag, &node, 1, &nodeid);
+          ESMC_CHECK_MOAB_THROW(merr)
+          if (nodeid == i) {
+            conn_pos = ni2->first;
+            break;
+          }
+        }
+        
+        if (ni2 == ne2) Throw () << "Node " << i << " not found.";
+        
+        // can't use lambdas with MOAB because tags cannot be accessed member functions
+        // auto it = std::find_if(sorted_nodes.begin(), sorted_nodes.end(),
+        //   [&i](const std::pair<int,EntityHandle>& x)
+        //   {  return nodeid == i;} );
+        // int conn_pos = it->first;
+      
+        // add to elemConn
+        // NOTE: add 1 for Fortran indexing convention
+        elem_conn[ind] = conn_pos + 1;
+        ind++;
+      }
     }
   }
   CATCH_MBMESH_RETHROW
@@ -953,7 +1001,7 @@ void MBMesh::get_elem_connectivity(std::vector<EntityHandle> const &elems, int *
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
       mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, 
-                                      merged_nids, false);
+                                      merged_nids);
                                           
       // Get an ordered list of nodes
       std::vector<std::pair<int,EntityHandle> > sorted_nodes;
@@ -972,7 +1020,7 @@ void MBMesh::get_elem_connectivity(std::vector<EntityHandle> const &elems, int *
       }
       
       // sort by creation order
-      // std::sort(sorted_nodes.begin(), sorted_nodes.end());
+      std::sort(sorted_nodes.begin(), sorted_nodes.end());
       
       int ind = 0;
       for (const auto i : merged_nids) {
@@ -990,8 +1038,9 @@ void MBMesh::get_elem_connectivity(std::vector<EntityHandle> const &elems, int *
           }
         }
         
-        if (ni2 == ne2) Throw();
+        if (ni2 == ne2) Throw () << "Node " << i << " not found.";
         
+        // can't use lambdas with MOAB because tags cannot be accessed member functions
         // auto it = std::find_if(sorted_nodes.begin(), sorted_nodes.end(),
         //   [&i](const std::pair<int,EntityHandle>& x)
         //   {  return nodeid == i;} );
@@ -1002,7 +1051,6 @@ void MBMesh::get_elem_connectivity(std::vector<EntityHandle> const &elems, int *
         elem_conn[ind] = conn_pos + 1;
         ind++;
       }
-
     }
   }
   CATCH_MBMESH_RETHROW
@@ -2207,7 +2255,7 @@ void MBMesh::set_owner(EntityHandle eh, int owner) {
 }
 
 
-int MBMesh::get_owner(EntityHandle eh) {
+int MBMesh::get_owner(EntityHandle eh) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_owner()"
 
@@ -2240,7 +2288,7 @@ void MBMesh::get_owners(std::vector<EntityHandle> const &objs, int *owners) {
 }
 
 
-int MBMesh::get_orig_pos(EntityHandle eh) {
+int MBMesh::get_orig_pos(EntityHandle eh) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_orig_pos()"
 
@@ -2274,7 +2322,7 @@ void MBMesh::get_orig_pos(std::vector<EntityHandle> const &objs, int *orig_pos) 
 
 
 
-int MBMesh::get_gid(EntityHandle eh) {
+int MBMesh::get_gid(EntityHandle eh) const {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_gid()"
 

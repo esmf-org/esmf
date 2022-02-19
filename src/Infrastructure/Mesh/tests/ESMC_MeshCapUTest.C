@@ -71,7 +71,7 @@ void combine(const std::string &api, const std::string &mesh,
         
         test->name = name;
         test->nativeormb = nvmb;
-        test->verbosity = 1;
+        test->verbosity = 3;
         // test->tol = 1.e-15;
         // test->print();
         
@@ -131,8 +131,8 @@ int main(int argc, char *argv[]) {
 
   // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis;
-    test_apis.push_back("createget");
-    // test_apis.push_back("dual");
+    // test_apis.push_back("createget");
+    test_apis.push_back("dual");
     // test_apis.push_back("redist_elem");
     // test_apis.push_back("redist_node");
     // test_apis.push_back("redist_elno");
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes;
-    // test_meshes.push_back("quad_2d_cart");
+    test_meshes.push_back("quad_2d_cart");
     // test_meshes.push_back("quad_2d_sph_deg");
     // test_meshes.push_back("quad_2d_sph_rad");
     // test_meshes.push_back("tri_2d_cart");
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
     // test_meshes.push_back("mix_2d_sph_rad");
     // test_meshes.push_back("periodic_2d_sph_deg");
     // test_meshes.push_back("periodic_2d_sph_rad");
-    test_meshes.push_back("ngon_2d_cart");
+    // test_meshes.push_back("ngon_2d_cart");
     // test_meshes.push_back("ngon_2d_sph_deg");
     // test_meshes.push_back("ngon_2d_sph_rad");
     // test_meshes.push_back("ngon_quad_2d_cart");
