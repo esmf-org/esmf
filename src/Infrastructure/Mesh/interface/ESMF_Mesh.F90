@@ -4652,7 +4652,8 @@ end function ESMF_MeshEmptyCreate
 !         is implied by its element type in
 !         {\tt elementTypes}. The nodes for each element
 !         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
-!         elementConn(2), etc.).
+!         elementConn(2), etc.). For polygons with more than 4 sides the connectivity
+!         may not be returned in the same order it was set.
 ! \item [{[elementMaskIsPresent]}]
 ! .true. if element masking was set in mesh, .false. otherwise.
 ! \item [{[elementMask]}]
