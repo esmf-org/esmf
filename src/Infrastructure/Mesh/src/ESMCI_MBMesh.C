@@ -604,6 +604,8 @@ int MBMesh::get_num_elem_conn(std::vector<EntityHandle> elems){
   try {
     int merr;
 
+    // std::cout << "MBMESH::get_num_elem_conn :: is_split = " << is_split << std::endl;
+
     if (!is_split) {
       std::vector<EntityHandle>::const_iterator ei = elems.begin();
       std::vector<EntityHandle>::const_iterator ee = elems.end();

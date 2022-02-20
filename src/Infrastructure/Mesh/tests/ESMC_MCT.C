@@ -245,17 +245,6 @@ class MCT {
         elemMask.reserve(_num_elem);
         elemArea.reserve(_num_elem);
 
-        // generate random numbers to fill mask and area vectors
-        std::uniform_int_distribution<int> distribution_int(0, 42);
-        std::uniform_real_distribution<double> distribution_real(0.0f, 42.0f);
-        std::mt19937 engine; // Mersenne twister MT19937
-        auto generator_int = std::bind(distribution_int, engine);
-        auto generator_real = std::bind(distribution_real, engine);
-
-        std::generate_n(nodeMask.begin(), _num_node, generator_int);
-        std::generate_n(elemMask.begin(), _num_elem, generator_int);
-        std::generate_n(elemArea.begin(), _num_elem, generator_real);
-
         redist_num_node = _redist_num_node;
         redist_num_elem = _redist_num_elem;
         redist_num_elem_conn = _redist_num_elem_conn;
@@ -271,10 +260,6 @@ class MCT {
           redist_nodeMask.reserve(_redist_num_node);
           redist_elemMask.reserve(_redist_num_elem);
           redist_elemArea.reserve(_redist_num_elem);
-
-          std::generate_n(redist_nodeMask.begin(), _redist_num_node, generator_int);
-          std::generate_n(redist_elemMask.begin(), _redist_num_elem, generator_int);
-          std::generate_n(redist_elemArea.begin(), _redist_num_elem, generator_real);
         }
         
         function_map["createget"] = std::bind(&MCT::createget, this);
@@ -357,6 +342,32 @@ class MCT {
         elem_area_present = true;
         elem_coord_present = true;
         elem_mask_present = true;
+
+        // generate random numbers to fill mask and area vectors
+        std::uniform_int_distribution<int> distribution_int(0, 42);
+        std::uniform_real_distribution<double> distribution_real(0.0f, 42.0f);
+        std::mt19937 engine; // Mersenne twister MT19937
+        auto generator_int = std::bind(distribution_int, engine);
+        auto generator_real = std::bind(distribution_real, engine);
+        
+        std::generate_n(nodeMask.begin(), num_node, generator_int);
+        std::generate_n(elemMask.begin(), num_elem, generator_int);
+        std::generate_n(elemArea.begin(), num_elem, generator_real);
+        
+        if (redist_num_node > 0) {
+          std::generate_n(redist_nodeMask.begin(), redist_num_node, generator_int);
+          std::generate_n(redist_elemMask.begin(), redist_num_elem, generator_int);
+          std::generate_n(redist_elemArea.begin(), redist_num_elem, generator_real);
+        }
+
+        // TODO: temporary solution to issue with random number generation
+        nodeMask = nodeId;
+
+        // // This print does not work unless nodeMask is set as above??
+        // std::cout << localPet << "# MCT::build() nodeMask " << std::flush;
+        // for (const auto m : nodeMask)
+        //   std::cout << m << " " << std::flush;
+        // std::cout << std::endl;
 
         InterArray<int> *iin = new InterArray<int>(nodeMask.data(),num_node);
         InterArray<int> *iie = new InterArray<int>(elemMask.data(),num_elem);
