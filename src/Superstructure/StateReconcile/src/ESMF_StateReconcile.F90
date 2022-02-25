@@ -172,7 +172,7 @@ contains
     type(ESMF_VM) :: localvm
     type(ESMF_AttReconcileFlag) :: lattreconflag
 
-    type(ESMF_InfoDescribe) :: idesc, idesc2
+    type(ESMF_InfoDescribe) :: idesc
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)

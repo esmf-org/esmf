@@ -35,6 +35,7 @@ module NUOPC_Auxiliary
     module procedure NUOPC_FactorsWrite
     module procedure NUOPC_FieldWrite
     module procedure NUOPC_StateWrite
+    module procedure NUOPC_FieldBundleWrite
   end interface
   
   !-----------------------------------------------------------------------------
@@ -245,11 +246,9 @@ module NUOPC_Auxiliary
 !     however, if the file already contains a time axis for the variable,
 !     a timeslice one greater than the maximum will be written.
 !   \item[{[iofmt]}]
-!    The I/O format.  Valid options are  {\tt ESMF\_IOFMT\_BIN} and
-!    {\tt ESMF\_IOFMT\_NETCDF}. If not present, file names with a {\tt .bin} 
-!    extension will use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc}
-!    extension will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
-!    {\tt ESMF\_IOFMT\_NETCDF}.
+!     The I/O format.  Supported options are {\tt ESMF\_IOFMT\_NETCDF},
+!     {\tt ESMF\_IOFMT\_NETCDF4P}, and {\tt ESMF\_IOFMT\_NETCDF4C}. If not
+!     present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
 !     the file due to library limitations, or because {\tt field} does not 
@@ -261,7 +260,7 @@ module NUOPC_Auxiliary
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)      :: standardName
+    character(ESMF_MAXSTR)      :: standardName, fieldName
     logical                     :: ioCapable
     logical                     :: doItFlag
     integer                     :: localrc
@@ -273,7 +272,7 @@ module NUOPC_Auxiliary
     ioCapable = (ESMF_IO_PIO_PRESENT .and. &
       (ESMF_IO_NETCDF_PRESENT .or. ESMF_IO_PNETCDF_PRESENT))
       
-    call ESMF_FieldGet(field, status=fieldStatus, rc=localrc)
+    call ESMF_FieldGet(field, status=fieldStatus, name=fieldName, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
@@ -296,7 +295,7 @@ module NUOPC_Auxiliary
         return  ! bail out
 
       call ESMF_InfoGet(info, key="/NUOPC/Instance/StandardName", &
-        value=standardName, rc=localrc)
+        value=standardName, default=trim(fieldName), rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -305,7 +304,7 @@ module NUOPC_Auxiliary
     
       call ESMF_FieldWrite(field, fileName=fileName, &
         variableName=standardName, overwrite=overwrite, status=status, &
-        iofmt=iofmt, timeslice=timeslice, rc=localrc)
+        timeslice=timeslice, iofmt=iofmt, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -323,7 +322,7 @@ module NUOPC_Auxiliary
 ! !INTERFACE:
   ! Private name; call using NUOPC_Write()
   subroutine NUOPC_StateWrite(state, fieldNameList, fileNamePrefix, overwrite, &
-    status, timeslice, relaxedflag, rc)
+    status, timeslice, iofmt, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_State),           intent(in)            :: state
     character(len=*),           intent(in),  optional :: fieldNameList(:)
@@ -331,6 +330,7 @@ module NUOPC_Auxiliary
     logical,                    intent(in),  optional :: overwrite
     type(ESMF_FileStatus_Flag), intent(in),  optional :: status
     integer,                    intent(in),  optional :: timeslice
+    type(ESMF_IOFmt_Flag),      intent(in),  optional :: iofmt
     logical,                    intent(in),  optional :: relaxedflag
     integer,                    intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -371,6 +371,10 @@ module NUOPC_Auxiliary
 !     provisions for time slicing are made in the output file,
 !     however, if the file already contains a time axis for the variable,
 !     a timeslice one greater than the maximum will be written.
+!   \item[{[iofmt]}]
+!     The I/O format.  Supported options are {\tt ESMF\_IOFMT\_NETCDF},
+!     {\tt ESMF\_IOFMT\_NETCDF4P}, and {\tt ESMF\_IOFMT\_NETCDF4C}. If not
+!     present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
 !     the file due to library limitations. Default is {\tt .false.}.
@@ -436,7 +440,7 @@ module NUOPC_Auxiliary
         endif
         call NUOPC_FieldWrite(field, fileName=trim(fileName), &
           overwrite=overwrite, status=status, timeslice=timeslice, &
-          relaxedflag=relaxedflag, rc=localrc)
+          iofmt=iofmt, relaxedflag=relaxedflag, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg="Failed writing file: "// &
           trim(fileName), &
           line=__LINE__, &
@@ -444,6 +448,135 @@ module NUOPC_Auxiliary
           rcToReturn=rc)) &
           return  ! bail out
       endif
+    enddo
+    
+    deallocate(fieldNameList_loc)
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_Write - Write the Fields within a FieldBundle to NetCDF files
+! !INTERFACE:
+  ! Private name; call using NUOPC_Write()
+  subroutine NUOPC_FieldBundleWrite(fieldbundle, fieldNameList, fileNamePrefix, overwrite, &
+    status, timeslice, iofmt, relaxedflag, rc)
+! !ARGUMENTS:
+    type(ESMF_FieldBundle),     intent(in)            :: fieldbundle
+    character(len=*),           intent(in),  optional :: fieldNameList(:)
+    character(len=*),           intent(in),  optional :: fileNamePrefix
+    logical,                    intent(in),  optional :: overwrite
+    type(ESMF_FileStatus_Flag), intent(in),  optional :: status
+    integer,                    intent(in),  optional :: timeslice
+    type(ESMF_IOFmt_Flag),      intent(in),  optional :: iofmt
+    logical,                    intent(in),  optional :: relaxedflag
+    integer,                    intent(out), optional :: rc
+! !DESCRIPTION:
+!   Write the data of the fields within a {\tt fieldbundle} to NetCDF files.
+!   Each field is written to an individual file using the "StandardName"
+!   attribute as NetCDF attribute.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[fieldbundle]
+!     The {\tt ESMF\_FieldBundle} object containing the fields.
+!   \item[{[fieldNameList]}]
+!     List of names of the fields to be written. By default write all the fields
+!     in {\tt fieldbundle}.
+!   \item[{[fileNamePrefix]}]
+!     File name prefix, common to all the files written.
+!   \item[{[overwrite]}]
+!      A logical flag, the default is .false., i.e., existing Field data may
+!      {\em not} be overwritten. If .true., the
+!      data corresponding to each field's name will be
+!      be overwritten. If the {\tt timeslice} option is given, only data for
+!      the given timeslice may be overwritten.
+!      Note that it is always an error to attempt to overwrite a NetCDF
+!      variable with data which has a different shape.
+!   \item[{[status]}]
+!      The file status. Valid options are {\tt ESMF\_FILESTATUS\_NEW}, 
+!      {\tt ESMF\_FILESTATUS\_OLD}, {\tt ESMF\_FILESTATUS\_REPLACE}, and
+!      {\tt ESMF\_FILESTATUS\_UNKNOWN} (default).
+!   \item[{[timeslice]}]
+!     Time slice counter. Must be positive. The behavior of this
+!     option may depend on the setting of the {\tt overwrite} flag:
+!     \begin{description}
+!     \item[{\tt overwrite = .false.}:]\ If the timeslice value is
+!     less than the maximum time already in the file, the write will fail.
+!     \item[{\tt overwrite = .true.}:]\ Any positive timeslice value is valid.
+!     \end{description}
+!     By default, i.e. by omitting the {\tt timeslice} argument, no
+!     provisions for time slicing are made in the output file,
+!     however, if the file already contains a time axis for the variable,
+!     a timeslice one greater than the maximum will be written.
+!   \item[{[iofmt]}]
+!     The I/O format.  Supported options are {\tt ESMF\_IOFMT\_NETCDF},
+!     {\tt ESMF\_IOFMT\_NETCDF4P}, and {\tt ESMF\_IOFMT\_NETCDF4C}. If not
+!     present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!   \item[{[relaxedflag]}]
+!     If {\tt .true.}, then no error is returned even if the call cannot write
+!     the file due to library limitations. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                         :: localrc
+    integer                         :: i, itemCount
+    type(ESMF_Field)                :: field
+    character(len=160)              :: fileName
+    character(len=160), allocatable :: fieldNameList_loc(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    if (present(fieldNameList)) then
+      allocate(fieldNameList_loc(size(fieldNameList)))
+      do i=1, size(fieldNameList)
+        fieldNameList_loc(i) = trim(fieldNameList(i))
+      enddo
+    else
+      call ESMF_FieldBundleGet(fieldbundle, fieldCount=itemCount, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      allocate(fieldNameList_loc(itemCount))
+      call ESMF_FieldBundleGet(fieldbundle, fieldNameList=fieldNameList_loc, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__, &
+        rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+    do i=1, size(fieldNameList_loc)
+      call ESMF_FieldBundleGet(fieldbundle, fieldName=fieldNameList_loc(i), &
+        field=field, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      ! -> output to file
+      if (present(fileNamePrefix)) then
+        write (fileName,"(A)") fileNamePrefix//trim(fieldNameList_loc(i))//".nc"
+      else
+        write (fileName,"(A)") trim(fieldNameList_loc(i))//".nc"
+      endif
+      call NUOPC_FieldWrite(field, fileName=trim(fileName), &
+        overwrite=overwrite, status=status, timeslice=timeslice, &
+        iofmt=iofmt, relaxedflag=relaxedflag, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg="Failed writing file: "// &
+        trim(fileName), &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
     enddo
     
     deallocate(fieldNameList_loc)

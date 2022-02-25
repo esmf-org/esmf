@@ -182,6 +182,22 @@ void ESMCI_regrid_create(
       }
     }
 
+
+    // Conservative not supported on 3D spherical meshes
+    if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+        (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+      if ((srcmesh->parametric_dim() == 3) && 
+          (dstmesh->parametric_dim() == 3)) {
+        if ((srcmesh->coordsys != ESMC_COORDSYS_CART) || 
+            (dstmesh->coordsys != ESMC_COORDSYS_CART)) {
+          
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                           "Conservative regridding isn't supported on 3D spherical Grids or Meshes.",
+                                           ESMC_CONTEXT, &localrc)) throw localrc;
+        }
+      }
+    }
+
     
      //// Precheck Meshes for errors
     bool degenerate=false;
