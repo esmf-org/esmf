@@ -214,6 +214,9 @@ contains
         type(ESMF_XGridSpec)                :: l_sparseMatA2X(2), l_sparseMatX2B(1)
         type(ESMF_Field)                    :: field, srcField(2), dstField(1)
 
+        type(ESMF_Field)                    :: areaField
+        real(ESMF_KIND_R8), pointer         :: areaFptr(:)
+
         type(ESMF_VM)                       :: vm
         integer                             :: lpet, eleCount,ndim
         integer                             :: sideAGC, sideBGC, sideAMC, sideBMC
@@ -481,6 +484,44 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+        !! Test ESMF_FieldRegridGetArea()
+
+        ! Create Field
+        areaField = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Get area
+        call ESMF_FieldRegridGetArea(areaField, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Get area Field
+        call ESMF_FieldGet(areaField, farrayPtr=areaFptr, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! If the areas don't match, then complain
+        do i=lbound(areaFptr,1),ubound(areaFptr,1)
+           if (areaFptr(i) /= xgrid_area(i)) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+                   msg="creation area and retrieved area don't match.", &
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+        enddo
+
+        ! Get rid of area Field
+        call ESMF_FieldDestroy(areaField, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
 
         !------------------------------------------------------------------------
         !NEX_UTest
