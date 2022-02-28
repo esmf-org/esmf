@@ -489,7 +489,7 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     int totNumElementConn=0;
     int *numElementConn=NULL, *elementConn=NULL;
     get_elemConn_info_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, elementCount, num_elems, elem_ids, 
-                                          totNumElementConn, numElementConn, elementConn);
+                                         totNumElementConn, numElementConn, elementConn);
 
     // Convert global elem info into node info
     int num_nodes;
@@ -498,7 +498,12 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     convert_global_elem_conn_to_local_node_and_elem_info(num_elems, totNumElementConn, numElementConn, elementConn,
                                                           num_nodes, node_ids, local_elem_conn);
 
+    // Convert numElementsConn to elementTypes
+    int *elementType=NULL;
+    convert_numElementConn_to_elementType(pdim, num_elems, numElementConn, elementType);
+
     // Free element connection info, because we don't need it any more
+    delete [] numElementConn;
     delete [] elementConn;
 
     // Get global nodeCount
@@ -591,7 +596,7 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
 
     // Add elements
     ESMCI_meshaddelements(out_mesh,
-                          &num_elems, elem_ids, numElementConn,
+                          &num_elems, elem_ids, elementType,
                           &elementMaskIA,
                           &areaPresent, elementArea,
                           &centerCoordsPresent, centerCoords, 
@@ -601,7 +606,7 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
                                       &localrc)) throw localrc;
 
     // Free things used for element creation
-    delete [] numElementConn;
+    delete [] elementType;
     if (elementMask != NULL) delete [] elementMask;
     if (elementArea != NULL) delete [] elementArea;
     if (centerCoords != NULL) delete [] centerCoords;
@@ -813,9 +818,13 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     convert_global_elem_conn_to_local_node_and_elem_info(num_elems, totNumElementConn, numElementConn, elementConn,
                                                           num_nodes, node_ids, local_elem_conn);
 
-    // Free element connection info, because we don't need it any more
-    delete [] elementConn;
+    // Convert numElementsConn to elementType
+    int *elementType=NULL;
+    convert_numElementConn_to_elementType(pdim, num_elems, numElementConn, elementType);
 
+    // Free element connection info, because we don't need it any more
+    delete [] numElementConn;
+    delete [] elementConn;
 
     // Get global nodeCount
     PIO_Offset nodeCount;
@@ -918,7 +927,7 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
 
     // Add elements
     ESMCI_meshaddelements(out_mesh,
-                          &num_elems, elem_ids, numElementConn,
+                          &num_elems, elem_ids, elementType,
                           &elementMaskIA,
                           &areaPresent, elementArea,
                           &centerCoordsPresent, centerCoords, 
@@ -928,7 +937,6 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
                                       &localrc)) throw localrc;
 
     // Free things used for element creation
-    delete [] numElementConn;
     if (elementMask != NULL) delete [] elementMask;
     if (elementArea != NULL) delete [] elementArea;
     if (centerCoords != NULL) delete [] centerCoords;

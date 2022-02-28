@@ -58,4 +58,6 @@ void convert_coords_between_coord_sys(ESMC_CoordSys_Flag coord_sys_from,
                                       ESMC_CoordSys_Flag coord_sys_to, 
                                       int coord_dim, int num_coords, double *coords);
 
+void convert_numElementConn_to_elementType(int pdim, int num_elem, int *num_elem_conn, int*& elem_type);
+
 #endif // ESMCI_FILEIO_UTIL_H

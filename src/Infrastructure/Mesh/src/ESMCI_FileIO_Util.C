@@ -281,5 +281,39 @@ void convert_coords_between_coord_sys(ESMC_CoordSys_Flag coord_sys_from,
     pnt += coord_dim;
   }
 }
-             
+
+
+void convert_numElementConn_to_elementType(int pdim, int num_elem, int *num_elem_conn, int*& elem_type) {
+
+  // Return code
+  int localrc;
+
+  // Allocate elem_type array
+  elem_type=new int[num_elem];
+
+  // Convert based on dimension of mesh
+  if (pdim==2) {
+    // for 2D just copy
+    for (int i=0; i<num_elem; i++) {
+      elem_type[i]=num_elem_conn[i];
+    }
+  } else if (pdim == 3) {
+    // For 3D convert
+    for (int i=0; i<num_elem; i++) {
+      if (num_elem_conn[i] == 4) elem_type[i]=10;
+      else  if (num_elem_conn[i] == 8) elem_type[i]=12;
+      else {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                        " Unrecognized 3D element type.",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;      
+      }
+    }
+  } else {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                        "ESMF Mesh format only supports meshes of dimension 2 or 3.",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;      
+  }
+
+}             
+
                              
