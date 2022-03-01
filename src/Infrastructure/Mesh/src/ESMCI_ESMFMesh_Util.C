@@ -196,6 +196,95 @@ void get_coordsys_from_ESMFMesh_file(int pioFileDesc, char *filename, ESMC_Coord
 
 }
 
+// Get numElementConn given offsets.
+// Since both Byte and Ints are supported for numElementConn this converts the output to ints
+// NOTE: that this method takes offsets rather than the elem_ids that the other reads take.
+void get_numElementConn_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename, 
+                                           PIO_Offset elementCount, 
+                                           int num_elems, PIO_Offset *nec_offsets,
+                                           int *&numElementConn) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "get_numElementConn_from_ESMFMesh_file()"
+
+  // Declare some useful vars
+  int dimid;
+  int varid;
+  int localrc;
+  int piorc;
+  int rearr = PIO_REARR_SUBSET;
+
+  // Get numElementConn var id
+  piorc = PIOc_inq_varid(pioFileDesc, "numElementConn", &varid);
+  if (!CHECKPIOERROR(piorc, std::string("Error NumElementConn variable not in file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+  
+  
+  // See what type the variable is
+  nc_type nEC_type;
+  piorc = PIOc_inq_vartype(pioFileDesc, varid, &nEC_type);
+  if (!CHECKPIOERROR(piorc, std::string("Error getting type of numElementConn variable from file ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+  
+  
+  // Read based on type
+  if (nEC_type == NC_BYTE) {
+    
+    // Init numElementConn decomp
+    int nec_iodesc;
+    int gdimlen = (int) elementCount;
+    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_BYTE, 1, &gdimlen, num_elems, nec_offsets, &nec_iodesc, 
+                            &rearr, NULL, NULL);
+    if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+    
+    char *char_numElementConn=new char[num_elems];
+    piorc = PIOc_read_darray(pioFileDesc, varid, nec_iodesc, num_elems, char_numElementConn);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading numElementConn variable from file ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+    
+    // Get rid of numElementConn decomp
+    piorc = PIOc_freedecomp(pioSystemDesc, nec_iodesc);
+    if (!CHECKPIOERROR(piorc, std::string("Error freeing numElementConn decomp "),
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+    
+    
+    // Copy to int array
+    numElementConn=new int[num_elems];
+    for (int i=0; i<num_elems; i++) {
+      numElementConn[i]=(int)char_numElementConn[i];
+    }
+    
+    // Get rid of char version
+    delete [] char_numElementConn;
+    
+  } else  if (nEC_type == NC_INT) {
+
+    // Init numElementConn decomp
+    int nec_iodesc;
+    int gdimlen = (int) elementCount;
+    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 1, &gdimlen, num_elems, nec_offsets, &nec_iodesc, 
+                            &rearr, NULL, NULL);
+    if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+    
+    numElementConn=new int[num_elems];
+    piorc = PIOc_read_darray(pioFileDesc, varid, nec_iodesc, num_elems, numElementConn);
+    if (!CHECKPIOERROR(piorc, std::string("Error reading numElementConn variable from file ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+    
+    // Get rid of numElementConn decomp
+    piorc = PIOc_freedecomp(pioSystemDesc, nec_iodesc);
+    if (!CHECKPIOERROR(piorc, std::string("Error freeing numElementConn decomp "),
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+        
+  } else {
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
+                                      "Unsupported type for numElementConn variable.",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
+  }
+
+}
+
 // Get elementConn info out of a 1D variable in an ESMFMesh file. 
 void get_elemConn_info_1Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *filename,
                                                 PIO_Offset elementCount, int num_elems, int *elem_ids, 
@@ -255,33 +344,14 @@ void get_elemConn_info_1Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
     pos++;
   }
 
-  // Init numElementConn even decomp
-  int nec_ed_iodesc;
-  int gdimlen = (int) elementCount;
-  piorc = PIOc_InitDecomp(pioSystemDesc, PIO_BYTE, 1, &gdimlen, num_ed_ids, nec_ed_offsets, &nec_ed_iodesc, 
-                          &rearr, NULL, NULL);
-  if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
+  // Get evenly divided numElementconn
+  int *ed_numElementConn;
+  get_numElementConn_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
+                                        elementCount, 
+                                        num_ed_ids, nec_ed_offsets, 
+                                        ed_numElementConn);
   // Get rid of offsets
   delete [] nec_ed_offsets;
-  
-  // Get numElementConn
-  piorc = PIOc_inq_varid(pioFileDesc, "numElementConn", &varid);
-  if (!CHECKPIOERROR(piorc, std::string("Error NumElementConn variable not in file ") + filename,
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
-  
-  char *char_ed_numElementConn=new char[num_ed_ids];
-  piorc = PIOc_read_darray(pioFileDesc, varid, nec_ed_iodesc, num_ed_ids, char_ed_numElementConn);
-  if (!CHECKPIOERROR(piorc, std::string("Error reading numElementConn variable from file ") + filename,
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
-  // Get rid of numElementConn decomp
-  piorc = PIOc_freedecomp(pioSystemDesc, nec_ed_iodesc);
-  if (!CHECKPIOERROR(piorc, std::string("Error freeing nodeCoord decomp "),
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-
 
 
   //// Now that we have the local list of sizes for evenly divided parts calculate the total offsets for the elements
@@ -289,7 +359,7 @@ void get_elemConn_info_1Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
   // Total this PETs size
   int local_tot_ed_numElementConn=0;
   for (int i=0; i<num_ed_ids; i++) {
-    local_tot_ed_numElementConn += (int)char_ed_numElementConn[i];
+    local_tot_ed_numElementConn += ed_numElementConn[i];
   }  
   
   // DEBUG OUTPUT
@@ -311,12 +381,12 @@ void get_elemConn_info_1Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
   for (int i=0; i < num_ed_ids; i++) {
     ed_gids[i] = (UInt)(min_ed_id+i);
     ed_offsets[i]=(UInt)(local_start_ed_offsets + partial_sum);
-    partial_sum += (int)(char_ed_numElementConn[i]);
+    partial_sum += ed_numElementConn[i];
   }
 
   
-  // Get rid of char version
-  delete [] char_ed_numElementConn;
+  // Get rid of evenly divided nums
+  delete [] ed_numElementConn;
 
   // DEBUG OUTPUT
   //  for (int i=0; i < num_ed_ids; i++) {
@@ -367,44 +437,15 @@ void get_elemConn_info_1Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
   for (int i=0; i<num_elems; i++) {
     nec_offsets[i] = (PIO_Offset)elem_ids[i];
   }
-  
-  // Init numElementConn decomp
-  int nec_iodesc;
-  int nec_gdimlen = (int) elementCount;
-  piorc = PIOc_InitDecomp(pioSystemDesc, PIO_BYTE, 1, &nec_gdimlen, num_elems, nec_offsets, &nec_iodesc, 
-                          &rearr, NULL, NULL);
-  if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
+
+  // read from file
+  get_numElementConn_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
+                                        elementCount, 
+                                        num_elems, nec_offsets, 
+                                        numElementConn);  
   // Get rid of offsets
   delete [] nec_offsets;
   
-  // Get numElementConn
-  piorc = PIOc_inq_varid(pioFileDesc, "numElementConn", &varid);
-  if (!CHECKPIOERROR(piorc, std::string("Error NumElementConn variable not in file ") + filename,
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
-  
-  char *char_numElementConn=new char[num_elems];
-  piorc = PIOc_read_darray(pioFileDesc, varid, nec_iodesc, num_elems, char_numElementConn);
-  if (!CHECKPIOERROR(piorc, std::string("Error reading numElementConn variable from file ") + filename,
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
-  // Get rid of numElementConn decomp
-  piorc = PIOc_freedecomp(pioSystemDesc, nec_iodesc);
-  if (!CHECKPIOERROR(piorc, std::string("Error freeing numElementConn decomp "),
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
-  
-  // Copy to int array
-  numElementConn=new int[num_elems];
-  for (int i=0; i<num_elems; i++) {
-    numElementConn[i]=(int)char_numElementConn[i];
-  }
-  
-  // Get rid of char version
-  delete [] char_numElementConn;
-
   // Get total number of connections on this PET
   totNumElementConn=0;
   for (int i=0; i<num_elems; i++) {
@@ -499,43 +540,14 @@ void get_elemConn_info_2Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
     nec_offsets[i] = (PIO_Offset)elem_ids[i];
   }
   
-  // Init numElementConn decomp
-  int nec_iodesc;
-  int gdimlen = (int) elementCount;
-  piorc = PIOc_InitDecomp(pioSystemDesc, PIO_BYTE, 1, &gdimlen, num_elems, nec_offsets, &nec_iodesc, 
-                          &rearr, NULL, NULL);
-  if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
+  // read from file
+  get_numElementConn_from_ESMFMesh_file(pioSystemDesc, pioFileDesc, filename, 
+                                        elementCount, 
+                                        num_elems, nec_offsets, 
+                                        numElementConn);    
   // Get rid of offsets
   delete [] nec_offsets;
   
-  // Get numElementConn
-  piorc = PIOc_inq_varid(pioFileDesc, "numElementConn", &varid);
-  if (!CHECKPIOERROR(piorc, std::string("Error NumElementConn variable not in file ") + filename,
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
-  
-  char *char_numElementConn=new char[num_elems];
-  piorc = PIOc_read_darray(pioFileDesc, varid, nec_iodesc, num_elems, char_numElementConn);
-  if (!CHECKPIOERROR(piorc, std::string("Error reading numElementConn variable from file ") + filename,
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
-  // Get rid of numElementConn decomp
-  piorc = PIOc_freedecomp(pioSystemDesc, nec_iodesc);
-  if (!CHECKPIOERROR(piorc, std::string("Error freeing numElementConn decomp "),
-                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
-  
-  // Copy to int array
-  numElementConn=new int[num_elems];
-  for (int i=0; i<num_elems; i++) {
-    numElementConn[i]=(int)char_numElementConn[i];
-  }
-  
-  // Get rid of char version
-  delete [] char_numElementConn;
-
   // Get total number of connections on this PET
   totNumElementConn=0;
   for (int i=0; i<num_elems; i++) {
