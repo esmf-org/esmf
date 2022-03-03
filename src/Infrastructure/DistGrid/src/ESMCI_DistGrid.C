@@ -132,16 +132,19 @@ DistGrid *DistGrid::create(
 //
 // !DESCRIPTION:
 //    Create a new DistGrid from an existing DistGrid, potentially on a
-//    different VM, keeping the decomposition unchanged. The firstExtra 
-//    and lastExtra arguments allow extra elements to be added at the 
-//    first/last edge DE in each dimension. The method also allows the 
-//    indexflag to be set different from the passed in DistGrid. Further, 
+//    different VM, keeping the decomposition unchanged, unless balanceflag
+//    is set to true (see below). 
+//    The firstExtra and lastExtra arguments allow extra elements to be added
+//    at the first/last edge DE in each dimension. The method also allows the
+//    indexflag to be set different from the passed in DistGrid. Further,
 //    if the connectionList argument is passed in it will be used to set
 //    connections in the newly created DistGrid, otherwise the connections
 //    of the existing DistGrid will be used.
-//    If neither firstExtra, lastExtra, indexflag, connectionList, nor vm
-//    arguments are specified, the method reduces to a deep copy of the
-//    incoming DistGrid object.
+//    For balanceflag==true, an attempt is made to change the decomposition to
+//    as many DEs as there are PETs in the target VM. However, if there are
+//    more tiles than PETs, some PETs will end up with more than one DE.
+//    Each tile is decomposed as to provide the most balanced decomposition
+//    into DEs along each dimension.
 //    The actualFlag argument identifies PETs that are part of vm. If
 //    on a PET actualFlag is true, and vm is not NULL, this PET is part of a
 //    vm that is of smaller size than the currentVM. If on a PET actualFlag is
