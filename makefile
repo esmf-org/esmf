@@ -677,11 +677,17 @@ install:
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	cp -f $(ESMF_LIBDIR)/libesmf*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
-	@for lib in $(wildcard $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf*.dylib) foo ; do \
+ifneq (,$(filter $(ESMF_OS),Darwin DARWIN darwin))
+	@for lib in $(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf*.dylib foo ; do \
 	  if [ $$lib != "foo" ]; then \
 	    install_name_tool -id "$$lib" $$lib ; \
 	  fi ; \
+	  if [ $$lib == "$(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmftrace_preload.dylib" ]; then \
+	    install_name_tool -change "$(ESMF_LIBDIR)/libesmf.dylib" \
+	      "$(ESMF_INSTALL_LIBDIR_ABSPATH)/libesmf.dylib" $$lib; \
+	  fi ; \
 	done
+endif
 ifeq ($(ESMF_TRACE_LIB_BUILD),ON)
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 	$(MAKE) ESMF_PRELOADDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) build_preload_script
