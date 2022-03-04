@@ -278,19 +278,20 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     // Iterate through all src elements counting the number and creating a map
 
     // Get a range containing all elements
-    Range range_elem;
-    merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->pdim,range_elem);
-    ESMC_CHECK_MOAB_THROW(merr);
+    Range src_elems;
+    src_mesh->get_all_elems(src_elems);
+    // merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->pdim,range_elem);
+    // ESMC_CHECK_MOAB_THROW(merr);
 
     std::map<int,int> id_to_index;
     int pos=0;
-    for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-      const EntityHandle *elem=&(*it);
+    for(Range::iterator it=src_elems.begin(); it !=src_elems.end(); it++) {
+      EntityHandle elem = *it;
 
       // Get element id
-      int elem_id;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int elem_id = src_mesh->get_gid(elem);
+      // merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
+      // ESMC_CHECK_MOAB_THROW(merr);
 
       // Translate id if split
       if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
@@ -311,8 +312,8 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
       // Use insert because once a key is in the map, it doesn't change the entry.
       // This means with a split elem, the orig elem id always points to the first
-      // split elem encountered. This make things a bit clearer and slighly more  efficient
-      // than having it move around. Its possible that it may also work the other   way, 
+      // split elem encountered. This make things a bit clearer and slighly more efficient
+      // than having it move around. Its possible that it may also work the other way, 
       // but I haven't tested it. 
       id_to_index.insert(std::make_pair(elem_id,pos));
       
@@ -347,13 +348,15 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     int max_num_elems=0;
     int max_num_elemConn=0;
     int max_num_node_elems=0;
+    
     // Get a range containing all nodes
-    Range range_node;
-    merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
-    ESMC_CHECK_MOAB_THROW(merr);
+    Range src_nodes;
+    src_mesh->get_all_nodes(src_nodes);
+    // merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
+    // ESMC_CHECK_MOAB_THROW(merr);
 
-    for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
-      const EntityHandle *node=&(*it);
+    for(Range::iterator it=src_nodes.begin(); it !=src_nodes.end(); it++) {
+      EntityHandle node= *it;
       
       // Only do local nodes
       // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
@@ -366,21 +369,21 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       // get_num_elems_around_node(&node, &num_node_elems);
       // pdim instead of sdim here, for spherical cases
       Range adjs;
-      merr = src_mesh->mesh->get_adjacencies(node, 1, pdim, false, adjs);
+      merr = src_mesh->mesh->get_adjacencies(&node, 1, pdim, false, adjs);
       ESMC_CHECK_MOAB_THROW(merr);
       num_node_elems = adjs.size();
 
 #ifdef DEBUG_CONNECTIVITY_ADJACENCIES
       {int nid;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
+      merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, &node, 1, &nid);
       ESMC_CHECK_MOAB_THROW(merr);
       printf("%d# mesh node id %d, adjacencies %d [", Par::Rank(), nid, num_node_elems);
       for(Range::iterator it=adjs.begin(); it !=adjs.end(); it++) {
-        const EntityHandle *elem=&(*it);
+        EntityHandle elem= *it;
         
         // Get element id
         int elem_id;
-        merr = src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
+        merr = src_mesh->mesh->tag_get_data(src_mesh->gid_tag, &elem, 1, &elem_id);
         ESMC_CHECK_MOAB_THROW(merr);
         
         printf("%d, ", elem_id);
@@ -429,8 +432,8 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     // Iterate through src nodes creating elements
     int num_elems=0;
     int conn_pos=0;
-    for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
-      const EntityHandle *node=&(*it);
+    for(Range::iterator it=src_nodes.begin(); it !=src_nodes.end(); it++) {
+      EntityHandle node= *it;
       
       // Only do local nodes
       // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
@@ -442,14 +445,14 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       // Get list of element ids
       int num_elems_around_node_ids=0;
       bool allnotowned = true; // init to true, false if one elem is owned
-      get_unique_elems_around_node(node, src_mesh, tmp_mdss,
+      get_unique_elems_around_node(&node, src_mesh, tmp_mdss,
                             &num_elems_around_node_ids,
                             elems_around_node_ids, allnotowned);
 
 #ifdef DEBUG_UNIQUE_ELEMS
-      {int nid;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
-      ESMC_CHECK_MOAB_THROW(merr);
+      {int nid = src_mesh->get_gid(node);
+      // merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
+      // ESMC_CHECK_MOAB_THROW(merr);
       printf("%d# mesh node id %d, unique elems %d [", Par::Rank(), nid, num_elems_around_node_ids);
       for (int i=0; i<num_elems_around_node_ids; i++) {  
         printf("%d, ", elems_around_node_ids[i]);
@@ -464,15 +467,15 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       elemType[num_elems]=num_elems_around_node_ids;
       
       // Save elemId
-      int elem_id;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &elem_id);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int elem_id = src_mesh->get_gid(node);
+      // merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &elem_id);
+      // ESMC_CHECK_MOAB_THROW(merr);
       elemId[num_elems]=elem_id;
 
       // Save owner
-      int owner;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int owner = src_mesh->get_owner(node);
+      // merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
+      // ESMC_CHECK_MOAB_THROW(merr);
       elemOwner[num_elems]=owner;
       
       // Next elem
@@ -541,13 +544,13 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
     pos=0;
     int data_index=0;
-    for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-      const EntityHandle *elem=&(*it);
+    for(Range::iterator it=src_elems.begin(); it !=src_elems.end(); it++) {
+      EntityHandle elem= *it;
 
       // Get element id
-      int elem_id;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int elem_id = src_mesh->get_gid(elem);
+      // merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
+      // ESMC_CHECK_MOAB_THROW(merr);
 
       // Translate id if split
       if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
@@ -560,9 +563,9 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       }
 
       // Get owner
-      int owner;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, elem, 1, &owner);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int owner = src_mesh->get_owner(elem);
+      // merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, elem, 1, &owner);
+      // ESMC_CHECK_MOAB_THROW(merr);
 
       // Translate owner if split
       // (Interestingly we DON'T have to translate the owner for
@@ -579,7 +582,7 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
         // Get orig coords of this element to put into the new node
         double orig_coords[3];
-        src_mesh->get_elem_orig_coords(*elem,orig_coords);
+        src_mesh->get_elem_orig_coords(elem,orig_coords);
 
         // Create new node corresponding to elem in src_mesh
         EntityHandle new_node=dual_mesh->add_node(orig_coords, elem_id, data_index, owner);
@@ -607,11 +610,11 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
           
           // now set individual node mask values, based on elem mask
           int elem_mask;
-          merr=src_mesh->mesh->tag_get_data(src_mesh->elem_mask_tag, elem, 1, &elem_mask);
+          merr=src_mesh->mesh->tag_get_data(src_mesh->elem_mask_tag, &elem, 1, &elem_mask);
           ESMC_CHECK_MOAB_THROW(merr);
           
           int elem_mask_val;
-          merr=src_mesh->mesh->tag_get_data(src_mesh->elem_mask_val_tag, elem, 1, &elem_mask_val);
+          merr=src_mesh->mesh->tag_get_data(src_mesh->elem_mask_val_tag, &elem, 1, &elem_mask_val);
           ESMC_CHECK_MOAB_THROW(merr);
           
           // set the elem mask value in the node mask
@@ -642,20 +645,21 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
 #ifdef DEBUG_MASK
     if (dual_mesh->has_node_mask) {
-      Range nodes;
-      merr=dual_mesh->mesh->get_entities_by_dimension(0, 0, nodes);
-      ESMC_CHECK_MOAB_THROW(merr);
+      Range dual_nodes;
+      dual_mesh->get_all_nodes(dual_nodes);
+      // merr=dual_mesh->mesh->get_entities_by_dimension(0, 0, nodes);
+      // ESMC_CHECK_MOAB_THROW(merr);
 
-      int num_verts = nodes.size();
+      int num_verts = dual_nodes.size();
       int src_node_mask[num_verts];
       int node_id[num_verts];
 
     printf("%d# - has_node_mask == %s\n", Par::Rank(), dual_mesh->has_node_mask ? "true" : "false");
 
-      merr=dual_mesh->mesh->tag_get_data(dual_mesh->node_mask_val_tag, nodes, &src_node_mask);
+      merr=dual_mesh->mesh->tag_get_data(dual_mesh->node_mask_val_tag, dual_nodes, &src_node_mask);
       ESMC_CHECK_MOAB_THROW(merr);
 
-      merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, nodes, &node_id);
+      merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, dual_nodes, &node_id);
       ESMC_CHECK_MOAB_THROW(merr);
 
       printf("%d# src_node_id = [", Par::Rank());
@@ -693,7 +697,6 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     } else {
       dual_mesh->is_split=false;
     }
-
 
     // Compute the extra element ranges
     int beg_extra_ids=0;
@@ -798,9 +801,9 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
 #ifdef DEBUG_CONNECTIVITY
             // get node id
-            int nid;
-            merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, &node, 1, &nid);
-            ESMC_CHECK_MOAB_THROW(merr);
+            int nid = dual_mesh->get_gid(node);
+            // merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, &node, 1, &nid);
+            // ESMC_CHECK_MOAB_THROW(merr);
 
             printf("PET %d node id %d of %d, node %d [%d]\n", Par::Rank(), nid, elemType[e], elemConn[conn_pos+i], conn_pos+i);
 #endif
@@ -910,8 +913,8 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 #ifdef DEBUG_CONNECTIVITY
     printf("PET %d verts [", localPet);
     for (int i=0; i<dual_mesh->num_verts; ++i) {
-      int nid;
-      merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, &dual_mesh->verts[i], 1, &nid);
+      int nid = dual_mesh->get_gid(&dual_mesh->verts[i]);
+      // merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, &dual_mesh->verts[i], 1, &nid);
       printf("%d, ", nid);
     }
     printf("]\n");
@@ -1151,30 +1154,19 @@ void get_unique_elems_around_node(const EntityHandle *node, MBMesh *mesh,
     ESMC_CHECK_MOAB_THROW(merr);
     
 #ifdef DEBUG_TRI
-    {int nid;
-    merr=mesh->mesh->tag_get_data(mesh->gid_tag, node, 1, &nid);
-    ESMC_CHECK_MOAB_THROW(merr);
-    int owner;
-    merr = mesh->mesh->tag_get_data(mesh->owner_tag, node, 1, &owner);
-    ESMC_CHECK_MOAB_THROW(merr);
+    {int nid = mesh->get_gid(node);
+    int owner = mesh->get_owner(node);
     
     if (range_elem.size() == 3) printf("%d# 3 adjacencies, node %d owener %d\n",    Par::Rank(), nid, owner);
     }
 #endif
     
 #ifdef DEBUG_CONNECTIVITY_ADJACENCIES
-    {int nid;
-    merr=mesh->mesh->tag_get_data(mesh->gid_tag, node, 1, &nid);
-    ESMC_CHECK_MOAB_THROW(merr);
+    {int nid = mesh->get_gid(node);;
     printf("%d# unique algorithm - mesh node id %d, adjacencies %d [", Par::Rank(), nid, range_elem.size());
     for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-      const EntityHandle *elem=&(*it);
-      
-      // Get element id
-      int elem_id;
-      merr = mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_THROW(merr);
-      
+      EntityHandle elem= *it;
+      int elem_id = mesh->get_gid(elem);
       printf("%d, ", elem_id);
     }
     printf("]\n");}
@@ -1186,19 +1178,15 @@ void get_unique_elems_around_node(const EntityHandle *node, MBMesh *mesh,
     int max_elem_id=0; // Init to 0 to watch for nothing ever being selected
     double max_elem_coords[3];
     for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-      const EntityHandle *elem=&(*it);
+      EntityHandle elem= *it;
       
       // Get owner
-      int owner;
-      merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int owner = mesh->get_owner(elem);
       
       if (owner == Par::Rank()) allnotowned = false;
       
       // Get element id
-      int elem_id;
-      merr = mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int elem_id = mesh->get_gid(elem);
 
       // Translate id if split
       if ((mesh->is_split) && (elem_id > mesh->max_non_split_id)) {
@@ -1212,7 +1200,7 @@ void get_unique_elems_around_node(const EntityHandle *node, MBMesh *mesh,
       // Check if max id if so switch max id and coordinates 
       if (elem_id > max_elem_id) {
         double ec[3];
-        merr=mesh->mesh->tag_get_data(mesh->elem_coords_tag, elem, 1, ec);
+        merr=mesh->mesh->tag_get_data(mesh->elem_coords_tag, &elem, 1, ec);
         ESMC_CHECK_MOAB_THROW(merr);
         double tmp_coords[3];
         tmp_coords[0]=ec[0];
@@ -1256,12 +1244,10 @@ void get_unique_elems_around_node(const EntityHandle *node, MBMesh *mesh,
     // Start over looping through elems attached to node, calculating angles
     int num_ids=0;
     for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-      const EntityHandle *elem=&(*it);
+      EntityHandle elem= *it;
       
       // Get element id
-      int elem_id;
-      merr = mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int elem_id = mesh->get_gid(elem);
 
       // Translate id if split
       if ((mesh->is_split) && (elem_id > mesh->max_non_split_id)) {
@@ -1276,7 +1262,7 @@ void get_unique_elems_around_node(const EntityHandle *node, MBMesh *mesh,
       // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
       double vcurr[3];
       double ec[3];
-      merr=mesh->mesh->tag_get_data(mesh->elem_coords_tag, elem, 1, ec);
+      merr=mesh->mesh->tag_get_data(mesh->elem_coords_tag, &elem, 1, ec);
       ESMC_CHECK_MOAB_THROW(merr);
       vcurr[0]=ec[0];
         vcurr[1]=ec[1];
@@ -1350,25 +1336,20 @@ void add_ghost_elems_to_split_orig_id_map(MBMesh *mesh) {
     ESMC_CHECK_THROW(localrc);
 
     // Get a range containing all elements
-    Range range_elem;
-    merr = mesh->mesh->get_entities_by_dimension(0, mesh->pdim, range_elem);
-    ESMC_CHECK_MOAB_THROW(merr);
+    Range all_elems;
+    mesh->get_all_elems(all_elems);
 
     // Get number of split elements
     int num_gids=0;
-    for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-      const EntityHandle *elem=&(*it);
+    for(Range::iterator it=all_elems.begin(); it !=all_elems.end(); it++) {
+      EntityHandle elem= *it;
     
       // Only do local 
-      int owner;
-      merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int owner = mesh->get_owner(elem);
       if (owner != localPet) continue;
 
       // Get element id
-      int elem_id;
-      merr=mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int elem_id = mesh->get_gid(elem);
 
       // If it's less than or equal to the maximum non split id then its not split
       if (elem_id <=  mesh->max_non_split_id) continue;
@@ -1388,19 +1369,15 @@ void add_ghost_elems_to_split_orig_id_map(MBMesh *mesh) {
       
       // Loop through list putting into arrays
       int pos=0;
-      for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-        const EntityHandle *elem=&(*it);
+      for(Range::iterator it=all_elems.begin(); it !=all_elems.end(); it++) {
+        EntityHandle elem= *it;
         
         // Only do local 
-        int owner;
-        merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
-        ESMC_CHECK_MOAB_THROW(merr);
+        int owner = mesh->get_owner(elem);
         if (owner != localPet) continue;
         
         // Get element id
-        int elem_id;
-        merr=mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-        ESMC_CHECK_MOAB_THROW(merr);
+        int elem_id = mesh->get_gid(elem);
         
         // If it's less than or equal to the maximum non split id then its not  split
         if (elem_id <= mesh->max_non_split_id) continue;
@@ -1436,24 +1413,20 @@ void add_ghost_elems_to_split_orig_id_map(MBMesh *mesh) {
 
     // Get number of ghost split elements
     int num_ghost_gids=0;
-    for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-      const EntityHandle *elem=&(*it);
+    for(Range::iterator it=all_elems.begin(); it !=all_elems.end(); it++) {
+      EntityHandle elem = *it;
     
       // Only do non-local 
-      int owner;
-      merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int owner = mesh->get_owner(elem);
       if (owner == localPet) continue;
 
       // Get element id
-      int elem_id;
-      merr=mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int elem_id = mesh->get_gid(elem);
 
       // If it's less than or equal to the maximum non split id then its not split
       if (elem_id <=  mesh->max_non_split_id) continue;
 
-      // It's split, so count this one     
+      // It's split, so count this one
       num_ghost_gids++;
     }
     
@@ -1465,19 +1438,15 @@ void add_ghost_elems_to_split_orig_id_map(MBMesh *mesh) {
     
     // Get ghost gids
     int pos=0;
-    for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
-      const EntityHandle *elem=&(*it);
+    for(Range::iterator it=all_elems.begin(); it !=all_elems.end(); it++) {
+      EntityHandle elem= *it;
     
       // Only do non-local 
-      int owner;
-      merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int owner = mesh->get_owner(elem);
       if (owner == localPet) continue;
 
       // Get element id
-      int elem_id;
-      merr=mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
-      ESMC_CHECK_MOAB_THROW(merr);
+      int elem_id = mesh->get_gid(elem);
 
       // If it's less than or equal to the maximum non split id then its not split
       if (elem_id <=  mesh->max_non_split_id) continue;
