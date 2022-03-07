@@ -660,8 +660,10 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
                         }
 
                         /* Write, in non-blocking fashion, a list of subarrays. */
-                        PLOG((3, "about to call ncmpi_iput_varn() varids[%d] = %d rrcnt = %d, llen = %d",
-                              nv, varids[nv], rrcnt, llen));
+//                        PLOG((3, "about to call ncmpi_iput_varn() varids[%d] = %d rrcnt = %d, llen = %d",
+//                              nv, varids[nv], rrcnt, llen));
+//                        for(int i=0;i < llen; i++)
+//                            PLOG((3, "bufptr[%d] = %d",i,((int *)bufptr)[i]));
                         ierr = ncmpi_iput_varn(file->fh, varids[nv], rrcnt, startlist, countlist,
                                                bufptr, llen, iodesc->mpitype, &vdesc->request[vdesc->nreqs]);
 
@@ -954,21 +956,25 @@ recv_and_write_data(file_desc_t *file, const int *varids, const int *frame,
             for (int regioncnt = 0; regioncnt < rregions; regioncnt++)
             {
                 PLOG((3, "writing data for region with regioncnt = %d", regioncnt));
+                bool needtowrite = true;
+
+                if ((ierr = get_var_desc(varids[0], &file->varlist, &vdesc)))
+                    return pio_err(NULL, file, ierr, __FILE__, __LINE__);
 
                 /* Get the start/count arrays for this region. */
                 for (int i = 0; i < fndims; i++)
                 {
                     start[i] = tmp_start[i + regioncnt * fndims];
                     count[i] = tmp_count[i + regioncnt * fndims];
-                    PLOG((3, "start[%d] = %d count[%d] = %d", i, start[i], i, count[i]));
+                    PLOG((3, "needtowrite %d count[%d] %d\n",needtowrite, i, count[i]));
+                    if(i>0 || vdesc->record <0)
+                        needtowrite = (count[i] > 0 && needtowrite);
                 }
 
                 /* Process each variable in the buffer. */
                 for (int nv = 0; nv < nvars; nv++)
                 {
                     PLOG((3, "writing buffer var %d", nv));
-                    if ((ierr = get_var_desc(varids[0], &file->varlist, &vdesc)))
-                        return pio_err(NULL, file, ierr, __FILE__, __LINE__);
 
                     /* Get a pointer to the correct part of the buffer. */
                     bufptr = (void *)((char *)iobuf + iodesc->mpitype_size * (nv * rlen + loffset));
@@ -990,13 +996,15 @@ recv_and_write_data(file_desc_t *file, const int *varids, const int *frame,
                     }
 
 #ifdef LOGGING
-                    for (int i = 1; i < fndims; i++)
-                        PLOG((3, "start[%d] %d count[%d] %d", i, start[i], i, count[i]));
+                    if(needtowrite)
+                        for (int i = 1; i < fndims; i++)
+                            PLOG((3, "(serial) start[%d] %d count[%d] %d needtowrite %d", i, start[i], i, count[i], needtowrite));
 #endif /* LOGGING */
 
                     /* Call the netCDF functions to write the data. */
-                    if ((ierr = nc_put_vara(file->fh, varids[nv], start, count, bufptr)))
-                        return check_netcdf2(ios, NULL, ierr, __FILE__, __LINE__);
+                    if (needtowrite)
+                        if ((ierr = nc_put_vara(file->fh, varids[nv], start, count, bufptr)))
+                            return check_netcdf2(ios, NULL, ierr, __FILE__, __LINE__);
 
                 } /* next var */
 
@@ -1358,7 +1366,7 @@ pio_read_darray_nc(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf)
                     /* Release the start and count arrays. */
                     for (int i = 0; i < rrlen; i++)
                     {
-                        PLOG((3,"startlist %d %d countlist %d %d",startlist[i][0],startlist[i][1],countlist[i][0],countlist[i][1]));
+//                        PLOG((3,"startlist %d %d countlist %d %d",startlist[i][0],startlist[i][1],countlist[i][0],countlist[i][1]));
                         free(startlist[i]);
                         free(countlist[i]);
                     }
