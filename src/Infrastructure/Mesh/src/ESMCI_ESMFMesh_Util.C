@@ -647,7 +647,18 @@ void get_elemConn_info_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, ch
                                       ESMC_CONTEXT, &localrc)) throw localrc;
   }
 
-  
+  // Check if there's a polybreak attribute on elementConn and if so get it
+  int polygon_break_value;
+  piorc = PIOc_get_att_int(pioFileDesc, varid, "polygon_break_value", &polygon_break_value);
+
+  // Found value so convert to internal mesh polygon_break_value
+  if (piorc == PIO_NOERR) {
+    for (int i=0; i<totNumElementConn; i++) {
+      if (elementConn[i] == polygon_break_value) elementConn[i] = MESH_POLYBREAK_IND;
+    }
+  }
+
+
   
   //     // DEBUG: output numElementConn
   //     printf("numElementConn=");

@@ -86,18 +86,25 @@ void convert_global_elem_conn_to_local_node_and_elem_info(int num_local_elem, in
   NODE_INFO *convert_list=new NODE_INFO[tot_num_elem_conn];
 
   // Copy global elem connection info into conversion list
+  int num_node_conn=0; // Number of connections that are nodes (vs. polybreak)
   for (int i=0; i<tot_num_elem_conn; i++) {
-    convert_list[i].node_id=global_elem_conn[i];
-    convert_list[i].local_elem_conn_pos=i;
+
+    // Skip polygon break entries 
+    if (global_elem_conn[i] == MESH_POLYBREAK_IND) continue;
+    
+    // Add node entiries to conversion list
+    convert_list[num_node_conn].node_id=global_elem_conn[i];
+    convert_list[num_node_conn].local_elem_conn_pos=i;
+    num_node_conn++;
   }
 
   // Sort list by node_id, to make it easy to find unique node_ids
-  std::sort(convert_list,convert_list+tot_num_elem_conn);
+  std::sort(convert_list,convert_list+num_node_conn);
 
   // Count number of unique node ids in  convert_list
   int num_unique_node_ids=1;                 // There has to be at least 1, 
   int prev_node_id=convert_list[0].node_id;  // because we leave if < 1 above
-  for (int i=1; i<tot_num_elem_conn; i++) {
+  for (int i=1; i<num_node_conn; i++) {
 
     // If not the same as the last one count a new one
     if (convert_list[i].node_id != prev_node_id) {
@@ -115,11 +122,17 @@ void convert_global_elem_conn_to_local_node_and_elem_info(int num_local_elem, in
   // Allocate local elem conn
   local_elem_conn=new int[tot_num_elem_conn];
 
+  // Set to polybreak value so that it's in the correct places
+  // after the code below fills in the node connection values
+  for (int i=0; i<tot_num_elem_conn; i++) {
+    local_elem_conn[i]=MESH_POLYBREAK_IND;
+  }
+  
   // Translate convert_list to node_ids and local_elem_conn
   int node_ids_pos=0;                             // There has to be at least 1, 
   node_ids[node_ids_pos]=convert_list[0].node_id; // because we leave if < 1 above
   local_elem_conn[convert_list[0].local_elem_conn_pos]=node_ids_pos+1; // +1 to make base-1
-  for (int i=1; i<tot_num_elem_conn; i++) {
+  for (int i=1; i<num_node_conn; i++) {
 
     // If not the same as the last one add a new one
     if (convert_list[i].node_id != node_ids[node_ids_pos]) {

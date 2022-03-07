@@ -181,7 +181,6 @@ void get_dim_from_UGRID_file(int pioFileDesc, char *filename, int mesh_topo_id,
 
 
 // Get the id of the elementConn array
-// TODO: PUT IN POLYGON BREAK VALUE!!!
 void get_elementConn_id_from_UGRID_file(int pioFileDesc, char *filename, int mesh_topo_id, int dim, 
                                         int &elementConn_id) {
 #undef ESMC_METHOD
