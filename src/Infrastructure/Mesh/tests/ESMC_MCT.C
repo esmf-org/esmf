@@ -370,9 +370,10 @@ class MCT {
         // Wrap node_owners in IntArray
         InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
 
-        // BOB THIS ISN'T COMPILING, BUT I DON'T NEED IT RIGHT NOW, SO COMMENT (I SUSPECT THIS IS FIXED IN DEVELOP)
-        //        MBMesh_addnodes(&mesh, &num_node, nodeId.data(), nodeCoord.data(), 
-        //                &nodeOwnerIA, iin, &coord_sys, &orig_sdim, &localrc);
+        // Add Nodes
+        mesh->meshaddnodes(&num_node, nodeId.data(), nodeCoord.data(), 
+                           &nodeOwnerIA, iin, &coord_sys, 
+                           &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         
@@ -421,6 +422,9 @@ class MCT {
 
         target = MeshCap::meshcreate(&pdim, &sdim, &coord_sys, &localrc);
         ESMC_CHECK_THROW(localrc);
+
+        // Wrap node_owners in IntArray
+        InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
 
         target->meshaddnodes(&num_node, nodeId.data(), nodeCoord.data(), 
                            &nodeOwnerIA, iin, &coord_sys, 
