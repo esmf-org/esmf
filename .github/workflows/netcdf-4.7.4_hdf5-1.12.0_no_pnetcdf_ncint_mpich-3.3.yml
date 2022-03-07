@@ -14,7 +14,10 @@ jobs:
     env:
       CPPFLAGS: "-I/home/runner/mpich/include -I/home/runner/hdf5/include -I/home/runner/netcdf-c/include -I/home/runner/netcdf-fortran/include"
       LDFLAGS: "-L/home/runner/mpich/lib -L/home/runner/hdf5/lib -L/home/runner/netcdf-c/lib -L/home/runner/netcdf-fortran/lib"
-
+      NETCDF_C_VERSION: 4.7.4
+      NETCDF_F_VERSION: 4.5.4
+      MPICH_VERSION: 3.3.2
+      HDF5_VERSION: 1.12.0
     steps:
     - uses: actions/checkout@v2
     - name: Installs
@@ -25,14 +28,14 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/mpich
-        key: mpich-${{ runner.os }}-3.3.2-1
+        key: mpich-${{ runner.os }}-${{ env.MPICH_VERSION }}
 
     - name: build-mpich
       if: steps.cache-mpich.outputs.cache-hit != 'true'
       run: |
-        wget http://www.mpich.org/static/downloads/3.3.2/mpich-3.3.2.tar.gz &> /dev/null
-        tar -xzf mpich-3.3.2.tar.gz
-        pushd mpich-3.3.2
+        wget http://www.mpich.org/static/downloads/${{ env.MPICH_VERSION }}/mpich-${{ env.MPICH_VERSION }}.tar.gz &> /dev/null
+        tar -xzf mpich-${{ env.MPICH_VERSION }}.tar.gz
+        pushd mpich-${{ env.MPICH_VERSION }}
         ./configure --prefix=/home/runner/mpich
         make
         sudo make install
@@ -42,7 +45,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/hdf5
-        key: hdf5-${{ runner.os }}-1.12.0-mpich-3.3.2-3
+        key: hdf5-${{ runner.os }}-${{ env.HDF5_VERSION }}-mpich-${{ env.MPICH_VERSION }}
 
     - name: build-hdf5
       if: steps.cache-hdf5.outputs.cache-hit != 'true'
@@ -50,9 +53,9 @@ jobs:
         set -x
         export PATH="/home/runner/mpich/bin:$PATH"
         export CC=/home/runner/mpich/bin/mpicc
-        wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.0/src/hdf5-1.12.0.tar.gz &> /dev/null
-        tar -xzf hdf5-1.12.0.tar.gz
-        pushd hdf5-1.12.0
+        wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-${{ env.HDF5_VERSION }}/src/hdf5-${{ env.HDF5_VERSION }}.tar.gz &> /dev/null
+        tar -xzf hdf5-${{ env.HDF5_VERSION }}.tar.gz
+        pushd hdf5-${{ env.HDF5_VERSION }}
         ./configure --prefix=/home/runner/hdf5 --enable-parallel --disable-tools --disable-fortran --disable-cxx --enable-parallel-tests
         make
         sudo make install
@@ -62,7 +65,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/netcdf-c
-        key: netcdf-c-${{ runner.os }}-4.7.4-mpich-3.3.2-5
+        key: netcdf-c-${{ runner.os }}-${{ env.NETCDF_C_VERSION }}-mpich-${{ env.MPICH_VERSION }}-hdf5-${{ env.HDF5_VERSION }}
 
     - name: build-netcdf-c
       if: steps.cache-netcdf-c.outputs.cache-hit != 'true'
@@ -70,19 +73,20 @@ jobs:
         set -x
         export PATH="/home/runner/mpich/bin:$PATH"
         export CC=/home/runner/mpich/bin/mpicc
-        wget https://www.unidata.ucar.edu/downloads/netcdf/ftp/netcdf-c-4.7.4.tar.gz &> /dev/null
-        tar -xzf netcdf-c-4.7.4.tar.gz
-        pushd netcdf-c-4.7.4
+        wget https://github.com/Unidata/netcdf-c/archive/refs/tags/v${{ env.NETCDF_C_VERSION }}.tar.gz
+        tar -xzf v${{ env.NETCDF_C_VERSION }}.tar.gz &> /dev/null
+        pushd netcdf-c-${{ env.NETCDF_C_VERSION }}
         ./configure --prefix=/home/runner/netcdf-c --disable-dap --disable-utilities
         make -j
         sudo make install
         popd
+
     - name: cache-netcdf-fortran
       id: cache-netcdf-fortran
       uses: actions/cache@v2
       with:
         path: ~/netcdf-fortran
-        key: netcdf-fortran-${{ runner.os }}-4.5.3-mpich-3.3.2-6
+        key: netcdf-fortran-${{ runner.os }}-${{ env.NETCDF_F_VERSION }}-mpich-${{ env.MPICH_VERSION }}-hdf5-${{ env.HDF5_VERSION }}
 
     - name: build-netcdf-fortran
       if: steps.cache-netcdf-fortran.outputs.cache-hit != 'true'
@@ -90,13 +94,14 @@ jobs:
         set -x
         export PATH="/home/runner/mpich/bin:$PATH"
         export CC=/home/runner/mpich/bin/mpicc
-        wget https://github.com/Unidata/netcdf-fortran/archive/v4.5.3.tar.gz &> /dev/null
-        tar -xzf v4.5.3.tar.gz
-        pushd netcdf-fortran-4.5.3
+        wget https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v${{ env.NETCDF_F_VERSION }}.tar.gz
+        tar -zxf v${{ env.NETCDF_F_VERSION }}.tar.gz &> /dev/null
+        pushd netcdf-fortran-${{ env.NETCDF_F_VERSION }}
         ./configure --prefix=/home/runner/netcdf-fortran
         make -j
         sudo make install
         popd
+
     - name: autotools build
       run: |
         set -x

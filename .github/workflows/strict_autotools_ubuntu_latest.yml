@@ -40,9 +40,9 @@ jobs:
       if: steps.cache-pnetcdf.outputs.cache-hit != 'true'
       run: |
         set -x
-        wget https://parallel-netcdf.github.io/Release/pnetcdf-1.12.1.tar.gz &> /dev/null
-        tar -xzvf pnetcdf-1.12.1.tar.gz
-        pushd pnetcdf-1.12.1
+        wget https://parallel-netcdf.github.io/Release/pnetcdf-1.12.3.tar.gz &> /dev/null
+        tar -xzvf pnetcdf-1.12.3.tar.gz
+        pushd pnetcdf-1.12.3
         ./configure --prefix=/home/runner/pnetcdf --enable-shared --disable-cxx
         make
         sudo make install

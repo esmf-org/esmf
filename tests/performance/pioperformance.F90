@@ -356,6 +356,10 @@ contains
 #endif
                 end if
 ! Now the Read
+
+                write(fname, '(a,i1,a,i4.4,a,i1,a)') 'pioperf.',1,'-',ntasks,'-',iotype,'.nc'
+
+
                 ierr = PIO_OpenFile(iosystem, File, iotype, trim(fname), mode=PIO_NOWRITE);
                 do nv=1,nvars
 #ifdef VARINT
@@ -417,7 +421,7 @@ contains
                          if(compmap(j)>0) then
 #ifdef VARINT
 #ifdef DEBUG
-                             write(*,'(a11,i2,a9,i11,a9,i11,a9,i2)') &
+                             write(*,'(a11,i2,a9,i11,a9,i11,a9,i11)') &
                                 ' Int    PE=',mype,'ifld=',ifld(j,nv),' ifld_in=',ifld_in(j,nv,frame),' compmap=',compmap(j)
 #endif
                             if(ifld(j,nv) /= ifld_in(j,nv,frame)) then
@@ -425,7 +429,7 @@ contains
                                !   print *,__LINE__,'Int: ',mype,j,nv,ifld(j,nv),ifld_in(j,nv,frame),compmap(j)
                                !endif
                                write(*,*) '***ERROR:Mismatch!***'
-                               write(*,'(a11,i2,a9,i11,a9,i11,a9,i2)') &
+                               write(*,'(a11,i2,a9,i11,a9,i11,a9,i11)') &
                                  ' Int    PE=',mype,'ifld=',ifld(j,nv),' ifld_in=',ifld_in(j,nv,frame),' compmap=',compmap(j)
 
                                errorcnt = errorcnt+1
@@ -433,7 +437,7 @@ contains
 #endif
 #ifdef VARREAL
 #ifdef DEBUG
-                            write(*,'(a11,i2,a9,f11.2,a9,f11.2,a9,i2)') &
+                            write(*,'(a11,i2,a9,f11.2,a9,f11.2,a9,i11)') &
                                 ' Real   PE=',mype,'rfld=',rfld(j,nv),' rfld_in=',rfld_in(j,nv,frame),' compmap=',compmap(j)
 #endif
 
@@ -442,7 +446,7 @@ contains
                                !   print *,__LINE__,'Real:', mype,j,nv,rfld(j,nv),rfld_in(j,nv,frame),compmap(j)
                                !endif
                                write(*,*) '***ERROR:Mismatch!***'
-                               write(*,'(a11,i2,a9,f11.2,a9,f11.2,a9,i2)') &
+                               write(*,'(a11,i2,a9,f11.2,a9,f11.2,a9,i11)') &
                                  ' Real   PE=',mype,'rfld=',rfld(j,nv),' rfld_in=',rfld_in(j,nv,frame),' compmap=',compmap(j)
 
                                errorcnt = errorcnt+1
