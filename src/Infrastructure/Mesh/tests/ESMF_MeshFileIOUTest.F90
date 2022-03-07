@@ -329,7 +329,7 @@ subroutine  test_mesh_create_from_med_EM_file(correct, rc)
   
   
   ! Create Mesh from file
-  mesh=ESMF_MeshCreateFromFileNew("data/ne4np4-esmf.nc", &
+  mesh=ESMF_MeshCreate("data/ne4np4-esmf.nc", &
        fileformat=ESMF_FILEFORMAT_ESMFMESH, &
        elementDistgrid=elemDistgrid, &
        rc=rc)
@@ -862,7 +862,7 @@ subroutine  check_mesh_from_sph_3x3_EM_file(correct, rc)
   
 
    ! Read mesh from file that's the same as the one described by info set up above
-   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_3x3_esmf.nc", &
+   mesh=ESMF_MeshCreate("data/test_sph_3x3_esmf.nc", &
         fileformat=ESMF_FILEFORMAT_ESMFMESH, &
         addUserArea=.true., &
         elementDistgrid=elemDistgrid, &
@@ -1552,7 +1552,7 @@ subroutine  check_mesh_from_cart_3x3_EM_file(correct, rc)
   
 
    ! Read mesh from file that's the same as the one described by info set up above
-   mesh=ESMF_MeshCreateFromFileNew("data/test_cart_3x3_esmf.nc", &
+   mesh=ESMF_MeshCreate("data/test_cart_3x3_esmf.nc", &
         fileformat=ESMF_FILEFORMAT_ESMFMESH, &
         addUserArea=.true., &
         elementDistgrid=elemDistgrid, &
@@ -2262,7 +2262,7 @@ subroutine  check_mesh_sph_1DeC_EM_file(correct, rc)
   
 
    ! Read mesh from file that's the same as the one described by info set up above
-   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_1D_elemConn_esmf.nc", &
+   mesh=ESMF_MeshCreate("data/test_sph_1D_elemConn_esmf.nc", &
         fileformat=ESMF_FILEFORMAT_ESMFMESH, &
         addUserArea=.true., &
         elementDistgrid=elemDistgrid, &
@@ -2717,7 +2717,7 @@ subroutine  check_coordSys_convert_EM_file(correct, rc)
   
 
    ! Read mesh from file that's the same as the one described by info set up above
-   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_3x3_esmf.nc", &
+   mesh=ESMF_MeshCreate("data/test_sph_3x3_esmf.nc", &
         fileformat=ESMF_FILEFORMAT_ESMFMESH, &
         addUserArea=.true., &
         coordSys=ESMF_COORDSYS_SPH_RAD, &
@@ -3129,7 +3129,7 @@ subroutine  check_mesh_from_sph_3D_EM_file(correct, rc)
   
 
    ! Read mesh from file that's the same as the one described by info set up above
-   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_2x2x1_esmf.nc", &
+   mesh=ESMF_MeshCreate("data/test_sph_2x2x1_esmf.nc", &
         fileformat=ESMF_FILEFORMAT_ESMFMESH, &
          elementDistgrid=elemDistgrid, &
         rc=rc)
@@ -3812,7 +3812,7 @@ subroutine  check_mesh_from_sph_pb_EM_file(correct, rc)
   
 
    ! Read mesh from file that's the same as the one described by info set up above
-   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_polybreak_esmf.nc", &
+   mesh=ESMF_MeshCreate("data/test_sph_polybreak_esmf.nc", &
         fileformat=ESMF_FILEFORMAT_ESMFMESH, &
         addUserArea=.true., &
         elementDistgrid=elemDistgrid, &
@@ -4486,7 +4486,7 @@ subroutine  check_mesh_from_sph_3x3_UG_file(correct, rc)
 
 
    ! Read mesh from file that's the same as the one described by info set up above
-   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_3x3_ugrid.nc", &
+   mesh=ESMF_MeshCreate("data/test_sph_3x3_ugrid.nc", &
         fileformat=ESMF_FILEFORMAT_UGRID, &
         elementDistgrid=elemDistgrid, &
         maskFlag=ESMF_MESHLOC_ELEMENT, &
@@ -5134,7 +5134,7 @@ subroutine  check_mesh_from_sph_pb_UG_file(correct, rc)
 
 
    ! Read mesh from file that's the same as the one described by info set up above
-   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_polybreak_ugrid.nc", &
+   mesh=ESMF_MeshCreate("data/test_sph_polybreak_ugrid.nc", &
         fileformat=ESMF_FILEFORMAT_UGRID, &
         elementDistgrid=elemDistgrid, &
         maskFlag=ESMF_MESHLOC_ELEMENT, &
@@ -5652,7 +5652,7 @@ subroutine  check_mesh_from_sph_3D_UG_file(correct, rc)
   
 
    ! Read mesh from file that's the same as the one described by info set up above
-   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_2x2x1_ugrid.nc", &
+   mesh=ESMF_MeshCreate("data/test_sph_2x2x1_ugrid.nc", &
         fileformat=ESMF_FILEFORMAT_UGRID, &
          elementDistgrid=elemDistgrid, &
         rc=rc)
@@ -6278,7 +6278,7 @@ subroutine  check_mesh_from_sph_3x3_SC_file(correct, rc)
 
 
    ! Read mesh from file that's the same as the one described by info set up above
-   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_3x3_scrip.nc", &
+   mesh=ESMF_MeshCreate("data/test_sph_3x3_scrip.nc", &
         fileformat=ESMF_FILEFORMAT_SCRIP, &
         elementDistgrid=elemDistgrid, &
         rc=rc)
@@ -6537,7 +6537,7 @@ subroutine  test_create_dual_from_file(correct, rc)
   endif
 
   ! Read mesh from file 
-  mesh=ESMF_MeshCreateFromFileNew("data/test_sph_3x3_esmf.nc", &
+  mesh=ESMF_MeshCreate("data/test_sph_3x3_esmf.nc", &
        fileformat=ESMF_FILEFORMAT_ESMFMESH, &
        convertToDual=.true., &
        rc=rc)
@@ -6728,7 +6728,7 @@ subroutine  check_mesh_node_redist_from_file(correct, rc)
   
 
    ! Read mesh from file and redist to node distribution in distgrid
-   mesh=ESMF_MeshCreateFromFileNew("data/test_sph_3x3_esmf.nc", &
+   mesh=ESMF_MeshCreate("data/test_sph_3x3_esmf.nc", &
         fileformat=ESMF_FILEFORMAT_ESMFMESH, &
         nodalDistgrid=nodeDistgrid, &
         rc=rc)
