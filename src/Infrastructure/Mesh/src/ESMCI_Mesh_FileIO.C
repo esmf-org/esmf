@@ -833,11 +833,11 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     // Get nodeCoords at positions indicated by node_ids
     double *nodeCoords=NULL;
     get_coords_from_UGRID_file(pioSystemDesc, pioFileDesc, filename, 
-                                   dim, nodeCoord_ids, 
-                                   nodeCount, 
-                                   num_nodes, node_ids, 
-                                   nodeCoords);
-
+                               coord_sys_file, dim, nodeCoord_ids, 
+                               nodeCount, 
+                               num_nodes, node_ids, 
+                               nodeCoords);
+    
 
     // If file in different coordinate system than mesh, convert
     if (coord_sys_file != coord_sys_mesh) {
@@ -911,10 +911,10 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
                                       dim, elemCoord_ids, centerCoordsPresent);
     if (centerCoordsPresent) {
       get_coords_from_UGRID_file(pioSystemDesc, pioFileDesc, filename, 
-                                     dim, elemCoord_ids, 
-                                     elementCount, 
-                                     num_elems, elem_ids, 
-                                     centerCoords);
+                                 coord_sys_file, dim, elemCoord_ids, 
+                                 elementCount, 
+                                 num_elems, elem_ids, 
+                                 centerCoords);
       
       // If center coords exist and
       // file in different coordinate system than mesh, convert

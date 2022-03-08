@@ -66,7 +66,7 @@ void get_nodeCoord_ids_from_UGRID_file(int pioFileDesc, char *filename, int mesh
 void get_nodeCount_from_UGRID_file(int pioFileDesc, char *filename, int dim, int *nodeCoord_ids, PIO_Offset &nodeCount);
 
 void get_coords_from_UGRID_file(int pioSystemDesc, int pioFileDesc, char *filename, 
-                                int dim, int *coordVar_ids, 
+                                ESMC_CoordSys_Flag coord_sys, int dim, int *coordVar_ids, 
                                 PIO_Offset global_count, 
                                 int num_ids, int *ids, 
                                 double *&coords);

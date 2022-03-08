@@ -5749,8 +5749,9 @@ subroutine  check_mesh_from_sph_3D_UG_file(correct, rc)
    ! Check node Coords
    k=1
    do i=1,numNodesTst ! Loop over nodes
-      do j=1,3 ! Loop over coord spatial dim
-         if (nodeCoords(k) .ne. nodeCoordsTst(k)) correct=.false.
+      do j=1,3 
+         ! Don't check 3rd dim, because it's normalized to Earth radius
+         if ((j<3) .and. (nodeCoords(k) .ne. nodeCoordsTst(k))) correct=.false.
          k=k+1
       enddo
    enddo

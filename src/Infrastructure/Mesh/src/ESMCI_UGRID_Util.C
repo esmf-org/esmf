@@ -616,10 +616,10 @@ void get_nodeCount_from_UGRID_file(int pioFileDesc, char *filename, int dim, int
 
 // Get coords from UGRID format file
 void get_coords_from_UGRID_file(int pioSystemDesc, int pioFileDesc, char *filename, 
-                                    int dim, int *coordVar_ids, 
-                                    PIO_Offset global_count, 
-                                    int num_ids, int *ids, 
-                                    double *&coords) {
+                                ESMC_CoordSys_Flag coord_sys, int dim, int *coordVar_ids, 
+                                PIO_Offset global_count, 
+                                int num_ids, int *ids, 
+                                double *&coords) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "get_coords_from_UGRID_file()"
 
@@ -679,7 +679,60 @@ void get_coords_from_UGRID_file(int pioSystemDesc, int pioFileDesc, char *filena
   piorc = PIOc_freedecomp(pioSystemDesc, iodesc);
   if (!CHECKPIOERROR(piorc, std::string("Error freeing coordinate decomp "),
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-  
+
+
+
+  // If this is 3D spherical, normalize the 3rd dimension to the radius of the earth to match
+  // how it was in the original version of mesh create from file.
+  // TODO: Add a base_height attribute, to allow the user to control this
+  if ((dim == 3) && (coord_sys != ESMC_COORDSYS_CART)) {
+    
+    // Get Units of height
+    nc_type type;
+    PIO_Offset units_len;
+    piorc = PIOc_inq_att(pioFileDesc, coordVar_ids[2], "units", &type, &units_len);
+    if (!CHECKPIOERROR(piorc, std::string("Error with getting units attribute from third coordinates varible in file ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+
+    // Get units attribute
+    char *units=new char[units_len+1]; // +1 for NULL terminator (sometimes the len from PIO doesn't seem to include that so adding just in case)
+    piorc = PIOc_get_att_text(pioFileDesc, coordVar_ids[2], "units", units);
+    if (!CHECKPIOERROR(piorc, std::string("Error with getting units attribute from third coordinates variable in file ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+    // Add null terminator
+    units[units_len]='\0'; 
+    
+    // Look at units to determine base height (default is Earth radius)
+    // (Using strncmp to only compare chars that match
+    // the unit name because sometimes the units can
+    // have garbage on the end.)
+    double earth_radius;
+    if (strncmp(units,"km",2) == 0) {
+      earth_radius= 6371.0;
+    } else if (strncmp(units,"kilometers",10) == 0) {
+      earth_radius= 6371.0;
+    } else if (strncmp(units,"m",1) == 0) {
+      earth_radius=6371000.0;
+    } else if (strncmp(units,"meters",6) == 0) {
+      earth_radius=6371000.0;
+    } else {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
+                                        "Unrecognized units for third (height) coordinate variable",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+
+    // Done with units so free
+    delete [] units;
+
+    // Normalize 3rd (height) dim to Earth radius
+    double *curr_coord=coords+2; // Set to third dim
+    for (int i=0; i<num_ids; i++) {
+      *curr_coord = 1.0 + *curr_coord/earth_radius;
+      curr_coord += 3; // Advance to next third dim
+    }      
+  }
 }
 
 

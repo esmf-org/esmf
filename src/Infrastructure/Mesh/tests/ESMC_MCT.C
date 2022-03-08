@@ -414,9 +414,6 @@ class MCT {
         InterArray<int> *iin = new InterArray<int>(nodeMask.data(),num_node);
         InterArray<int> *iie = new InterArray<int>(elemMask.data(),num_elem);
 
-        // Wrap node_owners in IntArray
-        InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
-        
         MeshCap::meshSetMOAB(&nativeormb, &localrc);
         ESMC_CHECK_THROW(localrc);
 
