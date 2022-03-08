@@ -461,9 +461,9 @@ int IO::write(
   // Open the file
   int localrc;
   {  
-  ESMCI_IOREGION_ENTER("ESMCI_IO:OPEN", localrc);  
+  ESMCI_IOREGION_ENTER("ESMCI_IO:OPEN");
   localrc1 = open(file, status, iofmt, overwrite);
-  ESMCI_IOREGION_EXIT("ESMCI_IO:OPEN", localrc);  
+  ESMCI_IOREGION_EXIT("ESMCI_IO:OPEN");
   }
   PRINTMSG("open returned " << localrc1);
   if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -477,18 +477,18 @@ int IO::write(
     }
   }
   {
-  ESMCI_IOREGION_ENTER("ESMCI_IO:WRITE", localrc);  
+  ESMCI_IOREGION_ENTER("ESMCI_IO:WRITE");
   localrc1 = write(timeslice);
-  ESMCI_IOREGION_EXIT("ESMCI_IO:WRITE", localrc);  
+  ESMCI_IOREGION_EXIT("ESMCI_IO:WRITE");
   }
   PRINTMSG("write returned " << localrc1);
   // Can't quit even if error; Have to close first
 
   // Close the file
   {
-  ESMCI_IOREGION_ENTER("ESMCI_IO:CLOSE", localrc);  
+  ESMCI_IOREGION_ENTER("ESMCI_IO:CLOSE");
   localrc2 = close();
-  ESMCI_IOREGION_EXIT("ESMCI_IO:CLOSE", localrc);  
+  ESMCI_IOREGION_EXIT("ESMCI_IO:CLOSE");
   }
   PRINTMSG("close returned " << localrc2);
   if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

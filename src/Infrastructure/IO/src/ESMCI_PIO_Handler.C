@@ -1136,7 +1136,7 @@ void PIO_Handler::arrayWrite(
   PIOc_set_log_level(0);
 #endif // ESMFIO_DEBUG
   // Write the array
-  ESMCI_IOREGION_ENTER("PIOc_write_darray", localrc);  
+  ESMCI_IOREGION_ENTER("PIOc_write_darray");
   piorc =  PIOc_write_darray(pioFileDesc, vardesc, iodesc, arrlen,
                              (void *)baseAddress, NULL);
   if (!CHECKPIOERROR(piorc, "Attempting to write file",
@@ -1144,7 +1144,7 @@ void PIO_Handler::arrayWrite(
       return;
   }
   new_file = false;
-  ESMCI_IOREGION_EXIT("PIOc_write_darray", localrc);
+  ESMCI_IOREGION_EXIT("PIOc_write_darray");
 
 
   // Cleanup & return
@@ -1310,11 +1310,11 @@ void PIO_Handler::open(
         break;
     }
     }    
-    ESMCI_IOREGION_ENTER("PIOc_createfile", localrc);
+    ESMCI_IOREGION_ENTER("PIOc_createfile");
 
     piorc = PIOc_createfile(pioSystemDesc, &pioFileDesc,
                                  &iotype, getFilename(), mode);
-    ESMCI_IOREGION_EXIT("PIOc_createfile", localrc);
+    ESMCI_IOREGION_EXIT("PIOc_createfile");
     if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ") + getFilename(),
       ESMF_RC_FILE_OPEN, (*rc))) {
       return;
@@ -1329,10 +1329,10 @@ void PIO_Handler::open(
     PRINTMSG(" calling PIOc_openfile with mode = " << mode <<
              ", file = \"" << getFilename() << "\"");
     // Looks like we are ready to go
-    ESMCI_IOREGION_ENTER("PIOc_openfile", localrc);
+    ESMCI_IOREGION_ENTER("PIOc_openfile");
     piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc,
                                &iotype, getFilename(), mode);
-    ESMCI_IOREGION_EXIT("PIOc_openfile", localrc);
+    ESMCI_IOREGION_EXIT("PIOc_openfile");
     PRINTMSG(", called PIOc_openfile on " << getFilename());
     if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + getFilename(),
         ESMF_RC_FILE_OPEN, (*rc))) {
@@ -1537,11 +1537,11 @@ void PIO_Handler::flush(
   // Not open? No problem, just skip
   if (isOpen() == ESMF_TRUE) {
     PRINTMSG("calling sync");
-      ESMCI_IOREGION_ENTER("PIOc_sync", localrc);
-  ESMCI::VM::logMemInfo("PIOc_sync Enter");  
+      ESMCI_IOREGION_ENTER("PIOc_sync");
+  ESMCI::VM::logMemInfo("PIOc_sync Enter");
     PIOc_sync(pioFileDesc);
-  ESMCI::VM::logMemInfo("PIOc_sync Exit");  
-      ESMCI_IOREGION_EXIT("PIOc_sync", localrc);
+  ESMCI::VM::logMemInfo("PIOc_sync Exit");
+      ESMCI_IOREGION_EXIT("PIOc_sync");
   }
   // return successfully
   if (rc != NULL) {
@@ -1584,9 +1584,9 @@ void PIO_Handler::close(
   PRINTPOS;
   // Not open? No problem, just skip
   if (isOpen() == ESMF_TRUE) {
-      ESMCI_IOREGION_ENTER("PIOc_closefile", localrc);
+      ESMCI_IOREGION_ENTER("PIOc_closefile");
     int piorc = PIOc_closefile(pioFileDesc);
-      ESMCI_IOREGION_EXIT("PIOc_closefile", localrc);
+      ESMCI_IOREGION_EXIT("PIOc_closefile");
     new_file = false;
     if (rc != NULL) *rc = piorc;
   }
@@ -1805,11 +1805,11 @@ PIO_IODescHandler::~PIO_IODescHandler (
 //-----------------------------------------------------------------------------
     int localrc;
     PRINTMSG("calling PIOc_freedecomp");
-  ESMCI_IOREGION_ENTER("PIOc_freedecomp", localrc);
-  ESMCI::VM::logMemInfo("PIOc_freedecomp Enter");  
+  ESMCI_IOREGION_ENTER("PIOc_freedecomp");
+  ESMCI::VM::logMemInfo("PIOc_freedecomp Enter");
   PIOc_freedecomp(ios, io_descriptor);
-  ESMCI::VM::logMemInfo("PIOc_freedecomp Exit");  
-  ESMCI_IOREGION_EXIT("PIOc_freedecomp", localrc);
+  ESMCI::VM::logMemInfo("PIOc_freedecomp Exit");
+  ESMCI_IOREGION_EXIT("PIOc_freedecomp");
   if (dims != (int *)NULL) {
     delete[] dims;
     dims = (int *)NULL;
@@ -2044,11 +2044,11 @@ int PIO_IODescHandler::constructPioDecomp(
       ddims[i] = handle->dims[handle->nDims - i - 1];
   // Create the decomposition
   int *rc;
-  ESMCI_IOREGION_ENTER("PIOc_InitDecomp", localrc);
+  ESMCI_IOREGION_ENTER("PIOc_InitDecomp");
   PIOc_InitDecomp(iosys, handle->basepiotype, handle->nDims,
                   ddims, pioDofCount, pioDofList,
                   &(handle->io_descriptor), NULL, NULL, NULL);
-  ESMCI_IOREGION_EXIT("PIOc_InitDecomp", localrc);
+  ESMCI_IOREGION_EXIT("PIOc_InitDecomp");
 
   PRINTMSG("after call to PIOc_initdecomp_dof");
 #ifdef ESMFIO_DEBUG
