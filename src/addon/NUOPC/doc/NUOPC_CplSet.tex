@@ -1,0 +1,75 @@
+% $Id$
+%
+
+\label{CplSets}
+
+The NUOPC Layer can couple multiple data sets by adding nested states to the import and export states of a {\tt NUOPC\_Model}. Each nested state is given a couple set identifier at the time it is added to the parent state. This identifier guarantees a {\tt NUOPC\_Connector} will only pair fields within this nested state to fields in a connected state with an identical identifier.
+
+During {\tt label\_Advertise}, before calling {\tt NUOPC\_Advertise} (using methods \ref{NUOPC_AdvertiseField} or \ref{NUOPC_AdvertiseFields}), add nested states to import and export states using {\tt NUOPC\_AddNestedState}. Each nested state is given a couple set identifier using the CplSet argument, see \ref{NUOPC_AddNestedState}. The nested states can then be used to advertise and realize fields. Each nested state may contain fields with identical standard names or unique standard names. Fields in each nested state will only connect to fields in another state if that state has an identical couple set identifier.
+
+For a complete example of how to couple sets using the NUOPC API, see https://github.com/esmf-org/nuopc-app-prototypes/tree/develop/AtmOcnCplSetProto. The following code snippets demonstrates the critical pieces of code used to add a nested state with a couple set identifier.
+
+\begin{verbatim}
+  subroutine Advertise(model, rc)
+    type(ESMF_GridComp)  :: model
+    integer, intent(out) :: rc
+
+    ! local variables
+    type(ESMF_State) :: importState, exportState
+    type(ESMF_State) :: NStateImp1, NStateImp2
+    type(ESMF_State) :: NStateExp1, NStateExp2
+
+    rc = ESMF_SUCCESS
+
+    ! query model for importState and exportState
+    call NUOPC_ModelGet(model, importState=importState, &
+      exportState=exportState, rc=rc)
+    ! check rc
+
+    ! add nested import states with couple set identifier
+    call NUOPC_AddNestedState(importState, &
+      CplSet="Nest1", nestedStateName="NestedStateImp_N1", &
+      nestedState=NStateImp1, rc=rc)
+    ! check rc
+    call NUOPC_AddNestedState(importState, &
+      CplSet="Nest2", nestedStateName="NestedStateImp_N2", &
+      nestedState=NStateImp2, rc=rc)
+    ! check rc
+
+    ! add nested export states with couple set identifier
+    call NUOPC_AddNestedState(exportState, &
+      CplSet="Nest1", nestedStateName="NestedStateExp_N1", &
+      nestedState=NStateExp1, rc=rc)
+    ! check rc
+    call NUOPC_AddNestedState(exportState, &
+      CplSet="Nest2", nestedStateName="NestedStateExp_N2", &
+      nestedState=NStateExp2, rc=rc)
+    ! check rc
+
+    ! importable field: sea_surface_temperature
+    call NUOPC_Advertise(NStateImp1, &
+      StandardName="sea_surface_temperature", name="sst", rc=rc)
+    ! check rc
+    call NUOPC_Advertise(NStateImp2, &
+      StandardName="sea_surface_temperature", name="sst", rc=rc)
+    ! check rc
+
+    ! exportable field: air_pressure_at_sea_level
+    call NUOPC_Advertise(NStateExp1, &
+      StandardName="air_pressure_at_sea_level", name="pmsl", rc=rc)
+    ! check rc
+    call NUOPC_Advertise(NStateExp2, &
+      StandardName="air_pressure_at_sea_level", name="pmsl", rc=rc)
+    ! check rc
+
+    ! exportable field: surface_net_downward_shortwave_flux
+    call NUOPC_Advertise(NStateExp1, &
+      StandardName="surface_net_downward_shortwave_flux", name="rsns", rc=rc)
+    ! check rc
+    call NUOPC_Advertise(NStateExp2, &
+      StandardName="surface_net_downward_shortwave_flux", name="rsns", rc=rc)
+    ! check rc
+
+  end subroutine
+\end{verbatim}
+

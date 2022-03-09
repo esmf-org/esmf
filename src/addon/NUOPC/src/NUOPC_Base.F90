@@ -236,6 +236,7 @@ module NUOPC_Base
     type(ESMF_State), intent(out), optional :: nestedState
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{NUOPC_AddNestedState}
 !   Create a nested state inside of {\tt state}. The arguments {\tt Namespace}
 !   and {tt\ CplSet} are used to set NUOPC attributes on the newly created
 !   state. The nested state is returned as {\tt nestedState}. If provided,
