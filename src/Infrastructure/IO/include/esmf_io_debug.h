@@ -10,7 +10,7 @@
 
 #ifndef __ESMF_IO_DEBUG_H_INCLUDED_
 #define __ESMF_IO_DEBUG_H_INCLUDED_
-#define ESMFIO_DEBUG 1
+#define ESMFIO_DEBUG 0
 
 #ifdef ESMFIO_DEBUG
 // Macros for printing out debug messages
