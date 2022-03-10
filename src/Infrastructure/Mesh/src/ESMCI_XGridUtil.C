@@ -1777,6 +1777,9 @@ static void _get_centroid_from_elem(MeshObj *elem, const MEField<>  *cfield, int
   MEField<> *side1_orig_elem_id = NULL;
   MEField<> *side2_mesh_ind = NULL;
   MEField<> *side2_orig_elem_id = NULL;
+
+  printf("Creating side=%d Mesh in XGrid\n",side);
+
   if (side == 1) {
     side1_mesh_ind = meshmid.RegisterField("side1_mesh_ind",
 					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
@@ -2461,4 +2464,151 @@ bool intersect_line_with_line(const double *p1, const double *p2, const double *
 
   return true; // great circles will always intersect ^_^
 }
+
+// Calc weights to go from a side mesh to it's xgrid. This call depends on the mesh
+// side information being set, so it only makes sense to call it from within the
+// XGrid create. 
+void calc_wgts_from_side_mesh_to_xgrid(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh, IWeights &wts) {
+
+
+    printf("mesh side=%d mesh ind=%d\n",src_side_mesh->side,src_side_mesh->ind);
+
+
+    // Get side mesh info
+    int side=src_side_mesh->side;
+    int ind=src_side_mesh->ind;
+    
+
+    // TODO: Add a test here to verify that side mesh has valid side and ind values
+
+    // Get data fields corresponding to side
+    MEField<> *mesh_ind_field = NULL;
+    MEField<> *orig_elem_id_field = NULL;
+    if (side == 1) {
+      mesh_ind_field = dst_xgrid_mesh->GetField("side1_mesh_ind");
+      orig_elem_id_field = dst_xgrid_mesh->GetField("side1_orig_elem_id");
+    } else if (side ==2) {
+      mesh_ind_field = dst_xgrid_mesh->GetField("side2_mesh_ind");
+      orig_elem_id_field = dst_xgrid_mesh->GetField("side2_orig_elem_id");
+    } else {
+      Throw() << "Invalid mesh side: "<<side;
+    }
+
+    // Error check Mesh fields
+    if (mesh_ind_field == NULL) Throw() << "XGrid mesh doesn't contain mesh index information.";
+    if (orig_elem_id_field == NULL) Throw() << "XGrid mesh doesn't contain original element id information.";
+
+    // Loop through XGrid elements creating matrix
+    Mesh::iterator ei = dst_xgrid_mesh->elem_begin(), ee = dst_xgrid_mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+
+      // Skip non-local elements
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Get XGrid element ind
+      // (Round to nearest to take care of possible representation issues)
+      double *elem_mesh_ind_dbl = mesh_ind_field->data(elem);
+      int elem_mesh_ind = (int)(*elem_mesh_ind_dbl + 0.5);
+
+      // If it matches, then add element to weights
+      if (elem_mesh_ind == ind) {
+
+        // Get orig elem id
+        // (Round to nearest to take care of possible representation issues)
+        double *src_orig_elem_id_dbl = orig_elem_id_field->data(elem);  
+        int src_orig_elem_id = (int)(*src_orig_elem_id_dbl+0.5);  
+      
+        // Get xgrid elem id
+        int dst_xgrid_elem_id=elem.get_id();
+
+        // Set col info (i.e. the src and weight)
+        IWeights::Entry col(src_orig_elem_id, 0, 1.0, 0);
+        
+        // Set row info (i.e. the destination id associated with the above weight)
+        IWeights::Entry row(dst_xgrid_elem_id, 0, 0.0, 0);
+        
+        // Put into matrix
+        wts.InsertRowMergeSingle(row, col);
+      }
+
+    }
+
+}
+
+// Calc weights from an xgrid to one of it's side meshes. This call depends on the mesh
+// side information being set, so it only makes sense to call it from within the
+// XGrid create. 
+void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh, IWeights &wts) {
+
+
+    printf("from xgrid to side:: mesh side=%d mesh ind=%d\n",dst_side_mesh->side,dst_side_mesh->ind);
+
+
+    // Get side mesh info
+    int side=src_side_mesh->side;
+    int ind=src_side_mesh->ind;
+    
+
+    // TODO: Add a test here to verify that side mesh has valid side and ind values
+
+    // Get data fields corresponding to side
+    MEField<> *mesh_ind_field = NULL;
+    MEField<> *orig_elem_id_field = NULL;
+    if (side == 1) {
+      mesh_ind_field = src_xgrid_mesh->GetField("side1_mesh_ind");
+      orig_elem_id_field = src_xgrid_mesh->GetField("side1_orig_elem_id");
+    } else if (side ==2) {
+      mesh_ind_field = src_xgrid_mesh->GetField("side2_mesh_ind");
+      orig_elem_id_field = src_xgrid_mesh->GetField("side2_orig_elem_id");
+    } else {
+      Throw() << "Invalid mesh side: "<<side;
+    }
+
+    // Error check Mesh fields
+    if (mesh_ind_field == NULL) Throw() << "XGrid mesh doesn't contain mesh index information.";
+    if (orig_elem_id_field == NULL) Throw() << "XGrid mesh doesn't contain original element id information.";
+
+    // Loop through XGrid elements creating matrix
+    Mesh::iterator ei = src_xgrid_mesh->elem_begin(), ee = src_xgrid_mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+
+      // Skip non-local elements
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Get XGrid element ind
+      // (Round to nearest to take care of possible representation issues)
+      double *elem_mesh_ind_dbl = mesh_ind_field->data(elem);
+      int elem_mesh_ind = (int)(*elem_mesh_ind_dbl + 0.5);
+
+      // If it matches, then add element to weights
+      if (elem_mesh_ind == ind) {
+
+        // Get orig elem id
+        // (Round to nearest to take care of possible representation issues)
+        double *dst_orig_elem_id_dbl = orig_elem_id_field->data(elem);  
+        int dst_orig_elem_id = (int)(*dst_orig_elem_id_dbl+0.5);  
+      
+        // Get xgrid elem id
+        int src_xgrid_elem_id=elem.get_id();
+
+        //STOPPED HERE
+
+        // Set col info (i.e. the src and weight)
+        IWeights::Entry col(src_orig_elem_id, 0, 1.0, 0);
+        
+        // Set row info (i.e. the destination id associated with the above weight)
+        IWeights::Entry row(dst_xgrid_elem_id, 0, 0.0, 0);
+        
+        // Put into matrix
+        wts.InsertRowMergeSingle(row, col);
+      }
+
+    }
+
+}
+
+
+
 } //namespace

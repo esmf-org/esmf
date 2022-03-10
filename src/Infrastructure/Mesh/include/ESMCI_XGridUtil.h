@@ -288,6 +288,11 @@ bool intersect_line_with_line(const double *p1, const double *p2, const double *
 double gcdistance(double l1, double g1, double l2, double g2);
 double gcdistance(double * v1, double * v2);
 
+ void calc_wgts_from_side_mesh_to_xgrid(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh, IWeights &wts);
+ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh, IWeights &wts);
+
+
+
 // Debugging apis
 void cart2sph(int num_p, const double *p, double *lonlat);
 void cart2sph(const polygon & cart, polygon & sph);
@@ -299,7 +304,9 @@ void test_clip2D(int pdim, int sdim, int num_s, double * s_coord, int num_c, dou
 void test_clip3D(int pdim, int sdim, int num_s, double * s_coord, int num_c, double * c_coord);
 void dump_sph_coords(int num, const double * coord);
 void dump_cart_coords(int num, const double * coord, bool only_sph=false);
-void dump_polygon(const polygon & poly, bool only_sph=false);
+ void dump_polygon(const polygon & poly, bool only_sph=false);
+ 
+
 
 } // namespace
 

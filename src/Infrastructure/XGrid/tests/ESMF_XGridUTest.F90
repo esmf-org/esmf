@@ -61,7 +61,7 @@
   ! Don't know if I should keep this turned on as an actual unit test, but it's useful for debugging
   write(name, *) "Testing XGrid side and elem info."
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-!  call test_side_and_elem_info(rc)  
+  call test_side_and_elem_info(rc)  
   call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -5236,9 +5236,10 @@ end subroutine test_CSGridToGrid_2nd
   integer, intent(out)  :: rc
   integer :: localrc
   type(ESMF_VM) :: vm
-  type(ESMF_Grid) :: srcGrid
-  type(ESMF_Grid) :: dstGrid
+  type(ESMF_Grid) :: a1Grid, a2Grid
+  type(ESMF_Grid) :: bGrid
   type(ESMF_XGrid) :: xgrid
+  type(ESMF_Mesh) :: xgridMesh
   integer :: localPet, petCount
 
   
@@ -5257,37 +5258,110 @@ end subroutine test_CSGridToGrid_2nd
        ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-#if 0
-  call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CORNER, &
-        filename="srcGridCnrb4", &
+  ! Create small 4 x 4 Grid for side A
+  a1Grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/4,4/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/8.0_ESMF_KIND_R8,5.0_ESMF_KIND_R8/), &
+       coordSys=ESMF_COORDSYS_CART, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
+       ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 0
-   ! Create XGrid
-   xgrid = ESMF_XGridCreate(sideAGrid=(/srcGrid/), &
-        sideBGrid=(/dstGrid/), &
-        storeOverlay = .true., &
+  ! Debug output
+  call ESMF_GridWriteVTK(a1Grid,staggerloc=ESMF_STAGGERLOC_CORNER, &
+        filename="a1GridCnr", &
         rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Create small 4 x 4 Grid for side A
+  a2Grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/4,4/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,4.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/8.0_ESMF_KIND_R8,8.0_ESMF_KIND_R8/), &
+       coordSys=ESMF_COORDSYS_CART, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Debug output
+  call ESMF_GridWriteVTK(a2Grid,staggerloc=ESMF_STAGGERLOC_CORNER, &
+        filename="a2GridCnr", &
+        rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+
+
+  ! Create small 8 x 8 Grid for side B
+  bGrid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/8,8/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/8.0_ESMF_KIND_R8,8.0_ESMF_KIND_R8/), &
+       coordSys=ESMF_COORDSYS_CART, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Debug output
+  call ESMF_GridWriteVTK(bGrid,staggerloc=ESMF_STAGGERLOC_CORNER, &
+        filename="bGridCnr", &
+        rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Create XGrid
+  xgrid = ESMF_XGridCreate(sideAGrid=(/a1Grid, a2Grid/), &
+       sideBGrid=(/bGrid/), &
+       storeOverlay = .true., &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+  
+   ! Debug output
+   call ESMF_XGridGet(xgrid, mesh=xgridMesh, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-   
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+   call ESMF_MeshWriteVTK(xgridMesh, "xgridMesh", rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Free the XGrid
+  call ESMF_XGridDestroy(xgrid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
 
   ! Free the grids
-  call ESMF_GridDestroy(srcGrid, rc=localrc)
+  call ESMF_GridDestroy(a1Grid, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call ESMF_GridDestroy(dstGrid, rc=localrc)
+  call ESMF_GridDestroy(a2Grid, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
+
+  call ESMF_GridDestroy(bGrid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Return success
   rc=ESMF_SUCCESS

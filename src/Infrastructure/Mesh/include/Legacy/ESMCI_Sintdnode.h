@@ -162,7 +162,7 @@ class sintd_cell {
     void set_side2_orig_elem_id(int _side2_orig_elem_id) {side2_orig_elem_id=_side2_orig_elem_id;}
 
     int get_side2_mesh_ind() {return side2_mesh_ind;}
-    int get_side2_orig_elem_id() {return side1_orig_elem_id;}
+    int get_side2_orig_elem_id() {return side2_orig_elem_id;}
 
     int num_edges() const { return nodes.size(); }
 

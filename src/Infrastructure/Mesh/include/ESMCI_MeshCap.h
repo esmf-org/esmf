@@ -321,6 +321,14 @@ namespace ESMCI {
                                    int *nentries, ESMCI::TempWeights **tweights,
                                    int*rc);
 
+    static void xgrid_calc_wgts_from_side_mesh(MeshCap *src_side_mesh, MeshCap *dst_xgrid_mesh,
+                                               int *nentries, ESMCI::TempWeights **tweights,
+                                               int*rc);
+
+    static void xgrid_calc_wgts_to_side_mesh(MeshCap *src_xgrid_mesh, MeshCap *dst_side_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc);
+
     static MeshCap *merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp, int*rc);
 
 

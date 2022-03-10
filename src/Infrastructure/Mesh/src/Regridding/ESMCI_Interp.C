@@ -1752,7 +1752,7 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
   } // for searchresult
 
   if(midmesh != 0)
-    compute_midmesh(sintd_nodes, sintd_cells, 2, 2, midmesh);
+    compute_midmesh(sintd_nodes, sintd_cells, 2, 2, midmesh,3);
 
 }
 
@@ -2422,7 +2422,7 @@ void calc_conserve_mat_serial_3D_3D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
 
 #if 0
   if(midmesh != 0)
-    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh);
+    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh,3);
 #endif
 
 }

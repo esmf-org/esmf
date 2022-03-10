@@ -84,9 +84,7 @@ void WMat::InsertRow(const Entry &row, const std::vector<Entry> &cols) {
 
 
 
-
-// Insert row and associated columns into matrix complain if column doesn't
-// exist then add it, if it exists with a different value then complain
+// Insert row and associated columns into matrix 
 // ASSUMES cols is in sorted order
 void WMat::InsertRowMergeSingle(const Entry &row, const Entry &col) {
 
@@ -130,8 +128,8 @@ void WMat::InsertRowMergeSingle(const Entry &row, const Entry &col) {
 
 
 
-// Insert row and associated columns into matrix complain if column doesn't
-// exist then add it, if it exists with a different value then sum values
+// Insert row and associated columns into matrix complain if it exists 
+// with a different value then sum values
 // ASSUMES cols is in sorted order
 void WMat::InsertRowSumSingle(const Entry &row, const Entry &col) {
 

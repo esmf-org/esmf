@@ -1267,6 +1267,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! When there is only 1 grid per side, optimization can be done but it's not clear for multiple Grids.
     compute_midmesh = 0
     do i = 1, ngrid_a
+#if 0
       call c_esmc_xgridregrid_createP(meshAt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -1274,6 +1275,10 @@ function ESMF_XGridCreate(keywordEnforcer, &
         xgtype%coordSys, &
         nentries, tweights, &
         localrc)
+#else 
+      call c_esmc_xgrid_calc_wgts_from_mesh(meshAt(i), mesh, &
+           nentries, tweights, localrc)
+#endif
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1283,6 +1288,11 @@ function ESMF_XGridCreate(keywordEnforcer, &
         call c_ESMC_Copy_TempWeights_xgrid(tweights, &
         xgtype%sparseMatA2X(i)%factorIndexList(1,1), &
         xgtype%sparseMatA2X(i)%factorList(1))
+
+        do j=1,size(xgtype%sparseMatA2X(i)%factorList,1)
+           write(*,*) "A2X: Grid=",i," src=",xgtype%sparseMatA2X(i)%factorIndexList(1,j)," wgt=",xgtype%sparseMatA2X(i)%factorList(j)," dst=",xgtype%sparseMatA2X(i)%factorIndexList(2,j)
+        enddo
+
       endif
       if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
         call ESMF_XGridGetFracInt(xgtype%sideA(i)%gbcp%grid, mesh=meshAt(i), array=xgtype%fracA2X(i), &
@@ -1300,6 +1310,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       
       ! Now the reverse direction
 #ifndef BOB_XGRID_DEBUG
+#if 0
       call c_esmc_xgridregrid_createP(mesh, meshAt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -1311,6 +1322,12 @@ function ESMF_XGridCreate(keywordEnforcer, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 #else
+      ! Calculate weights from xgrid to a side mesh
+      call c_esmc_xgrid_calc_wgts_to_mesh(mesh, meshAt(i), &
+           nentries, tweights, localrc)
+#endif
+
+#else
       nentries=0
 #endif
       allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
@@ -1319,6 +1336,11 @@ function ESMF_XGridCreate(keywordEnforcer, &
         call c_ESMC_Copy_TempWeights_xgrid(tweights, &
         xgtype%sparseMatX2A(i)%factorIndexList(1,1), &
         xgtype%sparseMatX2A(i)%factorList(1))
+
+        do j=1,size(xgtype%sparseMatX2A(i)%factorList,1)
+           write(*,*) "X2A: Grid=",i," src=",xgtype%sparseMatX2A(i)%factorIndexList(1,j)," wgt=",xgtype%sparseMatX2A(i)%factorList(j)," dst=",xgtype%sparseMatX2A(i)%factorIndexList(2,j)
+        enddo
+
       endif
       if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
         call ESMF_XGridGetFracInt(xgtype%sideA(i)%gbcp%grid, mesh=meshAt(i), array=xgtype%fracX2A(i), &
