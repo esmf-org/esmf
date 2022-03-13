@@ -294,7 +294,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayGet()
   subroutine ESMF_LocalArrayGetDefault(localarray, keywordEnforcer, &
-    typekind, rank, totalCount, totalLBound, totalUBound, rc)
+    typekind, rank, totalCount, totalLBound, totalUBound, isESMFallocated, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray),      intent(in)            :: localarray
@@ -304,6 +304,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out), optional :: totalCount(:)
     integer,                    intent(out), optional :: totalLBound(:)
     integer,                    intent(out), optional :: totalUBound(:)
+    logical,                    intent(out), optional :: isESMFallocated
     integer,                    intent(out), optional :: rc             
 !
 ! !STATUS:
@@ -328,6 +329,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Lower bound per dimension.
 !   \item[{[totalUBound]}]
 !     Upper bound per dimension.
+!   \item[{[isESMFallocated]}]
+!     If .TRUE., the LocalArray object allocated internally by ESMF.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -336,6 +339,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc    ! local return code
     integer :: lrank      ! Local use to get rank
+    type(ESMF_Logical) :: dealloc       ! do we need to free space?
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -398,6 +402,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    if (present(isESMFallocated)) then
+      call c_esmc_localarraygetdealloc(localarray, dealloc, localrc)
+      if (dealloc.eq.ESMF_TRUE) then
+        isESMFallocated = .true.
+      else
+        isESMFallocated = .false.
+      end if
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS

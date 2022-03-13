@@ -36,6 +36,7 @@
     integer(ESMF_KIND_I4), dimension(:), pointer :: intptr
     logical:: localarrayBool
     logical:: isCreated
+    logical:: isESMFallocated
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -95,7 +96,13 @@
     array1 = ESMF_LocalArrayCreate(intptr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
-
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    write(failMsg, *) "Did not return .false."
+    write(name, *) "Testing LocalArray is allocated internally or not for docpy ESMF_DATACOPY_REFERENCE"
+    call ESMF_LocalArrayGet(array1, isESMFallocated=isESMFallocated, rc=rc)
+    print *, "isESMFallocated = ", isESMFallocated
+    call ESMF_Test(.not. isESMFallocated, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -205,7 +212,7 @@
     write(failMsg, *) "Did return ESMF_SUCCESS"
     array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-   
+
     !--------------------------------------------------------------------------
     !NEX_UTest
     write(name, *) "Creating a LocalArray from TKR with counts and without lbounds, ubounds"
@@ -341,7 +348,7 @@
     nullify(real3dptr) ! make sure real3dptr is unassociated
     array1 = ESMF_LocalArrayCreate(real3dptr, datacopyflag=ESMF_DATACOPY_VALUE, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-   
+
 #ifdef ESMF_TESTEXHAUSTIVE
 
     !--------------------------------------------------------------------------
@@ -687,6 +694,14 @@
     call ESMF_LocalArrayGet(array2, realptr2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     print *, "array 2c get returned"
     print *, "realptr2 data = ", realptr2(1:3,1:3)
+
+    !--------------------------------------------------------------------------
+    !EX_UTest
+    write(failMsg, *) "Did not return .true."
+    write(name, *) "Testing LocalArray is allocated internally or not for docpy ESMF_DATACOPY_VALUE"
+    call ESMF_LocalArrayGet(array2, isESMFallocated=isESMFallocated, rc=rc)
+    print *, "isESMFallocated = ", isESMFallocated
+    call ESMF_Test(isESMFallocated, name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
    !EX_UTest
