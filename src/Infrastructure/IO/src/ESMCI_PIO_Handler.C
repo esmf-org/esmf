@@ -1295,7 +1295,7 @@ void PIO_Handler::open(
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_DEBUG
     // Looks like we are ready to try and create the file
-    int mode = clobberMode;
+    mode |= clobberMode;
     switch (getFormat()){
     case ESMF_IOFMT_NETCDF_64BIT_OFFSET: 
     {
@@ -1323,6 +1323,11 @@ void PIO_Handler::open(
 #ifdef ESMFIO_DEBUG
     PIOc_set_log_level(0);
 #endif // ESMFIO_DEBUG
+    piorc = PIOc_set_fill(pioFileDesc, PIO_NOFILL, NULL);
+    if (!CHECKPIOWARN(piorc, std::string("Unable to set fill on file: ") + getFilename(),
+                      ESMF_RC_FILE_OPEN, (*rc))) {
+        return;
+    }
   } else {
     PRINTMSG(" calling PIOc_openfile with mode = " << mode <<
              ", file = \"" << getFilename() << "\"");
@@ -1336,11 +1341,6 @@ void PIO_Handler::open(
         ESMF_RC_FILE_OPEN, (*rc))) {
       return;
     }
-  }
-  piorc = PIOc_set_fill(pioFileDesc, PIO_NOFILL, NULL);
-  if (!CHECKPIOWARN(piorc, std::string("Unable to set fill on file: ") + getFilename(),
-                    ESMF_RC_FILE_OPEN, (*rc))) {
-      return;
   }
 
   // return successfully
