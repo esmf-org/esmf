@@ -188,8 +188,6 @@ void PIO_Handler::initialize (
 
 #ifdef ESMFIO_DEBUG
     PIOc_set_log_level(PIO_DEBUG_LEVEL);
-#else // ESMFIO_DEBUG
-    PIOc_set_log_level(0);
 #endif // ESMFIO_DEBUG
     if (!instanceFound) {
       PRINTMSG("Before PIOc_Init_Intracomm, num_iotasks = " << num_iotasks);
