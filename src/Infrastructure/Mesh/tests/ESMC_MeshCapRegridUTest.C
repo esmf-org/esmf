@@ -33,6 +33,7 @@
 #include <map>
 #include <functional>
 #include <algorithm> //find_if
+#include <fstream>
 
 struct FindAnyPair {
     FindAnyPair (std::string a, std::string b, std::string c, std::string d, 
