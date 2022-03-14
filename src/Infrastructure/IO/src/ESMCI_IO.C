@@ -887,9 +887,7 @@ int IO::flush(void
 
   // Check to make sure that a file is already open
   if (ioHandler->isOpen() != ESMF_FALSE) {
-  ESMCI::VM::logMemInfo("ESMCI_IO:FLUSH Enter");  
     ioHandler->flush(&localrc);
-  ESMCI::VM::logMemInfo("ESMCI_IO:FLUSH Exit");  
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
       return rc;

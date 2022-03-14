@@ -1537,11 +1537,9 @@ void PIO_Handler::flush(
   // Not open? No problem, just skip
   if (isOpen() == ESMF_TRUE) {
     PRINTMSG("calling sync");
-      ESMCI_IOREGION_ENTER("PIOc_sync");
-  ESMCI::VM::logMemInfo("PIOc_sync Enter");
+    ESMCI_IOREGION_ENTER("PIOc_sync");
     PIOc_sync(pioFileDesc);
-  ESMCI::VM::logMemInfo("PIOc_sync Exit");
-      ESMCI_IOREGION_EXIT("PIOc_sync");
+    ESMCI_IOREGION_EXIT("PIOc_sync");
   }
   // return successfully
   if (rc != NULL) {
@@ -1805,20 +1803,18 @@ PIO_IODescHandler::~PIO_IODescHandler (
 //-----------------------------------------------------------------------------
     int localrc;
     PRINTMSG("calling PIOc_freedecomp");
-  ESMCI_IOREGION_ENTER("PIOc_freedecomp");
-  ESMCI::VM::logMemInfo("PIOc_freedecomp Enter");
-  PIOc_freedecomp(ios, io_descriptor);
-  ESMCI::VM::logMemInfo("PIOc_freedecomp Exit");
-  ESMCI_IOREGION_EXIT("PIOc_freedecomp");
-  if (dims != (int *)NULL) {
-    delete[] dims;
-    dims = (int *)NULL;
-  }
-  if (arrayShape != (int *)NULL) {
-    delete[] arrayShape;
-    arrayShape = (int *)NULL;
-  }
-  array_p = (Array *)NULL;
+    ESMCI_IOREGION_ENTER("PIOc_freedecomp");
+    PIOc_freedecomp(ios, io_descriptor);
+    ESMCI_IOREGION_EXIT("PIOc_freedecomp");
+    if (dims != (int *)NULL) {
+        delete[] dims;
+        dims = (int *)NULL;
+    }
+    if (arrayShape != (int *)NULL) {
+        delete[] arrayShape;
+        arrayShape = (int *)NULL;
+    }
+    array_p = (Array *)NULL;
 } // PIO_IODescHandler::~PIO_IODescHandler()
 //-----------------------------------------------------------------------------
 
