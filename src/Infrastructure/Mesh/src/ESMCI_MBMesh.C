@@ -604,7 +604,13 @@ int MBMesh::get_num_elem_conn(std::vector<EntityHandle> elems){
   try {
     int merr;
 
-    // std::cout << "MBMESH::get_num_elem_conn :: is_split = " << is_split << std::endl;
+    int localrc;
+    // Get current mpi communicator
+    MPI_Comm mpi_comm;
+    mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
+    ESMC_CHECK_THROW(localrc);
+    int localPet=VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
 
     if (!is_split) {
       std::vector<EntityHandle>::const_iterator ei = elems.begin();
@@ -627,7 +633,10 @@ int MBMesh::get_num_elem_conn(std::vector<EntityHandle> elems){
       std::vector<int> merged_nids;
       mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids, false);
       elemConnCount = merged_nids.size();
-      
+
+      std::cout << localPet << "#MBMESH::get_num_elem_conn :: = " 
+                << elemConnCount << std::endl;
+
       // std::cout << "num_merged_nids = [";
       // for (const auto nid: num_merged_nids)
       //   std::cout << nid << " ";
@@ -2906,6 +2915,9 @@ void MBMesh::finalize_elems() {
     _num_elem = all_elems.size();
     _num_owned_elem = owned_elems.size();
     _num_orig_elem = orig_elems.size();
+    
+    // std::cout << "MBMESH::finalize_elem num_elem = " << _num_elem
+    //           << std::endl;
     
     _num_elem_conn = get_num_elem_conn(all_elems);
 

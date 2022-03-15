@@ -22,7 +22,7 @@ TESTS_BUILD	  = \
                 $(ESMF_TESTDIR)/ESMC_NearestUTest \
                 $(ESMF_TESTDIR)/ESMC_Proj4UTest
 
-# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
 

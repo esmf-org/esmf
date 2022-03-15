@@ -487,13 +487,13 @@ class MCT {
       try {
         int localrc;
 
-        // skip if run on one processor
-        if (np == 1) {
-          name = "SKIP - " + name;
-          return ESMF_SUCCESS;
-        }
+        // // skip if run on one processor
+        // if (np == 1) {
+        //   name = "SKIP - " + name;
+        //   return ESMF_SUCCESS;
+        // }
           
-        int ne = redist_elemId.size();
+        // int ne = redist_elemId.size();
 
         target = MeshCap::meshcreatedual(&mesh, &localrc);
         ESMC_CHECK_THROW(localrc);
@@ -502,10 +502,14 @@ class MCT {
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
 
-        // verify dual info on target
-        // this is tricky will require vtk output for empirical discovery
-        // localrc = test_dual_info(target);
+        // // verify dual info on target
+        // // this is tricky will require vtk output for empirical discovery
+        localrc = test_dual_info();
         ESMC_CHECK_THROW(localrc);
+        
+        // 
+        // localrc = write_vtk();
+        // ESMC_CHECK_THROW(localrc);
       }
       CATCH_MCT_RETURN_RC(&rc)
 
@@ -749,13 +753,21 @@ class MCT {
         std::string test = name;
       
         // create test file name using localPet
-        int len = test.length();
+        int len = test.length()+10;
         char fname[len];
         sprintf(fname, "%s_%d", test.c_str(), localPet);
+        
+        // std::cout << fname << std::endl;
         
         mesh->meshwrite(fname, &localrc, len);
         ESMC_CHECK_THROW(localrc);
 
+        // create test file name using localPet
+        sprintf(fname, "dual_%s_%d", test.c_str(), localPet);
+        
+        target->meshwrite(fname, &localrc, len);
+        ESMC_CHECK_THROW(localrc);
+        
         // verify the original mesh is still valid
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
@@ -1223,7 +1235,8 @@ class MCT {
       if (verbosity >= 2) {
         std::cout << localPet << "# " << name  << " - "
                   << "nodeCount = " << nodeCount
-                  << " elemCount = " << elemCount << std::endl;
+                  << " elemCount = " << elemCount
+                  << " elemConnCount = " << elemConnCount << std::endl;
       }
 
       }
@@ -1813,7 +1826,7 @@ class MCT {
     }
 
 
-    int test_dual_info(MBMesh *mesh){
+    int test_dual_info(){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MCT::test_dual_info()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1909,12 +1922,12 @@ class MCT {
 
         // TODO: redist can't reassemble split element (fix with ngons)
         // NOTE: bypass for now, remove when elemType from ngons fixed
-        if (name.find("ngon") == std::string::npos) {
+        // if (name.find("ngon") == std::string::npos) {
           // in the node redist case there are more elements created
           // really need to subclass MCT to allow different specs
           if (!(check_node and !check_elem))
             localrc = test_get_counts(target);
-        }
+        // }
         ESMC_CHECK_THROW(localrc);
         
       /////////////////// node create info ////////////////////////////

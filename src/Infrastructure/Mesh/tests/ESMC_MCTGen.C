@@ -493,7 +493,7 @@ MCT* tri_2d_cart(int &rc) {
                          9,8,5,
                          9,5,6};
         mct->elemCoord = {0.1,0.9, 0.9,0.1, 1.1,0.1, 1.9,0.9,
-                          0.1,1.1, 0.9,1.9, 1.1,1.9, 1.9,0.9};
+                          0.1,1.1, 0.9,1.9, 1.1,1.9, 1.9,1.1};
 
     } else if (petCount == 4) {
       if (localPet == 0) {
@@ -504,9 +504,9 @@ MCT* tri_2d_cart(int &rc) {
         mct->elemId = {1,2};
         mct->elemType = {ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI};
-        mct->elemConn = {1,2,3,
-                         2,4,3};
-        mct->elemCoord = {0.9,0.1, 0.1,0.9};
+        mct->elemConn = {1,4,3,
+                         1,2,4};
+        mct->elemCoord = {0.1,0.9, 0.9,0.1};
       } else if (localPet == 1) {
         mct->nodeId = {2,3,5,6};
         mct->nodeCoord = {1.0,0.0, 2.0,0.0,
@@ -537,9 +537,9 @@ MCT* tri_2d_cart(int &rc) {
         mct->elemId = {7,8};
         mct->elemType = {ESMC_MESHELEMTYPE_TRI,
                          ESMC_MESHELEMTYPE_TRI};
-        mct->elemConn = {1,2,3,
-                         2,4,3};
-        mct->elemCoord = {1.1,1.9, 1.9,0.9};
+        mct->elemConn = {1,4,3,
+                         1,2,4};
+        mct->elemCoord = {1.1,1.9, 1.9,1.1};
       }
 
       // redist
@@ -554,9 +554,9 @@ MCT* tri_2d_cart(int &rc) {
         mct->redist_elemId = {7,8};
         mct->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
                                 ESMC_MESHELEMTYPE_TRI};
-        mct->redist_elemConn = {1,2,3,
-                                2,4,3};
-        mct->redist_elemCoord = {1.1,1.9, 1.9,0.9};
+        mct->redist_elemConn = {1,4,3,
+                                1,2,4};
+        mct->redist_elemCoord = {1.1,1.9, 1.9,1.1};
       } else if (localPet == 1) {
         mct->redist_nodeId_in ={4,7};
         mct->redist_elemId_in = {5,6};
@@ -584,8 +584,7 @@ MCT* tri_2d_cart(int &rc) {
                                 ESMC_MESHELEMTYPE_TRI};
         mct->redist_elemConn = {1,2,3,
                                 2,4,3};
-        mct->redist_elemCoord = {0.1,0.9, 0.9,0.1, 1.1,0.1, 1.9,0.9,
-                                 0.1,1.1, 0.9,1.9, 1.1,1.9, 1.9,0.9};
+        mct->redist_elemCoord = {1.1,0.1, 1.9,0.9};
       } else if (localPet == 3) {
         mct->redist_nodeId_in ={1};
         mct->redist_elemId_in = {1,2};
@@ -597,8 +596,8 @@ MCT* tri_2d_cart(int &rc) {
         mct->redist_elemId = {1,2};
         mct->redist_elemType = {ESMC_MESHELEMTYPE_TRI,
                                 ESMC_MESHELEMTYPE_TRI};
-        mct->redist_elemConn = {1,2,3,
-                                2,4,3};
+        mct->redist_elemConn = {1,4,3,
+                                1,2,4};
         mct->redist_elemCoord = {0.1,0.9, 0.9,0.1};
       }
     }

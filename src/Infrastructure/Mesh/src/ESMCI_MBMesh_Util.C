@@ -677,7 +677,9 @@ void MBMesh_detect_split_elems(
     MPI_Comm mpi_comm;
     mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
     ESMC_CHECK_THROW(localrc);
-    
+    int localPet=VM::getCurrent(&localrc)->getLocalPet();
+    ESMC_CHECK_THROW(localrc);
+        
     // Init is_split output
     is_split=false;
     is_split_local=false;
@@ -732,8 +734,11 @@ void MBMesh_detect_split_elems(
         is_split=false;
       }
     }
+  // std::cout << localPet << "#MBMESH::_detect_split_elems is_split = " << is_split << std::endl;
   }
   CATCH_MBMESH_RETHROW
+  
+
 }
 
 // triangulate > 4 sided
