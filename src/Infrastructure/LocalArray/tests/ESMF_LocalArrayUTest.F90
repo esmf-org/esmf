@@ -36,7 +36,7 @@
     integer(ESMF_KIND_I4), dimension(:), pointer :: intptr
     logical:: localarrayBool
     logical:: isCreated
-    logical:: isESMFallocated
+    logical:: isESMFAllocated
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -100,9 +100,9 @@
     !NEX_UTest
     write(failMsg, *) "Did not return .false."
     write(name, *) "Testing LocalArray is allocated internally or not for docpy ESMF_DATACOPY_REFERENCE"
-    call ESMF_LocalArrayGet(array1, isESMFallocated=isESMFallocated, rc=rc)
-    print *, "isESMFallocated = ", isESMFallocated
-    call ESMF_Test(.not. isESMFallocated, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_LocalArrayGet(array1, isESMFAllocated=isESMFAllocated, rc=rc)
+    print *, "isESMFAllocated = ", isESMFAllocated
+    call ESMF_Test(.not. isESMFAllocated, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -699,9 +699,9 @@
     !EX_UTest
     write(failMsg, *) "Did not return .true."
     write(name, *) "Testing LocalArray is allocated internally or not for docpy ESMF_DATACOPY_VALUE"
-    call ESMF_LocalArrayGet(array2, isESMFallocated=isESMFallocated, rc=rc)
-    print *, "isESMFallocated = ", isESMFallocated
-    call ESMF_Test(isESMFallocated, name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_LocalArrayGet(array2, isESMFAllocated=isESMFAllocated, rc=rc)
+    print *, "isESMFAllocated = ", isESMFAllocated
+    call ESMF_Test(isESMFAllocated, name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
    !EX_UTest

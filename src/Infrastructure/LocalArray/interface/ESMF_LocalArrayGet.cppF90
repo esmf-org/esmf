@@ -294,7 +294,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayGet()
   subroutine ESMF_LocalArrayGetDefault(localarray, keywordEnforcer, &
-    typekind, rank, totalCount, totalLBound, totalUBound, isESMFallocated, rc)
+    typekind, rank, totalCount, totalLBound, totalUBound, isESMFAllocated, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray),      intent(in)            :: localarray
@@ -304,7 +304,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out), optional :: totalCount(:)
     integer,                    intent(out), optional :: totalLBound(:)
     integer,                    intent(out), optional :: totalUBound(:)
-    logical,                    intent(out), optional :: isESMFallocated
+    logical,                    intent(out), optional :: isESMFAllocated
     integer,                    intent(out), optional :: rc             
 !
 ! !STATUS:
@@ -329,7 +329,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Lower bound per dimension.
 !   \item[{[totalUBound]}]
 !     Upper bound per dimension.
-!   \item[{[isESMFallocated]}]
+!   \item[{[isESMFAllocated]}]
 !     If .TRUE., the LocalArray object allocated internally by ESMF.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -403,12 +403,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    if (present(isESMFallocated)) then
+    if (present(isESMFAllocated)) then
       call c_esmc_localarraygetdealloc(localarray, dealloc, localrc)
       if (dealloc.eq.ESMF_TRUE) then
-        isESMFallocated = .true.
+        isESMFAllocated = .true.
       else
-        isESMFallocated = .false.
+        isESMFAllocated = .false.
       end if
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &

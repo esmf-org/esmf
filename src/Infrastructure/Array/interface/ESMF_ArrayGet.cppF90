@@ -137,7 +137,7 @@ contains
     tileCount, minIndexPTile, maxIndexPTile, deToTileMap, indexCountPDe, &
     delayout, deCount, localDeCount, ssiLocalDeCount, localDeToDeMap, &
     localDeList, &    ! DEPRECATED ARGUMENT
-    isESMFallocated, &
+    isESMFAllocated, &
     name, vm, rc)
 !
 ! !ARGUMENTS:
@@ -176,7 +176,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: ssiLocalDeCount
     integer,                       intent(out), optional :: localDeToDeMap(:)
     integer,                       intent(out), optional :: localDeList(:)     ! DEPRECATED ARGUMENT
-    logical,                       intent(out), optional :: isESMFallocated
+    logical,                       intent(out), optional :: isESMFAllocated
     character(len=*),              intent(out), optional :: name
     type(ESMF_VM),                 intent(out), optional :: vm
     integer,                       intent(out), optional :: rc  
@@ -195,7 +195,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              between PETs on the same single system image (SSI).\newline
 !              Added argument {\tt vm} in order to offer information about the
 !              VM on which the Array was created.
-! \item[8.3.0] Added argument {\tt isESMFallocated}.
+! \item[8.3.0] Added argument {\tt isESMFAllocated}.
 ! \end{description}
 ! \end{itemize}
 !         
@@ -347,7 +347,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ssiLocalDeCount}, and will be filled accordingly.
 !   \item[{[localDeList]}]
 !     \apiDeprecatedArgWithReplacement{localDeToDeMap}
-!   \item[{[isESMFallocated]}]
+!   \item[{[isESMFAllocated]}]
 !     If .TRUE., the data associated with the Array allocated internally by ESMF.
 !   \item [{[name]}]
 !     Name of the Array object.
@@ -578,7 +578,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain dealloc information
-    if (present(isESMFallocated)) then
+    if (present(isESMFAllocated)) then
       do i=1, opt_ssiLocalDeCount
         call c_ESMC_ArrayGetLArray(array, i, localArray, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -587,9 +587,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         if (dealloc.eq.ESMF_TRUE) then
-          isESMFallocated = .true.
+          isESMFAllocated = .true.
         else
-          isESMFallocated = .false.
+          isESMFAllocated = .false.
         end if
       end do
     end if
