@@ -1689,6 +1689,9 @@ ifdef ESMF_PIO
 ESMF_CPPFLAGS                += -DESMF_PIO=1
 ifneq ($(origin ESMF_PIO_LIBS), environment)
 ESMF_PIO_LIBS = -lpioc
+ifdef ESMF_NCCONFIG
+ESMF_PIO_LIBS += $(shell $(ESMF_NCCONFIG) --libs)
+endif
 endif
 ifdef ESMF_PIO_INCLUDE
 ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
