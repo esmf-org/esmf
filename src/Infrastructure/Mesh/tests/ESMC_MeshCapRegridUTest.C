@@ -34,6 +34,7 @@
 #include <functional>
 #include <algorithm> //find_if
 #include <fstream>
+#include <ctime>
 
 struct FindAnyPair {
     FindAnyPair (std::string a, std::string b, std::string c, std::string d, 
@@ -83,8 +84,23 @@ void combine(const std::string &api, const std::string &mesh,
 
     int nvmb = 1;
     if (nativeormb == "Native") nvmb = 0;
+
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+
+    std::array<char, 64> buffer;
+    buffer.fill(0);
+    time_t rawtime;
+    time(&rawtime);
+    const auto timeinfo = localtime(&rawtime);
+    strftime(buffer.data(), sizeof(buffer), "%d-%m-%Y %H-%M-%S", timeinfo);
+    std::string timeStr(buffer.data());
     
-    std::string name = nativeormb + " Mesh - " + api + dash + mesh +
+    std::string name = timeStr + dash + "PET " + std::to_string(localPet) + dash +
+                       nativeormb + " Mesh - " + api + dash + mesh +
                        dash + maptype + dash + normtype + dash + poletype +
                        dash + extrapmethod + dash + unmappedaction + 
                        dash + ignoredegenerate;

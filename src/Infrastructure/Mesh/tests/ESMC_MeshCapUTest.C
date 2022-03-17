@@ -36,6 +36,7 @@
 #include <map>
 #include <functional>
 #include <algorithm> //find_if
+#include <ctime>
 
 struct FindPair {
     FindPair (std::string first, std::string second) \
@@ -63,7 +64,22 @@ void combine(const std::string &api, const std::string &mesh,
     int nvmb = 1;
     if (nativeormb == "Native") nvmb = 0;
     
-    std::string name = nativeormb + " Mesh - " + api + " - " + mesh;
+    int localPet, petCount;
+    ESMC_VM vm;
+    vm=ESMC_VMGetGlobal(&rc);
+    rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
+                  (int *)NULL, (int *)NULL);
+
+    std::array<char, 64> buffer;
+    buffer.fill(0);
+    time_t rawtime;
+    time(&rawtime);
+    const auto timeinfo = localtime(&rawtime);
+    strftime(buffer.data(), sizeof(buffer), "%d-%m-%Y %H-%M-%S", timeinfo);
+    std::string timeStr(buffer.data());
+    
+    std::string name = timeStr + " - " + "PET " + std::to_string(localPet) + " - " +
+                       nativeormb + " Mesh - " + api + " - " + mesh;
 
 #if defined ESMF_MOAB
       try {
