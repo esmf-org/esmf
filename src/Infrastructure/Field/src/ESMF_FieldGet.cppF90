@@ -116,7 +116,8 @@ contains
     gridindex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, localDeCount, ssiLocalDeCount, &
     localDeToDeMap, minIndex, maxIndex, elementCount, &
-    localMinIndex, localMaxIndex, localElementCount, name, vm, rc)
+    localMinIndex, localMaxIndex, localElementCount, name, vm, &
+    isESMFAllocated, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field),           intent(in)            :: field
@@ -153,6 +154,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out), optional :: localElementCount(:)
     character(len=*),           intent(out), optional :: name
     type(ESMF_VM),              intent(out), optional :: vm
+    logical,                    intent(out), optional :: isESMFAllocated
     integer,                    intent(out), optional :: rc
 !
 ! !STATUS:
@@ -340,12 +342,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[localElementCount]}]
 !     Upon return this holds the PET local number of items of the field data.
 !     {\tt localElementCount} must be allocated to be of size equal to the field rank.
-! \item [{[name]}]
+! \item[{[name]}]
 !       Name of queried item.
-! \item [{[vm]}]
+! \item[{[vm]}]
 !       The VM on which the Field object was created.
+! \item[{[isESMFAllocated]}]
+!     If .TRUE., the data associated with the Array allocated internally by ESMF.
 ! \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOP
 !------------------------------------------------------------------------------
@@ -368,6 +372,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid)             :: l_grid
     type(ESMF_Mesh)             :: l_mesh
     type(ESMF_DistGrid)         :: distgrid
+    type(ESMF_Logical)          :: dealloc
+    type(ESMF_LocalArray)       :: localArray
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -920,6 +926,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
         ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     endif
+
+    ! Obtain dealloc information
+    if (present(isESMFAllocated)) then
+      call ESMF_FieldGetLocalArray(field, localArray, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_ESMC_LocalArrayGetDealloc(localArray, dealloc, localrc) 
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      isESMFAllocated = .false.
+      if (dealloc.eq.ESMF_TRUE) then
+        isESMFAllocated = .true.
+      end if
+    end if
 
     if (present(rc)) rc = ESMF_SUCCESS
 
