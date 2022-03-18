@@ -579,6 +579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Obtain dealloc information
     if (present(isESMFAllocated)) then
+      isESMFAllocated = .false.
       do i=1, opt_ssiLocalDeCount
         call c_ESMC_ArrayGetLArray(array, i, localArray, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -588,8 +589,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
         if (dealloc.eq.ESMF_TRUE) then
           isESMFAllocated = .true.
-        else
-          isESMFAllocated = .false.
         end if
       end do
     end if
