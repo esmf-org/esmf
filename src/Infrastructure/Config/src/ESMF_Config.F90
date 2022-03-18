@@ -179,7 +179,6 @@
 !------------------------------------------------------------------------------
 ! Revised parameter table to fit Fortran 90 standard.
 
-!       integer,   parameter :: LSZ = 256  ! Maximum line size
        integer,   parameter :: LSZ = max (1024,ESMF_MAXPATHLEN)  ! Maximum line size
                                           ! should be at least long enough
                                           ! to read in a file name with full
