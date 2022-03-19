@@ -28,8 +28,8 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
-ESMF_F90LINKLIBS       += 
-ESMF_CXXLINKLIBS       += 
+ESMF_F90LINKLIBS       +=
+ESMF_CXXLINKLIBS       +=
 ESMF_MPIRUNDEFAULT      = mpirun.srun
 ESMF_MPIMPMDRUNDEFAULT  =
 else
@@ -85,8 +85,10 @@ ESMF_PTHREADS := OFF
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_F90COMPILEOPTS += -homp
-ESMF_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90COMPILEOPTS += -homp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # How to specify module directories
@@ -136,7 +138,7 @@ ESMF_NOWEBSERVTESTING = TRUE
 ESMF_CPPDEFAULT       = gcc -E -P -x c
 
 ############################################################
-# Set these to avoid a cpp error 
+# Set these to avoid a cpp error
 #
 ESMF_PGIVERSION_MAJOR = -1
 ESMF_PGIVERSION_MINOR = -1
