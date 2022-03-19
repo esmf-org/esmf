@@ -134,3 +134,9 @@ ESMF_NOWEBSERVTESTING = TRUE
 # Override default C preprocessor on this platform
 #
 ESMF_CPPDEFAULT       = gcc -E -P -x c
+
+############################################################
+# Set these to avoid a cpp error 
+#
+ESMF_PGIVERSION_MAJOR = -1
+ESMF_PGIVERSION_MINOR = -1
