@@ -26,6 +26,7 @@
 
 namespace ESMCI {
 
+ 
 
  int regrid(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,
             Mesh *midmesh, IWeights &wts,
@@ -228,6 +229,12 @@ namespace ESMCI {
               set_dst_status, dst_status);
      }
 
+     // Normalize bilinear weights to ensure monotonicity
+     if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
+       wts.Normalize();
+     }
+
+     // Return success
     return 1;
  }
 

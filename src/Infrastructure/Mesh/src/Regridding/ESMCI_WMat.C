@@ -385,6 +385,67 @@ void WMat::MergeReplace(const WMat &wmat2) {
   }
 }
 
+// Ensure that the sum of weights for each destination is 1.0
+void WMat::Normalize() {
+
+  // Loop through rows of weights
+  WeightMap::iterator wi = weights.begin(), we = weights.end();
+  for (; wi != we; ++wi) {
+
+    // Get columns in row
+    std::vector<Entry> &col = wi->second;
+
+    // Total weights in column
+    double tot=0.0;
+    for (UInt i = 0; i < col.size(); i++) {
+      tot += col[i].value;
+    }
+
+
+#if 0    
+    double back_tot=0.0;
+    for (int i = col.size()-1; i >=0; i--) {
+      back_tot += col[i].value;
+    }
+    
+    //    if (wi->first.id == 2471) {
+    //  printf("id=%d tot=%20.17f back_tot=%20.17f \n",wi->first.id,tot,back_tot);
+    //}
+
+    if (((tot < 1.0) && (back_tot >= 1.0)) ||
+        ((tot >= 1.0) && (back_tot < 1.0))) {
+      printf("id=%d tot=%30.27f back_tot=%30.27f \n",wi->first.id,tot,back_tot);
+    }
+#endif    
+    
+    // Divide weights in column by total (if non-zero)
+    //if (tot != 0.0) {
+    if (tot > 1.0) {
+      for (UInt i = 0; i < col.size(); i++) {
+        col[i].value = col[i].value/tot;
+      }
+
+#if 0      
+      double new_tot=0.0;
+      for (UInt i = 0; i < col.size(); i++) {
+        new_tot += col[i].value;
+      }
+
+      double back_tot=0.0;
+      for (int i = col.size()-1; i >=0; i--) {
+        back_tot += col[i].value;
+      }
+
+      if (wi->first.id == 2471) {
+        printf("HERE id=%d new_tot=%20.17f back_tot=%20.17f\n",wi->first.id,new_tot, back_tot);
+      }
+#endif
+      
+    }   
+  }
+
+}
+
 
 void WMat::Print(std::ostream &os) {
 

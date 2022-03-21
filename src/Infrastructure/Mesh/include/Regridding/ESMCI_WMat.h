@@ -104,6 +104,8 @@ public:
   void GetRowSrcGIDS(std::vector<UInt> &gids);
   
   void GetColGIDS(std::vector<UInt> &gids);
+
+  void Normalize();
   
   void Print(std::ostream &);
 

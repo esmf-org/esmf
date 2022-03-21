@@ -372,6 +372,12 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate4.0"));
 #endif
 
+    // Moved to ESMCI_MeshRegrid.C
+     // Normalize bilinear weights to ensure monotonicity
+    //     if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
+    //    wts->Normalize();
+    // }
+    
     /////// We have the weights, now set up the sparsemm object /////
 
     // Firstly, the index list
@@ -392,10 +398,11 @@ void ESMCI_regrid_create(
       WMat::WeightMap::iterator wi = wts->begin_row(), we = wts->end_row();
       for (; wi != we; ++wi) {
         const WMat::Entry &w = wi->first;
-
-        std::vector<WMat::Entry> &wcol = wi->second;
+        
+        double tot=0.0;
 
         // Construct factor index list
+        std::vector<WMat::Entry> &wcol = wi->second;
         for (UInt j = 0; j < wcol.size(); ++j) {
           UInt twoi = 2*i;
           const WMat::Entry &wc = wcol[j];
@@ -404,6 +411,13 @@ void ESMCI_regrid_create(
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
 
+          tot += wc.value;
+          
+          //          if ((wc.value < 0.0) || (wc.value > 1.0)) {
+          //  printf("d_id=%d  s_id=%d s=%d w=%20.17E \n",w.id,wc.id,wc.src_id,wc.value);
+          //}
+
+          
 #define ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL_off
 
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
@@ -422,6 +436,11 @@ void ESMCI_regrid_create(
 
           i++;
         } // for j
+
+        //        if (tot > 1.0) {
+        //   printf(" dst_id=%d tot=%20.17f diff=%g\n",w.id,tot,tot-1.0);
+        // }
+        
       } // for wi
 
     } else {
