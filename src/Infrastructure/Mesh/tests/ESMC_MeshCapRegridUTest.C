@@ -281,10 +281,9 @@ int main(int argc, char *argv[]) {
     {"conservative_2nd", "ngon_2d_cart"},
     {"conservative_2nd", "ngon_2d_sph_deg"},
     {"conservative_2nd", "ngon_2d_sph_rad"},
-    {"conservative", "hex_3d_sph_deg"}, // Conservative not supported on 3D spherical meshes
-    {"conservative", "hex_3d_sph_rad"}, // Conservative not supported on 3D spherical meshes
-    // this exception is an attempt to allow orion intel to proceed without hang
-    {"periodic_2d_sph_rad", "IGNORE_DEGENERATE"},
+    // Conservative not supported on 3D spherical meshes
+    {"conservative", "hex_3d_sph_deg"},
+    {"conservative", "hex_3d_sph_rad"},
   };
 
   std::vector<std::pair<std::string, std::string>> skip_test_common = {\
