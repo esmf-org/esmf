@@ -200,6 +200,20 @@ class MCT {
     std::vector<int> redist_nodeId_in;
     std::vector<int> redist_elemId_in;
 
+    int dual_num_node;
+    int dual_num_elem;
+    int dual_num_elem_conn;
+    std::vector<int> dual_nodeId;
+    std::vector<int> dual_nodeMask;
+    std::vector<int> dual_nodeOwner;
+    std::vector<double> dual_nodeCoord;
+    std::vector<int> dual_elemConn;
+    std::vector<int> dual_elemId;
+    std::vector<int> dual_elemMask;
+    std::vector<int> dual_elemType;
+    std::vector<double> dual_elemArea;
+    std::vector<double> dual_elemCoord;
+
     std::map<std::string, std::function<int(void)>>  function_map;
     std::map<std::string, std::function<int(int, int, int, int, int, int)>>  regrid_map;
 
@@ -210,7 +224,7 @@ class MCT {
     std::map<std::string, int> UnmappedAction;
     std::map<std::string, int> IgnoreDegenerate;
 
-    MCT(int _pdim, int _sdim, ESMC_CoordSys_Flag _coord_sys, int _num_node, int _num_elem, int _num_elem_conn, int _redist_num_node, int _redist_num_elem, int _redist_num_elem_conn) {
+    MCT(int _pdim, int _sdim, ESMC_CoordSys_Flag _coord_sys, int _num_node, int _num_elem, int _num_elem_conn, int _redist_num_node, int _redist_num_elem, int _redist_num_elem_conn, int _dual_num_node=0, int _dual_num_elem=0, int _dual_num_elem_conn=0) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MCT()"
       try {
@@ -225,13 +239,18 @@ class MCT {
         pdim = _pdim;
         sdim = _sdim;
         orig_sdim = _sdim;
+        coord_sys = _coord_sys;
+
         num_node = _num_node;
         num_elem = _num_elem;
         num_elem_conn = _num_elem_conn;
         redist_num_node = _redist_num_node;
         redist_num_elem = _redist_num_elem;
         redist_num_elem_conn = _redist_num_elem_conn;
-        coord_sys = _coord_sys;
+
+        dual_num_node = _dual_num_node;
+        dual_num_elem = _dual_num_elem;
+        dual_num_elem_conn = _dual_num_elem_conn;
         
         nodeId.reserve(_num_node);
         nodeCoord.reserve(_num_node*_sdim);
@@ -260,6 +279,23 @@ class MCT {
           redist_nodeMask.reserve(_redist_num_node);
           redist_elemMask.reserve(_redist_num_elem);
           redist_elemArea.reserve(_redist_num_elem);
+        }
+        
+        dual_num_node = _dual_num_node;
+        dual_num_elem = _dual_num_elem;
+        dual_num_elem_conn = _dual_num_elem_conn;
+        if (_dual_num_node > 0) {
+          dual_nodeId.reserve(_dual_num_node);
+          dual_nodeCoord.reserve(_dual_num_node*_sdim);
+          dual_nodeOwner.reserve(_dual_num_node);
+          dual_elemId.reserve(_dual_num_elem);
+          dual_elemType.reserve(_dual_num_elem);
+          dual_elemConn.reserve(_dual_num_elem_conn);
+          dual_elemCoord.reserve(_dual_num_elem*_sdim);
+          
+          dual_nodeMask.reserve(_dual_num_node);
+          dual_elemMask.reserve(_dual_num_elem);
+          dual_elemArea.reserve(_dual_num_elem);
         }
         
         function_map["createget"] = std::bind(&MCT::createget, this);
@@ -1792,10 +1828,6 @@ class MCT {
       try {
         int localrc; 
 
-        num_node = num_elem;
-        num_elem = num_node;
-        // num_elem_conn = ;
-
         nodeId.clear();
         nodeMask.clear();
         nodeOwner.clear();
@@ -1806,17 +1838,22 @@ class MCT {
         elemArea.clear();
         elemCoord.clear();
         elemConn.clear();
+        
+        num_node = dual_num_node;
+        num_elem = dual_num_elem;
+        num_elem_conn = dual_num_elem_conn;
 
-        nodeId = elemId;
-        nodeMask = elemMask;
-        // nodeOwner = ;
-        nodeCoord = elemCoord;
-        elemId = nodeId;
-        elemMask = nodeMask;
-        // elemType = ;
-        // elemArea = ;
-        elemCoord = nodeCoord;
-        // elemConn = ;
+        nodeId = dual_nodeId;
+        nodeMask = dual_nodeMask;
+        nodeOwner = dual_nodeOwner;
+        nodeCoord = dual_nodeCoord;
+        elemId = dual_elemId;
+        // no elemMask yet for dual
+        // elemMask = dual_elemMask;
+        elemType = dual_elemType;
+        elemArea = dual_elemArea;
+        elemCoord = dual_elemCoord;
+        elemConn = dual_elemConn;
 
       }
       CATCH_MCT_RETURN_RC(&rc)
@@ -1948,13 +1985,13 @@ class MCT {
         localrc = test_get_presence(target);
         ESMC_CHECK_THROW(localrc);
         
-        // localrc = test_get_node_info(mesh);
+        // localrc = test_get_node_info(target);
         // ESMC_CHECK_THROW(localrc);
         // 
-        // localrc = test_get_elem_info(mesh);
+        // localrc = test_get_elem_info(target);
         // ESMC_CHECK_THROW(localrc);
         // 
-        // localrc = test_get_elem_conn_info(mesh);
+        // localrc = test_get_elem_conn_info(target);
         // ESMC_CHECK_THROW(localrc);
 
       /////////////////// counts ////////////////////////////

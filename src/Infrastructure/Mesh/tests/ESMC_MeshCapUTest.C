@@ -132,10 +132,10 @@ int main(int argc, char *argv[]) {
   // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis;
     // test_apis.push_back("createget");
-    // test_apis.push_back("dual");
-    test_apis.push_back("redist_elem");
-    test_apis.push_back("redist_node");
-    test_apis.push_back("redist_elno");
+    test_apis.push_back("dual");
+    // test_apis.push_back("redist_elem");
+    // test_apis.push_back("redist_node");
+    // test_apis.push_back("redist_elno");
     // test_apis.push_back("serialize");
     // test_apis.push_back("to_pointlist_elem");
     // test_apis.push_back("to_pointlist_node");

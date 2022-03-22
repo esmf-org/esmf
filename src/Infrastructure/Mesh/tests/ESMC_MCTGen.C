@@ -427,11 +427,25 @@ MCT* tri_2d_cart(int &rc) {
     int redist_num_node = 0;
     int redist_num_elem = 0;
     int redist_num_elem_conn = 0;
+    int dual_num_node = 0;
+    int dual_num_elem = 0;
+    int dual_num_elem_conn = 0;
+    int fix_dual_num_elem = 0;
 
     if (petCount == 1) {
       num_elem = 8;
       num_node = 9;
       num_elem_conn = 3*num_elem;
+      
+      redist_num_elem = 8;
+      redist_num_node = 9;
+      redist_num_elem_conn = 3*redist_num_elem;
+      
+      dual_num_elem = 6;
+      // elements are being combined properly after dual yet
+      fix_dual_num_elem = 1;
+      dual_num_node = 8;
+      dual_num_elem_conn = 8;
 
     } else if (petCount == 4) {
       if (localPet == 0) {
@@ -441,6 +455,9 @@ MCT* tri_2d_cart(int &rc) {
         redist_num_elem = 2;
         redist_num_node = 4;
         redist_num_elem_conn = 6;
+        dual_num_elem = 2;
+        dual_num_node = 4;
+        dual_num_elem_conn = 6;
       } else if (localPet == 1) {
         num_elem = 2;
         num_node = 4;
@@ -448,6 +465,9 @@ MCT* tri_2d_cart(int &rc) {
         redist_num_elem = 2;
         redist_num_node = 4;
         redist_num_elem_conn = 6;
+        dual_num_elem = 2;
+        dual_num_node = 4;
+        dual_num_elem_conn = 6;
       } else if (localPet == 2) {
         num_elem = 2;
         num_node = 4;
@@ -455,6 +475,9 @@ MCT* tri_2d_cart(int &rc) {
         redist_num_elem = 2;
         redist_num_node = 4;
         redist_num_elem_conn = 6;
+        dual_num_elem = 2;
+        dual_num_node = 4;
+        dual_num_elem_conn = 6;
       } else if (localPet == 3) {
         num_elem = 2;
         num_node = 4;
@@ -462,10 +485,13 @@ MCT* tri_2d_cart(int &rc) {
         redist_num_elem = 2;
         redist_num_node = 4;
         redist_num_elem_conn = 6;
+        dual_num_elem = 2;
+        dual_num_node = 4;
+        dual_num_elem_conn = 6;
       }
     }
 
-    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn, dual_num_node, dual_num_elem, dual_num_elem_conn);
 
     mct->name = ESMC_METHOD;
 
