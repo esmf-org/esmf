@@ -117,11 +117,18 @@ MCT *quad_2d_cart(int &rc){
     int redist_num_node = 0;
     int redist_num_elem = 0;
     int redist_num_elem_conn = 0;
+    int dual_num_node = 0;
+    int dual_num_elem = 0;
+    int dual_num_elem_conn = 0;
 
     if (petCount == 1) {
       num_elem = 4;
       num_node = 9;
       num_elem_conn = 4*num_elem;
+      // no redist in serial mode
+      dual_num_elem = 1;
+      dual_num_node = 4;
+      dual_num_elem_conn = 4*dual_num_elem;
     } else if (petCount == 4) {
       if (localPet == 0) {
         num_elem = 1;
@@ -130,6 +137,9 @@ MCT *quad_2d_cart(int &rc){
         redist_num_elem = 1;
         redist_num_node = 4;
         redist_num_elem_conn = 4;
+        dual_num_elem = 1;
+        dual_num_node = 4;
+        dual_num_elem_conn = 4;
       } else if (localPet == 1) {
         num_elem = 1;
         num_node = 4;
@@ -137,6 +147,9 @@ MCT *quad_2d_cart(int &rc){
         redist_num_elem = 1;
         redist_num_node = 4;
         redist_num_elem_conn = 4;
+        dual_num_elem = 1;
+        dual_num_node = 4;
+        dual_num_elem_conn = 4;
       } else if (localPet == 2) {
         num_elem = 1;
         num_node = 4;
@@ -144,6 +157,9 @@ MCT *quad_2d_cart(int &rc){
         redist_num_elem = 1;
         redist_num_node = 4;
         redist_num_elem_conn = 4;
+        dual_num_elem = 1;
+        dual_num_node = 4;
+        dual_num_elem_conn = 4;
       } else if (localPet == 3) {
         num_elem = 1;
         num_node = 4;
@@ -151,10 +167,13 @@ MCT *quad_2d_cart(int &rc){
         redist_num_elem = 1;
         redist_num_node = 4;
         redist_num_elem_conn = 4;
+        dual_num_elem = 1;
+        dual_num_node = 4;
+        dual_num_elem_conn = 4;
       }
     }
 
-    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn, dual_num_node, dual_num_elem, dual_num_elem_conn);
 
     mct->name = ESMC_METHOD;
 
@@ -175,6 +194,14 @@ MCT *quad_2d_cart(int &rc){
                        4,5,8,7,
                        5,6,9,8};
       mct->elemCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+
+      mct->dual_nodeId = {1,2,3,4};
+      mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+      mct->dual_nodeOwner = {0,0,0,0};
+      mct->dual_elemId = {1};
+      mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
+      mct->dual_elemConn = {1,2,4,3};
+      mct->dual_elemCoord = {1.0, 1.0};
 
     } else if (petCount == 4) {
       if (localPet == 0) {
@@ -256,6 +283,40 @@ MCT *quad_2d_cart(int &rc){
         mct->redist_elemType = {ESMC_MESHELEMTYPE_QUAD};
         mct->redist_elemConn = {1,2,4,3};
         mct->redist_elemCoord = {0.5,0.5};
+      }
+      
+      if (localPet == 0) {
+        mct->dual_nodeId = {1,2,3,4};
+        mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+        mct->dual_nodeOwner = {0,1,2,3};
+        mct->dual_elemId = {1};
+        mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->dual_elemConn = {1,2,4,3};
+        mct->dual_elemCoord = {1.0, 1.0};
+      } else if (localPet == 1) {
+        mct->dual_nodeId = {1,2,3,4};
+        mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+        mct->dual_nodeOwner = {0,1,2,3};
+        mct->dual_elemId = {1};
+        mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->dual_elemConn = {1,2,4,3};
+        mct->dual_elemCoord = {1.0, 1.0};
+      } else if (localPet == 2) {
+        mct->dual_nodeId = {1,2,3,4};
+        mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+        mct->dual_nodeOwner = {0,1,2,3};
+        mct->dual_elemId = {1};
+        mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->dual_elemConn = {1,2,4,3};
+        mct->dual_elemCoord = {1.0, 1.0};
+      } else if (localPet == 3) {
+        mct->dual_nodeId = {1,2,3,4};
+        mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+        mct->dual_nodeOwner = {0,1,2,3};
+        mct->dual_elemId = {1};
+        mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
+        mct->dual_elemConn = {1,2,4,3};
+        mct->dual_elemCoord = {1.0, 1.0};
       }
     }
 
@@ -1151,6 +1212,9 @@ MCT *mix_2d_cart(int &rc) {
     int redist_num_node = 0;
     int redist_num_elem = 0;
     int redist_num_elem_conn = 0;
+    int dual_num_node = 0;
+    int dual_num_elem = 0;
+    int dual_num_elem_conn = 0;
 
     if (petCount == 1) {
       num_elem = 10;
@@ -1523,11 +1587,17 @@ MCT *ngon_2d_cart(int &rc) {
     int redist_num_node = 0;
     int redist_num_elem = 0;
     int redist_num_elem_conn = 0;
+    int dual_num_node = 0;
+    int dual_num_elem = 0;
+    int dual_num_elem_conn = 0;
 
     if (petCount == 1) {
       num_elem = 5;
       num_node = 16;
       num_elem_conn = 2*5+3*6;
+      dual_num_elem = 4;
+      dual_num_node = 5;
+      dual_num_elem_conn = 3*dual_num_elem;
 
     } else if (petCount == 4) {
       if (localPet == 0) {
@@ -1537,6 +1607,9 @@ MCT *ngon_2d_cart(int &rc) {
         redist_num_elem = 1;
         redist_num_node = 6;
         redist_num_elem_conn = 6;
+        dual_num_elem = 1;
+        dual_num_node = 3;
+        dual_num_elem_conn = 3;
       } else if (localPet == 1) {
         num_elem = 2;
         num_node = 8;
@@ -1544,6 +1617,9 @@ MCT *ngon_2d_cart(int &rc) {
         redist_num_elem = 1;
         redist_num_node = 6;
         redist_num_elem_conn = 6;
+        dual_num_elem = 1;
+        dual_num_node = 1;
+        dual_num_elem_conn = 3;
       } else if (localPet == 2) {
         num_elem = 1;
         num_node = 6;
@@ -1551,6 +1627,9 @@ MCT *ngon_2d_cart(int &rc) {
         redist_num_elem = 2;
         redist_num_node = 8;
         redist_num_elem_conn = 5+6;
+        dual_num_elem = 1;
+        dual_num_node = 1;
+        dual_num_elem_conn = 3;
       } else if (localPet == 3) {
         num_elem = 1;
         num_node = 6;
@@ -1558,10 +1637,13 @@ MCT *ngon_2d_cart(int &rc) {
         redist_num_elem = 1;
         redist_num_node = 5;
         redist_num_elem_conn = 5;
+        dual_num_elem = 1;
+        dual_num_node = 0;
+        dual_num_elem_conn = 3;
       }
     }
 
-    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn, dual_num_node, dual_num_elem, dual_num_elem_conn);
 
     mct->name = ESMC_METHOD;
 
@@ -1596,6 +1678,24 @@ MCT *ngon_2d_cart(int &rc) {
                         2.4, 1.6,    // 3
                         1.01,2.042, // 4
                         2.1, 2.5};   // 5
+
+      mct->dual_nodeId = {1,2,3,4,5};
+      mct->dual_nodeCoord = {1.0, 1.0,
+                             1.74,1.76,
+                             2.4, 1.6,
+                             1.01,2.042,
+                             2.1, 2.5};
+      mct->dual_nodeOwner = {0,0,0,0,0};
+      mct->dual_elemId = {1,2,3,4,5};
+      mct->dual_elemType = {3,3,3,3,3};
+      mct->dual_elemConn = {1,2,4,
+                            1,3,2,
+                            2,5,4,
+                            2,3,5};
+      mct->dual_elemCoord = {1.1, 1.6,
+                             1.8,1.6,
+                             1.75, 1.9,
+                             2.2, 1.9};
 
     } else if (petCount == 4) {
       if (localPet == 0) {
@@ -1722,6 +1822,48 @@ MCT *ngon_2d_cart(int &rc) {
         mct->redist_elemType = {5};
         mct->redist_elemConn = {1,2,3,5,4};
         mct->redist_elemCoord = {1.0,1.0};
+      }
+      
+      if (localPet == 0) {
+        mct->dual_nodeId = {1,2,4};
+        mct->dual_nodeCoord = {1.0, 1.0,
+                               1.74,1.76,
+                               1.01,2.042,};
+        mct->dual_nodeOwner = {0,0,0};
+        mct->dual_elemId = {1};
+        mct->dual_elemType = {3};
+        mct->dual_elemConn = {1,2,3};
+        mct->dual_elemCoord = {1.1, 1.6,};
+      } else if (localPet == 1) {
+        mct->dual_nodeId = {1,2,3};
+        mct->dual_nodeCoord = {1.0, 1.0,
+                               1.74,1.76,
+                               2.4, 1.6,};
+        mct->dual_nodeOwner = {0,0,1};
+        mct->dual_elemId = {2};
+        mct->dual_elemType = {3};
+        mct->dual_elemConn = {1,3,2};
+        mct->dual_elemCoord = {1.8,1.6};
+      } else if (localPet == 2) {
+        mct->dual_nodeId = {2,4,5};
+        mct->dual_nodeCoord = {1.74,1.76,
+                               1.01,2.042,
+                               2.1, 2.5};
+        mct->dual_nodeOwner = {0,2,2};
+        mct->dual_elemId = {3};
+        mct->dual_elemType = {3};
+        mct->dual_elemConn = {1,3,2};
+        mct->dual_elemCoord = {1.75, 1.9};
+      } else if (localPet == 3) {
+        mct->dual_nodeId = {2,3,5};
+        mct->dual_nodeCoord = {1.74,1.76,
+                               2.4, 1.6,
+                               2.1, 2.5};
+        mct->dual_nodeOwner = {0,1,2};
+        mct->dual_elemId = {4};
+        mct->dual_elemType = {3};
+        mct->dual_elemConn = {1,2,3};
+        mct->dual_elemCoord = {2.2, 1.9};
       }
     }
 

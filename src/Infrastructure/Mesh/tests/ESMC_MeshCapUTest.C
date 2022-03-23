@@ -71,7 +71,7 @@ void combine(const std::string &api, const std::string &mesh,
         
         test->name = name;
         test->nativeormb = nvmb;
-        // test->verbosity = 3;
+        test->verbosity = 3;
         // test->tol = 1.e-15;
         // test->print();
         
@@ -143,10 +143,10 @@ int main(int argc, char *argv[]) {
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes;
-    // test_meshes.push_back("quad_2d_cart");
+    test_meshes.push_back("quad_2d_cart");
     // test_meshes.push_back("quad_2d_sph_deg");
     // test_meshes.push_back("quad_2d_sph_rad");
-    test_meshes.push_back("tri_2d_cart");
+    // test_meshes.push_back("tri_2d_cart");
     // test_meshes.push_back("tri_2d_sph_deg");
     // test_meshes.push_back("tri_2d_sph_rad");
     // test_meshes.push_back("hex_3d_cart");

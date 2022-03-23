@@ -1884,16 +1884,14 @@ class MCT {
         localrc = test_get_presence(target, check_elem, check_node);
         ESMC_CHECK_THROW(localrc);
         
-        // RLO: not sure how to do this for the dual..
+        localrc = test_get_node_info(target);
+        ESMC_CHECK_THROW(localrc);
         
-        // localrc = test_get_node_info(mesh);
-        // ESMC_CHECK_THROW(localrc);
-        // 
-        // localrc = test_get_elem_info(mesh);
-        // ESMC_CHECK_THROW(localrc);
-        // 
-        // localrc = test_get_elem_conn_info(mesh);
-        // ESMC_CHECK_THROW(localrc);
+        localrc = test_get_elem_info(target);
+        ESMC_CHECK_THROW(localrc);
+        
+        localrc = test_get_elem_conn_info(target);
+        ESMC_CHECK_THROW(localrc);
 
       }
       CATCH_MCT_RETURN_RC(&rc)
