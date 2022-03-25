@@ -21,4 +21,3 @@ DIRS     += src interface tests doc
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
-

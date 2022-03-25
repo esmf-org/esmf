@@ -188,6 +188,7 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Get Farray_w from field"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 !------------------------------------------------------------------------
 
   !print '(a,2(a,i0.1,a,i0.1),a)', 'field_w Farray_w bounds = ',  &
@@ -495,6 +496,7 @@ program ESMF_FieldIOUTest
     Farray_tw = 0.02  ! halo points will have value 0.02
     do j=exclusiveLBound(2),exclusiveUBound(2)
     do i=exclusiveLBound(1),exclusiveUBound(1)
+!      Farray_tw(i,j) = 100.0 + localpet
       Farray_tw(i,j) = dble(t)*(sin(i/5.0d0)*tan(j/5.0d0))
     enddo
     enddo
@@ -671,7 +673,7 @@ program ESMF_FieldIOUTest
   Farray_tw = 0.02d0  ! halo points will have value 0.02
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
-    Farray_tw(i,j) = dble(t)*(sin(i/5.0d0)*tan(j/5.0d0))
+      Farray_tw(i,j) = dble(t)*(sin(i/5.0d0)*tan(j/5.0d0))
   enddo
   enddo
 
@@ -1658,8 +1660,8 @@ program ESMF_FieldIOUTest
   write(name, *) "Create Field from Grid (from deBlockList)  test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   field_debl = ESMF_FieldCreate(name="field_3d_3dbl", grid=grid_debl, &
-      typekind=ESMF_TYPEKIND_R8, ungriddedLBound=(/1/), ungriddedUBound=(/50/),  &
-      rc=rc)
+    typekind=ESMF_TYPEKIND_R8, ungriddedLBound=(/1/), ungriddedUBound=(/50/),  &
+    rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
