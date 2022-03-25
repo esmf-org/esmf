@@ -734,8 +734,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmrecv)(ESMCI::VM **vm, void *message, int *size,
-    int *source, int *rc){
+  void FTN_X(c_esmc_vmrecv)(ESMCI::VM **vm, void *message,
+    unsigned long long int *size, int *source, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmrecv()"
     // Initialize return code; assume routine not implemented
@@ -757,8 +757,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmrecvnb)(ESMCI::VM **vm, void *message, int *size, 
-    int *source, void **commhandle, int *rc){
+  void FTN_X(c_esmc_vmrecvnb)(ESMCI::VM **vm, void *message,
+    unsigned long long int *size, int *source, void **commhandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmrecvnb()"
     // Initialize return code; assume routine not implemented
@@ -922,8 +922,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN_X(c_esmc_vmsend)(ESMCI::VM **vm, void *message, int *size, int *dest,
-    int *rc){
+  void FTN_X(c_esmc_vmsend)(ESMCI::VM **vm, void *message,
+    unsigned long long int *size, int *dest, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsend()"
     // Initialize return code; assume routine not implemented
@@ -945,8 +945,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmsendnb)(ESMCI::VM **vm, void *message, int *size,
-    int *dest, void **commhandle, int *rc){
+  void FTN_X(c_esmc_vmsendnb)(ESMCI::VM **vm, void *message,
+    unsigned long long int *size, int *dest, void **commhandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsendnb()"
     // Initialize return code; assume routine not implemented

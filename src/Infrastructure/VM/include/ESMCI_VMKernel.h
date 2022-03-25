@@ -63,6 +63,9 @@ enum vmEpoch  { epochNone=0, epochBuffer};
 #define VM_ANY_SRC                    (-2)
 #define VM_ANY_TAG                    (-2)
 
+// MPI size limit
+#define VM_MPI_SIZE_LIMIT     (2147483647)
+
 // define the communication preferences
 #define PREF_INTRA_PROCESS_SHMHACK    (0)       // default
 #define PREF_INTRA_PROCESS_PTHREAD    (1)
@@ -473,12 +476,12 @@ class VMK{
     static std::string getEsmfComm(){return std::string(XSTR(ESMF_COMM));}
 
     // p2p communication calls
-    int send(const void *message, int size, int dest, int tag=-1);
-    int send(const void *message, int size, int dest, commhandle **commh,
+    int send(const void *message, unsigned long long int size, int dest, int tag=-1);
+    int send(const void *message, unsigned long long int size, int dest, commhandle **commh,
       int tag=-1);
-    int recv(void *message, int size, int source, int tag=-1,
+    int recv(void *message, unsigned long long int size, int source, int tag=-1,
       status *status=NULL);
-    int recv(void *message, int size, int source, commhandle **commh,
+    int recv(void *message, unsigned long long int size, int source, commhandle **commh,
       int tag=-1);
     
     int sendrecv(void *sendData, int sendSize, int dst, void *recvData,
