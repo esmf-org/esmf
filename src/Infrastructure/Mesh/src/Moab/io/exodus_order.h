@@ -41,7 +41,9 @@ static const int *const *const exodus_elem_order_map[] = {
 };
 
 #ifdef __cplusplus
-} /*  extern "C" */
+} // namespace moab
+
+ /*  extern "C" */
 } /* namespace moab */
 #endif
 

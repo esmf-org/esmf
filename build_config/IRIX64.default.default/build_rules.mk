@@ -13,6 +13,7 @@ ESMF_F90DEFAULT         = f90
 ESMF_F90LINKERDEFAULT   = CC
 ESMF_CXXDEFAULT         = CC
 ESMF_CXXLINKLIBS       += -lC
+ESMF_CDEFAULT           = cc
 
 ############################################################
 # Default MPI setting.
@@ -52,6 +53,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -version
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -version
 
 ############################################################
 # 32- vs. 64-bit ABI
@@ -127,6 +129,7 @@ ESMF_F90COMPILEFIXNOCPP  = -fixedform -nocpp -extend_source
 #
 ESMF_F90RPATHPREFIX         = -rpath
 ESMF_CXXRPATHPREFIX         = -rpath
+ESMF_CRPATHPREFIX           = -rpath
 
 ############################################################
 # IRIX64 does not have a ranlib -> "true" is a noop command

@@ -26,7 +26,18 @@ program ESMF_ArrayIOUTest
 ! !USES:
   use ESMF_TestMod     ! test methods
   use ESMF
-  
+
+! -------------------------------------------------------------------------
+! -- The sole purpose of the netcdf/pnetcdf use statements is to trigger a
+! -- compile-time error in case the ESMF module above were to "leak" NetCDF
+! -- symbols.
+#if (defined ESMF_NETCDF)
+  use netcdf, only: nf90_nowrite, nf90_noerr
+#elif (defined ESMF_PNETCDF)
+  use pnetcdf, only: nf90_nowrite, nf90_noerr
+#endif
+! -------------------------------------------------------------------------
+
   implicit none
 
 !-------------------------------------------------------------------------
@@ -244,18 +255,13 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-! ! Given an ESMF array, write the binary file.
+! ! Given an ESMF array, write the binary file. Currently not supported by PIO
   write(name, *) "Write ESMF_Array with Halo to binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_withhalo, fileName='file3D_withhalo.bin', &
        status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_BIN, rc=rc)
-#if (defined ESMF_PIO && defined ESMF_MPIIO)
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-
-#endif
+  call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -379,17 +385,13 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-! ! Read in a binary file to an ESMF array.
+! ! Read in a binary file to an ESMF array. Currently not supported by PIO
   write(name, *) "Read ESMF_Array with Halo from binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_withhalo3, fileName='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
-#if (defined ESMF_PIO && defined ESMF_MPIIO)
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
+  call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -413,28 +415,6 @@ program ESMF_ArrayIOUTest
   call ESMF_Test((Maxvalue(1) > 0), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
-!------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-! ! Compare read in and the existing file
-  write(name, *) "Compare read in data to the existing binary data - 3D with halo"
-  Maxvalue(1) = 0
-  do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
-  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
-  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
-   diff = abs( Farray3D_withhalo3(i,j,k)-Farray3D_withhalo(i,j,k) )
-   Maxvalue(1) = max (Maxvalue(1), diff)
-  enddo
-  enddo
-  enddo
-#if (defined ESMF_PIO && defined ESMF_MPIIO)
-  write(failMsg, *) "Comparison failed.  Max error =", Maxvalue(1)
-  write(*,*)"Maximum Error (3D with Halo binary data case) = ", Maxvalue(1)
-  call ESMF_Test((Maxvalue(1) == 0), name, failMsg, result,ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Comparison did not fail as was expected"
-  call ESMF_Test((Maxvalue(1) > 0), name, failMsg, result,ESMF_SRCLINE)
-#endif
-
   deallocate (computationalLWidth, computationalUWidth)
   deallocate (totalLWidth, totalUWidth)
   deallocate (exclusiveLBound, exclusiveUBound)
@@ -446,7 +426,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_withhalo3, fileName='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, variableName='dummyname', rc=rc)
-! ! Should fail since varname not supported in binary mode
+ ! Should fail since varname not supported in binary mode
   call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------

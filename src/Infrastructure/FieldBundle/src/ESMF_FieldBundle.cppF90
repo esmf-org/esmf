@@ -1599,6 +1599,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Destroy all the internal Fields if this is a proxy fieldBundle
+#if 0
+!gjt: don't do this, Fields do their own garbage collection under their VM
       if(this%is_proxy) then
         nullify(flist)
         call ESMF_ContainerGet(this%container, itemCount=fcount, &
@@ -1614,6 +1616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
         deallocate(flist)
       endif
+#endif
 
       ! Destroy internal container
       call ESMF_ContainerDestroy(this%container, rc=localrc)

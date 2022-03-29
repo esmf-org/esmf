@@ -9,40 +9,48 @@
 
 #include "moab/CartVect.hpp"
 
-namespace moab {
+namespace moab
+{
 
 // Forward Declarations
 class ParallelComm;
 
-class MeshGeneration {
+class MeshGeneration
+{
 
-public:
-  struct BrickOpts
-  {
-    // follow the options in examples/advanced/GenLargeMesh.cpp
-    CartVect ui, uj, uk; // such that ui * uj = uk; uj*uk=ui, etc
-    double xsize, ysize, zsize ;  // extents of the brick
-    int A, B, C ; // number of blocks per processor
-    int M, N, K; // number of processors in each direction
-    int blockSize;  // each small block size
-    int GL ; // number of ghost layers
-    bool newMergeMethod ; // = false;
-    bool quadratic ; // = false;
-    bool keep_skins ; // = false;
-    bool tetra ; // = false;
-    bool adjEnts ; // = false;
-    bool parmerge ; // = false;
-  };
+  public:
+    struct BrickOpts
+    {
+        // follow the options in examples/advanced/GenLargeMesh.cpp
+        CartVect ui, uj, uk;         // such that ui * uj = uk; uj*uk=ui, etc
+        double xsize, ysize, zsize;  // extents of the brick
+        int A, B, C;                 // number of blocks per processor
+        int M, N, K;                 // number of processors in each direction
+        int blockSize;               // each small block size
+        int GL;                      // number of ghost layers
+        bool newMergeMethod;         // = false;
+        bool quadratic;              // = false;
+        bool keep_skins;             // = false;
+        bool tetra;                  // = false;
+        bool adjEnts;                // = false;
+        bool parmerge;               // = false;
+    };
 
-  MeshGeneration(Interface *mbi, ParallelComm * pcomm=0, EntityHandle rset =0);
-  virtual ~MeshGeneration();
+    MeshGeneration( Interface* mbi,
+#ifdef MOAB_HAVE_MPI
+                    ParallelComm* pcomm = 0,
+#endif
+                    EntityHandle rset = 0 );
+    virtual ~MeshGeneration();
 
-  ErrorCode BrickInstance(BrickOpts & opts);
+    ErrorCode BrickInstance( BrickOpts& opts );
 
-private:
-  Interface * mb;
-  ParallelComm * pc;
-  EntityHandle cset;
+  private:
+    Interface* mb;
+#ifdef MOAB_HAVE_MPI
+    ParallelComm* pc;
+#endif
+    EntityHandle cset;
 };
 
 } /* namespace moab */

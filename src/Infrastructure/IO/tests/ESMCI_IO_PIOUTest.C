@@ -12,8 +12,7 @@
 
 // PIO header
 #if defined (ESMF_PIO)
-#include "pio.h"
-#include "pio_types.h"
+#include <pio.h>
 #endif
 
 // ESMF header
@@ -39,6 +38,7 @@ using namespace std;
 int main(void){
 
   char name[80];
+  char disname[80];
   char failMsg[80];
   int result = 0;
   int rc;
@@ -46,16 +46,18 @@ int main(void){
   int iotype;
 #define NDIMS 1
   int dims[NDIMS];
+  int dims2[NDIMS+1];
 #define DIM_X 10
   double test_data[DIM_X], read_data[DIM_X];
   int dimid_x;
+  int dimid_t;
   string fname;
   int pioerr;
 #if defined (ESMF_PIO)
-  pio_file_desc_t pio_file1[PIO_SIZE_FILE_DESC];
-  pio_io_desc_t iodesc1[PIO_SIZE_IO_DESC];
-  pio_var_desc_t pio_vardesc1[PIO_SIZE_VAR_DESC];
-  pio_dof_t compdof[DIM_X];
+  int pio_file1;
+  int iodesc1;
+  int pio_vardesc1;
+  MPI_Offset compdof[DIM_X];
   int amode_in;
 
   int answer;
@@ -88,7 +90,7 @@ int main(void){
   strcpy(name, "Get VM pet info");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_VMGet(vm, &localPet, &petCount, &peCount,
-         &mpiCommunicator, &pthreadsEnabledFlag, &openMPEnabledFlag);
+	 &mpiCommunicator, &pthreadsEnabledFlag, &openMPEnabledFlag);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 //  cout << "I am PET " << localPet << " of " << petCount << endl;
   //----------------------------------------------------------------------------
@@ -101,26 +103,26 @@ int main(void){
   int num_iotasks=petCount;
   int num_aggregators=1;
   int stride=1;
-  int rearr=0;
+#if defined (ESMF_PIO)
+  int rearr=PIO_REARR_SUBSET;
+#endif
   int iosys_handle;
   int base=0;
 #if defined (ESMF_PIO)
-  pio_cpp_init_intracom(localPet, mpiCommunicator,
-      num_iotasks, num_aggregators,
-      stride, rearr,
-      &iosys_handle,
-      base);
+  rc = PIOc_Init_Intracomm(mpiCommunicator,
+      num_iotasks, stride, base, rearr,
+      &iosys_handle);
 #else
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
- 
+
   //------------------------------------------------------------------------
   // Test NETCDF
   //------------------------------------------------------------------------
 #if defined (ESMF_PIO)
-  iotype = PIO_iotype_netcdf;
+  iotype = PIO_IOTYPE_NETCDF;
 #endif
   fname="pio_file1c_netcdf.nc";
 
@@ -131,10 +133,13 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   amode_in=PIO_CLOBBER;
-  pioerr = pio_cpp_createfile(&iosys_handle, &pio_file1, iotype,
-           fname.c_str(), amode_in);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_createfile(iosys_handle, &pio_file1, &iotype,
+	   fname.c_str(), amode_in);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -146,10 +151,13 @@ int main(void){
   strcpy(name, "PIO NETCDF mode add global string attribute");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pioerr = pio_cpp_put_att_string (pio_file1, NULL,
-      "filename", fname.c_str());
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_put_att_text (pio_file1, PIO_GLOBAL,
+			      "filename", strlen(fname.c_str()),fname.c_str());
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -164,10 +172,13 @@ int main(void){
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   for (int i=0; i<DIM_X; i++)
     compdof[i] = (localPet*DIM_X + 1) + i;
-  pio_cpp_initdecomp_dof(&iosys_handle, PIO_double, dims, NDIMS,
-      compdof, DIM_X, iodesc1);
+  PIOc_InitDecomp(iosys_handle, PIO_DOUBLE, NDIMS, dims,
+		  DIM_X, compdof, &iodesc1, NULL, NULL, NULL);
   rc = ESMF_SUCCESS;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -180,9 +191,12 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dims[0] = DIM_X * petCount;
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pioerr = pio_cpp_def_dim (pio_file1, "x", DIM_X, &dimid_x);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_def_dim (pio_file1, "x", dims[0], &dimid_x);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -194,10 +208,13 @@ int main(void){
   strcpy(name, "PIO NETCDF mode define variable");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pioerr = pio_cpp_def_var_md (pio_file1, "testdata", PIO_double,
-       &dimid_x, 1, &pio_vardesc1);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_def_var (pio_file1, "testdata", PIO_DOUBLE,
+			 1, &dimid_x, &pio_vardesc1);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -209,10 +226,13 @@ int main(void){
   strcpy(name, "PIO NETCDF mode add string attribute");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pioerr = pio_cpp_put_att_string (pio_file1, &pio_vardesc1,
-      "units", "ordinal");
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_put_att_text (pio_file1, pio_vardesc1,
+			      "units", 7, "ordinal");
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -225,10 +245,13 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   answer = 42;
-  pioerr = pio_cpp_put_att_ints (pio_file1, &pio_vardesc1,
-      "answer", &answer, 1);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_put_att (pio_file1, pio_vardesc1,
+			 "answer", PIO_INT, 1, &answer);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -241,10 +264,13 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   float_att_value = 0.0001f;
-  pioerr = pio_cpp_put_att_floats (pio_file1, &pio_vardesc1,
-      "float_att_value", &float_att_value, 1);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_put_att (pio_file1, pio_vardesc1,
+			 "float_att_value", PIO_FLOAT, 1, &float_att_value);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -257,10 +283,13 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
   fillvalue = -9999.99;
-  pioerr = pio_cpp_put_att_doubles (pio_file1, &pio_vardesc1,
-      "_FillValue", &fillvalue, 1);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_put_att (pio_file1, pio_vardesc1,
+			 "_FillValue", PIO_DOUBLE, 1, &fillvalue);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -272,23 +301,12 @@ int main(void){
   strcpy(name, "End PIO NETCDF mode define mode");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pioerr = pio_cpp_enddef (&pio_file1);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_enddef (pio_file1);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
-  rc = ESMF_SUCCESS;
-#endif
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest
-  // Set variable descriptor frame number
-  strcpy(name, "PIO NETCDF mode setframe test");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pio_cpp_setframe (pio_vardesc1, 1);
-  rc = ESMF_SUCCESS;
-#else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -303,10 +321,13 @@ int main(void){
     test_data[i] = i + 1 + localPet*100;
   dims[0] = DIM_X;
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pio_cpp_write_darray_double (&pio_file1, &pio_vardesc1, iodesc1,
-      test_data, dims, 1, &pioerr);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_write_darray (pio_file1, pio_vardesc1, iodesc1,
+			      DIM_X, test_data, NULL);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -318,9 +339,12 @@ int main(void){
   strcpy(name, "PIO NETCDF mode closefile after write test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pio_cpp_closefile (&pio_file1);
-  rc = ESMF_SUCCESS;
+  pioerr = PIOc_closefile (pio_file1);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -332,27 +356,33 @@ int main(void){
   strcpy(name, "Open PIO NETCDF mode file for read");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pioerr = pio_cpp_openfile(&iosys_handle, &pio_file1, iotype,
-           fname.c_str(), 0);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_openfile(iosys_handle, &pio_file1, &iotype,
+			 fname.c_str(), 0);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_disabled_UTest
   // Set variable descriptor frame number
-  strcpy(name, "PIO NETCDF mode setframe number for read test");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pio_cpp_setframe (pio_vardesc1, 1);
-  rc = ESMF_SUCCESS;
-#else
-  rc = ESMF_SUCCESS;
-#endif
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+//  strcpy(name, "PIO NETCDF mode setframe number for read test");
+//  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+//#if defined (ESMF_PIO) && defined (ESMF_NETCDF)
+//  pioerr = PIOc_setframe (pio_file1, pio_vardesc1, 1);
+//  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
+//#else
+//  strcpy(disname, "DISABLED: ");
+//  strcat(disname, name);
+//  strcpy(name, disname);
+//  rc = ESMF_SUCCESS;
+//#endif
+//  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -364,10 +394,13 @@ int main(void){
   for (int i=0; i<DIM_X; i++)
     read_data[i] = -42.42;
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pio_cpp_read_darray_double (&pio_file1, &pio_vardesc1, iodesc1,
-      read_data, dims, 1, &pioerr);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_read_darray (pio_file1, pio_vardesc1, iodesc1,
+			     DIM_X, read_data);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -384,10 +417,13 @@ int main(void){
     if (test_data[i] != read_data[i]) {
       rc = ESMF_FAILURE;
       cout << "Comparison failed at element " << i
-          << test_data[i] << " != " << read_data[i] << endl;
+	  << test_data[i] << " != " << read_data[i] << endl;
       break;
     };
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -399,9 +435,12 @@ int main(void){
   strcpy(name, "Free PIO NETCDF mode decomposition");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pio_cpp_freedecomp_ios (&iosys_handle, &iodesc1);
-  rc = ESMF_SUCCESS;
+  pioerr = PIOc_freedecomp (iosys_handle, iodesc1);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -413,19 +452,22 @@ int main(void){
   strcpy(name, "PIO NETCDF mode closefile after read test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  pio_cpp_closefile (&pio_file1);
-  rc = ESMF_SUCCESS;
+  pioerr = PIOc_closefile (pio_file1);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
- 
+
   //------------------------------------------------------------------------
   // Test PNETCDF
   //------------------------------------------------------------------------
 #if defined (ESMF_PIO)
-  iotype = PIO_iotype_pnetcdf;
+  iotype = PIO_IOTYPE_PNETCDF;
 #endif
   fname="pio_file1c_pnetcdf.nc";
 
@@ -436,10 +478,13 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   amode_in=PIO_CLOBBER;
-  pioerr = pio_cpp_createfile(&iosys_handle, &pio_file1, iotype,
-           fname.c_str(), amode_in);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_createfile(iosys_handle, &pio_file1, &iotype,
+	   fname.c_str(), amode_in);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -451,10 +496,13 @@ int main(void){
   strcpy(name, "PIO PNETCDF mode add global string attribute");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pioerr = pio_cpp_put_att_string (pio_file1, NULL,
-      "filename", fname.c_str());
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_put_att_text (pio_file1, PIO_GLOBAL,
+			      "filename", strlen(fname.c_str()), fname.c_str());
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -469,10 +517,12 @@ int main(void){
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   for (int i=0; i<DIM_X; i++)
     compdof[i] = (localPet*DIM_X + 1) + i;
-  pio_cpp_initdecomp_dof(&iosys_handle, PIO_double, dims, NDIMS,
-      compdof, DIM_X, iodesc1);
-  rc = ESMF_SUCCESS;
+  rc = PIOc_InitDecomp(iosys_handle, PIO_DOUBLE, NDIMS, dims,
+		       DIM_X, compdof, &iodesc1, NULL, NULL, NULL);
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -485,9 +535,12 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dims[0] = DIM_X * petCount;
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pioerr = pio_cpp_def_dim (pio_file1, "x", DIM_X, &dimid_x);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_def_dim (pio_file1, "x", dims[0], &dimid_x);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -499,10 +552,14 @@ int main(void){
   strcpy(name, "PIO PNETCDF mode define variable");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pioerr = pio_cpp_def_var_md (pio_file1, "testdata", PIO_double,
-       &dimid_x, 1, &pio_vardesc1);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  dims[0] = dimid_x;
+  pioerr = PIOc_def_var (pio_file1, "testdata", PIO_DOUBLE,
+			 1, dims, &pio_vardesc1);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -514,10 +571,13 @@ int main(void){
   strcpy(name, "PIO PNETCDF mode add string attribute");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pioerr = pio_cpp_put_att_string (pio_file1, &pio_vardesc1,
-      "units", "ordinal");
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_put_att_text (pio_file1, pio_vardesc1,
+			      "units", 7, "ordinal");
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -530,10 +590,13 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   answer = 42;
-  pioerr = pio_cpp_put_att_ints (pio_file1, &pio_vardesc1,
-      "answer", &answer, 1);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_put_att (pio_file1, pio_vardesc1,
+			     "answer", PIO_INT, 1, &answer);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -546,10 +609,13 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   float_att_value = 0.0001f;
-  pioerr = pio_cpp_put_att_floats (pio_file1, &pio_vardesc1,
-      "float_att_value", &float_att_value, 1);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_put_att (pio_file1, pio_vardesc1,
+			 "float_att_value", PIO_FLOAT, 1, &float_att_value);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -562,10 +628,13 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
   fillvalue = -9999.99;
-  pioerr = pio_cpp_put_att_doubles (pio_file1, &pio_vardesc1,
-      "_FillValue", &fillvalue, 1);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_put_att (pio_file1, pio_vardesc1,
+				"_FillValue", PIO_DOUBLE, 1, &fillvalue);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -577,23 +646,12 @@ int main(void){
   strcpy(name, "End PIO PNETCDF mode define mode");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pioerr = pio_cpp_enddef (&pio_file1);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_enddef (pio_file1);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
-  rc = ESMF_SUCCESS;
-#endif
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest
-  // Set variable descriptor frame number
-  strcpy(name, "PIO PNETCDF mode setframe test");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pio_cpp_setframe (pio_vardesc1, 1);
-  rc = ESMF_SUCCESS;
-#else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -608,10 +666,13 @@ int main(void){
     test_data[i] = i + 1 + localPet*100;
   dims[0] = DIM_X;
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pio_cpp_write_darray_double (&pio_file1, &pio_vardesc1, iodesc1,
-      test_data, dims, 1, &pioerr);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_write_darray (pio_file1, pio_vardesc1, iodesc1,
+			      DIM_X, test_data, NULL);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -623,9 +684,12 @@ int main(void){
   strcpy(name, "PIO PNETCDF mode closefile after write test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pio_cpp_closefile (&pio_file1);
-  rc = ESMF_SUCCESS;
+  pioerr = PIOc_closefile (pio_file1);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -637,10 +701,13 @@ int main(void){
   strcpy(name, "Open PIO PNETCDF mode file for read");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pioerr = pio_cpp_openfile(&iosys_handle, &pio_file1, iotype,
-           fname.c_str(), 0);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_openfile(iosys_handle, &pio_file1, &iotype,
+	   fname.c_str(), 0);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -652,9 +719,12 @@ int main(void){
   strcpy(name, "PIO PNETCDF mode setframe number for read test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pio_cpp_setframe (pio_vardesc1, 1);
+  PIOc_setframe (pio_file1, pio_vardesc1, 1);
   rc = ESMF_SUCCESS;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -669,10 +739,13 @@ int main(void){
   for (int i=0; i<DIM_X; i++)
     read_data[i] = -42.42;
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pio_cpp_read_darray_double (&pio_file1, &pio_vardesc1, iodesc1,
-      read_data, dims, 1, &pioerr);
-  rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
+  pioerr = PIOc_read_darray (pio_file1, pio_vardesc1, iodesc1,
+			     DIM_X, read_data);
+  rc = (pioerr == PIO_NOERR) ? ESMF_SUCCESS : ESMF_FAILURE;
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -689,10 +762,13 @@ int main(void){
     if (test_data[i] != read_data[i]) {
       rc = ESMF_FAILURE;
       cout << "Comparison failed at element " << i
-          << test_data[i] << " != " << read_data[i] << endl;
+	  << test_data[i] << " != " << read_data[i] << endl;
       break;
     };
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -703,10 +779,13 @@ int main(void){
   // Free the decomposition
   strcpy(name, "Free PIO PNETCDF mode decomposition");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pio_cpp_freedecomp_ios (&iosys_handle, iodesc1);
-  rc = ESMF_SUCCESS;
+  rc = PIOc_freedecomp(iosys_handle, iodesc1);
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -718,9 +797,11 @@ int main(void){
   strcpy(name, "PIO PNETCDF mode closefile after read test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-  pio_cpp_closefile (&pio_file1);
-  rc = ESMF_SUCCESS;
+  rc = PIOc_closefile (pio_file1);
 #else
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
   rc = ESMF_SUCCESS;
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -732,7 +813,7 @@ int main(void){
   strcpy(name, "Finalization of a PIO iosystem handle");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO)
-  pio_cpp_finalize (&iosys_handle, &rc);
+  rc = PIOc_free_iosystem(iosys_handle);
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -745,7 +826,3 @@ int main(void){
 
   return 0;
 }
-
-
-
-

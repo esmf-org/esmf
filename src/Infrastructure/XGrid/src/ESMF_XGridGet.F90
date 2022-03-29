@@ -413,7 +413,7 @@ integer,              intent(out), optional :: rc
         endif    
         if(ncells /= size(xgtypep%area, 1)) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-               msg="- size of area doesn't match the size of area in the XGrid", &
+               msg=" size of area array doesn't match the size of area in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif

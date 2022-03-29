@@ -16,7 +16,7 @@
 #ifndef MHDF_FILE_HANDLE_H
 #define MHDF_FILE_HANDLE_H
 
-#ifdef _MSC_VER /* windows */
+#ifdef _WIN32 /* windows */
 #  include <BaseTsd.h>
 typedef ULONG32 uint32_t;
 #endif

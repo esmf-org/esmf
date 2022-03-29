@@ -170,6 +170,34 @@ void ESMCI_regrid_create(
                             ESMC_LOGMSG_WARN);
     }
 
+    ////// Sanity checks /////
+
+    // extrapolation not supported with conservative methods
+    if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Extrapolation is not currently supported with conservative regrid methods.",
+             ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+
+
+    // Conservative not supported on 3D spherical meshes
+    if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+        (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+      if ((srcmesh->parametric_dim() == 3) && 
+          (dstmesh->parametric_dim() == 3)) {
+        if ((srcmesh->coordsys != ESMC_COORDSYS_CART) || 
+            (dstmesh->coordsys != ESMC_COORDSYS_CART)) {
+          
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                           "Conservative regridding isn't supported on 3D spherical Grids or Meshes.",
+                                           ESMC_CONTEXT, &localrc)) throw localrc;
+        }
+      }
+    }
+
     
      //// Precheck Meshes for errors
     bool degenerate=false;
@@ -206,6 +234,7 @@ void ESMCI_regrid_create(
         }
       }
     }
+
 
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);

@@ -1,18 +1,17 @@
 /**
  * MOAB, a Mesh-Oriented datABase, is a software component for creating,
  * storing and accessing finite element mesh data.
- * 
+ *
  * Copyright 2004 Sandia Corporation.  Under the terms of Contract
  * DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
  * retains certain rights in this software.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  */
-
 
 #ifndef MOAB_WRITER_IFACE_HPP
 #define MOAB_WRITER_IFACE_HPP
@@ -21,7 +20,8 @@
 #include <string>
 #include "moab/Types.hpp"
 
-namespace moab {
+namespace moab
+{
 
 class FileOptions;
 
@@ -34,9 +34,8 @@ class FileOptions;
 class WriterIface
 {
   public:
-  
     virtual ~WriterIface() {}
-    
+
     /**
      *\brief Export mesh to a file.
      *
@@ -44,7 +43,7 @@ class WriterIface
      *
      *\param file_name      The name of the file to create.
      *\param overwrite      If false, reader should fail if the file already
-     *                      exists.  
+     *                      exists.
      *\param meshset_list   A list of meshsets to export, or NULL if the
      *                      whole mesh is to be exported.
      *\param num_sets       The length of <code>meshset_list</code> or zero
@@ -59,19 +58,12 @@ class WriterIface
      *                      from Interface should be used.
      *\author Jason Kraftcheck
      */
-    virtual ErrorCode write_file( const char* file_name,
-                                    const bool overwrite,
-                                    const FileOptions& opts,
-                                    const EntityHandle* meshset_list,
-                                    const int num_sets,
-                                    const std::vector<std::string>& qa_records,
-                                    const Tag* tag_list = NULL,
-                                    int num_tags = 0,
-                                    int requested_output_dimension = 3 ) = 0;
+    virtual ErrorCode write_file( const char* file_name, const bool overwrite, const FileOptions& opts,
+                                  const EntityHandle* meshset_list, const int num_sets,
+                                  const std::vector< std::string >& qa_records, const Tag* tag_list = NULL,
+                                  int num_tags = 0, int requested_output_dimension = 3 ) = 0;
 };
 
-} // namespace moab 
+}  // namespace moab
 
 #endif
-
-    

@@ -9,6 +9,7 @@
 ESMF_F90DEFAULT         = ftn -h ssp -dy
 ESMF_F90LINKERDEFAULT   = CC -h new_for_init -h ssp
 ESMF_CXXDEFAULT         = CC -h new_for_init -h ssp
+ESMF_CDEFAULT           = cc -h new_for_init -h ssp
 
 ############################################################
 # Default MPI setting.
@@ -47,6 +48,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -V
 
 ############################################################
 # on X1 optimization level must be > 1 else no optimization
@@ -58,6 +60,7 @@ ESMF_OPTLEVELDEFAULT  = 2
 #
 ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
+ESMF_CLINKRPATHS        =
 
 ############################################################
 # Help ftn to understand Fortran suffices
