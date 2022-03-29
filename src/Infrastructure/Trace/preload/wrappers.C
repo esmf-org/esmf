@@ -18,6 +18,9 @@ extern "C" {
    * to catch the notification.
    */
   int __wrap_c_esmftrace_notify_wrappers(int initialized) {
+
+    printf("Inside wrappers.C __wrap_c_esmftrace_notify_wrappers()");
+      
     if (initialized == 1) {
       traceInitialized = 1;
     }
@@ -28,6 +31,8 @@ extern "C" {
   }
    
   int __wrap_c_esmftrace_isinitialized() {
+
+    printf("Inside wrappers.C __wrap_c_esmftrace_isinitialized()");
     return traceInitialized;
   }  
   

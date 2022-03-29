@@ -16,6 +16,8 @@ extern "C" {
 
   /* will be overridden if preloader present */
   int c_esmftrace_notify_wrappers(int initialized) {
+
+    printf("Inside ESMCI_TraceWrap.C c_esmftrace_notify_wrappers()");
     //returning TRACE_WRAP_NONE, indicating that there are no wrappers present
     //this function may be replaced by the linker if wrappers are present
     return TRACE_WRAP_NONE;
@@ -23,6 +25,9 @@ extern "C" {
   
   /* will be overridden if preloader present */
   int c_esmftrace_isinitialized() {
+
+    printf("Inside ESMCI_TraceWrap.C c_esmftrace_isinitialized()");
+    
     if (ESMCI::TraceInitialized()) return 1;
     else return 0;
   }
