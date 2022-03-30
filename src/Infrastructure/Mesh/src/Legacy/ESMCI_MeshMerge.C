@@ -451,7 +451,10 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
 
   // figure out side
   int side=srcmesh.side;
-  if (dstmesh.side != side) Throw() << "Meshes being merged should be on the same side of the XGrid.";
+  if (dstmesh.side != side) {
+    std::cout << "src side="<<side<<"dst side="<<dstmesh.side<<std::endl;
+    Throw() << "Meshes being merged should be on the same side of the XGrid.";
+  }
   int side1_mesh_ind=-1;
   int side1_orig_elem_id=-1;
   int side2_mesh_ind=-1;
@@ -651,7 +654,7 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
   //}
 
   // We now have all the genesis cells, compute the merged mesh
-  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh);
+  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh, side);
   //char str[64]; memset(str, 0, 64);
   //sprintf(str, "sewmesh.vtk.%d", me);
   //WriteVTKMesh(mergemesh, str);

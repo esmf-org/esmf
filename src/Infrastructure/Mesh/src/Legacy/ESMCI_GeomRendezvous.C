@@ -1093,7 +1093,7 @@ void GeomRend::prep_meshes() {
 				 side1_mesh_ind->dim());
     }
 
-    MEField<> *side1_orig_elem_id= srcmesh->GetField("side1_orig_elem_id");
+    MEField<> *side1_orig_elem_id= dstmesh->GetField("side1_orig_elem_id");
     if (side1_orig_elem_id != NULL) {
       dstmesh_rend.RegisterField("side1_orig_elem_id", 
 				 side1_orig_elem_id->GetMEFamily(),
@@ -1111,7 +1111,7 @@ void GeomRend::prep_meshes() {
 				 side2_mesh_ind->dim());
     }
 
-    MEField<> *side2_orig_elem_id= srcmesh->GetField("side2_orig_elem_id");
+    MEField<> *side2_orig_elem_id= dstmesh->GetField("side2_orig_elem_id");
     if (side2_orig_elem_id != NULL) {
       dstmesh_rend.RegisterField("side2_orig_elem_id", 
 				 side2_orig_elem_id->GetMEFamily(),
@@ -1281,9 +1281,9 @@ void GeomRend::src_migrate_meshes() {
 
 void GeomRend::dst_migrate_meshes() {
   Trace __trace("GeomRend::migrate_meshes()");
-
+  
   if (dstplist == NULL) {
-
+    
   // And now the destination
   dstComm.GetCommRel(MeshObj::NODE).build_range();
 
@@ -1294,12 +1294,11 @@ void GeomRend::dst_migrate_meshes() {
     dstComm.GetCommRel(MeshObj::ELEMENT).build_range();
   }
 
-
   dstmesh_rend.Commit();
 
   if (iter_is_obj) {
     int num_snd=0;
-    MEField<> *snd[9],*rcv[9];
+    MEField<> *snd[10],*rcv[10];
 
     MEField<> *dc = dstmesh->GetCoordField();
     MEField<> *dc_r = dstmesh_rend.GetCoordField();
@@ -1353,6 +1352,7 @@ void GeomRend::dst_migrate_meshes() {
       num_snd++;
     }
 
+
     // Do side1 mesh index
     MEField<> *s1mi = dstmesh->GetField("side1_mesh_ind");
     if (s1mi != NULL) {
@@ -1374,7 +1374,6 @@ void GeomRend::dst_migrate_meshes() {
       rcv[num_snd]=s1oei_r;
       num_snd++;            
     }
-
 
     // Do side2 mesh index
     MEField<> *s2mi = dstmesh->GetField("side2_mesh_ind");
@@ -1398,8 +1397,8 @@ void GeomRend::dst_migrate_meshes() {
       num_snd++;            
     }
 
-
-     dstComm.SendFields(num_snd, snd, rcv);
+    // Send fields
+    dstComm.SendFields(num_snd, snd, rcv);
 
   } else {
     int num_snd=0;
@@ -1435,6 +1434,7 @@ void GeomRend::dst_migrate_meshes() {
 
   }
   }
+  
 }
 
 // do both src and dst migration with one call
@@ -1600,8 +1600,7 @@ void GeomRend::build_dst_mig_all_overlap(ZoltanUD &zud) {
 
 void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF, struct Zoltan_Struct **zzp, bool free_zz) {
   Trace __trace("GeomRend::Build()");
-
-
+  
   ThrowRequire(built == false);
   built = true;
 
@@ -1611,6 +1610,7 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
     return;
   }
 
+  
   MEField<> *src_coordField_ptr, *dst_coordField_ptr;
   if (srcmesh != NULL)
     src_coordField_ptr = srcmesh->GetCoordField();
@@ -1725,7 +1725,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   // Done with src zud lists, so free them in the intests of memory
   std::vector<MeshObj*>().swap(zud.srcObj);
 
-
   // Register the necessary fields (could put this in a function, but passing the args
   // would be a pain)
   for (UInt i = 0; i < nsrcF; i++) {
@@ -1737,7 +1736,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
   // Now migrate the src mesh.
   src_migrate_meshes();
 
-
   // Build the destination migration
   if (dcfg.all_overlap_dst) {
     // Here we need all the destination cells that overlap with each source cell on the same proc
@@ -1748,7 +1746,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
     else
       build_dst_mig_plist(zud, numExport, exportGlobalids, exportProcs, numImport, importGlobalids);
   }
-
 
   // Slightly different for destination; use interp field if not 'conserv'
   for (UInt i = 0; i < ndstF; i++) {
@@ -1768,7 +1765,6 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF,
 
   // Now migrate the dst mesh.
   dst_migrate_meshes();
-
 
   //WriteMesh(srcmesh_rend, "srcrend");
 

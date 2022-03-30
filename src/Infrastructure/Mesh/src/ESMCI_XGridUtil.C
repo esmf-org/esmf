@@ -1778,8 +1778,6 @@ static void _get_centroid_from_elem(MeshObj *elem, const MEField<>  *cfield, int
   MEField<> *side2_mesh_ind = NULL;
   MEField<> *side2_orig_elem_id = NULL;
 
-  printf("Creating side=%d Mesh in XGrid\n",side);
-
   if (side == 1) {
     side1_mesh_ind = meshmid.RegisterField("side1_mesh_ind",
 					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
@@ -2465,14 +2463,44 @@ bool intersect_line_with_line(const double *p1, const double *p2, const double *
   return true; // great circles will always intersect ^_^
 }
 
+
+static void _calc_elem_area(int sdim, MEField<> *coord_field, MeshObj &elem, double &elem_area) {
+    
+  // Declare varaibles to get elem info
+#define  MAX_NUM_ELEM_COORDS  60
+#define  MAX_NUM_ELEM_NODES_2D  30  // MAX_NUM_ELEM_COORDS/2
+#define  MAX_NUM_ELEM_NODES_3D  20  // MAX_NUM_ELEM_COORDS/3
+  int num_elem_nodes;
+  double elem_coords[MAX_NUM_ELEM_COORDS];
+  double tmp_coords[MAX_NUM_ELEM_COORDS];
+  
+  
+  // Calculate area of element depending on dim
+  if (sdim==2) {
+    get_elem_coords_2D_ccw(&elem, coord_field, MAX_NUM_ELEM_NODES_2D,
+                           tmp_coords, &num_elem_nodes, elem_coords);
+    remove_0len_edges2D(&num_elem_nodes, elem_coords);
+    elem_area=area_of_flat_2D_polygon(num_elem_nodes, elem_coords);
+  } else if (sdim==3) {
+    get_elem_coords_3D_ccw(&elem, coord_field, MAX_NUM_ELEM_NODES_3D,
+                           tmp_coords, &num_elem_nodes, elem_coords);
+    remove_0len_edges3D(&num_elem_nodes, elem_coords);
+    elem_area=great_circle_area(num_elem_nodes, elem_coords);
+  } else {
+    Throw() <<"Only Meshes of spatial dim 2 or 3 are supported in element area calculation.";
+  }
+    
+  // Get rid of defines
+#undef  MAX_NUM_ELEM_COORDS  
+#undef  MAX_NUM_ELEM_NODES_2D 
+#undef  MAX_NUM_ELEM_NODES_3D
+}
+
+
 // Calc weights to go from a side mesh to it's xgrid. This call depends on the mesh
 // side information being set, so it only makes sense to call it from within the
 // XGrid create. 
 void calc_wgts_from_side_mesh_to_xgrid(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh, IWeights &wts) {
-
-
-    printf("mesh side=%d mesh ind=%d\n",src_side_mesh->side,src_side_mesh->ind);
-
 
     // Get side mesh info
     int side=src_side_mesh->side;
@@ -2534,22 +2562,68 @@ void calc_wgts_from_side_mesh_to_xgrid(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh
 
     }
 
+    
+    // Get src area field, if it exists adjust by area
+    MEField<> *src_area_field = src_side_mesh->GetField("elem_area");
+    if (src_area_field != NULL) {
+      
+      
+      // Get spatial dim
+      int sdim=src_side_mesh->spatial_dim();
+      
+      // Get elem coord field
+      MEField<> *src_coord_field=src_side_mesh->GetCoordField();
+      
+      // Loop through src side mesh creating adjustment matrix
+      IWeights adj_wts;
+      Mesh::iterator ei = src_side_mesh->elem_begin(), ee = src_side_mesh->elem_end();
+      for (; ei != ee; ++ei) {
+        
+        // Get dst elem
+        MeshObj &src_elem=*ei;
+        
+        // Get calculated area of src element
+        double src_elem_calc_area;
+        _calc_elem_area(sdim, src_coord_field, src_elem, src_elem_calc_area);
+        
+        // get src elem area from area field        
+        double *src_elem_area_ptr=src_area_field->data(src_elem);
+        double src_elem_user_area=*src_elem_area_ptr;
+        
+        // Calc area adjustment factor
+        double user_area_adj=src_elem_user_area/src_elem_calc_area;
+        
+        // Set col info (i.e. the src and weight)
+        // USE src id for both col and row because 
+        IWeights::Entry col(src_elem.get_id(), 0, user_area_adj, 0);
+        
+        // Set row info (i.e. the destination id associated with the above weight)
+        // USE src id for both col and row because 
+        IWeights::Entry row(src_elem.get_id(), 0, 0.0, 0);
+        
+        // Put into matrix
+        adj_wts.InsertRowMergeSingle(row, col);
+      }
+      
+      // Change distribution of adj_wts so that its rows are lined up with the column ids of wts
+      wts.GatherToCol(adj_wts);
+      
+      // Replace source entries with adj wts entries and multiply factors (i.e. just multiply factors)
+      //wts.AssimilateConstraints(adj_wts);  
+      wts.MultColsByAdjMat(adj_wts);
+    }
 }
+
 
 // Calc weights from an xgrid to one of it's side meshes. This call depends on the mesh
 // side information being set, so it only makes sense to call it from within the
 // XGrid create. 
 void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh, IWeights &wts) {
 
-
-    printf("from xgrid to side:: mesh side=%d mesh ind=%d\n",dst_side_mesh->side,dst_side_mesh->ind);
-
-
     // Get side mesh info
-    int side=src_side_mesh->side;
-    int ind=src_side_mesh->ind;
+    int side=dst_side_mesh->side;
+    int ind=dst_side_mesh->ind;
     
-
     // TODO: Add a test here to verify that side mesh has valid side and ind values
 
     // Get data fields corresponding to side
@@ -2569,10 +2643,14 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
     if (mesh_ind_field == NULL) Throw() << "XGrid mesh doesn't contain mesh index information.";
     if (orig_elem_id_field == NULL) Throw() << "XGrid mesh doesn't contain original element id information.";
 
+    // Get xgrid area field
+    MEField<> *xgrid_elem_area_field = src_xgrid_mesh->GetField("elem_area");
+    if (xgrid_elem_area_field == NULL) Throw() << "XGrid mesh doesn't contain area information.";
+    
     // Loop through XGrid elements creating matrix
-    Mesh::iterator ei = src_xgrid_mesh->elem_begin(), ee = src_xgrid_mesh->elem_end();
-    for (; ei != ee; ++ei) {
-      MeshObj &elem = *ei;
+    Mesh::iterator sxei = src_xgrid_mesh->elem_begin(), sxee = src_xgrid_mesh->elem_end();
+    for (; sxei != sxee; ++sxei) {
+      MeshObj &elem = *sxei;
 
       // Skip non-local elements
       if (!GetAttr(elem).is_locally_owned()) continue;
@@ -2593,22 +2671,120 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
         // Get xgrid elem id
         int src_xgrid_elem_id=elem.get_id();
 
-        //STOPPED HERE
+        // Get xgrid element area
+        double *xgrid_elem_area=xgrid_elem_area_field->data(elem);
 
-        // Set col info (i.e. the src and weight)
-        IWeights::Entry col(src_orig_elem_id, 0, 1.0, 0);
+        // Set the source id and elem area, so we can use it to compute the weights later
+        IWeights::Entry col(src_xgrid_elem_id, 0, *xgrid_elem_area, 0);
         
         // Set row info (i.e. the destination id associated with the above weight)
-        IWeights::Entry row(dst_xgrid_elem_id, 0, 0.0, 0);
+        IWeights::Entry row(dst_orig_elem_id, 0, 0.0, 0);
         
         // Put into matrix
         wts.InsertRowMergeSingle(row, col);
       }
-
     }
 
-}
 
+    // Migrate to destination distribution of elements
+    wts.MigrateToElem(*dst_side_mesh);
+
+
+    //// Finish weight calculation by dividing by dst area.
+    //// Also, do frac calc. since it's convenient to do at the same time
+    
+    // Get spatial dim
+    int sdim=dst_side_mesh->spatial_dim();
+
+    // Get elem coord field
+    MEField<> *coord_field =dst_side_mesh->GetCoordField();
+    
+    // Get elem fraction field
+    MEField<> *dst_frac_field =dst_side_mesh->GetField("elem_frac");
+
+    // Get elem fraction2 field
+    MEField<> *dst_frac2_field =dst_side_mesh->GetField("elem_frac2");
+
+    // If fracs exist, then init to 0
+    if (dst_frac_field != NULL) {
+      Mesh::iterator dsei = dst_side_mesh->elem_begin(), dsee = dst_side_mesh->elem_end();
+      for (; dsei != dsee; ++dsei) {
+        MeshObj &elem = *dsei;
+        double *dst_elem_frac_ptr=dst_frac_field->data(elem);
+        *dst_elem_frac_ptr=0.0;        
+      }
+    }
+
+    // Get xgrid area field
+    MEField<> *dst_elem_area_field = dst_side_mesh->GetField("elem_area");
+    
+    // Iterate through rows of weight matrix
+    WMat::WeightMap::iterator wi=wts.begin_row(),we = wts.end_row();
+    for (; wi != we; ++wi) {
+      
+      // Get destination id
+      int dst_elem_id=wi->first.id;
+
+      // Find dst element
+      Mesh::MeshObjIDMap::iterator mi = dst_side_mesh->map_find(MeshObj::ELEMENT, dst_elem_id);
+
+      // Complain if it's not in mesh
+      if (mi == dst_side_mesh->map_end(MeshObj::ELEMENT)) {
+        Throw() << "couldn't find destination element in destination mesh.";
+      }
+
+      // Get dst elem
+      MeshObj &dst_elem=*mi;
+      
+      // Get calculated area of dst element
+      double dst_elem_area;
+      _calc_elem_area(sdim, coord_field, dst_elem, dst_elem_area);
+      
+      // Get column vector
+      std::vector<WMat::Entry> &col = wi->second;
+      
+      // Loop through dividing by calculated dst area to
+      // get fractions
+      double frac =0.0;
+      for (UInt i = 0; i < col.size(); i++) {
+        frac += col[i].value/dst_elem_area; 
+      }
+
+      // Set fraction value in element, if field exists
+      if (dst_frac_field != NULL) {
+        double *dst_elem_frac_ptr=dst_frac_field->data(dst_elem);
+        *dst_elem_frac_ptr=frac;
+      }        
+
+
+      // Get dst merge fraction
+      double dst_frac2_adj=1.0;
+      if (dst_frac2_field != NULL) { 
+        double *dst_elem_frac2_ptr=dst_frac2_field->data(dst_elem); 
+        if (*dst_elem_frac2_ptr >1.0E-15) dst_frac2_adj=1.0/(*dst_elem_frac2_ptr);
+        else dst_frac2_adj=0.0;
+      }
+      
+      
+      // Get user area from area field if it exists, otherwise just use calc area
+      double user_dst_elem_area=dst_elem_area; // default to the calc. area
+      if (dst_elem_area_field != NULL) {
+        double *dst_elem_area_ptr=dst_elem_area_field->data(dst_elem);
+        user_dst_elem_area=*dst_elem_area_ptr;
+      }
+
+      
+      // Loop through dividing by dst area to give final weights
+      for (UInt i = 0; i < col.size(); i++) {
+
+        // Calculate weights
+        col[i].value=col[i].value/user_dst_elem_area;
+        
+        // Adjust by merge fraction
+        col[i].value*=dst_frac2_adj;
+      }
+    }
+}
 
 
 } //namespace

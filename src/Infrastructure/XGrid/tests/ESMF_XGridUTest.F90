@@ -65,7 +65,7 @@
   call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-#if 0
+#if 1
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Testing XGrid IsCreated for uncreated object"
@@ -2759,7 +2759,7 @@ end subroutine CreateTestMesh2x2_2
 
 #else
 
-write(*,*) "NOT Using XGrid"
+!write(*,*) "NOT Using XGrid"
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -3427,7 +3427,7 @@ write(*,*) "NOT Using XGrid"
 #define USE_XGRID_CSGRID
 #ifdef USE_XGRID_CSGRID
 
-write(*,*) "Using XGrid"
+!write(*,*) "Using XGrid"
 
    ! Create XGrid
    xgrid = ESMF_XGridCreate(sideAGrid=(/srcGrid/), &
@@ -3494,7 +3494,7 @@ write(*,*) "Using XGrid"
        ESMF_CONTEXT, rcToReturn=rc)) return
 
 #else
-  write(*,*) "NOT Using XGrid"
+!  write(*,*) "NOT Using XGrid"
 
   ! Do regrid store to create routehandle
   call ESMF_FieldRegridStore(srcField, &
@@ -4534,7 +4534,8 @@ end subroutine test_CSGridToGrid_2nd
     integer                                   :: sideAGC, sideBGC, sideAMC, sideBMC
     real(ESMF_KIND_R8)                        :: global_sum, l_area_adj
     character(len=1)                          :: cids(10) = (/'0','1','2','3','4','5','6','7','8','9'/)
-
+    real(ESMF_KIND_R8)                        :: global_af, global_a
+    
     l_scheme = ESMF_REGRID_SCHEME_REGION3D
     if(present(scheme)) l_scheme = scheme
     l_area_adj = 1.0
@@ -4734,7 +4735,8 @@ end subroutine test_CSGridToGrid_2nd
         ESMF_CONTEXT, rcToReturn=rc)) return
     if(lpet == 0) print *, ' xgrid flux and area: ', allsrcsum
     if(abs(allsrcsum(1) - allsrcsum(2)*scale*l_area_adj) .gt. 1.e-10) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+    !   write(*,*) allsrcsum(1),allsrcsum(2)*scale*l_area_adj,allsrcsum(2)*scale,allsrcsum(2),scale,l_area_adj
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
          msg="- inconsistent flux and area found", &
          ESMF_CONTEXT, rcToReturn=rc) 
       return
@@ -4745,6 +4747,8 @@ end subroutine test_CSGridToGrid_2nd
 
     !make sure flux is conserved on dst Fields
     global_sum = 0.
+    global_af = 0.
+    global_a = 0.
     do i = 1, size(dstField)
       call ESMF_FieldRegrid(srcField=f_xgrid, dstField=dstField(i), &
         routehandle=x2d_rh(i), rc=localrc)
@@ -4778,7 +4782,10 @@ end subroutine test_CSGridToGrid_2nd
           ESMF_CONTEXT, rcToReturn=rc)) return
       if(lpet == 0) print *, 'dst flux and area: ', allsrcsum
       if(ndst == 1) then
-        if((abs(exf_tarea*l_area_adj - allsrcsum(2)) .gt. 1.e-10) .or. &
+      !   write(*,*) "exf_tarea*l_area_adj=",exf_tarea*l_area_adj," allsrcsum(2)=",allsrcsum(2)
+      !   write(*,*) "exf_tflux=",exf_tflux," allsrcsum(1)=",allsrcsum(1)
+         
+         if((abs(exf_tarea*l_area_adj - allsrcsum(2)) .gt. 1.e-10) .or. &
            (abs(exf_tflux - allsrcsum(1)) .gt. 1.e-10)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
              msg="- inconsistent flux and area found", &
@@ -4792,14 +4799,19 @@ end subroutine test_CSGridToGrid_2nd
             ESMF_CONTEXT, rcToReturn=rc)) return
         if(lpet == 0) print *, 'dst flux and area using frac2: ', allsrcsum
         global_sum = global_sum + allsrcsum(1)
-      endif
+        global_af = global_af + allsrcsum(2)
+        global_a = global_a + allsrcsum(3)
+     endif
 
     enddo
 
     ! make sure going to multiple Grids also conserve global flux
     if(ndst .gt. 1) then
+     !  write(*,*) exf_tflux,global_sum,exf_tflux-global_sum
+     !  write(*,*) global_af, global_a
+
         if ((abs(exf_tflux - global_sum) .gt. 1.e-10)) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- inconsistent flux and area found", &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -5230,6 +5242,8 @@ end subroutine test_CSGridToGrid_2nd
   end subroutine flux_exchange_sph_mesh
 
 
+  ! This is a test that creates a small xgrid from a couple of small grids.
+  ! It's useful for debugging simple issues because everything is easy to look through.
  subroutine test_side_and_elem_info(rc)
 #undef ESMF_METHOD 
 #define ESMF_METHOD "test_side_and_elem_info"
@@ -5270,13 +5284,15 @@ end subroutine test_CSGridToGrid_2nd
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Debug output
+#if 0
   call ESMF_GridWriteVTK(a1Grid,staggerloc=ESMF_STAGGERLOC_CORNER, &
         filename="a1GridCnr", &
         rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
+#endif
+  
   ! Create small 4 x 4 Grid for side A
   a2Grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/4,4/), &
        minCornerCoord=(/0.0_ESMF_KIND_R8,4.0_ESMF_KIND_R8/), &
@@ -5288,15 +5304,16 @@ end subroutine test_CSGridToGrid_2nd
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
+  
   ! Debug output
+#if 0
   call ESMF_GridWriteVTK(a2Grid,staggerloc=ESMF_STAGGERLOC_CORNER, &
         filename="a2GridCnr", &
         rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-
+#endif
 
 
   ! Create small 8 x 8 Grid for side B
@@ -5311,13 +5328,14 @@ end subroutine test_CSGridToGrid_2nd
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Debug output
+#if 0
   call ESMF_GridWriteVTK(bGrid,staggerloc=ESMF_STAGGERLOC_CORNER, &
         filename="bGridCnr", &
         rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
+#endif
 
   ! Create XGrid
   xgrid = ESMF_XGridCreate(sideAGrid=(/a1Grid, a2Grid/), &
@@ -5329,7 +5347,8 @@ end subroutine test_CSGridToGrid_2nd
        ESMF_CONTEXT, rcToReturn=rc)) return
   
    ! Debug output
-   call ESMF_XGridGet(xgrid, mesh=xgridMesh, rc=localrc)
+#if 0
+  call ESMF_XGridGet(xgrid, mesh=xgridMesh, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5338,14 +5357,13 @@ end subroutine test_CSGridToGrid_2nd
    if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-
+#endif
 
   ! Free the XGrid
   call ESMF_XGridDestroy(xgrid, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-
 
   ! Free the grids
   call ESMF_GridDestroy(a1Grid, rc=localrc)

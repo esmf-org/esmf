@@ -1476,9 +1476,6 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
                                          bool set_dst_status, WMat &dst_status) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
-
-
-
   // Get src coord field
   MEField<> *src_cfield = srcmesh.GetCoordField();
 
@@ -1753,7 +1750,6 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
 
   if(midmesh != 0)
     compute_midmesh(sintd_nodes, sintd_cells, 2, 2, midmesh,3);
-
 }
 
 
@@ -1777,8 +1773,6 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   }
 
 #endif
-
-
 
 
   // Get src coord field
@@ -2975,6 +2969,7 @@ interp_method(imethod)
     }
 
 
+    
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
 

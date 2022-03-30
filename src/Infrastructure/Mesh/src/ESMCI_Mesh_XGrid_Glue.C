@@ -65,10 +65,10 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_xgridregrid_create()"
   Trace __trace(" FTN_X(c_esmc_xgridregrid_create)");
-
+  
   Mesh &srcmesh = **meshsrcpp;
   Mesh &dstmesh = **meshdstpp;
-
+  
   // Old Regrid conserve turned off for now
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
@@ -99,14 +99,14 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
       (*mesh)->orig_spatial_dim=orig_sdim;
       (*mesh)->coordsys=*coordSys;
     }
-
+    
     // Weights matrix
     IWeights wts;
 
     if(!online_regrid_xgrid(srcmesh, dstmesh, *mesh, wts, &regridConserve, regridMethod,
                       unmappedaction))
       Throw() << "Online regridding error" << std::endl;
-
+    
     // Firstly, the index list
     std::pair<UInt,UInt> iisize = wts.count_matrix_entries();
     int num_entries = iisize.first;
@@ -115,7 +115,7 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
     // Gather the list
     ESMCI::InterArray<int> ii(iientries, 2, larg);
     ESMCI::InterArray<int> *iiptr = &ii;
-
+    
     double *factors = new double[iisize.first];
 
     // Translate weights to sparse matrix representatio
@@ -170,7 +170,6 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
   }
   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-
 }
 
 // mesh merge
