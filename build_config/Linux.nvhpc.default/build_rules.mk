@@ -130,9 +130,9 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} --version
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
-ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} --version -c
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version -c
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version -c
 
 ############################################################
 # Currently no support the Fortran2018 assumed type feature
