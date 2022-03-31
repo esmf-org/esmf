@@ -19,7 +19,7 @@ extern "C" {
    */
   int __wrap_c_esmftrace_notify_wrappers(int initialized) {
 
-    printf("Inside wrappers.C __wrap_c_esmftrace_notify_wrappers()");
+    printf("Inside wrappers.C __wrap_c_esmftrace_notify_wrappers()\n");
       
     if (initialized == 1) {
       traceInitialized = 1;
@@ -32,7 +32,7 @@ extern "C" {
    
   int __wrap_c_esmftrace_isinitialized() {
 
-    printf("Inside wrappers.C __wrap_c_esmftrace_isinitialized()");
+    //printf("Inside wrappers.C __wrap_c_esmftrace_isinitialized()\n");
     return traceInitialized;
   }  
   

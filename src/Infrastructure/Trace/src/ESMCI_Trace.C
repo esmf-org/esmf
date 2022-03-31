@@ -413,15 +413,8 @@ namespace ESMCI {
 	ESMC_LogDefault.Write("ESMCI_Trace.C: found c_esmftrace_notify_wrappers", ESMC_LOGMSG_INFO);
       }
       else {
-	notify_wrappers = (int (*)(int)) dlsym(preload_lib, "__wrap_c_esmftrace_notify_wrappers");
-	if (notify_wrappers != NULL) {
-	  wrappersPresent = notify_wrappers(1);
-	  ESMC_LogDefault.Write("ESMCI_Trace.C: found __wrap_c_esmftrace_notify_wrappers", ESMC_LOGMSG_INFO);
-	}
-	else {
-	  ESMC_LogDefault.Write("ESMF Tracing/Profiling could not load dynamic instrumentation functions.", ESMC_LOGMSG_WARN);
-	}
-      }
+	wrappersPresent = c_esmftrace_notify_wrappers(1);	
+      }      
     }
 #else
     wrappersPresent = c_esmftrace_notify_wrappers(1);
