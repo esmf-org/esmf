@@ -200,6 +200,7 @@ ESMF_OPENMP_CXXLINKOPTS    += -mp
 ############################################################
 # OpenACC compiler and linker flags (the -Minfo just there for debugging)
 #
+ESMF_OPENACCDEFAULT = ON
 ESMF_OPENACC_F90COMPILEOPTS += -acc -Minfo
 ESMF_OPENACC_CXXCOMPILEOPTS += -acc -Minfo
 ESMF_OPENACC_F90LINKOPTS    += -acc -Minfo
