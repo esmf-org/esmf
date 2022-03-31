@@ -89,6 +89,17 @@ ESMF_PTHREADS := OFF
 #
 ESMF_F90COMPILEOPTS += -homp
 ESMF_CXXCOMPILEOPTS += -fopenmp
+ESMF_F90LINKOPTS    += -homp
+ESMF_CXXLINKOPTS    += -fopenmp
+
+############################################################
+# OpenACC compiler and linker flags
+#
+ESMF_OPENACCDEFAULT = ON
+ESMF_OPENACC_F90COMPILEOPTS += -hacc
+ESMF_OPENACC_CXXCOMPILEOPTS += -hacc
+ESMF_OPENACC_F90LINKOPTS    += -hacc
+ESMF_OPENACC_CXXLINKOPTS    += -hacc
 
 ############################################################
 # How to specify module directories
