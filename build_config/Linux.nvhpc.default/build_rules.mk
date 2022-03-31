@@ -8,7 +8,7 @@
 #
 ESMF_F90DEFAULT         = nvfortran
 ESMF_CXXDEFAULT         = nvc++
-ESMF_CDEFAULT           = nvcc
+ESMF_CDEFAULT           = nvc
 
 ############################################################
 # Default MPI setting.
@@ -203,7 +203,8 @@ ESMF_OPENMP_CXXLINKOPTS    += -mp
 ESMF_OPENACCDEFAULT = ON
 ESMF_OPENACC_F90COMPILEOPTS += -acc -Minfo
 ESMF_OPENACC_CXXCOMPILEOPTS += -acc -Minfo
-ESMF_OPENACC_F90LINKOPTS    += -acc -Minfo
+#ESMF_OPENACC_F90LINKOPTS    += -acc -Minfo #TODO: understand why this breaks link
+ESMF_OPENACC_F90LINKOPTS    += -Minfo
 ESMF_OPENACC_CXXLINKOPTS    += -acc -Minfo
 
 ############################################################
