@@ -2505,9 +2505,10 @@ void calc_wgts_from_side_mesh_to_xgrid(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh
     // Get side mesh info
     int side=src_side_mesh->side;
     int ind=src_side_mesh->ind;
-    
 
-    // TODO: Add a test here to verify that side mesh has valid side and ind values
+    // Check side and ind info to make sure it's valid
+    if ((side != 1) && (side !=2)) Throw() << "side (for an xgrid side mesh) should be 1 or 2";
+    if (ind < 1) Throw() <<"ind (for an xgrid side mesh) should be >=1.";
 
     // Get data fields corresponding to side
     MEField<> *mesh_ind_field = NULL;
@@ -2594,11 +2595,13 @@ void calc_wgts_from_side_mesh_to_xgrid(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh
         double user_area_adj=src_elem_user_area/src_elem_calc_area;
         
         // Set col info (i.e. the src and weight)
-        // USE src id for both col and row because 
-        IWeights::Entry col(src_elem.get_id(), 0, user_area_adj, 0);
+        // Use 0 id for col because it doesn't matter what I use for MultColsByAdjMat(adj_wts)
+        // below, and 0 makes as much sense as anything
+        IWeights::Entry col(0, 0, user_area_adj, 0);
         
-        // Set row info (i.e. the destination id associated with the above weight)
-        // USE src id for both col and row because 
+        // Set row info 
+        // Use src id for row, because it's used to match with the src ids in the cols of the wts matrix in
+        // wts.MultColsByAdjMat(adj_wts)
         IWeights::Entry row(src_elem.get_id(), 0, 0.0, 0);
         
         // Put into matrix
@@ -2609,7 +2612,6 @@ void calc_wgts_from_side_mesh_to_xgrid(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh
       wts.GatherToCol(adj_wts);
       
       // Replace source entries with adj wts entries and multiply factors (i.e. just multiply factors)
-      //wts.AssimilateConstraints(adj_wts);  
       wts.MultColsByAdjMat(adj_wts);
     }
 }
@@ -2624,7 +2626,9 @@ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh
     int side=dst_side_mesh->side;
     int ind=dst_side_mesh->ind;
     
-    // TODO: Add a test here to verify that side mesh has valid side and ind values
+    // Check side and ind info to make sure it's valid
+    if ((side != 1) && (side !=2)) Throw() << "side (for an xgrid side mesh) should be 1 or 2";
+    if (ind < 1) Throw() <<"ind (for an xgrid side mesh) should be >=1.";
 
     // Get data fields corresponding to side
     MEField<> *mesh_ind_field = NULL;
