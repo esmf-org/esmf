@@ -2,7 +2,7 @@
 ## Ed Hartnett 8/16/17
 
 # Initialize autoconf and automake.
-AC_INIT(pio, 2.5.5)
+AC_INIT(pio, 2.5.6)
 AC_CONFIG_SRCDIR(src/clib/pio_darray.c)
 AM_INIT_AUTOMAKE([foreign serial-tests])
 
@@ -11,7 +11,7 @@ AM_INIT_AUTOMAKE([foreign serial-tests])
 # AC_DEFINE_UNQUOTED for config.h.
 AC_SUBST([PIO_VERSION_MAJOR]) PIO_VERSION_MAJOR=2
 AC_SUBST([PIO_VERSION_MINOR]) PIO_VERSION_MINOR=5
-AC_SUBST([PIO_VERSION_PATCH]) PIO_VERSION_PATCH=4
+AC_SUBST([PIO_VERSION_PATCH]) PIO_VERSION_PATCH=6
 AC_DEFINE_UNQUOTED([PIO_VERSION_MAJOR], [$PIO_VERSION_MAJOR], [PIO major version])
 AC_DEFINE_UNQUOTED([PIO_VERSION_MINOR], [$PIO_VERSION_MINOR], [PIO minor version])
 AC_DEFINE_UNQUOTED([PIO_VERSION_PATCH], [$PIO_VERSION_PATCH], [PIO patch version])
@@ -19,7 +19,7 @@ AC_DEFINE_UNQUOTED([PIO_VERSION_PATCH], [$PIO_VERSION_PATCH], [PIO patch version
 # Once more for the documentation.
 AC_SUBST([VERSION_MAJOR], [2])
 AC_SUBST([VERSION_MINOR], [5])
-AC_SUBST([VERSION_PATCH], [5])
+AC_SUBST([VERSION_PATCH], [6])
 
 
 # The m4 directory holds macros for autoconf.
@@ -92,9 +92,6 @@ if test -n "$fc_version_info"; then
   FC_VERSION="$FC_VERSION ( $fc_version_info)"
 fi
 
-# Always use malloc in autotools builds.
-AC_DEFINE([PIO_USE_MALLOC], [1], [use malloc for memory])
-
 AC_MSG_CHECKING([whether a PIO_BUFFER_SIZE was specified])
 AC_ARG_WITH([piobuffersize],
               [AS_HELP_STRING([--with-piobuffersize=<integer>],
@@ -108,7 +105,7 @@ AC_MSG_CHECKING([whether debug logging is enabled])
 AC_ARG_ENABLE([logging],
               [AS_HELP_STRING([--enable-logging],
                               [enable debug logging capability (will negatively impact performance). \
-			      This debugging feature is probably only of interest to PIO developers.])])
+                              This debugging feature is probably only of interest to PIO developers.])])
 test "x$enable_logging" = xyes || enable_logging=no
 AC_MSG_RESULT([$enable_logging])
 if test "x$enable_logging" = xyes; then
@@ -469,7 +466,7 @@ AC_SUBST([HAS_PIO_FORTRAN], [$enable_fortran])
 # Create the build summary file. 
 AC_CONFIG_FILES([libpio.settings
                  src/clib/pio_meta.h
-		 ])
+                 ])
 AC_CONFIG_LINKS([tests/unit/input.nl:tests/unit/input.nl])
 
 # Create the config.h file.
