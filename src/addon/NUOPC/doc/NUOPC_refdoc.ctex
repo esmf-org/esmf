@@ -158,6 +158,13 @@
 \input{../addon/NUOPC/doc/NUOPC_Namespaces}
 #endif
 
+\subsubsection{Using Coupling Sets for Coupling Multiple Nests}
+#ifdef STANDALONE
+\input{NUOPC_CplSet}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_CplSet}
+#endif
+
 \subsubsection{Connection Options}
 #ifdef STANDALONE
 \input{NUOPC_ConnectionOptions}

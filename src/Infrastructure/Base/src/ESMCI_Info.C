@@ -1216,12 +1216,13 @@ void Info::set(key_t &key, json &&j, bool force, const int *index, const key_t *
 
 #if 0
   std::string prefix = std::string(ESMC_METHOD) + ": ";
-  std::string msg;
+  std::string msg; std::stringstream msgStream;
   msg = prefix + "key=" + key;
   ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   msg = prefix + "j.dump()=" + j.dump();
   ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
-  msg = prefix + "force=" + std::to_string(force);
+  msgStream << std::boolalpha << force;
+  msg = prefix + "force=" + msgStream.str();
   ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
   if (index) {
     msg = prefix + "*index=" + std::to_string(*index);

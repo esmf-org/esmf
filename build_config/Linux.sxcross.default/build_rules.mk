@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = sxmpif90
 ESMF_CXXDEFAULT         = sxmpic++
+ESMF_CDEFAULT           = sxmpicc
 ESMF_ARDEFAULT          = sxar
 
 ############################################################
@@ -46,6 +47,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -EP -dW -V
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -V
 
 ############################################################
 # NEC SX is 64-bit, need to set it here because cross compiling in Linux
@@ -88,10 +90,12 @@ endif
 ############################################################
 # NEC SX hardcoded paths to system libs
 #
-ESMF_CXXLINKPATHS   += -L/SX/usr/lib
-ESMF_CXXLINKRPATHS  =
 ESMF_F90LINKPATHS   += -L/SX/usr/lib
 ESMF_F90LINKRPATHS  =
+ESMF_CXXLINKPATHS   += -L/SX/usr/lib
+ESMF_CXXLINKRPATHS  =
+ESMF_CLINKPATHS     += -L/SX/usr/lib
+ESMF_CLINKRPATHS    =
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end

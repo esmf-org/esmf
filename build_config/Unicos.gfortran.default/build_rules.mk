@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = ftn
 ESMF_CXXDEFAULT         = CC
+ESMF_CDEFAULT           = cc
 
 ############################################################
 # Default MPI setting.
@@ -46,6 +47,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} --version
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 
 ############################################################
 # Special debug flags
@@ -115,6 +117,7 @@ ESMF_F90COMPILEOPTS += -ffree-line-length-none
 #
 ESMF_F90RPATHPREFIX         = -Wl,-rpath,
 ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
 # Determine where gcc's libraries are located

@@ -31,6 +31,14 @@
 #define ESMCI_REGION_EXIT(name, localrc) 
 #endif
 
+//#ifdef ESMF_PROFILE_PIO
+//#define ESMCI_IOREGION_ENTER(name) ESMCI::TraceEventRegionEnter(name, NULL);
+//#define ESMCI_IOREGION_EXIT(name)  ESMCI::TraceEventRegionExit(name, NULL);
+//#else
+#define ESMCI_IOREGION_ENTER(name) 
+#define ESMCI_IOREGION_EXIT(name)  
+//#endif
+
 #ifdef ESMF_PROFILE_MESHCREATE
 #define ESMCI_MESHCREATE_TRACE_ENTER(name) {char before[100] = "before "; \
   VM::getCurrent(NULL)->logMemInfo(strcat(before, name)); \

@@ -495,11 +495,11 @@ workflows:
       - publish-esmf-docs:
           requires:
             - build-esmf-docs
-          filters:
-            branches:
-              only:
-                - develop
-                - /^release/.*$/
+#          filters:
+#            branches:
+#              only:
+#                - develop
+#                - /^release/.*$/
       - build-esmpy-docs
 #          requires:
 #            - should-build-docs

@@ -3822,6 +3822,18 @@ bool Array::matchBool(
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
+  if (array1->localDeCountAux != array2->localDeCountAux){
+    matchResult = false;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
   int localDeCount = array1->getDistGrid()->getDELayout()->getLocalDeCount();
   int *int1 = array1->totalElementCountPLocalDe;
   int *int2 = array2->totalElementCountPLocalDe;

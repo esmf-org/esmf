@@ -744,11 +744,14 @@ ESMF_GREPV                  = grep -v
 # dummies here, expected to be overwritten in platform files if used
 ESMF_F90RPATHPREFIX         = -L
 ESMF_CXXRPATHPREFIX         = -L
+ESMF_CRPATHPREFIX           = -L
 
 ESMF_F90OPTFLAG_X           =
 ESMF_CXXOPTFLAG_X           =
+ESMF_COPTFLAG_X             =
 ESMF_F90OPTFLAG_G           = -g
 ESMF_CXXOPTFLAG_G           = -g
+ESMF_COPTFLAG_G             = -g
 
 # setting default optimization flags is platform dependent
 ifneq ($(origin ESMF_OPTLEVEL), environment)
@@ -763,6 +766,7 @@ else
 ESMF_F90OPTFLAG_O =  -O$(ESMF_OPTLEVEL)
 endif
 ESMF_CXXOPTFLAG_O = -O$(ESMF_OPTLEVEL) -DNDEBUG
+ESMF_COPTFLAG_O   = -O$(ESMF_OPTLEVEL) -DNDEBUG
 else
 # if NEC, insert option before -O
 ifeq ($(ESMF_COMPILER),sxcross)
@@ -771,6 +775,7 @@ else
 ESMF_F90OPTFLAG_O = -O
 endif
 ESMF_CXXOPTFLAG_O = -O2 -DNDEBUG
+ESMF_COPTFLAG_O   = -O2 -DNDEBUG
 endif
 
 
@@ -877,6 +882,51 @@ endif
 ESMF_CXXCOMPILEPATHSLOCAL += -I$(ESMF_CONFDIR) $(ESMF_INTERNALINCDIRS)
 ESMF_CXXCOMPILEPATHS      += -I$(ESMF_INCDIR)  $(ESMF_CXXCOMPILEPATHSTHIRD)
 ESMF_CXXCOMPILECPPFLAGS   += $(ESMF_CPPFLAGS) -D__SDIR__='"$(LOCDIR)"'
+
+# - CCOMPILER
+ifneq ($(origin ESMF_CCOMPILER), environment)
+ifeq ($(origin ESMF_C), environment)
+ESMF_CCOMPILER = $(ESMF_C)
+else
+ESMF_CCOMPILER = $(ESMF_CCOMPILERDEFAULT)
+ESMF_CCOMPILERDEFAULT = $(ESMF_CDEFAULT)
+endif
+endif
+ifneq ($(origin ESMF_COPTFLAG), environment)
+ESMF_COPTFLAG = $(ESMF_COPTFLAG_X)
+ifeq ($(ESMF_BOPT),g)
+ESMF_COPTFLAG = $(ESMF_COPTFLAG_G)
+endif
+ifeq ($(ESMF_BOPT),O)
+ESMF_COPTFLAG = $(ESMF_COPTFLAG_O)
+endif
+endif
+# - make sure environment variable gets prepended _once_
+ifeq ($(origin ESMF_CCOMPILEOPTS), environment)
+export ESMF_CCOMPILEOPTS_ENV := $(ESMF_CCOMPILEOPTS)
+unexport ESMF_CCOMPILEOPTS
+endif
+ifeq ($(origin ESMF_CCOMPILEOPTS_ENV), environment)
+ESMF_CCOMPILEOPTS = $(ESMF_CCOMPILEOPTS_ENV)
+endif
+ESMF_CCOMPILEOPTS += $(ESMF_CSTDFLAG) $(ESMF_COPTFLAG) $(ESMF_SO_CCOMPILEOPTS)
+# - make sure environment variable gets prepended _once_
+ifeq ($(origin ESMF_CCOMPILEPATHS), environment)
+export ESMF_CCOMPILEPATHS_ENV := $(ESMF_CCOMPILEPATHS)
+unexport ESMF_CCOMPILEPATHS
+endif
+ifeq ($(origin ESMF_CCOMPILEPATHS_ENV), environment)
+ESMF_CCOMPILEPATHS = $(ESMF_CCOMPILEPATHS_ENV)
+endif
+ESMF_CCOMPILEPATHS      +=
+ESMF_CCOMPILEPATHSLOCAL  = -I$(ESMF_DIR)/$(LOCDIR)
+ESMF_CCOMPILEPATHSLOCAL += -I$(ESMF_DIR)/$(LOCDIR)/../include
+ifneq ($(ESMF_SITE),default)
+ESMF_CCOMPILEPATHSLOCAL += -I$(ESMF_SITEDIR)
+endif
+ESMF_CCOMPILEPATHSLOCAL += -I$(ESMF_CONFDIR) $(ESMF_INTERNALINCDIRS)
+ESMF_CCOMPILEPATHS      += -I$(ESMF_INCDIR)  $(ESMF_CCOMPILEPATHSTHIRD)
+ESMF_CCOMPILECPPFLAGS   += $(ESMF_CPPFLAGS) -D__SDIR__='"$(LOCDIR)"'
 
 # - F90LINKER
 ifneq ($(origin ESMF_F90LINKER), environment)
@@ -986,6 +1036,60 @@ endif
 ESMF_CXXLINKLIBS     +=
 ESMF_CXXESMFLINKLIBS += -lesmf $(ESMF_CXXLINKLIBS)
 
+# - CLINKER
+ifneq ($(origin ESMF_CLINKER), environment)
+ifeq ($(origin ESMF_C), environment)
+ESMF_CLINKER = $(ESMF_C)
+else
+ESMF_CLINKER = $(ESMF_CLINKERDEFAULT)
+ESMF_CLINKERDEFAULT = $(ESMF_CDEFAULT)
+endif
+endif
+# - make sure environment variable gets prepended _once_
+ifeq ($(origin ESMF_CLINKOPTS), environment)
+export ESMF_CLINKOPTS_ENV := $(ESMF_CLINKOPTS)
+unexport ESMF_CLINKOPTS
+endif
+ifeq ($(origin ESMF_CLINKOPTS_ENV), environment)
+ESMF_CLINKOPTS = $(ESMF_CLINKOPTS_ENV)
+else
+ifeq ($(ESMF_BOPT),g)
+ESMF_CLINKOPTS += $(ESMF_LINKOPTFLAG_G)
+endif
+ifeq ($(ESMF_BOPT),O)
+ESMF_CLINKOPTS += $(ESMF_LINKOPTFLAG_O)
+endif
+endif
+ESMF_CLINKOPTS     +=
+# - make sure environment variable gets prepended _once_
+ifeq ($(origin ESMF_CLINKPATHS), environment)
+export ESMF_CLINKPATHS_ENV := $(ESMF_CLINKPATHS)
+unexport ESMF_CLINKPATHS
+endif
+ifeq ($(origin ESMF_CLINKPATHS_ENV), environment)
+ESMF_CLINKPATHS = $(ESMF_CLINKPATHS_ENV)
+endif
+ESMF_CLINKPATHS    += -L$(ESMF_LDIR) $(ESMF_CLINKPATHSTHIRD)
+# - make sure environment variable gets prepended _once_
+ifeq ($(origin ESMF_CLINKRPATHS), environment)
+export ESMF_CLINKRPATHS_ENV := $(ESMF_CLINKRPATHS)
+unexport ESMF_CLINKRPATHS
+endif
+ifeq ($(origin ESMF_CLINKRPATHS_ENV), environment)
+ESMF_CLINKRPATHS = $(ESMF_CLINKRPATHS_ENV)
+endif
+ESMF_CLINKRPATHS   += $(ESMF_CRPATHPREFIX)$(ESMF_LDIR) $(ESMF_CLINKRPATHSTHIRD)
+# - make sure environment variable gets prepended _once_
+ifeq ($(origin ESMF_CLINKLIBS), environment)
+export ESMF_CLINKLIBS_ENV := $(ESMF_CLINKLIBS)
+unexport ESMF_CLINKLIBS
+endif
+ifeq ($(origin ESMF_CLINKLIBS_ENV), environment)
+ESMF_CLINKLIBS = $(ESMF_CLINKLIBS_ENV)
+endif
+ESMF_CLINKLIBS     +=
+ESMF_CESMFLINKLIBS += -lesmf $(ESMF_CLINKLIBS)
+
 # - tools: AR + RANLIB + ...
 ifneq ($(origin ESMF_AR), environment)
 ESMF_AR = $(ESMF_ARDEFAULT)
@@ -1051,6 +1155,9 @@ ESMF_SO_F90LINKOPTSEXE  +=
 ESMF_SO_CXXCOMPILEOPTS  +=
 ESMF_SO_CXXLINKOPTS     +=
 ESMF_SO_CXXLINKOPTSEXE  +=
+ESMF_SO_CCOMPILEOPTS    = $(ESMF_SO_CXXCOMPILEOPTS)
+ESMF_SO_CLINKOPTS       = $(ESMF_SO_CXXLINKOPTS)
+ESMF_SO_CLINKOPTSEXE    = $(ESMF_SO_CXXLINKOPTSEXE)
 
 # - OpenMP compiler and linker flags
 ESMF_OPENMP_F90COMPILEOPTS  +=
@@ -1563,6 +1670,13 @@ ifeq ($(ESMF_COMM),mpiuni)
 #TODO: but want to allow external PIO or explicit ESMF_PIO setting for developm. #TODO: Eventually this should become unnecessary.
 ESMF_PIO = OFF
 endif
+ifndef ESMF_NETCDF
+# PIO, starting with version 2, depends on NetCDF. Defaulting to internal needs
+# be turned off if there is no NetCDF available. Externally set PIO will be let
+# through, but will trigger the error down when actually attempting to build
+# PIO internally.
+ESMF_PIO = OFF
+endif
 endif
 
 endif
@@ -1571,14 +1685,11 @@ ifeq ($(ESMF_PIO),OFF)
 ESMF_PIO=
 endif
 
-ifeq ($(ESMF_PIO),external)
-ifneq ($(origin ESMF_PIO_LIBS), environment)
-ESMF_PIO_LIBS = -lpio
-endif
-endif
-
 ifdef ESMF_PIO
 ESMF_CPPFLAGS                += -DESMF_PIO=1
+ifneq ($(origin ESMF_PIO_LIBS), environment)
+ESMF_PIO_LIBS = -lpioc
+endif
 ifdef ESMF_PIO_INCLUDE
 ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
 ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_PIO_INCLUDE)
@@ -1594,13 +1705,6 @@ ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_PIO_LIBPATH)
 ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_PIO_LIBPATH)
 ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_PIO_LIBPATH)
 ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_PIO_LIBPATH)
-endif
-endif
-
-ifneq ($(ESMF_COMM),mpiuni)
-ifneq ($(ESMF_COMM),mvapich)
-export ESMF_MPIIO = supported
-ESMF_CPPFLAGS += -DESMF_MPIIO
 endif
 endif
 
