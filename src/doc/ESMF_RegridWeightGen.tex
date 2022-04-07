@@ -312,6 +312,7 @@ ESMF_RegridWeightGen
         [--user_areas]
         [--weight_only]
         [--check]
+        [--checkFlag]
         [--no_log]
         [--help]
         [--version]
@@ -566,6 +567,9 @@ where:
                         the destination and analytic field is computed, as well 
                         as the relative error between the mass of the source and 
                         destination fields in the conservative case.
+
+     --checkFlag      - Turn on more expensive extra error checking during 
+                        weight generation.
 
      --no_log         - Turn off the ESMF Log files.  By default, ESMF creates 
                         multiple log files, one per PET.
