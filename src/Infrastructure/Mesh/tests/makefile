@@ -1,4 +1,4 @@
-# $Id$ 
+# $Id$
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -22,7 +22,7 @@ TESTS_BUILD	  = \
                 $(ESMF_TESTDIR)/ESMC_NearestUTest \
                 $(ESMF_TESTDIR)/ESMC_Proj4UTest
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapUTest
+# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
 
@@ -185,4 +185,3 @@ RUN_ESMC_MBMesh_UtilUTestUNI:
 
 RUN_ESMC_NearestUTest:
 	$(MAKE) TNAME=Nearest NP=4 ctest
-

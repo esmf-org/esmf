@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -63,17 +63,17 @@ using namespace std;
 // NOTES (until I find a better place for them):
 //   + MBMesh should be responsible for both coordinate forms (cart and original)
 //      it should know about what coordinate system the mesh is in and be able to hand
-//      out either type. If we have the mesh responsbile for doing coordinate conversion, 
+//      out either type. If we have the mesh responsbile for doing coordinate conversion,
 //      then we know it's always happening the same way.
-//  
+//
 // TODO:
-//    + Think about orig position, it seems like we 
+//    + Think about orig position, it seems like we
 //      could make it much more useful for indexing into output arrays.
 //    + We might need a status flag eventually for things like
 //      non-active, pole, border, or ghostcells
-//      Maybe make bad_id and bad_proc MBMesh parameters? 
+//      Maybe make bad_id and bad_proc MBMesh parameters?
 //    + add an add_nodes() method that takes in lists and makes nodes in a group.
-//      we can replace a lot of the functionality in MBMesh_addnodes() with that. 
+//      we can replace a lot of the functionality in MBMesh_addnodes() with that.
 
 
 
@@ -84,7 +84,7 @@ using namespace std;
 int MBMesh::M2EType(int key, int range) {
   return
     (range == 0) ? throw "Key not present":
-    (MOAB2ESMFElemType[range - 1].first == key) ? 
+    (MOAB2ESMFElemType[range - 1].first == key) ?
       MOAB2ESMFElemType[range - 1].second:
     M2EType(key, range - 1);
 };
@@ -92,7 +92,7 @@ int MBMesh::M2EType(int key, int range) {
 int MBMesh::M2ETypeT(int value, int range) {
   return
     (range == 0) ? throw "Value not present":
-    (MOAB2ESMFElemType[range - 1].second == value) ? 
+    (MOAB2ESMFElemType[range - 1].second == value) ?
       MOAB2ESMFElemType[range - 1].first:
     M2ETypeT(value, range - 1);
 };
@@ -100,7 +100,7 @@ int MBMesh::M2ETypeT(int value, int range) {
 int MBMesh::E2MType(int key, int range) {
   return
     (range == 0) ? throw "Key not present":
-    (ESMF2MOABElemType[range - 1].first == key) ? 
+    (ESMF2MOABElemType[range - 1].first == key) ?
       ESMF2MOABElemType[range - 1].second:
     E2MType(key, range - 1);
 };
@@ -108,7 +108,7 @@ int MBMesh::E2MType(int key, int range) {
 int MBMesh::E2MTypeT(int value, int range) {
   return
     (range == 0) ? throw "Value not present":
-    (ESMF2MOABElemType[range - 1].second == value) ? 
+    (ESMF2MOABElemType[range - 1].second == value) ?
       ESMF2MOABElemType[range - 1].first:
     E2MTypeT(value, range - 1);
 };
@@ -117,18 +117,18 @@ int MBMesh::E2MTypeT(int value, int range) {
 // Empty mesh
 // EVENTUALLY MAKE THIS PRIVATE TO ENCOURAGE THE USE OF THE CONSTRUCTOR
 // THAT SETS EVEYTHING UP CORRECTLY
-MBMesh::MBMesh(): 
+MBMesh::MBMesh():
   pdim(0),
-  sdim(0), 
+  sdim(0),
   orig_sdim(0),
-  coordsys(ESMC_COORDSYS_UNINIT), 
+  coordsys(ESMC_COORDSYS_UNINIT),
   mesh(NULL),
   nodes_finalized(false),
   elems_finalized(false),
   has_node_orig_coords(false),
   has_node_mask(false),
   has_elem_coords(false),
-  has_elem_orig_coords(false), 
+  has_elem_orig_coords(false),
   has_elem_mask(false),
   has_elem_area(false),
   has_elem_frac(false),
@@ -143,27 +143,27 @@ MBMesh::MBMesh():
     _num_orig_elem = 0;
     _num_owned_node = 0;
     _num_owned_elem = 0;
-} 
+}
 
 // From inputs
 // _pdim - parametric dimension
 // _orig_sdim - the original spatial dimension (before converting to Cart 3D)
 // _coordSys  - the coordinate system of the mesh
-MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys): 
+MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh()"
   // TODO: Figure out if there's an empty tag to init tags to
   pdim(_pdim),
-  sdim(0), 
+  sdim(0),
   orig_sdim(_orig_sdim),
-  coordsys(_coordsys), 
+  coordsys(_coordsys),
   mesh(NULL),
   nodes_finalized(false),
   elems_finalized(false),
   has_node_orig_coords(false),
   has_node_mask(false),
   has_elem_coords(false),
-  has_elem_orig_coords(false), 
+  has_elem_orig_coords(false),
   has_elem_mask(false),
   has_elem_area(false),
   has_elem_frac(false),
@@ -193,7 +193,7 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
 
   // Set cartesian spatial dim in struct
   sdim=cart_sdim;
-    
+
   // Create MOAB Mesh
   mesh=new Core();
 
@@ -202,19 +202,19 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
 
   // Setup global id tag
   gid_tag=mesh->globalId_tag();
-  
+
   // Setup orig_pos tag
   int_def_val=ORIG_POS_AFTERCREATE; // Default to AFTERCREATE, so that if objects
                                     // are created later after the original mesh creation
-                                    // we know. 
+                                    // we know.
   merr=mesh->tag_get_handle("orig_pos", 1, MB_TYPE_INTEGER, orig_pos_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
   ESMC_CHECK_MOAB_THROW(merr);
-  
+
   // Setup owner tag
   int_def_val=-1;
   merr=mesh->tag_get_handle("owner", 1, MB_TYPE_INTEGER, owner_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
   ESMC_CHECK_MOAB_THROW(merr);
-  
+
   // Setup node_orig_coord tag
   has_node_orig_coords=false;
   if (coordsys != ESMC_COORDSYS_CART) {
@@ -230,9 +230,9 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   ESMC_CHECK_MOAB_THROW(merr);
   has_elem_frac=true;
 
-} 
+}
 
-// The coords variable here is in the original representation, not converted to cart. 
+// The coords variable here is in the original representation, not converted to cart.
 EntityHandle MBMesh::add_node(double *orig_coords, int gid, int orig_pos, int owner) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::add_node()"
@@ -254,7 +254,7 @@ EntityHandle MBMesh::add_node(double *orig_coords, int gid, int orig_pos, int ow
   ESMC_CHECK_MOAB_THROW(merr);
 
 
-  // Set original coords (if necessary) 
+  // Set original coords (if necessary)
   if (has_node_orig_coords) {
     // Set original coords
     merr=mesh->tag_set_data(node_orig_coords_tag, &new_vert, 1, orig_coords);
@@ -271,17 +271,17 @@ EntityHandle MBMesh::add_node(double *orig_coords, int gid, int orig_pos, int ow
   merr=mesh->tag_set_data(orig_pos_tag, &new_vert, 1, &orig_pos);
   ESMC_CHECK_MOAB_THROW(merr);
 
-  
+
   // Set Owner
   merr=mesh->tag_set_data(owner_tag, &new_vert, 1, &owner);
   ESMC_CHECK_MOAB_THROW(merr);
-  
+
   // Output new vertex/node
   return new_vert;
 }
 
 
-// Create a bunch of new nodes at once 
+// Create a bunch of new nodes at once
 // (This seems more memory efficient in MOAB)
 // TODO: have the added_nodes range come out the return??
 void MBMesh::add_nodes(int num_new_nodes,       // Number of nodes
@@ -289,7 +289,7 @@ void MBMesh::add_nodes(int num_new_nodes,       // Number of nodes
                        int *gids,           // For each node it's gid
                        int *orig_pos,       // For each node it's orig_pos, if NULL just do in order
                        int *owners,         // For each node it's owner
-                       Range &added_nodes) {        
+                       Range &added_nodes) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::add_nodes()"
 
@@ -300,10 +300,10 @@ void MBMesh::add_nodes(int num_new_nodes,       // Number of nodes
   if (num_new_nodes <= 0) return;
 
   // Check input
-  ThrowRequire(orig_coords != NULL); 
-  ThrowRequire(gids != NULL); 
+  ThrowRequire(orig_coords != NULL);
+  ThrowRequire(gids != NULL);
   // orig_pos can be NULL
-  ThrowRequire(owners != NULL); 
+  ThrowRequire(owners != NULL);
 
   // Allocate coordinate space
   double *cart_coords3D=NULL;
@@ -338,7 +338,7 @@ void MBMesh::add_nodes(int num_new_nodes,       // Number of nodes
   if (cart_coords3D != NULL) delete [] cart_coords3D;
 
 
-  // Set original coords (if necessary) 
+  // Set original coords (if necessary)
   if (has_node_orig_coords) {
     // Set original coords
     merr=mesh->tag_set_data(node_orig_coords_tag, added_nodes, orig_coords);
@@ -359,7 +359,7 @@ void MBMesh::add_nodes(int num_new_nodes,       // Number of nodes
     int pos=0;
     for(Range::const_iterator it=added_nodes.begin(); it !=added_nodes.end(); it++) {
       const EntityHandle *node=&(*it);
-    
+
       merr=mesh->tag_set_data(orig_pos_tag, node, 1, &pos);
       ESMC_CHECK_MOAB_THROW(merr);
 
@@ -371,10 +371,10 @@ void MBMesh::add_nodes(int num_new_nodes,       // Number of nodes
     merr=mesh->tag_set_data(orig_pos_tag, added_nodes, orig_pos);
     ESMC_CHECK_MOAB_THROW(merr);
   }
-  
+
   // Set Owners
   merr=mesh->tag_set_data(owner_tag, added_nodes, owners);
-  ESMC_CHECK_MOAB_THROW(merr);  
+  ESMC_CHECK_MOAB_THROW(merr);
 }
 
 
@@ -389,7 +389,7 @@ void MBMesh::setup_node_mask() {
   merr=mesh->tag_get_handle("node_mask", 1, MB_TYPE_INTEGER, node_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
   ESMC_CHECK_MOAB_THROW(merr);
 
-  
+
   // Setup node mask value tag
   int_def_val=0; // So things are by default not masked
   merr=mesh->tag_get_handle("node_mask_val", 1, MB_TYPE_INTEGER, node_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
@@ -498,43 +498,43 @@ void MBMesh::get_sorted_orig_nodes(std::vector<EntityHandle> &orig_nodes) const 
     ESMC_CHECK_THROW(localrc);
 
     int merr;
-  
+
     // compute original nodes
     Range all_nodes;
     get_all_nodes(all_nodes);
-  
+
     // Setup list to hold pairs
     std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
     pos_and_nodes.reserve(all_nodes.size());
-  
+
     // Loop through nodes putting into list
     for(Range::const_iterator it=all_nodes.begin(); it !=all_nodes.end();   it++) {
       EntityHandle node=*it;
-  
+
       // Get orig_pos
       int orig_pos;
       merr=mesh->tag_get_data(orig_pos_tag, &node, 1, &orig_pos);
       ESMC_CHECK_MOAB_THROW(merr);
-  
+
       // Skip ones with orig_pos<0 (they are not from original creation)
       if (orig_pos < ORIG_POS_MIN_OUTPUT) continue;
-  
+
       // Stick in list
       pos_and_nodes.push_back(std::make_pair(orig_pos,node));
     }
-  
+
     // Put in order by original pos
     std::sort(pos_and_nodes.begin(), pos_and_nodes.end());
-  
+
     // Setup orig_nodes list
     orig_nodes.clear();
     orig_nodes.reserve(pos_and_nodes.size());
-  
+
     // Fill array of node entities
     for (int i = 0; i<pos_and_nodes.size(); ++i) {
       orig_nodes.push_back(pos_and_nodes[i].second);
     }
-  
+
   }
   CATCH_MBMESH_RETHROW
 }
@@ -615,16 +615,16 @@ int MBMesh::get_num_elem_conn(std::vector<EntityHandle> elems){
     if (!is_split) {
       std::vector<EntityHandle>::const_iterator ei = elems.begin();
       std::vector<EntityHandle>::const_iterator ee = elems.end();
-  
+
       // Loop summing number of nodes per element
       for (ei; ei != ee; ++ei) {
         EntityHandle elem=*ei;
-  
+
         // Get topology of element
         std::vector<EntityHandle> nodes_on_elem;
         merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
         ESMC_CHECK_MOAB_THROW(merr)
-  
+
         // Add number of nodes for this elem to connection count
         elemConnCount += nodes_on_elem.size();
       }
@@ -634,8 +634,8 @@ int MBMesh::get_num_elem_conn(std::vector<EntityHandle> elems){
       mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids, false);
       elemConnCount = merged_nids.size();
 
-      std::cout << localPet << "#MBMESH::get_num_elem_conn :: = " 
-                << elemConnCount << std::endl;
+      // std::cout << localPet << "#MBMESH::get_num_elem_conn :: = "
+      //           << elemConnCount << std::endl;
 
       // std::cout << "num_merged_nids = [";
       // for (const auto nid: num_merged_nids)
@@ -648,7 +648,7 @@ int MBMesh::get_num_elem_conn(std::vector<EntityHandle> elems){
     }
   }
   CATCH_MBMESH_RETHROW
-  
+
   return elemConnCount;
 }
 void MBMesh::get_elem_areas(double *elem_area) {
@@ -656,13 +656,13 @@ void MBMesh::get_elem_areas(double *elem_area) {
 #define ESMC_METHOD "MBMesh::get_elem_areas()"
   try {
     int merr;
-  
+
     if (!has_elem_area) Throw () << "Element areas not present.";
 
     Range elems;
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
     ESMC_CHECK_MOAB_THROW(merr)
-  
+
     merr=mesh->tag_get_data(elem_area_tag, elems, elem_area);
     ESMC_CHECK_MOAB_THROW(merr)
 
@@ -675,7 +675,7 @@ void MBMesh::get_elem_coords(double *elem_coords) {
 #define ESMC_METHOD "MBMesh::get_elem_coords()"
   try {
     int merr;
-  
+
     Range elems;
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
     ESMC_CHECK_MOAB_THROW(merr)
@@ -683,7 +683,7 @@ void MBMesh::get_elem_coords(double *elem_coords) {
     if (coordsys != ESMC_COORDSYS_CART) {
       if (!has_elem_orig_coords)
         Throw () << "Element original coords not present.";
-  
+
       merr=mesh->tag_get_data(elem_orig_coords_tag, elems, elem_coords);
       ESMC_CHECK_MOAB_THROW(merr)
     } else {
@@ -727,7 +727,7 @@ void MBMesh::get_elem_mask(int *elem_mask) {
       Range elems;
       merr=mesh->get_entities_by_dimension(0, pdim, elems);
       ESMC_CHECK_MOAB_THROW(merr)
-  
+
       merr=mesh->tag_get_data(elem_mask_val_tag, elems, elem_mask);
       ESMC_CHECK_MOAB_THROW(merr)
     } else {
@@ -737,7 +737,7 @@ void MBMesh::get_elem_mask(int *elem_mask) {
 
       // Get an ordered list of elems
       std::vector<std::pair<int,EntityHandle> > sorted_elems;
-      
+
       // Make a vector to sort elems by original creation order
       Range elems;
       get_all_elems(elems);
@@ -748,28 +748,28 @@ void MBMesh::get_elem_mask(int *elem_mask) {
         merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &orig_pos);
         ESMC_CHECK_MOAB_THROW(merr)
 
-        sorted_elems.push_back(std::make_pair(orig_pos, elem));      
+        sorted_elems.push_back(std::make_pair(orig_pos, elem));
       }
-      
+
       // sort by creation order
       std::sort(sorted_elems.begin(), sorted_elems.end());
-      
+
       int ind = 0;
       int ind_meta = 0;
       for (const auto i : num_merged_nids) {
         // number of triangles created from ngon with i nodes
         int n = i - 2;
-        
+
         // get the mask value
         EntityHandle elem = sorted_elems[ind_meta].second;
-        
+
         int mask;
         merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &mask);
         ESMC_CHECK_MOAB_THROW(merr)
-        
+
         // add to elemIds
         elem_mask[ind] = mask;
-        
+
         // update indices
         ind++;
         ind_meta = ind_meta+n;
@@ -784,23 +784,23 @@ void MBMesh::get_elem_types(int *elem_types) {
 #define ESMC_METHOD "MBMesh::get_elem_types()"
   try {
     int merr;
-    
+
     if (!is_split) {
       std::vector<EntityHandle> elems;
       get_owned_elems(elems);
       ESMC_CHECK_MOAB_THROW(merr)
-    
+
       std::vector<EntityHandle>::const_iterator it = elems.begin();
       int i = 0;
       for (it; it != elems.end(); it++) {
         EntityHandle elem=*it;
-      
+
         // Get topology of element
         int type = mesh->type_from_handle(elem);
         ESMC_CHECK_MOAB_THROW(merr)
-    
+
         elem_types[i] = M2EType(type);
-    
+
         i++;
       }
     } else {
@@ -830,45 +830,44 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
       get_node_ids(node_ids);
       std::vector<int> nodeids(node_ids, node_ids + nodes.size());
       delete [] node_ids;
-  
+
       // now iterate through the elements
       Range elems;
       merr=mesh->get_entities_by_dimension(0, pdim, elems);
       ESMC_CHECK_MOAB_THROW(merr)
-      
+
       int elemConnCountTemp = 0;
       for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
         EntityHandle elem=*it;
-  
+
         // Get topology of element (ordered)
         vector<EntityHandle> nodes_on_elem;
         merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
         ESMC_CHECK_MOAB_THROW(merr)
-  
+
         int nid;
         // add connectivity to output array
         for (int i=0; i<nodes_on_elem.size(); ++i) {
           // get the node id
           merr=mesh->tag_get_data(gid_tag, &nodes_on_elem.at(i), 1, &nid);
           ESMC_CHECK_MOAB_THROW(merr)
-  
+
           std::vector<int>::iterator itr = std::find(nodeids.begin(), nodeids.end(),   nid);
           // add 1 for Fortran indexing
           elem_conn[elemConnCountTemp+i] = std::distance(nodeids.begin(), itr) +1;
         }
-  
+
         // Add number of nodes for this elem to connection count
         elemConnCountTemp += nodes_on_elem.size();
       }
     } else {
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
-      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, 
-                                      merged_nids);
-                                          
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids);
+
       // Get an ordered list of nodes
       std::vector<std::pair<int,EntityHandle> > sorted_nodes;
-      
+
       // Make a vector to sort nodes by original creation order
       Range nodes;
       get_all_nodes(nodes);
@@ -879,12 +878,12 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
         merr=mesh->tag_get_data(orig_pos_tag, &node, 1, &orig_pos);
         ESMC_CHECK_MOAB_THROW(merr)
 
-        sorted_nodes.push_back(std::make_pair(orig_pos, node));      
+        sorted_nodes.push_back(std::make_pair(orig_pos, node));
       }
-      
+
       // sort by creation order
       std::sort(sorted_nodes.begin(), sorted_nodes.end());
-      
+
       int ind = 0;
       for (const auto i : merged_nids) {
         int conn_pos;
@@ -900,15 +899,15 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
             break;
           }
         }
-        
+
         if (ni2 == ne2) Throw () << "Node " << i << " not found.";
-        
+
         // can't use lambdas with MOAB because tags cannot be accessed member functions
         // auto it = std::find_if(sorted_nodes.begin(), sorted_nodes.end(),
         //   [&i](const std::pair<int,EntityHandle>& x)
         //   {  return nodeid == i;} );
         // int conn_pos = it->first;
-      
+
         // add to elemConn
         // NOTE: add 1 for Fortran indexing convention
         elem_conn[ind] = conn_pos + 1;
@@ -924,17 +923,17 @@ void MBMesh::get_elem_types(std::vector<EntityHandle> const &elems, int *elem_ty
 #define ESMC_METHOD "MBMesh::get_elem_types()"
   try {
     int merr;
-  
+
     if (!is_split) {
       int i = 0;
       for (std::vector<EntityHandle>::const_iterator it=elems.begin(); it !=   elems.end(); it++) {
         EntityHandle elem=*it;
-    
+
         // Get topology of element
         Range nodes_on_elem;
         merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
         ESMC_CHECK_MOAB_THROW(merr)
-  
+
         elem_types[i] = 0;
         if (pdim == 2) {
           if (nodes_on_elem.size() == 3) elem_types[i] = ESMC_MESHELEMTYPE_TRI;
@@ -943,7 +942,7 @@ void MBMesh::get_elem_types(std::vector<EntityHandle> const &elems, int *elem_ty
             Throw () << "Element type not recognized.";
         } else if (pdim == 3) {
           if (nodes_on_elem.size() == 4) elem_types[i] = ESMC_MESHELEMTYPE_TETRA;
-          else if (nodes_on_elem.size() == 8) elem_types[i] =   ESMC_MESHELEMTYPE_HEX;       
+          else if (nodes_on_elem.size() == 8) elem_types[i] =   ESMC_MESHELEMTYPE_HEX;
           else
             Throw () << "Element type not recognized.";
         } else
@@ -982,41 +981,40 @@ void MBMesh::get_elem_connectivity(std::vector<EntityHandle> const &elems, int *
       std::vector<EntityHandle> orig_nodes;
       get_sorted_orig_nodes(orig_nodes);
       get_gid(orig_nodes, nodeids.data());
-  
+
       // now iterate through the elements
       int elemConnCountTemp = 0;
       for (std::vector<EntityHandle>::const_iterator it=elems.begin(); it !=   elems.end(); it++) {
         EntityHandle elem=*it;
-  
+
         // Get topology of element (ordered)
         vector<EntityHandle> nodes_on_elem;
         merr=mesh->get_connectivity(&elem, 1, nodes_on_elem);
         ESMC_CHECK_MOAB_THROW(merr)
-  
+
         int nid;
         // add connectivity to output array
         for (int i=0; i<nodes_on_elem.size(); ++i) {
           // get the node id
           merr=mesh->tag_get_data(gid_tag, &nodes_on_elem.at(i), 1, &nid);
           ESMC_CHECK_MOAB_THROW(merr)
-  
+
           std::vector<int>::iterator itr = std::find(nodeids.begin(), nodeids.end(),   nid);
           // add 1 for Fortran indexing
           elem_conn[elemConnCountTemp+i] = std::distance(nodeids.begin(), itr) +1;
         }
-  
+
         // Add number of nodes for this elem to connection count
         elemConnCountTemp += nodes_on_elem.size();
       }
     } else {
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
-      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, 
-                                      merged_nids);
-                                          
+      mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids);
+
       // Get an ordered list of nodes
       std::vector<std::pair<int,EntityHandle> > sorted_nodes;
-      
+
       // Make a vector to sort nodes by original creation order
       Range nodes;
       get_all_nodes(nodes);
@@ -1027,12 +1025,12 @@ void MBMesh::get_elem_connectivity(std::vector<EntityHandle> const &elems, int *
         merr=mesh->tag_get_data(orig_pos_tag, &node, 1, &orig_pos);
         ESMC_CHECK_MOAB_THROW(merr)
 
-        sorted_nodes.push_back(std::make_pair(orig_pos, node));      
+        sorted_nodes.push_back(std::make_pair(orig_pos, node));
       }
-      
+
       // sort by creation order
       std::sort(sorted_nodes.begin(), sorted_nodes.end());
-      
+
       int ind = 0;
       for (const auto i : merged_nids) {
         int conn_pos;
@@ -1048,15 +1046,15 @@ void MBMesh::get_elem_connectivity(std::vector<EntityHandle> const &elems, int *
             break;
           }
         }
-        
+
         if (ni2 == ne2) Throw () << "Node " << i << " not found.";
-        
+
         // can't use lambdas with MOAB because tags cannot be accessed member functions
         // auto it = std::find_if(sorted_nodes.begin(), sorted_nodes.end(),
         //   [&i](const std::pair<int,EntityHandle>& x)
         //   {  return nodeid == i;} );
         // int conn_pos = it->first;
-      
+
         // add to elemConn
         // NOTE: add 1 for Fortran indexing convention
         elem_conn[ind] = conn_pos + 1;
@@ -1072,19 +1070,19 @@ void MBMesh::get_elem_centroids(double *elem_centroids) {
 #define ESMC_METHOD "MBMesh::get_elem_centroids()"
   try {
     int merr;
-  
+
     Throw () << "Elem centroids are not yet available.";
-  
+
     // mbutil = Util::Util();
-    
+
     // auto i = 0;
     // for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
     //   EntityHandle elem=*it;
-    // 
+    //
     //   double coord[3];
     //   mesh->centroid(this, elem, coord);
     //   ESMC_CHECK_MOAB_THROW(merr)
-    // 
+    //
     //   elem_centroids[i*sdim] = coord[0];
     //   elem_centroids[i*sdim+1] = coord[1];
     //   if (sdim == 3)
@@ -1100,7 +1098,7 @@ void MBMesh::get_node_coords(double *node_coords) {
 #define ESMC_METHOD "MBMesh::get_node_coords()"
   try {
     int merr;
-    
+
     Range nodes;
     merr=mesh->get_entities_by_dimension(0, 0, nodes);
     ESMC_CHECK_MOAB_THROW(merr)
@@ -1108,7 +1106,7 @@ void MBMesh::get_node_coords(double *node_coords) {
     if (coordsys != ESMC_COORDSYS_CART) {
       if (!has_node_orig_coords)
         Throw () << "Node original coords not present.";
-  
+
       merr=mesh->tag_get_data(node_orig_coords_tag, nodes, node_coords);
       ESMC_CHECK_MOAB_THROW(merr)
     } else {
@@ -1116,7 +1114,7 @@ void MBMesh::get_node_coords(double *node_coords) {
       // double *node_coords3d = new double;
       merr=mesh->get_coords(nodes, node_coords3d);
       ESMC_CHECK_MOAB_THROW(merr)
-      
+
       // compact 3d coords to 2d
       for (int i=0; i<nodes.size(); ++i) {
         node_coords[i*pdim] = node_coords3d[i*3];
@@ -1124,7 +1122,7 @@ void MBMesh::get_node_coords(double *node_coords) {
         if (pdim == 3)
           node_coords[i*pdim+2] = node_coords3d[i*3+2];
       }
-      
+
       delete [] node_coords3d;
     }
 
@@ -1137,7 +1135,7 @@ void MBMesh::get_node_ids(int *node_ids) {
 #define ESMC_METHOD "MBMesh::get_node_ids()"
   try {
     int merr;
-    
+
     Range nodes;
     merr=mesh->get_entities_by_dimension(0, 0, nodes);
     ESMC_CHECK_MOAB_THROW(merr)
@@ -1194,7 +1192,7 @@ void MBMesh::set_node_mask_val(EntityHandle eh, int mask_val) {
 
   // If no masking, complain
   if (!has_node_mask) Throw() << "node mask value not present in mesh.";
-  
+
   // Set data
   merr=mesh->tag_set_data(node_mask_val_tag, &eh, 1, &mask_val);
   ESMC_CHECK_MOAB_THROW(merr);
@@ -1207,7 +1205,7 @@ void MBMesh::set_node_mask_val(Range nodes, int *mask_vals) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_node_mask) Throw() << "node mask value not present in mesh.";
 
@@ -1224,7 +1222,7 @@ void MBMesh::set_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_node_mask) Throw() << "node mask value not present in mesh.";
 
@@ -1245,7 +1243,7 @@ void MBMesh::set_node_mask(EntityHandle eh, int mask) {
 
   // If no masking, complain
   if (!has_node_mask) Throw() << "node mask not present in mesh.";
-  
+
   // Set data
   merr=mesh->tag_set_data(node_mask_tag, &eh, 1, &mask);
   ESMC_CHECK_MOAB_THROW(merr);
@@ -1258,7 +1256,7 @@ void MBMesh::set_node_mask(Range nodes, int *masks) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_node_mask) Throw() << "node mask not present in mesh.";
 
@@ -1275,7 +1273,7 @@ void MBMesh::set_node_mask(std::vector<EntityHandle> const &nodes, int *masks) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_node_mask) Throw() << "node mask not present in mesh.";
 
@@ -1296,7 +1294,7 @@ int MBMesh::get_node_mask(EntityHandle node) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, then error
   if (!has_node_mask) Throw() << "node mask not present in mesh.";
 
@@ -1316,7 +1314,7 @@ int MBMesh::get_node_mask_val(EntityHandle node) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, then error
   if (!has_node_mask) Throw() << "node mask value not present in mesh.";
 
@@ -1336,7 +1334,7 @@ void MBMesh::get_node_mask_val(std::vector<EntityHandle> const &nodes, int *mask
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_node_mask) Throw() << "node mask value not present in mesh.";
 
@@ -1356,7 +1354,7 @@ void MBMesh::set_node_coords(EntityHandle eh, double *orig_coords) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // Set original coords if present
   if (has_node_orig_coords) {
     merr=mesh->tag_set_data(node_orig_coords_tag, &eh, 1, orig_coords);
@@ -1376,7 +1374,7 @@ void MBMesh::set_node_coords(EntityHandle eh, double *orig_coords) {
 }
 
 // Get the internal Cartesian coords for the node
-// coords needs to be of size sdim 
+// coords needs to be of size sdim
 void MBMesh::get_node_cart_coords(EntityHandle node, double *coords) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_node_cart_coords()"
@@ -1396,8 +1394,8 @@ void MBMesh::get_node_cart_coords(EntityHandle node, double *coords) {
 }
 
 
-// Get the original coords for the node, if there are no orig coords then 
-// just uses coords (because those would be the original ones). 
+// Get the original coords for the node, if there are no orig coords then
+// just uses coords (because those would be the original ones).
 // orig_coords needs to be of size orig_sdim
 void MBMesh::get_node_orig_coords(EntityHandle node, double *orig_coords) {
 #undef  ESMC_METHOD
@@ -1423,8 +1421,8 @@ void MBMesh::get_node_orig_coords(EntityHandle node, double *orig_coords) {
   }
 }
 
-// Get the original coords for the node, if there are no orig coords then 
-// just uses coords (because those would be the original ones). 
+// Get the original coords for the node, if there are no orig coords then
+// just uses coords (because those would be the original ones).
 // orig_coords needs to be of size orig_sdim*nodes.size()
 void MBMesh::get_node_orig_coords(std::vector<EntityHandle> const &nodes, double *orig_coords) {
 #undef  ESMC_METHOD
@@ -1448,12 +1446,12 @@ void MBMesh::get_node_orig_coords(std::vector<EntityHandle> const &nodes, double
       double coords[3]={0.0,0.0,0.0};
       merr=mesh->get_coords(&nodes[i],1,coords);
       ESMC_CHECK_MOAB_THROW(merr);
-      
+
       // Copy into buffer of size orig_sdim
       orig_coords[pos]=coords[0];
       orig_coords[pos+1]=coords[1];
       if (orig_sdim > 2) orig_coords[pos+2]=coords[2];
-      
+
       // advance pos
       pos += orig_sdim;
     }
@@ -1462,8 +1460,8 @@ void MBMesh::get_node_orig_coords(std::vector<EntityHandle> const &nodes, double
 
 
 
-// The coords variable here is in the original representation, not converted to cart. 
-EntityHandle MBMesh::add_elem(EntityType elem_type, int num_nodes, EntityHandle *nodes, 
+// The coords variable here is in the original representation, not converted to cart.
+EntityHandle MBMesh::add_elem(EntityType elem_type, int num_nodes, EntityHandle *nodes,
                               int gid, int orig_pos, int owner) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::add_elem()"
@@ -1514,10 +1512,10 @@ void MBMesh::add_elems(int num_new_elems,  // The number of elems to add
   if (num_new_elems <= 0) return;
 
   // Check input
-  ThrowRequire(nodes != NULL); 
-  ThrowRequire(gids != NULL); 
+  ThrowRequire(nodes != NULL);
+  ThrowRequire(gids != NULL);
   // orig_pos can be NULL
-  ThrowRequire(owners != NULL); 
+  ThrowRequire(owners != NULL);
 
 
   // Get reader interface
@@ -1563,7 +1561,7 @@ void MBMesh::add_elems(int num_new_elems,  // The number of elems to add
     int pos=0;
     for(Range::const_iterator it=added_elems.begin(); it !=added_elems.end(); it++) {
       const EntityHandle elem=(*it);
-    
+
       merr=mesh->tag_set_data(orig_pos_tag, &elem, 1, &pos);
       ESMC_CHECK_MOAB_THROW(merr);
 
@@ -1575,7 +1573,7 @@ void MBMesh::add_elems(int num_new_elems,  // The number of elems to add
     merr=mesh->tag_set_data(orig_pos_tag, added_elems, orig_pos);
     ESMC_CHECK_MOAB_THROW(merr);
   }
-  
+
   // Set Owners
   merr=mesh->tag_set_data(owner_tag, added_elems, owners);
   ESMC_CHECK_MOAB_THROW(merr);
@@ -1584,7 +1582,7 @@ void MBMesh::add_elems(int num_new_elems,  // The number of elems to add
 
 
 // Get the internal Cartesian coords for the elem
-// coords needs to be of size sdim 
+// coords needs to be of size sdim
 void MBMesh::get_elem_cart_coords(EntityHandle elem, double *coords) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_elem_cart_coords()"
@@ -1598,8 +1596,8 @@ void MBMesh::get_elem_cart_coords(EntityHandle elem, double *coords) {
 }
 
 
-// Get the original coords for the elem, if there are no orig coords then 
-// just uses coords (because those would be the original ones). 
+// Get the original coords for the elem, if there are no orig coords then
+// just uses coords (because those would be the original ones).
 // orig_coords needs to be of size orig_sdim
 void MBMesh::get_elem_orig_coords(EntityHandle elem, double *orig_coords) {
 #undef  ESMC_METHOD
@@ -1618,12 +1616,12 @@ void MBMesh::get_elem_orig_coords(EntityHandle elem, double *orig_coords) {
   } else {
     merr=mesh->tag_get_data(elem_coords_tag, &elem, 1, orig_coords);
     ESMC_CHECK_MOAB_THROW(merr);
-  } 
+  }
 }
 
 
-// Get the original coords for a vector of elems, if there are no orig coords then 
-// just uses coords (because those would be the original ones). 
+// Get the original coords for a vector of elems, if there are no orig coords then
+// just uses coords (because those would be the original ones).
 // orig_coords needs to be of size orig_sdim*nodes.size()
 void MBMesh::get_elem_orig_coords(std::vector<EntityHandle> const &elems, double *orig_coords) {
 #undef  ESMC_METHOD
@@ -1645,20 +1643,20 @@ void MBMesh::get_elem_orig_coords(std::vector<EntityHandle> const &elems, double
   } else {
     merr=mesh->tag_get_data(elem_coords_tag, &elems[0], elems.size(), orig_coords);
     ESMC_CHECK_MOAB_THROW(merr);
-  } 
+  }
 }
 
 
 // Get an element's corner nodes
-// It looks like MOAB just returns a pointer into the actual connectivity storage, so 
-// corner_nodes shouldn't be deallocated. 
+// It looks like MOAB just returns a pointer into the actual connectivity storage, so
+// corner_nodes shouldn't be deallocated.
 void MBMesh::get_elem_corner_nodes(EntityHandle elem, int &num_corner_nodes, const EntityHandle *&corner_nodes) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_elem_corner_nodes()"
 
   // Error return code
   int merr;
-  
+
   // Get nodes in element
   merr=mesh->get_connectivity(elem,corner_nodes,num_corner_nodes,true);
   ESMC_CHECK_MOAB_THROW(merr);
@@ -1675,7 +1673,7 @@ void MBMesh::setup_elem_mask() {
   merr=mesh->tag_get_handle("elem_mask", 1, MB_TYPE_INTEGER, elem_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
   ESMC_CHECK_MOAB_THROW(merr);
 
-  
+
   // Setup elem mask value tag
   int_def_val=0; // So things are by default not masked
   merr=mesh->tag_get_handle("elem_mask_val", 1, MB_TYPE_INTEGER, elem_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &int_def_val);
@@ -1697,7 +1695,7 @@ void MBMesh::set_elem_mask(EntityHandle eh, int mask) {
 
   // If no masking, complain
   if (!has_elem_mask) Throw() << "elem mask not present in mesh.";
-  
+
   // Set data
   merr=mesh->tag_set_data(elem_mask_tag, &eh, 1, &mask);
   ESMC_CHECK_MOAB_THROW(merr);
@@ -1710,7 +1708,7 @@ void MBMesh::set_elem_mask(Range elems, int *masks) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_elem_mask) Throw() << "element mask not present in mesh.";
 
@@ -1729,7 +1727,7 @@ void MBMesh::set_elem_mask(std::vector<EntityHandle> const &elems, int *masks) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_elem_mask) Throw() << "elem mask not present in mesh.";
 
@@ -1749,7 +1747,7 @@ int MBMesh::get_elem_mask(EntityHandle eh) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, then error
   if (!has_elem_mask) Throw() << "element mask not present in mesh.";
 
@@ -1770,7 +1768,7 @@ void MBMesh::set_elem_mask_val(EntityHandle eh, int mask_val) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_elem_mask) Throw() << "element mask value not present in mesh.";
 
@@ -1788,7 +1786,7 @@ void MBMesh::set_elem_mask_val(Range elems, int *mask_vals) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_elem_mask) Throw() << "element mask value not present in mesh.";
 
@@ -1807,7 +1805,7 @@ void MBMesh::set_elem_mask_val(std::vector<EntityHandle> const &elems, int *mask
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_elem_mask) Throw() << "elem mask value not present in mesh.";
 
@@ -1827,7 +1825,7 @@ void MBMesh::get_elem_mask_val(std::vector<EntityHandle> const &elems, int *mask
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, complain
   if (!has_elem_mask) Throw() << "elem mask value not present in mesh.";
 
@@ -1847,7 +1845,7 @@ int MBMesh::get_elem_mask_val(EntityHandle eh) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no masking, then error
   if (!has_elem_mask) Throw() << "element mask value not present in mesh.";
 
@@ -1868,10 +1866,10 @@ void MBMesh::setup_elem_area() {
   int localrc, merr;
 
   // Setup elem area tag
-  double dbl_def_val=0.0; 
+  double dbl_def_val=0.0;
   merr=mesh->tag_get_handle("elem_area", 1, MB_TYPE_DOUBLE, elem_area_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
   ESMC_CHECK_MOAB_THROW(merr);
-  
+
   // Turn on elem areas
   has_elem_area=true;
 }
@@ -1883,7 +1881,7 @@ void MBMesh::set_elem_area(EntityHandle eh, double area) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no area, complain
   if (!has_elem_area) Throw() << "element area not present in mesh.";
 
@@ -1900,7 +1898,7 @@ void MBMesh::set_elem_area(Range elems, double *area) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no area, complain
   if (!has_elem_area) Throw() << "element area not present in mesh.";
 
@@ -1917,7 +1915,7 @@ void MBMesh::set_elem_area(std::vector<EntityHandle> const &elems, double *areas
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no area, complain
   if (!has_elem_area) Throw() << "elem areas not present in mesh.";
 
@@ -1937,7 +1935,7 @@ void MBMesh::get_elem_area(std::vector<EntityHandle> const &elems, double *areas
   // Error return codes
   int localrc;
   int merr;
-  
+
   try {
     // If no area, complain
     if (!has_elem_area) Throw() << "elem areas not present in mesh.";
@@ -1953,7 +1951,7 @@ void MBMesh::get_elem_area(std::vector<EntityHandle> const &elems, double *areas
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;
       mbmesh_get_mesh_merged_connlist(*this, num_merged_nids, merged_nids);
-      
+
       // get an ordered list of elems
       std::vector<std::pair<int,EntityHandle> > sorted_elems;
       sorted_elems.reserve(num_elem());
@@ -1964,13 +1962,13 @@ void MBMesh::get_elem_area(std::vector<EntityHandle> const &elems, double *areas
       Range::iterator ei = elems.begin(), ee = elems.end();
       for (; ei != ee; ++ei) {
         EntityHandle elem = *ei;
-        
+
         int orig_pos;
         merr=mesh->tag_get_data(orig_pos_tag, &elem, 1, &orig_pos);
         ESMC_CHECK_MOAB_THROW(merr);
-        
+
         // Add to list
-        sorted_elems.push_back(std::make_pair(orig_pos, elem));      
+        sorted_elems.push_back(std::make_pair(orig_pos, elem));
       }
 
       // sort by data index
@@ -1981,29 +1979,29 @@ void MBMesh::get_elem_area(std::vector<EntityHandle> const &elems, double *areas
       for (const auto i : num_merged_nids) {
         // number of triangles created from ngon with i nodes
         int n = i - 2;
-      
+
         // sum the area values of the triangles of the ngon
         double temp_area = 0;
         for (int j = 0; j < n; ++j) {
           EntityHandle elem = sorted_elems[ind_meta+j].second;
           double area = 0;
-          
+
           int elemid;
           merr=mesh->tag_get_data(gid_tag, &elem, 1, &elemid);
           ESMC_CHECK_MOAB_THROW(merr);
-          
+
           // std::cout << "elem " << elemid << " area " << std::flush;
-          
+
           merr=mesh->tag_get_data(elem_area_tag, &elem, 1, &area);
           ESMC_CHECK_MOAB_THROW(merr);
-          
+
           // std::cout << area << std::endl;
           temp_area += area;
         }
-      
+
         // add to elemIds
         areas[ind] = temp_area;
-      
+
         // update indices
         ind++;
         ind_meta = ind_meta+n;
@@ -2020,7 +2018,7 @@ double MBMesh::get_elem_area(EntityHandle eh) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no area, then error
   if (!has_elem_area) Throw() << "element area not present in mesh.";
 
@@ -2040,7 +2038,7 @@ double MBMesh::get_elem_area(EntityHandle eh) {
 double MBMesh::get_elem_frac(EntityHandle eh) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh::get_elem_frac()"
-  
+
   // If no frac, then error
   if (!has_elem_frac) Throw() << "element frac not present in mesh.";
 
@@ -2054,7 +2052,7 @@ double MBMesh::get_elem_frac(EntityHandle eh) {
 }
 
 
-// Get elem fractions. 
+// Get elem fractions.
 // merge_split - if true merge together values for split elems, otherwise just copy out data.
 // elems - vector of elems for which to get fraction data
 // fracs - place to put fraction data. Needs to be at least of size = sizeof(double)*elems.size()
@@ -2066,12 +2064,12 @@ void MBMesh::get_elem_frac(bool merge_split, std::vector<EntityHandle> const &el
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no fracs, complain
   if (!has_elem_frac) Throw() << "element fracs not present in mesh.";
 
 
-  // If requested and if they exist, merge split elems 
+  // If requested and if they exist, merge split elems
   if (merge_split && is_split) {
 
       // Make map of elem ids to index
@@ -2087,7 +2085,7 @@ void MBMesh::get_elem_frac(bool merge_split, std::vector<EntityHandle> const &el
         // Complain if it's already there
         if (!ret.second) {
           Throw() <<"multiple entries with the same global id in the input list currently not supported when merging fractions.";
-        } 
+        }
       }
 
       // Zero out array
@@ -2117,7 +2115,7 @@ void MBMesh::get_elem_frac(bool merge_split, std::vector<EntityHandle> const &el
         // Get index in input array
         int index;
         std::map<int,int>::iterator itoi=id_to_index.find(orig_gid);
-        if (itoi == id_to_index.end()) { 
+        if (itoi == id_to_index.end()) {
           continue; // Not in input array, so skip
         } else {
           index=itoi->second; // In input, so get index
@@ -2183,7 +2181,7 @@ void MBMesh::set_elem_coords(EntityHandle eh, double *orig_coords) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no coords, complain
   if (!has_elem_coords) Throw() << "Element coords not present in mesh.";
 
@@ -2205,7 +2203,7 @@ void MBMesh::set_elem_coords(EntityHandle eh, double *orig_coords) {
   // Set original coords if present
   merr=mesh->tag_set_data(elem_coords_tag, &eh, 1, cart_coords);
   ESMC_CHECK_MOAB_THROW(merr);
- 
+
 }
 
 
@@ -2216,7 +2214,7 @@ void MBMesh::set_elem_coords(Range elems, double *orig_coords) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // If no coords, complain
   if (!has_elem_coords) Throw() << "element coords not present in mesh.";
 
@@ -2225,24 +2223,24 @@ void MBMesh::set_elem_coords(Range elems, double *orig_coords) {
     merr=mesh->tag_set_data(elem_orig_coords_tag, elems, orig_coords);
     ESMC_CHECK_MOAB_THROW(merr);
   }
-  
-  // Loop converting and setting each cart coord. individually 
+
+  // Loop converting and setting each cart coord. individually
   // (This is more memory efficient, but maybe a bit less time efficient.)
   double *elem_orig_coords=orig_coords;
   for(Range::const_iterator it=elems.begin(); it !=elems.end(); it++) {
     const EntityHandle elem=*it;
-    
+
     // Convert and set coords
     double cart_coords[3]={0.0,0.0,0.0};
-    
+
     // Convert original coords to cartesian
     ESMCI_CoordSys_ConvertToCart(coordsys, orig_sdim,
                                  elem_orig_coords, cart_coords);
-    
+
     // Set cart coords
     merr=mesh->tag_set_data(elem_coords_tag, &elem, 1, cart_coords);
     ESMC_CHECK_MOAB_THROW(merr);
-    
+
     // Move to next set of coordinates
     elem_orig_coords += orig_sdim;
   }
@@ -2259,7 +2257,7 @@ void MBMesh::set_owner(EntityHandle eh, int owner) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // Get Owner
   merr=mesh->tag_set_data(owner_tag, &eh, 1, &owner);
   ESMC_CHECK_MOAB_THROW(merr);
@@ -2273,7 +2271,7 @@ int MBMesh::get_owner(EntityHandle eh) const {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // Get Owner
   int owner;
   merr=mesh->tag_get_data(owner_tag, &eh, 1, &owner);
@@ -2290,7 +2288,7 @@ void MBMesh::get_owners(std::vector<EntityHandle> const &objs, int *owners) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // Set data in MOAB
   if (objs.size() > 0) {
     merr=mesh->tag_get_data(owner_tag, &objs[0], objs.size(), owners);
@@ -2306,7 +2304,7 @@ int MBMesh::get_orig_pos(EntityHandle eh) const {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // Get Owner
   int orig_pos;
   merr=mesh->tag_get_data(orig_pos_tag, &eh, 1, &orig_pos);
@@ -2323,7 +2321,7 @@ void MBMesh::get_orig_pos(std::vector<EntityHandle> const &objs, int *orig_pos) 
   // Error return codes
   int localrc;
   int merr;
-  
+
   // Set data in MOAB
   if (objs.size() > 0) {
     merr=mesh->tag_get_data(orig_pos_tag, &objs[0], objs.size(), orig_pos);
@@ -2340,7 +2338,7 @@ int MBMesh::get_gid(EntityHandle eh) const {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // Get gid
   int gid;
   merr=mesh->tag_get_data(gid_tag, &eh, 1, &gid);
@@ -2357,7 +2355,7 @@ void MBMesh::get_gid(std::vector<EntityHandle> const &objs, int *gids) {
   // Error return codes
   int localrc;
   int merr;
-  
+
   // Set data in MOAB
   if (objs.size() > 0) {
     merr=mesh->tag_get_data(gid_tag, &objs[0], objs.size(), gids);
@@ -2369,7 +2367,7 @@ void MBMesh::get_gid(std::vector<EntityHandle> const &objs, int *gids) {
 
 
 
-// Setup MBMesh to operate in parallel by resolving shared ents, etc. 
+// Setup MBMesh to operate in parallel by resolving shared ents, etc.
 void MBMesh::setup_parallel() {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MBMesh::setup_parallel()"
@@ -2381,15 +2379,15 @@ void MBMesh::setup_parallel() {
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
-  // setup parallel comm, destroyed in MBMesh destructor   
+  // setup parallel comm, destroyed in MBMesh destructor
   ParallelComm *pcomm= new ParallelComm(mesh, mpi_comm);
 
   // Get list of elements
   Range elems;
   merr=mesh->get_entities_by_dimension(0, pdim, elems);
   ESMC_CHECK_MOAB_THROW(merr);
-    
-  // Resolve object sharing 
+
+  // Resolve object sharing
   merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
   ESMC_CHECK_MOAB_THROW(merr);
 
@@ -2397,7 +2395,7 @@ void MBMesh::setup_parallel() {
 
 // Update parallel
 // If the mesh has changed, call this to update the parallel connections
-// between pieces of the mesh. (E.g. for haloing, etc...) 
+// between pieces of the mesh. (E.g. for haloing, etc...)
 // (This hasn't been tested, but it should be what has to happen.
 //  TODO: Test!)
 void MBMesh::update_parallel() {
@@ -2423,19 +2421,19 @@ void MBMesh::update_parallel() {
   Range elems;
   merr=mesh->get_entities_by_dimension(0, pdim, elems);
   ESMC_CHECK_MOAB_THROW(merr);
-    
-  // Resolve object sharing 
+
+  // Resolve object sharing
   merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
   ESMC_CHECK_MOAB_THROW(merr);
 
 }
 
 // Do halo communication for all appropriate tags on nodes
-// TODO: Right now this is a work around because MOAB doesn't let you specify which 
+// TODO: Right now this is a work around because MOAB doesn't let you specify which
 //       is the owned version of a shared entity (it decides itself). So we use reduce min
-//       and set the non-owned versions to the max. 
+//       and set the non-owned versions to the max.
 //       do_internal_coords - if true also halo internal vertex coords. This is more expensive, because a new tag needs
-//                   to be added and removed, so if not supplied it's default off. 
+//                   to be added and removed, so if not supplied it's default off.
 void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
   int localrc, merr;
 #undef  ESMC_METHOD
@@ -2451,7 +2449,7 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
   ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
 
   // Do node halo comm
-  vector<Tag> node_tags;  
+  vector<Tag> node_tags;
   // DON'T UPDATE THIS IS LOCAL INFO node_tags.push_back(this->gid_tag);
   // DON'T UPDATE THIS IS LOCAL INFO node_tags.push_back(this->orig_pos_tag);
   // DON'T UPDATE THIS IS LOCAL INFO node_tags.push_back(this->owner_tag);
@@ -2470,7 +2468,7 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
   // Loop setting unowned data to max
   for (Range::iterator it=shared_nodes.begin(); it != shared_nodes.end(); it++) {
     EntityHandle node=*it;
-    
+
     // Only reset if not local
     if (this->get_owner(node) != localPet) {
 
@@ -2478,7 +2476,7 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
       //int max_orig_pos=std::numeric_limits<int>::max();
       //merr=mesh->tag_set_data(orig_pos_tag, &node, 1, &max_orig_pos);
       //ESMC_CHECK_MOAB_THROW(merr);
-      
+
       // Set orig_coords
       if (this->has_node_orig_coords) {
         double max_orig_coords[3]={std::numeric_limits<double>::max(),
@@ -2508,7 +2506,7 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
     double dbl_def_val[3]={-1.0, -1.0, -1.0};
     merr=mesh->tag_get_handle("tmp_node_coords", sdim, MB_TYPE_DOUBLE, tmp_node_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
     ESMC_CHECK_MOAB_THROW(merr);
-   
+
     // Add tag to list
     node_tags.push_back(tmp_node_coords_tag);
 
@@ -2544,7 +2542,7 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
 
   // Copy tmp coords back to vertex
   if (do_internal_coords) {
-   
+
     // Loop setting unowned vertex to tmp tag
     for (Range::iterator it=shared_nodes.begin(); it != shared_nodes.end(); it++) {
       EntityHandle node=*it;
@@ -2572,7 +2570,7 @@ void MBMesh::halo_comm_nodes_all_tags(bool do_internal_coords) {
 // Do halo communication for all appropriate tags on elems
 // TODO: Right now this is a work around because MOAB doesn't let you specify
 //       which is the owned version of a shared entity (it decides itself).
-//       So we use reduce min and set the non-owned versions to the max. 
+//       So we use reduce min and set the non-owned versions to the max.
 void MBMesh::halo_comm_elems_all_tags() {
   int localrc, merr;
 #undef  ESMC_METHOD
@@ -2587,7 +2585,7 @@ void MBMesh::halo_comm_elems_all_tags() {
   ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
 
   // Do elem halo comm
-  vector<Tag> elem_tags;  
+  vector<Tag> elem_tags;
   // DON'T UPDATE THIS IS LOCAL INFO elem_tags.push_back(this->gid_tag);
   // DON'T UPDATE THIS IS LOCAL INFO elem_tags.push_back(this->orig_pos_tag);
   // DON'T UPDATE THIS IS LOCAL INFO elem_tags.push_back(this->owner_tag);
@@ -2609,7 +2607,7 @@ void MBMesh::halo_comm_elems_all_tags() {
   // Loop setting unowned data to max
   for (Range::iterator it=shared_elems.begin(); it != shared_elems.end(); it++) {
     EntityHandle elem=*it;
-    
+
     // Only reset if not local
     if (this->get_owner(elem) != localPet) {
 
@@ -2632,7 +2630,7 @@ void MBMesh::halo_comm_elems_all_tags() {
         ESMC_CHECK_MOAB_THROW(merr);
       }
 
-      
+
       // Set elem_orig_coords
       if (this->has_elem_orig_coords) {
         double max_orig_coords[3]={std::numeric_limits<double>::max(),
@@ -2690,7 +2688,7 @@ MBMesh::~MBMesh() {
 
   // Deallocate the MOAB::Interface
   if (mesh != NULL) delete mesh;
-} 
+}
 
 
 void MBMesh::debug_output_nodes() {
@@ -2724,7 +2722,7 @@ void MBMesh::debug_output_nodes() {
 
       // Output info
       cout<<localPet<<"# NODE:";
-      
+
       // Output global id
       int gid=this->get_gid(node);
       cout<<" gid="<<gid;
@@ -2733,12 +2731,12 @@ void MBMesh::debug_output_nodes() {
       int owner=this->get_owner(node);
       cout<<" owner="<<owner;
 
-      // FOR DEBUGGING 
+      // FOR DEBUGGING
       // output moab owner
       //int moab_owner;
       //pcomm->get_owner(node,moab_owner);
       //cout<<" moab_owner="<<moab_owner;
-      
+
       // get node orig pos
       int orig_pos=this->get_orig_pos(node);
       cout<<" orig_pos="<<orig_pos;
@@ -2807,7 +2805,7 @@ void MBMesh::debug_output_elems() {
 
       // Output info
       cout<<localPet<<"# ELEM:";
-      
+
       // Output global id
       int gid=this->get_gid(elem);
       cout<<" gid="<<gid;
@@ -2816,12 +2814,12 @@ void MBMesh::debug_output_elems() {
       int owner=this->get_owner(elem);
       cout<<" owner="<<owner;
 
-      // FOR DEBUGGING 
+      // FOR DEBUGGING
       // output moab owner
       //int moab_owner;
       //pcomm->get_owner(node,moab_owner);
       //cout<<" moab_owner="<<moab_owner;
-      
+
       // get elem orig pos
       int orig_pos=this->get_orig_pos(elem);
       cout<<" orig_pos="<<orig_pos;
@@ -2872,16 +2870,16 @@ void MBMesh::finalize_nodes() {
   try {
     //RLO: we had considered separate calls for the counts, however it
     //     saves nothing in time, and very little in overall memory
-  
+
     vector<EntityHandle> all_nodes;
-    get_all_nodes(all_nodes);  
+    get_all_nodes(all_nodes);
 
     vector<EntityHandle> orig_nodes;
     get_sorted_orig_nodes(orig_nodes);
-    
+
     vector<EntityHandle> owned_nodes;
     get_owned_nodes(owned_nodes);
-  
+
     _num_node = all_nodes.size();
     _num_orig_node = orig_nodes.size();
     _num_owned_node = owned_nodes.size();
@@ -2915,10 +2913,10 @@ void MBMesh::finalize_elems() {
     _num_elem = all_elems.size();
     _num_owned_elem = owned_elems.size();
     _num_orig_elem = orig_elems.size();
-    
+
     // std::cout << "MBMESH::finalize_elem num_elem = " << _num_elem
     //           << std::endl;
-    
+
     _num_elem_conn = get_num_elem_conn(all_elems);
 
     // Mark elems as finalized, so things can be used
@@ -2954,8 +2952,8 @@ void MBMesh::CreateGhost() {
     Range elems;
     merr=mesh->get_entities_by_dimension(0, pdim, elems);
     ESMC_CHECK_MOAB_THROW(merr);
-      
-    // Resolve object sharing 
+
+    // Resolve object sharing
     merr = pcomm->resolve_shared_ents(0, elems, pdim, pdim-1);
     ESMC_CHECK_MOAB_THROW(merr);
 
@@ -2969,19 +2967,19 @@ void MBMesh::CreateGhost() {
 
     vector<Tag> node_tags;
     vector<Tag> elem_tags;
-    
+
     node_tags.push_back(this->gid_tag);
-    // Don't comm. orig_pos because it's different each PET 
-    // node_tags.push_back(this->orig_pos_tag); 
+    // Don't comm. orig_pos because it's different each PET
+    // node_tags.push_back(this->orig_pos_tag);
     node_tags.push_back(this->owner_tag);
     if (this->has_node_orig_coords) node_tags.push_back(this->node_orig_coords_tag);
     if (this->has_node_mask) {
       node_tags.push_back(this->node_mask_tag);
       node_tags.push_back(this->node_mask_val_tag);
     }
-    
+
     elem_tags.push_back(this->gid_tag);
-    // Don't comm. orig_pos because it's different each PET 
+    // Don't comm. orig_pos because it's different each PET
     // elem_tags.push_back(this->orig_pos_tag);
     elem_tags.push_back(this->owner_tag);
     if (this->has_elem_frac) elem_tags.push_back(this->elem_frac_tag);
@@ -2992,7 +2990,7 @@ void MBMesh::CreateGhost() {
     if (this->has_elem_area) elem_tags.push_back(this->elem_area_tag);
     if (this->has_elem_coords) elem_tags.push_back(this->elem_coords_tag);
     if (this->has_elem_orig_coords) elem_tags.push_back(this->elem_orig_coords_tag);
-    
+
     Range nodes;
     merr=this->mesh->get_entities_by_dimension(0, 0, nodes);
     ESMC_CHECK_MOAB_THROW(merr);
@@ -3014,8 +3012,8 @@ void MBMesh::CreateGhost() {
 }
 
 // Called after a Redist
-// Change the proc numbers in a mesh to correspond to a different set. This isn't to 
-// merge procs into one another, but to map them to different number. E.g. if they 
+// Change the proc numbers in a mesh to correspond to a different set. This isn't to
+// merge procs into one another, but to map them to different number. E.g. if they
 // are being switched to a different VM or MPI_COMM.
 void MBMesh::map_proc_numbers(int num_procs, int *proc_map) {
 #undef  ESMC_METHOD
@@ -3085,6 +3083,3 @@ void MBMesh::map_proc_numbers(int num_procs, int *proc_map) {
 
 
 #endif // ESMF_MOAB
-
-
-
