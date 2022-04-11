@@ -848,9 +848,12 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
            &localrc)) throw localrc;
      }
 
+     // Wrap node_owners in IntArray
+     InterArray<int> nodeOwnerIA(nodeOwner,numNodes);
+
      // Call into Mesh glue to add nodes
      ESMCI_meshaddnodes(&meshPointer, &numNodes, nodeId,
-                        nodeCoord, nodeOwner, (InterArray<int> *)NULL,
+                        nodeCoord, &nodeOwnerIA, (InterArray<int> *)NULL,
                         &coordSys, &spatialDim,
                         &localrc);
        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,

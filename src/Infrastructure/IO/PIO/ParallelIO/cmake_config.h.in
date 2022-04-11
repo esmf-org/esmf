@@ -15,10 +15,6 @@
 /** The patch part of the version number. */
 #define PIO_VERSION_PATCH @VERSION_PATCH@
 
-/** Set to non-zero to use native malloc. By defauly the PIO library
- * will use the included bget() package for memory management. */
-#define PIO_USE_MALLOC @USE_MALLOC@
-
 /** Set to non-zero to turn on logging. Output may be large. */
 #define PIO_ENABLE_LOGGING @ENABLE_LOGGING@
 

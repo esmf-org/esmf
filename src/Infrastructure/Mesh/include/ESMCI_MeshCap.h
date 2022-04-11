@@ -130,7 +130,7 @@ namespace ESMCI {
     static MeshCap *meshcreate_from_grid(Grid **gridpp, int *rc);
 
     void meshaddnodes(int *num_nodes, int *nodeId,
-                      double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                      double *nodeCoord,  InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                       ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                       int *rc);
 
@@ -352,6 +352,16 @@ namespace ESMCI {
                           int num_elemArrays, ESMCI::Array **elemArrays,
                           int *rc);
 
+    static MeshCap *meshcreatefromfilenew(char *filename,
+                                          ESMC_FileFormat_Flag fileformat,
+                                          bool convert_to_dual, 
+                                          bool add_user_area, 
+                                          ESMC_CoordSys_Flag coordSys, 
+                                          ESMC_MeshLoc_Flag maskFlag, 
+                                          char *maskVarName, 
+                                          ESMCI::DistGrid *node_distgrid,
+                                          ESMCI::DistGrid *elem_distgrid,
+                                          int *rc);
   };
 
 } // namespace

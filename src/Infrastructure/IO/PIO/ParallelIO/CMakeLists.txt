@@ -4,9 +4,8 @@
 
 # Jim Edwards
 
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.9.1)
 project (PIO C)
-#cmake_policy(VERSION 3.5.2)
 
 # The project version number.
 set(VERSION_MAJOR   2   CACHE STRING "Project major version number.")
@@ -106,9 +105,6 @@ if(PIO_USE_PNETCDF_VARD)
 else()
   set(USE_VARD 0)
 endif()
-
-# Set a variable that appears in the config.h.in file.
-set(USE_MALLOC 1)
 
 # Set a variable that appears in the config.h.in file.
 if(PIO_ENABLE_LOGGING)
@@ -281,7 +277,11 @@ add_subdirectory (src)
 
 # Custom "piotests" target (builds the test executables)
 add_custom_target (tests)
-add_dependencies (tests pioc piof)
+if (PIO_ENABLE_FORTRAN)
+  add_dependencies (tests pioc piof)
+else()
+  add_dependencies (tests pioc)
+endif()
 
 # Custom "check" target that depends upon "tests"
 add_custom_target (check COMMAND ${CMAKE_CTEST_COMMAND})

@@ -8,6 +8,7 @@ LOCDIR	  = src/Infrastructure/IO/PIO
 
 # Leave this line alone.
 include $(ESMF_DIR)/makefile
+
 PIO_CMAKE_OPTS = -Wno-dev -DPIO_ENABLE_TIMING=OFF -DPIO_ENABLE_EXAMPLES=OFF -DPIO_ENABLE_FORTRAN=OFF
 
 ifeq ("$(ESMF_BOPT)","g")

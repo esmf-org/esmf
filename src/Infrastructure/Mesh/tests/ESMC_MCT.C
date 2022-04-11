@@ -367,8 +367,12 @@ class MCT {
         mesh = MeshCap::meshcreate(&pdim, &sdim, &coord_sys, &localrc);
         ESMC_CHECK_THROW(localrc);
 
+        // Wrap node_owners in IntArray
+        InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
+
+        // Add Nodes
         mesh->meshaddnodes(&num_node, nodeId.data(), nodeCoord.data(), 
-                           nodeOwner.data(), iin, &coord_sys, 
+                           &nodeOwnerIA, iin, &coord_sys, 
                            &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
 
@@ -409,15 +413,18 @@ class MCT {
 
         InterArray<int> *iin = new InterArray<int>(nodeMask.data(),num_node);
         InterArray<int> *iie = new InterArray<int>(elemMask.data(),num_elem);
-        
+
         MeshCap::meshSetMOAB(&nativeormb, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         target = MeshCap::meshcreate(&pdim, &sdim, &coord_sys, &localrc);
         ESMC_CHECK_THROW(localrc);
 
+        // Wrap node_owners in IntArray
+        InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
+
         target->meshaddnodes(&num_node, nodeId.data(), nodeCoord.data(), 
-                           nodeOwner.data(), iin, &coord_sys, 
+                           &nodeOwnerIA, iin, &coord_sys, 
                            &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
         

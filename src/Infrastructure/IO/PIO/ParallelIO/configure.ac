@@ -92,9 +92,6 @@ if test -n "$fc_version_info"; then
   FC_VERSION="$FC_VERSION ( $fc_version_info)"
 fi
 
-# Always use malloc in autotools builds.
-AC_DEFINE([PIO_USE_MALLOC], [1], [use malloc for memory])
-
 AC_MSG_CHECKING([whether a PIO_BUFFER_SIZE was specified])
 AC_ARG_WITH([piobuffersize],
               [AS_HELP_STRING([--with-piobuffersize=<integer>],

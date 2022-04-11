@@ -1359,6 +1359,7 @@ pio_read_darray_nc(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf)
                         return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
 
 #else
+                    //printf("rllen %d mpitype %d\n",iodesc->rllen, iodesc->mpitype);
                     /* Read a list of subarrays. */
                     ierr = ncmpi_get_varn_all(file->fh, vid, rrlen, startlist,
                                               countlist, iobuf, iodesc->rllen, iodesc->mpitype);

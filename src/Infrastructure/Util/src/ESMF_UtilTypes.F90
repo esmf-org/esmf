@@ -872,6 +872,7 @@
   end type
 
   type(ESMF_CoordSys_Flag), parameter :: &
+    ESMF_COORDSYS_UNINIT  = ESMF_CoordSys_Flag(-1), &
     ESMF_COORDSYS_CART    = ESMF_CoordSys_Flag(0), &
     ESMF_COORDSYS_SPH_DEG = ESMF_CoordSys_Flag(1), &
     ESMF_COORDSYS_SPH_RAD = ESMF_CoordSys_Flag(2)
@@ -1246,7 +1247,9 @@
 
 
       public ESMF_CoordSys_Flag
-      public ESMF_COORDSYS_CART, ESMF_COORDSYS_SPH_DEG, &
+      public ESMF_COORDSYS_UNINIT,  &
+             ESMF_COORDSYS_CART,    &
+             ESMF_COORDSYS_SPH_DEG, &
              ESMF_COORDSYS_SPH_RAD
 
       public ESMF_COORDSYS_DEG2RAD, &
