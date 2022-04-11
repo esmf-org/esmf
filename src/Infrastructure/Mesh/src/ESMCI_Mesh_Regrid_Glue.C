@@ -86,6 +86,8 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
+template<class Type>
+void normalize_weights(WMat *wts);
 
 
 void ESMCI_regrid_create(
@@ -372,11 +374,15 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate4.0"));
 #endif
 
-    // Moved to ESMCI_MeshRegrid.C
-     // Normalize bilinear weights to ensure monotonicity
-    //     if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
-    //    wts->Normalize();
-    // }
+    // Normalize bilinear weights to ensure monotonicity
+    if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
+      // If R4 normalize to R4,...
+      if (dstarray.getTypekind() == ESMC_TYPEKIND_R4) {
+        normalize_weights<ESMC_R4>(wts);
+      } else { // ...otherwise just use R8.
+        normalize_weights<ESMC_R8>(wts);
+      }
+    }
     
     /////// We have the weights, now set up the sparsemm object /////
 
@@ -437,9 +443,10 @@ void ESMCI_regrid_create(
           i++;
         } // for j
 
-        //        if (tot > 1.0) {
-        //   printf(" dst_id=%d tot=%20.17f diff=%g\n",w.id,tot,tot-1.0);
-        // }
+        
+        //if (tot > 1.0) {
+        //   printf(" BIGGER THAN 1:: dst_id=%d tot=%20.17f diff=%g\n",w.id,tot,tot-1.0);
+        //}
         
       } // for wi
 
@@ -520,21 +527,53 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
-    ESMCI_REGRID_TRACE_ENTER("NativeMesh ArraySMMStore");
+    // If the dst is r4, then do things in R4
+    if (dstarray.getTypekind() == ESMC_TYPEKIND_R4) {
 
-    // Build the ArraySMM
-    if (*has_rh != 0) {
-      enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
-      ESMC_Logical ignoreUnmatched = ESMF_FALSE;
-      FTN_X(c_esmc_arraysmmstoreind4)(arraysrcpp, arraydstpp, rh, &tk, factors,
-            &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing,
-            pipelineDepth, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      // Copy to R4 Array
+      ESMC_R4 *factors_r4 = new ESMC_R4[num_entries];
+      for (int i=0; i<num_entries; i++) {
+        factors_r4[i]=(ESMC_R4)factors[i];
+      }
+      
+      // Build the ArraySMM using R4
+      ESMCI_REGRID_TRACE_ENTER("NativeMesh ArraySMMStore");  
+      if (*has_rh != 0) {
+        enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R4;
+        ESMC_Logical ignoreUnmatched = ESMF_FALSE;
+        FTN_X(c_esmc_arraysmmstoreind4)(arraysrcpp, arraydstpp, rh, &tk, factors_r4,
+                                        &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing,
+                                        pipelineDepth, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      }
+      ESMCI_REGRID_TRACE_EXIT("NativeMesh ArraySMMStore");
+
+      // Copy R4 Array back to R8, so it can be possibly dumped out below
+      for (int i=0; i<num_entries; i++) {
+        factors[i]=(ESMC_R8)factors_r4[i];
+      }
+
+      // Get rid of R4 array
+      delete factors_r4;
+      
+    } else { // ...otherwise just do in R8
+      
+      // Build the ArraySMM using R8
+      ESMCI_REGRID_TRACE_ENTER("NativeMesh ArraySMMStore");  
+      if (*has_rh != 0) {
+        enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
+        ESMC_Logical ignoreUnmatched = ESMF_FALSE;
+        FTN_X(c_esmc_arraysmmstoreind4)(arraysrcpp, arraydstpp, rh, &tk, factors,
+                                        &num_entries, iiptr, &ignoreUnmatched, srcTermProcessing,
+                                        pipelineDepth, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      }
+      ESMCI_REGRID_TRACE_EXIT("NativeMesh ArraySMMStore");
     }
-
-    ESMCI_REGRID_TRACE_EXIT("NativeMesh ArraySMMStore");
-
+      
+      
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from ArraySMMStore().", ESMC_LOGMSG_INFO);
 #endif
@@ -2507,3 +2546,37 @@ void copy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 }
 
 #undef  ESMC_METHOD
+
+template<class Type>
+void normalize_weights(WMat *wts) {
+
+  // Loop normalizing each row of weights
+  WMat::WeightMap::iterator wi = wts->begin_row(), we = wts->end_row();
+  for (; wi != we; ++wi) {
+
+    // Get column vector
+    std::vector<WMat::Entry> &wcol = wi->second;
+
+    // Loop cols in row and total weights
+    Type tot=0.0;
+    for (UInt i = 0; i < wcol.size(); ++i) {
+      WMat::Entry &wc = wcol[i];
+
+      // total weights
+      tot += ((Type)wc.value);
+    }
+
+    // If tot > 1.0 Loop row and divide by total to normalize
+    // (don't do if <= 1.0, because that can make tot>1.0) 
+    if (tot > 1.0) {
+      for (UInt i = 0; i < wcol.size(); ++i) {
+        WMat::Entry &wc = wcol[i];
+      
+        // Divide by tot to normalize
+        wc.value = ((Type)wc.value)/tot;
+      }
+    }
+        
+  } // for wi
+
+}
