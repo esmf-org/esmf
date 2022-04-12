@@ -43,8 +43,10 @@
 #include "Mesh/include/ESMCI_MeshRedist.h"
 #include "Mesh/include/ESMCI_MeshDual.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
-#include "IO/include/ESMCI_PIO_Handler.h"
 #include "Mesh/include/ESMCI_FileIO_Util.h"
+
+// These internal functions can only be used if PIO is available
+#ifdef ESMF_PIO
 
 #ifdef ESMF_PNETCDF
 # define _PNETCDF
@@ -53,7 +55,10 @@
 # define _NETCDF
 # include <netcdf.h>
 #endif
+
 #include <pio.h>
+#include "IO/include/ESMCI_PIO_Handler.h"
+
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -1060,5 +1065,5 @@ void get_origGridDims_from_ESMFMesh_file(int pioFileDesc, char *filename, bool &
 
 }
 
-
+#endif // ifdef ESMF_PIO
 

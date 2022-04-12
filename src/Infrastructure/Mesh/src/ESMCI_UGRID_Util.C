@@ -43,8 +43,10 @@
 #include "Mesh/include/ESMCI_MeshRedist.h"
 #include "Mesh/include/ESMCI_MeshDual.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
-#include "IO/include/ESMCI_PIO_Handler.h"
 #include "Mesh/include/ESMCI_FileIO_Util.h"
+
+// These internal functions can only be used if PIO is available
+#ifdef ESMF_PIO
 
 #ifdef ESMF_PNETCDF
 # define _PNETCDF
@@ -53,7 +55,10 @@
 # define _NETCDF
 # include <netcdf.h>
 #endif
+
 #include <pio.h>
+#include "IO/include/ESMCI_PIO_Handler.h"
+
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -1111,5 +1116,5 @@ void get_mask_from_UGRID_file(int pioSystemDesc, int pioFileDesc, char *filename
   delete [] mask_vals;
 }
 
-
+#endif // ifdef ESMF_PIO
 

@@ -87,7 +87,7 @@ program ESMF_FileRegridUTest
        polemethod = pole, unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
 
-#ifdef ESMF_NETCDF
+#ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -101,7 +101,7 @@ program ESMF_FileRegridUTest
   call ESMF_FileRegridCheck(dstfile, "nodedata", regridmethod=methodflag, &
        rc=rc)  
 
-#ifdef ESMF_NETCDF
+#ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -120,7 +120,7 @@ program ESMF_FileRegridUTest
        polemethod = pole, unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
 
-#ifdef ESMF_NETCDF
+#ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -134,7 +134,7 @@ program ESMF_FileRegridUTest
   call ESMF_FileRegridCheck(dstfile, "nodedata", regridmethod=methodflag, &
        rc=rc)  
 
-#ifdef ESMF_NETCDF
+#ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -155,7 +155,7 @@ program ESMF_FileRegridUTest
        unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
 
-#ifdef ESMF_NETCDF
+#ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -169,7 +169,7 @@ program ESMF_FileRegridUTest
   call ESMF_FileRegridCheck(dstfile, "elmtdata", regridmethod=methodflag, &
        rc=rc)  
 
-#ifdef ESMF_NETCDF
+#ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"

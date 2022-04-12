@@ -34,6 +34,10 @@
 #include "ESMCI_DistGrid.h"
 
 #include "Mesh/include/ESMCI_Mesh.h"
+
+// These internal functions can only be used if PIO is available
+#ifdef ESMF_PIO
+
 #include <pio.h>
 
 //-----------------------------------------------------------------------------
@@ -86,5 +90,6 @@ void get_origGridRank_from_ESMFMesh_file(int pioFileDesc, char *filename, bool &
 
 void get_origGridDims_from_ESMFMesh_file(int pioFileDesc, char *filename, bool &has_origGridDims, int *origGridDims);
 
+#endif // ifdef ESMF_PIO
 
 #endif // ESMCI_ESMFMESH_UTIL_H

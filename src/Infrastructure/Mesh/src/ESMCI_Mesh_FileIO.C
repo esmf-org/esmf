@@ -43,7 +43,6 @@
 #include "Mesh/include/ESMCI_MeshRedist.h"
 #include "Mesh/include/ESMCI_MeshDual.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
-#include "IO/include/ESMCI_PIO_Handler.h"
 #include "Mesh/include/ESMCI_FileIO_Util.h"
 #include "Mesh/include/ESMCI_ESMFMesh_Util.h"
 #include "Mesh/include/ESMCI_UGRID_Util.h"
@@ -56,7 +55,13 @@
 # define _NETCDF
 # include <netcdf.h>
 #endif
+
+// Only use if PIO is available
+#ifdef ESMF_PIO
 #include <pio.h>
+#include "IO/include/ESMCI_PIO_Handler.h"
+#endif
+
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -64,6 +69,8 @@
 //-----------------------------------------------------------------------------
 using namespace ESMCI;
 
+// These internal functions will only be used if PIO is avaiable
+#ifdef ESMF_PIO
 
 // Prototypes of per format mesh creates from below
 void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
@@ -93,6 +100,8 @@ void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh,
                                    ESMCI::DistGrid *node_distgrid, 
                                    ESMCI::DistGrid *elem_distgrid, 
                                    Mesh **out_mesh);
+#endif // ifdef ESMF_PIO
+
 
 
 
@@ -122,6 +131,9 @@ void ESMCI_mesh_create_from_file(char *filename,
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_file()"
 
+// Will only work if PIO is available
+#ifdef ESMF_PIO
+  
   //  printf("in new scalable mesh create from file filename=%s\n",filename);
 
 
@@ -278,7 +290,17 @@ void ESMCI_mesh_create_from_file(char *filename,
 
   // We've gotten to bottom successfully, so return success
   if(rc != NULL) *rc = ESMF_SUCCESS;
+
+#else
+     ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the PIO library enabled." ,
+      ESMC_CONTEXT, rc);
+#endif
 }
+
+// These internal functions will only be used if PIO is available
+#ifdef ESMF_PIO
+
 
 // This method checks to see if optional pole info is in the file, and
 // if it is, then it uses it to mark the pole edges in the passed in mesh
@@ -343,6 +365,8 @@ void ESMCI_mesh_mark_poles_from_ESMFMesh_file(int pioFileDesc, char *filename, M
     }
   }
 }
+
+
 
 
 //
@@ -1204,3 +1228,5 @@ void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh,
   }
 
 }
+
+#endif // ifdef ESMF_PIO

@@ -34,6 +34,10 @@
 #include "ESMCI_DistGrid.h"
 
 #include "Mesh/include/ESMCI_Mesh.h"
+
+// These internal functions can only be used if PIO is available
+#ifdef ESMF_PIO
+
 #include <pio.h>
 
 //-----------------------------------------------------------------------------
@@ -84,6 +88,8 @@ void get_mask_from_UGRID_file(int pioSystemDesc, int pioFileDesc, char *filename
                               PIO_Offset global_count, 
                               int num_ids, int *ids, 
                               int *&mask);
+
+#endif // ifdef ESMF_PIO
 
 #endif // ESMCI_UGRID_UTIL_H
 

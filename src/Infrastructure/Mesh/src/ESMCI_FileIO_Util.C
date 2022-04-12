@@ -43,16 +43,8 @@
 #include "Mesh/include/ESMCI_MeshRedist.h"
 #include "Mesh/include/ESMCI_MeshDual.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
-#include "IO/include/ESMCI_PIO_Handler.h"
 
-#ifdef ESMF_PNETCDF
-# define _PNETCDF
-#include <pnetcdf.h>
-# elif ESMF_NETCDF
-# define _NETCDF
-# include <netcdf.h>
-#endif
-#include <pio.h>
+
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.

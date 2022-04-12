@@ -34,7 +34,6 @@
 #include "ESMCI_DistGrid.h"
 
 #include "Mesh/include/ESMCI_Mesh.h"
-#include <pio.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
