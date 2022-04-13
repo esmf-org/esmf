@@ -89,8 +89,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -109,8 +109,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -129,8 +129,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -150,8 +150,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -169,8 +169,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -188,8 +188,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -207,8 +207,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -226,8 +226,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -246,8 +246,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -265,8 +265,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -285,8 +285,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -304,8 +304,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 
@@ -324,8 +324,8 @@ program ESMF_MeshFileIOUTest
 #ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
 #endif
