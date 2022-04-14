@@ -3282,12 +3282,39 @@ bool check_compmap(iosystem_desc_t *ios, io_desc_t *iodesc,const PIO_Offset *com
 
     if(ios->compproc) 
     {
+#ifdef OLDWAY
         int *gmaplen;
         if(ios->compmaster == MPI_ROOT)
             gmaplen = malloc(ios->num_comptasks * sizeof(int));
         else
             gmaplen = NULL;
-        /* First gather the array lengths from all compute tasks */
+#else
+        int gmaplen;
+#endif
+        /* First gather the non-zero array lengths from all compute tasks */
+        int lmaplen=0;
+        PIO_Offset lmax=0, lmin=LONG_MAX;
+        PIO_Offset gmax, gmin;
+        for(int i=0; i < iodesc->maplen; i++)
+        {
+            if(compmap[i] > 0)
+            {
+                lmaplen++;
+                lmax = (compmap[i] > lmax) ? compmap[i] : lmax;
+                lmin = (compmap[i] < lmin) ? compmap[i] : lmin;
+            }
+        }
+        if ((ierr = MPI_Allreduce(&lmaplen, &gmaplen, 1, MPI_INT, MPI_SUM, ios->comp_comm)))
+            return check_mpi(ios, NULL, ierr, __FILE__,__LINE__);
+        if ((ierr = MPI_Allreduce(&lmax, &gmax, 1, MPI_LONG, MPI_MAX, ios->comp_comm)))
+            return check_mpi(ios, NULL, ierr, __FILE__,__LINE__);
+        if ((ierr = MPI_Allreduce(&lmin, &gmin, 1, MPI_LONG, MPI_MIN, ios->comp_comm)))
+            return check_mpi(ios, NULL, ierr, __FILE__,__LINE__);
+        /* This is not an exhaustive condition, but is suffienct for most cases */
+        if((gmax - gmin + 1) < gmaplen)
+            readonly = 1;
+
+#ifdef OLDWAY
         if ((ierr = MPI_Gather(&(iodesc->maplen), 1, MPI_INT, gmaplen, 1, MPI_INT, 0, ios->comp_comm)))
             return check_mpi(ios, NULL, ierr, __FILE__,__LINE__);
 
@@ -3308,7 +3335,7 @@ bool check_compmap(iosystem_desc_t *ios, io_desc_t *iodesc,const PIO_Offset *com
 //            for(int i=0;i<ios->num_comptasks; i++)
 //                printf("gmaplen=%d displs[%d]=%d\n",gmaplen[i], i,displs[i]);
         }
-        
+
         /* next gather the compmap arrays */
         if ((ierr = MPI_Gatherv(compmap, iodesc->maplen, MPI_OFFSET, gcompmaps, gmaplen, displs, MPI_OFFSET, 0, ios->comp_comm)))
             return check_mpi(ios, NULL, ierr, __FILE__,__LINE__);
@@ -3333,5 +3360,8 @@ bool check_compmap(iosystem_desc_t *ios, io_desc_t *iodesc,const PIO_Offset *com
         
     }
     MPI_Bcast(&readonly, 1, MPI_CHAR, ios->comproot, ios->my_comm);
+#else
+    }
+#endif
     return readonly;
 }

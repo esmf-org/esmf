@@ -137,7 +137,7 @@ int test_ceil2_pair()
 
 /* Test the create_mpi_datatypes() function.
  * @returns 0 for success, error code otherwise.*/
-int test_create_mpi_datatypes()
+int test_create_mpi_datatypes(int rearr)
 {
     MPI_Datatype basetype = MPI_INT;
     int *mfrom = NULL;
@@ -1267,7 +1267,10 @@ int run_no_iosys_tests(int my_rank, MPI_Comm test_comm)
     if ((ret = test_get_regions(my_rank)))
         return ret;
 
-    if ((ret = test_create_mpi_datatypes()))
+    if ((ret = test_create_mpi_datatypes(1)))
+        return ret;
+
+    if ((ret = test_create_mpi_datatypes(2)))
         return ret;
 
     if ((ret = test_define_iodesc_datatypes(my_rank)))
