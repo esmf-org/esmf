@@ -161,7 +161,6 @@ get_target_property(includes pioc INCLUDE_DIRECTORIES)
 foreach(x IN LISTS cppdefs)
   string(APPEND CPPFLAGS " -D${x}")
 endforeach()
-#string(APPEND CPPFLAGS " -DESMF_PROFILE")
 
 foreach(x IN LISTS includes)
   if (x)

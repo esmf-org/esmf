@@ -641,13 +641,4 @@ enum PIO_MSG
     PIO_MSG_INQ_UNLIMDIMS
 };
 
-#ifdef ESMF_PROFILE
-#define ESMF_LOGMEMINFO(name) {\
-    int _loginfo=1;\
-    c_esmc_vmlogmeminfo_(name, &_loginfo, NULL, NULL, strlen(name));
-#else
-#define ESMF_LOGMEMINFO(name) ;
-#endif
-
-
 #endif /* __PIO_INTERNAL__ */
