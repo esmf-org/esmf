@@ -136,7 +136,7 @@ jobs:
         cmake -Wno-dev -DNetCDF_C_LIBRARY=/home/runner/netcdf-c/lib/libnetcdf.so -DNetCDF_C_INCLUDE_DIR=/home/runner/netcdf-c/include -DPnetCDF_PATH='/home/runner/pnetcdf' -DPIO_ENABLE_FORTRAN=Off -DPIO_ENABLE_LOGGING=On -DPIO_ENABLE_TIMING=Off .. || (cat CMakeFiles/CMakeOutput.log && cat CMakeFiles/CMakeError.log)
         make VERBOSE=1
         make tests VERBOSE=1
-#        ctest -VV
+        ctest -VV
     - name: autotools build
       run: |
         set -x
@@ -151,4 +151,9 @@ jobs:
         ./configure --enable-fortran --enable-netcdf-integration
         make -j check
         
+#     the following can be used by developers to login to the github server in case of errors
+#     see https://github.com/marketplace/actions/debugging-with-tmate for further details
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
         

@@ -2,7 +2,7 @@
 ## Ed Hartnett 8/16/17
 
 # Initialize autoconf and automake.
-AC_INIT(pio, 2.5.6)
+AC_INIT(pio, 2.5.7)
 AC_CONFIG_SRCDIR(src/clib/pio_darray.c)
 AM_INIT_AUTOMAKE([foreign serial-tests])
 
@@ -11,7 +11,7 @@ AM_INIT_AUTOMAKE([foreign serial-tests])
 # AC_DEFINE_UNQUOTED for config.h.
 AC_SUBST([PIO_VERSION_MAJOR]) PIO_VERSION_MAJOR=2
 AC_SUBST([PIO_VERSION_MINOR]) PIO_VERSION_MINOR=5
-AC_SUBST([PIO_VERSION_PATCH]) PIO_VERSION_PATCH=6
+AC_SUBST([PIO_VERSION_PATCH]) PIO_VERSION_PATCH=7
 AC_DEFINE_UNQUOTED([PIO_VERSION_MAJOR], [$PIO_VERSION_MAJOR], [PIO major version])
 AC_DEFINE_UNQUOTED([PIO_VERSION_MINOR], [$PIO_VERSION_MINOR], [PIO minor version])
 AC_DEFINE_UNQUOTED([PIO_VERSION_PATCH], [$PIO_VERSION_PATCH], [PIO patch version])
@@ -19,7 +19,7 @@ AC_DEFINE_UNQUOTED([PIO_VERSION_PATCH], [$PIO_VERSION_PATCH], [PIO patch version
 # Once more for the documentation.
 AC_SUBST([VERSION_MAJOR], [2])
 AC_SUBST([VERSION_MINOR], [5])
-AC_SUBST([VERSION_PATCH], [6])
+AC_SUBST([VERSION_PATCH], [7])
 
 
 # The m4 directory holds macros for autoconf.
@@ -336,12 +336,12 @@ fi
 AM_CONDITIONAL(BUILD_NETCDF4, [test "x$have_netcdf_par" = xyes])
 
 # Not working for some reason, so I will just set it...
-AC_CHECK_TYPE([MPI_Offset], [], [], [#include <mpi.h>])
-if test "x${ac_cv_type_MPI_Offset}" = xyes; then
-   AC_CHECK_SIZEOF([MPI_Offset], [], [#include <mpi.h>])
-else
-   AC_MSG_ERROR([Unable to find type MPI_Offset in mpi.h])
-fi
+#AC_CHECK_TYPE([MPI_Offset], [], [], [#include <mpi.h>])
+#if test "x${ac_cv_type_MPI_Offset}" = xyes; then
+#   AC_CHECK_SIZEOF([MPI_Offset], [], [#include <mpi.h>])
+#else
+#   AC_MSG_ERROR([Unable to find type MPI_Offset in mpi.h])
+#fi
 
 # If we want the timing library, we must find it.
 if test "x$enable_timing" = xyes; then
