@@ -474,7 +474,7 @@ class MCT {
         // Wrap node_owners in IntArray
         InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
 
-        target->meshaddnodes(&num_node, nodeId.data(), nodeCoord.data(), 
+        target->meshaddnodes(&num_node, nodeId.data(), nodeCoord.data(),
                            &nodeOwnerIA, iin, &coord_sys,
                            &orig_sdim, &localrc);
         ESMC_CHECK_THROW(localrc);
@@ -1530,7 +1530,9 @@ class MCT {
       return rc;
     }
 
-    int test_get_elem_info(MeshCap *mesh){
+    int test_get_elem_info(MeshCap *mesh, bool check_elem_area=true,
+                                          bool check_elem_coord=true,
+                                          bool check_elem_mask=true){
 #undef ESMC_METHOD
 #define ESMC_METHOD "MCT::test_get_elem_info()"
       // RETURN: rc : pass(0) fail(>0)
@@ -1625,7 +1627,7 @@ class MCT {
         std::cout << "]" << std::endl;
       }
 
-      if (elem_area_present) {
+      if (elem_area_present && check_elem_area) {
         mesh->getElemCreateInfo(NULL, NULL, NULL, NULL, eai, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
 
@@ -1657,7 +1659,7 @@ class MCT {
         }
       }
 
-      if (elem_coord_present) {
+      if (elem_coord_present && check_elem_coord) {
         mesh->getElemCreateInfo(NULL, NULL, NULL, NULL, NULL, eci, &localrc);
         ESMC_CHECK_THROW(localrc);
 
@@ -1689,7 +1691,7 @@ class MCT {
         }
       }
 
-      if (elem_mask_present) {
+      if (elem_mask_present && check_elem_mask) {
         mesh->getElemCreateInfo(NULL, NULL, NULL, emi, NULL, NULL, &localrc);
         ESMC_CHECK_THROW(localrc);
 
@@ -1721,9 +1723,9 @@ class MCT {
       }
 
       delete eii, eti;
-      if (elem_area_present) delete eai;
-      if (elem_coord_present) delete eci;
-      if (elem_mask_present) delete emi;
+      if (elem_area_present && check_elem_area) delete eai;
+      if (elem_coord_present && check_elem_coord) delete eci;
+      if (elem_mask_present && check_elem_mask) delete emi;
 
       }
       CATCH_MCT_RETURN_RC(&rc)
@@ -1894,7 +1896,12 @@ class MCT {
         localrc = test_get_node_info(target);
         ESMC_CHECK_THROW(localrc);
 
-        localrc = test_get_elem_info(target);
+        // dual meshes don't have elem area
+        bool check_elem_area = false;
+        bool check_elem_coord = false;
+        bool check_elem_mask = false;
+        localrc = test_get_elem_info(target, check_elem_area,
+                                     check_elem_coord, check_elem_mask);
         ESMC_CHECK_THROW(localrc);
 
         localrc = test_get_elem_conn_info(target);

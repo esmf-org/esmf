@@ -39,7 +39,7 @@
 
 class MCTGen {
 public:
-  
+
   double UNINITVAL = -42;
 
   std::map<std::string, std::function<MCT*(int&)>>  mesh_map;
@@ -183,7 +183,7 @@ MCT *quad_2d_cart(int &rc){
                         0.0,1.0, 1.0,1.0, 2.0,1.0,
                         0.0,2.0, 1.0,2.0, 2.0,2.0};
       mct->nodeOwner = {0,0,0,0,0,0,0,0,0};
-  
+
       mct->elemId = {1,2,3,4};
       mct->elemType = {ESMC_MESHELEMTYPE_QUAD,
                        ESMC_MESHELEMTYPE_QUAD,
@@ -198,7 +198,7 @@ MCT *quad_2d_cart(int &rc){
       mct->dual_nodeId = {1,2,3,4};
       mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
       mct->dual_nodeOwner = {0,0,0,0};
-      mct->dual_elemId = {1};
+      mct->dual_elemId = {5};
       mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
       mct->dual_elemConn = {1,2,4,3};
       mct->dual_elemCoord = {1.0, 1.0};
@@ -208,7 +208,7 @@ MCT *quad_2d_cart(int &rc){
         mct->nodeId ={1,2,4,5};
         mct->nodeCoord = {0.0,0.0, 1.0,0.0, 0.0,1.0, 1.0,1.0};
         mct->nodeOwner = {0,0,0,0};
-        mct->elemId = {1};
+        mct->elemId = {5};
         mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
         mct->elemConn = {1,2,4,3};
         mct->elemCoord = {0.5,0.5};
@@ -217,7 +217,7 @@ MCT *quad_2d_cart(int &rc){
         mct->nodeId = {2,3,5,6};
         mct->nodeCoord = {1.0,0.0, 2.0,0.0, 1.0,1.0, 2.0,1.0};
         mct->nodeOwner = {0,1,0,1};
-        mct->elemId = {2};
+        mct->elemId = {5};
         mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
         mct->elemConn = {1,2,4,3};
         mct->elemCoord = {1.5,0.5};
@@ -225,7 +225,7 @@ MCT *quad_2d_cart(int &rc){
         mct->nodeId = {4,5,7,8};
         mct->nodeCoord = {0.0,1.0, 1.0,1.0, 0.0,2.0, 1.0,2.0};
         mct->nodeOwner = {0,0,2,2};
-        mct->elemId = {3};
+        mct->elemId = {5};
         mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
         mct->elemConn = {1,2,4,3};
         mct->elemCoord = {0.5,1.5};
@@ -233,7 +233,7 @@ MCT *quad_2d_cart(int &rc){
         mct->nodeId = {5,6,8,9};
         mct->nodeCoord = {1.0,1.0, 2.0,1.0, 1.0,2.0, 2.0,2.0};
         mct->nodeOwner = {0,1,2,3};
-        mct->elemId = {4};
+        mct->elemId = {5};
         mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
         mct->elemConn = {1,2,4,3};
         mct->elemCoord = {1.5,1.5};
@@ -284,7 +284,7 @@ MCT *quad_2d_cart(int &rc){
         mct->redist_elemConn = {1,2,4,3};
         mct->redist_elemCoord = {0.5,0.5};
       }
-      
+
       if (localPet == 0) {
         mct->dual_nodeId = {1,2,3,4};
         mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
@@ -497,11 +497,11 @@ MCT* tri_2d_cart(int &rc) {
       num_elem = 8;
       num_node = 9;
       num_elem_conn = 3*num_elem;
-      
+
       redist_num_elem = 8;
       redist_num_node = 9;
       redist_num_elem_conn = 3*redist_num_elem;
-      
+
       dual_num_elem = 6;
       // elements are being combined properly after dual yet
       fix_dual_num_elem = 1;
@@ -1098,9 +1098,9 @@ MCT *hex_3d_sph_deg(int &rc) {
 
     mct->name = ESMC_METHOD;
 
-    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
 
     std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
@@ -1146,9 +1146,9 @@ MCT *hex_3d_sph_rad(int &rc) {
 
     mct->name = ESMC_METHOD;
 
-    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
 
     std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
@@ -1456,9 +1456,9 @@ MCT *mix_2d_sph_deg(int &rc) {
 
     mct->name = ESMC_METHOD;
 
-    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
 
     std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
@@ -1521,9 +1521,9 @@ MCT *mix_2d_sph_rad(int &rc) {
 
     mct->name = ESMC_METHOD;
 
-    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
 
     std::for_each(mct->redist_nodeCoord.begin(), mct->redist_nodeCoord.end(), [&c2s](double &d) {d*=c2s;});
@@ -1823,7 +1823,7 @@ MCT *ngon_2d_cart(int &rc) {
         mct->redist_elemConn = {1,2,3,5,4};
         mct->redist_elemCoord = {1.0,1.0};
       }
-      
+
       if (localPet == 0) {
         mct->dual_nodeId = {1,2,4};
         mct->dual_nodeCoord = {1.0, 1.0,
@@ -1922,9 +1922,9 @@ MCT *ngon_2d_sph_deg(int &rc) {
 
     mct->name = ESMC_METHOD;
 
-    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
 
 
@@ -1989,9 +1989,9 @@ MCT *ngon_2d_sph_rad(int &rc) {
 
     mct->name = ESMC_METHOD;
 
-    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(), 
+    std::for_each(mct->nodeCoord.begin(), mct->nodeCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
-    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(), 
+    std::for_each(mct->elemCoord.begin(), mct->elemCoord.end(),
                   [&c2s](double &d) {d*=c2s;});
 
 
@@ -2101,7 +2101,7 @@ MCT *ngon_quad_2d_cart(int &rc){
                         0.0,3.0, 2.0,3.0, 4.0,3.0,
                         0.0,4.0, 1.0,4.0, 2.0,4.0, 3.0,4.0, 4.0,4.0,};
       mct->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  
+
       mct->elemId = {1,2,3,4};
       mct->elemType = {8,8,8,8};
       mct->elemConn = {1,2,3,7,11,10,9,6,
@@ -2124,7 +2124,7 @@ MCT *ngon_quad_2d_cart(int &rc){
 
       } else if (localPet == 1) {
         mct->nodeId = {3,4,5,7,8,11,12,13};
-        mct->nodeCoord = {2.0,0.0, 3.0,0.0, 4.0,0.0, 
+        mct->nodeCoord = {2.0,0.0, 3.0,0.0, 4.0,0.0,
                           2.0,1.0, 4.0,1.0,
                           2.0,2.0, 3.0,2.0, 4.0,2.0};
         mct->nodeOwner = {0,1,1,0,1,0,1,1};
@@ -2134,7 +2134,7 @@ MCT *ngon_quad_2d_cart(int &rc){
         mct->elemCoord = {3.0,1.0};
       } else if (localPet == 2) {
         mct->nodeId = {9,10,11,14,15,17,18,19};
-        mct->nodeCoord = {0.0,2.0, 1.0,2.0, 2.0,2.0, 
+        mct->nodeCoord = {0.0,2.0, 1.0,2.0, 2.0,2.0,
                           0.0,3.0, 2.0,3.0,
                           0.0,4.0, 1.0,4.0, 2.0,4.0};
         mct->nodeOwner = {0,0,0,2,2,2,2,2};
@@ -2144,7 +2144,7 @@ MCT *ngon_quad_2d_cart(int &rc){
         mct->elemCoord = {1.0,3.0};
       } else if (localPet == 3) {
         mct->nodeId = {11,12,13,15,16,19,20,21};
-        mct->nodeCoord = {2.0,2.0, 3.0,2.0, 4.0,2.0, 
+        mct->nodeCoord = {2.0,2.0, 3.0,2.0, 4.0,2.0,
                           2.0,3.0, 4.0,3.0,
                           2.0,4.0, 3.0,4.0, 4.0,4.0};
         mct->nodeOwner = {0,1,1,2,3,2,3,3};
@@ -2159,7 +2159,7 @@ MCT *ngon_quad_2d_cart(int &rc){
         mct->redist_elemId_in = {4};
 
         mct->redist_nodeId = {11,12,13,15,16,19,20,21};
-        mct->redist_nodeCoord = {2.0,2.0, 3.0,2.0, 4.0,2.0, 
+        mct->redist_nodeCoord = {2.0,2.0, 3.0,2.0, 4.0,2.0,
                                  2.0,3.0, 4.0,3.0,
                                  2.0,4.0, 3.0,4.0, 4.0,4.0};
         mct->redist_nodeOwner = {0,0,0,0,0,0,0,0};
@@ -2172,7 +2172,7 @@ MCT *ngon_quad_2d_cart(int &rc){
         mct->redist_elemId_in = {3};
 
         mct->redist_nodeId = {9,10,11,14,15,17,18,19};
-        mct->redist_nodeCoord = {0.0,2.0, 1.0,2.0, 2.0,2.0, 
+        mct->redist_nodeCoord = {0.0,2.0, 1.0,2.0, 2.0,2.0,
                                  0.0,3.0, 2.0,3.0,
                                  0.0,4.0, 1.0,4.0, 2.0,4.0};
         mct->redist_nodeOwner = {1,1,0,1,0,1,1,0};
@@ -2185,7 +2185,7 @@ MCT *ngon_quad_2d_cart(int &rc){
         mct->redist_elemId_in = {2};
 
         mct->redist_nodeId = {3,4,5,7,8,11,12,13};
-        mct->redist_nodeCoord = {2.0,0.0, 3.0,0.0, 4.0,0.0, 
+        mct->redist_nodeCoord = {2.0,0.0, 3.0,0.0, 4.0,0.0,
                                  2.0,1.0, 4.0,1.0,
                                  2.0,2.0, 3.0,2.0, 4.0,2.0};
         mct->redist_nodeOwner = {2,2,2,2,2,0,0,0};
@@ -2322,7 +2322,7 @@ MCT *periodic_2d_sph_deg(int &rc){
   //        |       |       |       |       |           |       |       |  d
   //                                                                       i
   //                                                                       c
-  //                                                                        
+  //
   //  0.0   15----- 16----- 17----- 18----- 19    ----- 20----- 21----- 15 b
   //        |       |       |       |       |           |       |       |  o
   //  -22   |   8   |   9   |   10  |   11  |       12  |   13  |   14  |  u
@@ -2332,7 +2332,7 @@ MCT *periodic_2d_sph_deg(int &rc){
   //  -69   |   1   |   2   |   3   |   4   |       5   |   6   |   7   |  r
   //        |       |       |       |       |           |       |       |  y
   //  -80   1 ----- 2 ----- 3 ----- 4 ----- 5     ----- 6 ----- 7 ----- 1
-  //    
+  //
   //       0.0      50      100     150     200         250     300     360/0
   //
 
@@ -2417,7 +2417,7 @@ MCT *periodic_2d_sph_deg(int &rc){
           0,80,  50,80,  100,80,  150,80,  200,80,  250,80,  300,80};
       mct->nodeOwner = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                         0,0,0,0,0,0,0,0};
-  
+
       mct->elemId = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
                      21,22,23,24,25,26,27,28};
       mct->elemType = {ESMC_MESHELEMTYPE_QUAD,
@@ -2704,8 +2704,8 @@ MCT *periodic_2d_sph_rad(int &rc){
   //        |       |       |       |       |           |       |       |
   //  22    |   15  |   16  |   17  |   18  |       19  |   20  |   21  |
   //        |       |       |       |       |           |       |       |
-    
-    
+
+
   //  0.0   15----- 16----- 17----- 18----- 19    ----- 20----- 21----- 15
   //        |       |       |       |       |           |       |       |
   //  -22   |   8   |   9   |   10  |   11  |       12  |   13  |   14  |
@@ -2715,7 +2715,7 @@ MCT *periodic_2d_sph_rad(int &rc){
   //  -69   |   1   |   2   |   3   |   4   |       5   |   6   |   7   |
   //        |       |       |       |       |           |       |       |
   //  -80   1 ----- 2 ----- 3 ----- 4 ----- 5     ----- 6 ----- 7 ----- 1
-  //    
+  //
   //       0.0      50      100     150     200         250     300     2pi/0
   //
 #undef ESMC_METHOD
@@ -2800,43 +2800,43 @@ MCT *periodic_2d_sph_rad(int &rc){
 //   // Get parallel information
 //   int localPet, petCount;
 //   ESMC_VM vm;
-// 
+//
 //   vm=ESMC_VMGetGlobal(&rc);
 //   if (rc != ESMF_SUCCESS) return 0;
-// 
+//
 //   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
 //                 (int *)NULL, (int *)NULL);
 //   if (rc != ESMF_SUCCESS) return 0;
-// 
+//
 //   // Mesh variables
 //   int pdim=3;
 //   int sdim=3;
 //   int num_elem, num_node;
-// 
+//
 //   // set Mesh parameters
 //   int *nodeId;
 //   double *nodeCoord;
 //   int *nodeOwner;
-// 
+//
 //   int *elemId;
 //   int *elemType;
 //   int *elemConn;
-// 
+//
 //   MBMesh *mesh = new MBMesh();
-// 
+//
 //   ESMC_CoordSys_Flag coordsys=ESMC_COORDSYS_CART;
 //   MBMesh_create(&mesh, &pdim, &sdim, &coordsys, &rc);
-// 
+//
 //     num_node = 10;
 //     num_elem = 4;
-// 
+//
 //     nodeId    = (int *) malloc (num_node * sizeof (int));
 //     nodeCoord = (double *) malloc (3*num_node * sizeof (double));
 //     nodeOwner = (int *) malloc (num_node * sizeof (int));
 //     elemId   = (int *) malloc (num_elem * sizeof (int));
 //     elemType = (int *) malloc (num_elem * sizeof (int));
 //     elemConn = (int *) malloc (4*num_elem * sizeof (int));
-// 
+//
 //     nodeId[0]=1;
 //     nodeId[1]=2;
 //     nodeId[2]=3;
@@ -2847,7 +2847,7 @@ MCT *periodic_2d_sph_rad(int &rc){
 //     nodeId[7]=8;
 //     nodeId[8]=9;
 //     nodeId[9]=10;
-// 
+//
 //     nodeCoord[0]=0.0; nodeCoord[1]=0.0; nodeCoord[2]=0.0;
 //     nodeCoord[3]=1.0; nodeCoord[4]=0.0; nodeCoord[5]=0.0;
 //     nodeCoord[6]=2.0; nodeCoord[7]=0.0; nodeCoord[8]=0.0;
@@ -2858,7 +2858,7 @@ MCT *periodic_2d_sph_rad(int &rc){
 //     nodeCoord[21]=1.0; nodeCoord[22]=0.5; nodeCoord[23]=1.0;
 //     nodeCoord[24]=1.5; nodeCoord[25]=0.5; nodeCoord[26]=1.0;
 //     nodeCoord[27]=1.0; nodeCoord[28]=1.5; nodeCoord[29]=1.0;
-// 
+//
 //     nodeOwner[0]=0;
 //     nodeOwner[1]=0;
 //     nodeOwner[2]=0;
@@ -2869,25 +2869,25 @@ MCT *periodic_2d_sph_rad(int &rc){
 //     nodeOwner[7]=0;
 //     nodeOwner[8]=0;
 //     nodeOwner[9]=0;
-// 
+//
 //     elemId[0]=1;
 //     elemId[1]=2;
 //     elemId[2]=3;
 //     elemId[3]=4;
-// 
+//
 //     elemType[0]=ESMC_MESHELEMTYPE_TETRA;
 //     elemType[1]=ESMC_MESHELEMTYPE_TETRA;
 //     elemType[2]=ESMC_MESHELEMTYPE_TETRA;
 //     elemType[3]=ESMC_MESHELEMTYPE_TETRA;
-// 
+//
 //     elemConn[0]=1; elemConn[1]=2; elemConn[2]=7; elemConn[3]=4;
 //     elemConn[4]=2; elemConn[5]=3; elemConn[6]=9; elemConn[7]=5;
 //     elemConn[8]=2; elemConn[9]=5; elemConn[10]=8; elemConn[11]=4;
 //     elemConn[12]=4; elemConn[13]=5; elemConn[14]=10; elemConn[15]=6;
-// 
+//
 //     MBMesh_addnodes(&mesh, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
 //                     &coordsys, &sdim, &rc);
-// 
+//
 //     int areapresent = 0;
 //     int coordspresent = 0;
 //     int numelemconn = 4*num_elem;
@@ -2898,7 +2898,7 @@ MCT *periodic_2d_sph_rad(int &rc){
 //                        &numelemconn, elemConn,
 //                        &regridconserve,
 //                        &coordsys, &sdim, &rc);
-// 
+//
 //   rc = ESMF_SUCCESS;
 //   return mesh;
 // }
