@@ -396,13 +396,11 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
 
     /* Get pointer to iosystem. */
     ios = file->iosystem;
-    ESMF_LOGMEMINFO("Enter: get_var_desc");
 
     /* Point to var description scruct for first var. */
     if ((ierr = get_var_desc(varids[0], &file->varlist, &vdesc)))
         return pio_err(NULL, file, ierr, __FILE__, __LINE__);
 
-    ESMF_LOGMEMINFO("Exit: get_var_desc");
     /* Set these differently for data and fill writing. */
     int num_regions = fill ? iodesc->maxfillregions: iodesc->maxregions;
     io_region *region = fill ? iodesc->fillregion : iodesc->firstregion;
@@ -434,13 +432,10 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
         /* Process each region of data to be written. */
         for (int regioncnt = 0; regioncnt < num_regions; regioncnt++)
         {
-            int loginfo=1;
-            ESMF_LOGMEMINFO("Enter: find_start_count");
             /* Fill the start/count arrays. */
             if ((ierr = find_start_count(iodesc->ndims, fndims, vdesc, region, frame,
                                          start, count)))
                 return pio_err(ios, file, ierr, __FILE__, __LINE__);
-            ESMF_LOGMEMINFO("Exit: find_start_count");
 
             /* IO tasks will run the netCDF/pnetcdf functions to write the data. */
             switch (file->iotype)
@@ -448,7 +443,6 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
 #ifdef _NETCDF4
             case PIO_IOTYPE_NETCDF4P:
                 /* For each variable to be written. */
-                ESMF_LOGMEMINFO("Enter: nc_put_vara");
                 for (int nv = 0; nv < nvars; nv++)
                 {
                     /* Set the start of the record dimension. (Hasn't
@@ -467,7 +461,6 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
                     if (!ierr)
                         ierr = nc_put_vara(file->fh, varids[nv], (size_t *)start, (size_t *)count, bufptr);
                 }
-                ESMF_LOGMEMINFO("Exit: nc_put_vara");
                 break;
 #endif
 #ifdef _PNETCDF
@@ -1359,6 +1352,7 @@ pio_read_darray_nc(file_desc_t *file, io_desc_t *iodesc, int vid, void *iobuf)
                         return check_mpi(NULL, NULL, mpierr, __FILE__, __LINE__);
 
 #else
+                    //printf("rllen %d mpitype %d\n",iodesc->rllen, iodesc->mpitype);
                     /* Read a list of subarrays. */
                     ierr = ncmpi_get_varn_all(file->fh, vid, rrlen, startlist,
                                               countlist, iobuf, iodesc->rllen, iodesc->mpitype);
@@ -1860,14 +1854,11 @@ flush_buffer(int ncid, wmulti_buffer *wmb, bool flushtodisk)
     /* If there are any variables in this buffer... */
     if (wmb->num_arrays > 0)
     {
-        int loginfo=1;
-        ESMF_LOGMEMINFO("Enter: write_multi");
         /* Write any data in the buffer. */
         ret = PIOc_write_darray_multi(ncid, wmb->vid,  wmb->ioid, wmb->num_arrays,
                                       wmb->arraylen, wmb->data, wmb->frame,
                                       wmb->fillvalue, flushtodisk);
         PLOG((2, "return from PIOc_write_darray_multi ret = %d", ret));
-        ESMF_LOGMEMINFO("Exit: write_multi");
 
         wmb->num_arrays = 0;
 
@@ -2198,54 +2189,3 @@ compute_maxaggregate_bytes(iosystem_desc_t *ios, io_desc_t *iodesc)
 
     return PIO_NOERR;
 }
-#ifdef CHUNKING
-int 
-find_hdf5_chunksize(int ncid, int varid, int ndims)
-{
-/* Code to find chunk size for writing hdf5 */
-/* Pick a chunk length for each dimension, if one has not already
- * been picked above. */
-    int ret = PIO_NOERR;
-    PIO_Offset chunksize[ndims];
-    int storage;
-#define DEFAULT_CHUNK_SIZE 4194304
-    if ((ret = PIOc_inq_var_chunking(ncid, varid, &storage, chunksize)))
-        return pio_err(ncid, NULL, ierr, __FILE__,__LINE__);
-    if (storage == NC_CONTIGUOUS || storage == NC_COMPACT)
-        return;
-    storage = NC_CHUNKED;
-    for (int d = 0; d < ndims; d++)
-    {
-        if (!chunksize[d])
-        {
-            size_t suggested_size;
-            suggested_size = (pow((double)DEFAULT_CHUNK_SIZE/(num_values * type_size), 
-                                  1/(double)(ndims - num_set)) * var->dim[d]->len - .5);
-            if (suggested_size > var->dim[d]->len)
-                suggested_size = var->dim[d]->len;
-            chunksize[d] = suggested_size ? suggested_size : 1;
-            LOG((4, "nc_def_var_nc4: name %s dim %d DEFAULT_CHUNK_SIZE %d num_values %f type_size %d "
-                 "chunksize %ld", var->name, d, DEFAULT_CHUNK_SIZE, num_values, type_size, chunksize[d]));
-        }
-    }
-/* But did this add up to a chunk that is too big? */
-    retval = check_chunksizes(grp, var, chunksize);
-    if (retval)
-    {
-        /* Other error? */
-        if (retval != NC_EBADCHUNK)
-            return retval;
-        
-        /* Chunk is too big! Reduce each dimension by half and try again. */
-        for ( ; retval == NC_EBADCHUNK; retval = check_chunksizes(grp, var, chunksize))
-            for (d = 0; d < ndims; d++)
-                chunksize[d] = chunksize[d]/2 ? chunksize[d]/2 : 1;
-    }
-    
-    /* Do we have any big data overhangs? */
-#define NC_ALLOWED_OVERHANG .1
-    for (d = 0; d < ndims; d++)
-        for ( ; var->dim[d]->len % chunksize[d] > var->dim[d]->len * NC_ALLOWED_OVERHANG; )
-            chunksize[d] -= var->dim[d]->len * NC_ALLOWED_OVERHANG;
-}
-#endif

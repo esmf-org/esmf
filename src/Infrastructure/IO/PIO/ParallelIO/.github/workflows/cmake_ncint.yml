@@ -60,7 +60,7 @@ jobs:
           cmake -Wno-dev -DPIO_ENABLE_NETCDF_INTEGRATION=OFF \
           -DNetCDF_C_LIBRARY=/usr/lib/x86_64-linux-gnu/libnetcdf.so \
           -DNetCDF_C_INCLUDE_DIR=/usr/include -DPnetCDF_PATH='/home/runner/pnetcdf' \
-          -DPIO_HDF5_LOGGING=On -DPIO_ENABLE_FORTRAN=OFF -DPIO_USE_MALLOC=On \
+          -DPIO_ENABLE_FORTRAN=OFF \
           -DPIO_ENABLE_LOGGING=On -DPIO_ENABLE_TIMING=Off -DMPIEXEC_PREFLAGS="--oversubscribe" ..
           make VERBOSE=1
           make tests VERBOSE=1

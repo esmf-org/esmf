@@ -4,14 +4,13 @@
 
 # Jim Edwards
 
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.5.2)
 project (PIO C)
-#cmake_policy(VERSION 3.5.2)
 
 # The project version number.
 set(VERSION_MAJOR   2   CACHE STRING "Project major version number.")
 set(VERSION_MINOR   5   CACHE STRING "Project minor version number.")
-set(VERSION_PATCH   6   CACHE STRING "Project patch version number.")
+set(VERSION_PATCH   7   CACHE STRING "Project patch version number.")
 mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
 # Create version info in autotools parlance for pio_meta.h.
@@ -108,9 +107,6 @@ else()
 endif()
 
 # Set a variable that appears in the config.h.in file.
-set(USE_MALLOC 1)
-
-# Set a variable that appears in the config.h.in file.
 if(PIO_ENABLE_LOGGING)
   set(ENABLE_LOGGING 1)
   set(HAS_LOGGING "yes")
@@ -176,9 +172,9 @@ else ()
   set (CMAKE_REQUIRED_INCLUDES ${MPI_INCLUDE_PATH})
 endif ()
 
-SET(CMAKE_EXTRA_INCLUDE_FILES "mpi.h")
-check_type_size("MPI_Offset" SIZEOF_MPI_OFFSET)
-SET(CMAKE_EXTRA_INCLUDE_FILES)
+#SET(CMAKE_EXTRA_INCLUDE_FILES "mpi.h")
+#check_type_size("MPI_Offset" SIZEOF_MPI_OFFSET)
+#SET(CMAKE_EXTRA_INCLUDE_FILES)
 
 #===== Library Variables =====
 set (PIO_FILESYSTEM_HINTS IGNORE CACHE STRING "Filesystem hints (lustre or gpfs)")
@@ -281,7 +277,11 @@ add_subdirectory (src)
 
 # Custom "piotests" target (builds the test executables)
 add_custom_target (tests)
-add_dependencies (tests pioc piof)
+if (PIO_ENABLE_FORTRAN)
+  add_dependencies (tests pioc piof)
+else()
+  add_dependencies (tests pioc)
+endif()
 
 # Custom "check" target that depends upon "tests"
 add_custom_target (check COMMAND ${CMAKE_CTEST_COMMAND})

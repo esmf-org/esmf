@@ -61,7 +61,7 @@ void ESMCI_meshcreate(Mesh **meshpp,
                       ESMC_CoordSys_Flag *coordSys, int *rc);
 
 void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
-                            double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                            double *nodeCoord, InterArray<int> *nodeOwner, InterArray<int> *nodeMaskII,
                             ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                             int *rc);
 

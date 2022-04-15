@@ -42,6 +42,7 @@
 #include "Mesh/include/ESMCI_MBMesh_GToM_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Util.h"
+#include "Mesh/include/ESMCI_Mesh_FileIO.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -527,7 +528,7 @@ MeshCap *MeshCap::meshcreatefromfile(const char *filename,
  }
 
 void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
-                           double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                           double *nodeCoord, InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                            int *rc)
 {
@@ -538,7 +539,7 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
   if (is_esmf_mesh) {
     ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh addnodes");
     ESMCI_meshaddnodes(&mesh, num_nodes, nodeId,
-                       nodeCoord, nodeOwner, nodeMaskII,
+                       nodeCoord, nodeOwnerII, nodeMaskII,
                        _coordSys, _orig_sdim,
                        rc);
     ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh addnodes");
@@ -546,7 +547,7 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
 #if defined ESMF_MOAB
     ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addnodes");
     MBMesh_addnodes(&mbmesh, num_nodes, nodeId,
-                     nodeCoord, nodeOwner, nodeMaskII,
+                     nodeCoord, nodeOwnerII, nodeMaskII,
                      _coordSys, _orig_sdim,
                      rc);
     ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addnodes");
@@ -2478,5 +2479,64 @@ void MeshCap::meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
                                   ESMC_CONTEXT, rc);
     return;
   }
+}
+
+MeshCap *MeshCap::meshcreatefromfilenew(char *filename,
+                                        ESMC_FileFormat_Flag fileformat,
+                                        bool convert_to_dual, 
+                                        bool add_user_area, 
+                                        ESMC_CoordSys_Flag coordSys, 
+                                        ESMC_MeshLoc_Flag maskFlag, 
+                                        char *maskVarName, 
+                                        ESMCI::DistGrid *node_distgrid,
+                                        ESMCI::DistGrid *elem_distgrid,
+                                        int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshcreatefromfilenew()"
+
+  int localrc;
+
+  bool is_esmf_mesh = !moab_on;
+  
+  // Create mesh depending on the type
+  Mesh *mesh = nullptr;
+  MBMesh *mbmesh = nullptr;
+  int orig_sdim,pdim;
+  ESMC_CoordSys_Flag coord_sys; 
+  if (is_esmf_mesh) {
+    ESMCI_mesh_create_from_file(filename, 
+                                fileformat, 
+                                convert_to_dual,
+                                add_user_area, 
+                                coordSys,
+                                maskFlag, 
+                                maskVarName, 
+                                node_distgrid, 
+                                elem_distgrid, 
+                                &mesh, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, rc)) return NULL;
+      // Get mesh info
+      orig_sdim=mesh->orig_spatial_dim;
+      coord_sys=mesh->coordsys;
+      pdim=mesh->parametric_dim();
+
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return NULL;
+  }
+
+  // Create MeshCap
+  MeshCap *mc=new MeshCap();
+
+  // Set member variables
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
+  mc->finalize_dims(orig_sdim, pdim, coord_sys);
+  mc->finalize_counts(&localrc);
+  
+  // Output new MeshCap
+  return mc;
 }
 
