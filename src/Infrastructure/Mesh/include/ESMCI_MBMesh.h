@@ -115,7 +115,7 @@ namespace ESMCI {
   private:
     int _num_node;
     int _num_elem;
-    int _num_elem_conn;
+    // int _num_elem_conn;
     int _num_orig_node;
     int _num_orig_elem;
     int _num_owned_node;
@@ -319,10 +319,10 @@ namespace ESMCI {
       return _num_elem;
     };
 
-    int num_elem_conn(){
-      if (!elems_finalized) {Throw() << "Elements not finalized, so num_elem_conn not set.";}
-      return _num_elem_conn;
-    };
+    // int num_elem_conn(){
+    //   if (!elems_finalized) {Throw() << "Elements not finalized, so num_elem_conn not set.";}
+    //   return _num_elem_conn;
+    // };
 
     int num_owned_node(){
       if (!nodes_finalized) {Throw() << "Nodes not finalized, so num_owned_node not set.";}

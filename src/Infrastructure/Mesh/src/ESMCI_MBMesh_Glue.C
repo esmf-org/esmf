@@ -2339,7 +2339,9 @@ void MBMesh_GetElemConnCount(MBMesh *meshp, int *elemConnCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMesh_GetElemConnCount()"
   try {
-    *elemConnCount = meshp->num_elem_conn();
+    std::vector<EntityHandle> all_elems;
+    meshp->get_all_elems(all_elems);
+    *elemConnCount = meshp->get_num_elem_conn(all_elems);
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -2400,8 +2402,11 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     ESMC_CHECK_PASSTHRU_THROW(localrc);
     
     ////// Get some handy information //////
+    std::vector<EntityHandle> all_elems;
+    meshp->get_all_elems(all_elems);
+
     int num_elems = meshp->num_orig_elem();
-    int num_elem_conn = meshp->num_elem_conn();
+    int num_elem_conn = meshp->get_num_elem_conn(all_elems);
     int orig_sdim = meshp->orig_sdim;
 
     ////// Error check input arrays //////
