@@ -208,7 +208,7 @@ MCT *quad_2d_cart(int &rc){
         mct->nodeId ={1,2,4,5};
         mct->nodeCoord = {0.0,0.0, 1.0,0.0, 0.0,1.0, 1.0,1.0};
         mct->nodeOwner = {0,0,0,0};
-        mct->elemId = {5};
+        mct->elemId = {1};
         mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
         mct->elemConn = {1,2,4,3};
         mct->elemCoord = {0.5,0.5};
@@ -217,7 +217,7 @@ MCT *quad_2d_cart(int &rc){
         mct->nodeId = {2,3,5,6};
         mct->nodeCoord = {1.0,0.0, 2.0,0.0, 1.0,1.0, 2.0,1.0};
         mct->nodeOwner = {0,1,0,1};
-        mct->elemId = {5};
+        mct->elemId = {2};
         mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
         mct->elemConn = {1,2,4,3};
         mct->elemCoord = {1.5,0.5};
@@ -225,7 +225,7 @@ MCT *quad_2d_cart(int &rc){
         mct->nodeId = {4,5,7,8};
         mct->nodeCoord = {0.0,1.0, 1.0,1.0, 0.0,2.0, 1.0,2.0};
         mct->nodeOwner = {0,0,2,2};
-        mct->elemId = {5};
+        mct->elemId = {3};
         mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
         mct->elemConn = {1,2,4,3};
         mct->elemCoord = {0.5,1.5};
@@ -233,7 +233,7 @@ MCT *quad_2d_cart(int &rc){
         mct->nodeId = {5,6,8,9};
         mct->nodeCoord = {1.0,1.0, 2.0,1.0, 1.0,2.0, 2.0,2.0};
         mct->nodeOwner = {0,1,2,3};
-        mct->elemId = {5};
+        mct->elemId = {4};
         mct->elemType = {ESMC_MESHELEMTYPE_QUAD};
         mct->elemConn = {1,2,4,3};
         mct->elemCoord = {1.5,1.5};
