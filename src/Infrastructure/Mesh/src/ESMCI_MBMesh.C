@@ -824,17 +824,20 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
     if (!is_split) {
       // get node ids in a vector, which we will need to search later
       Range nodes;
-      merr=mesh->get_entities_by_dimension(0, 0, nodes);
-      ESMC_CHECK_MOAB_THROW(merr)
+      get_all_nodes(nodes);
+      
       int *node_ids = new int[nodes.size()];
       get_node_ids(node_ids);
       std::vector<int> nodeids(node_ids, node_ids + nodes.size());
       delete [] node_ids;
+      
+      std::cout << std::endl << "MBMesh::get_elem_connectivity::node_ids = ";
+      for (const auto i : nodeids) std::cout << i << " ";
+      std::cout << std::endl;
 
       // now iterate through the elements
       Range elems;
-      merr=mesh->get_entities_by_dimension(0, pdim, elems);
-      ESMC_CHECK_MOAB_THROW(merr)
+      get_all_elems(elems);
 
       int elemConnCountTemp = 0;
       for (Range::const_iterator it=elems.begin(); it != elems.end(); it++) {
@@ -855,11 +858,20 @@ void MBMesh::get_elem_connectivity(int *elem_conn) {
           std::vector<int>::iterator itr = std::find(nodeids.begin(), nodeids.end(),   nid);
           // add 1 for Fortran indexing
           elem_conn[elemConnCountTemp+i] = std::distance(nodeids.begin(), itr) +1;
+          std::cout << std::endl 
+                    << "adding " << std::distance(nodeids.begin(), itr) +1
+                    << "[" << nid << "]"
+                    << " at " << elemConnCountTemp+i << std::endl;
         }
 
         // Add number of nodes for this elem to connection count
         elemConnCountTemp += nodes_on_elem.size();
       }
+      
+      std::cout << "MBMesh::get_elem_connectivity::elem_conn = ";
+      for (int i=0; i<elemConnCountTemp; ++i) std::cout << elem_conn[i] << " ";
+      std::cout << std::endl;
+      
     } else {
       std::vector<int> num_merged_nids;
       std::vector<int> merged_nids;

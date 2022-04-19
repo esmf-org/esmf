@@ -386,8 +386,8 @@ class MCT {
         auto generator_int = std::bind(distribution_int, engine);
         auto generator_real = std::bind(distribution_real, engine);
 
-        std::generate_n(nodeMask.begin(), num_node, generator_int);
-        std::generate_n(elemMask.begin(), num_elem, generator_int);
+        // std::generate_n(nodeMask.begin(), num_node, generator_int);
+        // std::generate_n(elemMask.begin(), num_elem, generator_int);
         std::generate_n(elemArea.begin(), num_elem, generator_real);
 
         if (redist_num_node > 0) {
@@ -396,10 +396,13 @@ class MCT {
           std::generate_n(redist_elemArea.begin(), redist_num_elem, generator_real);
         }
 
-        // TODO: temporary solution to issue with random number generation
-        // nodeMask = nodeId;
+        nodeMask = nodeId;
+        // for dual parallel must use fixed values (not random numbers)
+        for (int &d : nodeMask) d += 42;
 
-        // // This print does not work unless nodeMask is set as above??
+        elemMask = elemId;
+        for (int &d : elemMask) d += 42;
+
         // std::cout << localPet << "# MCT::build() nodeMask " << std::flush;
         // for (const auto m : nodeMask)
         //   std::cout << m << " " << std::flush;
@@ -407,15 +410,14 @@ class MCT {
 
         InterArray<int> *iin = new InterArray<int>(nodeMask.data(),num_node);
         InterArray<int> *iie = new InterArray<int>(elemMask.data(),num_elem);
+        // Wrap node_owners in IntArray
+        InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
 
         MeshCap::meshSetMOAB(&nativeormb, &localrc);
         ESMC_CHECK_THROW(localrc);
 
         mesh = MeshCap::meshcreate(&pdim, &sdim, &coord_sys, &localrc);
         ESMC_CHECK_THROW(localrc);
-
-        // Wrap node_owners in IntArray
-        InterArray<int> nodeOwnerIA(nodeOwner.data(),num_node);
 
         // Add Nodes
         mesh->meshaddnodes(&num_node, nodeId.data(), nodeCoord.data(),
@@ -530,27 +532,17 @@ class MCT {
       try {
         int localrc;
 
-        // // skip if run on one processor
-        // if (np == 1) {
-        //   name = "SKIP - " + name;
-        //   return ESMF_SUCCESS;
-        // }
-
-        // int ne = redist_elemId.size();
-
         target = MeshCap::meshcreatedual(&mesh, &localrc);
         ESMC_CHECK_THROW(localrc);
-
+        
         // verify the original mesh is still valid
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
 
         // // verify dual info on target
-        // // this is tricky will require vtk output for empirical discovery
-        localrc = test_dual_info();
-        ESMC_CHECK_THROW(localrc);
+        // localrc = test_dual_info();
+        // ESMC_CHECK_THROW(localrc);
 
-        //
         // localrc = write_vtk();
         // ESMC_CHECK_THROW(localrc);
       }

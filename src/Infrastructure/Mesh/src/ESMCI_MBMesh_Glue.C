@@ -2341,7 +2341,14 @@ void MBMesh_GetElemConnCount(MBMesh *meshp, int *elemConnCount, int *rc){
   try {
     std::vector<EntityHandle> all_elems;
     meshp->get_all_elems(all_elems);
-    *elemConnCount = meshp->get_num_elem_conn(all_elems);
+
+    std::vector<EntityHandle> orig_elems;
+    meshp->get_sorted_orig_elems(orig_elems);
+
+    std::vector<EntityHandle> owned_elems;
+    meshp->get_owned_elems(owned_elems);
+    
+    *elemConnCount = meshp->get_num_elem_conn(orig_elems);
   }
   CATCH_MBMESH_RETURN(rc);
   
@@ -2405,10 +2412,18 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     std::vector<EntityHandle> all_elems;
     meshp->get_all_elems(all_elems);
 
-    int num_elems = meshp->num_orig_elem();
-    int num_elem_conn = meshp->get_num_elem_conn(all_elems);
-    int orig_sdim = meshp->orig_sdim;
+    std::vector<EntityHandle> orig_elems;
+    meshp->get_sorted_orig_elems(orig_elems);
 
+    std::vector<EntityHandle> owned_elems;
+    meshp->get_owned_elems(owned_elems);
+
+    int num_elems = meshp->num_orig_elem();
+    int orig_sdim = meshp->orig_sdim;
+    
+    int num_elem_conn;
+    MBMesh_GetElemConnCount(meshp, &num_elem_conn, &localrc);
+    ESMC_CHECK_PASSTHRU_THROW(localrc);
     ////// Error check input arrays //////
 
     if (present(elemIds)) {
@@ -2460,8 +2475,6 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     }
 
     // Fill info in arrays 
-    std::vector<EntityHandle> orig_elems;
-    meshp->get_sorted_orig_elems(orig_elems);
 
     // If it was passed in, fill elementIds array
     if (present(elemIds)) {

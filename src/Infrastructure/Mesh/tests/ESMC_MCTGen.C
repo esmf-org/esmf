@@ -138,7 +138,7 @@ MCT *quad_2d_cart(int &rc){
         redist_num_node = 4;
         redist_num_elem_conn = 4;
         dual_num_elem = 1;
-        dual_num_node = 4;
+        dual_num_node = 1;
         dual_num_elem_conn = 4;
       } else if (localPet == 1) {
         num_elem = 1;
@@ -147,9 +147,9 @@ MCT *quad_2d_cart(int &rc){
         redist_num_elem = 1;
         redist_num_node = 4;
         redist_num_elem_conn = 4;
-        dual_num_elem = 1;
-        dual_num_node = 4;
-        dual_num_elem_conn = 4;
+        dual_num_elem = 0;
+        dual_num_node = 1;
+        dual_num_elem_conn = 0;
       } else if (localPet == 2) {
         num_elem = 1;
         num_node = 4;
@@ -157,9 +157,9 @@ MCT *quad_2d_cart(int &rc){
         redist_num_elem = 1;
         redist_num_node = 4;
         redist_num_elem_conn = 4;
-        dual_num_elem = 1;
-        dual_num_node = 4;
-        dual_num_elem_conn = 4;
+        dual_num_elem = 0;
+        dual_num_node = 1;
+        dual_num_elem_conn = 0;
       } else if (localPet == 3) {
         num_elem = 1;
         num_node = 4;
@@ -167,9 +167,9 @@ MCT *quad_2d_cart(int &rc){
         redist_num_elem = 1;
         redist_num_node = 4;
         redist_num_elem_conn = 4;
-        dual_num_elem = 1;
-        dual_num_node = 4;
-        dual_num_elem_conn = 4;
+        dual_num_elem = 0;
+        dual_num_node = 1;
+        dual_num_elem_conn = 0;
       }
     }
 
@@ -193,10 +193,10 @@ MCT *quad_2d_cart(int &rc){
                        2,3,6,5,
                        4,5,8,7,
                        5,6,9,8};
-      mct->elemCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+      mct->elemCoord = {0.5,0.5,1.5,0.5,0.5,1.5,1.5,1.5};
 
       mct->dual_nodeId = {1,2,3,4};
-      mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+      mct->dual_nodeCoord = {0.5,0.5,1.5,0.5,0.5,1.5,1.5,1.5};
       mct->dual_nodeOwner = {0,0,0,0};
       mct->dual_elemId = {5};
       mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
@@ -287,7 +287,7 @@ MCT *quad_2d_cart(int &rc){
 
       if (localPet == 0) {
         mct->dual_nodeId = {1,2,3,4};
-        mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+        mct->dual_nodeCoord = {0.5,0.5,1.5,0.5,0.5,1.5,1.5,1.5};
         mct->dual_nodeOwner = {0,1,2,3};
         mct->dual_elemId = {1};
         mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
@@ -295,28 +295,28 @@ MCT *quad_2d_cart(int &rc){
         mct->dual_elemCoord = {1.0, 1.0};
       } else if (localPet == 1) {
         mct->dual_nodeId = {1,2,3,4};
-        mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+        mct->dual_nodeCoord = {0.5,0.5,1.5,0.5,0.5,1.5,1.5,1.5};
         mct->dual_nodeOwner = {0,1,2,3};
-        mct->dual_elemId = {1};
-        mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mct->dual_elemConn = {1,2,4,3};
-        mct->dual_elemCoord = {1.0, 1.0};
+        mct->dual_elemId = {};
+        mct->dual_elemType = {};
+        mct->dual_elemConn = {};
+        mct->dual_elemCoord = {};
       } else if (localPet == 2) {
         mct->dual_nodeId = {1,2,3,4};
-        mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+        mct->dual_nodeCoord = {0.5,0.5,1.5,0.5,0.5,1.5,1.5,1.5};
         mct->dual_nodeOwner = {0,1,2,3};
-        mct->dual_elemId = {1};
-        mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mct->dual_elemConn = {1,2,4,3};
-        mct->dual_elemCoord = {1.0, 1.0};
+        mct->dual_elemId = {};
+        mct->dual_elemType = {};
+        mct->dual_elemConn = {};
+        mct->dual_elemCoord = {};
       } else if (localPet == 3) {
         mct->dual_nodeId = {1,2,3,4};
-        mct->dual_nodeCoord = {0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
+        mct->dual_nodeCoord = {0.5,0.5,1.5,0.5,0.5,1.5,1.5,1.5};
         mct->dual_nodeOwner = {0,1,2,3};
-        mct->dual_elemId = {1};
-        mct->dual_elemType = {ESMC_MESHELEMTYPE_QUAD};
-        mct->dual_elemConn = {1,2,4,3};
-        mct->dual_elemCoord = {1.0, 1.0};
+        mct->dual_elemId = {};
+        mct->dual_elemType = {};
+        mct->dual_elemConn = {};
+        mct->dual_elemCoord = {};
       }
     }
 
