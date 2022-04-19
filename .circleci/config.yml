@@ -161,7 +161,8 @@ jobs:
           destination: doc-artifacts.zip
 
   publish-esmf-docs:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     resource_class: medium
     steps:
       - restore_cache:
@@ -210,7 +211,8 @@ jobs:
           destination: test_coverage-artifacts.zip
 
   publish-test-coverage:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     resource_class: medium
     steps:
       - restore_cache:
@@ -259,7 +261,8 @@ jobs:
           destination: api_change-artifacts.zip
 
   publish-api-change:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     resource_class: medium
     steps:
       - restore_cache:
@@ -325,7 +328,8 @@ jobs:
           destination: doc-esmpy.zip
 
   publish-esmpy-docs:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     resource_class: medium
     steps:
       - restore_cache:
