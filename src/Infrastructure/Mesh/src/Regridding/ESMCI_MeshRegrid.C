@@ -179,7 +179,7 @@ namespace ESMCI {
     if (*map_type==0) mtype=MAP_TYPE_CART_APPROX;
     else if (*map_type==1) mtype=MAP_TYPE_GREAT_CIRCLE;
     else Throw() << "Unrecognized map type";
-
+ 
     // Put interp in a block so that it and the rendezvous meshes are
     // destroyed before we do other things like the extrapolation below
     {
@@ -196,7 +196,6 @@ namespace ESMCI {
                     set_dst_status, dst_status,
                     mtype, *unmappedaction, checkFlag);
       ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid interp 1");
-
 
       ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid interp 2");
       // Create the weight matrix

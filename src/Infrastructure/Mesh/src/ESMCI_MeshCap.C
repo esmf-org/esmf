@@ -1250,6 +1250,82 @@ void MeshCap::xgridregrid_create(MeshCap **meshsrcpp, MeshCap **meshdstpp,
  }
 
 
+void MeshCap::xgrid_calc_wgts_from_side_mesh(MeshCap *src_side_mesh, MeshCap *dst_xgrid_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::xgrid_calc_wgts_from_side_mesh()"
+
+  int localrc;
+  
+  // Can only do if the same kind
+  if (src_side_mesh->is_esmf_mesh != dst_xgrid_mesh->is_esmf_mesh) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "Can't do this operation with different mesh types",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Get mesh type
+  bool is_esmf_mesh=src_side_mesh->is_esmf_mesh;
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_Mesh_XGrid_calc_wgts_from_side_mesh(src_side_mesh->mesh,
+                                              dst_xgrid_mesh->mesh, 
+                                              nentries, tweights,
+                                              &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "This functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+
+}
+
+
+void MeshCap::xgrid_calc_wgts_to_side_mesh(MeshCap *src_xgrid_mesh, MeshCap *dst_side_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::xgrid_calc_wgts_to_side_mesh()"
+
+  int localrc;
+  
+  // Can only do if the same kind
+  if (src_xgrid_mesh->is_esmf_mesh != dst_side_mesh->is_esmf_mesh) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "Can't do this operation with different mesh types",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Get mesh type
+  bool is_esmf_mesh=src_xgrid_mesh->is_esmf_mesh;
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_Mesh_XGrid_calc_wgts_to_side_mesh(src_xgrid_mesh->mesh,
+                                            dst_side_mesh->mesh, 
+                                            nentries, tweights,
+                                            &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "This functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+  
+}
+
+
+
+
 MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
                              const std::vector<ESMCI::Array*> &arrays,
                              ESMCI::InterArray<int> *maskValuesArg,

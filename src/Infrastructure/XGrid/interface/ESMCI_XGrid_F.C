@@ -237,6 +237,27 @@ void FTN_X(c_esmc_xgridregrid_createp)(MeshCap **meshsrcpp, MeshCap **meshdstpp,
                    rc);
 }
 
+
+void FTN_X(c_esmc_xgrid_calc_wgts_from_mesh)(MeshCap **src_side_mesh, MeshCap **dst_xgrid_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc) {
+
+  MeshCap::xgrid_calc_wgts_from_side_mesh(*src_side_mesh, *dst_xgrid_mesh,
+                                          nentries, tweights,
+                                          rc);
+}
+
+void FTN_X(c_esmc_xgrid_calc_wgts_to_mesh)(MeshCap **src_xgrid_mesh, MeshCap **dst_side_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc) {
+
+  MeshCap::xgrid_calc_wgts_to_side_mesh(*src_xgrid_mesh, *dst_side_mesh,
+                                        nentries, tweights,
+                                        rc);
+}
+
+
+
 void FTN_X(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, double *w) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "c_esmc_copy_tempweights_xgrid()"
