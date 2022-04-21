@@ -138,7 +138,7 @@ MCT *quad_2d_cart(int &rc){
         redist_num_node = 4;
         redist_num_elem_conn = 4;
         dual_num_elem = 1;
-        dual_num_node = 1;
+        dual_num_node = 4;
         dual_num_elem_conn = 4;
       } else if (localPet == 1) {
         num_elem = 1;
@@ -148,7 +148,7 @@ MCT *quad_2d_cart(int &rc){
         redist_num_node = 4;
         redist_num_elem_conn = 4;
         dual_num_elem = 0;
-        dual_num_node = 1;
+        dual_num_node = 4;
         dual_num_elem_conn = 0;
       } else if (localPet == 2) {
         num_elem = 1;
@@ -158,7 +158,7 @@ MCT *quad_2d_cart(int &rc){
         redist_num_node = 4;
         redist_num_elem_conn = 4;
         dual_num_elem = 0;
-        dual_num_node = 1;
+        dual_num_node = 4;
         dual_num_elem_conn = 0;
       } else if (localPet == 3) {
         num_elem = 1;
@@ -168,7 +168,7 @@ MCT *quad_2d_cart(int &rc){
         redist_num_node = 4;
         redist_num_elem_conn = 4;
         dual_num_elem = 0;
-        dual_num_node = 1;
+        dual_num_node = 4;
         dual_num_elem_conn = 0;
       }
     }

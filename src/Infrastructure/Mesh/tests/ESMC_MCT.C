@@ -539,9 +539,9 @@ class MCT {
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
 
-        // // verify dual info on target
-        // localrc = test_dual_info();
-        // ESMC_CHECK_THROW(localrc);
+        // verify dual info on target
+        localrc = test_dual_info();
+        ESMC_CHECK_THROW(localrc);
 
         // localrc = write_vtk();
         // ESMC_CHECK_THROW(localrc);
@@ -1754,30 +1754,42 @@ class MCT {
       mesh->getElemCreateInfo(NULL, NULL, ecni, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
 
-      test = "ElemConn";
-      fail_print = false;
-      for (int i=0; i<ecni->extent[0]; ++i) {
-        print = false;
-        if (ecni->array[i] != elemConn[i]) {
-          correct = false;
-          print = true;
-          fail_print = true;
+      // find the correct elem to start the rotation
+      int rotation_start = ecni->array[0];
+      
+      auto it = std::find(elemConn.begin(), elemConn.end(), rotation_start);
+      
+      
+      if (it == elemConn.end()) correct = false;
+      else {
+        
+        std::rotate(elemConn.begin(), it, elemConn.end());
+        
+        test = "ElemConn";
+        fail_print = false;
+        for (int i=0; i<ecni->extent[0]; ++i) {
+          print = false;
+          if (ecni->array[i] != elemConn[i]) {
+            correct = false;
+            print = true;
+            fail_print = true;
+          }
+          if (print && verbosity >= 3)
+            std::cout << localPet << "# " << name  << " - "
+                      << "elem_conn[" << i << "] = "
+                      << ecni->array[i] << " (correct = " << elemConn[i] << ")"
+                      << std::endl;
         }
-        if (print && verbosity >= 3)
-          std::cout << localPet << "# " << name  << " - "
-                    << "elem_conn[" << i << "] = "
-                    << ecni->array[i] << " (correct = " << elemConn[i] << ")"
-                    << std::endl;
-      }
-      if (verbosity >= 1) {
-        if (!fail_print) std::cout<< pass << test << std::endl;
-        else std::cout << fail << test << std::endl;
-      }
-      if (verbosity >= 3) {
-        std::cout << "elem_conn = [";
-        for (int i=0; i<ecni->extent[0]; ++i)
-          std::cout << ecni->array[i] << " ";
-        std::cout << "]" << std::endl;
+        if (verbosity >= 1) {
+          if (!fail_print) std::cout<< pass << test << std::endl;
+          else std::cout << fail << test << std::endl;
+        }
+        if (verbosity >= 3) {
+          std::cout << "elem_conn = [";
+          for (int i=0; i<ecni->extent[0]; ++i)
+            std::cout << ecni->array[i] << " ";
+          std::cout << "]" << std::endl;
+        }
       }
 
       delete ecni;
