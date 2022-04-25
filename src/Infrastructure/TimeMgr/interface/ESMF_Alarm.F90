@@ -296,8 +296,8 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_AlarmCreate()
       function ESMF_AlarmCreateNew(clock, keywordEnforcer, &
-        ringTime, ringInterval, stopTime, ringDuration, ringTimeStepCount, &
-        refTime, enabled, sticky, name, rc)
+        ringTime, ringInterval, & 
+        enabled, sticky, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Alarm) :: ESMF_AlarmCreateNew
@@ -307,10 +307,6 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Time),         intent(in),  optional :: ringTime
       type(ESMF_TimeInterval), intent(in),  optional :: ringInterval
-      type(ESMF_Time),         intent(in),  optional :: stopTime
-      type(ESMF_TimeInterval), intent(in),  optional :: ringDuration
-      integer,                 intent(in),  optional :: ringTimeStepCount
-      type(ESMF_Time),         intent(in),  optional :: refTime
       logical,                 intent(in),  optional :: enabled
       logical,                 intent(in),  optional :: sticky
       character (len=*),       intent(in),  optional :: name
@@ -342,27 +338,6 @@
 !          {\tt ringTime} is not also specified (first ring time), it will be
 !          calculated as the {\tt clock}'s current time plus {\tt ringInterval}.
 !          Must specify at least one of ringTime or ringInterval.
-!     \item[{[stopTime]}]
-!          The stop time for repeating (interval) alarms.  If not
-!          specified, an interval alarm will repeat forever.
-!     \item[{[ringDuration]}]
-!          The absolute ring duration.  If not sticky (see argument below),
-!          alarms rings for ringDuration, then turns itself off.  Default is
-!          zero (unused).  Mutually exclusive with ringTimeStepCount (below);
-!          used only if set to a non-zero duration and ringTimeStepCount is 1
-!          (see below).
-!          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
-!     \item[{[ringTimeStepCount]}]
-!          The relative ring duration.  If not sticky (see argument below),
-!          alarms rings for ringTimeStepCount, then turns itself off.
-!          Default is 1: a non-sticky alarm will ring for one clock time step.
-!          Mutually exclusive with ringDuration (above); used if
-!          ringTimeStepCount > 1.  If ringTimeStepCount is 1 (default) and
-!          ringDuration is non-zero, ringDuration is used (see above), otherwise
-!          ringTimeStepCount is used.
-!          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
-!     \item[{[refTime]}]
-!          The reference (i.e. base) time for an interval alarm.
 !     \item[{[enabled]}]
 !          Sets the enabled state; default is on (true).  If disabled,
 !          an alarm will not function at all.
@@ -406,9 +381,6 @@
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ringTime,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ringInterval,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,stopTime,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ringDuration,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,refTime,rc)
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -417,8 +389,7 @@
 
       ! invoke C to C++ entry point to allocate and initialize new alarm
       call c_ESMC_AlarmCreateNew(ESMF_AlarmCreateNew, nameLen, name, clock, &
-                                 ringTime, ringInterval, stopTime, &
-                                 ringDuration, ringTimeStepCount, refTime, &
+                                 ringTime, ringInterval, &
                                  enabled, sticky, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -660,26 +631,16 @@
 
 ! !INTERFACE:
       subroutine ESMF_AlarmGet(alarm, keywordEnforcer, &
-        clock, ringTime, prevRingTime, ringInterval, stopTime, ringDuration, &
-        ringTimeStepCount, timeStepRingingCount, ringBegin, ringEnd, &
-        refTime, ringing, ringingOnPrevTimeStep, enabled, sticky, ringerIsOn, name, rc)
+        clock, ringTime, ringInterval, &
+        ringing, enabled, sticky, ringerIsOn, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(in)            :: alarm
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Clock),        intent(out), optional :: clock
       type(ESMF_Time),         intent(out), optional :: ringTime
-      type(ESMF_Time),         intent(out), optional :: prevRingTime
       type(ESMF_TimeInterval), intent(out), optional :: ringInterval
-      type(ESMF_Time),         intent(out), optional :: stopTime
-      type(ESMF_TimeInterval), intent(out), optional :: ringDuration
-      integer,                 intent(out), optional :: ringTimeStepCount
-      integer,                 intent(out), optional :: timeStepRingingCount
-      type(ESMF_Time),         intent(out), optional :: ringBegin
-      type(ESMF_Time),         intent(out), optional :: ringEnd
-      type(ESMF_Time),         intent(out), optional :: refTime
       logical,                 intent(out), optional :: ringing
-      logical,                 intent(out), optional :: ringingOnPrevTimeStep
       logical,                 intent(out), optional :: enabled
       logical,                 intent(out), optional :: sticky
       logical,                 intent(out), optional :: ringerIsOn
@@ -783,10 +744,8 @@
 
       ! invoke C to C++ entry point
       call c_ESMC_AlarmGet(alarm, nameLen, tempNameLen, tempName, clock, &
-                    ringTime, prevRingTime, ringInterval, stopTime, &
-                    ringDuration, ringTimeStepCount, &
-                    timeStepRingingCount, ringBegin, ringEnd, refTime, &
-                    ringing, ringingOnPrevTimeStep, enabled, sticky, ringerIsOn, localrc)
+                    ringTime, ringInterval, &
+                    ringing, enabled, sticky, ringerIsOn, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -799,13 +758,7 @@
       !  mark outputs as successfully initialized
       call ESMF_ClockSetInitCreated(clock)
       call ESMF_TimeInit(ringTime)
-      call ESMF_TimeInit(prevRingTime)
       call ESMF_TimeIntervalInit(ringInterval)
-      call ESMF_TimeInit(stopTime)
-      call ESMF_TimeIntervalInit(ringDuration)
-      call ESMF_TimeInit(ringBegin)
-      call ESMF_TimeInit(ringEnd)
-      call ESMF_TimeInit(refTime)
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1344,8 +1297,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
       subroutine ESMF_AlarmSet(alarm, keywordEnforcer, &
-        clock, ringTime, ringInterval, stopTime, ringDuration, &
-        ringTimeStepCount, refTime, ringing, enabled, sticky, name, rc)
+        clock, ringTime, ringInterval, &
+        ringing, enabled, sticky, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
@@ -1353,10 +1306,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Clock),        intent(in),  optional :: clock
       type(ESMF_Time),         intent(in),  optional :: ringTime
       type(ESMF_TimeInterval), intent(in),  optional :: ringInterval
-      type(ESMF_Time),         intent(in),  optional :: stopTime
-      type(ESMF_TimeInterval), intent(in),  optional :: ringDuration
-      integer,                 intent(in),  optional :: ringTimeStepCount
-      type(ESMF_Time),         intent(in),  optional :: refTime
       logical,                 intent(in),  optional :: ringing
       logical,                 intent(in),  optional :: enabled
       logical,                 intent(in),  optional :: sticky
@@ -1450,9 +1399,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ringTime,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ringInterval,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,stopTime,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ringDuration,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,refTime,rc)
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -1461,8 +1407,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! invoke C to C++ entry point
       call c_ESMC_AlarmSet(alarm, nameLen, name, clock, ringTime, &
-                           ringInterval, stopTime, ringDuration, &
-                           ringTimeStepCount, refTime, ringing, &
+                           ringInterval, ringing, &
                            enabled, sticky, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

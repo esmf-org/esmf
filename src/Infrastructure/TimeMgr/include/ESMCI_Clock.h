@@ -197,7 +197,7 @@ namespace ESMCI{
     int syncToRealTime(void); // TMG3.4.5
     // (see Time::SyncToRealTime()
 
-    // to suuport copying of the alarmList
+    // to support copying of the alarmList
     Clock& operator=(const Clock &);
 
     bool operator==(const Clock &) const;
@@ -241,8 +241,8 @@ namespace ESMCI{
     // friend to allocate and initialize alarm from heap
     //   (needs access to clock current time to initialize alarm ring time)
     friend Alarm *ESMCI_alarmCreate(int, const char*, Clock*, 
-                                 Time*, TimeInterval*, Time*, 
-                                 TimeInterval*, int*, Time*, bool*,
+                                 Time*, 
+                                 TimeInterval*, bool*,
                                  bool*, int*);
 
     // friend function to copy an alarm

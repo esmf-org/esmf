@@ -7,21 +7,11 @@ dynamically allocated automatically, 200 alarm references at a time.
 This constant is defined in both Fortran and C++ with a \#define for ease
 of modification.
 
-\item {\bf Sticky alarm end times in reverse}  For sticky alarms, there is
-an implicit limitation that in order to properly reverse timestep through a
-ring end time, that time must have already been traversed in the forward
-direction.  This is due to the fact that the Time Manager cannot predict
-when user code will call {\tt ESMF\_AlarmRingerOff()}.  An error message
-will be logged when this limitation is not satisfied.
+\item {\bf Alarm ringInterval } The alarm ring interval must be greater
+than or equal to clock time step. This is consistent with physical clock and
+alarm behavior.
 
-\item {\bf Sticky alarm ring interval in reverse}  
-\begin{sloppypar}
-For repeating sticky alarms,
-it is currently assumed that the ringInterval is constant, so that only the
-time of the last call to {\tt ESMF\_AlarmRingerOff()} is saved.  In
-{\tt ESMF\_DIRECTION\_REVERSE}, this information is used to turn sticky alarms
-back on.  In a future release, ringIntervals will be allowed to be variable,
-by saving alarm state at every timestep.
-\end{sloppypar}
+\item {\bf Alarm ring time} An alarm will only ring if its ring time matches
+exactly the clock's current time.
 
 \end{enumerate}

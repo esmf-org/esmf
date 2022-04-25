@@ -27,9 +27,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <iostream>
 
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Clock.h"
+#include "ESMCI_Util.h"
+#include "ESMCI_Macros.h"
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -64,13 +67,9 @@ int Alarm::count=0;
 // !ARGUMENTS:
       int                nameLen,           // in
       const char        *name,              // in
-      Clock        *clock,             // in
-      Time         *ringTime,          // in
-      TimeInterval *ringInterval,      // in
-      Time         *stopTime,          // in
-      TimeInterval *ringDuration,      // in
-      int               *ringTimeStepCount, // in
-      Time         *refTime,           // in
+      Clock             *clock,             // in
+      Time              *ringTime,          // in
+      TimeInterval      *ringInterval,      // in
       bool              *enabled,           // in
       bool              *sticky,            // in
       int               *rc ) {             // out - return code
@@ -133,6 +132,34 @@ int Alarm::count=0;
       alarm->ringTime = alarm->prevRingTime = alarm->firstRingTime = *ringTime;
     }
     if (ringInterval != ESMC_NULL_POINTER) {
+      TimeInterval zeroTimeInterval(0,0,1,0,0,0);
+      if(*ringInterval < zeroTimeInterval){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "; Cannot set negative ringInterval", ESMC_CONTEXT, rc);
+        return 0;
+      }
+
+      if(*ringInterval < clock->timeStep) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "; alarm Interval cannot be less than clock interval", ESMC_CONTEXT, rc);
+        return 0;
+      }
+
+      if( ( *ringInterval == clock->timeStep) ){
+        int n = (*ringTime - clock->currTime)/(*ringInterval);
+        //std::cout << n << std::endl;
+        //ringTime->print(); 
+        //clock->currTime.print(); 
+        //ringInterval->print();
+        if(*ringTime != (clock->currTime + n*(*ringInterval)) ){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "; alarm Interval is the same as clock interval, ringTime cannot be misaligned with clock time, alarm will never ring", ESMC_CONTEXT, rc);
+          return 0;
+        }
+      }
+
+      // We do not check LCM because any two rational numbers are guranteed to have
+      // LCM albeit it may be very large.
       alarm->ringInterval = *ringInterval;
 
       // if ringTime not specified, calculate
@@ -143,31 +170,20 @@ int Alarm::count=0;
       
       if (ringTime == ESMC_NULL_POINTER) {
         // works for positive or negative ringInterval
-        alarm->ringTime = clock->currTime + alarm->ringInterval;
+        if(clock->direction == ESMF_DIRECTION_FORWARD)
+          alarm->ringTime = clock->currTime + alarm->ringInterval;
+        else
+          alarm->ringTime = clock->currTime - alarm->ringInterval;
         alarm->prevRingTime = alarm->firstRingTime = alarm->ringTime;
       }
     }else{
-      alarm->ringInterval = clock->timeStep;
+      // A negative ringInterval indicates a one shot alarm at ringTime only
+      TimeInterval zeroTimeInterval(0,0,1,0,0,0);
+      if(clock->timeStep < zeroTimeInterval)
+        alarm->ringInterval = clock->timeStep;
+      alarm->ringInterval = -clock->timeStep;
     }
  
-    if (stopTime != ESMC_NULL_POINTER) {
-      alarm->stopTime = *stopTime;
-    }
-    if (ringDuration != ESMC_NULL_POINTER) {
-      ESMC_LogDefault.Write("ringDuration is no longer supported. Please contact ESMF support.", 
-        ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      alarm->ringDuration = *ringDuration;
-    }
-    if (ringTimeStepCount != ESMC_NULL_POINTER) {
-      alarm->ringTimeStepCount = *ringTimeStepCount;
-    }
-    if (refTime != ESMC_NULL_POINTER) {
-      alarm->refTime = *refTime;
-      // TODO:  for ringInterval, calculate 1st ringTime > clock->currTime,
-      //        (&& > ringTime, if specified), using refTime as the base.
-    } else {
-      // TODO:  default to clock's current time (or ringTime, if specified?)
-    }
     if (enabled != ESMC_NULL_POINTER) {
       alarm->enabled = *enabled;
     }
@@ -197,6 +213,26 @@ int Alarm::count=0;
       ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc);
     }
+//    std::vector<Alarm>::iterator it = alarms.begin();
+//    while (it++ != alarms.end()){
+//      *it = *this;
+//    }
+
+//    for (auto it = begin (alarms); it != end (alarms); ++it) {
+//      *it = *this;
+//    }
+    for (int i = 0; i < SAVESIZE; i ++){
+      alarm->alarms.push_back(*alarm);
+      alarm->clocks.push_back(*clock);
+    }
+    
+    //for (Alarm a : alarms) {
+    //  a = *this;
+    //}
+    //for (Clock c : clocks) {
+    //  c = this->clock;
+    //}
+     
  
     return(alarm);
 
@@ -323,13 +359,9 @@ int Alarm::count=0;
 // !ARGUMENTS:
       int                nameLen,           // in
       const char        *name,              // in
-      Clock       **clock,             // in
-      Time         *ringTime,          // in
-      TimeInterval *ringInterval,      // in
-      Time         *stopTime,          // in
-      TimeInterval *ringDuration,      // in
-      int               *ringTimeStepCount, // in
-      Time         *refTime,           // in
+      Clock            **clock,             // in
+      Time              *ringTime,          // in
+      TimeInterval      *ringInterval,      // in
       bool              *ringing,           // in
       bool              *enabled,           // in
       bool              *sticky) {          // in
@@ -398,22 +430,16 @@ int Alarm::count=0;
       }
     }
     if (ringInterval != ESMC_NULL_POINTER) {
+      TimeInterval zeroTimeInterval(0,0,1,0,0,0);
+      if(*ringInterval < zeroTimeInterval){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "; Cannot set negative ringInterval", ESMC_CONTEXT, &rc);
+        return 0;
+      }
       if (this->ringInterval != *ringInterval) {
         this->ringInterval = *ringInterval;
         this->userChangedRingInterval = true;
       }
-    }
-    if (stopTime != ESMC_NULL_POINTER) {
-      this->stopTime = *stopTime;
-    }
-    if (ringDuration != ESMC_NULL_POINTER) {
-      this->ringDuration = *ringDuration;
-    }
-    if (ringTimeStepCount != ESMC_NULL_POINTER) {
-      this->ringTimeStepCount = *ringTimeStepCount;
-    }
-    if (refTime != ESMC_NULL_POINTER) {
-      this->refTime = *refTime;
     }
     if (ringing != ESMC_NULL_POINTER) {
       this->ringing = *ringing;
@@ -425,7 +451,8 @@ int Alarm::count=0;
       this->sticky = *sticky;
       if(*sticky) enableSticky();
     }
-     
+    
+    // Looks like this implementation is not complete.
     // TODO:  invoke private method, shared with ESMCI_alarmCreate(), to
     //        calculate next ringTime for interval alarms, given ringInterval
     //        and none, one or both of refTime and ringTime.  Will replace
@@ -467,17 +494,8 @@ void Alarm::enableSticky(void){
       char              *tempName,               // out
       Clock       **clock,                  // out
       Time         *ringTime,               // out
-      Time         *prevRingTime,           // out
       TimeInterval *ringInterval,           // out
-      Time         *stopTime,               // out
-      TimeInterval *ringDuration,           // out
-      int               *ringTimeStepCount,      // out
-      int               *timeStepRingingCount,   // out
-      Time         *ringBegin,              // out
-      Time         *ringEnd,                // out
-      Time         *refTime,                // out
       bool              *ringing,                // out
-      bool              *ringingOnPrevTimeStep,  // out
       bool              *enabled,                // out
       bool              *sticky,                 // out
       bool              *ringerIsOn) {           // out
@@ -527,38 +545,11 @@ void Alarm::enableSticky(void){
     if (ringTime != ESMC_NULL_POINTER) {
       *ringTime = this->ringTime;
     }
-    if (prevRingTime != ESMC_NULL_POINTER) {
-      *prevRingTime = this->prevRingTime;
-    }
     if (ringInterval != ESMC_NULL_POINTER) {
       *ringInterval = this->ringInterval;
     }
-    if (stopTime != ESMC_NULL_POINTER) {
-      *stopTime = this->stopTime;
-    }
-    if (ringDuration != ESMC_NULL_POINTER) {
-      *ringDuration = this->ringDuration;
-    }
-    if (ringTimeStepCount != ESMC_NULL_POINTER) {
-      *ringTimeStepCount = this->ringTimeStepCount;
-    }
-    if (timeStepRingingCount != ESMC_NULL_POINTER) {
-      *timeStepRingingCount = this->timeStepRingingCount;
-    }
-    if (ringBegin != ESMC_NULL_POINTER) {
-      *ringBegin = this->ringBegin;
-    }
-    if (ringEnd != ESMC_NULL_POINTER) {
-      *ringEnd = this->ringEnd;
-    }
-    if (refTime != ESMC_NULL_POINTER) {
-      *refTime = this->refTime;
-    }
     if (ringing != ESMC_NULL_POINTER) {
       *ringing = this->ringing;
-    }
-    if (ringingOnPrevTimeStep != ESMC_NULL_POINTER) {
-      *ringingOnPrevTimeStep = this->ringingOnPrevTimeStep;
     }
     if (enabled != ESMC_NULL_POINTER) {
       *enabled = this->enabled;
@@ -900,9 +891,7 @@ void Alarm::enableSticky(void){
 
     // get clock's next time
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
-    Time clockNextTime;
-    clock->Clock::getNextTime(&clockNextTime, timeStep);
-    return canRingAtTime(clockNextTime);
+    return canRingAtNextTime(*clock, timeStep);
 
  } // end Alarm::willRingNext
 
@@ -947,8 +936,9 @@ void Alarm::enableSticky(void){
 
     // get clock's prev time
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
-    Time clockTime = clock->currTime - clock->timeStep;
-    return canRingAtTime(clockTime);
+    // Time clockTime = clock->currTime - clock->timeStep;
+    // return canRingAtTime(clockTime);
+    return ringingOnPrevTimeStep;
 
  } // end Alarm::wasPrevRinging
 
@@ -1087,10 +1077,48 @@ void Alarm::enableSticky(void){
  } // end Alarm::isSticky
 
 #define DEBUG 1
-bool Alarm::canRingAtTime(const Time & clockTime) const{
+bool Alarm::canRingAtTime(const Clock & clock) {
     bool retval = false;
 
+    // If clock's current time is ahead of alarm->ringTime, adjust alarm->ringTime until
+    // either ringTime equals clockTime or ringTime is greater than clockTime when
+    // clock runs forward; Or ringTime is less than clockTime when clock runs reverse.
+
+    // Note ringInterval > 0 is a magnitude
+    Time clockTime = clock.currTime;
+
+    // One shot alarm that can only ring at ringTime
+    TimeInterval zeroTimeInterval(0,0,1,0,0,0);
+    if( this->ringInterval < zeroTimeInterval){
+      if(this->ringTime == clockTime )
+        return true;
+      else
+        return false;
+    }
+
+    if(clock.direction == ESMF_DIRECTION_FORWARD) {
+      while (this->ringTime < clockTime){
+        this->ringTime = this->ringTime + this->ringInterval;
+      }
+    }else if(clock.direction == ESMF_DIRECTION_REVERSE){
+      while (this->ringTime > clockTime){
+        this->ringTime = this->ringTime - this->ringInterval;
+      }
+    }
+
     if(this->ringTime  == clockTime) 
+      retval = true;
+
+    return retval;
+}
+
+bool Alarm::canRingAtNextTime(Clock & clock, TimeInterval * timeStep) const {
+    bool retval = false;
+
+    Time clockNextTime;
+    clock.Clock::getNextTime(&clockNextTime, timeStep);
+
+    if(this->ringTime  == clockNextTime) 
       retval = true;
 
     return retval;
@@ -1136,8 +1164,7 @@ bool Alarm::canRingAtTime(const Time & clockTime) const{
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       return(false);
     }
-    Time clockTime = clock->currTime;
-    bool canRing = canRingAtTime( clockTime); // Check if the alarm can ring when time matches.
+    bool canRing = canRingAtTime(*clock); // Check if the alarm can ring when time matches.
 
     if(sticky) {
 
@@ -1146,14 +1173,17 @@ bool Alarm::canRingAtTime(const Time & clockTime) const{
        * 2) it didn't ring but now it's the time to ring
        */
       if(ringing || canRing){ // Set ringing true either because it's a sticky ringing alarm or time matches.
+        ringingOnPrevTimeStep = ringing;
         ringing = true;
         if (canRing) updateRingTime(rc); // If the alarm's time match clock time, advance ringTime
+        if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
         return (ringing && enabled);
       }
     }
 
     // Non-sticky one shot alarms, time must match
     if (canRing){
+      ringingOnPrevTimeStep = ringing;
       ringing = true;
       updateRingTime(rc); // If the alarm's time match clock time, advance ringTime
     }else{
@@ -1190,8 +1220,28 @@ bool Alarm::canRingAtTime(const Time & clockTime) const{
 
   if(ringing){
     prevRingTime = ringTime;
-    ringTime = ringTime + ringInterval;
+
+    //if(clock->direction == ESMF_DIRECTION_FORWARD)
+    //  ringTime = ringTime + ringInterval;
+    //else
+    //  ringTime = ringTime - ringInterval;
   }
+}
+
+void Alarm::clockChangeDirection(const ESMC_Direction & old_direction, 
+                                 const ESMC_Direction & new_direction, 
+                                 int * rc) {
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::Alarm::clockChangeDirection()"
+
+  // If the direction didn't change, do nothing
+  if(old_direction == new_direction ) return;
+
+  if(old_direction == ESMF_DIRECTION_FORWARD) 
+    ringTime = ringTime - ringInterval; // ringTime goes backward by 1 interval
+  else
+    ringTime = ringTime + ringInterval; // ringTime goes forward by 1 interval
 }
 
 //-------------------------------------------------------------------------
@@ -1493,14 +1543,6 @@ bool Alarm::canRingAtTime(const Time & clockTime) const{
           prevRingTime.Time::print();
         }
       }
-      else if (strncmp(opts, "stoptime", 8) == 0) {
-        printf("stopTime = \n");
-        if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          stopTime.Time::print("string");
-        } else {
-          stopTime.Time::print();
-        }
-      }
       else if (strncmp(opts, "ringbegin", 9) == 0) {
         printf("ringBegin = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
@@ -1516,17 +1558,6 @@ bool Alarm::canRingAtTime(const Time & clockTime) const{
         } else {
           ringEnd.Time::print();
         }
-      }
-      else if (strncmp(opts, "reftime", 7) == 0) {
-        printf("refTime = \n");
-        if (strstr(opts, "string") != ESMC_NULL_POINTER) {
-          refTime.Time::print("string");
-        } else {
-          refTime.Time::print();
-        }
-      }
-      else if (strncmp(opts, "timestepringingcount", 20) == 0) {
-        printf("timeStepRingingCount = %d\n", timeStepRingingCount);
       }
       else if (strncmp(opts, "ringingonprevtimestep", 21) == 0) {
         printf("ringingOnPrevTimeStep = %s\n",
@@ -1549,14 +1580,11 @@ bool Alarm::canRingAtTime(const Time & clockTime) const{
 
       printf("name = %s\n", name);
       printf("ringInterval = \n"); ringInterval.TimeInterval::print(options);
-      printf("ringDuration = \n"); ringDuration.TimeInterval::print(options);
       printf("ringTime = \n");      ringTime.Time::print(options);
       printf("firstRingTime = \n"); firstRingTime.Time::print(options);
       printf("prevRingTime = \n");  prevRingTime.Time::print(options);
-      printf("stopTime = \n");      stopTime.Time::print(options);
       printf("ringBegin = \n");     ringBegin.Time::print(options);
       printf("ringEnd = \n");       ringEnd.Time::print(options);
-      printf("refTime = \n");       refTime.Time::print(options);
       printf("ringTimeStepCount = %d\n",    ringTimeStepCount);
       printf("timeStepRingingCount = %d\n", timeStepRingingCount);
       printf("ringing = %s\n", ringing ? "true" : "false");

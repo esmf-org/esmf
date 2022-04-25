@@ -2117,12 +2117,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_TimeGet(Time, yy=yy, mm=mm, dd=dd, d=d, h=h, m=m, s=s, rc=rc)
+    call ESMF_TimeGet(Time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(lpet == 0) then
-      write(*, '(A, A, 3I4, I10, 3I4)') 'Time Debug Printout: ', name, yy, mm, dd, d, h, m, s
+      write(*, '(A, A, 6I4)') 'Time Debug Printout: ', name, yy, mm, dd, h, m, s
     endif
 
   end subroutine ESMF_TimeDebug
@@ -2136,9 +2136,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     type (ESMF_VM)         :: vm
     integer                :: lpet, npet
-    logical                :: ringing, enabled, sticky, ringingOnPrevTimeStep, ringerIsOn
-    type (ESMF_Time)       :: ringTime, refTime, prevRingTime, stopTime, ringBegin, ringEnd, ringRef
-    type (ESMF_TimeInterval) :: ringInterval, ringDuration
+    logical                :: ringing, enabled, sticky, ringerIsOn
+    type (ESMF_Time)       :: ringTime
+    type (ESMF_TimeInterval) :: ringInterval
 
     rc = ESMF_SUCCESS
 
@@ -2156,26 +2156,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ringerIsOn = .false.
 
     call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, ringerIsOn=ringerIsOn, &
-      ringTime=ringTime, refTime=refTime, stopTime=stopTime, ringBegin=ringBegin, ringEnd=ringEnd, &
-      ringInterval=ringInterval, ringDuration=ringDuration, rc=rc)
+      ringTime=ringTime, ringInterval=ringInterval, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(lpet == 0) then
       write(*, '(A,A)') 'Alarm Debug Printout: ', name
-      print *, ''
       print *, 'ringing = ', ringing
       print *, 'enabled = ', enabled
       print *, 'sticky = ' , sticky
       print *, 'ringerIsOn = ' , ringerIsOn
-      call ESMF_TimeDebug(ringTime, 'ringTime', rc=rc)
-      call ESMF_TimeDebug(refTime, 'refTime', rc=rc)
-      !call ESMF_TimeDebug(stopTime, 'stopTime', rc=rc)
-      !call ESMF_TimeDebug(ringBegin, 'ringBegin', rc=rc)
-      !call ESMF_TimeDebug(ringEnd, 'ringEnd', rc=rc)
+      call ESMF_TimeDebug(ringTime, ' ringTime = ', rc=rc)
       call ESMF_TimeIntervalDebug(ringInterval, 'ringInterval', rc=rc)
-      call ESMF_TimeIntervalDebug(ringDuration, 'ringDuration', rc=rc)
-
+      print *, ''
     endif
   end subroutine ESMF_AlarmDebug
 
@@ -2206,9 +2199,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if(lpet == 0) then
     write(*, '(A, A)') 'Clock Debug Printout: ', name
-    write(*, *) ''
     write(*, *) 'AlarmCount = ', alarmCount
-    call ESMF_TimeDebug(currTime, 'currTime', rc=rc)
+    call ESMF_TimeDebug(currTime, ' currTime = ', rc=rc)
+    write(*, *) ''
   endif
 end subroutine ESMF_ClockDebug
 

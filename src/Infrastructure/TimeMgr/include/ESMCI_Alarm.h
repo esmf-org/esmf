@@ -28,6 +28,7 @@
 #include "ESMCI_Util.h"
 #include "ESMCI_Macros.h"
 #include "ESMF_TimeMgr.inc"
+#include <vector>
 
 //-------------------------------------------------------------------------
 //BOP
@@ -165,35 +166,22 @@ class Alarm {
 
     // accessor methods
 
-               int    set(int                nameLen,
+               int    set(int            nameLen,
                       const char        *name=0,
-                      Clock       **clock=0,
-                      Time         *ringTime=0,
-                      TimeInterval *ringInterval=0,
-                      Time         *stopTime=0,
-                      TimeInterval *ringDuration=0,
-                      int               *ringTimeStepCount=0,
-                      Time         *refTime=0,
+                      Clock            **clock=0,
+                      Time              *ringTime=0,
+                      TimeInterval      *ringInterval=0,
                       bool              *ringing=0,
                       bool              *enabled=0,  // (TMG 4.1, 4.7)
                       bool              *sticky=0);
 
-              int     get(int                nameLen,
+              int     get(int            nameLen,
                       int               *tempNameLen,
                       char              *tempName=0,
-                      Clock       **clock=0,
-                      Time         *ringTime=0,
-                      Time         *prevRingTime=0,
-                      TimeInterval *ringInterval=0,
-                      Time         *stopTime=0,
-                      TimeInterval *ringDuration=0,
-                      int               *ringTimeStepCount=0,
-                      int               *timeStepRingingCount=0,
-                      Time         *ringBegin=0,
-                      Time         *ringEnd=0,
-                      Time         *refTime=0,
+                      Clock            **clock=0,
+                      Time              *ringTime=0,
+                      TimeInterval      *ringInterval=0,
                       bool              *ringing=0,
-                      bool              *ringingOnPrevTimeStep=0,
                       bool              *enabled=0,  // (TMG 4.1, 4.7)
                       bool              *sticky=0, 
                       bool              *ringerIsOn=0);
@@ -221,6 +209,7 @@ class Alarm {
                          //   negative direction
                          // Can be basis for asynchronous alarm reporting
               void     updateRingTime(int *rc=0);
+              void     clockChangeDirection(const ESMC_Direction & old_direction, const ESMC_Direction & new_direction, int *rc=0);
 
     bool operator==(const Alarm &) const; 
     bool operator!=(const Alarm &) const; 
@@ -249,8 +238,7 @@ class Alarm {
 
     // friend to allocate and initialize alarm from heap
     friend Alarm *ESMCI_alarmCreate(int, const char*, Clock*, 
-                                 Time*, TimeInterval*, Time*, 
-                                 TimeInterval*, int*, Time*, bool*,
+                                 Time*, TimeInterval*, bool*,
                                  bool*, int*);
 
     // friend function to copy an alarm
@@ -278,16 +266,25 @@ class Alarm {
     // enable Sticky
     void enableSticky(void);
 
-    bool canRingAtTime(const Time & clockTime) const;
+    bool canRingAtTime(const Clock & clock) ;
+    bool canRingAtNextTime(Clock & clock, TimeInterval *timeStep) const;
 
     // friend class alarm
     friend class Clock;
 
+  // Keep track of 2 states for ringing calculation
+  // 0: saved current, 1: previous, 2, previous-previous ....
+  // saved current becomes previous, current becomes saved current as state evolves.
+  // It's possible to have more saved previous states
+  std::vector<Alarm> alarms;
+  std::vector<Clock> clocks;
 //
 //EOP
 //-------------------------------------------------------------------------
 
 };  // end class Alarm
+  const int SAVEDCURRENT=0;
+  const int SAVESIZE=2;
 
     // Note: though seemingly redundant with the friend declarations within
     // the class definition above, the following declarations are necessary
@@ -296,13 +293,9 @@ class Alarm {
 
     Alarm *ESMCI_alarmCreate(int nameLen,
                                  const char*        name=0,
-                                 Clock*        clock=0, 
-                                 Time*         ringTime=0,
-                                 TimeInterval* ringInterval=0,
-                                 Time*         stopTime=0, 
-                                 TimeInterval* ringDuration=0,
-                                 int*               ringTimeStepCount=0,
-                                 Time*         refTime=0,
+                                 Clock*             clock=0, 
+                                 Time*              ringTime=0,
+                                 TimeInterval*      ringInterval=0,
                                  bool*              enabled=0,
                                  bool*              sticky=0,
                                  int*               rc=0);

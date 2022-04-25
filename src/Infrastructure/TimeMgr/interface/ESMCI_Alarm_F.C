@@ -41,8 +41,6 @@ extern "C" {
        void FTN_X(c_esmc_alarmcreatenew)(Alarm **ptr, int *nameLen,
                 const char *name, Clock **clock,
                 Time *ringTime, TimeInterval *ringInterval,
-                Time *stopTime, TimeInterval *ringDuration,
-                int *ringTimeStepCount, Time *refTime,
                 bool *enabled, bool *sticky, int *status,
                 ESMCI_FortranStrLenArg name_l) {
           *ptr = ESMCI_alarmCreate(
@@ -52,10 +50,6 @@ extern "C" {
                                            *clock,    // required.
                     ESMC_NOT_PRESENT_FILTER(ringTime),
                     ESMC_NOT_PRESENT_FILTER(ringInterval),
-                    ESMC_NOT_PRESENT_FILTER(stopTime),
-                    ESMC_NOT_PRESENT_FILTER(ringDuration),
-                    ESMC_NOT_PRESENT_FILTER(ringTimeStepCount),
-                    ESMC_NOT_PRESENT_FILTER(refTime),
                     ESMC_NOT_PRESENT_FILTER(enabled),
                     ESMC_NOT_PRESENT_FILTER(sticky),
                     ESMC_NOT_PRESENT_FILTER(status) );
@@ -77,8 +71,6 @@ extern "C" {
        void FTN_X(c_esmc_alarmset)(Alarm **ptr, int *nameLen,
                                  const char *name, Clock **clock,
                 Time *ringTime, TimeInterval *ringInterval,
-                Time *stopTime, TimeInterval *ringDuration,
-                int *ringTimeStepCount, Time *refTime,
                 bool *ringing, bool *enabled, bool *sticky,
                 int *status,
                 ESMCI_FortranStrLenArg name_l) {
@@ -90,28 +82,33 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(clock),
                     ESMC_NOT_PRESENT_FILTER(ringTime),
                     ESMC_NOT_PRESENT_FILTER(ringInterval),
-                    ESMC_NOT_PRESENT_FILTER(stopTime),
-                    ESMC_NOT_PRESENT_FILTER(ringDuration),
-                    ESMC_NOT_PRESENT_FILTER(ringTimeStepCount),
-                    ESMC_NOT_PRESENT_FILTER(refTime),
                     ESMC_NOT_PRESENT_FILTER(ringing),
                     ESMC_NOT_PRESENT_FILTER(enabled),
                     ESMC_NOT_PRESENT_FILTER(sticky) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
+              int     get(int            nameLen,
+                      int               *tempNameLen,
+                      char              *tempName=0,
+                      Clock            **clock=0,
+                      Time              *ringTime=0,
+                      TimeInterval      *ringInterval=0,
+                      bool              *ringing=0,
+                      bool              *enabled=0,  // (TMG 4.1, 4.7)
+                      bool              *sticky=0, 
+                      bool              *ringerIsOn=0);
        void FTN_X(c_esmc_alarmget)(Alarm **ptr, int *nameLen,
                                  int *tempNameLen, char *tempName,
                                  Clock **clock,
-                Time *ringTime, Time *prevRingTime,
-                TimeInterval *ringInterval, Time *stopTime,
-                TimeInterval *ringDuration, int *ringTimeStepCount,
-                int *timeStepRingingCount, Time *ringBegin,
-                Time *ringEnd, Time *refTime, bool *ringing,
-                bool *ringingOnPrevTimeStep, bool *enabled, bool *sticky, bool *ringerIsOn, 
+                Time *ringTime, 
+                TimeInterval *ringInterval,
+                bool *ringing,
+                bool *enabled, bool *sticky, bool *ringerIsOn, 
                 int *status,
                 ESMCI_FortranStrLenArg tempName_l) {
           ESMF_CHECK_POINTER(*ptr, status)
+          //if(sticky != 0) printf("ptr address %x => %d \n", sticky, (int)*sticky);
           int rc = (*ptr)->Alarm::get(
                                          // always presnet internal arguments
                                            *nameLen,
@@ -119,20 +116,29 @@ extern "C" {
                                             tempName,
                     ESMC_NOT_PRESENT_FILTER(clock),
                     ESMC_NOT_PRESENT_FILTER(ringTime),
-                    ESMC_NOT_PRESENT_FILTER(prevRingTime),
                     ESMC_NOT_PRESENT_FILTER(ringInterval),
-                    ESMC_NOT_PRESENT_FILTER(stopTime),
-                    ESMC_NOT_PRESENT_FILTER(ringDuration),
-                    ESMC_NOT_PRESENT_FILTER(ringTimeStepCount),
-                    ESMC_NOT_PRESENT_FILTER(timeStepRingingCount),
-                    ESMC_NOT_PRESENT_FILTER(ringBegin),
-                    ESMC_NOT_PRESENT_FILTER(ringEnd),
-                    ESMC_NOT_PRESENT_FILTER(refTime),
                     ESMC_NOT_PRESENT_FILTER(ringing),
-                    ESMC_NOT_PRESENT_FILTER(ringingOnPrevTimeStep),
                     ESMC_NOT_PRESENT_FILTER(enabled),
                     ESMC_NOT_PRESENT_FILTER(sticky),
                     ESMC_NOT_PRESENT_FILTER(ringerIsOn) );
+          if(sticky != 0) {
+            if(*sticky) *(int *)sticky = 1;
+            else *(int *)sticky = 0;
+            //printf("ptr address %x => %d \n", sticky, *(int *)sticky);
+          }
+          if(ringing != 0) {
+            if(*ringing) *(int *)ringing = 1;
+            else *(int *)ringing = 0;
+            //printf("ptr address %x => %d \n", ringing, *(int *)ringing);
+          }
+          if(enabled != 0) {
+            if(*enabled) *(int *)enabled = 1;
+            else *(int *)enabled = 0;
+          }
+          if(ringerIsOn != 0) {
+            if(*ringerIsOn) *(int *)ringerIsOn = 1;
+            else *(int *)ringerIsOn = 0;
+          }
           if (ESMC_PRESENT(status)) *status = rc;
        }
 

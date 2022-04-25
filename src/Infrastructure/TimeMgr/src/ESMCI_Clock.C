@@ -365,6 +365,12 @@ int Clock::count=0;
     if (advanceCount != ESMC_NULL_POINTER) this->advanceCount = *advanceCount;
 
     if (direction != ESMC_NULL_POINTER) {
+      // traverse alarm list (i) to update ringTime
+      for(int i=0; i<alarmCount; i++) {
+        // if clock changes direction, alarms need to adjust ringTime
+        alarmList[i]->Alarm::clockChangeDirection(this->direction, *direction, &rc);
+      }
+      
       this->direction = *direction;
       this->userChangedDirection = true;
     }

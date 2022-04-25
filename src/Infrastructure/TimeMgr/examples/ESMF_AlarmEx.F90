@@ -31,22 +31,23 @@
       implicit none
 
       ! instantiate time_step, start, stop, and alarm times
-      type(ESMF_TimeInterval) :: timeStep, alarmInterval
-      type(ESMF_Time) :: alarmTime, startTime, stopTime
+      type(ESMF_TimeInterval) :: timeStep, alarmInterval, ringTimeInterval
+      type(ESMF_Time) :: alarmTime, startTime, stopTime, ringTime
+      logical           :: ringing, enabled, sticky
 
       ! instantiate a clock 
       type(ESMF_Clock) :: clock
 
       ! instantiate Alarm lists
       integer, parameter :: NUMALARMS = 2
-      type(ESMF_Alarm) :: alarm(NUMALARMS)
+      type(ESMF_Alarm) :: alarms(NUMALARMS), alarm
 
       ! local variables for Get methods
       integer :: ringingAlarmCount  ! at any time step (0 to NUMALARMS)
 
       ! name, loop counter, result code
       character (len=ESMF_MAXSTR) :: name
-      integer :: i, rc, result
+      integer :: i, n, nrings, rc, result, status
 !EOC
 
       ! result code
@@ -127,7 +128,7 @@
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
-      alarm(1) = ESMF_AlarmCreate(clock, &
+      alarms(1) = ESMF_AlarmCreate(clock, &
          ringTime=alarmTime, name="Example alarm 1", rc=rc)
 !EOC
 
@@ -149,7 +150,7 @@
 
 !BOC
       ! Alarm gets default name "Alarm002"
-      alarm(2) = ESMF_AlarmCreate(clock=clock, ringTime=alarmTime, &
+      alarms(2) = ESMF_AlarmCreate(clock=clock, ringTime=alarmTime, &
                                   ringInterval=alarmInterval, rc=rc)
 !EOC
 
@@ -189,13 +190,13 @@
           print *, "number of ringing alarms = ", ringingAlarmCount
 
           do i = 1, NUMALARMS
-            if (ESMF_AlarmIsRinging(alarm(i), rc=rc)) then
+            if (ESMF_AlarmIsRinging(alarms(i), rc=rc)) then
 !EOC
 
               if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC 
-              call ESMF_AlarmGet(alarm(i), name=name, rc=rc)
+              call ESMF_AlarmGet(alarms(i), name=name, rc=rc)
               print *, trim(name), " is ringing!"
 !EOC
 
@@ -203,7 +204,7 @@
 
 !BOC
               ! after processing alarm, turn it off
-              call ESMF_AlarmRingerOff(alarm(i), rc=rc)
+              call ESMF_AlarmRingerOff(alarms(i), rc=rc)
 !EOC
 
               if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -215,6 +216,7 @@
       end do ! timestep clock
 !EOC
 
+!------------------------------------------------------------------------------
 !BOE
 !\subsubsection{Alarm and Clock destruction}
 
@@ -222,13 +224,13 @@
 !EOE
 
 !BOC 
-      call ESMF_AlarmDestroy(alarm(1), rc=rc)
+      call ESMF_AlarmDestroy(alarms(1), rc=rc)
 !EOC
 
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC 
-      call ESMF_AlarmDestroy(alarm(2), rc=rc)
+      call ESMF_AlarmDestroy(alarms(2), rc=rc)
 !EOC
 
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -238,6 +240,505 @@
 !EOC
 
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!BOE
+!\subsubsection{One shot Alarm}
+
+! This example shows how to set up an one shot alarm that will ring exactly at
+! the ringtime specified during alarmCreate but not at any other time.
+! 
+! To specify such an alarm, do not use the ringInterval argument during AlarmCreate.
+!EOE
+!BOE
+
+! A clock is set up to run from 0h0m0s to 1h0m0s; One shot ring time is set to 0h30m0s.
+
+!EOE
+!BOC
+    call ESMF_TimeSet(startTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeSet(stopTime,yy=1,mm=1,dd=1,h=1,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeSet(ringTime,yy=1,mm=1,dd=1,h=0,m=30,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!BOE
+
+! The clock advances by 10 minutes.
+
+!EOE
+!BOC
+    call ESMF_TimeIntervalSet(timeStep,S=600, sN=0, sD=1,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+    nrings = 0
+!BOE
+
+! Create the clock from the specified start time, stop time and time step. 
+
+!EOE
+!BOC
+    clock = ESMF_ClockCreate(timeStep=timeStep,startTime=startTime,stopTime=stopTime,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Create the alarm from the specified ring time (0h0m0s) only. This is how one shot alarm
+! is created.
+! This alarm is enabled upon creation and non sticky.
+
+!EOE
+!BOC
+    alarm = ESMF_AlarmCreate(clock, ringTime=ringTime, enabled=.true., sticky=.false., name='alarm', rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!BOE
+
+! Query the alarm to check if it's ringing, enabled and sticky. In this case, we expect
+! the alarm to return ringing=true, enabled=true, sticky=false.
+
+!EOE
+!BOC
+    call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+    !print *, 'Ex: ringing = ', ringing
+!BOE
+
+! Advance the clock 6 times to move from 0h0m0s to 1h0m0s.
+
+!EOE
+!BOC
+    do n = 1, 6
+      call ESMF_ClockAdvance(clock,rc=status)
+!EOC
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Query the alarm to check if it's ringing, enabled and sticky. In this case, we expect
+! the alarm only return ringing=true at 0h 30m 0s.
+
+!EOE
+!BOC
+      call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+!EOC
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+      !print *, '  Ex: ringing = ', ringing
+    enddo
+
+!BOE
+
+! Destroy the alarm and clock created for this example.
+
+!EOE
+!BOC
+    call ESMF_AlarmDestroy(alarm, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_ClockDestroy(clock, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOE
+!\subsubsection{Using Alarm in clock running forward}
+
+! This example shows how to set up an alarm in conjuction with a reverse
+! running clock.
+!EOE
+!BOE
+
+! A clock is set up to run from 0h0m0s to 1h0m0s; Initial ring time is set to 0h0m0s.
+
+!EOE
+!BOC
+    call ESMF_TimeSet(startTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeSet(stopTime,yy=1,mm=1,dd=1,h=1,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeSet(ringTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!BOE
+
+! The clock advances by 10 minutes and the alarm rings every 10 minutes as well.
+
+!EOE
+!BOC
+    call ESMF_TimeIntervalSet(timeStep,S=600, sN=0, sD=1,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeIntervalSet(ringTimeInterval,S=600, sN=0, sD=1,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+    nrings = 0
+!BOE
+
+! Create the clock from the specified start time, stop time and time step. 
+
+!EOE
+!BOC
+    clock = ESMF_ClockCreate(timeStep=timeStep,startTime=startTime,stopTime=stopTime,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Create the alarm from the specified ring time (0h0m0s), ring interval (10 minutes). 
+! This alarm is enabled upon creation and non sticky.
+
+!EOE
+!BOC
+    alarm = ESMF_AlarmCreate(clock, ringTime=ringTime, ringInterval=ringTimeInterval, enabled=.true., sticky=.false., name='alarm', rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!BOE
+
+! Query the alarm to check if it's ringing, enabled and sticky. In this case, we expect
+! the alarm to return ringing=true, enabled=true, sticky=false.
+
+!EOE
+!BOC
+    call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+    if(ringing) nrings = nrings + 1
+    !print *, 'Ex: ringing = ', ringing
+!BOE
+
+! Advance the clock 6 times to move from 0h0m0s to 1h0m0s.
+
+!EOE
+!BOC
+    do n = 1, 6
+      call ESMF_ClockAdvance(clock,rc=status)
+!EOC
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Query the alarm to check if it's ringing, enabled and sticky. In this case, we expect
+! the alarm should return ringing=true, enabled=true, sticky=false every clock time step
+! because the alarm and the clock have identical time step (or interval).
+
+!EOE
+!BOC
+      call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+!EOC
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+      !print *, '  Ex: ringing = ', ringing
+      if(ringing) nrings = nrings + 1
+    enddo
+
+!BOE
+
+! Destroy the alarm and clock created for this example.
+
+!EOE
+!BOC
+    call ESMF_AlarmDestroy(alarm, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_ClockDestroy(clock, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOE
+!\subsubsection{Using Alarm in clock running reverse}
+
+! This example shows how to set up an alarm in conjuction with a reverse
+! running clock.
+!EOE
+!BOE
+
+! A clock is set up to run from 1h0m0s to 0h0m0s; Initial ring time is set to 1h0m0s.
+! For clock running in reverse direction, the start time should still be in the past
+! compared with the stoptime. This example shows the start time is 0h0m0s, the stop
+! time is 1h0m0s. We will set the current time to 1h0m0s and set the clock to run
+! in reverse direction.
+
+!EOE
+!BOC
+    call ESMF_TimeSet(startTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeSet(stopTime,yy=1,mm=1,dd=1,h=1,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeSet(ringTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!BOE
+
+! The clock advances by 10 minutes and the alarm rings every 10 minutes as well.
+
+!EOE
+!BOC
+    call ESMF_TimeIntervalSet(timeStep,S=600, sN=0, sD=1,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeIntervalSet(ringTimeInterval,S=600, sN=0, sD=1,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+    nrings = 0
+!BOE
+
+! Create the clock from the specified start time, stop time and time step. 
+
+!EOE
+!BOC
+    clock = ESMF_ClockCreate(timeStep=timeStep,startTime=startTime,stopTime=stopTime,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Here we set the current time on the clock to stop time 1h0m0s and set the clock to run in
+! reverse direction.
+
+!EOE
+
+!BOC
+    call ESMF_ClockSet(clock, currTime = stopTime, direction=ESMF_DIRECTION_REVERSE, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Create the alarm from the specified ring time (0h0m0s), ring interval (10 minutes). 
+! This alarm is enabled upon creation and non sticky.
+
+!EOE
+!BOC
+    alarm = ESMF_AlarmCreate(clock, ringTime=ringTime, ringInterval=ringTimeInterval, enabled=.true., sticky=.false., name='alarm', rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!BOE
+
+! Query the alarm to check if it's ringing, enabled and sticky. In this case, we expect
+! the alarm to return ringing=true, enabled=true, sticky=false.
+
+!EOE
+!BOC
+    call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+    if(ringing) nrings = nrings + 1
+    !print *, 'Ex: ringing = ', ringing
+!BOE
+
+! Advance the clock 6 times to move from 0h0m0s to 1h0m0s.
+
+!EOE
+!BOC
+    do n = 1, 6
+      call ESMF_ClockAdvance(clock,rc=status)
+!EOC
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Query the alarm to check if it's ringing, enabled and sticky. In this case, we expect
+! the alarm should return ringing=true, enabled=true, sticky=false every clock time step
+! because the alarm and the clock have identical time step (or interval).
+
+!EOE
+!BOC
+      call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+!EOC
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+      !print *, '  Ex: ringing = ', ringing
+      if(ringing) nrings = nrings + 1
+    enddo
+
+!BOE
+
+! Destroy the alarm and clock created for this example.
+
+!EOE
+!BOC
+    call ESMF_AlarmDestroy(alarm, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_ClockDestroy(clock, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOE
+!\subsubsection{Using Alarm in clock runs forward then reverse}
+
+! This example shows how to set up an alarm in conjuction with a reverse
+! running clock.
+!EOE
+
+!BOE
+
+! A clock is set up to run from 0h0m0s to 1h0m0s; Initial ring time is set to 0h0m0s.
+
+!EOE
+!BOC
+    call ESMF_TimeSet(startTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeSet(stopTime,yy=1,mm=1,dd=1,h=1,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeSet(ringTime,yy=1,mm=1,dd=1,h=0,m=0,s=0,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!BOE
+
+! The clock advances by 10 minutes and the alarm rings every 10 minutes as well.
+
+!EOE
+!BOC
+    call ESMF_TimeIntervalSet(timeStep,S=600, sN=0, sD=1,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_TimeIntervalSet(ringTimeInterval,S=600, sN=0, sD=1,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+    nrings = 0
+!BOE
+
+! Create the clock from the specified start time, stop time and time step. 
+
+!EOE
+!BOC
+    clock = ESMF_ClockCreate(timeStep=timeStep,startTime=startTime,stopTime=stopTime,rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Create the alarm from the specified ring time (0h0m0s), ring interval (10 minutes). 
+! This alarm is enabled upon creation and non sticky.
+
+!EOE
+!BOC
+    alarm = ESMF_AlarmCreate(clock, ringTime=ringTime, ringInterval=ringTimeInterval, enabled=.true., sticky=.false., name='alarm', rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+!BOE
+
+! Query the alarm to check if it's ringing, enabled and sticky. In this case, we expect
+! the alarm to return ringing=true, enabled=true, sticky=false.
+
+!EOE
+!BOC
+    call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+    if(ringing) nrings = nrings + 1
+    !print *, 'Ex: ringing = ', ringing
+!BOE
+
+! Advance the clock 6 times to move from 0h0m0s to 1h0m0s.
+
+!EOE
+!BOC
+    do n = 1, 6
+      call ESMF_ClockAdvance(clock,rc=status)
+!EOC
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Query the alarm to check if it's ringing, enabled and sticky. In this case, we expect
+! the alarm should return ringing=true, enabled=true, sticky=false every clock time step
+! because the alarm and the clock have identical time step (or interval).
+
+!EOE
+!BOC
+      call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+!EOC
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+      !print *, '  Ex: ringing = ', ringing
+      if(ringing) nrings = nrings + 1
+    enddo
+!BOE
+
+! Reverse the direction of the clock, since the clock's current time is 1h0m0s, the clock
+! now runs backward to 0h50m0s, 0h40m0s, etc.
+
+!EOE
+!BOC
+    call ESMF_ClockSet(clock, direction = ESMF_DIRECTION_REVERSE, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Advance the clock 6 times to move from 1h0m0s to 0h0m0s.
+
+!EOE
+!BOC
+    do n = 1, 6
+      call ESMF_ClockAdvance(clock,rc=status)
+!EOC
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOE
+
+! Query the alarm to check if it's ringing, enabled and sticky. In this case, we expect
+! the alarm should return ringing=true, enabled=true, sticky=false every clock time step
+! because the alarm and the clock have identical time step (or interval).
+
+!EOE
+!BOC
+      call ESMF_AlarmGet(alarm, ringing=ringing, enabled=enabled, sticky=sticky, rc=status)
+!EOC
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+      if(ringing) nrings = nrings + 1
+      !print *, '  Ex: ringing = ', ringing
+    enddo
+!BOE
+
+! Destroy the alarm and clock created for this example.
+
+!EOE
+!BOC
+    call ESMF_AlarmDestroy(alarm, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+!BOC
+    call ESMF_ClockDestroy(clock, rc=status)
+!EOC
+    if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
 
      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
      ! file that the scripts grep for.
