@@ -15,6 +15,8 @@ SOURCEC	  = \
             ESMCI_Mesh_Regrid_Glue.C \
             ESMCI_Mesh_XGrid_Glue.C \
             ESMCI_Mesh.C \
+            ESMCI_Raster.C \
+            ESMCI_Mesh_From_Raster.C \
             ESMCI_MeshCap.C \
             ESMCI_MeshCXX.C \
             ESMCI_MeshDual.C \

@@ -118,7 +118,7 @@ program ESMF_MeshUTest
 
 
  ! This surrounds all the tests to make turning off everything but one test easier
-#if 1
+#if 0
 
   !------------------------------------------------------------------------
 
@@ -2868,7 +2868,22 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+#endif
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh Create from raster information."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
 
+  ! initialize check variables
+  correct=.false.
+  rc=ESMF_FAILURE
+ 
+  ! Do test
+  call test_mesh_create_from_raster(correct, rc)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+#if 0
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
   !  to be called until then".
@@ -7829,6 +7844,92 @@ subroutine test_meshset_with_gt4sided(correct, rc)
 
 
 end subroutine test_meshset_with_gt4sided
+
+subroutine test_mesh_create_from_raster(correct, rc)
+  logical :: correct
+  integer :: rc
+
+  type(ESMF_Grid) :: grid
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_Field) :: field
+  type(ESMF_Array) :: array
+  type(ESMF_VM) :: vm
+  integer :: localPet, petCount
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Init correct
+  correct=.true.
+
+  ! Create Grid
+  grid=ESMF_GridCreate1PeriDimUfrm( &
+       maxIndex=(/10,10/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,-90.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/360.0_ESMF_KIND_R8,90.0_ESMF_KIND_R8/), &
+       regDecomp=(/4,1/), & 
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       coordSys=ESMF_COORDSYS_SPH_DEG, &
+       rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+  ! Create field
+  field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_I4,  rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   ! Fill raster field
+   
+   
+   ! Get array from field
+   call ESMF_FieldGet(field, array=array, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   ! Create Mesh structure from raster info
+   mesh=ESMF_MeshCreate(grid, array, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+#if 0
+   ! Output Mesh for debugging
+   call ESMF_MeshWrite(mesh,"mesh_from_raster",rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+#endif
+
+   ! Get rid of Grid
+   call ESMF_GridDestroy(grid, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   ! Get rid of Mesh
+   call ESMF_MeshDestroy(mesh, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine test_mesh_create_from_raster
 
 
 

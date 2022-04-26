@@ -352,6 +352,11 @@ namespace ESMCI {
                           int num_elemArrays, ESMCI::Array **elemArrays,
                           int *rc);
 
+    static MeshCap *meshcreate_from_raster(Grid *raster_grid,
+                                           Array *raster_array,
+                                           InterArray<int> *raster_mask_values,
+                                           int *rc);
+    
   };
 
 } // namespace

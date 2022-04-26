@@ -222,7 +222,8 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreateEasyElemsGen
      module procedure ESMF_MeshCreateEasyElems1Type
      module procedure ESMF_MeshCreateFromGrid
-   end interface
+     module procedure ESMF_MeshCreateFromRaster
+  end interface ESMF_MeshCreate
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -2962,6 +2963,111 @@ end function ESMF_MeshCreateFromScrip
   end function ESMF_MeshCreateFromIntPtr
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromRaster()"
+!BOP
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a raster data
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
+  function ESMF_MeshCreateFromRaster(rasterGrid, rasterArray, rasterMaskValues, &
+                                     name, rc)
+!
+
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromRaster
+! !ARGUMENTS:
+    type(ESMF_Grid),        intent(in)            :: rasterGrid
+    type(ESMF_Array),       intent(in)            :: rasterArray
+    integer(ESMF_KIND_I4),  intent(in),  optional :: rasterMaskValues(:)
+    character(len=*),       intent(in),  optional :: name
+    integer,                intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Create an ESMF Mesh from raster data. The raster data is described by a Grid which
+!   represents the coordinates and topology, and an Array which contains the actual
+!   raster data corresponding to the cells in the Grid. Parts of the raster can be
+!   optionally masked out, so they don't contribute to the resulting Mesh using maskValues. 
+!
+!   \begin{description}
+!   \item [rasterGrid]
+!         The ESMF Grid which represents the coordinates and topology of the raster.
+!   \item [rasterArray]
+!         The ESMF Array which contains the raster data. The rasterArray needs to
+!         be created on the same DistGrid as the Grid center stagger location.
+!   \item [{[rasterMaskValues]}]
+!         List of raster values which should not be used to create parts of the mesh.
+!         Note that this is a bit different from the way masking usually works, since the masking is checked
+!         against values in the raster Array instead of in the Grid internal mask Array.
+!         Currently, only rasters containing values of typekind ESMF_KIND_I4 support masking.    
+!   \item [{[name]}]
+!         The name of the Mesh.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc
+    type(ESMF_InterArray) :: rasterMaskValuesIA
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, rasterGrid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, rasterArray, rc)
+
+    
+    ! Create interface array to wrap optional mask values
+    rasterMaskValuesIA = ESMF_InterArrayCreate(rasterMaskValues, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create C side Mesh
+    call C_ESMC_MeshCreateFromRaster(ESMF_MeshCreateFromRaster%this, &
+                                     rasterGrid, rasterArray, rasterMaskValuesIA, &
+                                     localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    
+    ! Get rid of interface array wrapper
+    call ESMF_InterArrayDestroy(rasterMaskValuesIA, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    
+    ! Create nodal distgrid
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromRaster, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create element distgrid
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromRaster, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    
+    ! Set the name in Base object
+    if (present(name)) then
+      call c_ESMC_SetName(ESMF_MeshCreateFromRaster, "Mesh", name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Set Status
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreateFromRaster, ESMF_MESHSTATUS_COMPLETE)
+
+    ! Set init status of mesh
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromRaster)
+
+    ! Return success
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+end function ESMF_MeshCreateFromRaster
+!------------------------------------------------------------------------------
+
+  
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

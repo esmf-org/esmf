@@ -873,6 +873,46 @@ extern "C" void FTN_X(c_esmc_meshcreatefromgrid)(MeshCap **meshpp,
 } // meshcreate
 
 
+extern "C" void FTN_X(c_esmc_meshcreatefromraster)(MeshCap **meshpp,
+                                                   Grid    **rasterGridpp,
+                                                   Array   **rasterArraypp,
+                                                   InterArray<int> *rasterMaskValues,
+                                                   int *rc)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreatefromraster()"
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // Dereference Grid to go from F90 rep to C++ rep
+  Grid *rasterGrid=NULL;
+  if (rasterGridpp != NULL) {
+    rasterGrid=*rasterGridpp;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                  "rasterGrid double pointer should not be NULL here.",
+                                  ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    return; // bail out
+  }
+
+  // Dereference Array to go from F90 rep to C++ rep
+  Array *rasterArray=NULL;
+  if (rasterArraypp != NULL) {
+    rasterArray=*rasterArraypp;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                  "rasterArray double pointer should not be NULL here.",
+                                  ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    return; // bail out
+  }
+
+  // Call into C++ to create mesh from raster
+  *meshpp=MeshCap::meshcreate_from_raster(rasterGrid, rasterArray, rasterMaskValues,
+                                          ESMC_NOT_PRESENT_FILTER(rc));
+
+} // meshcreate
+
+
+
 extern "C" void FTN_X(c_esmc_geteleminfointoarray)(MeshCap **meshpp,
                                                    DistGrid **elemDistgrid,
                                                    int *numElemArrays,
