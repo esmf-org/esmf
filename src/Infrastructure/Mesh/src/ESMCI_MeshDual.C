@@ -86,6 +86,9 @@ namespace ESMCI {
 
   void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm);
 
+  void _update_elem_is_local_info(Mesh *dual_mesh);
+
+  
 
   // Create a dual of the input Mesh 
   // This adds ghostcells to the input mesh, 
@@ -841,6 +844,12 @@ namespace ESMCI {
     // Change owners to be on the current communicator rather than the source mesh's communicator
     _change_owners_from_src_to_curr_comm(dual_mesh, src_mesh->orig_comm);
 
+
+    // Update locality for elems
+    // (nodes are handled automatically)
+    _update_elem_is_local_info(dual_mesh);
+
+
     // Commit Mesh
     dual_mesh->build_sym_comm_rel(MeshObj::NODE);
     dual_mesh->Commit();
@@ -886,6 +895,50 @@ namespace ESMCI {
 
     // Switch back to current comm
     ESMCI::Par::Init("MESHLOG", false, curr_comm);
+  }
+
+
+  void _update_elem_is_local_info(Mesh *dual_mesh) {
+    
+    // Stick in vector, because changing context can change order in iterator
+    std::vector<MeshObj *> elems;
+    elems.reserve(dual_mesh->num_elems());
+    MeshDB::iterator ei = dual_mesh->elem_begin_all(), ee = dual_mesh->elem_end_all();
+    for (; ei != ee; ++ei) {
+      MeshObj *elem=&(*ei);
+      elems.push_back(elem);
+    }
+
+    // Loop updating locality bits
+    for (auto i=0; i<elems.size(); i++) {
+      MeshObj *elem=elems[i];
+
+      // If owner isn't the same as the local proc in the current context, then make non-local
+      // (all elems are autoset to local, so we don't need to do that side.
+      if (elem->get_owner() != Par::Rank()) {
+
+        // Setup for changing attribute
+        const Context &ctxt = GetMeshObjContext(*elem);
+        Context newctxt(ctxt);
+        
+        // Clear OWNED_ID since we're not owned
+        newctxt.clear(Attr::OWNED_ID);
+
+        // Clear ACTIVE_ID since we're not locally owned 
+        newctxt.clear(Attr::ACTIVE_ID);
+        
+        // turn on SHARED_ID since owned someplace else 
+        newctxt.set(Attr::SHARED_ID);
+        
+        // If attribute has changed change in elem
+        if (newctxt != ctxt) {
+          Attr attr(GetAttr(*elem), newctxt);
+          dual_mesh->update_obj(elem, attr);
+        }
+      }
+
+    }
+    
   }
 
 
