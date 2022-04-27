@@ -87,7 +87,7 @@ void combine(const std::string &api, const std::string &mesh,
 
         test->name = name;
         test->nativeormb = nvmb;
-        test->verbosity = 3;
+        test->verbosity = 1;
         // test->tol = 1.e-15;
         // test->print();
 
@@ -141,9 +141,9 @@ int main(int argc, char *argv[]) {
 
   // this is an easy way to comment a single line to toggle mbmesh/native
   bool mbmesh = false;
-  // mbmesh = true;
+  mbmesh = true;
   bool native = false;
-  native = true;
+  // native = true;
 
   // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis;
