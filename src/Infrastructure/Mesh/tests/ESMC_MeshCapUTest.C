@@ -147,39 +147,39 @@ int main(int argc, char *argv[]) {
 
   // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis;
-    // test_apis.push_back("createget");
+    test_apis.push_back("createget");
     // dual not working after ngon connectivity changes
-    test_apis.push_back("dual");
-    // test_apis.push_back("redist_elem");
-    // test_apis.push_back("redist_node");
-    // test_apis.push_back("redist_elno");
-    // test_apis.push_back("serialize");
-    // test_apis.push_back("to_pointlist_elem");
-    // test_apis.push_back("to_pointlist_node");
-    // test_apis.push_back("write_vtk");
+    // test_apis.push_back("dual");
+    test_apis.push_back("redist_elem");
+    test_apis.push_back("redist_node");
+    test_apis.push_back("redist_elno");
+    test_apis.push_back("serialize");
+    test_apis.push_back("to_pointlist_elem");
+    test_apis.push_back("to_pointlist_node");
+    test_apis.push_back("write_vtk");
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes;
     test_meshes.push_back("quad_2d_cart");
-    // test_meshes.push_back("quad_2d_sph_deg");
-    // test_meshes.push_back("quad_2d_sph_rad");
-    // test_meshes.push_back("tri_2d_cart");
-    // test_meshes.push_back("tri_2d_sph_deg");
-    // test_meshes.push_back("tri_2d_sph_rad");
-    // test_meshes.push_back("hex_3d_cart");
-    // test_meshes.push_back("hex_3d_sph_deg");
-    // test_meshes.push_back("hex_3d_sph_rad");
-    // test_meshes.push_back("mix_2d_cart");
-    // test_meshes.push_back("mix_2d_sph_deg");
-    // test_meshes.push_back("mix_2d_sph_rad");
-    // test_meshes.push_back("periodic_2d_sph_deg");
-    // test_meshes.push_back("periodic_2d_sph_rad");
-    // test_meshes.push_back("ngon_2d_cart");
-    // test_meshes.push_back("ngon_2d_sph_deg");
-    // test_meshes.push_back("ngon_2d_sph_rad");
-    // test_meshes.push_back("ngon_quad_2d_cart");
-    // test_meshes.push_back("ngon_quad_2d_sph_deg");
-    // test_meshes.push_back("ngon_quad_2d_sph_rad");
+    test_meshes.push_back("quad_2d_sph_deg");
+    test_meshes.push_back("quad_2d_sph_rad");
+    test_meshes.push_back("tri_2d_cart");
+    test_meshes.push_back("tri_2d_sph_deg");
+    test_meshes.push_back("tri_2d_sph_rad");
+    test_meshes.push_back("hex_3d_cart");
+    test_meshes.push_back("hex_3d_sph_deg");
+    test_meshes.push_back("hex_3d_sph_rad");
+    test_meshes.push_back("mix_2d_cart");
+    test_meshes.push_back("mix_2d_sph_deg");
+    test_meshes.push_back("mix_2d_sph_rad");
+    test_meshes.push_back("periodic_2d_sph_deg");
+    test_meshes.push_back("periodic_2d_sph_rad");
+    test_meshes.push_back("ngon_2d_cart");
+    test_meshes.push_back("ngon_2d_sph_deg");
+    test_meshes.push_back("ngon_2d_sph_rad");
+    test_meshes.push_back("ngon_quad_2d_cart");
+    test_meshes.push_back("ngon_quad_2d_sph_deg");
+    test_meshes.push_back("ngon_quad_2d_sph_rad");
 
   std::vector<std::pair<std::string, std::string>> skip_test_common = {\
     // dual meshes of ngons not supported
@@ -207,13 +207,19 @@ int main(int argc, char *argv[]) {
     {"redist_node", "tri_2d_cart"},
     {"redist_node", "tri_2d_sph_deg"},
     {"redist_node", "tri_2d_sph_rad"},
-    // redist_elem failing for ngons after ngon connectivity changes
+    // redist failing for ngons after ngon connectivity changes
     {"redist_elem", "ngon_2d_cart"},
     {"redist_elem", "ngon_2d_sph_deg"},
     {"redist_elem", "ngon_2d_sph_rad"},
     {"redist_elem", "ngon_quad_2d_cart"},
     {"redist_elem", "ngon_quad_2d_sph_deg"},
     {"redist_elem", "ngon_quad_2d_sph_rad"},
+    {"redist_node", "ngon_2d_cart"},
+    {"redist_node", "ngon_2d_sph_deg"},
+    {"redist_node", "ngon_2d_sph_rad"},
+    {"redist_node", "ngon_quad_2d_cart"},
+    {"redist_node", "ngon_quad_2d_sph_deg"},
+    {"redist_node", "ngon_quad_2d_sph_rad"},
 
   };
 
