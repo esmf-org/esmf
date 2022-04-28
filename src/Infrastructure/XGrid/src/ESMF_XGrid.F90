@@ -485,8 +485,8 @@ contains
       endif
 
       ! Compare Grids contained
-      fp1 = xgrid1%xgtypep
-      fp2 = xgrid2%xgtypep
+      fp1 => xgrid1%xgtypep
+      fp2 => xgrid2%xgtypep
       ! Side A Grids
       if(associated(fp1%sideA)) ngridA1 = size(fp1%sideA, 1)
       if(associated(fp2%sideA)) ngridA2 = size(fp2%sideA, 1)

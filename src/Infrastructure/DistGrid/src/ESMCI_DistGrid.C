@@ -132,16 +132,19 @@ DistGrid *DistGrid::create(
 //
 // !DESCRIPTION:
 //    Create a new DistGrid from an existing DistGrid, potentially on a
-//    different VM, keeping the decomposition unchanged. The firstExtra 
-//    and lastExtra arguments allow extra elements to be added at the 
-//    first/last edge DE in each dimension. The method also allows the 
-//    indexflag to be set different from the passed in DistGrid. Further, 
+//    different VM, keeping the decomposition unchanged, unless balanceflag
+//    is set to true (see below). 
+//    The firstExtra and lastExtra arguments allow extra elements to be added
+//    at the first/last edge DE in each dimension. The method also allows the
+//    indexflag to be set different from the passed in DistGrid. Further,
 //    if the connectionList argument is passed in it will be used to set
 //    connections in the newly created DistGrid, otherwise the connections
 //    of the existing DistGrid will be used.
-//    If neither firstExtra, lastExtra, indexflag, connectionList, nor vm
-//    arguments are specified, the method reduces to a deep copy of the
-//    incoming DistGrid object.
+//    For balanceflag==true, an attempt is made to change the decomposition to
+//    as many DEs as there are PETs in the target VM. However, if there are
+//    more tiles than PETs, some PETs will end up with more than one DE.
+//    Each tile is decomposed as to provide the most balanced decomposition
+//    into DEs along each dimension.
 //    The actualFlag argument identifies PETs that are part of vm. If
 //    on a PET actualFlag is true, and vm is not NULL, this PET is part of a
 //    vm that is of smaller size than the currentVM. If on a PET actualFlag is
@@ -222,20 +225,60 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
     // create a DistGrid that uses default decomposition to balance index space
-    int *dimCountInterArray = new int[2];
-    dimCountInterArray[0] = dg->getDimCount();
-    dimCountInterArray[1] = dg->getTileCount();
+    int dimCount = dg->getDimCount();
+    int tileCount = dg->getTileCount();
+    int dummyLen[2];
+    dummyLen[0] = dimCount;
+    dummyLen[1] = tileCount;
     InterArray<int> *minIndex =
-      new InterArray<int>((int*)(dg->getMinIndexPDimPTile()), 2,
-      dimCountInterArray);
+      new InterArray<int>((int*)(dg->getMinIndexPDimPTile()), 2, dummyLen);
     InterArray<int> *maxIndex =
-      new InterArray<int>((int*)(dg->getMaxIndexPDimPTile()), 2,
-      dimCountInterArray);
-    delete [] dimCountInterArray;
+      new InterArray<int>((int*)(dg->getMaxIndexPDimPTile()), 2, dummyLen);
+#if 1
+    //TODO: Long term get rid of this branch, and switch to the default
+    //TODO: create of the else branch. This is when the default
+    //TODO: DistGrid::create() has switched to using "most cubic" decomposition.
+    //TODO: Currently the default create() decomposes only along the _first_
+    //TODO: dim into petCount many DEs. Therefore, need to do the balancing
+    //TODO: to "most cubic" here explicitly.
+    int petCount = VM::getCurrent()->getPetCount();
+    int deCountPerTile = max(1, petCount/tileCount);  //..at least 1 DE per tile
+    int extraDEs = max(0, petCount-deCountPerTile*tileCount); // remaining DEs
+    // create a temporary default regDecomp and deCountPTile
+    int *dummy = new int[dimCount*tileCount];
+    int *deCountPTile = new int[tileCount];
+    InterArray<int> *regDecomp;
+    for (int i=0; i<tileCount; i++){
+      if (i<extraDEs)
+        deCountPTile[i] = deCountPerTile + 1; // spread the extra DEs
+      else
+        deCountPTile[i] = deCountPerTile;     // just regular DEs
+      // "most cubic" regDecomp on each tile
+      regDecomp = new InterArray<int>(dummy+dimCount*i, 1, &dimCount);
+      regDecompSetCubic(regDecomp,deCountPTile[i]);
+      delete regDecomp;
+    }
+    // finish up creating the default regDecomp InterArray covering all tiles
+    dummyLen[0] = dimCount;
+    dummyLen[1] = tileCount;
+    regDecomp = new InterArray<int>(dummy, 2, dummyLen);
+    // ready to create the DistGrid with "most cubic" regDecomp
+    distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0, 0,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc, dg->indexTK);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    // clean-up
+    delete regDecomp;
+#else
+    // default DistGrid::create(), currently only distribute along first dim
     distgrid = DistGrid::create(minIndex, maxIndex, NULL, NULL, 0, 0,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc, dg->indexTK);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+#endif
+    // clean-up
+    delete minIndex;
+    delete maxIndex;
     // determine whether the incoming DG holds any arbitrary sequence indices
     VM *currentVM = VM::getCurrent();
     int localArbSeqFlag = 0; // initialize
@@ -428,7 +471,7 @@ DistGrid *DistGrid::create(
     // creating a new DistGrid from the existing one considering additional info
     // prepare for internal InterArray usage
     int dimInterArray;
-    int *dimCountInterArray = new int[2];
+    int dimCountInterArray[2];
     // prepare connectionList
     bool connectionListInternalFlag = false;
     int *connectionListAlloc = NULL; // default
@@ -837,7 +880,6 @@ DistGrid *DistGrid::create(
       delete [] deBlockListAlloc;
     }
     // garbage collection
-    delete [] dimCountInterArray;
     delete minIndex;
     delete [] minIndexAlloc;
     delete maxIndex;

@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = ftn
 ESMF_CXXDEFAULT         = CC
+ESMF_CDEFAULT           = cc
 
 ############################################################
 # Default MPI setting.
@@ -46,6 +47,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 
 ############################################################
 # Cray Fortran compiler still needs a numerical opt level default
@@ -106,6 +108,7 @@ ESMF_F90COMPILEFIXNOCPP  = -f fixed -N 132
 #
 ESMF_F90RPATHPREFIX         = -Wl,-rpath,
 ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
 # Shared library options

@@ -56,7 +56,6 @@ extern "C" void FTN_X(c_esmc_regrid_create)(MeshCap **meshsrcpp,
                                             int *map_type,
                                             int *norm_type,
                                             int *regridPoleType, int *regridPoleNPnts,
-                                            int *regridScheme,
                                             int *extrapMethod,
                                             int *extrapNumSrcPnts,
                                             ESMC_R8 *extrapDistExponent,
@@ -95,7 +94,6 @@ MeshCap::regrid_create(meshsrcpp, arraysrcpp, plsrcpp,
                        map_type,
                        norm_type,
                        regridPoleType, regridPoleNPnts,
-                       regridScheme,
                        extrapMethod,
                        extrapNumSrcPnts,
                        extrapDistExponent,
@@ -113,23 +111,23 @@ MeshCap::regrid_create(meshsrcpp, arraysrcpp, plsrcpp,
 
 extern "C" void FTN_X(c_esmc_regrid_getiwts)(Grid **gridpp,
                    MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()"
   MeshCap::regrid_getiwts(gridpp,
                           meshpp, arraypp, staggerLoc,
-                          regridScheme, rc);
+                          rc);
 }
 
 
 extern "C" void FTN_X(c_esmc_regrid_getarea)(Grid **gridpp,
                    MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getarea()"
   MeshCap::regrid_getarea(gridpp,
                           meshpp, arraypp, staggerLoc,
-                          regridScheme, rc);
+                          rc);
 }
 
 

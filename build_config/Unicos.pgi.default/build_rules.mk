@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = ftn
 ESMF_CXXDEFAULT         = CC
+ESMF_CDEFAULT           = cc
 
 ############################################################
 # Default MPI setting.
@@ -46,6 +47,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -V
 
 ############################################################
 # Determine PGI version
@@ -113,6 +115,7 @@ ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
 #
 ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
+ESMF_CLINKRPATHS        =
 
 ############################################################
 # Determine where pgf90's libraries are located

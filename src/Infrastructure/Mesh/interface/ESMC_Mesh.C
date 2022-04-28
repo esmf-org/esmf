@@ -43,13 +43,14 @@ extern "C" {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetMOAB()"
-void ESMC_MeshGetMOAB(bool moabOn, int *rc){
+void ESMC_MeshGetMOAB(bool *moabOn, int *rc){
 
   int moabOnInt = 0;
   MeshCap::meshGetMOAB(&moabOnInt, rc);
   
-  moabOn = static_cast<bool> (moabOnInt);
-  
+  if (moabOnInt == 0) *moabOn = false;
+  else *moabOn = true;
+    
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }
@@ -186,8 +187,11 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
 
   MeshCap *mc = static_cast<MeshCap*> (mesh.ptr);
 
+  // Wrap node_owners in IntArray
+  InterArray<int> nodeOwnersIA(nodeOwners,nodeCount);
+
   // call into ESMCI method
-  mc->meshaddnodes(&nodeCount, nodeIds, nodeCoords, nodeOwners,
+  mc->meshaddnodes(&nodeCount, nodeIds, nodeCoords, &nodeOwnersIA,
                    NULL, &(mc->coordsys_mc), &(mc->sdim_mc), &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
@@ -225,10 +229,6 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
   int cpresent = 0;
   if (elementCoords != nullptr) cpresent = 1;
 
-  // default to 1 so all native meshes are created with frac fields
-  // this could be handled better
-  int regridconserve = 1;
-  
   // convert elementMask to InterArray for transfer to MeshCap
   InterArray<int> *em = new InterArray<int> (elementMask, elementCount);
   
@@ -238,7 +238,6 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
                       &apresent, elementArea, 
                       &cpresent, elementCoords, 
                       &ec, elementConn,
-                      &regridconserve, 
                       &(mc->coordsys_mc), &(mc->sdim_mc),
                       &localrc);
                       // elementConn, elementMask, elementArea, elementCoords);
@@ -320,7 +319,7 @@ void ESMC_MeshGetCoord(ESMC_Mesh mesh,
     rc)) return;  // bail out
 
   // get the num_nodes
-  mc->getNodeCount(num_nodes, &localrc);
+  mc->getOwnedNodeCount(num_nodes, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;  // bail out
 
@@ -350,7 +349,7 @@ void ESMC_MeshGetElemCoord(ESMC_Mesh mesh,
     rc)) return;  // bail out
 
   // get the num_elems
-  mc->getElemCount(num_elems, &localrc);
+  mc->getOwnedElemCount(num_elems, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;  // bail out
 

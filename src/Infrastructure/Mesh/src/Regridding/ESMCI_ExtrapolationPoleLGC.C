@@ -357,10 +357,13 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
       // Get side nodes with poleward boundary
       const MeshObjTopo *etopo = GetMeshObjTopo(elem);
 
-      ThrowRequire(etopo->num_nodes == 4);
+      // We only handle 3 and 4 sided thingThrowRequire((etopo->num_nodes == 3) || (etopo->num_nodes == 4));
+      if ( !((etopo->num_nodes == 3) || (etopo->num_nodes == 4))) {
+        Throw() << "all average pole extrapolation currenly only supports elements with 3 or 4 sides.";
+      }
 
+      // Find side next to pole
       int pole_side = -1;
-
       for (UInt s = 0; pole_side < 0 && s < etopo->num_sides; s++) {
 
         const int *side_nodes = etopo->get_side_nodes(s);
@@ -368,22 +371,17 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
         // Check; if this is the side, all nodes on side should have the boundary context;
         bool is_pole_side = true;
         for (UInt sn = 0; is_pole_side && sn < (UInt) etopo->num_side_nodes; sn++) {
-
           is_pole_side = elem.Relations[side_nodes[sn]].obj->GetKernel()->key() == node_id;
-
         }
 
         if (is_pole_side) pole_side = s;
-
       } // for s
 
-      // BOB_DEBUG
-      if (pole_side < 0) {
-        printf("elem.id=%d pole_side=%d\n",elem.get_id(),pole_side);
-      }
+      // If we didn't find a whole pole side, skip the elem
+      // (We can have a tri or tilted quad with just one node next to the pole)
+      if (pole_side < 0) continue;
 
-      ThrowRequire(pole_side >= 0); // need to have found a side
-
+      // Get nodes on that side
       const int *side_nodes = etopo->get_side_nodes(pole_side);
 
       // Create the triangle
@@ -727,12 +725,6 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     const MeshObjTopo *tri_topo = GetTopo("SHELL3");
     ThrowRequire(tri_topo);
 
-    // number of elems around pole
-    // Note: this is also the number of nodes because of periodicity
-    int num_pole_elems=elems.size();
-
-    // Make sure we aren't averaging over more points than exist
-    ThrowRequire(num_avg_pnts<=num_pole_elems);
 
     // Hold edges of the pole area
     EEdge_Map pole_edge_map;
@@ -745,10 +737,14 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
       // Get side nodes with poleward boundary
       const MeshObjTopo *etopo = GetMeshObjTopo(elem);
 
-      ThrowRequire(etopo->num_nodes == 4);
+      // We only handle 4 sided elements
+      // We only handle 3 and 4 sided thingThrowRequire((etopo->num_nodes == 3) || (etopo->num_nodes == 4));
+      if ( !((etopo->num_nodes == 3) || (etopo->num_nodes == 4))) {
+        Throw() << "all average pole extrapolation currenly only supports elements with 3 or 4 sides.";
+      }
 
+      // Find side next to pole
       int pole_side = -1;
-
       for (UInt s = 0; pole_side < 0 && s < etopo->num_sides; s++) {
 
         const int *side_nodes = etopo->get_side_nodes(s);
@@ -756,17 +752,18 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
         // Check; if this is the side, all nodes on side should have the boundary context;
         bool is_pole_side = true;
         for (UInt sn = 0; is_pole_side && sn < (UInt) etopo->num_side_nodes; sn++) {
-
           is_pole_side = elem.Relations[side_nodes[sn]].obj->GetKernel()->key() == node_id;
-
         }
 
         if (is_pole_side) pole_side = s;
 
       } // for s
 
-      ThrowRequire(pole_side >= 0); // need to have found a side
+      // If we didn't find a whole pole side, skip the elem
+      // (We can have a tri or tilted quad with just one node next to the pole)
+      if (pole_side < 0) continue;
 
+      // Get nodes on that side
       const int *side_nodes = etopo->get_side_nodes(pole_side);
 
       // Create the triangle
@@ -854,14 +851,20 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     pole_coord[1] = new_coords[1];
     pole_coord[2] = new_coords[2];
 
+    // number of edges around pole
+    // Note: this is also the number of nodes because of periodicity
+    int num_pole_edges=pole_edge_map.size();
+
+    // Make sure we aren't averaging over more points than exist
+    ThrowRequire(num_avg_pnts<=num_pole_edges);
 
     // Create ordered list of nodes around pole
     // plus associated edge structures
     //// Allocate lists
     std::vector<UInt> ordered_node_ids;
-    ordered_node_ids.resize(num_pole_elems,0);
+    ordered_node_ids.resize(num_pole_edges,0);
     std::vector<EEdge *> ordered_eedge;
-    ordered_eedge.resize(num_pole_elems,NULL);
+    ordered_eedge.resize(num_pole_edges,NULL);
 
     //// Get map iterators
     EEdge_Map::iterator pemi=pole_edge_map.begin();
@@ -871,7 +874,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     UInt curr_id=pemi->first;
 
     //// Loop through putting nodes into order
-    for (int i=0; i<num_pole_elems; i++) {
+    for (int i=0; i<num_pole_edges; i++) {
 
       ////// Get EEdge structure
       pemi=pole_edge_map.find(curr_id);
@@ -892,7 +895,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     double val = 1.0 / num_avg_pnts;
 
     // Generate constraints
-    for (int i=0; i<num_pole_elems; i++) {
+    for (int i=0; i<num_pole_edges; i++) {
 
       //// pointer to eedge structure
       EEdge *eedge=ordered_eedge[i];
@@ -915,7 +918,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
       for (int j=0; j<num_avg_pnts; j++) {
 
         ////// Get node id
-        UInt node_id=ordered_node_ids[(beg+j)%num_pole_elems];
+        UInt node_id=ordered_node_ids[(beg+j)%num_pole_edges];
 
         ////// Add node to weights
         ecol.push_back(IWeights::Entry(node_id, 0, val));
@@ -1319,10 +1322,6 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
     // Loop the elements around the pole gap
     std::set<MeshObj*>::iterator ei = elems.begin(), ee = elems.end();
 
-    // number of elems around pole
-    // Note: this is also the number of nodes because of periodicity
-    int num_pole_elems=elems.size();
-
     // Hold edges of the pole area
     EEdge_Map pole_edge_map;
 
@@ -1333,10 +1332,13 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
       // Get side nodes with poleward boundary
       const MeshObjTopo *etopo = GetMeshObjTopo(elem);
 
-      ThrowRequire(etopo->num_nodes == 4);
+      // We only handle 3 and 4 sided thingThrowRequire((etopo->num_nodes == 3) || (etopo->num_nodes == 4));
+      if ( !((etopo->num_nodes == 3) || (etopo->num_nodes == 4))) {
+        Throw() << "all average pole extrapolation currenly only supports elements with 3 or 4 sides.";
+      }
 
+      // Find side next to pole
       int pole_side = -1;
-
       for (UInt s = 0; pole_side < 0 && s < etopo->num_sides; s++) {
 
         const int *side_nodes = etopo->get_side_nodes(s);
@@ -1344,16 +1346,16 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
         // Check; if this is the side, all nodes on side should have the boundary context;
         bool is_pole_side = true;
         for (UInt sn = 0; is_pole_side && sn < (UInt) etopo->num_side_nodes; sn++) {
-
           is_pole_side = elem.Relations[side_nodes[sn]].obj->GetKernel()->key() == node_id;
-
         }
 
         if (is_pole_side) pole_side = s;
 
       } // for s
 
-      ThrowRequire(pole_side >= 0); // need to have found a side
+      // If we didn't find a whole pole side, skip the elem
+      // (We can have a tri or tilted quad with just one node next to the pole)
+      if (pole_side < 0) continue;
 
       const int *side_nodes = etopo->get_side_nodes(pole_side);
 
@@ -1369,17 +1371,19 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
 
     } // for ei
 
-
+    // number of edges around pole
+    // Note: this is also the number of nodes because of periodicity
+    int num_pole_edges=pole_edge_map.size();
 
     // Create ordered list of nodes around pole
     // plus associated edge structures
     //// Allocate lists
     std::vector<UInt> ordered_node_ids;
-    ordered_node_ids.resize(num_pole_elems,0);
+    ordered_node_ids.resize(num_pole_edges,0);
     std::vector<MeshObj *> ordered_node_ptrs;
-    ordered_node_ptrs.resize(num_pole_elems,NULL);
+    ordered_node_ptrs.resize(num_pole_edges,NULL);
     std::vector<EEdge *> ordered_eedge;
-    ordered_eedge.resize(num_pole_elems,NULL);
+    ordered_eedge.resize(num_pole_edges,NULL);
 
     //// Get map iterators
     EEdge_Map::iterator pemi=pole_edge_map.begin();
@@ -1389,7 +1393,7 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
     UInt curr_id=pemi->first;
 
     //// Loop through putting nodes into order
-    for (int i=0; i<num_pole_elems; i++) {
+    for (int i=0; i<num_pole_edges; i++) {
 
       ////// Get EEdge structure
       pemi=pole_edge_map.find(curr_id);
@@ -1413,9 +1417,9 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
 
     /// Loop around gap filling in gap with triangles
     int s=0; // start node
-    int e=num_pole_elems-1; // end node
+    int e=num_pole_edges-1; // end node
     UInt tri_num = 0; // count ids used
-    for (int i=0; i<num_pole_elems; i++) {
+    for (int i=0; i<num_pole_edges; i++) {
       std::vector<MeshObj*> tri_nodes;
       tri_nodes.resize(3,NULL);
       MeshObj::id_type tri_id;
@@ -1442,8 +1446,6 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
 
       // Leave if we're done
       if (e-1 == s+1) break;
-
-
 
       // Triangle from the other...
 

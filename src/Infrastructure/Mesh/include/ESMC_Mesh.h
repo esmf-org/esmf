@@ -63,7 +63,7 @@ typedef struct{
 //
 // !INTERFACE:
 void ESMC_MeshGetMOAB(
-  bool moabOn,
+  bool *moabOn,
   int *rc
 );
 // !RETURN VALUE:

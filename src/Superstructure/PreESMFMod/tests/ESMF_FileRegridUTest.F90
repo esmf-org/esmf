@@ -87,25 +87,29 @@ program ESMF_FileRegridUTest
        polemethod = pole, unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
 
-#ifdef ESMF_NETCDF
+! The above call needs PIO, so check output based on that
+#ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  call ESMF_Test(((rc==ESMF_RC_LIB_NOT_PRESENT) .or. (rc==ESMC_RC_LIB_NOT_PRESENT)), &
+       name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
   !NEX_UTest
   write(name, *) "FileRegridCheck bilinear Test using UGRID"
   write(failmsg, *) "Did not return ESMF_SUCCESS"
 
+
+  ! Only call to check if PIO is present and a file has been written above
+#ifdef ESMF_PIO
   call ESMF_FileRegridCheck(dstfile, "nodedata", regridmethod=methodflag, &
        rc=rc)  
 
-#ifdef ESMF_NETCDF
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  ! Otherwise just pass
+  call ESMF_Test((.true.),  name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
   !----------------------------------------------------------------------------
@@ -120,25 +124,28 @@ program ESMF_FileRegridUTest
        polemethod = pole, unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
 
+! The above call needs NETCDF, so check output based on that
 #ifdef ESMF_NETCDF
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  call ESMF_Test(((rc==ESMF_RC_LIB_NOT_PRESENT) .or. (rc==ESMC_RC_LIB_NOT_PRESENT)), &
+       name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
   !NEX_UTest
   write(name, *) "FileRegridCheck neareststod Test using UGRID with data no node"
   write(failmsg, *) "Did not return ESMF_SUCCESS"
 
+  ! Only check file if NETCDF is present and test above ran
+#ifdef ESMF_NETCDF
   call ESMF_FileRegridCheck(dstfile, "nodedata", regridmethod=methodflag, &
        rc=rc)  
 
-#ifdef ESMF_NETCDF
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  ! Otherwise just pass
+  call ESMF_Test((.true.),  name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
   !----------------------------------------------------------------------------
@@ -155,25 +162,28 @@ program ESMF_FileRegridUTest
        unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
 
-#ifdef ESMF_NETCDF
+! The above call needs PIO, so check output based on that
+#ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  call ESMF_Test(((rc==ESMF_RC_LIB_NOT_PRESENT) .or. (rc==ESMC_RC_LIB_NOT_PRESENT)), &
+       name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
   !NEX_UTest
   write(name, *) "FileRegridCheck conserve Test using UGRID with data on element"
   write(failmsg, *) "Did not return ESMF_SUCCESS"
 
+  ! Only call to check if PIO is present and a file has been written above
+#ifdef ESMF_PIO
   call ESMF_FileRegridCheck(dstfile, "elmtdata", regridmethod=methodflag, &
        rc=rc)  
 
-#ifdef ESMF_NETCDF
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 #else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+  ! Otherwise just pass
+  call ESMF_Test((.true.),  name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
   !-----------------------------------------------------------------------------

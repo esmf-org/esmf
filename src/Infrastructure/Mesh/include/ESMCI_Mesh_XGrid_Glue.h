@@ -43,5 +43,12 @@ void ESMCI_meshmerge(Mesh **srcmeshpp, Mesh **dstmeshpp,
                      Mesh **meshpp,
                      int*rc);
 
+void ESMCI_Mesh_XGrid_calc_wgts_from_side_mesh(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh,
+                                               int *nentries, ESMCI::TempWeights **tweights,
+                                               int*rc);
+
+void ESMCI_Mesh_XGrid_calc_wgts_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc);
 
 #endif

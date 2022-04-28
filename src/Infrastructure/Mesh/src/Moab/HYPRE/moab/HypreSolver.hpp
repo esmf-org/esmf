@@ -34,309 +34,378 @@ namespace moab
 {
 
 /// Base class for solvers
-  class AbstractSolver
-  {
-    protected:
-      const Eigen::SparseMatrix<double> *m_operator;
+class AbstractSolver
+{
+  protected:
+    const Eigen::SparseMatrix< double >* m_operator;
 
-    public:
-      /// If true, use the second argument of Mult as an initial guess
-      bool iterative_mode;
+  public:
+    /// If true, use the second argument of Mult as an initial guess
+    bool iterative_mode;
 
-      /// Initialize a Solver
-      explicit AbstractSolver(bool iter_mode)
-      { iterative_mode = iter_mode; }
+    /// Initialize a Solver
+    explicit AbstractSolver( bool iter_mode )
+    {
+        iterative_mode = iter_mode;
+    }
 
-      /// Set/update the solver for the given operator
-      virtual void SetOperator(const HypreParMatrix &op) = 0;
-  };
-
-
+    /// Set/update the solver for the given operator
+    virtual void SetOperator( const HypreParMatrix& op ) = 0;
+};
 
 /// Abstract class for hypre's solvers and preconditioners
-  class HypreSolver : public AbstractSolver
-  {
-    public:
-      typedef HypreParVector Vector;
+class HypreSolver : public AbstractSolver
+{
+  public:
+    typedef HypreParVector Vector;
 
-    protected:
-      /// The linear system matrix
-      HypreParMatrix *A;
+  protected:
+    /// The linear system matrix
+    HypreParMatrix* A;
 
-      /// Right-hand side and solution vector
-      mutable HypreParVector *B, *X;
+    /// Right-hand side and solution vector
+    mutable HypreParVector *B, *X;
 
-      /// Was hypre's Setup function called already?
-      mutable int setup_called;
+    /// Was hypre's Setup function called already?
+    mutable int setup_called;
 
-    public:
-      HypreSolver(bool iterative = true);
+  public:
+    HypreSolver( bool iterative = true );
 
-      HypreSolver(HypreParMatrix *_A, bool iterative = true);
+    HypreSolver( HypreParMatrix* _A, bool iterative = true );
 
-      /// Typecast to HYPRE_Solver -- return the solver
-      virtual operator HYPRE_Solver() const = 0;
+    /// Typecast to HYPRE_Solver -- return the solver
+    virtual operator HYPRE_Solver() const = 0;
 
-      virtual void Verbosity(int /*print_level*/)
-      { /* nothing to do */ }
+    virtual void Verbosity( int /*print_level*/ )
+    { /* nothing to do */
+    }
 
-      /// Set the hypre solver to be used as a preconditioner
-      virtual void SetPreconditioner(HypreSolver &/*precond*/)
-      { /* Nothing to do */ }
+    /// Set the hypre solver to be used as a preconditioner
+    virtual void SetPreconditioner( HypreSolver& /*precond*/ )
+    { /* Nothing to do */
+    }
 
-      /// hypre's internal Setup function
-      virtual HYPRE_PtrToParSolverFcn SetupFcn() const = 0;
-      /// hypre's internal Solve function
-      virtual HYPRE_PtrToParSolverFcn SolveFcn() const = 0;
+    /// hypre's internal Setup function
+    virtual HYPRE_PtrToParSolverFcn SetupFcn() const = 0;
+    /// hypre's internal Solve function
+    virtual HYPRE_PtrToParSolverFcn SolveFcn() const = 0;
 
-      virtual void SetOperator(const HypreParMatrix &/*op*/)
-      { MB_SET_ERR_RET("HypreSolvers do not support SetOperator!"); }
+    virtual void SetOperator( const HypreParMatrix& /*op*/ )
+    {
+        MB_SET_ERR_RET( "HypreSolvers do not support SetOperator!" );
+    }
 
-      virtual void GetFinalResidualNorm(double &normr) = 0;
+    virtual void GetFinalResidualNorm( double& normr ) = 0;
 
-      virtual void GetNumIterations(int &num_iterations) = 0;
+    virtual void GetNumIterations( int& num_iterations ) = 0;
 
-      /// Solve the linear system Ax=b
-      virtual HYPRE_Int Solve(const HypreParVector &b, HypreParVector &x) const;
+    /// Solve the linear system Ax=b
+    virtual HYPRE_Int Solve( const HypreParVector& b, HypreParVector& x ) const;
 
-      virtual ~HypreSolver();
-  };
+    virtual ~HypreSolver();
+};
 
 /// PCG solver in hypre
-  class HyprePCG : public HypreSolver
-  {
-    private:
-      HYPRE_Solver pcg_solver;
+class HyprePCG : public HypreSolver
+{
+  private:
+    HYPRE_Solver pcg_solver;
 
-    public:
-      HyprePCG(HypreParMatrix &_A);
+  public:
+    HyprePCG( HypreParMatrix& _A );
 
-      void SetTol(double tol);
-      void SetMaxIter(int max_iter);
-      void SetLogging(int logging);
-      virtual void Verbosity(int print_lvl);
+    void SetTol( double tol );
+    void SetMaxIter( int max_iter );
+    void SetLogging( int logging );
+    virtual void Verbosity( int print_lvl );
 
-      /// Set the hypre solver to be used as a preconditioner
-      virtual void SetPreconditioner(HypreSolver &precond);
+    /// Set the hypre solver to be used as a preconditioner
+    virtual void SetPreconditioner( HypreSolver& precond );
 
-      /** Use the L2 norm of the residual for measuring PCG convergence, plus
-          (optionally) 1) periodically recompute true residuals from scratch; and
-          2) enable residual-based stopping criteria. */
-      void SetResidualConvergenceOptions(int res_frequency = -1, double rtol = 0.0);
+    /** Use the L2 norm of the residual for measuring PCG convergence, plus
+        (optionally) 1) periodically recompute true residuals from scratch; and
+        2) enable residual-based stopping criteria. */
+    void SetResidualConvergenceOptions( int res_frequency = -1, double rtol = 0.0 );
 
-      /// non-hypre setting
-      void SetZeroInintialIterate() { iterative_mode = false; }
+    /// non-hypre setting
+    void SetZeroInintialIterate()
+    {
+        iterative_mode = false;
+    }
 
-      virtual void GetFinalResidualNorm(double &normr)
-      {
-        HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(pcg_solver,
-            &normr);
-      }
+    virtual void GetFinalResidualNorm( double& normr )
+    {
+        HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( pcg_solver, &normr );
+    }
 
-      virtual void GetNumIterations(int &num_iterations)
-      {
+    virtual void GetNumIterations( int& num_iterations )
+    {
         HYPRE_Int num_it;
-        HYPRE_ParCSRPCGGetNumIterations(pcg_solver, &num_it);
-        num_iterations = internal::to_int(num_it);
-      }
+        HYPRE_ParCSRPCGGetNumIterations( pcg_solver, &num_it );
+        num_iterations = internal::to_int( num_it );
+    }
 
-      /// The typecast to HYPRE_Solver returns the internal pcg_solver
-      virtual operator HYPRE_Solver() const { return pcg_solver; }
+    /// The typecast to HYPRE_Solver returns the internal pcg_solver
+    virtual operator HYPRE_Solver() const
+    {
+        return pcg_solver;
+    }
 
-      /// PCG Setup function
-      virtual HYPRE_PtrToParSolverFcn SetupFcn() const
-      { return (HYPRE_PtrToParSolverFcn) HYPRE_ParCSRPCGSetup; }
-      /// PCG Solve function
-      virtual HYPRE_PtrToParSolverFcn SolveFcn() const
-      { return (HYPRE_PtrToParSolverFcn) HYPRE_ParCSRPCGSolve; }
+    /// PCG Setup function
+    virtual HYPRE_PtrToParSolverFcn SetupFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)HYPRE_ParCSRPCGSetup;
+    }
+    /// PCG Solve function
+    virtual HYPRE_PtrToParSolverFcn SolveFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)HYPRE_ParCSRPCGSolve;
+    }
 
-      /// Solve Ax=b with hypre's PCG
-      virtual HYPRE_Int Solve(const HypreParVector &b, HypreParVector &x) const;
-      using HypreSolver::Solve;
+    /// Solve Ax=b with hypre's PCG
+    virtual HYPRE_Int Solve( const HypreParVector& b, HypreParVector& x ) const;
+    using HypreSolver::Solve;
 
-      virtual ~HyprePCG();
-  };
+    virtual ~HyprePCG();
+};
 
 /// GMRES solver in hypre
-  class HypreGMRES : public HypreSolver
-  {
-    private:
-      HYPRE_Solver gmres_solver;
+class HypreGMRES : public HypreSolver
+{
+  private:
+    HYPRE_Solver gmres_solver;
 
-    public:
-      HypreGMRES(HypreParMatrix &_A);
+  public:
+    HypreGMRES( HypreParMatrix& _A );
 
-      void SetTol(double atol, double rtol = 1e-20);
-      void SetMaxIter(int max_iter);
-      void SetKDim(int dim);
-      void SetLogging(int logging);
-      virtual void Verbosity(int print_lvl);
+    void SetTol( double atol, double rtol = 1e-20 );
+    void SetMaxIter( int max_iter );
+    void SetKDim( int dim );
+    void SetLogging( int logging );
+    virtual void Verbosity( int print_lvl );
 
-      /// Set the hypre solver to be used as a preconditioner
-      virtual void SetPreconditioner(HypreSolver &precond);
+    /// Set the hypre solver to be used as a preconditioner
+    virtual void SetPreconditioner( HypreSolver& precond );
 
-      /** Use the L2 norm of the residual for measuring PCG convergence, plus
-          (optionally) 1) periodically recompute true residuals from scratch; and
-          2) enable residual-based stopping criteria. */
-      void SkipRealResidualCheck()
-      {
-        HYPRE_GMRESSetSkipRealResidualCheck(gmres_solver, 1);
-      }
+    /** Use the L2 norm of the residual for measuring PCG convergence, plus
+        (optionally) 1) periodically recompute true residuals from scratch; and
+        2) enable residual-based stopping criteria. */
+    void SkipRealResidualCheck()
+    {
+        HYPRE_GMRESSetSkipRealResidualCheck( gmres_solver, 1 );
+    }
 
-      /// non-hypre setting
-      void SetZeroInintialIterate() { iterative_mode = false; }
+    /// non-hypre setting
+    void SetZeroInintialIterate()
+    {
+        iterative_mode = false;
+    }
 
-      virtual void GetFinalResidualNorm(double &normr)
-      {
-        HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(gmres_solver,
-            &normr);
-      }
+    virtual void GetFinalResidualNorm( double& normr )
+    {
+        HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm( gmres_solver, &normr );
+    }
 
-      virtual void GetNumIterations(int &num_iterations)
-      {
+    virtual void GetNumIterations( int& num_iterations )
+    {
         HYPRE_Int num_it;
-        HYPRE_GMRESGetNumIterations(gmres_solver, &num_it);
-        num_iterations = internal::to_int(num_it);
-      }
+        HYPRE_GMRESGetNumIterations( gmres_solver, &num_it );
+        num_iterations = internal::to_int( num_it );
+    }
 
-      /// The typecast to HYPRE_Solver returns the internal gmres_solver
-      virtual operator HYPRE_Solver() const  { return gmres_solver; }
+    /// The typecast to HYPRE_Solver returns the internal gmres_solver
+    virtual operator HYPRE_Solver() const
+    {
+        return gmres_solver;
+    }
 
-      /// GMRES Setup function
-      virtual HYPRE_PtrToParSolverFcn SetupFcn() const
-      { return (HYPRE_PtrToParSolverFcn) HYPRE_ParCSRGMRESSetup; }
-      /// GMRES Solve function
-      virtual HYPRE_PtrToParSolverFcn SolveFcn() const
-      { return (HYPRE_PtrToParSolverFcn) HYPRE_ParCSRGMRESSolve; }
+    /// GMRES Setup function
+    virtual HYPRE_PtrToParSolverFcn SetupFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)HYPRE_ParCSRGMRESSetup;
+    }
+    /// GMRES Solve function
+    virtual HYPRE_PtrToParSolverFcn SolveFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)HYPRE_ParCSRGMRESSolve;
+    }
 
-      /// Solve Ax=b with hypre's GMRES
-      virtual HYPRE_Int Solve(const HypreParVector &b, HypreParVector &x) const;
-      using HypreSolver::Solve;
+    /// Solve Ax=b with hypre's GMRES
+    virtual HYPRE_Int Solve( const HypreParVector& b, HypreParVector& x ) const;
+    using HypreSolver::Solve;
 
-      virtual ~HypreGMRES();
-  };
+    virtual ~HypreGMRES();
+};
 
 /// The identity operator as a hypre solver
-  class HypreIdentity : public HypreSolver
-  {
-    public:
-      virtual operator HYPRE_Solver() const { return NULL; }
+class HypreIdentity : public HypreSolver
+{
+  public:
+    virtual operator HYPRE_Solver() const
+    {
+        return NULL;
+    }
 
-      virtual HYPRE_PtrToParSolverFcn SetupFcn() const
-      { return (HYPRE_PtrToParSolverFcn) hypre_ParKrylovIdentitySetup; }
-      virtual HYPRE_PtrToParSolverFcn SolveFcn() const
-      { return (HYPRE_PtrToParSolverFcn) hypre_ParKrylovIdentity; }
+    virtual HYPRE_PtrToParSolverFcn SetupFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)hypre_ParKrylovIdentitySetup;
+    }
+    virtual HYPRE_PtrToParSolverFcn SolveFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)hypre_ParKrylovIdentity;
+    }
 
-      virtual void GetNumIterations(int &num_iterations)
-      { num_iterations = 1; }
+    virtual void GetNumIterations( int& num_iterations )
+    {
+        num_iterations = 1;
+    }
 
-      virtual void GetFinalResidualNorm(double &normr)
-      { normr = 0.0; }
+    virtual void GetFinalResidualNorm( double& normr )
+    {
+        normr = 0.0;
+    }
 
-      virtual ~HypreIdentity() { }
-  };
+    virtual ~HypreIdentity() {}
+};
 
 /// Jacobi preconditioner in hypre
-  class HypreDiagScale : public HypreSolver
-  {
-    public:
-      HypreDiagScale() : HypreSolver() { }
-      explicit HypreDiagScale(HypreParMatrix &A) : HypreSolver(&A) { }
-      virtual operator HYPRE_Solver() const { return NULL; }
+class HypreDiagScale : public HypreSolver
+{
+  public:
+    HypreDiagScale() : HypreSolver() {}
+    explicit HypreDiagScale( HypreParMatrix& A ) : HypreSolver( &A ) {}
+    virtual operator HYPRE_Solver() const
+    {
+        return NULL;
+    }
 
-      virtual HYPRE_PtrToParSolverFcn SetupFcn() const
-      { return (HYPRE_PtrToParSolverFcn) HYPRE_ParCSRDiagScaleSetup; }
-      virtual HYPRE_PtrToParSolverFcn SolveFcn() const
-      { return (HYPRE_PtrToParSolverFcn) HYPRE_ParCSRDiagScale; }
+    virtual HYPRE_PtrToParSolverFcn SetupFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)HYPRE_ParCSRDiagScaleSetup;
+    }
+    virtual HYPRE_PtrToParSolverFcn SolveFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)HYPRE_ParCSRDiagScale;
+    }
 
-      virtual void GetNumIterations(int &num_iterations)
-      { num_iterations = 1; }
+    virtual void GetNumIterations( int& num_iterations )
+    {
+        num_iterations = 1;
+    }
 
-      virtual void GetFinalResidualNorm(double &normr)
-      { normr = 0.0; }
+    virtual void GetFinalResidualNorm( double& normr )
+    {
+        normr = 0.0;
+    }
 
-      HypreParMatrix *GetData() { return A; }
-      virtual ~HypreDiagScale() { }
-  };
-
+    HypreParMatrix* GetData()
+    {
+        return A;
+    }
+    virtual ~HypreDiagScale() {}
+};
 
 /// The ParaSails preconditioner in hypre
-  class HypreParaSails : public HypreSolver
-  {
-    private:
-      HYPRE_Solver sai_precond;
+class HypreParaSails : public HypreSolver
+{
+  private:
+    HYPRE_Solver sai_precond;
 
-    public:
-      HypreParaSails(HypreParMatrix &A);
+  public:
+    HypreParaSails( HypreParMatrix& A );
 
-      void SetSymmetry(int sym);
+    void SetSymmetry( int sym );
 
-      virtual void GetNumIterations(int &num_iterations)
-      { num_iterations = 1; }
+    virtual void GetNumIterations( int& num_iterations )
+    {
+        num_iterations = 1;
+    }
 
-      virtual void GetFinalResidualNorm(double &normr)
-      { normr = 0.0; }
+    virtual void GetFinalResidualNorm( double& normr )
+    {
+        normr = 0.0;
+    }
 
-      /// The typecast to HYPRE_Solver returns the internal sai_precond
-      virtual operator HYPRE_Solver() const { return sai_precond; }
+    /// The typecast to HYPRE_Solver returns the internal sai_precond
+    virtual operator HYPRE_Solver() const
+    {
+        return sai_precond;
+    }
 
-      virtual HYPRE_PtrToParSolverFcn SetupFcn() const
-      { return (HYPRE_PtrToParSolverFcn) HYPRE_ParaSailsSetup; }
-      virtual HYPRE_PtrToParSolverFcn SolveFcn() const
-      { return (HYPRE_PtrToParSolverFcn) HYPRE_ParaSailsSolve; }
+    virtual HYPRE_PtrToParSolverFcn SetupFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)HYPRE_ParaSailsSetup;
+    }
+    virtual HYPRE_PtrToParSolverFcn SolveFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)HYPRE_ParaSailsSolve;
+    }
 
-      virtual ~HypreParaSails();
-  };
-
+    virtual ~HypreParaSails();
+};
 
 /// The BoomerAMG solver in hypre
-  class HypreBoomerAMG : public HypreSolver
-  {
-    private:
-      HYPRE_Solver amg_precond;
+class HypreBoomerAMG : public HypreSolver
+{
+  private:
+    HYPRE_Solver amg_precond;
 
-      /// Default, generally robust, BoomerAMG options
-      void SetDefaultOptions();
+    /// Default, generally robust, BoomerAMG options
+    void SetDefaultOptions();
 
-      // If amg_precond is NULL, allocates it and sets default options.
-      // Otherwise saves the options from amg_precond, destroys it, allocates a new
-      // one, and sets its options to the saved values.
-      void ResetAMGPrecond();
+    // If amg_precond is NULL, allocates it and sets default options.
+    // Otherwise saves the options from amg_precond, destroys it, allocates a new
+    // one, and sets its options to the saved values.
+    void ResetAMGPrecond();
 
-    public:
-      HypreBoomerAMG();
+  public:
+    HypreBoomerAMG();
 
-      HypreBoomerAMG(HypreParMatrix &A);
+    HypreBoomerAMG( HypreParMatrix& A );
 
-      virtual void SetOperator(const HypreParMatrix &op);
+    virtual void SetOperator( const HypreParMatrix& op );
 
-      virtual void GetNumIterations(int &num_iterations)
-      { num_iterations = 1; }
+    virtual void GetNumIterations( int& num_iterations )
+    {
+        num_iterations = 1;
+    }
 
-      virtual void GetFinalResidualNorm(double &normr)
-      { normr = 0.0; }
+    virtual void GetFinalResidualNorm( double& normr )
+    {
+        normr = 0.0;
+    }
 
-      /** More robust options for systems, such as elasticity. Note that BoomerAMG
-          assumes Ordering::byVDIM in the finite element space used to generate the
-          matrix A. */
-      void SetSystemsOptions(int dim);
+    /** More robust options for systems, such as elasticity. Note that BoomerAMG
+        assumes Ordering::byVDIM in the finite element space used to generate the
+        matrix A. */
+    void SetSystemsOptions( int dim );
 
-      virtual void Verbosity(int print_level)
-      { HYPRE_BoomerAMGSetPrintLevel(amg_precond, print_level); }
+    virtual void Verbosity( int print_level )
+    {
+        HYPRE_BoomerAMGSetPrintLevel( amg_precond, print_level );
+    }
 
-      /// The typecast to HYPRE_Solver returns the internal amg_precond
-      virtual operator HYPRE_Solver() const { return amg_precond; }
+    /// The typecast to HYPRE_Solver returns the internal amg_precond
+    virtual operator HYPRE_Solver() const
+    {
+        return amg_precond;
+    }
 
-      virtual HYPRE_PtrToParSolverFcn SetupFcn() const
-      { return (HYPRE_PtrToParSolverFcn) HYPRE_BoomerAMGSetup; }
-      virtual HYPRE_PtrToParSolverFcn SolveFcn() const
-      { return (HYPRE_PtrToParSolverFcn) HYPRE_BoomerAMGSolve; }
+    virtual HYPRE_PtrToParSolverFcn SetupFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)HYPRE_BoomerAMGSetup;
+    }
+    virtual HYPRE_PtrToParSolverFcn SolveFcn() const
+    {
+        return (HYPRE_PtrToParSolverFcn)HYPRE_BoomerAMGSolve;
+    }
 
-      virtual ~HypreBoomerAMG();
-  };
+    virtual ~HypreBoomerAMG();
+};
 
-}
+}  // namespace moab
 
-#endif // MOAB_HAVE_MPI
+#endif  // MOAB_HAVE_MPI
 
 #endif
