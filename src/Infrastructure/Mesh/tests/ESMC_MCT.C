@@ -356,8 +356,10 @@ class MCT {
     }
 
     ~MCT(){
-      if (mesh) delete mesh;
-      if (target) delete target;
+      // if (mesh) delete mesh;
+      if (mesh) MeshCap::destroy(&mesh, true);
+      // if (target) delete target;
+      if (target) MeshCap::destroy(&target, true);
       if (pl) delete pl;
       if (target_pl) delete target_pl;
       // if (serialize_buffer) delete serialize_buffer;

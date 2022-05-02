@@ -147,7 +147,9 @@ public:
   void AssimilateConstraints(const WMat &constraints);
 
   void AssimilateConstraintsNPnts(const WMat &constraints);
-  
+
+  void MultColsByAdjMat(const WMat &adj_mat);
+
   typedef std::map<Entry, std::vector<Entry> > WeightMap;
   
   WeightMap::iterator begin_row() { return weights.begin(); }

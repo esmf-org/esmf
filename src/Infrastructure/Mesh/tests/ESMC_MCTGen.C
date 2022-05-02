@@ -42,7 +42,7 @@ public:
 
   double UNINITVAL = -42;
 
-  std::map<std::string, std::function<MCT*(int&)>>  mesh_map;
+  std::map<std::string, std::function<std::shared_ptr<MCT>(int&)>>  mesh_map;
 
 MCTGen() {
   try {
@@ -71,7 +71,7 @@ MCTGen() {
 }
 
 
-MCT *quad_2d_cart(int &rc){
+std::shared_ptr<MCT> quad_2d_cart(int &rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "quad_2d_cart"
   //
@@ -90,7 +90,7 @@ MCT *quad_2d_cart(int &rc){
   //
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct_return = NULL;
 
   try {
 
@@ -173,7 +173,7 @@ MCT *quad_2d_cart(int &rc){
       }
     }
 
-    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn, dual_num_node, dual_num_elem, dual_num_elem_conn);
+     std::shared_ptr<MCT> mct (new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn, dual_num_node, dual_num_elem, dual_num_elem_conn));
 
     mct->name = ESMC_METHOD;
 
@@ -320,13 +320,15 @@ MCT *quad_2d_cart(int &rc){
       }
     }
 
+    mct_return = mct;
+
   } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mct;
+  return mct_return;
 }
 
-MCT *quad_2d_sph_deg(int &rc){
+std::shared_ptr<MCT> quad_2d_sph_deg(int &rc){
   //
   //  20.0  7 ------- 8 -------- 9
   //        |         |          |
@@ -344,7 +346,7 @@ MCT *quad_2d_sph_deg(int &rc){
 #define ESMC_METHOD "quad_2d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -384,7 +386,7 @@ MCT *quad_2d_sph_deg(int &rc){
   return mct;
 }
 
-MCT *quad_2d_sph_rad(int &rc){
+std::shared_ptr<MCT> quad_2d_sph_rad(int &rc){
   //
   //  pi/5  7 ------- 8 -------- 9
   //        |         |          |
@@ -402,7 +404,7 @@ MCT *quad_2d_sph_rad(int &rc){
 #define ESMC_METHOD "quad_2d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -443,7 +445,7 @@ MCT *quad_2d_sph_rad(int &rc){
   return mct;
 }
 
-MCT* tri_2d_cart(int &rc) {
+std::shared_ptr<MCT> tri_2d_cart(int &rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "tri_2d_cart"
   //
@@ -461,7 +463,7 @@ MCT* tri_2d_cart(int &rc) {
   //
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct_return = NULL;
 
   try {
 
@@ -552,7 +554,7 @@ MCT* tri_2d_cart(int &rc) {
       }
     }
 
-    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn, dual_num_node, dual_num_elem, dual_num_elem_conn);
+     std::shared_ptr<MCT> mct (new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn, dual_num_node, dual_num_elem, dual_num_elem_conn));
 
     mct->name = ESMC_METHOD;
 
@@ -689,13 +691,15 @@ MCT* tri_2d_cart(int &rc) {
       }
     }
 
+    mct_return = mct;
+
   } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mct;
+  return mct_return;
 }
 
-MCT *tri_2d_sph_deg(int &rc){
+std::shared_ptr<MCT> tri_2d_sph_deg(int &rc){
   //
   //  20    7 ------- 8 -------- 9
   //        |  \   6  |  7    /  |
@@ -713,7 +717,7 @@ MCT *tri_2d_sph_deg(int &rc){
 #define ESMC_METHOD "tri_2d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -753,7 +757,7 @@ MCT *tri_2d_sph_deg(int &rc){
   return mct;
 }
 
-MCT *tri_2d_sph_rad(int &rc){
+std::shared_ptr<MCT> tri_2d_sph_rad(int &rc){
   //
   //  pi/5  7 ------- 8 -------- 9
   //        |  \   6  |  7    /  |
@@ -771,7 +775,7 @@ MCT *tri_2d_sph_rad(int &rc){
 #define ESMC_METHOD "tri_2d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -812,12 +816,12 @@ MCT *tri_2d_sph_rad(int &rc){
   return mct;
 }
 
-MCT *hex_3d_cart(int &rc) {
+std::shared_ptr<MCT> hex_3d_cart(int &rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "hex_3d_cart"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct_return = NULL;
 
   try {
 
@@ -882,7 +886,7 @@ MCT *hex_3d_cart(int &rc) {
       }
     }
 
-    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    std::shared_ptr<MCT> mct (new  MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn));
 
     mct->name = ESMC_METHOD;
 
@@ -1061,18 +1065,20 @@ MCT *hex_3d_cart(int &rc) {
       }
     }
 
+    mct_return = mct;
+
   } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mct;
+  return mct_return;
 }
 
-MCT *hex_3d_sph_deg(int &rc) {
+std::shared_ptr<MCT> hex_3d_sph_deg(int &rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "hex_3d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -1114,12 +1120,12 @@ MCT *hex_3d_sph_deg(int &rc) {
   return mct;
 }
 
-MCT *hex_3d_sph_rad(int &rc) {
+std::shared_ptr<MCT> hex_3d_sph_rad(int &rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "hex_3d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -1162,7 +1168,7 @@ MCT *hex_3d_sph_rad(int &rc) {
   return mct;
 }
 
-MCT *mix_2d_cart(int &rc) {
+std::shared_ptr<MCT> mix_2d_cart(int &rc) {
   //
   //
   //  3.0   13 ------ 14 ------- 15 ------ 16
@@ -1185,7 +1191,7 @@ MCT *mix_2d_cart(int &rc) {
 #define ESMC_METHOD "mix_2d_cart_par"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct_return = NULL;
 
   try {
 
@@ -1253,7 +1259,7 @@ MCT *mix_2d_cart(int &rc) {
       }
     }
 
-    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    std::shared_ptr<MCT> mct (new  MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn));
 
     mct->name = ESMC_METHOD;
 
@@ -1401,14 +1407,16 @@ MCT *mix_2d_cart(int &rc) {
                                 1.0,1.75,1.75, 1.75};
       }
     }
+    
+    mct_return = mct;
 
   } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mct;
+  return mct_return;
 }
 
-MCT *mix_2d_sph_deg(int &rc) {
+std::shared_ptr<MCT> mix_2d_sph_deg(int &rc) {
   //
   //  3.0   13 ------ 14 ------- 15 ------ 16
   //        |         |          |         |
@@ -1430,7 +1438,7 @@ MCT *mix_2d_sph_deg(int &rc) {
 #define ESMC_METHOD "mix_2d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -1472,7 +1480,7 @@ MCT *mix_2d_sph_deg(int &rc) {
   return mct;
 }
 
-MCT *mix_2d_sph_rad(int &rc) {
+std::shared_ptr<MCT> mix_2d_sph_rad(int &rc) {
   //
   //  3.0   13 ------ 14 ------- 15 ------ 16
   //        |         |          |         |
@@ -1494,7 +1502,7 @@ MCT *mix_2d_sph_rad(int &rc) {
 #define ESMC_METHOD "mix_2d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -1537,7 +1545,7 @@ MCT *mix_2d_sph_rad(int &rc) {
   return mct;
 }
 
-MCT *ngon_2d_cart(int &rc) {
+std::shared_ptr<MCT> ngon_2d_cart(int &rc) {
   //
   //  3.1                    / -- 15 -- \
   //  3.0    13 ------ 14 --             -- 16
@@ -1560,7 +1568,7 @@ MCT *ngon_2d_cart(int &rc) {
 #define ESMC_METHOD "ngon_2d_cart"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct_return = NULL;
 
   try {
 
@@ -1643,7 +1651,7 @@ MCT *ngon_2d_cart(int &rc) {
       }
     }
 
-    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn, dual_num_node, dual_num_elem, dual_num_elem_conn);
+     std::shared_ptr<MCT> mct (new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn, dual_num_node, dual_num_elem, dual_num_elem_conn));
 
     mct->name = ESMC_METHOD;
 
@@ -1867,13 +1875,15 @@ MCT *ngon_2d_cart(int &rc) {
       }
     }
 
+    mct_return = mct;
+
   } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mct;
+  return mct_return;
 }
 
-MCT *ngon_2d_sph_deg(int &rc) {
+std::shared_ptr<MCT> ngon_2d_sph_deg(int &rc) {
   //
   //  3.1                    / -- 15 -- \
   //  3.0    13 ------ 14 --             -- 16
@@ -1896,7 +1906,7 @@ MCT *ngon_2d_sph_deg(int &rc) {
 #define ESMC_METHOD "ngon_2d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -1939,7 +1949,7 @@ MCT *ngon_2d_sph_deg(int &rc) {
   return mct;
 }
 
-MCT *ngon_2d_sph_rad(int &rc) {
+std::shared_ptr<MCT> ngon_2d_sph_rad(int &rc) {
   //
   //  3.1                    / -- 15 -- \
   //  3.0    13 ------ 14 --             -- 16
@@ -1962,7 +1972,7 @@ MCT *ngon_2d_sph_rad(int &rc) {
 #define ESMC_METHOD "ngon_2d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -2006,7 +2016,7 @@ MCT *ngon_2d_sph_rad(int &rc) {
   return mct;
 }
 
-MCT *ngon_quad_2d_cart(int &rc){
+std::shared_ptr<MCT> ngon_quad_2d_cart(int &rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ngon_quad_2d_cart"
   //
@@ -2025,7 +2035,7 @@ MCT *ngon_quad_2d_cart(int &rc){
   //
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct_return = NULL;
 
   try {
 
@@ -2089,7 +2099,7 @@ MCT *ngon_quad_2d_cart(int &rc){
       }
     }
 
-    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    std::shared_ptr<MCT> mct(new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn));
 
     mct->name = ESMC_METHOD;
 
@@ -2209,18 +2219,20 @@ MCT *ngon_quad_2d_cart(int &rc){
       }
     }
 
+    mct_return = mct;
+
   } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mct;
+  return mct_return;
 }
 
-MCT *ngon_quad_2d_sph_deg(int &rc){
+std::shared_ptr<MCT> ngon_quad_2d_sph_deg(int &rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ngon_quad_2d_sph_deg"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -2260,12 +2272,12 @@ MCT *ngon_quad_2d_sph_deg(int &rc){
   return mct;
 }
 
-MCT *ngon_quad_2d_sph_rad(int &rc){
+std::shared_ptr<MCT> ngon_quad_2d_sph_rad(int &rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ngon_quad_2d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
@@ -2307,7 +2319,7 @@ MCT *ngon_quad_2d_sph_rad(int &rc){
 }
 
 
-MCT *periodic_2d_sph_deg(int &rc){
+std::shared_ptr<MCT> periodic_2d_sph_deg(int &rc){
 #undef ESMC_METHOD
 #define ESMC_METHOD "periodic_2d_sph_deg"
   //
@@ -2337,7 +2349,7 @@ MCT *periodic_2d_sph_deg(int &rc){
   //
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct_return = NULL;
 
   try {
 
@@ -2402,7 +2414,7 @@ MCT *periodic_2d_sph_deg(int &rc){
       }
     }
 
-    mct = new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn);
+    std::shared_ptr<MCT> mct (new MCT(pdim, sdim, coord_sys, num_node, num_elem, num_elem_conn, redist_num_node, redist_num_elem, redist_num_elem_conn));
 
     mct->name = ESMC_METHOD;
 
@@ -2687,13 +2699,15 @@ MCT *periodic_2d_sph_deg(int &rc){
       }
     }
 
+    mct_return = mct;
+
   } CATCH_MCT_RETURN_NULL(&rc)
 
   rc = ESMF_SUCCESS;
-  return mct;
+  return mct_return;
 }
 
-MCT *periodic_2d_sph_rad(int &rc){
+std::shared_ptr<MCT> periodic_2d_sph_rad(int &rc){
   //
   //
   //  80    29----- 30----- 31----- 32----- 33    ----- 34----- 35----- 29
@@ -2722,7 +2736,7 @@ MCT *periodic_2d_sph_rad(int &rc){
 #define ESMC_METHOD "periodic_2d_sph_rad"
 
   rc = ESMF_RC_NOT_IMPL;
-  MCT *mct = NULL;
+  std::shared_ptr<MCT> mct = NULL;
 
   try {
 
