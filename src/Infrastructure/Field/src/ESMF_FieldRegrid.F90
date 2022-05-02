@@ -368,6 +368,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     polemethod, regridPoleNPnts, & 
                     lineType, &
                     normType, &
+                    ensureMonotonic, &
                     extrapMethod, &
                     extrapNumSrcPnts, &
                     extrapDistExponent, &
@@ -395,6 +396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                        intent(in),    optional :: regridPoleNPnts
       type(ESMF_LineType_Flag),       intent(in),    optional :: lineType
       type(ESMF_NormType_Flag),       intent(in),    optional :: normType
+      logical,                        intent(in),    optional :: ensureMonotonic
       type(ESMF_ExtrapMethod_Flag),   intent(in),    optional :: extrapMethod
       integer,                        intent(in),    optional :: extrapNumSrcPnts
       real(ESMF_KIND_R4),             intent(in),    optional :: extrapDistExponent
@@ -535,7 +537,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           This argument controls the type of normalization used when generating conservative weights. This option
 !           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE} or  {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE\_2ND}
 !           Please see  Section~\ref{opt:normType} for a 
-!           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}.
+!     \item [{[ensureMonotonic]}] 
+!           Some regrid methods are in principle monotonic, but due to rounding, etc. can be slighlty off. This flag
+!           causes the regridding to do the extra work to ensure as far as possible that the output for regridding is within
+!           the range of the inputs. If not specified, defaults to false. 
 !     \item [{[extrapMethod]}]
 !           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
 !           for a list of valid options. If not specified, defaults to 
@@ -695,6 +701,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer :: localExtrapNumLevels
         integer :: localExtrapNumInputLevels        
         logical :: localCheckFlag
+        logical :: localEnsureMonotonic
         type(ESMF_PoleMethod_Flag):: localpolemethod
         integer              :: localRegridPoleNPnts
         logical :: hasStatusArray
@@ -761,6 +768,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            localCheckFlag=checkFlag
         endif
 
+        ! Handle optional method argument
+        if (present(ensureMonotonic)) then
+           localEnsureMonotonic=ensureMonotonic
+        else     
+           localEnsureMonotonic=.false.
+        endif
+
+        
         ! Handle optional extrap method argument
         if (present(extrapMethod)) then
            localExtrapMethod=extrapMethod
@@ -940,8 +955,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
         endif
 
+        ! Monotonic is only available throught some methods right now
+        if (localEnsureMonotonic) then
+           if (.not. (lregridmethod .eq. ESMF_REGRIDMETHOD_BILINEAR) .or. &
+                .not. (lregridmethod .eq. ESMF_REGRIDMETHOD_NEAREST_STOD)) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg=" the ensureMonotonic capability is not currently available with this regrid method.", & 
+                   ESMF_CONTEXT, rcToReturn=rc)                 
+           endif
+        endif
 
-
+        
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         !!!! Get information (e.g. meshes) from Fields needed for regridding !!!!
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1154,6 +1178,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   dstMesh, dstArray, dstPointList, dstUsingPointList, &
                                   lregridmethod, &
                                   localLineType,localNormType, &
+                                  localEnsureMonotonic, &
                                   localpolemethod, localRegridPoleNPnts, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
@@ -1185,6 +1210,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   dstMesh, dstArray, dstPointList, dstUsingPointList, &
                                   lregridmethod, &
                                   localLineType, localNormType, &
+                                  localEnsureMonotonic, &
                                   localpolemethod, localRegridPoleNPnts, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &

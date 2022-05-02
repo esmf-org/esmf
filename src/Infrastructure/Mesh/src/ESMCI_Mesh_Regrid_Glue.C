@@ -94,8 +94,9 @@ void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
                      Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
                      int *regridMethod,
-                      int *map_type,
+                     int *map_type,
                      int *norm_type,
+                     int *_ensureMonotonic, 
                      int *regridPoleType, int *regridPoleNPnts,
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
@@ -127,6 +128,11 @@ void ESMCI_regrid_create(
   int has_statusArray=*_has_statusArray;
   ESMCI::Array *statusArray=*_statusArray;
 
+  bool ensureMonotonic=false;
+  if (_ensureMonotonic != NULL) {
+    if (*_ensureMonotonic != 0) ensureMonotonic=true;
+  }
+  
 #define PROGRESSLOG_off
 #define MEMLOG_off
 
@@ -375,12 +381,14 @@ void ESMCI_regrid_create(
 #endif
 
     // Normalize bilinear weights to ensure monotonicity
-    if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
-      // If R4 normalize to R4,...
-      if (dstarray.getTypekind() == ESMC_TYPEKIND_R4) {
-        normalize_weights<ESMC_R4>(wts);
-      } else { // ...otherwise just use R8.
-        normalize_weights<ESMC_R8>(wts);
+    if (ensureMonotonic) {
+      if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
+        // If R4 normalize to R4,...
+        if (dstarray.getTypekind() == ESMC_TYPEKIND_R4) {
+          normalize_weights<ESMC_R4>(wts);
+        } else { // ...otherwise just use R8.
+          normalize_weights<ESMC_R8>(wts);
+        }
       }
     }
     
@@ -527,8 +535,8 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
-    // If the dst is r4, then do things in R4
-    if (dstarray.getTypekind() == ESMC_TYPEKIND_R4) {
+    // If ensureMonotonic and R4, then use R4 weights
+    if (ensureMonotonic && (dstarray.getTypekind() == ESMC_TYPEKIND_R4)) {
 
       // Copy to R4 Array
       ESMC_R4 *factors_r4 = new ESMC_R4[num_entries];

@@ -275,6 +275,7 @@ namespace ESMCI {
       int *regridMethod,
       int *map_type,
       int *norm_type,
+      int *ensureMonotonic, 
       int *regridPoleType, int *regridPoleNPnts,
       int *extrapMethod,
       int *extrapNumSrcPnts,

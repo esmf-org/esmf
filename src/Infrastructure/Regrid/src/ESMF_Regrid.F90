@@ -150,6 +150,7 @@ end function my_xor
                  regridmethod, &
                  lineType, &
                  normType, &
+                 ensureMonotonic, &
                  polemethod, regridPoleNPnts, &
                  hasStatusArray, &
                  statusArray, &
@@ -180,6 +181,7 @@ end function my_xor
       type(ESMF_RegridMethod_Flag), intent(in)    :: regridmethod
       type(ESMF_LineType_Flag), intent(in)    :: lineType
       type(ESMF_NormType_Flag), intent(in)    :: normType
+      logical, intent(in)                    :: ensureMonotonic
       type(ESMF_PoleMethod_Flag), intent(in)      :: polemethod
       integer, intent(in)                    :: regridPoleNPnts
       type(ESMF_ExtrapMethod_Flag),   intent(in) :: extrapMethod
@@ -199,7 +201,8 @@ end function my_xor
       type(ESMF_Array)            :: statusArray
       logical :: checkFlag
       integer,                  intent(  out), optional :: rc
-!
+
+      
 ! !DESCRIPTION:
  !     The arguments are:
 !     \begin{description}
@@ -248,7 +251,7 @@ end function my_xor
        integer :: src_pl_used_int, dst_pl_used_int
        integer ::  has_statusArrayInt
        integer :: checkFlagInt
-
+       integer :: ensureMonotonicInt
 
        ! Logic to determine if valid optional args are passed.  
 
@@ -342,12 +345,18 @@ end function my_xor
        checkFlagInt=0
        if (checkFlag) checkFlagInt=1
 
+       ! Covert ensureMonotonic to int
+       ensureMonotonicInt=0
+       if (ensureMonotonic) ensureMonotonicInt=1
+
+       
         ! Call through to the C++ object that does the work
         call c_ESMC_regrid_create(srcMesh%this, srcArray, srcPointList, src_pl_used_int, &
                    dstMesh%this, dstArray, dstPointList, dst_pl_used_int, &
                    regridmethod,  &
                    lineType, &
                    normType, &
+                   ensureMonotonicInt, &
                    polemethod, regridPoleNPnts, &    
                    extrapMethod, &
                    extrapNumSrcPnts, &
