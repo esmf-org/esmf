@@ -20,6 +20,8 @@ PET*.ESMF_LogFile
 /src/include/
 /test/
 /examples/
+/src/Infrastructure/IO/PIO/Build/
+/src/Infrastructure/IO/PIO/Install/
 
 # protex generated files #
 ##########################
