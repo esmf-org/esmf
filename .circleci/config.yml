@@ -297,7 +297,7 @@ jobs:
 
   build-esmpy-docs:
     docker:
-      - image: cimg/base:2020.01
+      - image: cimg/base:stable
     steps:
       - setup_remote_docker
       - run:
