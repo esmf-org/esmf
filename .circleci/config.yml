@@ -220,7 +220,7 @@ jobs:
             - test-coverage-{{ .Revision }}
       - add_ssh_keys:
           fingerprints:
-            - "49:10:da:8a:3d:c0:2e:14:db:ab:93:56:d5:4e:74:67"
+            - "4a:f2:d9:dd:d6:2a:4e:fd:79:06:72:29:4c:d9:c0:8c"
       - run:
           name: Prep Test Coverage
           command: cd /tmp/artifacts && unzip test_coverage-artifacts.zip
@@ -270,7 +270,7 @@ jobs:
             - api-change-{{ .Revision }}
       - add_ssh_keys:
           fingerprints:
-            - "49:10:da:8a:3d:c0:2e:14:db:ab:93:56:d5:4e:74:67"
+            - "4a:f2:d9:dd:d6:2a:4e:fd:79:06:72:29:4c:d9:c0:8c"
       - run:
           name: Prep API Changes
           command: cd /tmp/artifacts && unzip api_change-artifacts.zip
