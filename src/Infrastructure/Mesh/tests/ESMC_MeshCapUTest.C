@@ -87,7 +87,7 @@ void combine(const std::string &api, const std::string &mesh,
         
         test->name = name;
         test->nativeormb = nvmb;
-        test->verbosity = 1;
+        // test->verbosity = 1;
         // test->tol = 1.e-15;
         // test->print();
 
@@ -145,13 +145,13 @@ int main(int argc, char *argv[]) {
   bool mbmesh = false;
   mbmesh = true;
   bool native = false;
-  // native = true;
+  native = true;
 
   // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis;
     test_apis.push_back("createget");
     // dual not working after ngon connectivity changes
-    // test_apis.push_back("dual");
+    test_apis.push_back("dual");
     test_apis.push_back("redist_elem");
     test_apis.push_back("redist_node");
     test_apis.push_back("redist_elno");
@@ -197,12 +197,11 @@ int main(int argc, char *argv[]) {
     {"dual", "hex_3d_sph_rad"},  };
 
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
-    // dual mix is giving segv in parllel for meshes with triangles
-    // is_split is being set in MBMesh_detect_split_elems somehow
+    // dual with tri failing due to funky dual mesh generation
     {"dual", "mix_2d_cart"},
     {"dual", "mix_2d_sph_deg"},
     {"dual", "mix_2d_sph_rad"},
-    // {"dual", "tri_2d_cart"},
+    {"dual", "tri_2d_cart"},
     {"dual", "tri_2d_sph_deg"},
     {"dual", "tri_2d_sph_rad"},
     // ESMCI_MBMesh_Redist.C, line:2336:Could not find a suitable processor for this element

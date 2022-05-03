@@ -2421,9 +2421,6 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     int num_elems = meshp->num_orig_elem();
     int orig_sdim = meshp->orig_sdim;
     
-    int num_elem_conn;
-    MBMesh_GetElemConnCount(meshp, &num_elem_conn, &localrc);
-    ESMC_CHECK_PASSTHRU_THROW(localrc);
     ////// Error check input arrays //////
 
     if (present(elemIds)) {
@@ -2441,6 +2438,10 @@ void MBMesh_GetElemCreateInfo(MBMesh *meshp,
     }
 
     if (present(elemConn)) {
+      int num_elem_conn;
+      MBMesh_GetElemConnCount(meshp, &num_elem_conn, &localrc);
+      ESMC_CHECK_PASSTHRU_THROW(localrc);
+
       if (elemConn->dimCount !=1)
         Throw () << "elemConn array must be 1D";
       if (elemConn->extent[0] != num_elem_conn)

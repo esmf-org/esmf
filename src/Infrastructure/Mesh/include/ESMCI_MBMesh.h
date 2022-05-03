@@ -115,7 +115,6 @@ namespace ESMCI {
   private:
     int _num_node;
     int _num_elem;
-    // int _num_elem_conn;
     int _num_orig_node;
     int _num_orig_elem;
     int _num_owned_node;
