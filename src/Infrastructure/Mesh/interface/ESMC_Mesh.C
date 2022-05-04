@@ -391,8 +391,8 @@ void ESMC_MeshGetConnectivity(ESMC_Mesh mesh, double *connCoord,
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_MeshGetLocalNodeCount()"
-int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int *num_nodes){
+#define ESMC_METHOD "ESMC_MeshGetNodeCount()"
+int ESMC_MeshGetNodeCount(ESMC_Mesh mesh, int *num_nodes){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
@@ -439,8 +439,8 @@ int ESMC_MeshGetOwnedNodeCount(ESMC_Mesh mesh, int *num_nodes){
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_MeshGetLocalElementCount()"
-int ESMC_MeshGetLocalElementCount(ESMC_Mesh mesh, int *num_elems){
+#define ESMC_METHOD "ESMC_MeshGetElementCount()"
+int ESMC_MeshGetElementCount(ESMC_Mesh mesh, int *num_elems){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
