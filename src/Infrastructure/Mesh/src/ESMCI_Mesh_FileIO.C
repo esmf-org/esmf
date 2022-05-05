@@ -425,8 +425,8 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
     piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
-    //    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
-    //                   ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
 
     //// Get VM Info
@@ -727,12 +727,17 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     int pioFileDesc;
     int mode = 0;
     piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
+    // if the file was created with netcdf4, it cannot be opened with pnetcdf
+    if (piorc == PIO_EINVAL){
+        pio_type = PIO_IOTYPE_NETCDF;
+        piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
+    }
     if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
     piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
-    //    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
-    //                   ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
 
     //// Get VM Info

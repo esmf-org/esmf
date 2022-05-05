@@ -242,6 +242,10 @@ void get_numElementConn_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, c
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
     
+    piorc = PIOc_setframe(pioFileDesc, varid, -1);
+    if (!CHECKPIOERROR(piorc, std::string("Error setting frame for numElementConn variable ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
     char *char_numElementConn=new char[num_elems];
     piorc = PIOc_read_darray(pioFileDesc, varid, nec_iodesc, num_elems, char_numElementConn);
     if (!CHECKPIOERROR(piorc, std::string("Error reading numElementConn variable from file ") + filename,
@@ -272,6 +276,9 @@ void get_numElementConn_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, c
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
     
+    piorc = PIOc_setframe(pioFileDesc, varid, -1);
+    if (!CHECKPIOERROR(piorc, std::string("Error setting frame for numElementConn variable ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
     numElementConn=new int[num_elems];
     piorc = PIOc_read_darray(pioFileDesc, varid, nec_iodesc, num_elems, numElementConn);
     if (!CHECKPIOERROR(piorc, std::string("Error reading numElementConn variable from file ") + filename,
@@ -512,6 +519,10 @@ void get_elemConn_info_1Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
   if (!CHECKPIOERROR(piorc, std::string("Error elementConn variable not in file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
   
+  piorc = PIOc_setframe(pioFileDesc, varid, -1);
+  if (!CHECKPIOERROR(piorc, std::string("Error setting frame for variable elementConn ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+    
   elementConn= new int[totNumElementConn];
   piorc = PIOc_read_darray(pioFileDesc, varid, ec_iodesc, totNumElementConn, elementConn);
   if (!CHECKPIOERROR(piorc, std::string("Error reading variable elementConn from file ") + filename,
@@ -599,6 +610,10 @@ void get_elemConn_info_2Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
   piorc = PIOc_inq_varid(pioFileDesc, "elementConn", &varid);
   if (!CHECKPIOERROR(piorc, std::string("Error elementConn variable not in file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+  piorc = PIOc_setframe(pioFileDesc, varid, -1);
+  if (!CHECKPIOERROR(piorc, std::string("Error setting frame for variable elementConn ") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
   
   elementConn= new int[totNumElementConn];
   piorc = PIOc_read_darray(pioFileDesc, varid, ec_iodesc, totNumElementConn, elementConn);
@@ -729,9 +744,12 @@ void get_nodeCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char 
     if (!CHECKPIOERROR(piorc, std::string("Error nodeCoords variable not in file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
+    piorc = PIOc_setframe(pioFileDesc, varid, -1);
+    if (!CHECKPIOERROR(piorc, std::string("Error setting frame for nodeCoords variable") + filename,
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
     // Get nodeCoords
     nodeCoords= new double[num_nodes*coordDim];
-
     piorc = PIOc_read_darray(pioFileDesc, varid, node_iodesc, num_nodes*coordDim, nodeCoords);
     if (!CHECKPIOERROR(piorc, std::string("Error with finding nodeCoords variable in file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;
@@ -786,6 +804,10 @@ void get_nodeMask_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *f
 
       // Get rid of offsets
       delete [] nm_offsets;
+
+      piorc = PIOc_setframe(pioFileDesc, varid, -1);
+      if (!CHECKPIOERROR(piorc, std::string("Error setting frame for nodeMask variable ") + filename,
+                         ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
       // Allocate space
       nodeMask=new int[num_nodes];
@@ -847,6 +869,10 @@ void get_elementMask_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char
     // Get rid of offsets
     delete [] em_offsets;
     
+    piorc = PIOc_setframe(pioFileDesc, varid, -1);
+    if (!CHECKPIOERROR(piorc, std::string("Error setting frame for elementMask variable ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
     // Allocate space
     elementMask=new int[num_elems];
     
@@ -915,6 +941,10 @@ void get_elementArea_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char
     // record that area present
     areaPresent=1;
     
+    piorc = PIOc_setframe(pioFileDesc, varid, -1);
+    if (!CHECKPIOERROR(piorc, std::string("Error setting frame for elementArea variable ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
     // Allocate space to hold area
     elementArea=new double[num_elems];
     
@@ -983,6 +1013,9 @@ void get_centerCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, cha
     
     // Record the centerCoords present
     centerCoordsPresent=1;
+    piorc = PIOc_setframe(pioFileDesc, varid, -1);
+    if (!CHECKPIOERROR(piorc, std::string("Error setting frame for variable centerCoords ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
     
     // Allocate space
     centerCoords=new double[num_elems*coordDim];
