@@ -6282,7 +6282,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !      the given timeslice will be overwritten.
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
-!    \end{description}
 !    \end{sloppypar}
 !   \item[{[status]}]
 !    \begin{sloppypar}
