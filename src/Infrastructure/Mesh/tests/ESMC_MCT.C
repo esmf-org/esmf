@@ -356,8 +356,10 @@ class MCT {
     }
 
     ~MCT(){
-      if (mesh) delete mesh;
-      if (target) delete target;
+      // if (mesh) delete mesh;
+      if (mesh) MeshCap::destroy(&mesh, true);
+      // if (target) delete target;
+      if (target) MeshCap::destroy(&target, true);
       if (pl) delete pl;
       if (target_pl) delete target_pl;
       // if (serialize_buffer) delete serialize_buffer;
@@ -539,9 +541,9 @@ class MCT {
         localrc = test_get_info(mesh);
         ESMC_CHECK_THROW(localrc);
 
-        // // verify dual info on target
-        // localrc = test_dual_info();
-        // ESMC_CHECK_THROW(localrc);
+        // verify dual info on target
+        localrc = test_dual_info();
+        ESMC_CHECK_THROW(localrc);
 
         // localrc = write_vtk();
         // ESMC_CHECK_THROW(localrc);
@@ -1190,9 +1192,9 @@ class MCT {
       return rc;
     }
 
-    int test_get_counts(MeshCap *mesh){
+    int test_get_count(MeshCap *mesh){
 #undef ESMC_METHOD
-#define ESMC_METHOD "MCT::test_get_counts()"
+#define ESMC_METHOD "MCT::test_get_count()"
       // RETURN: rc : pass(0) fail(>0)
       int rc = ESMF_FAILURE;
       bool correct = true;
@@ -1256,6 +1258,42 @@ class MCT {
         correct = false;
       }
 
+      // int elemConnCount;
+      // mesh->getElemConnCount(&elemConnCount, &localrc);
+      // ESMC_CHECK_THROW(localrc);
+
+      // if (elemConnCount != num_elem_conn) {
+      //   std::cout << localPet << "# " << name  << " - "
+      //             << "elemConnCount = " << elemConnCount
+      //             << " (correct = " << num_elem_conn << ")" << std::endl;
+      //   correct = false;
+      // }
+
+      if (verbosity >= 2) {
+        std::cout << localPet << "# " << name  << " - "
+                  << "nodeCount = " << nodeCount
+                  << " elemCount = " << elemCount
+                  << std::endl;
+                  // << " elemConnCount = " << elemConnCount << std::endl;
+      }
+
+      }
+      CATCH_MCT_RETURN_RC(&rc)
+
+      if(correct == true) rc = ESMF_SUCCESS;
+      return rc;
+    }
+
+    int test_get_conn_count(MeshCap *mesh){
+#undef ESMC_METHOD
+#define ESMC_METHOD "MCT::test_get_conn_count()"
+      // RETURN: rc : pass(0) fail(>0)
+      int rc = ESMF_FAILURE;
+      bool correct = true;
+
+      try {
+      int localrc;
+
       int elemConnCount;
       mesh->getElemConnCount(&elemConnCount, &localrc);
       ESMC_CHECK_THROW(localrc);
@@ -1269,8 +1307,6 @@ class MCT {
 
       if (verbosity >= 2) {
         std::cout << localPet << "# " << name  << " - "
-                  << "nodeCount = " << nodeCount
-                  << " elemCount = " << elemCount
                   << " elemConnCount = " << elemConnCount << std::endl;
       }
 
@@ -1754,30 +1790,42 @@ class MCT {
       mesh->getElemCreateInfo(NULL, NULL, ecni, NULL, NULL, NULL, &localrc);
       ESMC_CHECK_THROW(localrc);
 
-      test = "ElemConn";
-      fail_print = false;
-      for (int i=0; i<ecni->extent[0]; ++i) {
-        print = false;
-        if (ecni->array[i] != elemConn[i]) {
-          correct = false;
-          print = true;
-          fail_print = true;
+      // find the correct elem to start the rotation
+      int rotation_start = ecni->array[0];
+      
+      auto it = std::find(elemConn.begin(), elemConn.end(), rotation_start);
+      
+      
+      if (it == elemConn.end()) correct = false;
+      else {
+        
+        std::rotate(elemConn.begin(), it, elemConn.end());
+        
+        test = "ElemConn";
+        fail_print = false;
+        for (int i=0; i<ecni->extent[0]; ++i) {
+          print = false;
+          if (ecni->array[i] != elemConn[i]) {
+            correct = false;
+            print = true;
+            fail_print = true;
+          }
+          if (print && verbosity >= 3)
+            std::cout << localPet << "# " << name  << " - "
+                      << "elem_conn[" << i << "] = "
+                      << ecni->array[i] << " (correct = " << elemConn[i] << ")"
+                      << std::endl;
         }
-        if (print && verbosity >= 3)
-          std::cout << localPet << "# " << name  << " - "
-                    << "elem_conn[" << i << "] = "
-                    << ecni->array[i] << " (correct = " << elemConn[i] << ")"
-                    << std::endl;
-      }
-      if (verbosity >= 1) {
-        if (!fail_print) std::cout<< pass << test << std::endl;
-        else std::cout << fail << test << std::endl;
-      }
-      if (verbosity >= 3) {
-        std::cout << "elem_conn = [";
-        for (int i=0; i<ecni->extent[0]; ++i)
-          std::cout << ecni->array[i] << " ";
-        std::cout << "]" << std::endl;
+        if (verbosity >= 1) {
+          if (!fail_print) std::cout<< pass << test << std::endl;
+          else std::cout << fail << test << std::endl;
+        }
+        if (verbosity >= 3) {
+          std::cout << "elem_conn = [";
+          for (int i=0; i<ecni->extent[0]; ++i)
+            std::cout << ecni->array[i] << " ";
+          std::cout << "]" << std::endl;
+        }
       }
 
       delete ecni;
@@ -1798,7 +1846,10 @@ class MCT {
       try {
         int localrc;
 
-        localrc = test_get_counts(mesh);
+        localrc = test_get_count(mesh);
+        ESMC_CHECK_THROW(localrc);
+
+        localrc = test_get_conn_count(mesh);
         ESMC_CHECK_THROW(localrc);
 
         localrc = test_get_presence(mesh);
@@ -1876,7 +1927,10 @@ class MCT {
         localrc = transfer_dual_info();
         ESMC_CHECK_THROW(localrc);
 
-        localrc = test_get_counts(target);
+        localrc = test_get_count(target);
+        ESMC_CHECK_THROW(localrc);
+
+        localrc = test_get_conn_count(target);
         ESMC_CHECK_THROW(localrc);
 
         // dual does not yet have elem masking
@@ -1966,9 +2020,10 @@ class MCT {
         // if (name.find("ngon") == std::string::npos) {
           // in the node redist case there are more elements created
           // really need to subclass MCT to allow different specs
-          if (!(check_node and !check_elem))
-            localrc = test_get_counts(target);
-        // }
+          if (!(check_node and !check_elem)) {
+            localrc = test_get_count(target);
+            localrc = test_get_conn_count(target);
+        }
         ESMC_CHECK_THROW(localrc);
 
       /////////////////// node create info ////////////////////////////

@@ -129,33 +129,27 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     {
     // Get a range containing all nodes
     Range range_node;
-    merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
-    ESMC_CHECK_MOAB_THROW(merr);
+    src_mesh->get_all_nodes(range_node);
 
     int nn = 0;
     int on = 0;
     for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
       ++nn;
-      const EntityHandle *node=&(*it);
-      int owner;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
-      ESMC_CHECK_MOAB_THROW(merr);
+      const EntityHandle node=*it;
+      int owner = src_mesh->get_owner(node);
       if (owner != Par::Rank()) on++;
     }
 
     // Get a range containing all elems
     Range range_elem;
-    merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->pdim,range_elem);
-    ESMC_CHECK_MOAB_THROW(merr);
+    src_mesh->get_all_elems(range_elem);
 
     int ne = 0;
     int oe = 0;
     for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
       ++ne;
-      const EntityHandle *elem=&(*it);
-      int owner;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, elem, 1, &owner);
-      ESMC_CHECK_MOAB_THROW(merr);
+      const EntityHandle elem=*it;
+      int owner = src_mesh->get_owner(elem);
       if (owner != Par::Rank()) oe++;
     }
 
@@ -169,7 +163,6 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     sprintf(fname, "MBMeshBeforeGhost_%d", Par::Rank());
     MBMesh_write(&mbptr, fname, rc, len);}
 #endif
-
 
     // TODO: add elem mask fields and mask_val fields   
     src_mesh->CreateGhost();
@@ -185,33 +178,27 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     {
     // Get a range containing all nodes
     Range range_node;
-    merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
-    ESMC_CHECK_MOAB_THROW(merr);
+    src_mesh->get_all_nodes(range_node);
 
     int nn = 0;
     int on = 0;
     for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
       ++nn;
-      const EntityHandle *node=&(*it);
-      int owner;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
-      ESMC_CHECK_MOAB_THROW(merr);
+      const EntityHandle node=*it;
+      int owner = src_mesh->get_owner(node);
       if (owner != Par::Rank()) on++;
     }
 
     // Get a range containing all elems
     Range range_elem;
-    merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->pdim,range_elem);
-    ESMC_CHECK_MOAB_THROW(merr);
+    src_mesh->get_all_elems(range_elem);
 
     int ne = 0;
     int oe = 0;
     for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
       ++ne;
-      const EntityHandle *elem=&(*it);
-      int owner;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, elem, 1, &owner);
-      ESMC_CHECK_MOAB_THROW(merr);
+      const EntityHandle elem=*it;
+      int owner = src_mesh->get_owner(elem);
       if (owner != Par::Rank()) oe++;
     }
 
@@ -219,32 +206,26 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     }
 #endif
   
-
 #ifdef DEBUG_CONNECTIVITY_ADJACENCIES
     {
     // Get a range containing all nodes
     Range range_node;
-    merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
-    ESMC_CHECK_MOAB_THROW(merr);
+    src_mesh->get_all_nodes(range_node);
 
     for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
-      const EntityHandle *node=&(*it);
+      const EntityHandle node=*it;
 
       Range adjs;
-      merr = src_mesh->mesh->get_adjacencies(node, 1, src_mesh->pdim, false, adjs);
+      merr = src_mesh->mesh->get_adjacencies(&node, 1, src_mesh->pdim, false, adjs);
       ESMC_CHECK_MOAB_THROW(merr);
 
-      {int nid;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
-      ESMC_CHECK_MOAB_THROW(merr);
+      {int nid = src_mesh->get_gid(node);
       printf("%d# mesh node id %d, adjacencies %d [", Par::Rank(), nid, adjs.size());
       for(Range::iterator it=adjs.begin(); it !=adjs.end(); it++) {
-        const EntityHandle *elem=&(*it);
+        const EntityHandle elem=*it;
         
         // Get element id
-        int elem_id;
-        merr = src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-        ESMC_CHECK_MOAB_THROW(merr);
+        int elem_id = src_mesh->get_gid(elem);
         
         printf("%d, ", elem_id);
       }
@@ -280,8 +261,6 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     // Get a range containing all elements
     Range src_elems;
     src_mesh->get_all_elems(src_elems);
-    // merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->pdim,range_elem);
-    // ESMC_CHECK_MOAB_THROW(merr);
 
     std::map<int,int> id_to_index;
     int pos=0;
@@ -290,8 +269,6 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
       // Get element id
       int elem_id = src_mesh->get_gid(elem);
-      // merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-      // ESMC_CHECK_MOAB_THROW(merr);
 
       // Translate id if split
       if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
@@ -352,11 +329,9 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     // Get a range containing all nodes
     Range src_nodes;
     src_mesh->get_all_nodes(src_nodes);
-    // merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
-    // ESMC_CHECK_MOAB_THROW(merr);
 
     for(Range::iterator it=src_nodes.begin(); it !=src_nodes.end(); it++) {
-      EntityHandle node= *it;
+      EntityHandle node = *it;
       
       // Only do local nodes
       // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
@@ -374,17 +349,13 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       num_node_elems = adjs.size();
 
 #ifdef DEBUG_CONNECTIVITY_ADJACENCIES
-      {int nid;
-      merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, &node, 1, &nid);
-      ESMC_CHECK_MOAB_THROW(merr);
+      {int nid = src_mesh->get_gid(node);
       printf("%d# mesh node id %d, adjacencies %d [", Par::Rank(), nid, num_node_elems);
       for(Range::iterator it=adjs.begin(); it !=adjs.end(); it++) {
-        EntityHandle elem= *it;
+        EntityHandle elem = *it;
         
         // Get element id
-        int elem_id;
-        merr = src_mesh->mesh->tag_get_data(src_mesh->gid_tag, &elem, 1, &elem_id);
-        ESMC_CHECK_MOAB_THROW(merr);
+        int elem_id = src_mesh->get_gid(elem);
         
         printf("%d, ", elem_id);
       }
@@ -451,8 +422,6 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
 #ifdef DEBUG_UNIQUE_ELEMS
       {int nid = src_mesh->get_gid(node);
-      // merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
-      // ESMC_CHECK_MOAB_THROW(merr);
       printf("%d# mesh node id %d, unique elems %d [", Par::Rank(), nid, num_elems_around_node_ids);
       for (int i=0; i<num_elems_around_node_ids; i++) {  
         printf("%d, ", elems_around_node_ids[i]);
@@ -468,14 +437,10 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       
       // Save elemId
       int elem_id = src_mesh->get_gid(node);
-      // merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &elem_id);
-      // ESMC_CHECK_MOAB_THROW(merr);
       elemId[num_elems]=elem_id;
 
       // Save owner
       int owner = src_mesh->get_owner(node);
-      // merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
-      // ESMC_CHECK_MOAB_THROW(merr);
       elemOwner[num_elems]=owner;
       
       // Next elem
@@ -536,21 +501,17 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     }
 
 #ifdef DEBUG_CONNECTIVITY
-    {Range elemss;
-    merr=src_mesh->mesh->get_entities_by_dimension(0, src_mesh->pdim, elemss);
-    ESMC_CHECK_MOAB_THROW(merr);
+    {Range elemss; src_mesh->get_all_elems(elemss);
     printf("%d# range size = %d\n", localPet, elemss.size());}
 #endif
 
     pos=0;
     int data_index=0;
     for(Range::iterator it=src_elems.begin(); it !=src_elems.end(); it++) {
-      EntityHandle elem= *it;
+      EntityHandle elem = *it;
 
       // Get element id
       int elem_id = src_mesh->get_gid(elem);
-      // merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-      // ESMC_CHECK_MOAB_THROW(merr);
 
       // Translate id if split
       if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
@@ -564,8 +525,6 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
       // Get owner
       int owner = src_mesh->get_owner(elem);
-      // merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, elem, 1, &owner);
-      // ESMC_CHECK_MOAB_THROW(merr);
 
       // Translate owner if split
       // (Interestingly we DON'T have to translate the owner for
@@ -647,8 +606,6 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     if (dual_mesh->has_node_mask) {
       Range dual_nodes;
       dual_mesh->get_all_nodes(dual_nodes);
-      // merr=dual_mesh->mesh->get_entities_by_dimension(0, 0, nodes);
-      // ESMC_CHECK_MOAB_THROW(merr);
 
       int num_verts = dual_nodes.size();
       int src_node_mask[num_verts];
@@ -673,8 +630,6 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
       printf("]\n");
     }
 #endif
-
-
 
     // Check for Split 
     // Count the number of extra elements we need for splitting
@@ -911,13 +866,12 @@ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
     }
 
 #ifdef DEBUG_CONNECTIVITY
-    printf("PET %d verts [", localPet);
-    for (int i=0; i<dual_mesh->num_verts; ++i) {
-      int nid = dual_mesh->get_gid(&dual_mesh->verts[i]);
-      // merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, &dual_mesh->verts[i], 1, &nid);
-      printf("%d, ", nid);
-    }
-    printf("]\n");
+    // printf("PET %d verts [", localPet);
+    // for (int i=0; i<dual_mesh->num_verts; ++i) {
+    //   int nid = dual_mesh->get_gid(&dual_mesh->verts[i]);
+    //   printf("%d, ", nid);
+    // }
+    // printf("]\n");
 #endif
 
     // Now loop the elements and add them to the mesh.

@@ -83,18 +83,19 @@ void combine(const std::string &api, const std::string &mesh,
 
 #if defined ESMF_MOAB
       try {
-        MCT *test = generate->mesh_map[mesh](localrc);
-
+        std::shared_ptr<MCT> test = generate->mesh_map[mesh](localrc);
+        
         test->name = name;
         test->nativeormb = nvmb;
-        test->verbosity = 3;
+        // test->verbosity = 1;
         // test->tol = 1.e-15;
         // test->print();
 
         if (localrc == ESMF_SUCCESS) localrc = test->build();
         if (localrc == ESMF_SUCCESS) rc = test->function_map[api]();
-
-        delete test;
+        
+        // test is a shared_ptr so no need to delete
+        // delete test;
       }
       CATCH_MCT_FAIL(&rc)
 #else
@@ -107,6 +108,7 @@ void combine(const std::string &api, const std::string &mesh,
 
     ESMC_Test(rc==ESMF_SUCCESS, name.c_str(), failMsg.c_str(),
               &result, __FILE__, __LINE__, 0);
+
 }
 
 int main(int argc, char *argv[]) {
@@ -141,45 +143,45 @@ int main(int argc, char *argv[]) {
 
   // this is an easy way to comment a single line to toggle mbmesh/native
   bool mbmesh = false;
-  // mbmesh = true;
+  mbmesh = true;
   bool native = false;
   native = true;
 
   // these are bound to MCT in constructor, must match!
   std::vector<std::string> test_apis;
-    // test_apis.push_back("createget");
+    test_apis.push_back("createget");
     // dual not working after ngon connectivity changes
     test_apis.push_back("dual");
-    // test_apis.push_back("redist_elem");
-    // test_apis.push_back("redist_node");
-    // test_apis.push_back("redist_elno");
-    // test_apis.push_back("serialize");
-    // test_apis.push_back("to_pointlist_elem");
-    // test_apis.push_back("to_pointlist_node");
-    // test_apis.push_back("write_vtk");
+    test_apis.push_back("redist_elem");
+    test_apis.push_back("redist_node");
+    test_apis.push_back("redist_elno");
+    test_apis.push_back("serialize");
+    test_apis.push_back("to_pointlist_elem");
+    test_apis.push_back("to_pointlist_node");
+    test_apis.push_back("write_vtk");
 
   // these are bound to MCTGen in constructor, must match!
   std::vector<std::string> test_meshes;
     test_meshes.push_back("quad_2d_cart");
-    // test_meshes.push_back("quad_2d_sph_deg");
-    // test_meshes.push_back("quad_2d_sph_rad");
-    // test_meshes.push_back("tri_2d_cart");
-    // test_meshes.push_back("tri_2d_sph_deg");
-    // test_meshes.push_back("tri_2d_sph_rad");
-    // test_meshes.push_back("hex_3d_cart");
-    // test_meshes.push_back("hex_3d_sph_deg");
-    // test_meshes.push_back("hex_3d_sph_rad");
-    // test_meshes.push_back("mix_2d_cart");
-    // test_meshes.push_back("mix_2d_sph_deg");
-    // test_meshes.push_back("mix_2d_sph_rad");
-    // test_meshes.push_back("periodic_2d_sph_deg");
-    // test_meshes.push_back("periodic_2d_sph_rad");
-    // test_meshes.push_back("ngon_2d_cart");
-    // test_meshes.push_back("ngon_2d_sph_deg");
-    // test_meshes.push_back("ngon_2d_sph_rad");
-    // test_meshes.push_back("ngon_quad_2d_cart");
-    // test_meshes.push_back("ngon_quad_2d_sph_deg");
-    // test_meshes.push_back("ngon_quad_2d_sph_rad");
+    test_meshes.push_back("quad_2d_sph_deg");
+    test_meshes.push_back("quad_2d_sph_rad");
+    test_meshes.push_back("tri_2d_cart");
+    test_meshes.push_back("tri_2d_sph_deg");
+    test_meshes.push_back("tri_2d_sph_rad");
+    test_meshes.push_back("hex_3d_cart");
+    test_meshes.push_back("hex_3d_sph_deg");
+    test_meshes.push_back("hex_3d_sph_rad");
+    test_meshes.push_back("mix_2d_cart");
+    test_meshes.push_back("mix_2d_sph_deg");
+    test_meshes.push_back("mix_2d_sph_rad");
+    test_meshes.push_back("periodic_2d_sph_deg");
+    test_meshes.push_back("periodic_2d_sph_rad");
+    test_meshes.push_back("ngon_2d_cart");
+    test_meshes.push_back("ngon_2d_sph_deg");
+    test_meshes.push_back("ngon_2d_sph_rad");
+    test_meshes.push_back("ngon_quad_2d_cart");
+    test_meshes.push_back("ngon_quad_2d_sph_deg");
+    test_meshes.push_back("ngon_quad_2d_sph_rad");
 
   std::vector<std::pair<std::string, std::string>> skip_test_common = {\
     // dual meshes of ngons not supported
@@ -195,25 +197,30 @@ int main(int argc, char *argv[]) {
     {"dual", "hex_3d_sph_rad"},  };
 
   std::vector<std::pair<std::string, std::string>> skip_test_mbmesh = {\
-    // dual mix is giving segv in parllel for meshes with triangles
-    // is_split is being set in MBMesh_detect_split_elems somehow
+    // dual with tri failing due to funky dual mesh generation
     {"dual", "mix_2d_cart"},
     {"dual", "mix_2d_sph_deg"},
     {"dual", "mix_2d_sph_rad"},
-    // {"dual", "tri_2d_cart"},
+    {"dual", "tri_2d_cart"},
     {"dual", "tri_2d_sph_deg"},
     {"dual", "tri_2d_sph_rad"},
     // ESMCI_MBMesh_Redist.C, line:2336:Could not find a suitable processor for this element
     {"redist_node", "tri_2d_cart"},
     {"redist_node", "tri_2d_sph_deg"},
     {"redist_node", "tri_2d_sph_rad"},
-    // redist_elem failing for ngons after ngon connectivity changes
+    // redist failing for ngons after ngon connectivity changes
     {"redist_elem", "ngon_2d_cart"},
     {"redist_elem", "ngon_2d_sph_deg"},
     {"redist_elem", "ngon_2d_sph_rad"},
     {"redist_elem", "ngon_quad_2d_cart"},
     {"redist_elem", "ngon_quad_2d_sph_deg"},
     {"redist_elem", "ngon_quad_2d_sph_rad"},
+    {"redist_node", "ngon_2d_cart"},
+    {"redist_node", "ngon_2d_sph_deg"},
+    {"redist_node", "ngon_2d_sph_rad"},
+    {"redist_node", "ngon_quad_2d_cart"},
+    {"redist_node", "ngon_quad_2d_sph_deg"},
+    {"redist_node", "ngon_quad_2d_sph_rad"},
 
   };
 

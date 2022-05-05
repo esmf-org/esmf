@@ -138,7 +138,6 @@ MBMesh::MBMesh():
 
     _num_node = 0;
     _num_elem = 0;
-    // _num_elem_conn = 0;
     _num_orig_node = 0;
     _num_orig_elem = 0;
     _num_owned_node = 0;
@@ -178,7 +177,6 @@ MBMesh::MBMesh(int _pdim, int _orig_sdim, ESMC_CoordSys_Flag _coordsys):
   // Init
   _num_node = 0;
   _num_elem = 0;
-  // _num_elem_conn = 0;
   _num_orig_node = 0;
   _num_orig_elem = 0;
   _num_owned_node = 0;
@@ -2925,11 +2923,6 @@ void MBMesh::finalize_elems() {
     _num_elem = all_elems.size();
     _num_owned_elem = owned_elems.size();
     _num_orig_elem = orig_elems.size();
-
-    // std::cout << "MBMESH::finalize_elem num_elem = " << _num_elem
-    //           << std::endl;
-
-    // _num_elem_conn = get_num_elem_conn(all_elems);
 
     // Mark elems as finalized, so things can be used
     elems_finalized=true;
