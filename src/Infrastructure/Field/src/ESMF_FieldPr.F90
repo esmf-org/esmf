@@ -256,7 +256,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    Use this argument only in the I/O format (such as NetCDF) that
 !    supports variable name. If the I/O format does not support this
 !    (such as binary format), ESMF will return an error code.
-!   \item[timeslice]
+!   \item[{[timeslice]}]
 !     Number of slices to be read from file, starting from the 1st slice
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
