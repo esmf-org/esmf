@@ -142,6 +142,11 @@ endif
 
 ifndef ESMF_COMM
 export ESMF_COMM = default
+else
+ifeq ($(ESMF_COMM),mpich3)
+export ESMF_COMM = mpich
+$(warning !!! For MPICH3 and up, please use ESMF_COMM=mpich !!!)
+endif
 endif
 
 ifndef ESMF_COMPILER
