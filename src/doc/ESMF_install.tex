@@ -196,7 +196,7 @@ desired setting.  E.g. {\tt "-lnetcdff -lnetcdf -lhdf5\_hl -lhdf5"}
 
 \subsubsection{Parallel-NetCDF}
 \label{sec:pnetcdf}
-ESMF provides the ability to write Mesh weights using
+ESMF provides the ability to write data using
 \htmladdnormallink{Parallel-NetCDF}{http://trac.mcs.anl.gov/projects/parallel-netcdf}.
 
 Some file systems, for example \htmladdnormallink{Lustre}{http://wiki.lustre.org}, may need
@@ -251,17 +251,17 @@ application.
 
 \subsubsection{PIO}
 \label{sec:pio}
-ESMF provides the ability to read and write data in both binary and
-NetCDF formats through \htmladdnormallink{ParallelIO (PIO)}
+ESMF provides the ability to read and write data in
+NetCDF format through \htmladdnormallink{ParallelIO (PIO)}
 {https://github.com/NCAR/ParallelIO}, a third-party I/O software
 library that is integrated in the ESMF library. The following environment
 variable enables PIO functionalities inside of ESMF.
 
 The PIO code depends on MPI I/O support by the underlying MPI
-implementation to provide the binary format. Almost all current MPI
+implementation for parallel I/O. Almost all current MPI
 implementations support MPI I/O to the required degree. For NetCDF format
-support the integrated PIO code depends on {\tt ESMF\_PNETCDF}
-(see \ref{sec:pnetcdf}) and/or {\tt ESMF\_NETCDF} (see \ref{sec:netcdf})
+support the integrated PIO code depends on {\tt ESMF\_NETCDF} (see \ref{sec:netcdf})
+being enabled and optionally {\tt ESMF\_PNETCDF} (see \ref{sec:pnetcdf})
 being enabled.
 
 \begin{description}
@@ -269,18 +269,18 @@ being enabled.
 {\tt "external"}, {\tt "OFF"}.
 
 \begin{description}
-\item[{\it not set} (default)] PIO-dependent features will be enabled on platforms where
-certain Fortran-2003 C Interoperability features are available.  Most currently supported
-compilers support these features.
+\item[{\it not set} (default)] PIO-dependent features will be enabled on supported
+platforms, as determined by the ESMF build configuration.
 
 \item[{\tt "internal"}] PIO-dependent features will be enabled and will use the
-PIO library that is included and built with ESMF.
+PIO library that is included and built with ESMF. Internal builds of PIO2 require
+CMake version 2.8.12 or newer be available in the path.
 
 \item[{\tt "external"}] PIO-dependent features will be enabled and will use an
 external PIO library.  The additional parameters {\tt ESMF\_PIO\_INCLUDE} 
 (path to PIO include files) and {\tt ESMF\_PIO\_LIBPATH} (path to PIO library files)
 should also be set when using this option. The minimum version of PIO for
-this option is 2.5.5. 
+this option is 2.5.7. 
 
 \item[{\tt "OFF"}] Disables PIO-dependent code.
 

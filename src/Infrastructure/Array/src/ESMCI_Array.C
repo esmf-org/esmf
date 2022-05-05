@@ -4000,36 +4000,6 @@ int Array::write(
     localstatus = *status;
   }
 
-  // It is an error to supply a variable name in binary mode
-  if (ESMF_IOFMT_BIN == localiofmt) {
-    if (variableName.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
-          "NetCDF variable name not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
-  }
-
-  // It is an error to supply Attribute convention in binary mode
-  if (ESMF_IOFMT_BIN == localiofmt) {
-    if (convention.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
-          "NetCDF Attribute convention not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
-  }
-
-  // It is an error to supply Attribute purpose in binary mode
-  if (ESMF_IOFMT_BIN == localiofmt) {
-    if (purpose.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
-          "NetCDF Attribute convention not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
-  }
-
   DistGrid *dg = getDistGrid();
   ESMCI::Info *info_this = this->ESMC_BaseGetInfo();
   ESMCI::Info *info_dg = dg->ESMC_BaseGetInfo();
