@@ -263,6 +263,30 @@ ESMC_VM ESMC_VMGetGlobal(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_VMLogMemInfo - Log memory measurements to file
+//
+// !INTERFACE:
+int ESMC_VMLogMemInfo(
+  char *prefix                // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Write memory info to the log file.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[prefix] 
+//    String value to indicate the location of the memory measurement
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_VMPrint - Print a VM
 //
 // !INTERFACE:

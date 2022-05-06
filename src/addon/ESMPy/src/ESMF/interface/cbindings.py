@@ -383,6 +383,26 @@ def ESMP_VMGetGlobal():
                         constants._errmsg)
     return vm.ptr
 
+_ESMF.ESMC_VMLogMemInfo.argtypes = [ct.c_int]
+_ESMF.ESMC_VMLogMemInfo.argtypes = [ct.c_char_p]
+
+def ESMP_VMLogMemInfo(str):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions: Memory measurements have been output to the log file.\n
+    Arguments:\n
+        string :: str\n
+    """
+    # Need to create a C string buffer for Python 3.
+    b_str = str.encode('utf-8')
+    b_str = ct.create_string_buffer(b_str)
+
+    
+    rc = _ESMF.ESMC_VMLogMemInfo(b_str)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_VMLogMemInfo() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
 _ESMF.ESMC_VMPrint.restype = ct.c_int
 _ESMF.ESMC_VMPrint.argtypes = [ct.c_void_p]
 

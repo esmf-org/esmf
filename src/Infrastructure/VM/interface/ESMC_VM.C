@@ -41,7 +41,7 @@ extern "C" {
 
 int ESMC_VMBarrier(ESMC_VM vm){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_VMPrint()"
+#define ESMC_METHOD "ESMC_VMBarrier()"
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -190,6 +190,27 @@ ESMC_VM ESMC_VMGetGlobal(int *rc){
   return vm;
 }
 
+int ESMC_VMLogMemInfo(char *prefix){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMLogMemInfo()"
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  ESMCI::VM *vmp = ESMCI::VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+    
+  // call into ESMCI method  
+  vmp->logMemInfo(std::string(prefix));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
 
 int ESMC_VMPrint(ESMC_VM vm){
 #undef  ESMC_METHOD
