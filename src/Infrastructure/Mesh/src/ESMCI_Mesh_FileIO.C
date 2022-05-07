@@ -424,9 +424,9 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
-    piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
-    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
-                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+    // the return from this call is the previous setting of error handling
+    // a non-zero value does not indicate an error
+    piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_BCAST_ERROR);
 
 
     //// Get VM Info
@@ -735,9 +735,10 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
-    piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
-    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
-                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+    piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_BCAST_ERROR);
+    // piorc in this case is the previous setting of ERROR HANDLER, it's value does not indicate an error
+    //if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
+    //                   ESMF_RC_FILE_OPEN, localrc)) throw localrc;
 
 
     //// Get VM Info

@@ -202,7 +202,7 @@ void PIO_Handler::initialize (
         // Set the error handling to return PIO errors
         // Just return error (error code may be different on different PEs).
         // Broadcast the error to all PEs (consistant error handling)
-        PIOc_Set_IOSystem_Error_Handling(instance, PIO_RETURN_ERROR);
+        PIOc_Set_IOSystem_Error_Handling(instance, PIO_BCAST_ERROR);
         PRINTMSG("After PIOc_Set_IOSystem_Error_Handling");
         // Add the instance to the global list
         PIO_Handler::activePioInstances.push_back(instance);
@@ -603,11 +603,6 @@ void PIO_Handler::arrayRead(
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_READ, "file not open",
         ESMC_CONTEXT, rc)) return;
 
-  iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
-      &arrDims, &narrDims, &basepiotype, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, rc)) return;
-
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
   localDE = 0;
@@ -687,6 +682,12 @@ void PIO_Handler::arrayRead(
         PIOc_setframe(pioFileDesc, vardesc, frame-1);
     }
   }
+  // If frame >= 0 then we need to not use the unlimited dim in the iodesc.
+  iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
+      &arrDims, &narrDims, &basepiotype, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return;
+
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
 #ifdef ESMFIO_DEBUG
   PIOc_set_log_level(0);
