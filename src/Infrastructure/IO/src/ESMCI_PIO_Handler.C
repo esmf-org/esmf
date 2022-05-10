@@ -2045,7 +2045,7 @@ int PIO_IODescHandler::constructPioDecomp(
     }
     PRINTMSG(", IODesc shape = [" << dimstr << "], calling pio_initdecomp");
   }
-  PIOc_set_log_level(0);
+  PIOc_set_log_level(PIO_DEBUG_LEVEL);
 #endif // ESMFIO_DEBUG
   int ddims[handle->nDims];
   for(int i=0; i<handle->nDims; i++)
