@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -5654,11 +5654,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! check the incoming pointer
-    if (associated(compList)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="compList must enter unassociated", &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
-      return  ! bail out
+    if (present(compList)) then
+      if (associated(compList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="compList must enter unassociated", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
+    endif
+    if (present(petLists)) then
+      if (associated(petLists)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="petLists must enter unassociated", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
     endif
 
     ! query the component for info
@@ -5666,7 +5676,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
     ! query Component for the internal State
     nullify(is%wrap)
 #ifdef ESMF_NO_F2018ASSUMEDTYPE
@@ -5683,7 +5693,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-      
+
     ! allocate memory for the compList
     if (present(compList)) then
       allocate(compList(mapCount), stat=stat)
@@ -5692,7 +5702,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! allocate memory for the petLists
     if (present(petLists)) then
       allocate(petLists(mapCount), stat=stat)
@@ -5701,7 +5711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! fill the compList and/or petLists
     if (present(compList) .or. present(petLists)) then
       do i=1, mapCount
@@ -5714,7 +5724,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(petLists)) petLists(i)%ptr => cmEntry%wrap%petList
       enddo
     endif
-    
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -5751,12 +5761,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! check the incoming pointer
+    ! check the incoming pointers
     if (associated(compList)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="compList must enter unassociated", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
+    endif
+    if (present(petLists)) then
+      if (associated(petLists)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="petLists must enter unassociated", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
     endif
 
     ! query the component for info
@@ -5764,7 +5782,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
     ! query Component for the internal State
     nullify(is%wrap)
 #ifdef ESMF_NO_F2018ASSUMEDTYPE
@@ -5781,14 +5799,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-      
+
     ! allocate memory for the compList
     allocate(compList(mapCount), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of compList failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
     ! allocate memory for the petLists
     if (present(petLists)) then
       allocate(petLists(mapCount), stat=stat)
@@ -5797,7 +5815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! fill the compList and optionally petLists
     do i=1, mapCount
       call ESMF_ContainerGetUDTByIndex(is%wrap%connectorMap, i, &
@@ -5808,7 +5826,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       compList(i) = cmEntry%wrap%connector
       if (present(petLists)) petLists(i)%ptr => cmEntry%wrap%petList
     enddo
-    
+
   end subroutine
   !-----------------------------------------------------------------------------
 

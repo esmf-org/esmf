@@ -216,6 +216,15 @@ class Manager(object):
         '''
         ESMP_VMBroadcast(self.vm, bcstBuf, count, rootPet)
 
+    def _logmem_(self, str):
+        '''
+        Send memory measurement to the log file.\n
+            Arguments:\n
+                string :: str\n
+
+        '''
+        ESMP_VMLogMemInfo(str)
+
     def _reduce_(self, sendBuf, recvBuf, count, reduceflag=Reduce.SUM, rootPet=0):
         '''
         Reduce data from sendBuf into recvBuf across the VM.\n

@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -320,8 +320,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If .TRUE., it will print summary information about the regrid parameters,
 !     default to .FALSE..
 !   \item [{[checkFlag]}]
-  !   checkFlag value to pass into ESMF_FieldRegridStore(), if not provided
-  !  has same default as ESMF_FieldRegridStore() which is false.
+!     checkFlag value to pass into ESMF\_FieldRegridStore(), if not provided
+!     has same default as ESMF\_FieldRegridStore() which is false.
 !   \item[{[tileFilePath]}]
 !     Optional argument to define the path where the tile files reside. If it
 !     is given, it overwrites the path defined in {\tt gridlocation} variable

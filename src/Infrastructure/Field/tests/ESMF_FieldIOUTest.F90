@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -661,9 +661,8 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------
 ! Recall my Fortran array at time=t=... :
-#ifdef ESMF_MPICH
-  !TODO: Remove this once timeslicing is fixed for multi-PET with MPICH
-  ! right now under MPICH always the first slice is pulled out by FieldRead()
+#ifdef ESMF_MPICH1
+  ! For multi-PET with MPICH1 always first slice is pulled out by FieldRead()
   t = 1
 #else
   t = 3

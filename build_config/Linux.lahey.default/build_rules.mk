@@ -28,10 +28,10 @@ ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
-ifeq ($(ESMF_COMM),mpich)
-# Mpich ----------------------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
+ifeq ($(ESMF_COMM),mpich1)
+# Mpich1 ---------------------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH1
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH1
 ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKERDEFAULT   = mpiCC
 ESMF_CXXDEFAULT         = mpiCC
@@ -51,8 +51,8 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
-ifeq ($(ESMF_COMM),mpich3)
-# Mpich3 ---------------------------------------------------
+ifeq ($(ESMF_COMM),mpich)
+# Mpich3 and up --------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc

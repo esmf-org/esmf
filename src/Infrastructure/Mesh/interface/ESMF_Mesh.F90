@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2044,7 +2044,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !
-!   {\em WARNING:} This is the deprecated ESMF_MeshCreateFromFileOld() interface. It is being kept 
+!   {\em WARNING:} This is the deprecated ESMF\_MeshCreateFromFileOld() interface. It is being kept 
 !   as a backup during the 8.3 release in case there are issues with the new implementation. However,
 !   this interface will be removed in the 8.4 release.
 !

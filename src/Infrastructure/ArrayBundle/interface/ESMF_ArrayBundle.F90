@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1693,10 +1693,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
 !    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
-!    of options. If not present, file names with a {\tt .bin} extension will
-!    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
-!    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
-!    {\tt ESMF\_IOFMT\_NETCDF}.
+!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !     \end{sloppypar}
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1729,19 +1726,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (fileName, '.') > 0) then
-        file_ext_p = index (fileName, '.', back=.true.)
-        select case (fileName(file_ext_p:))
-        case ('.nc')
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        case ('.bin')
-          opt_iofmt = ESMF_IOFMT_BIN
-        case default
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        end select
-      else
-        opt_iofmt = ESMF_IOFMT_NETCDF
-      end if
+      opt_iofmt = ESMF_IOFMT_NETCDF
     end if
 
     ! Call into the C++ interface, which will call IO object
@@ -3866,18 +3851,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing Array data may
-!      {\em not} be overwritten. If .true., the overwrite behavior depends
-!      on the value of {\tt iofmt} as shown below:
-!    \begin{description}
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
-!      be overwritten with each Arrays's data.
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF, ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET}:]\ Only the
+!      {\em not} be overwritten. If .true., only the
 !      data corresponding to each Array's name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
 !      the given timeslice may be overwritten.
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
-!    \end{description}
 !    \end{sloppypar}
 !   \item[{[status]}]
 !    \begin{sloppypar}
@@ -3904,10 +3883,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
 !    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
-!    of options. If not present, file names with a {\tt .bin} extension will
-!    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
-!    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
-!    {\tt ESMF\_IOFMT\_NETCDF}.
+!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !     \end{sloppypar}
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3952,19 +3928,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (fileName, '.') > 0) then
-        file_ext_p = index (fileName, '.', back=.true.)
-        select case (fileName(file_ext_p:))
-        case ('.nc')
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        case ('.bin')
-          opt_iofmt = ESMF_IOFMT_BIN
-        case default
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        end select
-      else
-        opt_iofmt = ESMF_IOFMT_NETCDF
-      end if
+      opt_iofmt = ESMF_IOFMT_NETCDF
     end if
 
     ! Call into the C++ interface, which will call IO object

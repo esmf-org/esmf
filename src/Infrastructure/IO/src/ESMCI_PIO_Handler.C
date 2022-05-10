@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -609,7 +609,6 @@ void PIO_Handler::arrayRead(
   baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
   int arrlen = 1;
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
-  if (getFormat() != ESMF_IOFMT_BIN) {
     int nDims;
 
     // If frame >= 0 then we need to not use the unlimited dim in the iodesc.
@@ -625,22 +624,13 @@ void PIO_Handler::arrayRead(
       return;
     }
 
-
-  if (((char *)NULL != name) && (strlen(name) > 0)) {
-      varname = name;
-    } else {
-      varname = arr_p->getName();
-    }
-    PRINTMSG(" (" << my_rank << "): varname = " << varname);
-
-  }
-  if (getFormat() != ESMF_IOFMT_BIN) {
     piorc = PIOc_inq_varid(pioFileDesc, varname.c_str(), &vardesc);
     // An error here means the variable is not in the file
     const std::string errmsg = "variable " + varname + " not found in file";
     if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
       return;
     }
+
     int frame;
     if (((int *)NULL != timeslice) && (*timeslice > 0) && narrDims < nioDims) {
       //
@@ -706,7 +696,7 @@ void PIO_Handler::arrayRead(
         PRINTMSG("calling setframe for read_darray, frame = " << frame);
         PIOc_setframe(pioFileDesc, vardesc, frame-1);
     }
-  }
+
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
 #ifdef ESMFIO_DEBUG
   PIOc_set_log_level(0);
@@ -822,7 +812,6 @@ void PIO_Handler::arrayWrite(
   PRINTMSG("arrlen = " << arrlen);
 
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
-  if (getFormat() != ESMF_IOFMT_BIN) {
     // Define the variable name and check the file
     if (((char *)NULL != name) && (strlen(name) > 0)) {
       varname = name;
@@ -864,11 +853,10 @@ void PIO_Handler::arrayWrite(
       // This should succeed if the variable exists
       varExists = (PIO_NOERR == piorc);
     }
-  }
 
   // Check consistency of time dimension with timeslice
   bool hasTimeDim;
-  if (getFormat() != ESMF_IOFMT_BIN) {
+
     int dimidTime;
     PIO_Offset timeLen;
     PRINTMSG("Checking time dimension");
@@ -920,9 +908,9 @@ void PIO_Handler::arrayWrite(
         PRINTMSG("timeslice not passed but set to " << timeFrame);
       }
     }
-  }
+
   PRINTMSG("ready to check var compat., timeFrame = " << timeFrame);
-  if ((getFormat() != ESMF_IOFMT_BIN) && varExists) {
+  if (varExists) {
     int nDims;
     int nArrdims = nioDims + ((timeFrame > 0) ? 1 : 0);
 
@@ -999,7 +987,7 @@ void PIO_Handler::arrayWrite(
     }
   }
 
-  if ((getFormat() != ESMF_IOFMT_BIN) && !varExists) {
+  if (!varExists) {
     // Ensure we are in define mode
     PRINTMSG("Going into NetCDF define mode (redef)");
     piorc = PIOc_redef(pioFileDesc);
@@ -1015,7 +1003,7 @@ void PIO_Handler::arrayWrite(
     }
   }
 
-  if ((getFormat() != ESMF_IOFMT_BIN) && !varExists) {
+  if (!varExists) {
     // Create the variable
     for (int i = 0; i < nioDims; i++) {
       std::string axis;
@@ -1079,7 +1067,7 @@ void PIO_Handler::arrayWrite(
     }
   }
   PRINTMSG("varExists = " << varExists);
-  if ((getFormat() != ESMF_IOFMT_BIN) && !varExists) {
+  if (!varExists) {
     PRINTMSG("niodims = " << nioDims);
     PRINTMSG("basepiotype = " << basepiotype);
      
@@ -1090,7 +1078,7 @@ void PIO_Handler::arrayWrite(
       return;
     }
   }
-  if ((getFormat() != ESMF_IOFMT_BIN) && (timeFrame >= 0)) {
+  if (timeFrame >= 0) {
 #ifdef ESMFIO_DEBUG
     int nvdims;
     PIOc_inq_varndims(pioFileDesc, vardesc, &nvdims);
@@ -1103,20 +1091,17 @@ void PIO_Handler::arrayWrite(
     }
   }
 #ifdef ESMFIO_DEBUG
-  else if (getFormat() != ESMF_IOFMT_BIN) {
+  else {
     PRINTMSG("NOT calling setframe, timeFrame = " << timeFrame);
   }
-  if (getFormat() != ESMF_IOFMT_BIN) {
     if (varExists) {
       int varid;
       int lrc;
       lrc = PIOc_inq_varid(pioFileDesc, varname.c_str(), &varid);
       PRINTMSG("varid = " << varid);
     }
-  }
 #endif // ESMFIO_DEBUG
 
-  if (getFormat() != ESMF_IOFMT_BIN) {
     // ESMF Attribute Package -> NetCDF variable and global attributes
     if (varAttPack) {
       attPackPut (vardesc, varAttPack, &localrc);
@@ -1132,16 +1117,16 @@ void PIO_Handler::arrayWrite(
         return;
       }
     }
-  }
+
 
   PRINTMSG("calling enddef, status = " << rc);
-  if ((getFormat() != ESMF_IOFMT_BIN)) {
+
     piorc = PIOc_enddef(pioFileDesc);
     if (!CHECKPIOERROR(piorc,  "Attempting to end definition of variable: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
     }
-  }
+
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
   PRINTMSG("calling write_darray, pio type = " << basepiotype << ", address = " << baseAddress);
 #ifdef ESMFIO_DEBUG
