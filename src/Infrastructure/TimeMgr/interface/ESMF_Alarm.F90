@@ -663,7 +663,7 @@
 !     \item[{[clock]}]
 !          The associated clock.
 !     \item[{[ringTime]}]
-!          The ring time for a one-shot alarm or the next repeating alarm.
+!          The associated clock's time at which the alarm is ringing.
 !     \item[{[ringInterval]}]
 !          The ring interval for repeating (interval) alarms.
 !     \item[{[ringing]}]
