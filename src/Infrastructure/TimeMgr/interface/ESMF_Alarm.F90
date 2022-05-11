@@ -664,44 +664,11 @@
 !          The associated clock.
 !     \item[{[ringTime]}]
 !          The ring time for a one-shot alarm or the next repeating alarm.
-!     \item[{[prevRingTime]}]
-!          The previous ring time.
 !     \item[{[ringInterval]}]
 !          The ring interval for repeating (interval) alarms.
-!     \item[{[stopTime]}]
-!          The stop time for repeating (interval) alarms.
-!     \item[{[ringDuration]}]
-!          The ring duration.  Mutually exclusive with
-!          ringTimeStepCount (see below).
-!     \item[{[ringTimeStepCount]}]
-!          The number of time steps comprising the ring duration.  Mutually
-!          exclusive with ringDuration (see above).
-!     \item[{[timeStepRingingCount]}]
-!          The number of time steps for which the alarm has been ringing thus
-!          far.  Used internally for tracking ringTimeStepCount ring
-!          durations (see above).  Mutually exclusive with ringBegin
-!          (see below).  Increments in {\tt ESMF\_DIRECTION\_FORWARD} and
-!          decrements in {\tt ESMF\_DIRECTION\_REVERSE};
-!          see Section~\ref{sec:Clock}.
-!     \item[{[ringBegin]}]
-!          The time when the alarm began ringing.  Used internally for tracking
-!          ringDuration (see above).  Mutually exclusive with
-!          timeStepRingingCount (see above).
-!     \item[{[ringEnd]}]
-!          \begin{sloppypar}
-!          The time when the alarm ended ringing.  Used internally for
-!          re-ringing alarm in {\tt ESMF\_DIRECTION\_REVERSE}.
-!          \end{sloppypar}
-!     \item[{[refTime]}]
-!          The reference (i.e. base) time for an interval alarm.
 !     \item[{[ringing]}]
 !          The current ringing state.
 !          See also {\tt ESMF\_AlarmRingerOn()}, {\tt ESMF\_AlarmRingerOff()}.
-!     \item[{[ringingOnPrevTimeStep]}]
-!          \begin{sloppypar}
-!          The ringing state upon the previous time step. Same as
-!          {\tt ESMF\_AlarmWasPrevRinging()}.
-!          \end{sloppypar}
 !     \item[{[enabled]}]
 !          The enabled state.
 !          See also {\tt ESMF\_AlarmEnable()}, {\tt ESMF\_AlarmDisable()}.
