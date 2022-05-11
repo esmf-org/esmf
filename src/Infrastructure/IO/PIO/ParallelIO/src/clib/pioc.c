@@ -663,10 +663,13 @@ PIOc_InitDecomp(int iosysid, int pio_type, int ndims, const int *gdimlen, int ma
       if(ios->compproc){
         // It should be okay to use compmap here but test_darray_fill shows
         // the compmap array modified by this call, TODO - investigate this.
-        PIO_Offset tmpmap[maplen];
+        PIO_Offset *tmpmap;
+	if (!(tmpmap = malloc(sizeof(PIO_Offset) * maplen)))
+	  return PIO_ENOMEM;
         memcpy(tmpmap, compmap, maplen*sizeof(PIO_Offset));
         if((ierr = run_unique_check(ios->comp_comm, (size_t) maplen, tmpmap, &iodesc->readonly)))
             return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
+	free(tmpmap);
       }
         /*      printf("readonly: %d\n",iodesc->readonly);
         for(int i=0;i<maplen;i++)
