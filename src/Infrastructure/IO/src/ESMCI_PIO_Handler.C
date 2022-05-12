@@ -624,9 +624,12 @@ void PIO_Handler::arrayRead(
       return;
     }
 
-    if (name != NULL) {
-      varname = std::string(name);
+    if (((char *)NULL != name) && (strlen(name) > 0)) {
+      varname = name;
+    } else {
+      varname = arr_p->getName();
     }
+
     piorc = PIOc_inq_varid(pioFileDesc, varname.c_str(), &vardesc);
     // An error here means the variable is not in the file
     const std::string errmsg = "variable " + varname + " not found in file";
