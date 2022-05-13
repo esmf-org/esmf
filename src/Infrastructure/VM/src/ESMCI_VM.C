@@ -929,8 +929,7 @@ void *VM::startup(
     // and determine a localID for the current VM that uniquely identifies it.
     // At the same time construct a list of empty entries to be used further
     // down.
-    int *emptyList = new int[matchTableBound];  // can't be larger than that
-    int emptyListBound = 0; // reset
+    vector<int> emptyList;
     for (int i=0; i<matchTableBound; i++){
       if (matchTable_vm[i]!=NULL){
         // This is a valid entry to consider
@@ -940,13 +939,13 @@ void *VM::startup(
         }
       }else{
         // This is an empty entry that can be used further down
-        emptyList[emptyListBound] = i;
-        ++emptyListBound;
+        emptyList.push_back(i);
       }
     }
     ++(vmID.localID); // Make this localID unique to all other entries
 
     // Enter information for each spawned PET of this new VM into the matchTable
+    int emptyListBound = emptyList.size();
     for (int j=0; j<vmp->nspawn; j++){
       // Each thread spawned by this PET gets its own entry because it will
       // have a unique tid which will be used to associate the thread with
@@ -979,7 +978,6 @@ void *VM::startup(
       matchTable_FObjects[index].reserve(1000);             // start w/ 1000 obj
       VMIdCopy(&(matchTable_vmID[index]), &vmID);           // deep copy
     }
-    delete [] emptyList;
     VMIdDestroy(&vmID, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return NULL;  // bail out on error
