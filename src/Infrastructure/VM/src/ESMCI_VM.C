@@ -228,6 +228,28 @@ int procParseLine(char* line){
 }
 
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::logMatchTable()"
+static void logMatchTable(ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO){
+  ESMC_LogDefault.Write("--- " ESMC_METHOD " -----------------------", msgType);
+  std::stringstream msg;
+  msg << "matchTableBound=" << matchTableBound;
+  ESMC_LogDefault.Write(msg, msgType);
+  for (int i=0; i<matchTableBound; i++){
+    if (matchTable_vm[i]!=NULL){
+      // a valid matchTable entry
+      msg.str(""); // clear string
+      msg << "i=" << i;
+      matchTable_vmID[i].log(msg.str(),msgType);
+    }else{
+      msg.str(""); // clear string
+      msg << "i=" << i << " INVALID";
+      ESMC_LogDefault.Write(msg, msgType);
+    }
+  }
+  ESMC_LogDefault.Write("-------------------------------------------", msgType);
+}
+
 //-----------------------------------------------------------------------------
 //
 // VMId functions
@@ -1091,17 +1113,16 @@ void VM::shutdown(
                 ESMC_CONTEXT, rc))
                 return;
             }
-// gjt: no longer remove remnant from garbage collection for safety
-//            matchTable_FObjects[i].pop_back();
+            // remove Fortran remnant from garbage collection
+            matchTable_FObjects[i].pop_back();
           }
-#if 0
-// gjt: no take down garbage collection table for safety
+          // take down Fortran object garbage collection table
           if (matchTable_FObjects[i].size() > 0)
-            std::cout << "Failure in ESMF Automatic Garbage Collection line: "
+            std::cout << "Problem in ESMF Automatic Garbage Collection line: "
               << __LINE__ << std::endl;
           // swap() trick with a temporary to free vector's memory
           std::vector<FortranObject>().swap(matchTable_FObjects[i]);
-#endif
+
           // The following loop deletes deep C++ ESMF objects derived from
           // Base class. For deep Fortran classes it deletes the Base member.
           for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
@@ -1130,7 +1151,7 @@ void VM::shutdown(
 #if 0
 // gjt: no take down garbage collection table for safety
           if (matchTable_Objects[i].size() > 0)
-            std::cout << "Failure in ESMF Automatic Garbage Collection line: "
+            std::cout << "Problem in ESMF Automatic Garbage Collection line: "
               << __LINE__ << std::endl;
           // swap() trick with a temporary to free vector's memory
           std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
@@ -2708,11 +2729,14 @@ int VM::getBaseIDAndInc(
 //EOPI
 //-----------------------------------------------------------------------------
   int i;
-  for (i=0; i<matchTableBound; i++)
-    if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
+  for (i=0; i<matchTableBound; i++){
+    if (matchTable_vm[i]!=NULL){
+      // a valid matchTable entry
+      if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
+    }
+  }
   if (i == matchTableBound)
     return -1;  // no match found -> return invalid count
-
   // match found
   int count = matchTable_BaseIDCount[i];
   matchTable_BaseIDCount[i] = count + 1;  // increment
@@ -2750,7 +2774,10 @@ void VM::addObject(
 
   int i;
   for (i=0; i<matchTableBound; i++)
-    if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
+    if (matchTable_vm[i]!=NULL){
+      // a valid matchTable entry
+      if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
+    }
   if (i == matchTableBound){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Could not find table entry for current VM", ESMC_CONTEXT, &rc);
@@ -2830,6 +2857,8 @@ void VM::rmObject(
   VM *vm = getCurrent();
   vm->lock();
   for (int i=0; i<matchTableBound; i++){  //gjt: loop through all of the VMs
+  if (matchTable_vm[i]!=NULL){
+    // a valid matchTable entry
   for (vector<ESMC_Base *>::iterator
     it = matchTable_Objects[i].begin();
     it != matchTable_Objects[i].end(); ++it){
@@ -2843,6 +2872,7 @@ void VM::rmObject(
 #endif
       break;
     }
+  }
   }
   }
 
@@ -2881,7 +2911,10 @@ void VM::addFObject(
 
   int i;
   for (i=0; i<matchTableBound; i++)
-    if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
+    if (matchTable_vm[i]!=NULL){
+      // a valid matchTable entry
+      if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
+    }
   if (i == matchTableBound){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Could not find table entry for current VM", ESMC_CONTEXT, &rc);
@@ -2969,6 +3002,8 @@ void VM::rmFObject(
   VM *vm = getCurrent();
   vm->lock();
   for (int i=0; i<matchTableBound; i++){  //gjt: loop through all of the VMs
+  if (matchTable_vm[i]!=NULL){
+    // a valid matchTable entry
   for (vector<FortranObject>::iterator
     it = matchTable_FObjects[i].begin();
     it != matchTable_FObjects[i].end(); ++it){
@@ -2990,6 +3025,7 @@ void VM::rmFObject(
 #endif
       break;
     }
+  }
   }
   }
 
@@ -3027,6 +3063,8 @@ bool VM::validObject(
   VM *vm = getCurrent();
   vm->lock();
   for (int i=0; i<matchTableBound; i++){
+  if (matchTable_vm[i]!=NULL){
+    // a valid matchTable entry
   for (vector<ESMC_Base *>::iterator
     it = matchTable_Objects[i].begin();
     it != matchTable_Objects[i].end(); ++it){
@@ -3034,6 +3072,7 @@ bool VM::validObject(
       valid = true;
       break;
     }
+  }
   }
   }
   vm->unlock();
@@ -3431,17 +3470,16 @@ void VM::finalize(
           ESMC_CONTEXT, rc))
           return;
       }
-// gjt: no longer remove remnant from garbage collection for safety
-//      matchTable_FObjects[0].pop_back();
+      // remove remnant from garbage collection
+      matchTable_FObjects[0].pop_back();
     }
-#if 0
-// gjt: no take down garbage collection table for safety
+    // take down Fortran object garbage collection table
     if (matchTable_FObjects[0].size() > 0)
-      std::cout << "Failure in ESMF Automatic Garbage Collection line: "
+      std::cout << "Problem in ESMF Automatic Garbage Collection line: "
         << __LINE__ << std::endl;
     // swap() trick with a temporary to free vector's memory
     std::vector<FortranObject>().swap(matchTable_FObjects[0]);
-#endif
+
     // The following loop deletes deep C++ ESMF objects derived from
     // Base class. For deep Fortran classes it deletes the Base member.
     for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
@@ -3470,7 +3508,7 @@ void VM::finalize(
 #if 0
 // gjt: no take down garbage collection table for safety
     if (matchTable_Objects[0].size() > 0)
-      std::cout << "Failure in ESMF Automatic Garbage Collection line: "
+      std::cout << "Problem in ESMF Automatic Garbage Collection line: "
         << __LINE__ << std::endl;
     // swap() trick with a temporary to free vector's memory
     std::vector<ESMC_Base *>().swap(matchTable_Objects[0]);
@@ -3492,7 +3530,6 @@ void VM::finalize(
 
   // clean-up matchTable
   matchTableBound = 0;
-
 //gjtNotYet  delete [] matchTable_tid;
 //gjtNotYet  delete [] matchTable_vm;
 //gjtNotYet  delete [] matchTable_vmID;
