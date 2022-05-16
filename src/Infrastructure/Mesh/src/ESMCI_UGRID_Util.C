@@ -353,7 +353,7 @@ void get_elementConn_info_from_UGRID_file(int pioSystemDesc, int pioFileDesc, ch
 
   // Init elementConn decomp
   int ec_iodesc;
-  int gdimlen2D[2]={elementCount,max_num_conns_per_elem};
+  int gdimlen2D[2]={(int) elementCount, (int) max_num_conns_per_elem};
   piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 
                           2, gdimlen2D, totNumRectElementConn,
                           ec_offsets, &ec_iodesc, 
