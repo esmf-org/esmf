@@ -40,9 +40,9 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lmpi++
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
-ESMF_MPILAUNCHOPTIONS   = -p "%g: "
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPILAUNCHOPTIONS   = -p %g: 
 else
 ifeq ($(ESMF_COMM),mpich1)
 # Mpich1 ---------------------------------------------------

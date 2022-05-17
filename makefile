@@ -505,7 +505,7 @@ endif
 	-@echo "# Internal ESMF variables, do NOT depend on these!" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_INTERNAL_DIR=$(ESMF_DIR)" >> $(MKINFO)
-	-@echo "ESMF_INTERNAL_MPIRUN=$(ESMF_MPIRUN)" >> $(MKINFO)
+	-@echo "ESMF_INTERNAL_MPIRUN=\"$(ESMF_MPIRUN)\"" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "#" >> $(MKINFO)
 	-@echo "# !!! The following options were used on this ESMF build !!!" >> $(MKINFO)
