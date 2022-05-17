@@ -32,7 +32,7 @@ TESTS_RUN_UNI = RUN_ESMF_StringUTestUNI \
                 RUN_ESMF_F90ArrayPtrUTestUNI \
 		RUN_ESMF_LAPACKUTestUNI \
 		RUN_ESMF_FeatureUTestUNI \
-		RUN_ESMF_ExcptionsUTestUNI \
+		RUN_ESMF_ExceptionsUTestUNI \
 		RUN_ESMCI_ExceptionsUTestUNI \
 		RUN_ESMCI_FeatureUTestUNI
 #		RUN_ESMF_F95PtrUTestUNI
