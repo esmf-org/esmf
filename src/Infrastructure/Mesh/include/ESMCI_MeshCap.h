@@ -197,7 +197,10 @@ namespace ESMCI {
 
     void meshgetfrac(int *_num_elem, double *elem_fracs, int *rc);
 
-
+    void mesh_write_to_file(char *filename,
+                            ESMC_FileFormat_Flag fileformat,
+                            int *rc);
+    
     void meshgetfrac2(int *num_elem, double *elem_fracs, int *rc);
 
     static void triangulate(int *pdim, int *sdim, int *numPnts,

@@ -958,6 +958,30 @@ extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
 } // meshcreate
 
 
+extern "C" void FTN_X(c_esmc_meshwritetofile)(MeshCap **meshpp,
+                                              char *filename,
+                                              ESMC_FileFormat_Flag *fileformat,
+                                              int *rc, 
+                                              ESMCI_FortranStrLenArg filename_len)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshwritetofile()"
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // Get C style filename
+  char *C_filename = ESMC_F90toCstring(filename, filename_len);
+
+
+  // Write mesh to file
+  (*meshpp)->mesh_write_to_file(C_filename,
+                                *fileformat,
+                                ESMC_NOT_PRESENT_FILTER(rc));
+
+  // Get rid C style filename
+  delete [] C_filename;
+} 
+
+
 
 
 #if 0

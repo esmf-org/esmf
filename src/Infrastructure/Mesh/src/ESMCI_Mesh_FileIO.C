@@ -69,6 +69,226 @@
 //-----------------------------------------------------------------------------
 using namespace ESMCI;
 
+/////////////////// Mesh Write To File ////////////////////////////////
+
+// These internal functions will only be used if PIO is avaiable
+#ifdef ESMF_PIO
+
+// Prototypes of per format mesh write to file
+void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
+                                       Mesh *mesh, 
+                                       char *filename);
+#endif // ifdef ESMF_PIO
+
+
+
+
+// INPUTS: 
+//  filename - file name in NULL delimited form
+//  fileformat - the format of the file
+//
+// OUTPUTS:
+//   rc       - the return code
+//
+void ESMCI_mesh_write_to_file(Mesh *mesh, 
+                              char *filename, 
+                              ESMC_FileFormat_Flag fileformat, 
+                              int *rc){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_mesh_write_to_file()"
+
+// Will only work if PIO is available
+#ifdef ESMF_PIO
+
+  //  printf("In mesh write to file filename=%s\n",filename);
+
+  // Try-catch block around main part of method
+  try {
+    // local return code
+    int localrc;
+
+    //// Set up PIO
+
+    // Get VM 
+    ESMCI::VM *vm=VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+    
+    // Get VM info
+    int local_pet = vm->getLocalPet();  
+    MPI_Comm mpi_comm = vm->getMpi_c();  
+    int pet_count = vm->getPetCount();
+    int pets_per_Ssi = vm->getSsiLocalPetCount();
+
+    // Initialize IO system
+    int num_iotasks = pet_count/pets_per_Ssi;
+    int stride = pets_per_Ssi;
+    int pioSystemDesc;
+    int piorc;
+    piorc = PIOc_Init_Intracomm(mpi_comm, num_iotasks, stride, 0, PIO_REARR_SUBSET, &pioSystemDesc);
+    if (!CHECKPIOERROR(piorc, std::string("Unable to init PIO Intracomm for file: ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+
+    // Create Mesh based on the file format
+    Mesh *tmp_mesh;
+    if (fileformat == ESMC_FILEFORMAT_ESMFMESH) {
+      ESMCI_mesh_write_to_ESMFMesh_file(pioSystemDesc, mesh, filename);
+
+    } else if (fileformat == ESMC_FILEFORMAT_UGRID) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+         "Writing a Mesh to UGRID format currently isn't supported.",
+           ESMC_CONTEXT, &localrc)) throw localrc;
+    } else if (fileformat == ESMC_FILEFORMAT_SCRIP) {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+         "Writing a Mesh to SCRIP format currently isn't supported.",
+           ESMC_CONTEXT, &localrc)) throw localrc;
+    } else {
+      if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+         "Unrecognized file format.",
+           ESMC_CONTEXT, &localrc)) throw localrc;
+    }    
+
+
+    // Free IO system
+    piorc = PIOc_free_iosystem(pioSystemDesc);
+    if (!CHECKPIOERROR(piorc, std::string("Error freeing pio file system description "),
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+    
+
+  } catch(std::exception &x) {
+
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT,rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT,rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // We've gotten to bottom successfully, so return success
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+
+#else
+     ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the PIO library enabled." ,
+      ESMC_CONTEXT, rc);
+#endif
+}
+
+// These internal functions will only be used if PIO is available
+#ifdef ESMF_PIO
+
+
+
+void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
+                                       Mesh *mesh, 
+                                       char *filename){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_mesh_write_to_ESMFMesh_file()"
+
+  // Declare some handy variables
+  int localrc;
+  int rc;
+  int piorc;
+
+
+  // Try-catch block around main part of method
+  try {
+
+    //// Open file via PIO
+
+    // Set pio_type based on what's available
+#ifdef ESMF_PNETCDF
+    int pio_type = PIO_IOTYPE_PNETCDF;
+#else
+    int pio_type = PIO_IOTYPE_NETCDF;
+#endif
+
+    // Open file
+    int pioFileDesc;
+    int mode = 0;
+    piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
+    // if the file was created with netcdf4, it cannot be opened with pnetcdf
+    if (piorc == PIO_EINVAL){
+        pio_type = PIO_IOTYPE_NETCDF;
+        piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
+    }
+    if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,
+                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+    piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
+    //    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
+    //                   ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+
+
+    //// Get VM Info
+
+    // Get VM 
+    ESMCI::VM *vm=VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &localrc)) throw localrc;
+    
+    // Get info
+    int local_pet = vm->getLocalPet();  
+    int pet_count = vm->getPetCount();
+
+
+    /// BILL FILL IN HERE.
+    /// (IT'S ALSO POSSIBLE YOU MAY ALSO NEED TO MAKE MODIFICATIONS TO THE ENCLOSING METHODS.
+    ///  THEY ARE JUST A SUGGESTION OF WHAT SHOULD HAPPEN... :-)) 
+
+    
+
+    //// Close file using PIO
+    piorc = PIOc_closefile(pioFileDesc);
+    if (!CHECKPIOERROR(piorc, std::string("Error closing file ") + filename,
+                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+
+
+  } catch(std::exception &x) {
+
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT,&rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT,&rc);
+    }
+    throw rc; // To be caught one level up so we know where the error came from
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,&rc);
+    throw rc; // To be caught one level up so we know where the error came from
+
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught unknown exception", ESMC_CONTEXT, &rc);
+    throw rc; // To be caught one level up so we know where the error came from
+  }
+}
+
+#endif
+
+
+
+/////////////////// Mesh Read From File ////////////////////////////////
+
 // These internal functions will only be used if PIO is avaiable
 #ifdef ESMF_PIO
 

@@ -6191,7 +6191,89 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    end subroutine ESMF_MeshSetMOAB
+  end subroutine ESMF_MeshSetMOAB
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshWrite()"
+!BOP
+!\label{API:MeshWrite}
+! !IROUTINE: ESMF_MeshWrite - Write a Mesh to a file
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshWrite()
+ subroutine ESMF_MeshWriteToFile(mesh, filename, fileformat, keywordEnforcer, rc)
+!
+!
+
+! !ARGUMENTS:
+    type(ESMF_Mesh),            intent(in)            :: mesh
+    character(len=*),           intent(in)            :: filename
+    type(ESMF_FileFormat_Flag), intent(in)            :: fileformat
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                    intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Output a Mesh to a file.
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh to write to the file.
+!   \item [filename]
+!         The name of the file
+!   \item[fileformat]
+!         The format in which to output the Mesh. Currently the only valid option is {\tt ESMF\_FILEFORMAT\_ESMFMESH}.
+!      Please see Section~\ref{const:fileformatflag} for a detailed description of the options.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    type(ESMF_Mesh) :: myMesh
+    integer::  localrc
+    type(ESMF_Logical) :: isfree
+    type(ESMF_MeshStatus_Flag) :: status
+
+    
+    ! Check init status of the mesh
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! Make sure the mesh is complete enough to output
+    call C_ESMC_MeshGetIsFree(mesh, isfree)
+    if (isfree == ESMF_TRUE) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
+    
+    call C_ESMC_MeshGetStatus(mesh, status)
+    if (status .ne. ESMF_MESHSTATUS_COMPLETE) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
+
+    
+    ! Call into C to output mesh
+    call c_ESMC_MeshWriteToFile(mesh, &
+         filename, fileformat, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return success
+    if (present(rc)) rc=ESMF_SUCCESS
+
+  end subroutine ESMF_MeshWriteToFile
+!------------------------------------------------------------------------------
+
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD

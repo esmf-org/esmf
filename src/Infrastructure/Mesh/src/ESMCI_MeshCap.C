@@ -2616,3 +2616,31 @@ MeshCap *MeshCap::meshcreatefromfilenew(char *filename,
   return mc;
 }
 
+
+// Write mesh to one of the ESMF supported file formats
+// (e.g. ESMFMesh
+void MeshCap::mesh_write_to_file(char *filename,
+                            ESMC_FileFormat_Flag fileformat,
+                            int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::mesh_write_to_file()"
+
+  // Declare local return code
+  int localrc;
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_mesh_write_to_file(mesh,
+                             filename, 
+                             fileformat,
+                             &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "This functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+

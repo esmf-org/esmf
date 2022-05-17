@@ -54,4 +54,10 @@ void ESMCI_mesh_create_from_file(char *filename,
                                  ESMCI::DistGrid *elem_distgrid, 
                                  Mesh **out_mesh, int *rc);
 
+void ESMCI_mesh_write_to_file(Mesh *mesh, 
+                              char *filename, 
+                              ESMC_FileFormat_Flag fileformat, 
+                              int *rc);
+
+
 #endif // ESMCI_MESH_FILEIO_H
