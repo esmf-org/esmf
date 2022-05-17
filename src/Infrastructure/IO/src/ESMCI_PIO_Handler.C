@@ -75,14 +75,14 @@ namespace ESMCI
   class PIO_IODescHandler {
   private:
     static std::vector<PIO_IODescHandler *> activePioIoDescriptors;
-    int ios;     // PIO IO system instance for this descriptor
-    int io_descriptor; // PIO IO descriptor
-    int nDims;                   // The number of dimensions for Array IO
-    int *dims;                   // The shape of the Array IO
-    int basepiotype;             // PIO version of Array data type
-    Array *array_p;              // The array matched to this descriptor
-    int arrayRank;               // The rank of array_p
-    int *arrayShape;             // The shape of array_p
+    int ios;                  // PIO IO system instance for this descriptor
+    int io_descriptor;        // PIO IO descriptor
+    int nDims;                // The number of dimensions for Array IO
+    int *dims;                // The shape of the Array IO
+    int basepiotype;          // PIO version of Array data type
+    Array *array_p;           // The array matched to this descriptor
+    int arrayRank;            // The rank of array_p
+    int *arrayShape;          // The shape of array_p
   public:
     PIO_IODescHandler(int iosArg, Array *arrayArg) {
       ios = iosArg;
@@ -202,7 +202,7 @@ void PIO_Handler::initialize (
         // Set the error handling to return PIO errors
         // Just return error (error code may be different on different PEs).
         // Broadcast the error to all PEs (consistant error handling)
-        PIOc_Set_IOSystem_Error_Handling(instance, PIO_RETURN_ERROR);
+        PIOc_Set_IOSystem_Error_Handling(instance, PIO_BCAST_ERROR);
         PRINTMSG("After PIOc_Set_IOSystem_Error_Handling");
         // Add the instance to the global list
         PIO_Handler::activePioInstances.push_back(instance);
@@ -603,36 +603,32 @@ void PIO_Handler::arrayRead(
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_READ, "file not open",
         ESMC_CONTEXT, rc)) return;
 
-  iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
-      &arrDims, &narrDims, &basepiotype, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, rc)) return;
-
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
   localDE = 0;
   baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
   int arrlen = 1;
-  const int *counts = arr_p->getLocalarrayList()[localDE]->getCounts();
-  for (int i=0; i<narrDims; i++)
-      arrlen *= counts[i]; 
-
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
     int nDims;
+
+    // If frame >= 0 then we need to not use the unlimited dim in the iodesc.
+    iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
+		       &arrDims, &narrDims, &basepiotype, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+				      ESMC_CONTEXT, rc)) return;
+
+    // This should work if it is a NetCDF file.
+    piorc = PIOc_inq(pioFileDesc, &nDims,
+		     &nVar, &nAtt, &unlim);
+    if (!CHECKPIOERROR(piorc, "File is not in NetCDF format", ESMF_RC_FILE_READ, (*rc))) {
+      return;
+    }
+
     if (((char *)NULL != name) && (strlen(name) > 0)) {
       varname = name;
     } else {
       varname = arr_p->getName();
     }
-    PRINTMSG(" (" << my_rank << "): varname = " << varname);
-
-    // This should work if it is a NetCDF file.
-    piorc = PIOc_inq(pioFileDesc, &nDims,
-                              &nVar, &nAtt, &unlim);
-    if (!CHECKPIOERROR(piorc, "File is not in NetCDF format", ESMF_RC_FILE_READ, (*rc))) {
-      return;
-    }
-
 
     piorc = PIOc_inq_varid(pioFileDesc, varname.c_str(), &vardesc);
     // An error here means the variable is not in the file
@@ -642,7 +638,25 @@ void PIO_Handler::arrayRead(
     }
 
     int frame;
-    if (((int *)NULL != timeslice) && (*timeslice > 0)) {
+    if (((int *)NULL != timeslice) && (*timeslice > 0) && narrDims < nioDims) {
+      //
+      // Do not use the unlimited dim in iodesc calculation
+      //
+      int dimids[narrDims];
+      piorc = PIOc_inq_vardimid(pioFileDesc, vardesc, dimids);
+      // This should never happen
+      const std::string errmsg = "variable " + varname + " inq_dimid failed";
+      if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
+	return;
+      }
+       
+      if(unlim == dimids[narrDims-1]){
+	narrDims = narrDims - 1;
+      }
+      for (int i=0; i<narrDims; i++){
+	arrlen *= arrDims[i];
+      }
+
       int dimid_time;
       MPI_Offset time_len;
       piorc = PIOc_inq_dimid(pioFileDesc, "time", &dimid_time);
@@ -679,6 +693,10 @@ void PIO_Handler::arrayRead(
       frame = (*timeslice);
     } else {
       frame = -1;
+      for (int i=0; i<narrDims; i++){
+	arrlen *= arrDims[i];
+      }
+
     }
     if (unlim >= 0 && frame > 0) {
         PRINTMSG("calling setframe for read_darray, frame = " << frame);
