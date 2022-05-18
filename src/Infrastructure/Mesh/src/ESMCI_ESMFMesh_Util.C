@@ -585,7 +585,7 @@ void get_elemConn_info_2Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
 
   // Init elementConn decomp
   int ec_iodesc;
-  int gdimlen2D[2]={elementCount,maxNodePElement};
+  int gdimlen2D[2]={(int)elementCount,(int)maxNodePElement};
   piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 2, gdimlen2D, totNumElementConn, ec_offsets, &ec_iodesc, 
                           &rearr, NULL, NULL);
   if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
@@ -715,7 +715,7 @@ void get_nodeCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char 
 
     // Init nodeCoords decomp
     int node_iodesc;
-    int node_gdimlen2D[2]={nodeCount, coordDim};
+    int node_gdimlen2D[2]={(int)nodeCount, (int)coordDim};
     piorc = PIOc_InitDecomp(pioSystemDesc, PIO_DOUBLE, 2, node_gdimlen2D, num_nodes*coordDim, node_offsets, &node_iodesc, 
                     &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
@@ -975,7 +975,7 @@ void get_centerCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, cha
     
     // Init elementConn decomp
     int cc_iodesc;
-    int cc_gdimlen2D[2]={elementCount,coordDim};
+    int cc_gdimlen2D[2]={(int)elementCount,(int)coordDim};
     piorc = PIOc_InitDecomp(pioSystemDesc, PIO_DOUBLE, 2, cc_gdimlen2D, num_elems*coordDim, cc_offsets, &cc_iodesc, 
                             &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for centerCoords ") + filename,
