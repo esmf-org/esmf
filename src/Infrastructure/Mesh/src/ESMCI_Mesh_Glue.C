@@ -1924,6 +1924,7 @@ void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
     if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
+// Get the number of nodes in mesh on this processor.
 void ESMCI_MeshGetNodeCount(Mesh *mesh, int *nodeCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetNodeCount()"
@@ -1934,6 +1935,8 @@ void ESMCI_MeshGetNodeCount(Mesh *mesh, int *nodeCount, int *rc){
 }
 
 
+
+// Get the number of elements in mesh on this processor
 void ESMCI_MeshGetElemCount(Mesh *mesh, int *elemCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetElemCount()"
@@ -1965,7 +1968,7 @@ void ESMCI_MeshGetElemCount(Mesh *mesh, int *elemCount, int *rc){
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-
+// The size of the connection list on this processor
 void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetElemConnCount()"
@@ -1998,6 +2001,8 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
+// Get the number of nodes in mesh owned by this processor (different than
+// nodeCount, because this doesn't count ghost nodes owned by anothre processor).
 void ESMCI_MeshGetOwnedNodeCount(Mesh *mesh, int *nodeCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetOwnedNodeCount()"
@@ -2018,6 +2023,7 @@ void ESMCI_MeshGetOwnedNodeCount(Mesh *mesh, int *nodeCount, int *rc){
 }
 
 
+// Get the number of elems in mesh owned by this processor 
 void ESMCI_MeshGetOwnedElemCount(Mesh *mesh, int *elemCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetOwnedElemCount()"
@@ -2061,7 +2067,7 @@ static int _num_nodes_to_elem_type(int pdim, int num_nodes) {
 }
 
 
-/* XMRKX */
+// Indicate which optional element data is present in a mesh
 void ESMCI_MeshGetElemInfoPresence(Mesh *mesh, 
                                    int *elemMaskIsPresent,
                                    int *elemAreaIsPresent,
@@ -2093,7 +2099,26 @@ void ESMCI_MeshGetElemInfoPresence(Mesh *mesh,
 }
 
 
-
+// Get elem information from mesh.
+// Inputs:
+//  - mesh - the mesh to get the information from
+// Outputs:
+//  - elemIds    - the ids of the elems on this processor. Input array should be allocated to the number of
+//                 elems on this processor.
+//  - elemTypes  - the types of the elems on this processor. Input array should be allocated to the number of
+//                 elems on this processor.
+//  - elemConn   - the connections (positions in the local node arrays base 1) of the elems on this processor.
+//                 Input array should be allocated to the number of connections on this processor. You can
+//                 get this using ESMCI_MeshGetElemConnCount() or sum up the connections implied by elemTypes. 
+//  - elemMask   - the mask value of the elems on this processor. Input array should be allocated
+//                 to the number of elems on this processor. Will return an error if elem masks
+//                 not present in mesh.
+//  - elemArea   - the areas of the elems on this processor. Input array should be allocated
+//                 to the number of elems on this processor. Will return an error if elem areas
+//                 not present in mesh.
+//  - elemCoords - the coordinate values of the elems on this processor. Input array should be allocated
+//                 to the number of elems on this processor times orig_spatial_dim of the mesh.
+//                 Will return an error if elem areas not present in mesh.
 void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *elemIds,
                                  ESMCI::InterArray<int> *elemTypes,
@@ -2685,10 +2710,7 @@ void ESMCI_MeshSetElemInfo(Mesh *mesh,
 }
 
 
-
-
-
-/* XMRKX */
+// Indicate if node masks are present in mesh. 
 void ESMCI_MeshGetNodeInfoPresence(Mesh *mesh, 
                                    int *nodeMaskIsPresent,
                                    int *rc){
@@ -2704,7 +2726,19 @@ void ESMCI_MeshGetNodeInfoPresence(Mesh *mesh,
 }
 
 
-
+// Get node information from mesh.
+// Inputs:
+//  - mesh - the mesh to get the information from
+// Outputs:
+//  - nodeIds    - the ids of the nodes on this processor. Input array should be allocated to the number of
+//                 nodes on this processor. 
+//  - nodeCoords - the coordinates of the nodes on this processor. Input array should be allocated to
+//                 the number of nodes on this processor times the mesh orig_spatial_dim.
+//  - nodeOwners - the owners of the nodes on this processor. Input array should be allocated to the
+//                 number of nodes on thie processor.
+//  - nodeMask   - the mask value of the nodes on this processor. Inpute array should be allocated
+//                 to the number of nodes on this processor. Will return an error if node masks
+//                 not present in mesh.
 void ESMCI_MeshGetNodeCreateInfo(Mesh *mesh,
                                  ESMCI::InterArray<int> *nodeIds,
                                  ESMCI::InterArray<ESMC_R8> *nodeCoords,

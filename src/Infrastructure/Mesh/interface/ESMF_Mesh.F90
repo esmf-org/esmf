@@ -197,7 +197,8 @@ module ESMF_MeshMod
   public ESMF_MeshCreateCubedSphere
   public ESMF_MeshEmptyCreate
   public ESMF_MeshCreateFromFileOld 
-
+  public ESMF_MeshWriteToFile
+  
 !EOPI
 !------------------------------------------------------------------------------
 

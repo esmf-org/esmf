@@ -208,8 +208,6 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
   // Try-catch block around main part of method
   try {
 
-    //// Open file via PIO
-
     // Set pio_type based on what's available
 #ifdef ESMF_PNETCDF
     int pio_type = PIO_IOTYPE_PNETCDF;
@@ -217,6 +215,19 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     int pio_type = PIO_IOTYPE_NETCDF;
 #endif
 
+    
+    /// Create new file via PIO?
+
+    /// BILL: FILL IN HERE
+
+
+#if 0
+    //// BILL: I LEFT THE BELOW FROM THE READ BECAUSE YOU MIGHT NEED IT, BUT YOU MAY NEED TO MODIFY IT TO
+    //// DO WRITE INSTEAD OF READ
+
+    
+    //// Open file via PIO
+    
     // Open file
     int pioFileDesc;
     int mode = 0;
@@ -228,13 +239,10 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
     }
     if (!CHECKPIOERROR(piorc, std::string("Unable to open existing file: ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+#endif
+    
 
-    piorc = PIOc_Set_File_Error_Handling(pioFileDesc, PIO_RETURN_ERROR);
-    //    if (!CHECKPIOERROR(piorc, std::string("Unable to set PIO error handling for file: ") + filename,
-    //                   ESMF_RC_FILE_OPEN, localrc)) throw localrc;
-
-
-    //// Get VM Info
+    //// Get parallel information ESMF VM class 
 
     // Get VM 
     ESMCI::VM *vm=VM::getCurrent(&localrc);
@@ -242,21 +250,26 @@ void ESMCI_mesh_write_to_ESMFMesh_file(int pioSystemDesc,
                                       &localrc)) throw localrc;
     
     // Get info
-    int local_pet = vm->getLocalPet();  
-    int pet_count = vm->getPetCount();
+    int local_pet = vm->getLocalPet();  // I.e. the rank of this processor in the current mpi communicator
+    int pet_count = vm->getPetCount();  // I.e. the number of processors in the current mpi communicator
 
 
-    /// BILL FILL IN HERE.
+    /// BILL: FILL IN HERE TO PULL INFO OUT OF MESH AND WRITE TO FILE AS AN INVERSE EXAMPLE YOU CAN
+    ///       LOOK AT ESMCI_mesh_create_from_ESMFMesh_file() below
     /// (IT'S ALSO POSSIBLE YOU MAY ALSO NEED TO MAKE MODIFICATIONS TO THE ENCLOSING METHODS.
     ///  THEY ARE JUST A SUGGESTION OF WHAT SHOULD HAPPEN... :-)) 
 
-    
 
+    
+#if 0
+
+    //// BILL: Saved from before, you probably need this. 
+    
     //// Close file using PIO
     piorc = PIOc_closefile(pioFileDesc);
     if (!CHECKPIOERROR(piorc, std::string("Error closing file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-
+#endif
 
 
   } catch(std::exception &x) {
