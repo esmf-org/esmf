@@ -190,7 +190,7 @@ ESMC_VM ESMC_VMGetGlobal(int *rc){
   return vm;
 }
 
-int ESMC_VMLogMemInfo(char *prefix){
+int ESMC_VMLogMemInfo(const char *prefix){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMLogMemInfo()"
 

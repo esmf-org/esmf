@@ -52,6 +52,15 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  // MemInfo logging
+  strcpy(name, "VMLogMemInfo");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_VMLogMemInfo("Test-Prefix:");
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   // Get the global VM
   strcpy(name, "VMGetGlobal");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
