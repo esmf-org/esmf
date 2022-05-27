@@ -5378,7 +5378,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             rh=is%wrap%cplSet(i)%rh, &
             zeroRegions=is%wrap%cplSet(i)%zeroRegions, &
             termOrders=is%wrap%cplSet(i)%termOrders, &
-            name=name, rc=rc)
+            name=name, verbosity=verbosity, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
@@ -5387,7 +5387,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           cplList=cplListTemp(1:j-1), rh=is%wrap%rh, &
           zeroRegions=is%wrap%zeroRegions, &
           termOrders=is%wrap%termOrders, &
-          name=name, rc=rc)
+          name=name, verbosity=verbosity, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
@@ -6984,7 +6984,7 @@ print *, "found match:"// &
   !-----------------------------------------------------------------------------
 
   subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, zeroRegions, &
-    termOrders, name, rc)
+    termOrders, name, verbosity, rc)
     ! This method will destroy srcFB/dstFB, and replace with newly created FBs.
     ! Order of fields in outgoing srcFB/dstFB may be different from incoming.
     ! Order of elements in termOrders matches those in outgoing srcFB/dstFB.
@@ -6995,6 +6995,7 @@ print *, "found match:"// &
     type(ESMF_Region_Flag),    pointer               :: zeroRegions(:)
     type(ESMF_TermOrder_Flag), pointer               :: termOrders(:)
     character(*),              intent(in)            :: name
+    integer,                   intent(in)            :: verbosity
     integer,                   intent(out), optional :: rc
     
     ! local variables
@@ -7004,7 +7005,7 @@ print *, "found match:"// &
     type(ESMF_Field), pointer       :: srcFields(:), dstFields(:)
     type(ESMF_FieldBundle)          :: srcFBRedist, dstFBRedist
     integer                         :: rraShift, vectorLengthShift
-    type(ESMF_RouteHandle)          :: rhh
+    type(ESMF_RouteHandle)          :: rhh, rhhSaved
     integer(ESMF_KIND_I4), pointer  :: factorIndexList(:,:)
     real(ESMF_KIND_R8), pointer     :: factorList(:)
     character(ESMF_MAXSTR), pointer :: chopStringList(:)
@@ -7032,6 +7033,7 @@ print *, "found match:"// &
     integer(ESMF_KIND_I4), pointer  :: dstMaskValues(:)
     integer                         :: srcTermProcessing, pipelineDepth
     logical                         :: dumpWeightsFlag
+    logical                         :: singleRHFlag, rhComputed
     type(ESMF_Grid)                 :: srcGrid, dstGrid
     type(ESMF_GeomType_Flag)        :: srcGeomtype, dstGeomtype
     type(ESMF_ArraySpec)            :: srcArraySpec, dstArraySpec
@@ -7206,6 +7208,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
 
     ! prepare rhList linked list
     nullify(rhList)
+    rhComputed = .false.
 
     ! loop over all field pairs
     do i=1, count
@@ -7698,6 +7701,40 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         endif
       enddo
 
+      ! determine "singleRHFlag"
+      singleRHFlag = .false. ! default
+      do j=2, size(chopStringList)
+        if (index(chopStringList(j),"singlerh=")==1) then
+          call NUOPC_ChopString(chopStringList(j), chopChar="=", &
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+          if (size(chopSubString)>=2) then
+            if (trim(chopSubString(2))=="on") then
+              singleRHFlag = .true.
+            else if (trim(chopSubString(2))=="off") then
+              singleRHFlag = .false.
+            else if (trim(chopSubString(2))=="yes") then
+              singleRHFlag = .true.
+            else if (trim(chopSubString(2))=="no") then
+              singleRHFlag = .false.
+            else if (trim(chopSubString(2))=="true") then
+              singleRHFlag = .true.
+            else if (trim(chopSubString(2))=="false") then
+              singleRHFlag = .false.
+            else
+              write (msgString,*) "Specified option '", &
+                trim(chopStringList(j)), &
+                "' is not a valid choice. Defaulting to OFF for: '", &
+                trim(chopStringList(1)), "'"
+              call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_WARNING)
+            endif
+          endif
+          deallocate(chopSubString) ! local garbage collection
+          exit ! skip the rest of the loop after first hit
+        endif
+      enddo
+
       ! for now reuse of Regrid RouteHandle is only implemented for Grids
       
       call ESMF_FieldGet(srcFields(i), geomtype=srcGeomtype, rc=localrc)
@@ -7909,6 +7946,11 @@ call ESMF_LogWrite(trim(name)//&
             rcToReturn=rc)
           return  ! bail out
         else      
+         if(.not. (rhComputed .and. singleRHFlag)) then
+          if (btest(verbosity,12)) then
+            write(msgString,*) "   Before FieldRegridStore: "//trim(name)//"_"//trim(chopStringList(1))
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+          endif
           ! regrid store call
           !TODO: leverage ESMF_FieldBundleRegridStore(), like for the Redist
           !TODO: case, once ESMF_FieldBundleRegridStore() supports passing
@@ -7931,6 +7973,16 @@ call ESMF_LogWrite(trim(name)//&
             rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+          if (btest(verbosity,12)) then
+            write(msgString,*) "   After FieldRegridStore: "//trim(name)//"_"//trim(chopStringList(1))
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
+          endif
+          rhComputed = .true.
+          rhhSaved = rhh
+         else !
+          rhh = rhhSaved
+          rhListMatch = .true.
+         endif ! singlerh
         endif
         if (gridPair) then
           ! store info in the new rhList element
