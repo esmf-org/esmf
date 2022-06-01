@@ -247,7 +247,7 @@ for dirpath, dirnames, filenames in os.walk(src_path):
 # TODO: build doc command
 # TODO: remove duplicated metadata: here and src/ESMF/__init__.py
 setup(name="ESMPy",
-      version="8.3.0",
+      version="8.4.0",
       description="ESMF Python interface",
       author="University Corporation for Atmospheric Research, \
               Massachusetts Institute of Technology, \
