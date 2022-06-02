@@ -2016,12 +2016,11 @@ end function ESMF_MeshCreateFromFile
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromFileOld()"
-!BOP
+!BOPI
 !\label{API:MeshCreateFromFileOld}
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a file
+! !IROUTINE: ESMF_MeshCreate - Previous version of Mesh create from a file
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFileOld(filename, fileformat, keywordEnforcer, &
                  convertToDual, addUserArea, maskFlag, varname, &
                  nodalDistgrid, elementDistgrid, name, rc)
@@ -2095,7 +2094,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     logical::  localConvertToDual      ! local flag
     logical::  localAddUserArea
