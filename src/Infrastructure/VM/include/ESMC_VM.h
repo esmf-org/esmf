@@ -267,7 +267,7 @@ ESMC_VM ESMC_VMGetGlobal(
 //
 // !INTERFACE:
 int ESMC_VMLogMemInfo(
-  char *prefix                // in
+  const char *prefix                // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
