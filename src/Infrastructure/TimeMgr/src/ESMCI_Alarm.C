@@ -128,9 +128,11 @@ int Alarm::count=0;
       sprintf(alarm->name, "Alarm%3.3d", alarm->id);
     }
 
-    if (ringTime != ESMC_NULL_POINTER) {
-      alarm->ringTime = alarm->prevRingTime = alarm->firstRingTime = *ringTime;
-    }
+    if (ringTime != ESMC_NULL_POINTER) 
+      alarm->ringTime = *ringTime;
+    else
+      alarm->ringTime = clock->currTime;
+
     if (ringInterval != ESMC_NULL_POINTER) {
       TimeInterval zeroTimeInterval(0,0,1,0,0,0);
       if(*ringInterval < zeroTimeInterval){
@@ -146,12 +148,12 @@ int Alarm::count=0;
       }
 
       if( ( *ringInterval == clock->timeStep) ){
-        int n = (*ringTime - clock->currTime)/(*ringInterval);
+        int n = (alarm->ringTime - clock->currTime)/(*ringInterval);
         //std::cout << n << std::endl;
         //ringTime->print(); 
         //clock->currTime.print(); 
         //ringInterval->print();
-        if(*ringTime != (clock->currTime + n*(*ringInterval)) ){
+        if(alarm->ringTime != (clock->currTime + n*(*ringInterval)) ){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "; alarm Interval is the same as clock interval, ringTime cannot be misaligned with clock time, alarm will never ring", ESMC_CONTEXT, rc);
           return 0;
@@ -162,20 +164,6 @@ int Alarm::count=0;
       // LCM albeit it may be very large.
       alarm->ringInterval = *ringInterval;
 
-      // if ringTime not specified, calculate
-      //   ringTime from the current clock time
-
-      // TODO: handle case where *ringTime < clock->currTime;
-      //       same or similar to refTime
-      
-      if (ringTime == ESMC_NULL_POINTER) {
-        // works for positive or negative ringInterval
-        if(clock->direction == ESMF_DIRECTION_FORWARD)
-          alarm->ringTime = clock->currTime + alarm->ringInterval;
-        else
-          alarm->ringTime = clock->currTime - alarm->ringInterval;
-        alarm->prevRingTime = alarm->firstRingTime = alarm->ringTime;
-      }
     }else{
       // A negative ringInterval indicates a one shot alarm at ringTime only
       TimeInterval zeroTimeInterval(0,0,1,0,0,0);
@@ -192,18 +180,9 @@ int Alarm::count=0;
     }
     alarm->ringerIsOn = true;
 
-    // TODO:  invoke private method, shared with Alarm::set(), to calculate
-    //        first ringTime for interval alarms, given ringInterval and none,
-    //        one or both of refTime and ringTime.  Will replace logic in
-    //        corresponding above sections.
-    //        this->ringTime > clock->currTime &&
-    //        this->ringTime > (passed in) ringTime
-
     returnCode = alarm->Alarm::validate();
     if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) {
-      // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
-      //   and at the F90 level, so isInit flag can be set to usable value.
       delete alarm;
       return(ESMC_NULL_POINTER);
     } else {
@@ -213,27 +192,12 @@ int Alarm::count=0;
       ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc);
     }
-//    std::vector<Alarm>::iterator it = alarms.begin();
-//    while (it++ != alarms.end()){
-//      *it = *this;
-//    }
 
-//    for (auto it = begin (alarms); it != end (alarms); ++it) {
-//      *it = *this;
-//    }
     for (int i = 0; i < SAVESIZE; i ++){
       alarm->alarms.push_back(*alarm);
       alarm->clocks.push_back(*clock);
     }
-    
-    //for (Alarm a : alarms) {
-    //  a = *this;
-    //}
-    //for (Clock c : clocks) {
-    //  c = this->clock;
-    //}
-     
- 
+
     return(alarm);
 
  } // end ESMCI_alarmCreate (new)

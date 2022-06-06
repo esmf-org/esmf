@@ -332,12 +332,15 @@
 !     \item[{[ringTime]}]
 !          The ring time for a one-shot alarm or the first ring time for a
 !          repeating (interval) alarm.  Must specify at least one of ringTime
-!          or ringInterval.
+!          or ringInterval. ringTime defaults to clock's current time if
+!          not specified.
 !     \item[{[ringInterval]}]
-!          The ring interval for repeating (interval) alarms.  If
-!          {\tt ringTime} is not also specified (first ring time), it will be
-!          calculated as the {\tt clock}'s current time plus {\tt ringInterval}.
-!          Must specify at least one of ringTime or ringInterval.
+!          The ring interval for repeating (interval) alarms.
+!          Must specify at least one of ringTime or ringInterval. If ringInterval
+!          is not specified, the alarm will only ring at ringTime effectively
+!          making the alarm a one shot alarm. When both ringTime and ringInterval
+!          are specified, alarm rings intermittently starting at ringTime every
+!          ringInterval.
 !     \item[{[enabled]}]
 !          Sets the enabled state; default is on (true).  If disabled,
 !          an alarm will not function at all.
