@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -3102,9 +3102,6 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     integer                         :: verbosity, profiling
     integer                         :: indentCount
-    integer                         :: loopLevel, loopLevelPrev
-    integer                         :: levelMember, levelMemberPrev
-    integer                         :: loopIteration, loopIterationPrev
 
     rc = ESMF_SUCCESS
 
@@ -3443,21 +3440,21 @@ module NUOPC_Driver
     endif
           
   end subroutine
-    
+
   !-----------------------------------------------------------------------------
-  
+
   recursive subroutine ExecuteRunSequence(driver, rc)
     type(ESMF_GridComp)   :: driver
     integer, intent(out)  :: rc
-    
+
     ! Set the internal clock according to the incoming driver clock.
     ! Implement the default explicit timekeeping rules.
-    
+
     ! local variables
     integer                         :: userrc
     type(type_InternalState)        :: is
     character(ESMF_MAXSTR)          :: name
-    character(ESMF_MAXSTR)          :: msgString, timeString
+    character(ESMF_MAXSTR)          :: msgString, traceString, timeString
     type(NUOPC_RunElement), pointer :: runElement
     type(ESMF_Clock)                :: internalClock, activeClock
     integer                         :: i, j, phase, runPhase, runSeqIndex
@@ -3495,7 +3492,7 @@ module NUOPC_Driver
     call NUOPC_CompGet(driver, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
     ! query component for its internal state
     nullify(is%wrap)
 #ifdef ESMF_NO_F2018ASSUMEDTYPE
@@ -3505,13 +3502,13 @@ module NUOPC_Driver
 #endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
     ! initialize the activeClock
     activeClock = internalClock
 
-    ! determine the correct run sequence index for the current runPhase    
+    ! determine the correct run sequence index for the current runPhase
     runSeqIndex = is%wrap%runPhaseToRunSeqMap(runPhase)
-    
+
     if (btest(verbosity,12)) then
       call ESMF_LogWrite(trim(name)//": begin -------> RunSequence.", &
         ESMF_LOGMSG_INFO, rc=rc)
@@ -3525,7 +3522,7 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-    
+
     ! initialize "Prev" variables
     loopLevelPrev = 0
     levelMemberPrev = 0
@@ -3544,35 +3541,54 @@ module NUOPC_Driver
         activeClock = runElement%runSeq%clock
       endif
 
-      if (btest(verbosity,12)) then
+      if (btest(verbosity,12).or.btest(profiling,12)) then
         loopLevel = runElement%runSeq%loopLevel
         levelMember = runElement%runSeq%levelMember
         loopIteration = runElement%runSeq%loopIteration
         if ((loopLevel/=loopLevelPrev).or.(levelMember/=levelMemberPrev).or.&
           (loopIteration/=loopIterationPrev)) then
-          ! found a time loop event -> need to log
+          ! found a time loop event
+          if (btest(profiling,12)) then
+            if ((loopLevelPrev/=0).and.(levelMemberPrev/=0).and. &
+              (loopIterationPrev/=0)) then
+              ! an actual previous iteration does exist -> exit trace region
+              write(traceString,"('RunSequenceEvent.',I4.4,'.',I4.4,'.',I4.4)") &
+                loopLevelPrev, levelMemberPrev, loopIterationPrev
+              call ESMF_TraceRegionExit(trim(traceString), rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
+            ! enter new trace region
+            write(traceString,"('RunSequenceEvent.',I4.4,'.',I4.4,'.',I4.4)") &
+              loopLevel, levelMember, loopIteration
+            call ESMF_TraceRegionEnter(trim(traceString), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
           ! update the "Prev' variables
           loopLevelPrev = loopLevel
           levelMemberPrev = levelMember
           loopIterationPrev = loopIteration
-          ! write iteration info to Log
-          write(msgString,"(A,I4,A,I4,A,I4)") &
-            trim(name)//": RunSequence event loopLevel=", &
-            runElement%runSeq%loopLevel, "  levelMember=", &
-            runElement%runSeq%levelMember, "  loopIteration=", &
-            runElement%runSeq%loopIteration
-          call ESMF_ClockPrint(activeClock, options="currTime", &
-            preString=trim(msgString)//", current time: ", &
-            unit=timeString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_LogWrite(timeString, ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-            return  ! bail out
+          if (btest(verbosity,12)) then
+            ! write iteration info to Log
+            write(msgString,"(A,I4,A,I4,A,I4)") &
+              trim(name)//": RunSequence event loopLevel=", loopLevel, &
+              "  levelMember=", levelMember, "  loopIteration=", loopIteration
+            call ESMF_ClockPrint(activeClock, options="currTime", &
+              preString=trim(msgString)//", current time: ", &
+              unit=timeString, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_LogWrite(timeString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
         endif
       endif
-      
+
       ! now interpret and act on the current runElement
       i = runElement%i
       phase = runElement%phase
@@ -3620,7 +3636,20 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
+    if (btest(profiling,12)) then
+      if ((loopLevelPrev/=0).and.(levelMemberPrev/=0).and. &
+        (loopIterationPrev/=0)) then
+        ! an actual previous iteration does exist -> exit trace region
+        write(traceString,"('RunSequenceEvent.',I4.4,'.',I4.4,'.',I4.4)") &
+          loopLevelPrev, levelMemberPrev, loopIterationPrev
+        call ESMF_TraceRegionExit(trim(traceString), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+
     if (btest(verbosity,12)) then
       call ESMF_LogGet(indentCount=indentCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5625,11 +5654,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! check the incoming pointer
-    if (associated(compList)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="compList must enter unassociated", &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
-      return  ! bail out
+    if (present(compList)) then
+      if (associated(compList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="compList must enter unassociated", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
+    endif
+    if (present(petLists)) then
+      if (associated(petLists)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="petLists must enter unassociated", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
     endif
 
     ! query the component for info
@@ -5637,7 +5676,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
     ! query Component for the internal State
     nullify(is%wrap)
 #ifdef ESMF_NO_F2018ASSUMEDTYPE
@@ -5654,7 +5693,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-      
+
     ! allocate memory for the compList
     if (present(compList)) then
       allocate(compList(mapCount), stat=stat)
@@ -5663,7 +5702,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! allocate memory for the petLists
     if (present(petLists)) then
       allocate(petLists(mapCount), stat=stat)
@@ -5672,7 +5711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! fill the compList and/or petLists
     if (present(compList) .or. present(petLists)) then
       do i=1, mapCount
@@ -5685,7 +5724,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(petLists)) petLists(i)%ptr => cmEntry%wrap%petList
       enddo
     endif
-    
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -5722,12 +5761,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! check the incoming pointer
+    ! check the incoming pointers
     if (associated(compList)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="compList must enter unassociated", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
+    endif
+    if (present(petLists)) then
+      if (associated(petLists)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="petLists must enter unassociated", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
     endif
 
     ! query the component for info
@@ -5735,7 +5782,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
     ! query Component for the internal State
     nullify(is%wrap)
 #ifdef ESMF_NO_F2018ASSUMEDTYPE
@@ -5752,14 +5799,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-      
+
     ! allocate memory for the compList
     allocate(compList(mapCount), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of compList failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
     ! allocate memory for the petLists
     if (present(petLists)) then
       allocate(petLists(mapCount), stat=stat)
@@ -5768,7 +5815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! fill the compList and optionally petLists
     do i=1, mapCount
       call ESMF_ContainerGetUDTByIndex(is%wrap%connectorMap, i, &
@@ -5779,7 +5826,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       compList(i) = cmEntry%wrap%connector
       if (present(petLists)) petLists(i)%ptr => cmEntry%wrap%petList
     enddo
-    
+
   end subroutine
   !-----------------------------------------------------------------------------
 

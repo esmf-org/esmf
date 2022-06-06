@@ -14,18 +14,23 @@ for a standard cpp preprocessor implementation;
 test scripts.
 \end{itemize} 
 
-The following packages are optional, and only used for selected capabilities:
+Internal packages that can optionally reference external libraries:
 \begin{itemize}
 \item LAPACK - version 3.x or newer
-\item NetCDF - version 3.6.x or newer
-\item parallel-NetCDF - version 1.2.0 or newer 
-\item Xerces - version 3.1.0 or newer
+\item ParallelIO (PIO) - version 2.5.7 or newer
 \item yaml-cpp - tag yaml-cpp-0.6.2 or newer
 \end{itemize}
 
-Alternatively ESMF can be built using a single-processor MPI-bypass library
-that comes with ESMF. It allows ESMF applications to be linked and run in
-single-process mode.
+Optional external packages that must be specified for certain functions:
+\begin{itemize}
+\item NetCDF - version 3.6.x or newer (version 4.4 or newer required by PIO)
+\item parallel-NetCDF - version 1.2.0 or newer (version 1.12 or newer required by PIO)
+\item Xerces - version 3.1.0 or newer
+\end{itemize}  
+
+ESMF can be built using a single-processor MPI-bypass library
+that comes with ESMF by setting {\tt ESMF\_COMM=mpiuni}. This allows ESMF applications
+to be linked and run in single-process mode.
 
 In order to build html and pdf versions of the ESMF documentation, 
 \htmladdnormallink{\LaTeX}{http://www.latex-project.org},

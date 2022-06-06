@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -39,6 +39,8 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 
   ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
@@ -194,6 +196,7 @@ module ESMF_MeshMod
   public ESMF_MeshCreateFromIntPtr
   public ESMF_MeshCreateCubedSphere
   public ESMF_MeshEmptyCreate
+  public ESMF_MeshCreateFromFileOld 
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -425,6 +428,27 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 
 
+!------------------------------------------------------------------------------
+! ! Interoperability interfaces
+
+#ifndef ESMF_NO_F2018ASSUMEDTYPE
+
+  interface
+
+    subroutine C_ESMC_MeshSetElemDistGrid(mesh, distgrid, rc)
+      use ESMF_DistGridMod
+      type(*)               :: mesh
+      type(ESMF_DistGrid)   :: distgrid
+      integer               :: rc
+    end subroutine
+
+  end interface
+
+#endif
+
+!------------------------------------------------------------------------------
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -645,7 +669,6 @@ end subroutine
     integer :: numNode, numElem
     type(ESMF_CoordSys_Flag):: coordSys
     integer :: num_elems, num_elementConn
-    type(ESMF_RegridConserve) :: lregridConserve
     type(ESMF_InterArray) :: elementMaskII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
@@ -668,21 +691,6 @@ end subroutine
        return
     endif
 
-    ! Handle optional conserve argument
-! Passing the regridConserve flag into add elements is a fix for source masking
-! with patch interpolation.  Right now the Regrid does not support source masking
-! on a Mesh.  So this option is defaulting to CONSERVE_ON to make things more simple
-! because of the mulitple entry points when creating a Mesh.  When this option is
-! added to the pulic API, (when mesh source masking is enabled) this flag will
-! need to be defaulted to CONSERVE_OFF, and documentation should be added to tell
-! the users that if they are doing conservative with a mesh created in the three
-! step process they should make sure to turn CONSERVE_ON in the add element call.
-
-!    if (present(regridConserve)) then
-!       lregridConserve=regridConserve
-!    else
-       lregridConserve=ESMF_REGRID_CONSERVE_ON
-!    endif
 
     ! If we're at the wrong stage then complain
     call C_ESMC_MeshGetStatus(mesh, status)
@@ -727,7 +735,6 @@ end subroutine
                areaPresent, elementArea, &
                coordsPresent, elementCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSys, sdim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -739,7 +746,6 @@ end subroutine
                areaPresent, tmpArea, &
                coordsPresent, elementCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve,&
                coordSys, sdim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -753,7 +759,6 @@ end subroutine
                areaPresent, elementArea, &
                coordsPresent, tmpCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSys, sdim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -765,7 +770,6 @@ end subroutine
                areaPresent, tmpArea, &
                coordsPresent, tmpCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSys, sdim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -783,7 +787,7 @@ end subroutine
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
-       call C_ESMC_MeshSetElemDistGrid(mesh%this, elementDistgrid, localrc)
+       call C_ESMC_MeshSetElemDistGrid(mesh, elementDistgrid, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -817,7 +821,7 @@ end subroutine
     type(ESMF_Mesh),    intent(inout)         :: mesh
     integer,            intent(in)            :: nodeIds(:)
     real(ESMF_KIND_R8), intent(in)            :: nodeCoords(:)
-    integer,            intent(in)            :: nodeOwners(:)
+    integer,            intent(in),  optional :: nodeOwners(:)
     integer,            intent(in),  optional :: nodeMask(:)
     type(ESMF_DistGrid), intent(in), optional :: nodalDistgrid
     integer,            intent(out), optional :: rc
@@ -853,12 +857,13 @@ end subroutine
 !          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(1) and
 !          nodeCoords(2), the coordinates for node 2 are in nodeCoords(3) and nodeCoords(4),
 !          etc.).
-!   \item[nodeOwners]
+!   \item[{[nodeOwners]}]
 !         An array containing the PETs that own the nodes to be created on this PET.
 !         If the node is shared with another PET, the value
 !         may be a PET other than the current one. Only nodes owned by this PET
 !         will have PET local entries in a Field created on the Mesh. This input consists of
-!         a 1D array the size of the number of nodes on this PET.
+!         a 1D array the size of the number of nodes on this PET. If not provided by the user, 
+!         then ESMF will calculate node ownership. 
 !   \item [{[nodeMask]}]
 !          An array containing values which can be used for node masking. Which values indicate
 !          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
@@ -884,7 +889,7 @@ end subroutine
     integer :: num_nodes
     integer :: sdim, pdim, numNode
     type(ESMF_CoordSys_Flag):: coordSys
-    type(ESMF_InterArray) :: nodeMaskII
+    type(ESMF_InterArray) :: nodeMaskII, nodeOwnersII
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -915,6 +920,11 @@ end subroutine
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+   ! Create interface int to wrap optional node owners
+   nodeOwnersII = ESMF_InterArrayCreate(nodeOwners, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Create interface int to wrap optional element mask
     nodeMaskII = ESMF_InterArrayCreate(nodeMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -923,12 +933,16 @@ end subroutine
 
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds, nodeCoords, &
-                         nodeOwners, nodeMaskII, &
+                         nodeOwnersII, nodeMaskII, &
                          coordSys, sdim, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Get rid of interface Int wrapper
+    ! Get rid of interface Int wrappers
+    call ESMF_InterArrayDestroy(nodeOwnersII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     call ESMF_InterArrayDestroy(nodeMaskII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1064,7 +1078,7 @@ end subroutine
     integer,                  intent(in)            :: spatialDim
     integer,                  intent(in)            :: nodeIds(:)
     real(ESMF_KIND_R8),       intent(in)            :: nodeCoords(:)
-    integer,                  intent(in)            :: nodeOwners(:)
+    integer,                  intent(in),  optional :: nodeOwners(:)
     integer,                  intent(in),  optional :: nodeMask(:)
     type(ESMF_DistGrid),      intent(in),  optional :: nodalDistgrid
     integer,                  intent(in)            :: elementIds(:)
@@ -1130,12 +1144,13 @@ end subroutine
 !          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(1) and
 !          nodeCoords(2), the coordinates for node 2 are in nodeCoords(3) and nodeCoords(4),
 !          etc.).
-!   \item[nodeOwners]
+!   \item[{[nodeOwners]}]
 !         An array containing the PETs that own the nodes to be created on this PET.
 !         If the node is shared with another PET, the value
 !         may be a PET other than the current one. Only nodes owned by this PET
 !         will have PET local entries in a Field created on the Mesh. This input consists of
-!         a 1D array the size of the number of nodes on this PET.
+!         a 1D array the size of the number of nodes on this PET. If not provided by the user, 
+!         then ESMF will calculate node ownership. 
 !   \item [{[nodeMask]}]
 !          An array containing values which can be used for node masking. Which values indicate
 !          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
@@ -1221,8 +1236,8 @@ end subroutine
     integer :: numNode, numElem
     integer :: num_nodes
     integer :: num_elems, num_elementConn
-    type(ESMF_RegridConserve) :: lregridConserve
     type(ESMF_InterArray) :: elementMaskII, nodeMaskII
+    type(ESMF_InterArray) :: nodeOwnersII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
     real(ESMF_KIND_R8) :: tmpCoords(2)
@@ -1235,28 +1250,9 @@ end subroutine
 
     ESMF_MeshCreate1Part%this = ESMF_NULL_POINTER
 
-
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, nodalDistgrid, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, elementDistgrid, rc)
-
-
-    ! Handle optional conserve argument
-! Passing the regridConserve flag into add elements is a fix for source masking
-! with patch interpolation.  Right now the Regrid does not support source masking
-! on a Mesh.  So this option is defaulting to CONSERVE_ON to make things more simple
-! because of the mulitple entry points when creating a Mesh.  When this option is
-! added to the pulic API, (when mesh source masking is enabled) this flag will
-! need to be defaulted to CONSERVE_OFF, and documentation should be added to tell
-! the users that if they are doing conservative with a mesh created in the three
-! step process they should make sure to turn CONSERVE_ON in the add element call.
-
-!    if (present(regridConserve)) then
-!       lregridConserve=regridConserve
-!    else
-       lregridConserve=ESMF_REGRID_CONSERVE_ON
-!    endif
-
 
    ! Set Default coordSys
    if (present(coordSys)) then
@@ -1283,25 +1279,34 @@ end subroutine
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate1Part)
 
 
-   ! Create interface int to wrap optional element mask
+   ! Create interface int to wrap optional node owners
+   nodeOwnersII = ESMF_InterArrayCreate(nodeOwners, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+   ! Create interface int to wrap optional node mask
    nodeMaskII = ESMF_InterArrayCreate(nodeMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+
     ! Add the nodes
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(ESMF_MeshCreate1Part%this, num_nodes, nodeIds, nodeCoords, &
-                             nodeOwners, nodeMaskII, &
+                             nodeOwnersII, nodeMaskII, &
                              coordSysLocal, spatialDim, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-    ! Get rid of interface Int wrapper
-    call ESMF_InterArrayDestroy(nodeMaskII, rc=localrc)
+    ! Get rid of interface Int wrappers
+    call ESMF_InterArrayDestroy(nodeOwnersII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    call ESMF_InterArrayDestroy(nodeMaskII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! Create interface int to wrap optional element mask
@@ -1332,7 +1337,7 @@ end subroutine
 num_elems, &
                              elementIds, elementTypes, elementMaskII, &
                              num_elementConn, elementConn, &
-                             lregridConserve%regridconserve, localrc)
+                             localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
@@ -1349,7 +1354,6 @@ num_elems, &
                areaPresent, elementArea, &
                coordsPresent, elementCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve,&
                coordSysLocal, spatialDim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1362,7 +1366,6 @@ num_elems, &
                areaPresent, tmpArea, &
                coordsPresent, elementCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSysLocal, spatialDim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1377,7 +1380,6 @@ num_elems, &
                areaPresent, elementArea, &
                coordsPresent, tmpCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSysLocal, spatialDim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1390,7 +1392,6 @@ num_elems, &
                areaPresent, tmpArea, &
                coordsPresent, tmpCoords, &
                num_elementConn, elementConn, &
-               lregridConserve%regridconserve, &
                coordSysLocal, spatialDim, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1832,6 +1833,7 @@ end function ESMF_MeshCreateFromGrid
 end function ESMF_MeshCreateFromMeshes
 !------------------------------------------------------------------------------
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromFile()"
@@ -1843,7 +1845,8 @@ end function ESMF_MeshCreateFromMeshes
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFile(filename, fileformat, keywordEnforcer, &
                  convertToDual, addUserArea, maskFlag, varname, &
-                 nodalDistgrid, elementDistgrid, name, rc)
+                 nodalDistgrid, elementDistgrid, &
+                 coordSys, name, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1858,10 +1861,192 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),           intent(in),  optional :: varname
     type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
     type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
+    type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
     character(len=*),           intent(in),  optional :: name
     integer,                    intent(out), optional :: rc
 !
 ! !DESCRIPTION:
+!   Create a Mesh from a file. Provides options to convert to 3D and in the case of SCRIP
+!   format files, allows the dual of the mesh to be created.
+!
+!   This call is {\em collective} across the current VM.
+!
+!   \begin{description}
+!   \item [filename]
+!         The name of the grid file
+!   \item[fileformat]
+!         The file format. The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH} and
+!         {\tt ESMF\_FILEFORMAT\_UGRID}.
+!         Please see Section~\ref{const:fileformatflag} for a detailed description of the options.
+!   \item[{[convertToDual]}]
+!         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
+!         defaults to {\tt .false.}.
+!   \item[{[addUserArea]}]
+!         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
+!         only supported when the grid file is in the SCRIP or ESMF format. If not specified,
+!         defaults to {\tt .false.}.
+!   \item[{[maskFlag]}]
+!         If maskFlag is present, generate the mask using the missing\_value attribute defined in 'varname'
+!         This flag is only supported when the grid file is in the UGRID format.
+!         The value could be either {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}.  If the value is
+!         {\tt ESMF\_MESHLOC\_NODE}, the node mask will be generated and the variable has to be
+!         defined on the "node" (specified by its {\tt location} attribute).  If the value is
+!         {\tt ESMF\_MESHLOC\_ELEMENT}, the element mask will be generated and the variable has to be
+!         defined on the "face" of the mesh.  If the variable is not defined on the right location,
+!         no mask will be generated.  If not specified, no mask will be generated.
+!   \item[{[varname]}]
+!         If maskFlag is present, provide a variable name stored in the UGRID file and
+!         the mask will be generated using the missing value of the data value of
+!         this variable.  The first two dimensions of the variable has to be the
+!         the longitude and the latitude dimension and the mask is derived from the
+!         first 2D values of this variable even if this data is 3D, or 4D array. If not
+!         specified, defaults to empty string.
+!   \item [{[nodalDistgrid]}]
+!         A Distgrid describing the user-specified distribution of
+!         the nodes across the PETs.
+!   \item [{[elementDistgrid]}]
+!         A Distgrid describing the user-specified distribution of
+!         the elements across the PETs.
+!   \item[{[coordSys]}]
+!         The coordinate system in which to store the mesh coordinate data.
+!         If this setting doesn't match the coordinate system in the file, then
+!         the coordinates in the file will be converted to this system during mesh
+!         creation. It is currently an error to convert Cartesian file coordinates
+!         into a spherical coordinate system.  
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified, then defaults to the coordinate system in the file.  
+!   \item [{[name]}]
+!         The name of the Mesh.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    type(ESMF_Mesh) :: myMesh
+    integer::  localrc
+    type(ESMF_Logical) :: localAddUserArea
+    type(ESMF_Logical) :: localConvertToDual
+    type(ESMF_CoordSys_Flag) :: localCoordSys
+    type(ESMF_MeshLoc) :: localMaskFlag
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, nodalDistgrid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_DistgridGetInit, elementDistgrid, rc)
+
+
+    ! Process optional arguments and at the same time convert to a format to go through to C
+    localAddUserArea=ESMF_FALSE
+    if (present(addUserArea)) then
+       localAddUserArea=addUserArea
+    endif
+
+    localConvertToDual=ESMF_FALSE
+    if (present(convertToDual)) then
+       localConvertToDual=convertToDual
+    endif
+
+    localCoordSys=ESMF_COORDSYS_UNINIT
+    if (present(coordSys)) then
+       localCoordSys=coordSys
+    endif
+
+    localMaskFlag=ESMF_MESHLOC_NONE
+    if (present(maskFlag)) then
+       localMaskFlag=maskFlag
+    endif
+
+
+    ! Call into C 
+    call c_ESMC_MeshCreateFromFile(ESMF_MeshCreateFromFile%this, &
+         filename, fileformat, &
+         localConvertToDual, localAddUserArea, &
+         localCoordSys, &
+         localMaskFlag, varname, & 
+         nodalDistgrid, elementDistgrid, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Set nodeDistgrid in Mesh
+    if (present(nodalDistgrid)) then
+      call c_ESMC_MeshSetNodeDistGrid(ESMF_MeshCreateFromFile, nodalDistgrid, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromFile, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Set elementDistgrid in Mesh
+    if (present(elementDistgrid)) then
+      call c_ESMC_MeshSetElemDistGrid(ESMF_MeshCreateFromFile, elementDistgrid, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromFile, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
+    ! Set the name in Base object
+    ! Do this here for now, but eventually move into above C func
+    if (present(name)) then
+      call c_ESMC_SetName(ESMF_MeshCreateFromFile, "Mesh", name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
+    ! Change status
+    call C_ESMC_MeshSetStatus(ESMF_MeshCreateFromFile, ESMF_MESHSTATUS_COMPLETE)
+
+    ! Set init status of arguments
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromFile)
+
+    ! Return success
+    if (present(rc)) rc=ESMF_SUCCESS
+
+end function ESMF_MeshCreateFromFile
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromFileOld()"
+!BOPI
+!\label{API:MeshCreateFromFileOld}
+! !IROUTINE: ESMF_MeshCreate - Previous version of Mesh create from a file
+!
+! !INTERFACE:
+    function ESMF_MeshCreateFromFileOld(filename, fileformat, keywordEnforcer, &
+                 convertToDual, addUserArea, maskFlag, varname, &
+                 nodalDistgrid, elementDistgrid, name, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromFileOld
+! !ARGUMENTS:
+    character(len=*),           intent(in)            :: filename
+    type(ESMF_FileFormat_Flag), intent(in)            :: fileformat
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                    intent(in),  optional :: convertToDual
+    logical,                    intent(in),  optional :: addUserArea
+    type(ESMF_MeshLoc),         intent(in),  optional :: maskFlag
+    character(len=*),           intent(in),  optional :: varname
+    type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
+    type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
+    character(len=*),           intent(in),  optional :: name
+    integer,                    intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!   {\em WARNING:} This is the deprecated ESMF\_MeshCreateFromFileOld() interface. It is being kept 
+!   as a backup during the 8.3 release in case there are issues with the new implementation. However,
+!   this interface will be removed in the 8.4 release.
+!
 !   Create a Mesh from a file. Provides options to convert to 3D and in the case of SCRIP
 !   format files, allows the dual of the mesh to be created.
 !
@@ -1909,7 +2094,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     logical::  localConvertToDual      ! local flag
     logical::  localAddUserArea
@@ -1981,14 +2166,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(elementDistgrid) .and. present(nodalDistgrid)) then
-        ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
+        ESMF_MeshCreateFromFileOld = ESMF_MeshCreateRedist(myMesh, &
                                        nodalDistgrid=nodalDistgrid, &
                                        elementDistgrid=elementDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_MeshDestroy(myMesh)
     elseif (present(elementDistgrid)) then
-        ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
+        ESMF_MeshCreateFromFileOld = ESMF_MeshCreateRedist(myMesh, &
                                        elementDistgrid=elementDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1996,7 +2181,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_MeshDestroy(myMesh)
     elseif (present(nodalDistgrid)) then
-        ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
+        ESMF_MeshCreateFromFileOld = ESMF_MeshCreateRedist(myMesh, &
                                        nodalDistgrid=nodalDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2004,12 +2189,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_MeshDestroy(myMesh)
     else
-       ESMF_MeshCreateFromFile = myMesh
+       ESMF_MeshCreateFromFileOld = myMesh
     endif
 
     ! Set the name in Base object
     if (present(name)) then
-      call c_ESMC_SetName(ESMF_MeshCreateFromFile, "Mesh", name, localrc)
+      call c_ESMC_SetName(ESMF_MeshCreateFromFileOld, "Mesh", name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -2017,8 +2202,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc=ESMF_SUCCESS
     return
 
-end function ESMF_MeshCreateFromFile
+end function ESMF_MeshCreateFromFileOld
 !------------------------------------------------------------------------------
+
+
+
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2695,6 +2884,7 @@ end function ESMF_MeshCreateFromFile
     return
 end function ESMF_MeshCreateFromUnstruct
 !------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

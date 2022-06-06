@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -61,7 +61,7 @@ void ESMCI_meshcreate(Mesh **meshpp,
                       ESMC_CoordSys_Flag *coordSys, int *rc);
 
 void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
-                            double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                            double *nodeCoord, InterArray<int> *nodeOwner, InterArray<int> *nodeMaskII,
                             ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                             int *rc);
 
@@ -74,11 +74,11 @@ void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg n
                             int *rc);
 
 void ESMCI_meshaddelements(Mesh **meshpp,
-                                              int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
-                                              int *_areaPresent, double *elemArea,
-                                              int *_coordsPresent, double *elemCoords,
-                                              int *_num_elemConn, int *elemConn, int *regridConserve,
-                                              ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
+                           int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
+                           int *_areaPresent, double *elemArea,
+                           int *_coordsPresent, double *elemCoords,
+                           int *_num_elemConn, int *elemConn, 
+                           ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                            int *rc);
 
 /**

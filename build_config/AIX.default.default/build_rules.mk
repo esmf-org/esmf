@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = xlf90_r
 ESMF_CXXDEFAULT         = xlC_r
+ESMF_CDEFAULT           = xlc_r
 
 ############################################################
 # Default MPI setting.
@@ -32,6 +33,7 @@ ESMF_F90DEFAULT         = mpxlf90_r
 ESMF_F90LINKLIBS       += -lmpi_r
 ESMF_CXXDEFAULT         = mpCC_r
 ESMF_CXXLINKLIBS       += -lmpi_r
+ESMF_CXXDEFAULT         = mpcc_r
 ESMF_MPIRUNDEFAULT      = mpirun.pc604
 else
 ifeq ($(ESMF_COMM),user)
@@ -47,6 +49,7 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = lslpp -l | fgrep xlf
 ESMF_CXXCOMPILER_VERSION    = lslpp -l | fgrep C++
+ESMF_CCOMPILER_VERSION      = lslpp -l | fgrep C
 
 ############################################################
 # 32- vs. 64-bit ABI
@@ -94,6 +97,7 @@ ESMF_OPENMP := OFF
 #
 ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
+ESMF_CLINKRPATHS        =
 
 ############################################################
 # xlf90 does not know about Fortran suffices

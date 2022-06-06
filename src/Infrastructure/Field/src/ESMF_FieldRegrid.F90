@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1155,7 +1155,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   lregridmethod, &
                                   localLineType,localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
-                                  ESMF_REGRID_SCHEME_NATIVE, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, localExtrapDistExponent, &
@@ -1187,7 +1186,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   lregridmethod, &
                                   localLineType, localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
-                                  ESMF_REGRID_SCHEME_NATIVE, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, localExtrapDistExponent, &
@@ -2764,7 +2762,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localLineType, &
                                   localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
-                                  ESMF_REGRID_SCHEME_NATIVE, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, &
@@ -2802,7 +2799,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localLineType, &
                                   localNormType, &
                                   localpolemethod, localRegridPoleNPnts, &
-                                  ESMF_REGRID_SCHEME_NATIVE, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, &
@@ -3979,10 +3975,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If created on a 3D Grid, it must be built on the {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} stagger 
 !     location. If created on a Mesh, it must be built on the {\tt ESMF\_MESHLOC\_ELEMENT} mesh location. 
 !
-!     If the user has set the area in the Grid or Mesh under {\tt areaField}, then that's the area that's
+!     If the user has set the area in the Grid, Mesh, or XGrid under {\tt areaField}, then that's the area that's
 !     returned in the units that the user set it in. If the user hasn't set the area, then the area is 
-!     calculated and returned. If the Grid or Mesh is on the surface of a sphere, then the calculated area is in
-!     units of square radians. If the Grid or Mesh is 
+!     calculated and returned. If the Grid, Mesh, or XGrid is on the surface of a sphere, then the calculated area is in
+!     units of square radians. If the Grid, Mesh, or XGrid is 
 !     Cartesian, then the calculated area is in square units of whatever unit the coordinates are in. 
 !
 !     The arguments are:
@@ -3995,12 +3991,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
         integer :: localrc
-        integer              :: lregridScheme
         type(ESMF_GeomType_Flag)  :: geomtype
 
         type(ESMF_Grid)      :: Grid
         type(ESMF_Array)     :: Array
         type(ESMF_Mesh)      :: Mesh
+        type(ESMF_XGrid)     :: xgrid
         type(ESMF_StaggerLoc) :: staggerLoc, staggerLocG2M
         type(ESMF_MeshLoc)   :: meshloc
         real(ESMF_KIND_R8), pointer :: areaFptr(:)
@@ -4014,8 +4010,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
-  !  check Field and areaField to make sure they are from the same grid
-
         ! Now we go through the painful process of extracting the data members
         ! that we need.
         call ESMF_FieldGet(areaField, typekind=typekind, geomtype=geomtype, array=Array, rc=localrc)
@@ -4025,26 +4019,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Check typekind
         if (typekind .ne. ESMF_TYPEKIND_R8) then
            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-              msg="- Area calculation is only supported for Fields of typekind=ESMF_TYPEKIND_R8", & 
+              msg="Area calculation is only supported for Fields of typekind=ESMF_TYPEKIND_R8", & 
               ESMF_CONTEXT, rcToReturn=rc) 
            return
         endif
 
 
-        ! TODO: Get rid of this
-        lregridScheme = ESMF_REGRID_SCHEME_NATIVE
-          
-        ! Set interpretation of grid based on regridScheme
-        if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) then
-           isSphere = 1
-           isLatLonDeg=.true.
-        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_REGION3D) then
-           isSphere = 0
-           isLatLonDeg=.true.
-        else  
-           isSphere = 0
-           isLatLonDeg=.false.
-        endif
 
         ! If grids, then convert to a mesh to do the regridding
         if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
@@ -4057,7 +4037,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! control volume for the others should be
           if (staggerloc .ne. ESMF_STAGGERLOC_CENTER) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-              msg="- can't currently calculate area on a stagger other then center", & 
+              msg="Can't currently calculate area on a stagger other then center", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
           endif
@@ -4074,7 +4054,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                staggerlocG2M=ESMF_STAGGERLOC_CORNER_VFACE
             else
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can currently only do conservative regridding on 2D or 3D grids", & 
+                 msg="Can currently only do conservative regridding on 2D or 3D grids", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
             endif
@@ -4099,11 +4079,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
 
           ! call into the Regrid GetareaField interface
-          call ESMF_RegridGetArea(Grid, Mesh, Array, staggerlocG2M, lregridScheme, rc=localrc)
+          call ESMF_RegridGetArea(Grid, Mesh, Array, staggerlocG2M, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        else
+
+          ! Get rid of Mesh
+          call ESMF_MeshDestroy(Mesh, noGarbage=.true., rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+               ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+       else if (geomtype .eq. ESMF_GEOMTYPE_MESH) then
           call ESMF_FieldGet(areaField, mesh=Mesh, meshloc=meshloc, &
                  localDECount=localDECount, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4111,7 +4098,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-              msg="- can't currently calculate area on a mesh location other than elements", & 
+              msg="Can't currently calculate area on a mesh location other than elements", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
           endif
@@ -4133,17 +4120,55 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        else if (geomtype .eq. ESMF_GEOMTYPE_XGRID) then
+
+           ! Get Field info
+           call ESMF_FieldGet(areaField, xgrid=xgrid, &
+                localDECount=localDECount, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           
+           ! Don't need to do anything if there are no DEs
+           if (localDECount < 1) then
+              if(present(rc)) rc = ESMF_SUCCESS
+              return
+           endif
+
+           ! Only support 1 localDE right now
+           if (localDECount .ne. 1) then
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg="Getting areas for XGrid currently only supported for Fields with <= 1 local DE on each PET.", & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+
+           ! Get pointer to field data
+           ! Right now only support 1 DE per PET
+           call ESMF_FieldGet(areaField, localDE=0,  farrayPtr=areaFptr, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+           ! Get area from XGrid
+           ! (The ESMF_XGridGet() call checks that the size of the array matches, 
+           !  so I'm not doing it before calling in.)
+           call ESMF_XGridGet(xgrid, area=areaFptr, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           
+        else if (geomtype .eq. ESMF_GEOMTYPE_LOCSTREAM) then
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                msg="Can't get areas for a Field built on a LocStream.", & 
+                ESMF_CONTEXT, rcToReturn=rc) 
+           return
+        else
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                msg="Unrecognized geometry type.", & 
+                ESMF_CONTEXT, rcToReturn=rc) 
+
         endif
 
-
-        ! destroy Mesh, if they were created here
-        if (geomtype .ne. ESMF_GEOMTYPE_MESH) then
-        call ESMF_MeshDestroy(Mesh, noGarbage=.true., rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-
+        ! Return success
         if(present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_FieldRegridGetArea
@@ -4158,7 +4183,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridGetIwts()
-      subroutine ESMF_FieldRegridGetIwts(Field, Iwts, MaskValues, regridScheme, rc)
+      subroutine ESMF_FieldRegridGetIwts(Field, Iwts, MaskValues, rc)
 !
 ! !RETURN VALUE:
 !      
@@ -4166,7 +4191,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Field), intent(inout)                    :: Field
       type(ESMF_Field), intent(inout)                 :: Iwts
       integer(ESMF_KIND_I4), intent(in), optional     :: MaskValues(:)
-      integer, intent(in), optional                   :: regridScheme
       integer, intent(out), optional                  :: rc 
 !
 ! !DESCRIPTION:
@@ -4175,11 +4199,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [Field]
 !           The Field.
-!     \item [{[regridScheme]}]
-!           Whether to convert to spherical coordinates 
-!           ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
-!           or to leave in native coordinates 
-!           ({\tt ESMF\_REGRID\_SCHEME\_NATIVE}). 
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4187,7 +4206,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
         integer :: localrc
         integer              :: isSphere
-        integer              :: lregridScheme
         type(ESMF_GeomType_Flag)  :: geomtype
 
         type(ESMF_Grid)      :: Grid
@@ -4213,13 +4231,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Will eventually determine scheme either as a parameter or from properties
-        ! of the source grid
-        if (present(regridScheme)) then
-          lregridScheme = regridScheme
-        else
-          lregridScheme = ESMF_REGRID_SCHEME_NATIVE
-        endif
 
         ! If grids, then convert to a mesh to do the regridding
         if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
@@ -4246,7 +4257,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         ! call into the Regrid GetIwts interface
-        call ESMF_RegridGetIwts(Grid, Mesh, Array, staggerLoc, lregridScheme, rc=localrc)
+        call ESMF_RegridGetIwts(Grid, Mesh, Array, staggerLoc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

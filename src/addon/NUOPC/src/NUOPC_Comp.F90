@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -545,7 +545,11 @@ module NUOPC_Comp
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_GridCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -634,7 +638,11 @@ module NUOPC_Comp
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -723,7 +731,11 @@ module NUOPC_Comp
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_GridCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -811,7 +823,11 @@ module NUOPC_Comp
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -903,7 +919,11 @@ module NUOPC_Comp
 !   the attribute is not present or not set.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_GridCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1042,7 +1062,11 @@ module NUOPC_Comp
 !   the attribute is not present or not set.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1181,7 +1205,11 @@ module NUOPC_Comp
 !   the attribute is not present or not set.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_GridCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1318,7 +1346,11 @@ module NUOPC_Comp
 !   the attribute is not present or not set.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1445,10 +1477,16 @@ module NUOPC_Comp
     logical,                intent(in),  optional :: addFlag
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{NUOPC_GridCompAttributeIng}
 !   Ingest the Attributes from a FreeFormat object onto the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-! 
+!
+!   Important: Attributes ingested by this method are stored as type character
+!   strings, and must be accessed accordingly. Conversion from string into a
+!   different data type, e.g. {\tt integer} or {\tt real}, is the user's
+!   responsibility.
+!
 !   If {\tt addFlag} is {\tt .false.} (default), an error will be returned if 
 !   an attribute is to be ingested that was not previously added to the 
 !   {\tt comp} object. If {\tt addFlag} is {\tt .true.}, all missing attributes
@@ -1590,10 +1628,16 @@ module NUOPC_Comp
     logical,                intent(in),  optional :: addFlag
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{NUOPC_CplCompAttributeIng}
 !   Ingest the Attributes from a FreeFormat object onto the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-! 
+!
+!   Important: Attributes ingested by this method are stored as type character
+!   strings, and must be accessed accordingly. Conversion from string into a
+!   different data type, e.g. {\tt integer} or {\tt real}, is the user's
+!   responsibility.
+!
 !   If {\tt addFlag} is {\tt .false.} (default), an error will be returned if 
 !   an attribute is to be ingested that was not previously added to the 
 !   {\tt comp} object. If {\tt addFlag} is {\tt .true.}, all missing attributes

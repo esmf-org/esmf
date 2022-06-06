@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -29,7 +29,7 @@ namespace ESMCI {
 
  int regrid(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,
             Mesh *midmesh, IWeights &wts,
-            int *regridMethod, int *regridScheme,
+            int *regridMethod, 
             int *regridPoleType, int *regridPoleNPnts,
             int *map_type,
             int *extrapMethod,
@@ -179,7 +179,7 @@ namespace ESMCI {
     if (*map_type==0) mtype=MAP_TYPE_CART_APPROX;
     else if (*map_type==1) mtype=MAP_TYPE_GREAT_CIRCLE;
     else Throw() << "Unrecognized map type";
-
+ 
     // Put interp in a block so that it and the rendezvous meshes are
     // destroyed before we do other things like the extrapolation below
     {
@@ -196,7 +196,6 @@ namespace ESMCI {
                     set_dst_status, dst_status,
                     mtype, *unmappedaction, checkFlag);
       ESMCI_REGRID_TRACE_EXIT("NativeMesh regrid interp 1");
-
 
       ESMCI_REGRID_TRACE_ENTER("NativeMesh regrid interp 2");
       // Create the weight matrix
@@ -233,7 +232,7 @@ namespace ESMCI {
 
 
   // to generate the iwts again, and return to Fortran
-  int get_iwts(Mesh &mesh, MEField<> *iwts, int *regridScheme) {
+  int get_iwts(Mesh &mesh, MEField<> *iwts) {
 
     // generate integration weights
     Integrate ig(mesh);
@@ -243,11 +242,10 @@ namespace ESMCI {
 
     // Add weights to meshes before poles
     // so all the weights are on user data points
-    if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
-        (*regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
-        (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
-      for (UInt i = 1; i <= 7; ++i)
+    if (mesh.coordsys != ESMC_COORDSYS_CART) {
+      for (UInt i = 1; i <= 7; ++i) {
         ig.AddPoleWeights(mesh,i,iwts);
+      }
     }
 
     // Add in other none-pole weights

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1113,11 +1113,11 @@ function ESMF_XGridCreate(keywordEnforcer, &
          ESMF_CONTEXT, rcToReturn=rc) 
       return
     endif
-
-    ! Call into streamlined Regrid
+    
+    ! Call into a modifed conservative regrid call to create XGrid (super) Mesh
     ! input:  MeshA: merged mesh on side A
     ! input:  MeshB: merged mesh on side B
-    ! output: Meshp: merged mesh in the middle (the super mesh)
+    ! output: Meshp: merged XGrid mesh in the middle (the super mesh)
     compute_midmesh = 1
     call c_esmc_xgridregrid_create(meshA, meshB, &
       meshp, compute_midmesh, &
@@ -1130,11 +1130,13 @@ function ESMF_XGridCreate(keywordEnforcer, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Wrap XGrid mesh pointer in proper F90 structure
     mesh = ESMF_MeshCreate(meshp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Get mesh info
     call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
             spatialDim=sdim, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1150,7 +1152,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
          msg="spatial dim mismatch", ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
-    
+
     allocate(xgtype%area(localElemCount), xgtype%centroid(localElemCount, sdim), stat=localrc)
     if(localrc /= 0) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
@@ -1167,7 +1169,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-
+    
     ! Create and Retrieve fraction Arrays for store use, only for online
     allocate(xgtype%fracA2X(ngrid_a), xgtype%fracB2X(ngrid_b))
     allocate(xgtype%fracX2A(ngrid_a), xgtype%fracX2B(ngrid_b))
@@ -1267,6 +1269,11 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! When there is only 1 grid per side, optimization can be done but it's not clear for multiple Grids.
     compute_midmesh = 0
     do i = 1, ngrid_a
+#ifndef XGRID_WGT_CALC_OLDWAY
+      ! Calculate weights from a side mesh to the xgrid
+       call c_esmc_xgrid_calc_wgts_from_mesh(meshAt(i), mesh, &
+           nentries, tweights, localrc)
+#else 
       call c_esmc_xgridregrid_createP(meshAt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -1274,16 +1281,84 @@ function ESMF_XGridCreate(keywordEnforcer, &
         xgtype%coordSys, &
         nentries, tweights, &
         localrc)
+#endif
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+
+
       allocate(xgtype%sparseMatA2X(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatA2X(i)%factorList(nentries))
       if(nentries .ge. 1) then
         call c_ESMC_Copy_TempWeights_xgrid(tweights, &
         xgtype%sparseMatA2X(i)%factorIndexList(1,1), &
         xgtype%sparseMatA2X(i)%factorList(1))
+
+#if 0
+        ! DEBUG OUTPUT
+        do j=1,size(xgtype%sparseMatA2X(i)%factorList,1)
+           write(*,*) "A2X: Grid=",i," src=",xgtype%sparseMatA2X(i)%factorIndexList(1,j)," wgt=",xgtype%sparseMatA2X(i)%factorList(j)," dst=",xgtype%sparseMatA2X(i)%factorIndexList(2,j)
+        enddo
+#endif
+        
+     endif
+
+#ifdef  XGRID_WGT_CALC_OLDWAY
+     if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
+        call ESMF_XGridGetFracInt(xgtype%sideA(i)%gbcp%grid, mesh=meshAt(i), array=xgtype%fracA2X(i), &
+             staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+             ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_XGridGetFracInt(mesh=meshAt(i), array=xgtype%fracA2X(i), &
+             meshloc=ESMF_MESHLOC_ELEMENT, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+             ESMF_CONTEXT, rcToReturn=rc)) return
       endif
+#endif
+      
+      
+      ! Now the reverse direction
+#ifndef BOB_XGRID_DEBUG
+#ifndef  XGRID_WGT_CALC_OLDWAY
+      ! Calculate weights from the xgrid to a side mesh
+      ! Also, set fraction information in meshAt(i) to be retrieved below
+      call c_esmc_xgrid_calc_wgts_to_mesh(mesh, meshAt(i), &
+           nentries, tweights, localrc)
+#else
+      call c_esmc_xgridregrid_createP(mesh, meshAt(i), &
+        tmpmesh, compute_midmesh, &
+        ESMF_REGRIDMETHOD_CONSERVE, &
+        ESMF_UNMAPPEDACTION_IGNORE, &
+        xgtype%coordSys, &
+        nentries, tweights, &
+        localrc)
+#endif
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+#else
+      nentries=0
+#endif
+      allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
+      allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
+      if(nentries .ge. 1) then
+        call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+        xgtype%sparseMatX2A(i)%factorIndexList(1,1), &
+        xgtype%sparseMatX2A(i)%factorList(1))
+
+#if 0
+        ! DEBUG OUTPUT
+        do j=1,size(xgtype%sparseMatX2A(i)%factorList,1)
+           write(*,*) "X2A: Grid=",i," src=",xgtype%sparseMatX2A(i)%factorIndexList(1,j)," wgt=",xgtype%sparseMatX2A(i)%factorList(j)," dst=",xgtype%sparseMatX2A(i)%factorIndexList(2,j)
+        enddo
+#endif
+        
+      endif
+
+#ifndef  XGRID_WGT_CALC_OLDWAY     
+      ! If doing things the new way, the fractions are set after xgrid to side mesh weight calc, so get them here
       if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
         call ESMF_XGridGetFracInt(xgtype%sideA(i)%gbcp%grid, mesh=meshAt(i), array=xgtype%fracA2X(i), &
              staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
@@ -1295,31 +1370,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-
-
-      
-      ! Now the reverse direction
-#ifndef BOB_XGRID_DEBUG
-      call c_esmc_xgridregrid_createP(mesh, meshAt(i), &
-        tmpmesh, compute_midmesh, &
-        ESMF_REGRIDMETHOD_CONSERVE, &
-        ESMF_UNMAPPEDACTION_IGNORE, &
-        xgtype%coordSys, &
-        nentries, tweights, &
-        localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-#else
-      nentries=0
 #endif
-      allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
-      allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
-      if(nentries .ge. 1) then
-        call c_ESMC_Copy_TempWeights_xgrid(tweights, &
-        xgtype%sparseMatX2A(i)%factorIndexList(1,1), &
-        xgtype%sparseMatX2A(i)%factorList(1))
-      endif
+
+
       if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
         call ESMF_XGridGetFracInt(xgtype%sideA(i)%gbcp%grid, mesh=meshAt(i), array=xgtype%fracX2A(i), &
              staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
@@ -1331,18 +1384,25 @@ function ESMF_XGridCreate(keywordEnforcer, &
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-    enddo
+
+   enddo
 
     ! now do the B side
     do i = 1, ngrid_b
 #ifndef BOB_XGRID_DEBUG
-      call c_esmc_xgridregrid_createP(meshBt(i), mesh, &
+#ifndef XGRID_WGT_CALC_OLDWAY
+      ! Calculate weights from a side mesh to the xgrid
+       call c_esmc_xgrid_calc_wgts_from_mesh(meshBt(i), mesh, &
+           nentries, tweights, localrc)
+#else 
+       call c_esmc_xgridregrid_createP(meshBt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         ESMF_UNMAPPEDACTION_IGNORE, &
         xgtype%coordSys, &
         nentries, tweights, &
         localrc)
+#endif       
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1356,6 +1416,8 @@ function ESMF_XGridCreate(keywordEnforcer, &
         xgtype%sparseMatB2X(i)%factorIndexList(1,1), &
         xgtype%sparseMatB2X(i)%factorList(1))
       endif
+
+#ifdef  XGRID_WGT_CALC_OLDWAY     
       if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_GRID) then
         call ESMF_XGridGetFracInt(xgtype%sideB(i)%gbcp%grid, mesh=meshBt(i), array=xgtype%fracB2X(i), &
              staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
@@ -1366,10 +1428,17 @@ function ESMF_XGridCreate(keywordEnforcer, &
              meshloc=ESMF_MESHLOC_ELEMENT, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
              ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
+     endif
+#endif     
    
       ! Now the reverse direction
 #ifndef BOB_XGRID_DEBUG
+#ifndef  XGRID_WGT_CALC_OLDWAY
+     ! Calculate weights from the xgrid to a side mesh
+     ! Also, set fraction information in meshBt(i) to be retrieved below
+      call c_esmc_xgrid_calc_wgts_to_mesh(mesh, meshBt(i), &
+           nentries, tweights, localrc)
+#else
       call c_esmc_xgridregrid_createP(mesh, meshBt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -1377,6 +1446,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
         xgtype%coordSys, &
         nentries, tweights, &
         localrc)
+#endif
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1390,6 +1460,24 @@ function ESMF_XGridCreate(keywordEnforcer, &
         xgtype%sparseMatX2B(i)%factorIndexList(1,1), &
         xgtype%sparseMatX2B(i)%factorList(1))
       endif
+
+
+#ifndef  XGRID_WGT_CALC_OLDWAY
+      ! If doing things the new way, the fractions are set after xgrid to side mesh weight calc, so get them here
+      if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_GRID) then
+        call ESMF_XGridGetFracInt(xgtype%sideB(i)%gbcp%grid, mesh=meshBt(i), array=xgtype%fracB2X(i), &
+             staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+             ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_XGridGetFracInt(mesh=meshBt(i), array=xgtype%fracB2X(i), &
+             meshloc=ESMF_MESHLOC_ELEMENT, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+             ESMF_CONTEXT, rcToReturn=rc)) return
+     endif
+#endif     
+
+
       if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_GRID) then
         call ESMF_XGridGetFracInt(xgtype%sideB(i)%gbcp%grid, mesh=meshBt(i), array=xgtype%fracX2B(i), &
              staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)

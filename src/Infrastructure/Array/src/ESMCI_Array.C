@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -3822,6 +3822,18 @@ bool Array::matchBool(
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
+  if (array1->localDeCountAux != array2->localDeCountAux){
+    matchResult = false;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
   int localDeCount = array1->getDistGrid()->getDELayout()->getLocalDeCount();
   int *int1 = array1->totalElementCountPLocalDe;
   int *int2 = array2->totalElementCountPLocalDe;
@@ -3986,36 +3998,6 @@ int Array::write(
     localstatus = ESMC_FILESTATUS_UNKNOWN;
   } else {
     localstatus = *status;
-  }
-
-  // It is an error to supply a variable name in binary mode
-  if (ESMF_IOFMT_BIN == localiofmt) {
-    if (variableName.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
-          "NetCDF variable name not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
-  }
-
-  // It is an error to supply Attribute convention in binary mode
-  if (ESMF_IOFMT_BIN == localiofmt) {
-    if (convention.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
-          "NetCDF Attribute convention not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
-  }
-
-  // It is an error to supply Attribute purpose in binary mode
-  if (ESMF_IOFMT_BIN == localiofmt) {
-    if (purpose.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
-          "NetCDF Attribute convention not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
   }
 
   DistGrid *dg = getDistGrid();

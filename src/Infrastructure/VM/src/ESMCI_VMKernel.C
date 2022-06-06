@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -381,7 +381,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   argc = 0; // reset
   for (int k=0; k<100; k++)
     argv[k] = new char[1600];
-#ifdef ESMF_MPICH
+#ifdef ESMF_MPICH1
   // currently only obtain arguments for MPICH because it needs it!!!
   obtain_args();
 #endif
@@ -393,7 +393,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
 #ifndef ESMF_MPIUNI
   if (!mpi_init_outside_esmf){
     InitPreMPI(); // must call before MPI is initialized
-#ifdef ESMF_MPICH
+#ifdef ESMF_MPICH1
     // MPICH1.2 is not standard compliant and needs valid args
     // make copy of argc and argv for MPICH because it modifies them and
     // the original values are needed to delete the memory during finalize()
@@ -1553,6 +1553,9 @@ void *VMK::startup(class VMKPlan *vmp,
 #if (VERBOSITY > 9)
   vmp->vmkplan_print();
 #endif
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():1.0"));
+#endif
   // enter a vm derived from current vm according to the VMKPlan
   // need as many spawn_args as there are threads to be spawned from this pet
   // this is so that each spawned thread does not have to be worried about this
@@ -1570,6 +1573,9 @@ void *VMK::startup(class VMKPlan *vmp,
     sarg[0].cargo = cargo;
     return sarg;
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():2.0"));
+#endif
   // now:
   //    sarg[] has as many elements as mypet spawns threads, but at least one
   // next, allocate as many vm objects off the heap as there will be spawned
@@ -1581,6 +1587,9 @@ void *VMK::startup(class VMKPlan *vmp,
     }
     sarg[i].myvm = vmp->myvms[i];
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():3.0"));
+#endif
   // next, determine new_npets and new_mypet_base ...
   int new_mypet_base=0;
   int new_npets=0;
@@ -1593,16 +1602,19 @@ void *VMK::startup(class VMKPlan *vmp,
       new_mypet_base += vmp->spawnflag[i];
     }
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():4.0"));
+#endif
   // now:
   //    new_npets is equal to the total number of pets in the new VMK
   //    new_mypet_base is the index of the first new pet that mypet will spawn
   // next, allocate temporary arrays ...
-  int *new_lpid = new int[new_npets];
-  int *new_pid = new int[new_npets];
-  int *new_tid = new int[new_npets];
-  int *new_ncpet = new int[new_npets];
-  int *new_nadevs = new int[new_npets];
-  int *new_ncontributors = new int[new_npets];
+  vector<int> new_lpid(new_npets);
+  vector<int> new_pid(new_npets);
+  vector<int> new_tid(new_npets);
+  vector<int> new_ncpet(new_npets);
+  vector<int> new_nadevs(new_npets);
+  vector<int> new_ncontributors(new_npets);
   int **new_cid = new int*[new_npets];
   contrib_id **new_contributors = new contrib_id*[new_npets];
   // local variables, unallocated yet...
@@ -1619,6 +1631,9 @@ void *VMK::startup(class VMKPlan *vmp,
   int new_petid=0;      // used for keeping track of new_petid in loop
   // next, run through all current pets and check the VMKPlan ...
   // inside the following loop pet "i" will be refered to as "this pet"
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():5.0"));
+#endif
   for (int ii=0; ii<npets; ii++){
     int i = vmp->petlist[ii];   // indirection to preserve petlist order
     // get the last max_tid count of a pet with same pid
@@ -1775,6 +1790,9 @@ void *VMK::startup(class VMKPlan *vmp,
     // keep record of how high local_tid counted for the pid of this pet
     keep_max_tid[i] = local_tid;
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():6.0"));
+#endif
   // collect garbage of temporary arrays from previous i-loop
   delete [] keep_max_tid;
   // now:
@@ -1790,16 +1808,18 @@ void *VMK::startup(class VMKPlan *vmp,
   printf(">>>>>>>>> num_diff_pids for new VMK = %d\n", num_diff_pids);
 #endif
   //
-  // next, set up temporary arrays lpid_list and pet_list to facititate 
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():7.0"));
+#endif
+  // next, set up temporary arrays lpid_list and pet_list to facilitate 
   // MPI_Comm creation and shared memory allocation for new VMK
-  int **lpid_list = new int*[2];
-  lpid_list[0] = new int[num_diff_pids]; // this dimension holds lpids
-  lpid_list[1] = new int[num_diff_pids]; // this dimension holds number of pets
-  int **pet_list = new int*[num_diff_pids];
+  vector<vector<int>> lpid_list(2);
+  lpid_list[0].resize(num_diff_pids); // this dimension holds lpids
+  lpid_list[1].resize(num_diff_pids); // this dimension holds number of pets
+  vector<vector<int>> pet_list(num_diff_pids);
   for (int i=0; i<num_diff_pids; i++){
     lpid_list[0][i] = -1;  // invalidate the lpid entry
     lpid_list[1][i] = 0;   // no pets associated yet
-    pet_list[i] = new int[npets];  // npets is maximum possible number here!
   }
   for (int ii=0; ii<npets; ii++){
     int i = vmp->petlist[ii];     // indirection to preserve petlist order
@@ -1809,11 +1829,14 @@ void *VMK::startup(class VMKPlan *vmp,
       for (j=0; j<num_diff_pids; j++)
         if (lpid_list[0][j]==lpid[i] || lpid_list[0][j]==-1) break;
       lpid_list[0][j] = lpid[i];  // store lpid (does not matter to overwrite)
-      pet_list[j][lpid_list[1][j]] = i;  //enter the current pet id
+      pet_list[j].push_back(i);
       ++lpid_list[1][j];         // increment pet count for this pid
     }
   }
 
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():8.0"));
+#endif
 #if (VERBOSITY > 9)
   printf("finished setting up lpid_list and pet_list\n");
 #endif
@@ -1836,6 +1859,9 @@ void *VMK::startup(class VMKPlan *vmp,
     }
   }
   
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():9.0"));
+#endif
   // A new_commarray will be allocated for every PET that runs in a VAS
   // that is going to have threads in the new VMK.
   // The new_commarray is a temporary data structure that will be deleted
@@ -1850,6 +1876,9 @@ void *VMK::startup(class VMKPlan *vmp,
     }
   }
   
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():10.0"));
+#endif
   // the new MPI group will be derived from the mpi_g_part group so there is an
   // additional level of indirection here
   int *grouplist = new int[num_diff_pids];
@@ -1857,6 +1886,9 @@ void *VMK::startup(class VMKPlan *vmp,
     grouplist[i] = vmp->lpid_mpi_g_part_map[lpid_list[0][i]];
   }
   
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():11.0"));
+#endif
   // setting up MPI communicators is a collective MPI communication call
   // thus it requires that exactly one pet of each process running in the 
   // current VMK makes that call, even if this process will not participate
@@ -1866,6 +1898,9 @@ void *VMK::startup(class VMKPlan *vmp,
   MPI_Comm new_mpi_c_ssi;
 #endif
   
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():12.0"));
+#endif
   int foundfirstflag=0;
   int foundfirstpet;
   int mylpid = lpid[mypet];
@@ -1960,6 +1995,9 @@ void *VMK::startup(class VMKPlan *vmp,
   printf("now valid new_mpi_c exists\n");
 #endif
 
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():13.0"));
+#endif
   // now:
   //    new_mpi_c is the valid MPI_Comm for the new VMK
   // Next, setting up intra-process shared memory connection between
@@ -2112,6 +2150,9 @@ void *VMK::startup(class VMKPlan *vmp,
       }
     } // at least one PET of the current VMK will spawn from this lpid
   } // i
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():14.0"));
+#endif
   // now:
   //    new_pth_mutex2 is valid pthread_mutex
   //    new_pth_mutex is valid pthread_mutex
@@ -2215,31 +2256,25 @@ void *VMK::startup(class VMKPlan *vmp,
       if (*rc) return NULL;  // could not create pthread -> bail out
     }
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():15.0"));
+#endif
   // free all the temporary arrays.... (not sarg array!!!)
-  delete [] new_lpid;
-  delete [] new_pid;
-  delete [] new_tid;
-  delete [] new_ncpet;
-  delete [] new_nadevs;
-  delete [] new_ncontributors;
   for (int i=0; i<new_npets; i++){
     delete [] new_cid[i];
     delete [] new_contributors[i];
   }
   delete [] new_cid;
   delete [] new_contributors;
-  delete [] lpid_list[0];
-  delete [] lpid_list[1];
-  delete [] lpid_list;
-  for (int i=0; i<num_diff_pids; i++)
-    delete [] pet_list[i];
-  delete [] pet_list;
   if (new_commarray_delete_flag){
     // mypet must deallocate its new_commarray
     for (int ii=0; ii<mypetNewThreadGroupSize; ii++)
       delete [] new_commarray[ii];
     delete [] new_commarray;
   }
+#ifdef VM_MEMLOG_on
+      VM::logMemInfo(std::string("VMK::startup():16.0"));
+#endif
   // return info that is associated with the new VMK...
   return sarg;
 }
@@ -3745,17 +3780,16 @@ void VMK::epochFinal(){
   std::map<int, sendBuffer>:: iterator its;
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
     sendBuffer *sm = &(its->second);
+#ifdef VM_EPOCHLOG_on
 #ifdef USE_STRSTREAM
     // use strstream
     void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
     int size = sm->stream.pcount();           // bytes in stream buffer
-    sm->stream.freeze(false); // unfreeze the persistent buffer for deallocation
 #else
     // use stringstream
     void *buffer = (void *)sm->streamBuffer.data();
     int size = sm->streamBuffer.size();       // bytes in stream buffer
 #endif
-#ifdef VM_EPOCHLOG_on
     std::stringstream msg;
     msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm:"
     << " dst=" << getVas(lpid[its->first]) << " size=" << size
@@ -3763,11 +3797,12 @@ void VMK::epochFinal(){
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     sm->clear();
-    // drain throttle data structure
+    // drain acknowledge data structure
     while (sm->ackQueue.size() > 0){
 #ifdef VM_EPOCHLOG_on
       std::stringstream msg;
-      msg << "epochBuffer:" << __LINE__ << " drain throttled sends: "
+      msg << "epochBuffer:" << __LINE__ << " drain unacknowledged sends to"
+        << " dst=" << getVas(lpid[its->first]) << ": "
         << sm->ackQueue.size();
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
@@ -3776,9 +3811,11 @@ void VMK::epochFinal(){
       sm->ackQueue.pop();
     }
   }
+  sendMap.clear();  // completely clear the sendMap
+  recvMap.clear();  // completely clear the recvMap
 }
 
-void VMK::epochEnter(vmEpoch epoch_, int throttle){
+void VMK::epochEnter(vmEpoch epoch_, bool keepAlloc, int throttle){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMK::epochEnter()"
   epoch=epoch_;
@@ -3790,7 +3827,7 @@ void VMK::epochEnter(vmEpoch epoch_, int throttle){
     throw localrc;  // bail out with exception
   }
   epochThrottle = throttle;
-  epochSetFirst();
+  epochSetFirst(!keepAlloc);  // potentially test and release inactive buffers
 }
 
 void VMK::epochExit(bool keepAlloc){
@@ -3805,7 +3842,8 @@ void VMK::epochExit(bool keepAlloc){
 #ifdef VM_EPOCHLOG_on
       {
         std::stringstream msg;
-        msg << "epochBuffer:" << __LINE__ << " outstanding sends: "
+        msg << "epochBuffer:" << __LINE__ << " unacknowledged sends to"
+          << " dst=" << getVas(lpid[its->first]) << ": "
           << sm->ackQueue.size();
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
@@ -3814,13 +3852,20 @@ void VMK::epochExit(bool keepAlloc){
       while ((int)sm->ackQueue.size() > epochThrottle){
 #ifdef VM_EPOCHLOG_on
         std::stringstream msg;
-        msg << "epochBuffer:" << __LINE__ << "  throttling sends: "
-          << sm->ackQueue.size();
+        msg << "epochBuffer:" << __LINE__ << "  throttling sends to"
+          << " dst=" << getVas(lpid[its->first]);
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
         ackElement *ackE = &(sm->ackQueue.front());
         MPI_Wait(&(ackE->ackReq), MPI_STATUS_IGNORE);
         sm->ackQueue.pop();
+#ifdef VM_EPOCHLOG_on
+        msg.str(""); // clear
+        msg << "epochBuffer:" << __LINE__ << " unacknowledged sends to"
+          << " dst=" << getVas(lpid[its->first]) << ": "
+          << sm->ackQueue.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
       }
       bool needAck = false;
 #ifdef USE_STRSTREAM
@@ -3852,8 +3897,8 @@ void VMK::epochExit(bool keepAlloc){
       // use stringstream
       sm->streamBuffer = sm->stream.str();  // copy data into persistent buffer
       sm->stream.str("");                   // clear out stream
-#ifdef VM_EPOCHLOG_on
       if (sm->streamBuffer.size() > 0){
+#ifdef VM_EPOCHLOG_on
         std::stringstream msg;
         msg << "epochBuffer:" << __LINE__ << " ready to post non-blocking send:"
         << " dst=" << getVas(lpid[its->first]) 
@@ -3866,7 +3911,7 @@ void VMK::epochExit(bool keepAlloc){
           MPI_BYTE, lpid[its->first], tag, mpi_c, &sm->mpireq);
         needAck = true;
 #ifdef VM_EPOCHLOG_on
-        double t1; wtime(&1);
+        double t1; wtime(&t1);
         msg.str(""); // clear
         msg << "epochBuffer:" << __LINE__ << " cost of non-blocking send: "
           << t1 - t0 << " seconds";
@@ -3880,11 +3925,18 @@ void VMK::epochExit(bool keepAlloc){
         ackElement *ackE = &(sm->ackQueue.back());
         MPI_Irecv(&(ackE->ackDummy), sizeof(int), MPI_BYTE, lpid[its->first], tag,
           mpi_c, &(ackE->ackReq));
+#ifdef VM_EPOCHLOG_on
+        std::stringstream msg;
+        msg << "epochBuffer:" << __LINE__ << " unacknowledged sends to"
+          << " dst=" << getVas(lpid[its->first]) << ": "
+          << sm->ackQueue.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
       }
     }
     if (!keepAlloc){
       // clear the recvMap, freeing all receive buffers held
-      // use this option in case the receving side is tight on memory
+      // use this option in case the receiving side is tight on memory
       recvMap.clear();
     }
   }
@@ -3892,20 +3944,58 @@ void VMK::epochExit(bool keepAlloc){
   epoch=epochNone;
 }
 
-void VMK::epochSetFirst(){
+void VMK::epochSetFirst(bool testAndClearBuffers){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMK::epochSetFirst()"
+  // send buffer
   std::map<int, sendBuffer>:: iterator its;
+  std::map<int, sendBuffer>:: iterator itErase = sendMap.end();
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
+    if (itErase!=sendMap.end()){
+#ifdef VM_EPOCHLOG_on
+      std::stringstream msg;
+      msg << "epochBuffer:" << __LINE__ << " erase sendBuffer to"
+        << " dst=" << getVas(lpid[itErase->first]);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
+      // hold on to ackQueue, erase itErase from sendMap, recreate and restore
+      std::queue<ackElement> ackQueue = itErase->second.ackQueue;
+      int key = itErase->first;
+      sendMap.erase(itErase);
+      itErase = sendMap.end();
+      sendMap[key].ackQueue = ackQueue;
+      sendMap[key].firstFlag = true;
+    }
     its->second.firstFlag=true;
+    if(testAndClearBuffers)
+      if (its->second.clear(true)) itErase = its;
+    else
+      itErase = sendMap.end();
   }
+  // handle case where the very last element needs to be erased
+  if (itErase!=sendMap.end()){
+#ifdef VM_EPOCHLOG_on
+    std::stringstream msg;
+    msg << "epochBuffer:" << __LINE__ << " erase sendBuffer to"
+      << " dst=" << getVas(lpid[itErase->first]);
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
+    // hold on to ackQueue, erase itErase from sendMap, recreate and restore
+    std::queue<ackElement> ackQueue = itErase->second.ackQueue;
+    int key = itErase->first;
+    sendMap.erase(itErase);
+    itErase = sendMap.end();
+    sendMap[key].ackQueue = ackQueue;
+    sendMap[key].firstFlag = true;
+  }
+  // receive buffer
   std::map<int, recvBuffer>:: iterator itr;
   for (itr=recvMap.begin(); itr!=recvMap.end(); ++itr){
     itr->second.firstFlag=true;
   }
 }
 
-void VMK::sendBuffer::clear(){
+bool VMK::sendBuffer::clear(bool justTest){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMK::sendBuffer::clear"
 #ifdef VM_EPOCHLOG_on
@@ -3913,21 +4003,43 @@ void VMK::sendBuffer::clear(){
   msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm";
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
+  bool done = false;
   if (mpireq != MPI_REQUEST_NULL){
+    if (justTest){
 #ifdef VM_EPOCHLOG_on
-    std::stringstream msg;
-    msg << "epochBuffer:" << __LINE__ << " posting MPI_Wait()";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-    double t0; wtime(&t0);
+      std::stringstream msg;
+      msg << "epochBuffer:" << __LINE__ << " posting MPI_Test()";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      double t0; wtime(&t0);
 #endif
-    MPI_Wait(&mpireq, MPI_STATUS_IGNORE);
+      int flag;
+      MPI_Test(&mpireq, &flag, MPI_STATUS_IGNORE); // sets mpireq to MPI_REQUEST_NULL if done
+      done = (bool)flag;
 #ifdef VM_EPOCHLOG_on
-    double t1; wtime(&t1);
-    msg.str(""); // clear
-    msg << "epochBuffer:" << __LINE__ << " returned from MPI_Wait(), cost: "
-      << t1 - t0 << " seconds";
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      double t1; wtime(&t1);
+      msg.str(""); // clear
+      msg << "epochBuffer:" << __LINE__ << " returned from MPI_Test(), flag: "
+        << (bool)flag;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
+    }else{
+#ifdef VM_EPOCHLOG_on
+      std::stringstream msg;
+      msg << "epochBuffer:" << __LINE__ << " posting MPI_Wait()";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      double t0; wtime(&t0);
+#endif
+      MPI_Wait(&mpireq, MPI_STATUS_IGNORE); // sets mpireq to MPI_REQUEST_NULL
+      done = true;
+#ifdef VM_EPOCHLOG_on
+      double t1; wtime(&t1);
+      msg.str(""); // clear
+      msg << "epochBuffer:" << __LINE__ << " returned from MPI_Wait(), cost: "
+        << t1 - t0 << " seconds";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+#endif
+      
+    }
   }
 #ifdef USE_STRSTREAM
   // use strstream
@@ -3936,6 +4048,7 @@ void VMK::sendBuffer::clear(){
   // use stringstream
   streamBuffer.clear(); // done with buffer
 #endif
+  return done;
 }
 
 
@@ -4133,7 +4246,8 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       sendBuffer *sm = &(sendMap[dest]);
 #ifdef VM_EPOCHLOG_on
       std::stringstream msg;
-      msg << "epochBuffer:" << __LINE__ << " non-blocking send" << 
+      msg << "epochBuffer:" << __LINE__ << " non-blocking send to" <<
+      " dst=" << dest <<
       " firstFlag=" << sm->firstFlag <<
       " msg size=" << size;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
@@ -4149,7 +4263,13 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       sm->stream.write((const char*)message, size);
 #ifdef VM_EPOCHLOG_on
       msg.str(""); // clear
-      msg << "epochBuffer:" << __LINE__ << " non-blocking send write complete";
+      msg << "epochBuffer:" << __LINE__ << " non-blocking send write complete"<<
+      ", current stream size=" <<
+#ifdef USE_STRSTREAM
+      sm->stream.pcount();
+#else
+      sm->stream.tellp();
+#endif
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     }else{
@@ -4495,7 +4615,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
         MPI_Send(&ackDummy, sizeof(int), MPI_BYTE, lpid[source], defaultTag,
           mpi_c);
         
-        // post blocking recv of the enire epoch buffer
+        // post blocking recv of the entire epoch buffer
 #ifdef VM_EPOCHLOG_on
         msg.str(""); // clear
         msg << "epochBuffer:" << __LINE__ << " ready to post blocking recv:"

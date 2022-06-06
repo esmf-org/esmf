@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -779,9 +779,6 @@ int MeshCXX::addElements(int num_elems, int *elemId,
   int num_elemConn=expected_conn_size;
 #endif
 
-  int regridConserve = 1; // Set this to 1 to force the frac field to be
-                          // added (required for conservative regridding.
-
   InterArray<int> *elemMaskII = NULL;
   if (elemMask) {
     int extent[1];
@@ -790,7 +787,7 @@ int MeshCXX::addElements(int num_elems, int *elemId,
   }
   ESMCI_meshaddelements(&meshPointer, &num_elems, elemId, elemType, elemMaskII,
                         &areaPresent, elemArea, &coordsPresent, elemCoords,
-                        &num_elemConn, elemConn, &regridConserve,
+                        &num_elemConn, elemConn, 
                         &coordSys, &spatial_dim, &localrc);
 
   // Set the local number of nodes and elements
@@ -851,9 +848,12 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
            &localrc)) throw localrc;
      }
 
+     // Wrap node_owners in IntArray
+     InterArray<int> nodeOwnerIA(nodeOwner,numNodes);
+
      // Call into Mesh glue to add nodes
      ESMCI_meshaddnodes(&meshPointer, &numNodes, nodeId,
-                        nodeCoord, nodeOwner, (InterArray<int> *)NULL,
+                        nodeCoord, &nodeOwnerIA, (InterArray<int> *)NULL,
                         &coordSys, &spatialDim,
                         &localrc);
        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,

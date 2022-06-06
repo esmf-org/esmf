@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -241,7 +241,7 @@ class VMK{
       mpireq = MPI_REQUEST_NULL;
       firstFlag = true;
     }
-    void clear();
+    bool clear(bool justTest=false);
   };
     
   struct recvBuffer{
@@ -559,10 +559,10 @@ class VMK{
     int unlock();
 
     // Epoch support
-    void epochSetFirst();
+    void epochSetFirst(bool testAndClearBuffers=false);
     void epochInit();
     void epochFinal();
-    void epochEnter(vmEpoch epoch, int throttle=10);
+    void epochEnter(vmEpoch epoch, bool keepAlloc=true, int throttle=10);
     void epochExit(bool keepAlloc=true);
     vmEpoch getEpoch() const {return epoch;}
         

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -717,15 +717,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create a new DistGrid from an existing DistGrid, keeping the decomposition
-!     unchanged. The {\tt firstExtra} and {\tt lastExtra} arguments allow extra
+!     unchanged, unless {\tt balanceflag=.true.} (see below).
+!     The {\tt firstExtraPTile} and {\tt lastExtraPTile} arguments allow extra
 !     elements to be added at the first/last edge DE in each dimension. The 
 !     method also allows the {\tt indexflag} to be set. Further, if the 
-!     {\tt connectionList} argument is provided it will be used to set 
+!     {\tt connectionList} argument provided in it will be used to set 
 !     connections in the newly created DistGrid, otherwise the connections of
 !     the incoming DistGrid will be used.
-!     If neither {\tt firstExtra}, {\tt lastExtra}, {\tt indexflag}, nor 
-!     {\tt connectionList} arguments are specified, the method reduces to a 
-!     deep copy of the incoming DistGrid object.
+!
+!     The {\tt balanceflag} argument allows a change in the decomposition, and
+!     thus of the number of DEs. An attempt is made to decompose the index
+!     space into as many DEs as there are PETs in the VM for which the DistGrid
+!     is created. See the argument description for details.
+!
+!     Setting the {\tt balanceflag} argument to {\tt .true.} is currently
+!     incompatible with providing any of the other optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
@@ -756,7 +762,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          method. By default use the connections defined in {\tt distgrid}.
 !     \item[{[balanceflag]}]
 !          If set to {\tt .true}, rebalance the incoming {\tt distgrid}
-!          decompositon. The default is {\tt .false.}.
+!          decompositon to exactly one DE per PET. The DEs along each dimension
+!          are chosen to provide the most balanced decomposition across all
+!          dimensions.
+!          The default is {\tt .false.}, leaving the decomposition, and
+!          therefore the number of DEs unchanged. For this case, PETs might end
+!          up with no DE, one DE, or multiple DEs.
 !     \item[{[delayout]}]
 !          If present, override the DELayout of the incoming {\tt distgrid}.
 !          By default use the DELayout defined in {\tt distgrid}.
@@ -884,15 +895,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create a new DistGrid from an existing DistGrid, keeping the decomposition
-!     unchanged. The {\tt firstExtraPTile} and {\tt lastExtraPTile} arguments allow extra
+!     unchanged, unless {\tt balanceflag=.true.} (see below).
+!     The {\tt firstExtraPTile} and {\tt lastExtraPTile} arguments allow extra
 !     elements to be added at the first/last edge DE in each dimension. The 
 !     method also allows the {\tt indexflag} to be set. Further, if the 
 !     {\tt connectionList} argument provided in it will be used to set 
 !     connections in the newly created DistGrid, otherwise the connections of
 !     the incoming DistGrid will be used.
-!     If neither {\tt firstExtraPTile}, {\tt lastExtraPTile}, {\tt indexflag}, nor 
-!     {\tt connectionList} arguments are specified, the method reduces to a 
-!     deep copy of the incoming DistGrid object.
+!
+!     The {\tt balanceflag} argument allows a change in the decomposition, and
+!     thus of the number of DEs. An attempt is made to decompose the index
+!     space into as many DEs as there are PETs in the VM for which the DistGrid
+!     is created. See the argument description for details.
+!
+!     Setting the {\tt balanceflag} argument to {\tt .true.} is currently
+!     incompatible with providing any of the other optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
@@ -923,7 +940,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          method. By default use the connections defined in {\tt distgrid}.
 !     \item[{[balanceflag]}]
 !          If set to {\tt .true}, rebalance the incoming {\tt distgrid}
-!          decompositon. The default is {\tt .false.}.
+!          decompositon. An attempt is made to come out at exactly one DE per
+!          PET. However, if there are more tiles than PETs, the lower PETs will
+!          hold more than one DE. For cases where there are more PETs than
+!          tiles, each tile is decomposed into DEs as to provide the most
+!          balanced decomposition across all dimensions.
+!          The default is {\tt .false.}, leaving the decomposition, and
+!          therefore the number of DEs unchanged. For this case, PETs might end
+!          up with no DE, one DE, or multiple DEs.
 !     \item[{[delayout]}]
 !          If present, override the DELayout of the incoming {\tt distgrid}.
 !          By default use the DELayout defined in {\tt distgrid}.

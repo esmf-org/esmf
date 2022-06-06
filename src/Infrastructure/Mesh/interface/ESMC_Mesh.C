@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -187,8 +187,11 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
 
   MeshCap *mc = static_cast<MeshCap*> (mesh.ptr);
 
+  // Wrap node_owners in IntArray
+  InterArray<int> nodeOwnersIA(nodeOwners,nodeCount);
+
   // call into ESMCI method
-  mc->meshaddnodes(&nodeCount, nodeIds, nodeCoords, nodeOwners,
+  mc->meshaddnodes(&nodeCount, nodeIds, nodeCoords, &nodeOwnersIA,
                    NULL, &(mc->coordsys_mc), &(mc->sdim_mc), &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
@@ -226,10 +229,6 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
   int cpresent = 0;
   if (elementCoords != nullptr) cpresent = 1;
 
-  // default to 1 so all native meshes are created with frac fields
-  // this could be handled better
-  int regridconserve = 1;
-  
   // convert elementMask to InterArray for transfer to MeshCap
   InterArray<int> *em = new InterArray<int> (elementMask, elementCount);
   
@@ -239,7 +238,6 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
                       &apresent, elementArea, 
                       &cpresent, elementCoords, 
                       &ec, elementConn,
-                      &regridconserve, 
                       &(mc->coordsys_mc), &(mc->sdim_mc),
                       &localrc);
                       // elementConn, elementMask, elementArea, elementCoords);
@@ -393,8 +391,8 @@ void ESMC_MeshGetConnectivity(ESMC_Mesh mesh, double *connCoord,
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_MeshGetLocalNodeCount()"
-int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int *num_nodes){
+#define ESMC_METHOD "ESMC_MeshGetNodeCount()"
+int ESMC_MeshGetNodeCount(ESMC_Mesh mesh, int *num_nodes){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
@@ -441,8 +439,8 @@ int ESMC_MeshGetOwnedNodeCount(ESMC_Mesh mesh, int *num_nodes){
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_MeshGetLocalElementCount()"
-int ESMC_MeshGetLocalElementCount(ESMC_Mesh mesh, int *num_elems){
+#define ESMC_METHOD "ESMC_MeshGetElementCount()"
+int ESMC_MeshGetElementCount(ESMC_Mesh mesh, int *num_elems){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;

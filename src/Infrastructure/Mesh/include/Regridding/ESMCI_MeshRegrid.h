@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -29,7 +29,7 @@ namespace ESMCI {
 
  int regrid(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,
             Mesh *midmesh, IWeights &wts,
-            int *regridMethod, int *regridScheme,
+            int *regridMethod, 
             int *regridPoleType, int *regridPoleNPnts,
             int *map_type,
             int *extrapMethod,
@@ -40,7 +40,7 @@ namespace ESMCI {
             int *unmappedaction,
             bool set_dst_status, WMat &dst_status, bool checkFlag);
 
- int get_iwts(Mesh &mesh, MEField<> *iwts, int *regridScheme);
+ int get_iwts(Mesh &mesh, MEField<> *iwts);
 
 } // namespace
 

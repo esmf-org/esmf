@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = bgxlf90_r
 ESMF_CXXDEFAULT         = bgxlC_r
+ESMF_CDEFAULT           = bgxlc_r
 
 ############################################################
 # Default MPI setting.
@@ -43,8 +44,9 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION = ${ESMF_F90COMPILER} -qversion
-ESMF_CXXCOMPILER_VERSION = ${ESMF_CXXCOMPILER} -qversion
+ESMF_F90COMPILER_VERSION  = ${ESMF_F90COMPILER} -qversion
+ESMF_CXXCOMPILER_VERSION  = ${ESMF_CXXCOMPILER} -qversion
+ESMF_CCOMPILER_VERSION    = ${ESMF_CCOMPILER} -qversion
 
 ############################################################
 # BlueGene/Q needs to link with F90 front end
@@ -81,6 +83,7 @@ ESMF_OPENMP_CXXLINKOPTS    += -qsmp=omp
 #
 ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
+ESMF_CLINKRPATHS        =
 
 ############################################################
 # xlf90 does not know about Fortran suffices

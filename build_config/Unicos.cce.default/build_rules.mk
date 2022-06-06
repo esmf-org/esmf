@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = ftn
 ESMF_CXXDEFAULT         = CC
+ESMF_CDEFAULT           = cc
 
 ############################################################
 # Default MPI setting.
@@ -46,11 +47,14 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 
 ############################################################
 # Cray Fortran compiler still needs a numerical opt level default
 #
+ifeq ($(ESMF_BOPT),O)
 ESMF_OPTLEVELDEFAULT  = 2
+endif
 
 ############################################################
 # Disable POSIX IPC (memory mapped files) support on Cray XC
@@ -58,35 +62,21 @@ ESMF_OPTLEVELDEFAULT  = 2
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
-# Disable POSIX dynamic linking support on Cray XC
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
-
-############################################################
-# Disable "gethostid()" support on Cray XC
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
-# Disable signals support on Cray XC
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
-
-############################################################
-# Disable system call support on Cray XC
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
-
-############################################################
-# Disable Pthreads support on Cray XC
-#
-ESMF_PTHREADS := OFF
-
-############################################################
 # OpenMP compiler and linker flags
 #
 ESMF_F90COMPILEOPTS += -homp
 ESMF_CXXCOMPILEOPTS += -fopenmp
+ESMF_F90LINKOPTS    += -homp
+ESMF_CXXLINKOPTS    += -fopenmp
+
+############################################################
+# OpenACC compiler and linker flags
+#
+ESMF_OPENACCDEFAULT = OFF
+ESMF_OPENACC_F90COMPILEOPTS += -hacc
+ESMF_OPENACC_CXXCOMPILEOPTS += -hacc
+ESMF_OPENACC_F90LINKOPTS    += -hacc
+ESMF_OPENACC_CXXLINKOPTS    += -hacc
 
 ############################################################
 # How to specify module directories
@@ -106,6 +96,7 @@ ESMF_F90COMPILEFIXNOCPP  = -f fixed -N 132
 #
 ESMF_F90RPATHPREFIX         = -Wl,-rpath,
 ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
 # Shared library options

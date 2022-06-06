@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -8188,7 +8188,7 @@ int XXE::printProfile(
 }
 //-----------------------------------------------------------------------------
 
-      //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::optimizeElement()"
 //BOPI
@@ -8299,7 +8299,7 @@ int XXE::optimizeElement(
 }
 //-----------------------------------------------------------------------------
 
-      //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::execReady()"
 //BOPI
@@ -8328,15 +8328,11 @@ int XXE::execReady(
     count, sizeof(StreamElement));
 #endif
 
-  const int sendnbMax = 20000;
-  int *sendnbIndexList = new int[sendnbMax];
-  int sendnbCount = 0;
-  int sendnbLowerIndex = -1;  // prime lower index indicator blow 0
+  vector<int> sendnbIndexList;
+  int sendnbLowerIndex = -1;  // prime lower index indicator below 0
 
-  const int recvnbMax = 20000;
-  int *recvnbIndexList = new int[recvnbMax];
-  int recvnbCount = 0;
-  int recvnbLowerIndex = -1;  // prime lower index indicator blow 0
+  vector<int> recvnbIndexList;
+  int recvnbLowerIndex = -1;  // prime lower index indicator below 0
 
   StreamElement *xxeElement, *xxeIndexElement, *xxeElement2;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
@@ -8355,8 +8351,8 @@ int XXE::execReady(
     // repeat going through the entire opstream until no more StreamElements
     // need to be replaced, i.e. the i-loop will finally make it all the way
     // through.
-    sendnbCount = 0;
-    recvnbCount = 0;
+    sendnbIndexList.resize(0);
+    recvnbIndexList.resize(0);
 
     for (i=0; i<count; i++){
       xxeElement = &(opstream[i]);
@@ -8408,53 +8404,26 @@ int XXE::execReady(
       case recv:
         break;
       case sendnb:
-        if (i>sendnbLowerIndex){
-          sendnbIndexList[sendnbCount] = i;
-          ++sendnbCount;
-          if (sendnbCount >= sendnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "sendnbCount out of range", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-        }
+        if (i>sendnbLowerIndex)
+          sendnbIndexList.push_back(i);
         break;
       case recvnb:
-        if (i>recvnbLowerIndex){
-          recvnbIndexList[recvnbCount] = i;
-          ++recvnbCount;
-          if (recvnbCount >= recvnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "recvnbCount out of range", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-        }
+        if (i>recvnbLowerIndex)
+          recvnbIndexList.push_back(i);
         break;
       case sendnbRRA:
-        if (i>sendnbLowerIndex){
-          sendnbIndexList[sendnbCount] = i;
-          ++sendnbCount;
-          if (sendnbCount >= sendnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "sendnbCount out of range", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-        }
+        if (i>sendnbLowerIndex)
+          sendnbIndexList.push_back(i);
         break;
       case recvnbRRA:
-        if (i>recvnbLowerIndex){
-          recvnbIndexList[recvnbCount] = i;
-          ++recvnbCount;
-          if (recvnbCount >= recvnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "recvnbCount out of range", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-        }
+        if (i>recvnbLowerIndex)
+          recvnbIndexList.push_back(i);
         break;
         // --- cases below this line cannot be used in execution -> must replace
       case waitOnAllSendnb:
         sendnbLowerIndex = i; // all sendnb prior this index are considered
         {
+          int sendnbCount = sendnbIndexList.size();
 #if 0
           printf("case: waitOnAllSendnb: %d outstanding sendnb\n",
             sendnbCount);
@@ -8499,6 +8468,7 @@ int XXE::execReady(
       case waitOnAllRecvnb:
         recvnbLowerIndex = i; // all recvnb prior this index are considered
         {
+          int recvnbCount = recvnbIndexList.size();
 #if 0
           printf("case: waitOnAllRecvnb: %d outstanding recvnb\n",
             recvnbCount);
@@ -8546,10 +8516,6 @@ int XXE::execReady(
       if (breakFlag) break;
     } // for i
   } // while
-
-  // garbage collection
-  delete [] sendnbIndexList;
-  delete [] recvnbIndexList;
 
   // translate profiling Wtimer Ids into XXE opstream indices
   int *idList = new int[count];

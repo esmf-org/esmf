@@ -240,7 +240,7 @@ class TestMesh(TestBase):
         mesh3 = mesh2[1:3]
         
         assert mesh.coords[0][0].shape == (12,)
-        assert mesh.size == [12, 10]
+        assert mesh.size == [12, 5]
         assert mesh.size_owned == [12, 5]
 
         del mesh

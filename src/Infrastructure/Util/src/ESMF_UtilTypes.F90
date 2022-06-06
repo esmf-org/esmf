@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -82,13 +82,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
-      integer, parameter :: ESMF_VERSION_MINOR        = 2
+      integer, parameter :: ESMF_VERSION_MINOR        = 3
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .true.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.2.0"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.3.0"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -558,14 +558,15 @@
       end type
 
       type(ESMF_IOFmt_Flag), parameter ::  &
-                           ESMF_IOFMT_BIN      = ESMF_IOFmt_Flag(0), &
-                           ESMF_IOFMT_NETCDF   = ESMF_IOFmt_Flag(1), &
-                           ESMF_IOFMT_NETCDF_64BIT_OFFSET = ESMF_IOFmt_Flag(2), &
-                           ESMF_IOFMT_NETCDF4  = ESMF_IOFmt_Flag(3), &
-                           ESMF_IOFMT_NETCDF4P = ESMF_IOFmt_Flag(4), &
-                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmt_Flag(5), &
-                           ESMF_IOFMT_CONFIG   = ESMF_IOFmt_Flag(6), &
-                           ESMF_IOFMT_YAML     = ESMF_IOFmt_Flag(7)
+!                           ESMF_IOFMT_BIN                 = ESMF_IOFmt_Flag(0), &
+                           ESMF_IOFMT_NETCDF              = ESMF_IOFmt_Flag(1), &
+                           ESMF_IOFMT_NETCDF_64BIT_DATA   = ESMF_IOFmt_Flag(2), &
+                           ESMF_IOFMT_NETCDF_64BIT_OFFSET = ESMF_IOFmt_Flag(3), &
+                           ESMF_IOFMT_NETCDF4             = ESMF_IOFmt_Flag(4), &
+                           ESMF_IOFMT_NETCDF4P            = ESMF_IOFmt_Flag(5), &
+                           ESMF_IOFMT_NETCDF4C            = ESMF_IOFmt_Flag(6), &
+                           ESMF_IOFMT_CONFIG              = ESMF_IOFmt_Flag(7), &
+                           ESMF_IOFMT_YAML                = ESMF_IOFmt_Flag(8)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Index_Flag
@@ -871,6 +872,7 @@
   end type
 
   type(ESMF_CoordSys_Flag), parameter :: &
+    ESMF_COORDSYS_UNINIT  = ESMF_CoordSys_Flag(-1), &
     ESMF_COORDSYS_CART    = ESMF_CoordSys_Flag(0), &
     ESMF_COORDSYS_SPH_DEG = ESMF_CoordSys_Flag(1), &
     ESMF_COORDSYS_SPH_RAD = ESMF_CoordSys_Flag(2)
@@ -1058,8 +1060,9 @@
       public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
       public ESMF_IOFmt_Flag, &
-             ESMF_IOFMT_BIN, &
+!             ESMF_IOFMT_BIN,  &
              ESMF_IOFMT_NETCDF, &
+             ESMF_IOFMT_NETCDF_64BIT_DATA, &
              ESMF_IOFMT_NETCDF_64BIT_OFFSET, &
              ESMF_IOFMT_NETCDF4, &
              ESMF_IOFMT_NETCDF4P, &
@@ -1244,7 +1247,9 @@
 
 
       public ESMF_CoordSys_Flag
-      public ESMF_COORDSYS_CART, ESMF_COORDSYS_SPH_DEG, &
+      public ESMF_COORDSYS_UNINIT,  &
+             ESMF_COORDSYS_CART,    &
+             ESMF_COORDSYS_SPH_DEG, &
              ESMF_COORDSYS_SPH_RAD
 
       public ESMF_COORDSYS_DEG2RAD, &
@@ -2391,7 +2396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2021 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2022 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"

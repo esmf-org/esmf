@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -95,7 +95,6 @@ void ESMCI_regrid_create(
                       int *map_type,
                      int *norm_type,
                      int *regridPoleType, int *regridPoleNPnts,
-                     int *regridScheme,
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
                      ESMC_R8 *extrapDistExponent,
@@ -171,6 +170,34 @@ void ESMCI_regrid_create(
                             ESMC_LOGMSG_WARN);
     }
 
+    ////// Sanity checks /////
+
+    // extrapolation not supported with conservative methods
+    if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Extrapolation is not currently supported with conservative regrid methods.",
+             ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+
+
+    // Conservative not supported on 3D spherical meshes
+    if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+        (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+      if ((srcmesh->parametric_dim() == 3) && 
+          (dstmesh->parametric_dim() == 3)) {
+        if ((srcmesh->coordsys != ESMC_COORDSYS_CART) || 
+            (dstmesh->coordsys != ESMC_COORDSYS_CART)) {
+          
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                           "Conservative regridding isn't supported on 3D spherical Grids or Meshes.",
+                                           ESMC_CONTEXT, &localrc)) throw localrc;
+        }
+      }
+    }
+
     
      //// Precheck Meshes for errors
     bool degenerate=false;
@@ -208,6 +235,7 @@ void ESMCI_regrid_create(
       }
     }
 
+
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
 #endif
@@ -237,7 +265,7 @@ void ESMCI_regrid_create(
 
       if(!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, 
                  NULL, *wts, 
-                 regridMethod, regridScheme, 
+                 regridMethod, 
                  regridPoleType, regridPoleNPnts,
                  map_type,
                  extrapMethod,
@@ -255,7 +283,7 @@ void ESMCI_regrid_create(
 
       if(!regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, 
                  NULL, *wts,
-                 &tempRegridMethod, regridScheme, 
+                 &tempRegridMethod, 
                  regridPoleType, regridPoleNPnts,
                   map_type,
                  extrapMethod,
@@ -574,7 +602,7 @@ void ESMCI_regrid_create(
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()"
   Trace __trace(" FTN_X(regrid_getiwts)()");
@@ -590,7 +618,7 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
     if (!iwts) Throw() << "Could not find integration weights field on this mesh"
                              <<std::endl;
 
-    if(!get_iwts(mesh, iwts, regridScheme))
+    if(!get_iwts(mesh, iwts))
       Throw() << "Online regridding error" << std::endl;
 
     CpMeshDataToArray(grid, *staggerLoc, mesh, array, iwts);
@@ -624,7 +652,7 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
 
 void ESMCI_regrid_getarea(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getarea()"
   Trace __trace(" FTN_X(regrid_getarea)()");

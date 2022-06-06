@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -95,7 +95,8 @@ program ESMF_GridCreateUTest
   integer :: total, s,  decount, localDe
   type(ESMF_Staggerloc) :: staggerLocList(2)
   type(ESMF_CubedSphereTransform_Args) :: transformArgs
- 
+  type(ESMF_Routehandle)  :: rh
+
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -619,12 +620,30 @@ program ESMF_GridCreateUTest
 
 
   ! Create Grid 2 from the original grid and distgrid
-  grid2=ESMF_GridCreate(grid, name=trim(grid_name), distgrid=distgrid, rc=localrc)
+  grid2=ESMF_GridCreate(grid, name=trim(grid_name), distgrid=distgrid, routehandle=rh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! If the grid create copy works, then grid2 should now be 
   ! a perfect copy of grid, so check that match returns true
-  if (ESMF_GridMatch(grid,grid2,rc=localrc)/=ESMF_GRIDMATCH_EXACT) correct=.false.
+  correct = (ESMF_GridMatch(grid,grid2,rc=localrc)==ESMF_GRIDMATCH_EXACT)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing GridRedist()"
+  write(failMsg, *) "Incorrect result"
+
+  ! Redist coordinates from grid -> grid2
+  call ESMF_GridRedist(srcGrid=grid, dstGrid=grid2, routehandle=rh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! If the grid create copy works, then grid2 should now be 
+  ! a perfect copy of grid, so check that match returns true
+  correct = (ESMF_GridMatch(grid,grid2,rc=localrc)==ESMF_GRIDMATCH_EXACT)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get rid of first grid

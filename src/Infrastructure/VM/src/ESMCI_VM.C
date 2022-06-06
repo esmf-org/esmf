@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2517,18 +2517,53 @@ void VM::logMemInfo(
   char msg[800];
   std::stringstream info;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-  // access /proc/self
   char line[128];
-  FILE* file = fopen("/proc/self/status", "r");
+  FILE* file;
+  // access /proc/meminfo
+  long ssiTotal, ssiCommitted;
+  file = fopen("/proc/meminfo", "r");
   while (fgets(line, 128, file) != NULL){
-    if (strncmp(line, "Vm", 2) == 0){
+    bool outFlag = false;
+    if (strncmp(line, "MemTotal:", 9) == 0){
+      outFlag = true;
+      sscanf(line+9, "%ld", &ssiTotal);
+    }
+    if (strncmp(line, "Mem", 3) == 0){
+      outFlag = true;
+    }
+    if (strncmp(line, "Committed_AS:", 13) == 0){
+      outFlag = true;
+      sscanf(line+13, "%ld", &ssiCommitted);
+    }
+    if (outFlag){
       int len = strlen(line);
       line[len-1] = '\0'; // replace the newline with null
-      sprintf(msg, "%s - MemInfo: \t%s", prefix.c_str(), line);
+      sprintf(msg, "%s - MemInfo: [/proc/meminfo - SSI]\t%s",prefix.c_str(),line);
       log->Write(msg, msgType);
     }
   }
   fclose(file);
+  sprintf(msg, "%s - MemInfo: [/proc/meminfo - SSI]\tCommittedPercent: %g %%",
+    prefix.c_str(), ssiCommitted/(double)ssiTotal * 100.);
+  log->Write(msg, msgType);
+  // access /proc/self
+  long vmRss;
+  file = fopen("/proc/self/status", "r");
+  while (fgets(line, 128, file) != NULL){
+    if (strncmp(line, "Vm", 2) == 0){
+      int len = strlen(line);
+      line[len-1] = '\0'; // replace the newline with null
+      sprintf(msg, "%s - MemInfo: [/proc/self/status]\t%s",prefix.c_str(),line);
+      log->Write(msg, msgType);
+    }
+    if (strncmp(line, "VmRSS:", 6) == 0){
+      sscanf(line+6, "%ld", &vmRss);
+    }
+  }
+  fclose(file);
+  sprintf(msg, "%s - MemInfo: [/proc/self/status]\tVmRSSPercent: %g %%",
+    prefix.c_str(), vmRss/(double)ssiTotal * 100.);
+  log->Write(msg, msgType);
   // access mallinfo
   struct mallinfo m = mallinfo();
   info << "[malloc] Non-mmapped space allocated:        " <<setw(16)<< m.arena;
@@ -2561,7 +2596,6 @@ void VM::logMemInfo(
   long total = 0; // init
   if (m.hblkhd>=0 && m.uordblks>=0){
     total = (long)m.hblkhd+(long)m.uordblks;
-//    total /= (long)1024;  // scale to KiB
   }
   info.str(""); // clear info
   info << "[malloc] Total space in use, mmap + non-mmap:" <<setw(16)<< total;
@@ -2586,7 +2620,6 @@ void VM::logMemInfo(
   size_t pos = malloc_stats_output.rfind("system bytes     =");
   pos += 18;
   long system = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
-//  system /= (long)1024;  // scale to KiB
   info.str(""); // clear info
   info << "[malloc] Total space held (mmap + non-mmap): " <<setw(16)<< system;
   sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());
@@ -2594,7 +2627,6 @@ void VM::logMemInfo(
   pos = malloc_stats_output.rfind("in use bytes     =");
   pos += 18;
   long in_use = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
-//  in_use /= (long)1024;  // scale to KiB
   info.str(""); // clear info
   info << "[malloc] Total space used (mmap + non-mmap): " <<setw(16)<< in_use;
   sprintf(msg, "%s - MemInfo: %s Byte", prefix.c_str(), info.str().c_str());

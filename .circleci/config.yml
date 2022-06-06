@@ -130,6 +130,7 @@ jobs:
   build-esmf-docs:
     docker:
       - image: cimg/base:2020.01
+    resource_class: large
     steps:
       - setup_remote_docker
       - run:
@@ -160,12 +161,16 @@ jobs:
           destination: doc-artifacts.zip
 
   publish-esmf-docs:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     resource_class: medium
     steps:
       - restore_cache:
           keys:
             - esmf-docs-{{ .Revision }}
+      - add_ssh_keys:
+          fingerprints:
+            - "14:e5:89:bd:fe:9a:28:7e:06:56:f2:0d:93:ff:9a:9c"
       - run:
           name: Prep Artifacts
           command: cd /tmp/artifacts && unzip doc-artifacts.zip
@@ -206,12 +211,16 @@ jobs:
           destination: test_coverage-artifacts.zip
 
   publish-test-coverage:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     resource_class: medium
     steps:
       - restore_cache:
           keys:
             - test-coverage-{{ .Revision }}
+      - add_ssh_keys:
+          fingerprints:
+            - "4a:f2:d9:dd:d6:2a:4e:fd:79:06:72:29:4c:d9:c0:8c"
       - run:
           name: Prep Test Coverage
           command: cd /tmp/artifacts && unzip test_coverage-artifacts.zip
@@ -238,7 +247,7 @@ jobs:
           command: git clone --branch $CIRCLE_BRANCH https://github.com/esmf-org/esmf.git
       - run:
           name: Docker Run API Changes
-          command: docker build -t "esmf/api-change:${CIRCLE_BRANCH_NEW}" --file "ESCOMP-Containers/ESMF/API_changes/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" --build-arg TAG1="ESMF_8_1_0" --build-arg TAG2="${CIRCLE_BRANCH}" --no-cache .
+          command: docker build -t "esmf/api-change:${CIRCLE_BRANCH_NEW}" --file "ESCOMP-Containers/ESMF/API_changes/Dockerfile" --build-arg DOCKER_NAMESPACE="esmf" --build-arg TAG1="ESMF_8_2_0" --build-arg TAG2="${CIRCLE_BRANCH}" --no-cache .
       - run:
           name: Extract API Changes
           command: bash esmf/.circleci/sh/extract-artifacts.sh "/tmp/artifacts" "/artifacts/api_change-artifacts.zip" "esmf/api-change:${CIRCLE_BRANCH_NEW}"
@@ -252,12 +261,16 @@ jobs:
           destination: api_change-artifacts.zip
 
   publish-api-change:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     resource_class: medium
     steps:
       - restore_cache:
           keys:
             - api-change-{{ .Revision }}
+      - add_ssh_keys:
+          fingerprints:
+            - "4a:f2:d9:dd:d6:2a:4e:fd:79:06:72:29:4c:d9:c0:8c"
       - run:
           name: Prep API Changes
           command: cd /tmp/artifacts && unzip api_change-artifacts.zip
@@ -315,12 +328,16 @@ jobs:
           destination: doc-esmpy.zip
 
   publish-esmpy-docs:
-    machine: true
+    machine:
+      image: ubuntu-2004:202201-02
     resource_class: medium
     steps:
       - restore_cache:
           keys:
             - esmpy-docs-{{ .Revision }}
+      - add_ssh_keys:
+          fingerprints:
+            - "bd:e1:a6:87:3f:d5:fe:18:88:69:eb:55:bf:f9:e4:3d"
       - run:
           name: Prep Artifacts
           command: cd /tmp/artifacts && unzip doc-esmpy.zip
@@ -482,11 +499,11 @@ workflows:
       - publish-esmf-docs:
           requires:
             - build-esmf-docs
-          filters:
-            branches:
-              only:
-                - develop
-                - /^release/.*$/
+#          filters:
+#            branches:
+#              only:
+#                - develop
+#                - /^release/.*$/
       - build-esmpy-docs
 #          requires:
 #            - should-build-docs

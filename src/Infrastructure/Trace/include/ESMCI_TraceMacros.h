@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -30,6 +30,14 @@
 #define ESMCI_REGION_ENTER(name, localrc)
 #define ESMCI_REGION_EXIT(name, localrc) 
 #endif
+
+//#ifdef ESMF_PROFILE_PIO
+//#define ESMCI_IOREGION_ENTER(name) ESMCI::TraceEventRegionEnter(name, NULL);
+//#define ESMCI_IOREGION_EXIT(name)  ESMCI::TraceEventRegionExit(name, NULL);
+//#else
+#define ESMCI_IOREGION_ENTER(name) 
+#define ESMCI_IOREGION_EXIT(name)  
+//#endif
 
 #ifdef ESMF_PROFILE_MESHCREATE
 #define ESMCI_MESHCREATE_TRACE_ENTER(name) {char before[100] = "before "; \

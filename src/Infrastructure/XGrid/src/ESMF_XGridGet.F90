@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -413,7 +413,7 @@ integer,              intent(out), optional :: rc
         endif    
         if(ncells /= size(xgtypep%area, 1)) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-               msg="- size of area doesn't match the size of area in the XGrid", &
+               msg=" size of area array doesn't match the size of area in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif

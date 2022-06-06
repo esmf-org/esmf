@@ -25,33 +25,34 @@
 #ifdef MOAB_HAVE_MPI
 #include "moab_mpi.h"
 #include "moab/ParallelComm.hpp"
-#endif 
+#endif
 
 #ifdef MOAB_HAVE_PNETCDF
 #include "pnetcdf.h"
-#define NCFUNC(func) ncmpi_ ## func
+#define NCFUNC( func ) ncmpi_##func
 
 //! Collective I/O mode get
-#define NCFUNCAG(func) ncmpi_get ## func ## _all
+#define NCFUNCAG( func ) ncmpi_get##func##_all
 
 //! Independent I/O mode get
-#define NCFUNCG(func) ncmpi_get ## func
+#define NCFUNCG( func ) ncmpi_get##func
 
 //! Nonblocking get (request aggregation), used so far only for ucd mesh
-#define NCFUNCREQG(func) ncmpi_iget ## func
+#define NCFUNCREQG( func ) ncmpi_iget##func
 
 #define NCDF_SIZE MPI_Offset
 #define NCDF_DIFF MPI_Offset
 #else
 #include "netcdf.h"
-#define NCFUNC(func) nc_ ## func
-#define NCFUNCAG(func) nc_get ## func
-#define NCFUNCG(func) nc_get ## func
-#define NCDF_SIZE size_t
-#define NCDF_DIFF ptrdiff_t
+#define NCFUNC( func )   nc_##func
+#define NCFUNCAG( func ) nc_get##func
+#define NCFUNCG( func )  nc_get##func
+#define NCDF_SIZE        size_t
+#define NCDF_DIFF        ptrdiff_t
 #endif
 
-namespace moab {
+namespace moab
+{
 
 class ReadUtilIface;
 class ScdInterface;
@@ -60,161 +61,161 @@ class NCHelper;
 //! Output Exodus File for VERDE
 class ReadNC : public ReaderIface
 {
-  friend class NCHelper;
-  friend class ScdNCHelper;
-  friend class UcdNCHelper;
-  friend class NCHelperEuler;
-  friend class NCHelperFV;
-  friend class NCHelperHOMME;
-  friend class NCHelperMPAS;
-  friend class NCHelperGCRM;
+    friend class NCHelper;
+    friend class ScdNCHelper;
+    friend class UcdNCHelper;
+    friend class NCHelperEuler;
+    friend class NCHelperFV;
+    friend class NCHelperDomain;
+    friend class NCHelperHOMME;
+    friend class NCHelperMPAS;
+    friend class NCHelperGCRM;
 
-public:
+  public:
+    static ReaderIface* factory( Interface* );
 
-  static ReaderIface* factory(Interface*);
+    //! Load an NC file
+    ErrorCode load_file( const char* file_name, const EntityHandle* file_set, const FileOptions& opts,
+                         const SubsetList* subset_list = 0, const Tag* file_id_tag = 0 );
 
-  //! Load an NC file
-  ErrorCode load_file(const char* file_name,
-                       const EntityHandle* file_set,
-                       const FileOptions& opts,
-                       const SubsetList* subset_list = 0,
-                       const Tag* file_id_tag = 0);
+    //! Constructor
+    ReadNC( Interface* impl = NULL );
 
-  //! Constructor
-  ReadNC(Interface* impl = NULL);
+    //! Destructor
+    virtual ~ReadNC();
 
-  //! Destructor
-  virtual ~ReadNC();
+    virtual ErrorCode read_tag_values( const char* file_name, const char* tag_name, const FileOptions& opts,
+                                       std::vector< int >& tag_values_out, const SubsetList* subset_list = 0 );
 
-  virtual ErrorCode read_tag_values(const char* file_name,
-                                    const char* tag_name,
-                                    const FileOptions& opts,
-                                    std::vector<int>& tag_values_out,
-                                    const SubsetList* subset_list = 0);
+    //! ENTLOCNSEDGE for north/south edge
+    //! ENTLOCWEEDGE for west/east edge
+    enum EntityLocation
+    {
+        ENTLOCVERT = 0,
+        ENTLOCNSEDGE,
+        ENTLOCEWEDGE,
+        ENTLOCFACE,
+        ENTLOCSET,
+        ENTLOCEDGE,
+        ENTLOCREGION
+    };
 
-  //! ENTLOCNSEDGE for north/south edge
-  //! ENTLOCWEEDGE for west/east edge
-  enum EntityLocation {ENTLOCVERT = 0, ENTLOCNSEDGE, ENTLOCEWEDGE, ENTLOCFACE, ENTLOCSET, ENTLOCEDGE, ENTLOCREGION};
+  private:
+    class AttData
+    {
+      public:
+        AttData() : attId( -1 ), attLen( 0 ), attVarId( -2 ) {}
+        int attId;
+        NCDF_SIZE attLen;
+        int attVarId;
+        nc_type attDataType;
+        std::string attName;
+    };
 
-private:
+    class VarData
+    {
+      public:
+        VarData() : varId( -1 ), numAtts( -1 ), entLoc( ENTLOCSET ), numLev( 0 ), sz( 0 ), has_tsteps( false ) {}
+        int varId;
+        int numAtts;
+        nc_type varDataType;
+        std::vector< int > varDims;  // The dimension indices making up this multi-dimensional variable
+        std::map< std::string, AttData > varAtts;
+        std::string varName;
+        std::vector< Tag > varTags;  // Tags created for this variable, e.g. one tag per timestep
+        std::vector< void* > varDatas;
+        std::vector< NCDF_SIZE > readStarts;  // Starting index for reading data values along each dimension
+        std::vector< NCDF_SIZE > readCounts;  // Number of data values to be read along each dimension
+        int entLoc;
+        int numLev;
+        int sz;
+        bool has_tsteps;  // Indicate whether timestep numbers are appended to tag names
+    };
 
-  class AttData
-  {
-    public:
-    AttData() : attId(-1), attLen(0), attVarId(-2) {}
-    int attId;
-    NCDF_SIZE attLen;
-    int attVarId;
-    nc_type attDataType;
-    std::string attName;
-  };
+    ReadUtilIface* readMeshIface;
 
-  class VarData
-  {
-    public:
-    VarData() : varId(-1), numAtts(-1), entLoc(ENTLOCSET), numLev(0), sz(0), has_tsteps(false) {}
-    int varId;
-    int numAtts;
-    nc_type varDataType;
-    std::vector<int> varDims; // The dimension indices making up this multi-dimensional variable
-    std::map<std::string, AttData> varAtts;
-    std::string varName;
-    std::vector<Tag> varTags; // Tags created for this variable, e.g. one tag per timestep
-    std::vector<void*> varDatas;
-    std::vector<NCDF_SIZE> readStarts; // Starting index for reading data values along each dimension
-    std::vector<NCDF_SIZE> readCounts; // Number of data values to be read along each dimension
-    int entLoc;
-    int numLev;
-    int sz;
-    bool has_tsteps; // Indicate whether timestep numbers are appended to tag names
-  };
+    //! Read the header information
+    ErrorCode read_header();
 
-  ReadUtilIface* readMeshIface;
+    //! Get all global attributes in the file
+    ErrorCode get_attributes( int var_id, int num_atts, std::map< std::string, AttData >& atts,
+                              const char* prefix = "" );
 
-  //! Read the header information
-  ErrorCode read_header();
+    //! Get all dimensions in the file
+    ErrorCode get_dimensions( int file_id, std::vector< std::string >& dim_names, std::vector< int >& dim_lens );
 
-  //! Get all global attributes in the file
-  ErrorCode get_attributes(int var_id, int num_atts, std::map<std::string, AttData>& atts,
-                           const char* prefix = "");
+    //! Get the variable names and other info defined for this file
+    ErrorCode get_variables();
 
-  //! Get all dimensions in the file
-  ErrorCode get_dimensions(int file_id, std::vector<std::string>& dim_names, std::vector<int>& dim_lens);
+    ErrorCode parse_options( const FileOptions& opts, std::vector< std::string >& var_names,
+                             std::vector< int >& tstep_nums, std::vector< double >& tstep_vals );
 
-  //! Get the variable names and other info defined for this file
-  ErrorCode get_variables();
+    //------------member variables ------------//
 
-  ErrorCode parse_options(const FileOptions& opts,
-                          std::vector<std::string>& var_names,
-                          std::vector<int>& tstep_nums,
-                          std::vector<double>& tstep_vals);
+    //! Interface instance
+    Interface* mbImpl;
 
-//------------member variables ------------//
+    //! File name
+    std::string fileName;
 
-  //! Interface instance
-  Interface* mbImpl;
+    //! File numbers assigned by netcdf
+    int fileId;
 
-  //! File name
-  std::string fileName;
+    //! Dimension names
+    std::vector< std::string > dimNames;
 
-  //! File numbers assigned by netcdf
-  int fileId;
+    //! Dimension lengths
+    std::vector< int > dimLens;
 
-  //! Dimension names
-  std::vector<std::string> dimNames;
+    //! Global attribs
+    std::map< std::string, AttData > globalAtts;
 
-  //! Dimension lengths
-  std::vector<int> dimLens;
+    //! Variable info
+    std::map< std::string, VarData > varInfo;
 
-  //! Global attribs
-  std::map<std::string, AttData> globalAtts;
+    //! Cached tags for reading. Note that all these tags are defined when the
+    //! core is initialized.
+    Tag mGlobalIdTag;
 
-  //! Variable info
-  std::map<std::string, VarData> varInfo;
+    //! This is a pointer to the file id tag that is passed from ReadParallel
+    //! it gets deleted at the end of resolve sharing, but it will have same data
+    //! as the global id tag
+    //! global id tag is preserved, and is needed later on.
+    const Tag* mpFileIdTag;
 
-  //! Cached tags for reading. Note that all these tags are defined when the
-  //! core is initialized.
-  Tag mGlobalIdTag;
+    //! Debug stuff
+    DebugOutput dbgOut;
 
-  //! This is a pointer to the file id tag that is passed from ReadParallel
-  //! it gets deleted at the end of resolve sharing, but it will have same data
-  //! as the global id tag
-  //! global id tag is preserved, and is needed later on.
-  const Tag* mpFileIdTag;
+    //! Are we reading in parallel?
+    bool isParallel;
 
-  //! Debug stuff
-  DebugOutput dbgOut;
+    //! Partitioning method
+    int partMethod;
 
-  //! Are we reading in parallel?
-  bool isParallel;
+    //! Scd interface
+    ScdInterface* scdi;
 
-  //! Partitioning method
-  int partMethod;
-
-  //! Scd interface
-  ScdInterface* scdi;
-
-  //! Parallel data object, to be cached with ScdBox
-  ScdParData parData;
+    //! Parallel data object, to be cached with ScdBox
+    ScdParData parData;
 
 #ifdef MOAB_HAVE_MPI
-  ParallelComm* myPcomm;
+    ParallelComm* myPcomm;
 #endif
 
-  //! Read options
-  bool noMesh;
-  bool noVars;
-  bool spectralMesh;
-  bool noMixedElements;
-  bool noEdges;
-  int gatherSetRank;
-  int tStepBase;
-  int trivialPartitionShift;
+    //! Read options
+    bool noMesh;
+    bool noVars;
+    bool spectralMesh;
+    bool noMixedElements;
+    bool noEdges;
+    int gatherSetRank;
+    int tStepBase;
+    int trivialPartitionShift;
 
-  //! Helper class instance
-  NCHelper* myHelper;
+    //! Helper class instance
+    NCHelper* myHelper;
 };
 
-} // namespace moab
+}  // namespace moab
 
 #endif

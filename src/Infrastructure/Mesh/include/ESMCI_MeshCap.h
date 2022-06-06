@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -130,14 +130,14 @@ namespace ESMCI {
     static MeshCap *meshcreate_from_grid(Grid **gridpp, int *rc);
 
     void meshaddnodes(int *num_nodes, int *nodeId,
-                      double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                      double *nodeCoord,  InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                       ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                       int *rc);
 
     void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                          int *_coordsPresent, double *elemCoords,
-                         int *_num_elemConn, int *elemConn, int *regridConserve,
+                         int *_num_elemConn, int *elemConn, 
                          ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                          int *rc);
 
@@ -276,7 +276,6 @@ namespace ESMCI {
       int *map_type,
       int *norm_type,
       int *regridPoleType, int *regridPoleNPnts,
-      int *regridScheme,
       int *extrapMethod,
       int *extrapNumSrcPnts,
       ESMC_R8 *extrapDistExponent,
@@ -293,11 +292,11 @@ namespace ESMCI {
 
     static void regrid_getiwts(Grid **gridpp,
                                MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                               int *regridScheme, int*rc);
+                               int *rc);
 
     static void regrid_getarea(Grid **gridpp,
                                MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                               int *regridScheme, int*rc);
+                               int *rc);
 
 
     static void regrid_getfrac(Grid **gridpp,
@@ -321,6 +320,14 @@ namespace ESMCI {
                                    ESMC_CoordSys_Flag *coordSys,
                                    int *nentries, ESMCI::TempWeights **tweights,
                                    int*rc);
+
+    static void xgrid_calc_wgts_from_side_mesh(MeshCap *src_side_mesh, MeshCap *dst_xgrid_mesh,
+                                               int *nentries, ESMCI::TempWeights **tweights,
+                                               int*rc);
+
+    static void xgrid_calc_wgts_to_side_mesh(MeshCap *src_xgrid_mesh, MeshCap *dst_side_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc);
 
     static MeshCap *merge(MeshCap **srcmeshpp, MeshCap **dstmeshpp, int*rc);
 
@@ -353,6 +360,16 @@ namespace ESMCI {
                           int num_elemArrays, ESMCI::Array **elemArrays,
                           int *rc);
 
+    static MeshCap *meshcreatefromfilenew(char *filename,
+                                          ESMC_FileFormat_Flag fileformat,
+                                          bool convert_to_dual, 
+                                          bool add_user_area, 
+                                          ESMC_CoordSys_Flag coordSys, 
+                                          ESMC_MeshLoc_Flag maskFlag, 
+                                          char *maskVarName, 
+                                          ESMCI::DistGrid *node_distgrid,
+                                          ESMCI::DistGrid *elem_distgrid,
+                                          int *rc);
   };
 
 } // namespace

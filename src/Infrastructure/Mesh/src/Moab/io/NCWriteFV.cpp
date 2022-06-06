@@ -6,11 +6,12 @@
 
 #include "NCWriteFV.hpp"
 
-namespace moab {
+namespace moab
+{
 
 NCWriteFV::~NCWriteFV()
 {
-  // TODO Auto-generated destructor stub
+    // TODO Auto-generated destructor stub
 }
 
 } /* namespace moab */

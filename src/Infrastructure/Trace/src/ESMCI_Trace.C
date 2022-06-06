@@ -3,7 +3,7 @@
  * Writes trace events to the file system.
  *
  * Earth System Modeling Framework
- * Copyright 2002-2021, University Corporation for Atmospheric Research,
+ * Copyright 2002-2022, University Corporation for Atmospheric Research,
  * Massachusetts Institute of Technology, Geophysical Fluid Dynamics
  * Laboratory, University of Michigan, National Centers for Environmental
  * Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -877,10 +877,10 @@ namespace ESMCI {
       }
 
       stringstream fmt;
-      fmt << "%-" << namePadding << "s %-6lu %-8s %-11.4f %-11.4f %-7d %-11.4f %-7d";
+      fmt << "%-" << namePadding << "s %-6lu %-6lu %-8s %-11.4f %-11.4f %-7d %-11.4f %-7d";
 
       snprintf(strbuf, STATLINE, fmt.str().c_str(),
-               name.c_str(), rs->getPetCount(), countstr,
+               name.c_str(), rs->getPetCount(), rs->getPeCount(), countstr,
 	       rs->getTotalMean()*NANOS_TO_SECS,
 	       rs->getTotalMin()*NANOS_TO_SECS, rs->getTotalMinPet(),
 	       rs->getTotalMax()*NANOS_TO_SECS, rs->getTotalMaxPet());
@@ -906,11 +906,11 @@ namespace ESMCI {
     if (namePadding > 200) namePadding = 200;
 
     stringstream fmt;
-    fmt << "%-" << namePadding << "s %-6s %-8s %-11s %-11s %-7s %-11s %-7s";
+    fmt << "%-" << namePadding << "s %-6s %-6s %-8s %-11s %-11s %-7s %-11s %-7s";
 
     char strbuf[STATLINE];
     snprintf(strbuf, STATLINE, fmt.str().c_str(),
-             "Region", "PETs", "Count", "Mean (s)", "Min (s)", "Min PET", "Max (s)", "Max PET");
+             "Region", "PETs", "PEs ", "Count", "Mean (s)", "Min (s)", "Min PET", "Max (s)", "Max PET");
 
     ofs.open(filename.c_str(), ofstream::trunc);
     if (ofs.is_open() && !ofs.fail()) {

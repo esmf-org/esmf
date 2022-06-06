@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -296,6 +296,8 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 
   public ESMF_GridMatch
   public ESMF_GridPrint
+
+  public ESMF_GridRedist
 
   public ESMF_GridValidate
 
@@ -2746,7 +2748,7 @@ end subroutine ESMF_GridConvertIndex
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateCopyFromNewDG(grid, distgrid, keywordEnforcer, &
-        name, copyAttributes, rc)
+        name, copyAttributes, routehandle, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateCopyFromNewDG
@@ -2757,6 +2759,7 @@ end subroutine ESMF_GridConvertIndex
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        character (len=*),     intent(in),   optional  :: name
        logical,               intent(in),   optional  :: copyAttributes
+       type(ESMF_RouteHandle),intent(out),  optional  :: routehandle
        integer,               intent(out),  optional  :: rc
 !
 ! !STATUS:
@@ -2765,27 +2768,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[7.1.0r] Added argument {\tt copyAttributes} to support attribute
-!               propagation from the existing to the newly created grid object.
+!               propagation from the existing to the newly created grid object. \newline
+! \item[8.2.1] Added argument {\tt routehandle} providing the user with a convenient
+!              way to execute {\tt ESMF\_GridRedist()} repeatedly, e.g. when coordinates
+!              on the source grid have changed.
 ! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! This call allows the user to copy of an existing ESMF Grid, but with a new distribution.
-! All internal data from the old Grid (coords, items) is redistributed to the new Grid.
+! This call allows the user to copy an existing ESMF Grid, but with a new distribution.
+! All internal data from the old Grid (coords, items) are redistributed to the new Grid.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[grid]
-!     {\tt ESMF\_Grid} to copy.
+!      The existing {\tt ESMF\_Grid} being redistributed, i.e. the "source" grid.
 ! \item[distgrid]
-!      {\tt ESMF\_DistGrid} object which describes how the Grid is decomposed and
-!      distributed over DEs.
+!      {\tt ESMF\_DistGrid} object which describes how the newly created Grid is
+!      decomposed and distributed.
 ! \item[{[name]}]
 !      Name of the new Grid. If not specified, a new unique name will be created
 !      for the Grid.
 ! \item[{[copyAttributes]}]
 !      A flag to indicate whether to copy the attributes of the existing grid
 !      to the new grid.  The default value is .false..
+! \item[{[routehandle]}]
+!      If provided holds the mapping of coordinates between the two grids. This can
+!      be used in the companion method {\tt ESMF\_GridRedist()} to update coordinates.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2806,8 +2815,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer :: staggerLBound(ESMF_MAXDIM)
        type(ESMF_Index_Flag) :: indexflag, arrayIndexflag
        integer :: i, j, nStaggers
+#define USE_ARRAYBUNDLE
+#ifdef USE_ARRAYBUNDLE
        type(ESMF_ArrayBundle) :: srcAB, dstAB
-       type(ESMF_RouteHandle) :: routehandle
+#endif
+       type(ESMF_RouteHandle) :: rh
        type(ESMF_STAGGERLOC), allocatable :: srcStaggers(:)
        type(ESMF_Array), allocatable :: srcA(:), dstA(:)
        type(ESMF_Array), allocatable :: srcA2D(:), dstA2D(:)
@@ -3094,10 +3106,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
        enddo
 
-!       srcAB = ESMF_ArrayBundleCreate(arrayList=srcA2D(1:nStaggers), multiflag=.true., rc=localrc)
-!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
-
+#ifdef USE_ARRAYBUNDLE
+       srcAB = ESMF_ArrayBundleCreate(arrayList=srcA2D, multiflag=.true., rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
 
        ! Create dst Arraybundle
        ! Pull coord Arrays out of new grid and put them into Arraybundle
@@ -3135,38 +3147,57 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
        enddo
 
-!       dstAB = ESMF_ArrayBundleCreate(arrayList=dstA2D(1:nStaggers), multiflag=.true., rc=localrc)
-!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
+#ifdef USE_ARRAYBUNDLE
+       dstAB = ESMF_ArrayBundleCreate(arrayList=dstA2D, multiflag=.true., rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
 
 #if 0
         call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG before coord RedistStore()",&
           ESMF_LOGMSG_INFO)
 #endif
 
-       ! Redist between ArrayBundles
-!       call ESMF_ArrayBundleRedistStore(srcAB, dstAB, routehandle=routehandle, rc=localrc)
-!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
-!       call ESMF_ArrayBundleRedist(srcAB, dstAB, routehandle=routehandle, rc=localrc)
-!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
 
+#ifdef USE_ARRAYBUNDLE
+        if (dimCount*nStaggers > 0) then
+          ! Redist between ArrayBundles
+          call ESMF_ArrayBundleRedistStore(srcAB, dstAB, routehandle=rh, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_ArrayBundleRedist(srcAB, dstAB, routehandle=rh, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+          ! Conditionally return the valid routehandle, or destroy here
+          if (present(routehandle)) then
+            routehandle = rh
+          else
+            call ESMF_ArrayBundleRedistRelease(routehandle=rh, noGarbage=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        endif
+        ! Destroy ArrayBundles
+        call ESMF_ArrayBundleDestroy(srcAB, noGarbage=.true., rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_ArrayBundleDestroy(dstAB, noGarbage=.true., rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+#else
+!gjt thinks this comment is outdates, and was due to a silly mistake that was in earlier code when
+!gjt creating the ArrayBundles.
 !TODO: figure out why ArrayBundleRedist() does not seem to work right for
 !TODO: some of the Arrays -> use individual ArrayRedist() instead as work-around
 
        do k=1, dimCount*nStaggers
-         call ESMF_ArrayRedistStore(srcA2D(k), dstA2D(k), routehandle=routehandle, rc=localrc)
+         call ESMF_ArrayRedistStore(srcA2D(k), dstA2D(k), routehandle=rh, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-         call ESMF_ArrayRedist(srcA2D(k), dstA2D(k), routehandle=routehandle, &
+         call ESMF_ArrayRedist(srcA2D(k), dstA2D(k), routehandle=rh, &
             zeroregion=ESMF_REGION_TOTAL, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-         call ESMF_ArrayRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
+         call ESMF_ArrayRedistRelease(routehandle=rh, noGarbage=.true., rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
+#endif
 
 #if 0
         call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG after coord RedistStore()",&
@@ -3222,19 +3253,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        deallocate(dstA2D)
        deallocate(srcRepl)
        deallocate(dstRepl)
-
-
-       ! Destroy ArrayBundles and release Routehandle
-!       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
-!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
-!       call ESMF_ArrayBundleDestroy(srcAB, noGarbage=.true., rc=localrc)
-!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
-!       call ESMF_ArrayBundleDestroy(dstAB, noGarbage=.true., rc=localrc)
-!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
-
 
 #if 1
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -3296,21 +3314,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           !     ESMF_CONTEXT, rcToReturn=rc)) return
           ! Redist between ArrayBundles
-          !       call ESMF_ArrayBundleRedistStore(srcAB, dstAB, routehandle=routehandle, rc=localrc)
+          !       call ESMF_ArrayBundleRedistStore(srcAB, dstAB, routehandle=rh, rc=localrc)
           !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           !            ESMF_CONTEXT, rcToReturn=rc)) return
-          !       call ESMF_ArrayBundleRedist(srcAB, dstAB, routehandle=routehandle, rc=localrc)
+          !       call ESMF_ArrayBundleRedist(srcAB, dstAB, routehandle=rh, rc=localrc)
           !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           !            ESMF_CONTEXT, rcToReturn=rc)) return
           do j=1, nStaggers
-             call ESMF_ArrayRedistStore(srcA(j), dstA(j), routehandle=routehandle, rc=localrc)
+             call ESMF_ArrayRedistStore(srcA(j), dstA(j), routehandle=rh, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-             call ESMF_ArrayRedist(srcA(j), dstA(j), routehandle=routehandle, &
+             call ESMF_ArrayRedist(srcA(j), dstA(j), routehandle=rh, &
                zeroregion=ESMF_REGION_TOTAL, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
-             call ESMF_ArrayRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
+             call ESMF_ArrayRedistRelease(routehandle=rh, noGarbage=.true., rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
@@ -3325,7 +3343,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
        ! Destroy ArrayBundles and release Routehandle
-          !       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, noGarbage=.true., rc=localrc)
+          !       call ESMF_ArrayBundleRedistRelease(routehandle=rh, noGarbage=.true., rc=localrc)
           !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           !            ESMF_CONTEXT, rcToReturn=rc)) return
           !call ESMF_ArrayBundleDestroy(srcAB, rc=localrc)
@@ -24640,6 +24658,249 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present (rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_GridPrint
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridRedist"
+!BOP
+! !IROUTINE: ESMF_GridRedist - Redistribute the coordinates of a Grid
+
+! !INTERFACE:
+    subroutine ESMF_GridRedist(srcGrid, dstGrid, routehandle, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+       type(ESMF_Grid),       intent(in)              :: srcGrid
+       type(ESMF_Grid),       intent(inout)           :: dstGrid
+       type(ESMF_RouteHandle),intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+! This call is companion to the {\tt ESMF\_GridCreate()} that allows the user to copy an
+! existing ESMF Grid, but with a new distribution. The {\tt ESMF\_GridRedist()} allows
+! the user to repeatedly redistribute the coordinates from {\tt srcGrid} to {\tt dstGrid}.
+!
+! The arguments are:
+! \begin{description}
+! \item[srcGrid]
+!      The source grid providing the coordinates.
+! \item[srcGrid]
+!      The destination grid receiving the coordinates from {\tt srcGrid}.
+! \item[routehandle]
+!      The {\tt ESMF\_RouteHandle} object returned by the companion method
+!      {\tt ESMF\_GridCreate()} used to create {\tt dstGrid} from {\tt srcGrid}.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+      integer                 :: localrc
+      type(ESMF_ArrayBundle)  :: srcAB, dstAB
+      integer                 :: i, j, nStaggers
+      integer                 :: rank, dimCount, maxNumStaggers
+      logical, allocatable    :: srcRepl(:), dstRepl(:)
+      type(ESMF_STAGGERLOC), allocatable :: staggers(:)
+      type(ESMF_Array), allocatable :: srcA(:), dstA(:)
+      type(ESMF_Array), allocatable :: srcA2D(:), dstA2D(:)
+      integer                  :: arrayDimCount
+      integer                  :: localDECount, localDE
+      integer                  :: atodMap(1), k
+      type(ESMF_DistGrid)      :: dg
+      type(ESMF_TypeKind_Flag) :: tk
+      type(ESMF_Index_Flag)    :: arrayIndexflag
+      real(ESMF_KIND_R8), pointer:: farrayPtr(:), farrayPtr2d(:,:)
+
+      ! Initialize return code; assume failure until success is certain
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, srcGrid, rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, dstGrid, rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit, routehandle, rc)
+
+      call ESMF_GridGet(srcGrid, dimCount=dimCount, &
+           staggerlocCount=maxNumStaggers, &
+           rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Allocate to maximum number of possible staggers
+      allocate(staggers(maxNumStaggers))
+
+      ! Get list and number of active staggers
+      call c_ESMC_gridgetactivestaggers(srcGrid%this, &
+           nStaggers, staggers, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! prep arrays
+      allocate(srcA(dimCount*nStaggers), dstA(dimCount*nStaggers))
+      allocate(srcA2D(dimCount*nStaggers), dstA2D(dimCount*nStaggers))
+      allocate(srcRepl(dimCount*nStaggers), dstRepl(dimCount*nStaggers))
+
+      ! Pull coord Arrays out of srcGrid
+      do i=1,dimCount
+        do j = 1, nStaggers
+          call ESMF_GridGetCoord(srcGrid, coordDim=i, staggerloc=staggers(j), &
+            array=srcA((i-1)*nStaggers+j), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      enddo
+
+      ! construct temporary 2D src Arrays and fill with data if necessary
+      do k=1, dimCount*nStaggers
+         call ESMF_ArrayGet(srcA(k), rank=rank, dimCount=arrayDimCount, &
+           localDECount=localDECount, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+         if (rank==arrayDimCount) then
+           ! branch that assumes no replicated dims in Array
+           ! TODO: actually there may still be replication, only
+           ! TODO: arrayToDistGridMap conclusively provides that indication
+           srcRepl(k) = .false.
+           srcA2D(k) = srcA(k)
+         else
+           ! this branch is hard-coded for 2D DistGrids with 1D replicated
+           ! dim Arrays along one dimension
+           srcRepl(k) = .true.
+           call ESMF_ArrayGet(srcA(k), distgrid=dg, typekind=tk, &
+             arrayToDistGridMap=atodMap, indexflag=arrayIndexflag, &
+             rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+           srcA2D(k) = ESMF_ArrayCreate(distgrid=dg, typekind=tk, &
+             indexflag=arrayIndexflag, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+           if (localDECount/=0) then
+             call ESMF_ArrayGet(srcA(k), farrayPtr=farrayPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_ArrayGet(srcA2D(k), farrayPtr=farrayPtr2D, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+             if (atodMap(1)==1) then
+               do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+                 do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+                   farrayPtr2D(i,j) = farrayPtr(i)
+                 enddo
+               enddo
+             else
+               do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+                 do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+                   farrayPtr2D(i,j) = farrayPtr(j)
+                 enddo
+               enddo
+             endif
+           endif
+         endif
+      enddo
+
+      ! Pull coord Arrays out of dstGrid
+      do i=1,dimCount
+        do j = 1, nStaggers
+          call ESMF_GridGetCoord(dstGrid, coordDim=i, staggerloc=staggers(j), &
+            array=dstA((i-1)*nStaggers+j), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      enddo
+
+      ! construct temporary 2D Arrays
+      do k=1, dimCount*nStaggers
+         call ESMF_ArrayGet(dstA(k), rank=rank, dimCount=arrayDimCount, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+         if (rank==arrayDimCount) then
+           ! branch that assumes no replicated dims in Array
+           ! TODO: actually there may still be replication, only
+           ! TODO: arrayToDistGridMap conclusively provides that indication
+           dstRepl(k) = .false.
+           dstA2D(k) = dstA(k)
+         else
+           dstRepl(k) = .true.
+           call ESMF_ArrayGet(dstA(k), distgrid=dg, typekind=tk, &
+                indexflag=arrayIndexflag, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+           dstA2D(k) = ESMF_ArrayCreate(distgrid=dg, typekind=tk, &
+             indexflag=arrayIndexflag, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+         endif
+      enddo
+
+      ! Create ArrayBundles
+      srcAB = ESMF_ArrayBundleCreate(arrayList=srcA2D, multiflag=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      dstAB = ESMF_ArrayBundleCreate(arrayList=dstA2D, multiflag=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Redist between ArrayBundles
+      call ESMF_ArrayBundleRedist(srcAB, dstAB, routehandle=routehandle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Destroy ArrayBundles
+      call ESMF_ArrayBundleDestroy(srcAB, noGarbage=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_ArrayBundleDestroy(dstAB, noGarbage=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Fill the replicated dimension Arrays from the 2D redist data
+      do k=1, dimCount*nStaggers
+       if (dstRepl(k)) then
+         call ESMF_ArrayGet(dstA(k), arrayToDistGridMap=atodMap, &
+           localDECount=localDECount, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+         do localDE=0, localDECount-1
+           call ESMF_ArrayGet(dstA(k), localDE=localDE, &
+             farrayPtr=farrayPtr, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+           call ESMF_ArrayGet(dstA2D(k), localDE=localDE, &
+             farrayPtr=farrayPtr2D, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+           if (atodMap(1)==1) then
+             do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+               farrayPtr(i) = farrayPtr2D(i,lbound(farrayPtr2D,2))
+             enddo
+           else
+             do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+               farrayPtr(j) = farrayPtr2D(lbound(farrayPtr2D,1),j)
+             enddo
+           endif
+         enddo
+       endif
+      enddo
+
+      ! clean up temporary Arrays
+      do k=1, dimCount*nStaggers
+        if (srcRepl(k)) then
+          call ESMF_ArrayDestroy(srcA2D(k), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if (dstRepl(k)) then
+          call ESMF_ArrayDestroy(dstA2D(k), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+      enddo
+
+      deallocate(srcA)
+      deallocate(srcA2D)
+      deallocate(dstA)
+      deallocate(dstA2D)
+      deallocate(srcRepl)
+      deallocate(dstRepl)
+
+      ! Return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_GridRedist
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------

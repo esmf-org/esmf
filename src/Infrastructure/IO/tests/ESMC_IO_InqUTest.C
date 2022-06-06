@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -37,6 +37,7 @@ extern "C" {
 int main(void){
 
   char name[80];
+  char disname[80];
   char failMsg[80];
   int result = 0;
   int localPet, petCount;
@@ -82,11 +83,13 @@ int main(void){
   ESMC_ScripInq("./T42_grid.nc", grid_dims, &grid_rank, &rc);
   printf ("grid_rank=%d\n", grid_rank);
   printf ("grid_dims=[%d,%d]\n", grid_dims[0], grid_dims[1]);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 #else
-  // No NetCDF, so just PASS this test.
-  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
+  rc = ESMF_SUCCESS;
 #endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -100,11 +103,13 @@ int main(void){
   ESMC_GridspecInq("./GRIDSPEC_320x160.nc", &ndims, gridspec_grid_dims, &rc);
   printf ("ndims=%d\n", ndims);
   printf ("grid_dims=[%d,%d]\n", gridspec_grid_dims[0], gridspec_grid_dims[1]);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 #else
-  // No NetCDF, so just PASS this test.
-  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+  strcpy(disname, "DISABLED: ");
+  strcat(disname, name);
+  strcpy(name, disname);
+  rc = ESMF_SUCCESS;
 #endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------

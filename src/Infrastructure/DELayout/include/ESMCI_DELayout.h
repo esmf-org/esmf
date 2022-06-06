@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -433,7 +433,7 @@ class XXE{
       xxeSubList = new XXE*[xxeSubMaxCountArg];
       xxeSubCount  = 0;
       xxeSubMaxCount = xxeSubMaxCountArg;
-      bufferInfoList.reserve(10000);  // initial preparation
+      bufferInfoList.reserve(20000);  // initial preparation
       lastFilterBitField = 0x0;
       superVectorOkay = true;
       rh = NULL;

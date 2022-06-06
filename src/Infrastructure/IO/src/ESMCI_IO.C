@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -32,7 +32,7 @@
 #include "ESMC_Interface.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-
+#include "ESMCI_TraceMacros.h"
 #include "esmf_io_debug.h"
 #include "json.hpp"
 
@@ -459,7 +459,12 @@ int IO::write(
 
   PRINTPOS;
   // Open the file
+  int localrc;
+  {  
+  ESMCI_IOREGION_ENTER("ESMCI_IO:OPEN");
   localrc1 = open(file, status, iofmt, overwrite);
+  ESMCI_IOREGION_EXIT("ESMCI_IO:OPEN");
+  }
   PRINTMSG("open returned " << localrc1);
   if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) {
@@ -471,13 +476,20 @@ int IO::write(
       return ESMF_RC_FILE_WRITE;
     }
   }
-
+  {
+  ESMCI_IOREGION_ENTER("ESMCI_IO:WRITE");
   localrc1 = write(timeslice);
+  ESMCI_IOREGION_EXIT("ESMCI_IO:WRITE");
+  }
   PRINTMSG("write returned " << localrc1);
   // Can't quit even if error; Have to close first
 
   // Close the file
+  {
+  ESMCI_IOREGION_ENTER("ESMCI_IO:CLOSE");
   localrc2 = close();
+  ESMCI_IOREGION_EXIT("ESMCI_IO:CLOSE");
+  }
   PRINTMSG("close returned " << localrc2);
   if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) {
@@ -924,11 +936,11 @@ int IO::close(void
 
   // Check to make sure that a file is already open
   if (ioHandler->isOpen() != ESMF_FALSE) {
-    ioHandler->flush(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &rc)) {
-      return rc;
-    }
+      ioHandler->flush(&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                        &rc)) {
+          return rc;
+      }
     if (ESMF_SUCCESS == localrc) {
       ioHandler->close();
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,

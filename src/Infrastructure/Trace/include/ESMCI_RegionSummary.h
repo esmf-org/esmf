@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -34,7 +34,7 @@ namespace ESMCI {
 
   RegionSummary(RegionSummary *parent):
     _parent(parent), _name(""),
-      _pet_count(0), _count_each(0), _counts_match(true),
+      _pet_count(0), _pe_count(0), _count_each(0), _counts_match(true),
       _total_sum(0),
       _total_min(UINT64T_BIG), _total_min_pet(-1),
       _total_max(0), _total_max_pet(-1) {}
@@ -124,6 +124,10 @@ namespace ESMCI {
       return _pet_count;
     }
 
+    size_t getPeCount() const {
+      return _pe_count;
+    }
+
     /*
     uint64_t getSelfTime() const {
       uint64_t st = _total;
@@ -154,6 +158,8 @@ namespace ESMCI {
      * Add a set of PET region timings to the summary
      */
     void merge(const RegionNode &rn, int pet) {
+
+      _pe_count += rn.getPeCount();
 
       _pet_count++;
       if (_pet_count == 1) {
@@ -198,6 +204,7 @@ namespace ESMCI {
     vector<RegionSummary *> _children;
 
     size_t _pet_count;       //number of PETs reporting for this region
+    size_t _pe_count;        //sum of PEs for all PETs reporting for this region
 
     size_t _count_each;      //count on each PET (typically these will match)
     bool _counts_match;      //whether the counts all match

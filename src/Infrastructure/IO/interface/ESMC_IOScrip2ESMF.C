@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -25,6 +25,8 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_CoordSys.h"
 #include "Mesh/include/ESMCI_ClumpPnts.h"
+#include "ESMC_Macros.h"
+#include "ESMF_ErrReturnCodes.inc"
 
 #ifdef ESMF_NETCDF
 #include <netcdf.h>
@@ -253,15 +255,13 @@ extern "C" {
 
 //--------------------------------------------------------------------------
 #undef ESMC_METHOD
-#define ESMC_METHOD "c_convertscrip"
-extern "C" {
-void FTN_X(c_convertscrip)(
-  char *infile,
-  char *outfile,
-  int *dualflag,
-  int *rc,
-  ESMCI_FortranStrLenArg infileLen,
-  ESMCI_FortranStrLenArg outfileLen)
+#define ESMC_METHOD "ESMCI_convert_SCRIP_to_ESMFMesh"
+//extern "C" {
+void ESMCI_convert_SCRIP_to_ESMFMesh(
+                                    char *c_infile,
+                                    char *c_outfile,
+                                    int *dualflag,
+                                    int *rc)
 {
   int ncid1, ncid2;
   int gsdimid, gcdimid, grdimid;
@@ -286,33 +286,21 @@ void FTN_X(c_convertscrip)(
   size_t starts[2], counts[2];
   time_t tloc;
   int maxconnection;
-  char *c_infile;
-  char *c_outfile;
   char units[80];
   int isRadian = 0;
   size_t len;
   double *nodelons,  *nodelats;
   int totalsize;
   int localrc;
+  int ogr_dimid, ogd_id;
+  int grid_dims_id;
+  int grid_dims[ESMF_MAXDIM];
 
+
+  // Init return code
   *rc = 1;
-#ifdef ESMF_NETCDF
-  // ensure C conform string termination
-  c_infile=NULL;
-  c_infile=ESMC_F90toCstring(infile,infileLen);
-  if (c_infile == NULL) {
-    ESMC_LogDefault.MsgAllocError("Fail to allocate input NetCDF filename",
-      ESMC_CONTEXT, rc);
-    return; // bail out
-  }
 
-  c_outfile=NULL;
-  c_outfile=ESMC_F90toCstring(outfile,outfileLen);
-  if (c_outfile == NULL) {
-    ESMC_LogDefault.MsgAllocError("Fail to allocate output NetCDF filename",
-      ESMC_CONTEXT, rc);
-    return; // bail out
-  }
+#ifdef ESMF_NETCDF
 
   // Open intput SCRIP file
   status = nc_open(c_infile, NC_NOWRITE, &ncid1);
@@ -545,6 +533,26 @@ void FTN_X(c_convertscrip)(
       // if (handle_error(status,__LINE__)) return; // bail out;
     }
 
+    // If originally 2D, then write the original grid rank and dims to file
+    if (grdim == 2)  {
+      // Define and write original grid rank variable
+      status = nc_def_dim(ncid2, "origGridRank", grdim, &ogr_dimid);
+      if (handle_error(status,__LINE__)) return; // bail out;
+
+      // Get grid dims from original file
+      status = nc_inq_varid(ncid1, "grid_dims", &grid_dims_id);
+      if (handle_error(status,__LINE__)) return; // bail out;
+      status = nc_get_var_int(ncid1, grid_dims_id, grid_dims);
+      if (handle_error(status,__LINE__)) return; // bail out;
+
+      // Define and write original grid dims
+      status = nc_def_var(ncid2,"origGridDims", NC_INT, 1, &ogr_dimid, &ogd_id);
+      if (handle_error(status,__LINE__)) return; // bail out;
+      status = nc_put_var_int(ncid2,ogd_id, grid_dims);
+      if (handle_error(status,__LINE__)) return; // bail out;
+    }
+
+
     // Global Attribute
     strbuf = "unstructured";
     status = nc_put_att_text(ncid2, NC_GLOBAL, "gridType", strlen(strbuf), strbuf);
@@ -639,8 +647,6 @@ void FTN_X(c_convertscrip)(
     nc_close(ncid1);
     nc_close(ncid2);
     free(totalneighbors);
-    delete [] c_infile;
-    delete [] c_outfile;
     *rc = 0;
     return;
   }
@@ -855,9 +861,6 @@ void FTN_X(c_convertscrip)(
   free(inbuf1);
   nc_close(ncid2);
   nc_close(ncid1);
-  delete [] c_infile;
-  delete [] c_outfile;
-
   *rc = 0;
   return;
 
@@ -867,4 +870,59 @@ void FTN_X(c_convertscrip)(
   return;
 #endif
 }
+//}
+
+///
+
+
+//--------------------------------------------------------------------------
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_convertscrip"
+extern "C" {
+void FTN_X(c_convertscrip)(
+                           char *infile,
+                           char *outfile,
+                           int *dualflag,
+                           int *rc,
+                           ESMCI_FortranStrLenArg infileLen,
+                           ESMCI_FortranStrLenArg outfileLen)
+{
+  char *c_infile;
+  char *c_outfile;
+  int localrc;
+    
+  // ensure C conform string termination
+  c_infile=NULL;
+  c_infile=ESMC_F90toCstring(infile,infileLen);
+  if (c_infile == NULL) {
+    ESMC_LogDefault.MsgAllocError("Fail to allocate input NetCDF filename",
+                                  ESMC_CONTEXT, rc);
+    return; // bail out
+  }
+  
+  c_outfile=NULL;
+  c_outfile=ESMC_F90toCstring(outfile,outfileLen);
+  if (c_outfile == NULL) {
+    ESMC_LogDefault.MsgAllocError("Fail to allocate output NetCDF filename",
+                                  ESMC_CONTEXT, rc);
+    return; // bail out
+  }
+
+  // Conversion code
+  ESMCI_convert_SCRIP_to_ESMFMesh(c_infile,
+                                  c_outfile,
+                                  dualflag,
+                                  &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    rc)) return;
+
+
+  // Get rid of strings
+  delete [] c_infile;
+  delete [] c_outfile;
+
+  // Set to success
+  if (rc) *rc = ESMF_SUCCESS;
+}
+
 }

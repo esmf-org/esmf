@@ -1,5 +1,5 @@
 /** \file   Compiler.hpp
- *  \author Jason Kraftcheck 
+ *  \author Jason Kraftcheck
  *  \date   2010-12-16
  *
  * Provide pre-processor macros for compiler-specific features.  All
@@ -36,9 +36,9 @@
  * broken in platform-specific ways) if designated pointers are aliased.
  */
 #ifdef __cplusplus
-# if !defined __GNUC__ || __GNUC__ < 4 || __GNUC_MINOR__ < 5
-#   define __restrict__
-# endif
+#if !defined __GNUC__ || __GNUC__ < 4 || __GNUC_MINOR__ < 5
+#define __restrict__
+#endif
 #endif
 
 /*@}*/
@@ -61,50 +61,49 @@
  *             the first argument is 1.
  *\NOTE This macro is designed to be used with member functions of C++ classes,
  *      and therefore explicitly accounts for the implicit \c this pointer
- *      in the argument list.  It will not work correctly with static or 
+ *      in the argument list.  It will not work correctly with static or
  *      non-member functions.
  *\NOTE This macro assumes that the arguments referenced in the format string
  *      begin immediately after the format string itself.
  */
 #ifdef __GNUC__
-  #define MB_PRINTF(START) __attribute__((format(printf,(START)+1,(START)+2)))
+#define MB_PRINTF( START ) __attribute__( ( format( printf, ( START ) + 1, ( START ) + 2 ) ) )
 #else
-  #define MB_PRINTF(START)
+#define MB_PRINTF( START )
 #endif
- 
+
 /**\def MB_DLL_EXPORT
  *\brief Declare a function or class to be visible in shared library.
  */
 /**\def MB_DLL_HIDDEN
  *\brief Declare a function or class to be internal to a shared library.
  */
-#if defined _MSC_VER || defined __CYGWIN__ || defined __MINGW32__ \
- || defined __MINGW64__ || defined _WIN32
-  #if !defined IS_BUILDING_MB || !defined MB_EXPORTS
-    #define MB_DLL_EXPORT __dllspec(dllexport)
-  #elif !defined MB_WIN_DLL
-    #define MB_DLL_EXPORT __dllspec(dllimport)
-  #else
-    #define MB_DLL_EXPORT
-  #endif
-  #define MB_DLL_HIDDEN
-#elif defined __GNUC__ && __GNUC__ > 3
-  #define MB_DLL_EXPORT __attribute__((visibility("default")))
-  #define MB_DLL_HIDDEN __attribute__((visibility("hidden")))
+#if defined _MSC_VER || defined __CYGWIN__ || defined __MINGW32__ || defined __MINGW64__ || defined _WIN32
+#if !defined IS_BUILDING_MB || !defined MB_EXPORTS
+#define MB_DLL_EXPORT __dllspec( dllexport )
+#elif !defined MB_WIN_DLL
+#define MB_DLL_EXPORT __dllspec( dllimport )
 #else
-  #define MB_DLL_EXPORT
-  #define MB_DLL_HIDDEN
+#define MB_DLL_EXPORT
+#endif
+#define MB_DLL_HIDDEN
+#elif defined __GNUC__ && __GNUC__ > 3
+#define MB_DLL_EXPORT __attribute__( ( visibility( "default" ) ) )
+#define MB_DLL_HIDDEN __attribute__( ( visibility( "hidden" ) ) )
+#else
+#define MB_DLL_EXPORT
+#define MB_DLL_HIDDEN
 #endif
 
 /**\def MB_DEPRECATED
  *\brief Mark function or API as deprecated
  */
-#if defined(__GNUC__) && (1000 * __GNUC__ + __GNUC_MINOR__ ) > 3000
-#  define MB_DEPRECATED __attribute__((__deprecated__))
+#if defined( __GNUC__ ) && ( 1000 * __GNUC__ + __GNUC_MINOR__ ) > 3000
+#define MB_DEPRECATED __attribute__( ( __deprecated__ ) )
 #else
-#  define MB_DEPRECATED
+#define MB_DEPRECATED
 #endif
 
 /*@}*/
 
-#endif // moab_COMPILER_HPP
+#endif  // moab_COMPILER_HPP

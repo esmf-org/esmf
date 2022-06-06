@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -146,49 +146,86 @@ void ESMCI_meshcreate(Mesh **meshpp,
 
 } // meshcreate
 
-void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
-                                           double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+
+void set_node_owners_wo_list(int num_nodes, int *node_ids, int *node_owners);
+
+
+void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
+                                           double *nodeCoord,  InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                            int *rc)
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshaddnodes()"
 {
    try {
-    Mesh *meshp = *meshpp;
-    ThrowRequire(meshp);
-    Mesh &mesh = *meshp;
+     // Delare local return code
+     int localrc;
+     
+     // Some handy info
+     Mesh *meshp = *meshpp;
+     ThrowRequire(meshp);
+     Mesh &mesh = *meshp;
+     ESMC_CoordSys_Flag coordSys=*_coordSys;
+     int sdim = mesh.spatial_dim(); // spatial dim of mesh (after conversion to Cartesian)
+     int orig_sdim = *_orig_sdim;   // original sdim (before conversion to Cartesian)
+     int num_nodes=*_num_nodes;
 
-    ESMC_CoordSys_Flag coordSys=*_coordSys;
-    int sdim = mesh.spatial_dim(); // spatial dim of mesh (after conversion to Cartesian)
-    int orig_sdim = *_orig_sdim;   // original sdim (before conversion to Cartesian)
 
-
-  // Initialize the parallel environment for mesh (if not already done)
-    {
- int localrc;
- int rc;
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
-    }
-
-    // Get petCount for error checking
-    int localrc;
-    int petCount = VM::getCurrent(&localrc)->getPetCount();
+     // Initialize the parallel environment for mesh (if not already done)
+     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception
+       throw localrc;  // bail out with exception
+     
+     
+     // Get petCount for error checking
+     int petCount = VM::getCurrent(&localrc)->getPetCount();
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+       throw localrc;  // bail out with exception
+
+     // Get nodeOwner
+     int *nodeOwner=NULL;
+     bool nodeOwner_allocated=false;
+     if (present(nodeOwnerII)) { // if masks exist
+       // Error checking
+       if (nodeOwnerII->dimCount !=1) {
+         int localrc;
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                          " nodeOwner array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+       }
+       
+       if (nodeOwnerII->extent[0] != num_nodes) {
+         int localrc;
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                          " nodeOwner array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
+       }
+       
+       // Get array
+       nodeOwner=nodeOwnerII->array;
+     } else {
+
+       // If parts of the mesh exist on this PET, then autofill owner info
+       if (num_nodes >0) {
+         // Create local version of owners array
+         nodeOwner=new int[num_nodes];
+         nodeOwner_allocated=true;
+
+         // Autofill
+         set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);         
+       }
+     }
+
+
 
     // Check node owners
-    for (int n = 0; n < *num_nodes; ++n) {
+    for (int n = 0; n < num_nodes; ++n) {
       if ((nodeOwner[n]<0) || (nodeOwner[n]>petCount-1)) {
          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
            "- Bad nodeOwner value ", ESMC_CONTEXT,&localrc)) throw localrc;
       }
     }
 
-
     // Create new nodes
-    for (int n = 0; n < *num_nodes; ++n) {
+    for (int n = 0; n < num_nodes; ++n) {
 
       MeshObj *node = new MeshObj(MeshObj::NODE, nodeId[n], n);
 
@@ -196,6 +233,12 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
 
       mesh.add_node(node, 0);
 
+    }
+
+    // If locally allocated, get rid of nodeOwner
+    if (nodeOwner_allocated) {
+      delete [] nodeOwner;
+      nodeOwner=NULL;
     }
 
     // Register the nodal coordinate field.
@@ -223,7 +266,7 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
         "- nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
     }
 
-    if ((nodeMaskII)->extent[0] != *num_nodes) {
+    if ((nodeMaskII)->extent[0] != num_nodes) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
                                        "- nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -683,12 +726,12 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
 
 
 void ESMCI_meshaddelements(Mesh **meshpp,
-                                              int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
-                                              int *_areaPresent, double *elemArea,
-                                              int *_elemCoordsPresent, double *elemCoords,
-                                              int *_num_elemConn, int *elemConn, int *regridConserve,
-                                              ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                                              int *rc)
+                           int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
+                           int *_areaPresent, double *elemArea,
+                           int *_elemCoordsPresent, double *elemCoords,
+                           int *_num_elemConn, int *elemConn, 
+                           ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
+                           int *rc)
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshaddelements()"
 
@@ -1273,14 +1316,14 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     } // for e
 
 
-  // Register the frac field
-  if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
-    Context ctxt; ctxt.flip();
-     MEField<> *elem_frac = mesh.RegisterField("elem_frac",
-                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-     MEField<> *elem_frac2 = mesh.RegisterField("elem_frac2",
-                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
-  }
+    // Register the frac field
+    {
+      Context ctxt; ctxt.flip();
+      MEField<> *elem_frac = mesh.RegisterField("elem_frac",
+                                                MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+      MEField<> *elem_frac2 = mesh.RegisterField("elem_frac2",
+                                                 MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    }
 
 
   // Handle element masking
@@ -1348,10 +1391,11 @@ void ESMCI_meshaddelements(Mesh **meshpp,
   mesh.Commit();
 
   // Set Frac values
-  if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
+  {
     // Get Fields
     MEField<> *elem_frac2=mesh.GetField("elem_frac2");
 
+    // Init frac2 to 1.0
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     int count = 0;
     for (; ei != ee; ++ei) {
@@ -1894,9 +1938,31 @@ void ESMCI_MeshGetElemCount(Mesh *mesh, int *elemCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_MeshGetElemCount()"
 
-    *elemCount = mesh->num_elems();
+  // If split, only count orig elements
+  if (mesh->is_split) {
 
-    if(rc != NULL) *rc = ESMF_SUCCESS;
+    // Count non-split elements
+    int num_nonsplit_elems=0;
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj *elem = &(*ei);
+      
+      // If it's a split element, then skip
+      if (elem->get_id() > mesh->max_non_split_id) continue;
+      
+      // Count
+      num_nonsplit_elems++;
+    }
+    
+    // Set in output
+    *elemCount = num_nonsplit_elems;
+
+  } else { // ...otherwise, just get usual elem count
+    *elemCount = mesh->num_elems();
+  }
+
+  // return success
+  if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
 
@@ -2005,16 +2071,22 @@ void ESMCI_MeshGetElemInfoPresence(Mesh *mesh,
 #define ESMC_METHOD "ESMCI_MeshGetElemInfoPresence()"
 
   // Check if element mask is present
-  *elemMaskIsPresent=0;
-  if (mesh->GetField("elem_mask_val")) *elemMaskIsPresent=1;
+  if (elemMaskIsPresent) {
+    *elemMaskIsPresent=0;
+    if (mesh->GetField("elem_mask_val")) *elemMaskIsPresent=1;
+  }
 
   // Check if element area is present
-  *elemAreaIsPresent=0;
-  if (mesh->GetField("elem_area")) *elemAreaIsPresent=1;
+  if (elemAreaIsPresent) {
+    *elemAreaIsPresent=0;
+    if (mesh->GetField("elem_area")) *elemAreaIsPresent=1;
+  }
 
   // Check if element coords are present
-  *elemCoordsIsPresent=0;
-  if (mesh->GetField("elem_coordinates")) *elemCoordsIsPresent=1;
+  if (elemCoordsIsPresent) {
+    *elemCoordsIsPresent=0;
+    if (mesh->GetField("elem_coordinates")) *elemCoordsIsPresent=1;
+  }
 
   // return success
   if (rc != NULL) *rc = ESMF_SUCCESS;
@@ -6289,9 +6361,12 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
        node_owners[i]=Par::Rank();
      }
 
+     // Wrap node_owners in IntArray
+     InterArray<int> node_ownersII(node_owners,num_nodes);
+
      // Create nodes using internal mesh add nodes method
      ESMCI_meshaddnodes(meshpp, &num_nodes, node_ids,
-                        node_coords, node_owners, NULL,
+                        node_coords, &node_ownersII, NULL,
                         coordSys, &sdim, &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
        throw localrc;  // bail out with exception
@@ -6366,15 +6441,12 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
        elem_conns[i]=i+1;
      }
 
-     // Set regrid conserve flag
-     int regridConserve = ESMC_REGRID_CONSERVE_ON;
-
      // Create elements using internal mesh add elements method
      ESMCI_meshaddelements(meshpp,
                            &num_elems, elem_ids, elemTypes, elemMaskII ,
                            has_elemArea, elemArea,
                            has_elemCoords, elemCoords,
-                           &num_elem_conns, elem_conns, &regridConserve,
+                           &num_elem_conns, elem_conns, 
                            coordSys, &sdim,
                            &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
@@ -6410,5 +6482,105 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
 
 } // meshcreate_easy_elems
 
+
+  // Fill nodeOwners list from nodeIds list using a DDir
+// node_ids and node_owners should both be allocated to the size of num_nodes
+void set_node_owners_wo_list(int num_nodes, int *node_ids, int *node_owners) {
+  
+  // Allocate structuress for DDir
+  // TODO: we have to create seperate lists because of UInt, template DDir to get
+  //       rid of this issue
+  std::vector<UInt> gids;
+  gids.resize(num_nodes,0);
+  std::vector<UInt> lids; 
+  lids.resize(num_nodes,0);
+
+  // Fill gid list from input
+  for (int i=0; i<num_nodes; i++) {
+    gids[i]=(UInt)node_ids[i];
+  }
+
+
+  // Create a distributed directory with the above information
+  DDir<> dir;
+  if (gids.size ()) {
+    dir.Create(gids.size(), &gids[0], &lids[0]);
+  } else {
+    dir.Create(0, (UInt*) NULL, 0);
+  }
+
+  // Do look up of gids
+  std::vector<DDir<>::dentry> lookups;
+  if (gids.size()) {
+    dir.RemoteGID(gids.size(), &gids[0], lookups);
+  } else {
+    dir.RemoteGID(0, (UInt *) NULL, lookups);
+  }
+
+  // Loop through the results.
+  // The loop should go through the entires in the same order
+  // as the gids in the gids vector, but with repeated gids
+  int curr_pos=0;
+  UInt curr_gid=0;
+  UInt curr_proc_best=0;
+  bool first_time=true;
+  std::vector<DDir<>::dentry>::iterator ri = lookups.begin(), re = lookups.end();
+     for (; ri != re; ++ri) {
+       DDir<>::dentry &dent = *ri;
+
+       // Get info for this entry gid
+       UInt gid=dent.gid;
+       UInt proc=dent.origin_proc;
+       
+       // first time
+       if (first_time) {
+         // If this doesn't match throw error
+         if (gids[curr_pos] != gid) {
+           Throw() << " Error: gid "<<gid<<" missing from search list!";
+         }
+
+         // Set intial values
+         curr_gid=gids[curr_pos];
+         curr_proc_best=proc;
+
+         // No longer first time
+         first_time=false;
+       }
+
+       // If we're on the same gid then choose the best proc, otherwise move to next
+       if (curr_gid == gid) {
+         // Choose the lowest proc as best
+         if (proc < curr_proc_best) {
+           curr_proc_best=proc;
+         }
+       } else {
+         // Set owner of gid before moving on
+         ThrowRequire(curr_pos < num_nodes);
+         node_owners[curr_pos]=curr_proc_best;
+         
+         // Move to next gid
+         curr_pos++;
+
+         // If this doesn't match throw error
+         if (gids[curr_pos] != gid) {
+           Throw() << " Error: gid "<<gid<<" missing from search list!";
+         }
+         
+         // Get info for next
+         curr_gid=gids[curr_pos];
+         curr_proc_best=proc;
+       }
+     } // ri
+
+
+     // Set owner of last gid before moving on
+     // (but first make sure list isn't empty) 
+     if (num_nodes > 0) {
+       ThrowRequire(curr_pos < num_nodes);
+       node_owners[curr_pos]=curr_proc_best;
+     }
+
+     // printf("Last curr_pos=%d gids.size()=%d\n",curr_pos,gids.size());
+}
 
 

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -355,17 +355,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     if (iofmt)
       opt_iofmt = iofmt;
     else {
-      const char *file_ext_p = strrchr (file, '.');
-      if (file_ext_p) {
-        std::string file_ext = std::string(file_ext_p);
-        if (file_ext == ".nc")
-          opt_iofmt = ESMF_IOFMT_NETCDF;
-        else if (file_ext == ".bin")
-          opt_iofmt = ESMF_IOFMT_BIN;
-        else
-          opt_iofmt = ESMF_IOFMT_NETCDF;
-      } else
-        opt_iofmt = ESMF_IOFMT_NETCDF;
+      opt_iofmt = ESMF_IOFMT_NETCDF;
     }
  
     // typecase into ESMCI type
@@ -680,17 +670,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     if (iofmt)
       opt_iofmt = iofmt;
     else {
-      const char *file_ext_p = strrchr (file, '.');
-      if (file_ext_p) {
-        std::string file_ext = std::string(file_ext_p);
-        if (file_ext == ".nc")
-          opt_iofmt = ESMF_IOFMT_NETCDF;
-        else if (file_ext == ".bin")
-          opt_iofmt = ESMF_IOFMT_BIN;
-        else
-          opt_iofmt = ESMF_IOFMT_NETCDF;
-      } else
-        opt_iofmt = ESMF_IOFMT_NETCDF;
+      opt_iofmt = ESMF_IOFMT_NETCDF;
     }
 
     // typecase into ESMCI type
