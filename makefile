@@ -699,6 +699,8 @@ install:
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	cp -f $(ESMF_LIBDIR)/libesmf*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)/cmake/esmf
+	cp -f $(ESMF_DIR)/cmake/* $(ESMF_INSTALL_LIBDIR_ABSPATH)/cmake/esmf
 
 ifeq ($(ESMF_PIO),internal)
 	cp -f $(ESMF_LIBDIR)/libpioc.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
