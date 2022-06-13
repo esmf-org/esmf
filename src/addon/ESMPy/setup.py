@@ -4,6 +4,7 @@ import os
 import sys
 from distutils.core import setup, Command
 from distutils.util import get_platform
+from distutils.command.build import build as _build
 import subprocess
 
 
@@ -25,9 +26,11 @@ class AbstractESMFCommand(Command):
     user_options = []
 
     def initialize_options(self):
+        super().initialize_options()
         self.cwd = None
 
     def finalize_options(self):
+        super().finalize_options()
         self.cwd = os.getcwd()
 
     def _validate_(self):
@@ -76,12 +79,13 @@ class AbstractESMFNoseCommand(AbstractESMFCommand):
         return ret
 
 
-class BuildCommand(AbstractESMFCommand):
+class BuildCommand(AbstractESMFCommand, _build):
     description = "build: will build the ESMF package"
     user_options = [('ESMFMKFILE=', 'e',
                      "Location of esmf.mk for the ESMF installation")]
 
     def initialize_options(self):
+        super().initialize_options()
         self.cwd = None
         self.ESMFMKFILE = None
         SITEDIR = os.system('%s -m site --user-site' % sys.executable)
@@ -90,6 +94,7 @@ class BuildCommand(AbstractESMFCommand):
         self.plat_name = None
 
     def finalize_options(self):
+        super().finalize_options()
         self.cwd = os.getcwd()
         if isinstance(self.ESMFMKFILE, type(None)):
             self.ESMFMKFILE = os.getenv('ESMFMKFILE')
@@ -99,6 +104,7 @@ class BuildCommand(AbstractESMFCommand):
             self.plat_name = get_platform()
 
     def run(self):
+        super().run()
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
 
         # Create "esmfmkfile.py" file holding the path to the ESMF "esmf.mk" file
