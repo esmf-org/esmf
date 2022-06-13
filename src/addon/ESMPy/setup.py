@@ -2,7 +2,8 @@
 
 import os
 import sys
-from distutils.core import setup, Command
+from setuptools import setup
+from distutils.core import Command
 from distutils.util import get_platform
 from distutils.command.build import build as _build
 import subprocess
