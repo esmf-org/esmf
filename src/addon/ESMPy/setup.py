@@ -107,10 +107,6 @@ class BuildCommand(AbstractESMFCommand):
             f.write('ESMFMKFILE = "%s"' % self.ESMFMKFILE)
             f.close()
 
-        # Attempt to load ESMF.
-        update_system_path()
-        import ESMF.interface.loadESMF
-
 
 class CleanCommand(AbstractESMFCommand):
     description = "clean: will remove all libraries, log and output files"
