@@ -271,4 +271,8 @@ setup(name="ESMPy",
                 'test_regrid_from_file': TestRegridFromFileCommand,
                 'test_regrid_from_file_dryrun': TestRegridFromFileDryrunCommand,
                 'test_regrid_parallel': TestRegridParallelCommand,
-                'test_regrid_from_file_parallel': TestRegridFromFileParallelCommand})
+                'test_regrid_from_file_parallel': TestRegridFromFileParallelCommand},
+      install_requires=[
+          "numpy",
+      ],
+)
