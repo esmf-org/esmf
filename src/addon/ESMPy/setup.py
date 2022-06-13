@@ -109,7 +109,7 @@ class BuildCommand(AbstractESMFCommand, _build):
 
         # Create "esmfmkfile.py" file holding the path to the ESMF "esmf.mk" file
         if not isinstance(self.ESMFMKFILE, type(None)):
-            f = open(os.path.join('src', 'ESMF', 'interface', 'esmfmkfile.py'), 'w')
+            f = open(os.path.join(self.build_lib, 'ESMF', 'interface', 'esmfmkfile.py'), 'w')
             f.write('ESMFMKFILE = "%s"' % self.ESMFMKFILE)
             f.close()
 
