@@ -1822,15 +1822,16 @@ module NUOPC_Comp
     endif
 
     ! Add NUOPC/Driver, NUOPC/Model, NUOPC/Mediator Attributes
-    allocate(attrList(8))
+    allocate(attrList(9))
     attrList(1) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
     attrList(2) = "InternalRunPhaseMap"  ! list of strings to map str to phase #
     attrList(3) = "InternalFinalizePhaseMap"  ! list of strings to map str to phase #
     attrList(4) = "NestingGeneration" ! values: integer starting 0 for parent
     attrList(5) = "Nestling"  ! values: integer starting 0 for first nestling
-    attrList(6) = "InitializeDataComplete"  ! values: strings "false"/"true"
-    attrList(7) = "InitializeDataProgress"  ! values: strings "false"/"true"
-    attrList(8) = "HierarchyProtocol"       ! strings
+    attrList(6) = "InitializeDataResolution"! values: strings "false"/"true"
+    attrList(7) = "InitializeDataComplete"  ! values: strings "false"/"true"
+    attrList(8) = "InitializeDataProgress"  ! values: strings "false"/"true"
+    attrList(9) = "HierarchyProtocol"       ! strings
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
       attrList=attrList, rc=localrc)
@@ -1875,6 +1876,11 @@ module NUOPC_Comp
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     call NUOPC_CompAttributeSet(comp, &
       name="Nestling", value=0, &                 ! default to first nestling
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="InitializeDataResolution", value="true", &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out

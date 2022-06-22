@@ -191,7 +191,7 @@ module NUOPC_Driver
     ! Explicitly claim initialize phase 1 to be able to call into Driver
     ! simply via a single ESMF_GridCompInitialize() from the application level.
     call ESMF_GridCompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP1, phase=1, rc=rc)
+      userRoutine=InitializeGeneric, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -300,9 +300,9 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-          
+
     ! Set IPDvX attribute
-    call NUOPC_CompAttributeSet(driver, name="IPDvX", value="true", rc=rc)
+    call NUOPC_CompAttributeSet(driver, name="IPDvX", value="false", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -389,14 +389,14 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine InitializeP1(driver, importState, exportState, clock, rc)
+  recursive subroutine InitializeGeneric(driver, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: driver
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
     ! local variables
-    character(*), parameter   :: rName="InitializeP1"
+    character(*), parameter   :: rName="InitializeGeneric"
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity, profiling
     type(type_InternalState)  :: is
@@ -452,6 +452,9 @@ module NUOPC_Driver
     endif
 
     ! call the actual initialize routines
+    call InitializeP0(driver, importState, exportState, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call InitializeIPDv02p1(driver, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -564,10 +567,13 @@ module NUOPC_Driver
     endif
 
     ! call the actual initialize routine
+    call InitializeP0(driver, importState, exportState, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call InitializeIPDv02p1(driver, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2427,49 +2433,68 @@ module NUOPC_Driver
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
 
-    ! deal with the fact that the executing component may not be across all PETs
-    execFlagInt = 0
-    if (execFlagCollect) execFlagInt = 1
-
-    call ESMF_VMAllFullReduce(vm, sendData=(/execFlagInt/), &
-      recvData=execFlagIntReduced, count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
+    ! determine whether to enter initialize data resolution loop
+    call NUOPC_CompAttributeGet(driver, name="InitializeDataResolution", &
+      value=valueString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+#if 0
+    call ESMF_LogWrite("InitializeDataResolution: "//trim(valueString), &
+      ESMF_LOGMSG_DEBUG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+#endif
 
-    if (execFlagIntReduced>0) execFlag = .true.
-      
-    ! now all PETs have the same execFlag setting for a consistent decision
-    if (execFlag) then
-      ! there were model components with IPDv02p5, IPDv03p7, IPDv04p7, 
-      ! IPDv05p8, or IPDvXp08 -->> resolve data dependencies by entering loop
-      if (btest(verbosity,11)) then
-        call ESMF_LogWrite(trim(name)//&
-          ": components present that trigger loopDataDependentInitialize().", &
-          ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      endif
-      
-      call loopDataDependentInitialize(driver, is%wrap%dataDepAllComplete, rc=rc)
+    if (trim(valueString)=="true") then
+      ! deal with the fact that the executing component may not be across all PETs
+      execFlagInt = 0
+      if (execFlagCollect) execFlagInt = 1
+
+      call ESMF_VMAllFullReduce(vm, sendData=(/execFlagInt/), &
+        recvData=execFlagIntReduced, count=1, reduceflag=ESMF_REDUCE_SUM, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
 
-      if (btest(verbosity,11)) then
-        write(msgString, "(A,l)") trim(name)//&
-          ": loopDataDependentInitialize() returned with dataDepAllComplete: ",&
-          is%wrap%dataDepAllComplete
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (execFlagIntReduced>0) execFlag = .true.
+
+      ! now all PETs have the same execFlag setting for a consistent decision
+      if (execFlag) then
+        ! there were model components with IPDv02p5, IPDv03p7, IPDv04p7, 
+        ! IPDv05p8, or IPDvXp08 -->> resolve data dependencies by entering loop
+        if (btest(verbosity,11)) then
+          call ESMF_LogWrite(trim(name)//&
+            ": components present that trigger loopDataDependentInitialize().", &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+
+        call loopDataDependentInitialize(driver, is%wrap%dataDepAllComplete, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+
+        if (btest(verbosity,11)) then
+          write(msgString, "(A,l)") trim(name)//&
+            ": loopDataDependentInitialize() returned with dataDepAllComplete: ",&
+            is%wrap%dataDepAllComplete
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
       endif
+
+      ! set the InitializeDataComplete attribute
+      valueString="false"
+      if (is%wrap%dataDepAllComplete) valueString="true"
+
+    else
+      valueString="true"
     endif
-    
-    ! set the InitializeDataComplete attribute
-    valueString="false"
-    if (is%wrap%dataDepAllComplete) valueString="true"
-    
+
     call NUOPC_CompAttributeSet(driver, &
       name="InitializeDataComplete", value=valueString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
