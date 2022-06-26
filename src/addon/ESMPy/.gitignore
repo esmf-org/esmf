@@ -28,8 +28,10 @@ PET*
 # ESMPy build and docs #
 ########################
 build
+dist
 doc/esmpy_doc
 src/ESMF/interface/esmfmkfile.py
+src/ESMPy.egg-info
 examples/data
 src/ESMF/test/data
 examples/notebooks/ESMPy-data

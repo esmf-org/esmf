@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+# [project]
+# name = "ESMPy"
+# description = "ESMF Python interface"
+# license = {text = "University of Illinois-NCSA"}
+# readme = "README.md"
+# # dynamic = ["version"]
+# dependencies = [
+#     "numpy",
+# ]
+# 
+# [tool.setuptools.packages.find]
+# where = ["src"]
+# exclude = [
+#     "ESMPy.doc*",
+#     "ESMPy.example*",
+#     "ESMPy.test*",
+# ]
+# 
+# [tool.setuptools.dynamic]
+# version = {attr = "ESMPy.VERSION"}

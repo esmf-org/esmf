@@ -9,20 +9,36 @@ import traceback
 import ESMF.api.constants as constants
 
 try:
-    from ESMF.interface.esmfmkfile import ESMFMKFILE as esmfmk
-except:
-    raise ImportError('The ESMFMKFILE cannot be found!')
-
-try:
     import numpy as np
 except:
-    raise ImportError('The Numpy library cannot be found!')
+    raise ImportError('The Numpy library cannot be found.')
 
 # this library is loaded here so that it can be pulled back up without sys
 try:
     import ctypes as ct
 except:
-    raise ImportError('The CTypes library cannot be found!')
+    raise ImportError('The CTypes library cannot be found.')
+
+esmfmk = None
+mked = False
+esmfmkfile_local = os.path.join(os.getcwd(),"src/ESMF/interface/esmfmkfile.py")
+try:
+    
+    if os.path.isfile(esmfmkfile_local):
+        from ESMF.interface.esmfmkfile import ESMFMKFILE as esmfmk
+        mked = True
+except:
+    raise ImportError('The esmf.mk file could not be loaded.')
+else:
+    if not mked:
+        esmfmk = os.getenv("ESMFMKFILE")
+        if not esmfmk:
+            raise ImportError('The ESMFMKFILE was not set in the build, nor is it available as an environment variable.')
+        else:
+            with open(esmfmkfile_local, 'w') as emfl:
+                emfl.write('ESMFMKFILE = "'+esmfmk+'"')
+                emfl.close()
+
 
 #### INVESTIGATE esmf.mk ######################################################
 
