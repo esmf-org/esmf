@@ -862,4 +862,3 @@ class TestGrid(TestBase):
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
             raise NameError('grid_create_from_file_scrip_cyclic_cyclic failed!')
-

@@ -95,4 +95,3 @@ def netcdf(func):
             raise NetCDFMissing("This function requires ESMF to have been built with NetCDF.")
         
     return new_func
-
