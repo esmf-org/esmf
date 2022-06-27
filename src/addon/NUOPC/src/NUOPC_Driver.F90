@@ -3559,7 +3559,7 @@ module NUOPC_Driver
               if (loopLevel > loopLevelPrev) then
                 ! going down another level in the loop nesting hierarchy
                 exitPrevious = .false.
-              else if (loopLevel > loopLevelPrev) then
+              else if (loopLevel < loopLevelPrev) then
                 ! coming back up a level in the loop nesting hierarchy
                 enterCurrent = .false.
               endif
