@@ -2065,8 +2065,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2108,8 +2106,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2151,8 +2147,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2194,8 +2188,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2238,8 +2230,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2281,8 +2271,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
