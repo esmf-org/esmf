@@ -3464,6 +3464,7 @@ module NUOPC_Driver
     integer                         :: levelMember, levelMemberPrev
     integer                         :: loopIteration, loopIterationPrev
     logical                         :: enterCurrent, exitPrevious
+    type(NUOPC_RunSeqEventHandler)  :: eventHandler
 
     rc = ESMF_SUCCESS
 
@@ -3529,10 +3530,17 @@ module NUOPC_Driver
     levelMemberPrev = 0
     loopIterationPrev = 0
 
+    ! initialize eventHandler
+    eventHandler%vFlag = btest(verbosity,12)
+    eventHandler%pFlag = btest(profiling,12)
+    eventHandler%loopLevelPrev = 0
+    eventHandler%levelMemberPrev = 0
+    eventHandler%loopIterationPrev = 0
+
     ! use RunSequence iterator to execute the actual time stepping loop
     nullify(runElement) ! prepare runElement for iterator use
     do while (NUOPC_RunSequenceIterate(is%wrap%runSeq, runSeqIndex, &
-      runElement, rc=rc))
+      runElement, eventHandler, rc=rc))
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3567,7 +3575,8 @@ module NUOPC_Driver
             if (exitPrevious) then
               write(traceString,"('RunSequenceEvent.',I4.4,'.',I4.4,'.',I4.4)") &
                 loopLevelPrev, levelMemberPrev, loopIterationPrev
-              call ESMF_TraceRegionExit(trim(traceString), rc=rc)
+call ESMF_LogWrite("TRExit: "//trim(traceString), ESMF_LOGMSG_DEBUG, rc=rc)
+!              call ESMF_TraceRegionExit(trim(traceString), rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
@@ -3576,13 +3585,14 @@ module NUOPC_Driver
               ! enter new trace region
               write(traceString,"('RunSequenceEvent.',I4.4,'.',I4.4,'.',I4.4)") &
                 loopLevel, levelMember, loopIteration
-              call ESMF_TraceRegionEnter(trim(traceString), rc=rc)
+call ESMF_LogWrite("TREntr: "//trim(traceString), ESMF_LOGMSG_DEBUG, rc=rc)
+!              call ESMF_TraceRegionEnter(trim(traceString), rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
             endif
           endif
-          ! update the "Prev' variables
+          ! update the "Prev" variables
           loopLevelPrev = loopLevel
           levelMemberPrev = levelMember
           loopIterationPrev = loopIteration
@@ -3658,7 +3668,8 @@ module NUOPC_Driver
         ! an actual previous iteration does exist -> exit trace region
         write(traceString,"('RunSequenceEvent.',I4.4,'.',I4.4,'.',I4.4)") &
           loopLevelPrev, levelMemberPrev, loopIterationPrev
-        call ESMF_TraceRegionExit(trim(traceString), rc=rc)
+call ESMF_LogWrite("TRExit: "//trim(traceString), ESMF_LOGMSG_DEBUG, rc=rc)
+!        call ESMF_TraceRegionExit(trim(traceString), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
