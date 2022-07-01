@@ -933,14 +933,16 @@ module NUOPC_RunSequenceDef
     if (endFlagInternal) then
       if ((eh%loopLevelPrev/=0).and.(eh%levelMemberPrev/=0).and. &
         (eh%loopIterationPrev/=0)) then
-        ! an actual previous iteration does exist -> exit trace region
-        write(traceString,"('RunSequenceRegion.',I4.4,'.',I4.4,'.',I4.4)") &
-          eh%loopLevelPrev, eh%levelMemberPrev, eh%loopIterationPrev
+        if (eh%pFlag) then
+          ! an actual previous iteration does exist -> exit trace region
+          write(traceString,"('RunSequenceRegion.',I4.4,'.',I4.4,'.',I4.4)") &
+            eh%loopLevelPrev, eh%levelMemberPrev, eh%loopIterationPrev
 !call ESMF_LogWrite("TRExit: "//trim(traceString), ESMF_LOGMSG_DEBUG, rc=rc)
-        call ESMF_TraceRegionExit(trim(traceString), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(eh%name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
+          call ESMF_TraceRegionExit(trim(traceString), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(eh%name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
       endif
     else
       if ((loopLevel/=eh%loopLevelPrev).or.(levelMember/=eh%levelMemberPrev).or.&
