@@ -835,6 +835,16 @@ module NUOPC_RunSequenceDef
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
           ! set the linked RunSequence level index one higher than current one
           runSeq(i)%loopLevel = runElement%runSeq%loopLevel + 1
+          if (runElement%runSeq%loopIteration==1) then
+            ! first time into this alarm again during loop
+            runElement%runSeq%levelChildren = runElement%runSeq%levelChildren + 1
+            runSeq(i)%levelMember = runElement%runSeq%levelChildren
+            runSeq(i)%loopIteration = 1
+            runSeq(i)%levelChildren = 0
+          else
+            ! coming in subsequent times
+            runSeq(i)%loopIteration = runSeq(i)%loopIteration + 1
+          endif
           ! put the next element in the current level onto the new levels stack
           runSeq(i)%stack => runElement%next  ! set stack pointer for return
           ! follow the link: start at the top of linked sequence
