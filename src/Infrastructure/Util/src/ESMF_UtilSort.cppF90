@@ -97,8 +97,8 @@ contains
 !       Array of data to be sorted.  The original data is overwritten by the @\
 !       sorted data.  @\
 !     \item [direction] @\
-!       Direction of sorting.  Legal values are {\tt ESMF\_SORT\_ASCENDING} @\
-!       and {\tt ESMF\_SORT\_DESCENDING}. @\
+!       Direction of sorting.  Legal values are {\tt ESMF\_SORTFLAG\_ASCENDING} @\
+!       and {\tt ESMF\_SORTFLAG\_DESCENDING}. @\
 !     \item [{[rc]}] @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if the sorting is successful. @\
 !     \end{description} @\
