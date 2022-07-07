@@ -6,8 +6,23 @@ project (PIOC C)
 #  DEFINE THE TARGET
 #==============================================================================
 
+if (CMAKE_BUILD_TYPE)
+    define_property(
+        SOURCE
+        PROPERTY COMPILE_FLAGS 
+        INHERITED 
+        BRIEF_DOCS "brief-doc"
+        FULL_DOCS  "full-doc"
+    )
+    string(TOUPPER ${CMAKE_BUILD_TYPE} _build_type)
+    set_directory_properties(PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS_${_build_type}}")
+    set(CMAKE_CXX_FLAGS_${_build_type} "")
+endif()
+
+
+
 set (src topology.c pio_file.c pioc_support.c pio_lists.c
-  pioc.c pioc_sc.c pio_spmd.c pio_rearrange.c pio_nc4.c
+  pioc.c pioc_sc.c pio_spmd.c pio_rearrange.c pio_nc4.c pioc_async.c
   pio_nc.c pio_put_nc.c pio_get_nc.c pio_getput_int.c pio_msg.c
   pio_darray.c pio_darray_int.c pio_get_vard.c pio_put_vard.c pio_error.c parallel_sort.c)
 if (NETCDF_INTEGRATION)
@@ -15,6 +30,13 @@ if (NETCDF_INTEGRATION)
 endif ()
 
 add_library (pioc ${src})
+
+set_source_files_properties( 
+    pioc_async.c 
+    PROPERTIES
+    COMPILE_FLAGS -O0 
+)
+
 
 # set up include-directories
 include_directories(
@@ -161,7 +183,6 @@ get_target_property(includes pioc INCLUDE_DIRECTORIES)
 foreach(x IN LISTS cppdefs)
   string(APPEND CPPFLAGS " -D${x}")
 endforeach()
-
 foreach(x IN LISTS includes)
   if (x)
     string(APPEND CPPFLAGS " -I${x}")

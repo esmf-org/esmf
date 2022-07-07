@@ -398,6 +398,7 @@ PIOc_sync(int ncid)
     int ierr = PIO_NOERR;  /* Return code from function calls. */
 
     PLOG((1, "PIOc_sync ncid = %d", ncid));
+
     /* Get the file info from the ncid. */
     if ((ierr = pio_get_file(ncid, &file)))
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
