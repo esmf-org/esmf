@@ -157,9 +157,14 @@ The assignment
 deep2 = ESMF_NamedAlias(deep1)
 \end{verbatim}
 makes {\tt deep2} a {\bf named alias} of {\tt deep1}. Any {\em name} changes on
-{\tt deep2} only affect {\tt deep2}, and any regular aliases created from
-{\tt deep2}. However, the {\em name} retrieved from {\tt deep1}, or from any
-regular aliases created from {\tt deep1}, is unaffected.
+{\tt deep2} only affect {\tt deep2}. However, the {\em name} retrieved from
+{\tt deep1}, or from any regular aliases created from {\tt deep1}, is
+unaffected.
+
+Notice that aliases generated from a named alias are again named aliases. This
+is true even when using the regular assignment operator with a named alias on
+the right hand side. Named aliases own their unique name string that cannot
+be accessed or altered through any other alias.
 
 \input{../Superstructure/NamedAlias/doc/ESMF_NamedAlias_fapi}
 

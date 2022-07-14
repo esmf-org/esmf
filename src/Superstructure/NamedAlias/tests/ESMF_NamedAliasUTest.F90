@@ -48,7 +48,9 @@ program ESMF_NamedAliasUTest
   character(ESMF_MAXSTR) :: name
 
   !LOCAL VARIABLES:
-  type(ESMF_DistGrid):: distgrid1, distgrid2
+  logical                 :: testFlag
+  character(ESMF_MAXSTR)  :: name1, name2
+  type(ESMF_State)        :: state1, state2
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -64,16 +66,134 @@ program ESMF_NamedAliasUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
 
-  distgrid1 = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/1000/), rc=rc)
+  state1 = ESMF_StateCreate(name="Test Name 1", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Testing NamedAlias for DistGrid"
+  write(name, *) "NamedAlias() with default name for State Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  distgrid2 = ESMF_NamedAlias(distgrid1, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  state2 = ESMF_NamedAlias(state1, rc=rc)
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NamedAlias is an Alias State Test"
+  write(failMsg, *) "Incorrect result"
+  testFlag = (state1 == state2)
+  call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  call ESMF_StateGet(state1, name=name1, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_StateGet(state2, name=name2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Same default name for NamedAlias for State Test"
+  write(failMsg, *) "Incorrect result"
+  testFlag = (name1 == name2)
+  call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  call ESMF_StateSet(state2, name="Test Name 2", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_StateGet(state1, name=name2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Name change on NamedAlias for State not affecting Test"
+  write(failMsg, *) "Incorrect result"
+  testFlag = (name1 == name2)
+  call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  call ESMF_StateGet(state2, name=name2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Name change on NamedAlias for State correct setting Test"
+  write(failMsg, *) "Incorrect result"
+  testFlag = (trim(name2) == "Test Name 2")
+  call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NamedAlias is still an Alias State Test"
+  write(failMsg, *) "Incorrect result"
+  testFlag = (state1 == state2)
+  call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy object through NamedAlias State Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_StateDestroy(state2, rc=rc)
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroying NamedAlias destroys object State Test"
+  write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
+  call ESMF_StateGet(state1, name=name1, rc=rc)
+  call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  state1 = ESMF_StateCreate(name="Test Name 1", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NamedAlias() with new name for State Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  state2 = ESMF_NamedAlias(state1, name="Test Name 2", rc=rc)
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NamedAlias is an Alias State Test"
+  write(failMsg, *) "Incorrect result"
+  testFlag = (state1 == state2)
+  call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  call ESMF_StateGet(state1, name=name1, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_StateGet(state2, name=name2, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Different name for NamedAlias for State Test"
+  write(failMsg, *) "Incorrect result"
+  testFlag = (name1 /= name2)
+  call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy object through NamedAlias State Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_StateDestroy(state2, rc=rc)
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroying NamedAlias destroys object State Test"
+  write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
+  call ESMF_StateGet(state1, name=name1, rc=rc)
+  call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
 
 
   !------------------------------------------------------------------------

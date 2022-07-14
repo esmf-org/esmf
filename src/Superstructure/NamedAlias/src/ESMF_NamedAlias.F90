@@ -25,8 +25,12 @@ use ESMF_InitMacrosMod    ! ESMF initializer macros
 use ESMF_BaseMod          ! ESMF base class
 use ESMF_LogErrMod        ! ESMF error handling
 
-use ESMF_VMMod
+
 use ESMF_StateMod
+use ESMF_ArrayMod
+
+#if 0
+use ESMF_VMMod
 use ESMF_StateItemMod
 use ESMF_DistGridMod
 use ESMF_FieldMod
@@ -36,7 +40,6 @@ use ESMF_CompMod
 use ESMF_GridCompMod
 use ESMF_CplCompMod
 use ESMF_SciCompMod
-use ESMF_ArrayMod
 use ESMF_ArrayBundleMod
 use ESMF_InfoMod
 use ESMF_UtilTypesMod
@@ -48,6 +51,7 @@ use ESMF_XGridGetMod
 use ESMF_LocStreamMod
 use ESMF_RHandleMod
 use ESMF_InfoDescribeMod
+#endif
 
 implicit none
 
@@ -61,7 +65,7 @@ public ESMF_NamedAlias
 !==============================================================================
 
 interface ESMF_NamedAlias
-  module procedure ESMF_NamedAliasDistGrid
+  module procedure ESMF_NamedAliasState
   module procedure ESMF_NamedAliasArray
 #if 0
   module procedure ESMF_NamedAliasArrayBundle
@@ -71,7 +75,6 @@ interface ESMF_NamedAlias
   module procedure ESMF_NamedAliasField
   module procedure ESMF_NamedAliasFieldBundle
   module procedure ESMF_NamedAliasGrid
-  module procedure ESMF_NamedAliasState
   module procedure ESMF_NamedAliasLocStream
   module procedure ESMF_NamedAliasMesh
 #endif
@@ -92,7 +95,11 @@ contains !=====================================================================
 !   integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Generate a named alias to {\tt object}.
+!   Generate a named alias to {\tt object}. The supported classes are:
+!   \begin{itemize}
+!   \item {\tt ESMF\_State}
+!   \item {\tt ESMF\_Array}
+!   \end{itemize}
 !
 !   The arguments are:
 !   \begin{description}
@@ -109,28 +116,46 @@ contains !=====================================================================
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_NamedAliasDistGrid()"
+#define ESMF_METHOD "ESMF_NamedAliasState()"
 !BOPI
-! !IROUTINE: ESMF_NamedAliasDistGrid - Named Alias
+! !IROUTINE: ESMF_NamedAliasState - Named Alias
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_NamedAlias()
-  function ESMF_NamedAliasDistGrid(object, keywordEnforcer, name, rc)
+  function ESMF_NamedAliasState(object, keywordEnforcer, name, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_NamedAliasDistGrid
+    type(ESMF_State) :: ESMF_NamedAliasState
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),intent(in)            :: object
+    type(ESMF_State),intent(in)               :: object
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *), intent(in),  optional :: name
     integer,            intent(out), optional :: rc
 !EOPI
 !------------------------------------------------------------------------------
+    integer                 :: localrc
+    character(ESMF_MAXSTR)  :: nameDefault
 
-    ESMF_NamedAliasDistGrid = object
+    if (present(rc)) rc = ESMF_SUCCESS
 
-  end function ESMF_NamedAliasDistGrid
+    ! first create regular alias
+    ESMF_NamedAliasState = object
+
+    ! next mark as namedAlias
+    ESMF_NamedAliasState%namedAlias = .true.
+
+    ! finally set name
+    if (present(name)) then
+      ESMF_NamedAliasState%name = trim(name)
+    else
+      call ESMF_StateGet(object, name=nameDefault, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_NamedAliasState%name = trim(nameDefault)
+    endif
+
+  end function ESMF_NamedAliasState
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
