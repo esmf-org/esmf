@@ -237,7 +237,7 @@ void get_numElementConn_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, c
     // Init numElementConn decomp
     int nec_iodesc;
     int gdimlen = (int) elementCount;
-    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_BYTE, 1, &gdimlen, num_elems, nec_offsets, &nec_iodesc, 
+    piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_BYTE, 1, &gdimlen, num_elems, nec_offsets, &nec_iodesc, 
                             &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -271,7 +271,7 @@ void get_numElementConn_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, c
     // Init numElementConn decomp
     int nec_iodesc;
     int gdimlen = (int) elementCount;
-    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 1, &gdimlen, num_elems, nec_offsets, &nec_iodesc, 
+    piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_INT, 1, &gdimlen, num_elems, nec_offsets, &nec_iodesc, 
                             &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -505,7 +505,7 @@ void get_elemConn_info_1Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
   // Init elementConn decomp
   int ec_iodesc;
   int ec_gdimlen=connectionCount;
-  piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 1, &ec_gdimlen, totNumElementConn, ec_offsets, &ec_iodesc, 
+  piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_INT, 1, &ec_gdimlen, totNumElementConn, ec_offsets, &ec_iodesc, 
                           &rearr, NULL, NULL);
   if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -597,7 +597,7 @@ void get_elemConn_info_2Dvar_from_ESMFMesh_file(int pioSystemDesc, int pioFileDe
   // Init elementConn decomp
   int ec_iodesc;
   int gdimlen2D[2]={(int)elementCount,(int)maxNodePElement};
-  piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 2, gdimlen2D, totNumElementConn, ec_offsets, &ec_iodesc, 
+  piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_INT, 2, gdimlen2D, totNumElementConn, ec_offsets, &ec_iodesc, 
                           &rearr, NULL, NULL);
   if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -731,7 +731,7 @@ void get_nodeCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char 
     // Init nodeCoords decomp
     int node_iodesc;
     int node_gdimlen2D[2]={(int)nodeCount, (int)coordDim};
-    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_DOUBLE, 2, node_gdimlen2D, num_nodes*coordDim, node_offsets, &node_iodesc, 
+    piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_DOUBLE, 2, node_gdimlen2D, num_nodes*coordDim, node_offsets, &node_iodesc, 
                     &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -797,7 +797,7 @@ void get_nodeMask_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char *f
       // Init nodeMask decomp
       int nm_iodesc;
       int nm_gdimlen = (int) nodeCount;
-      piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 1, &nm_gdimlen, num_nodes, nm_offsets, &nm_iodesc, 
+      piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_INT, 1, &nm_gdimlen, num_nodes, nm_offsets, &nm_iodesc, 
                               &rearr, NULL, NULL);
       if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for nodeMask ") + filename,
                          ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -861,7 +861,7 @@ void get_elementMask_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char
     // Init elementMask decomp
     int em_iodesc;
     int em_gdimlen = (int) elementCount;
-    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 1, &em_gdimlen, num_elems, em_offsets, &em_iodesc, 
+    piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_INT, 1, &em_gdimlen, num_elems, em_offsets, &em_iodesc, 
                             &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for elementMask ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -930,7 +930,7 @@ void get_elementArea_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, char
     // Init elementArea decomp
     int ea_iodesc;
     int ea_gdimlen = (int) elementCount;
-    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_DOUBLE, 1, &ea_gdimlen, num_elems, ea_offsets, &ea_iodesc, 
+    piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_DOUBLE, 1, &ea_gdimlen, num_elems, ea_offsets, &ea_iodesc, 
                             &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for elementMask ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -1006,7 +1006,7 @@ void get_centerCoords_from_ESMFMesh_file(int pioSystemDesc, int pioFileDesc, cha
     // Init elementConn decomp
     int cc_iodesc;
     int cc_gdimlen2D[2]={(int)elementCount,(int)coordDim};
-    piorc = PIOc_InitDecomp(pioSystemDesc, PIO_DOUBLE, 2, cc_gdimlen2D, num_elems*coordDim, cc_offsets, &cc_iodesc, 
+    piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_DOUBLE, 2, cc_gdimlen2D, num_elems*coordDim, cc_offsets, &cc_iodesc, 
                             &rearr, NULL, NULL);
     if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for centerCoords ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
