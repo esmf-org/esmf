@@ -61,13 +61,13 @@ public ESMF_NamedAlias
 !==============================================================================
 
 interface ESMF_NamedAlias
+  module procedure ESMF_NamedAliasDistGrid
   module procedure ESMF_NamedAliasArray
 #if 0
   module procedure ESMF_NamedAliasArrayBundle
   module procedure ESMF_NamedAliasCplComp
   module procedure ESMF_NamedAliasGridComp
   module procedure ESMF_NamedAliasSciComp
-  module procedure ESMF_NamedAliasDistGrid
   module procedure ESMF_NamedAliasField
   module procedure ESMF_NamedAliasFieldBundle
   module procedure ESMF_NamedAliasGrid
@@ -105,6 +105,32 @@ contains !=====================================================================
 !   \end{description}
 !
 !EOP
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_NamedAliasDistGrid()"
+!BOPI
+! !IROUTINE: ESMF_NamedAliasDistGrid - Named Alias
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_NamedAlias()
+  function ESMF_NamedAliasDistGrid(object, keywordEnforcer, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_NamedAliasDistGrid
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),intent(in)            :: object
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len = *), intent(in),  optional :: name
+    integer,            intent(out), optional :: rc
+!EOPI
+!------------------------------------------------------------------------------
+
+    ESMF_NamedAliasDistGrid = object
+
+  end function ESMF_NamedAliasDistGrid
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------

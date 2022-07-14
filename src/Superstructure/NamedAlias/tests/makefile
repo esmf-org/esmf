@@ -25,8 +25,8 @@ DIRS        =
 # unit test targets
 #
 
-RUN_ESMF_DistGridCreateGetUTest:
+RUN_ESMF_NamedAliasUTest:
 	$(MAKE) TNAME=NamedAlias NP=4 ftest
 
-RUN_ESMF_DistGridCreateGetUTestUNI:
+RUN_ESMF_NamedAliasUTestUNI:
 	$(MAKE) TNAME=NamedAlias NP=1 ftest
