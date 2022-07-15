@@ -27,6 +27,12 @@ use ESMF_LogErrMod        ! ESMF error handling
 
 
 use ESMF_StateMod
+use ESMF_CompMod
+use ESMF_GridCompMod
+use ESMF_CplCompMod
+use ESMF_SciCompMod
+
+
 use ESMF_ArrayMod
 
 #if 0
@@ -36,10 +42,6 @@ use ESMF_DistGridMod
 use ESMF_FieldMod
 use ESMF_FieldGetMod
 use ESMF_FieldBundleMod
-use ESMF_CompMod
-use ESMF_GridCompMod
-use ESMF_CplCompMod
-use ESMF_SciCompMod
 use ESMF_ArrayBundleMod
 use ESMF_InfoMod
 use ESMF_UtilTypesMod
@@ -66,12 +68,13 @@ public ESMF_NamedAlias
 
 interface ESMF_NamedAlias
   module procedure ESMF_NamedAliasState
+  module procedure ESMF_NamedAliasGridComp
+  module procedure ESMF_NamedAliasCplComp
+  module procedure ESMF_NamedAliasSciComp
+  
   module procedure ESMF_NamedAliasArray
 #if 0
   module procedure ESMF_NamedAliasArrayBundle
-  module procedure ESMF_NamedAliasCplComp
-  module procedure ESMF_NamedAliasGridComp
-  module procedure ESMF_NamedAliasSciComp
   module procedure ESMF_NamedAliasField
   module procedure ESMF_NamedAliasFieldBundle
   module procedure ESMF_NamedAliasGrid
@@ -84,7 +87,7 @@ contains !=====================================================================
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_NamedAlias - Named Alias
+! !IROUTINE: ESMF_NamedAlias - Generate a Named Alias
 !
 ! !INTERFACE:
 !   function ESMF_NamedAlias(object, name, rc)
@@ -98,6 +101,9 @@ contains !=====================================================================
 !   Generate a named alias to {\tt object}. The supported classes are:
 !   \begin{itemize}
 !   \item {\tt ESMF\_State}
+!   \item {\tt ESMF\_GridComp}
+!   \item {\tt ESMF\_CplComp}
+!   \item {\tt ESMF\_SciComp}
 !   \item {\tt ESMF\_Array}
 !   \end{itemize}
 !
@@ -143,7 +149,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_NamedAliasState = object
 
     ! next mark as namedAlias
-    ESMF_NamedAliasState%namedAlias = .true.
+    ESMF_NamedAliasState%isNamedAlias = .true.
 
     ! finally set name
     if (present(name)) then
@@ -156,6 +162,138 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
   end function ESMF_NamedAliasState
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_NamedAliasGridComp()"
+!BOPI
+! !IROUTINE: ESMF_NamedAliasGridComp - Named Alias
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_NamedAlias()
+  function ESMF_NamedAliasGridComp(object, keywordEnforcer, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_GridComp) :: ESMF_NamedAliasGridComp
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp),intent(in)            :: object
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len = *), intent(in),  optional :: name
+    integer,            intent(out), optional :: rc
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc
+    character(ESMF_MAXSTR)  :: nameDefault
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! first create regular alias
+    ESMF_NamedAliasGridComp = object
+
+    ! next mark as namedAlias
+    ESMF_NamedAliasGridComp%isNamedAlias = .true.
+
+    ! finally set name
+    if (present(name)) then
+      ESMF_NamedAliasGridComp%name = trim(name)
+    else
+      call ESMF_GridCompGet(object, name=nameDefault, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_NamedAliasGridComp%name = trim(nameDefault)
+    endif
+
+  end function ESMF_NamedAliasGridComp
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_NamedAliasCplComp()"
+!BOPI
+! !IROUTINE: ESMF_NamedAliasCplComp - Named Alias
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_NamedAlias()
+  function ESMF_NamedAliasCplComp(object, keywordEnforcer, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_CplComp) :: ESMF_NamedAliasCplComp
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),intent(in)             :: object
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len = *), intent(in),  optional :: name
+    integer,            intent(out), optional :: rc
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc
+    character(ESMF_MAXSTR)  :: nameDefault
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! first create regular alias
+    ESMF_NamedAliasCplComp = object
+
+    ! next mark as namedAlias
+    ESMF_NamedAliasCplComp%isNamedAlias = .true.
+
+    ! finally set name
+    if (present(name)) then
+      ESMF_NamedAliasCplComp%name = trim(name)
+    else
+      call ESMF_CplCompGet(object, name=nameDefault, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_NamedAliasCplComp%name = trim(nameDefault)
+    endif
+
+  end function ESMF_NamedAliasCplComp
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_NamedAliasSciComp()"
+!BOPI
+! !IROUTINE: ESMF_NamedAliasSciComp - Named Alias
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_NamedAlias()
+  function ESMF_NamedAliasSciComp(object, keywordEnforcer, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_SciComp) :: ESMF_NamedAliasSciComp
+!
+! !ARGUMENTS:
+    type(ESMF_SciComp),intent(in)             :: object
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len = *), intent(in),  optional :: name
+    integer,            intent(out), optional :: rc
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc
+    character(ESMF_MAXSTR)  :: nameDefault
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! first create regular alias
+    ESMF_NamedAliasSciComp = object
+
+    ! next mark as namedAlias
+    ESMF_NamedAliasSciComp%isNamedAlias = .true.
+
+    ! finally set name
+    if (present(name)) then
+      ESMF_NamedAliasSciComp%name = trim(name)
+    else
+      call ESMF_SciCompGet(object, name=nameDefault, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_NamedAliasSciComp%name = trim(nameDefault)
+    endif
+
+  end function ESMF_NamedAliasSciComp
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------

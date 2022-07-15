@@ -249,7 +249,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -265,7 +265,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -281,7 +281,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------

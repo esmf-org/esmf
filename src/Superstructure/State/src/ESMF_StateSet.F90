@@ -115,7 +115,7 @@ module ESMF_StateSetMod
     stypep => state%statep
     if (present(stateIntent)) stypep%st = stateintent
     if (present(name)) then
-      if (state%namedAlias) then
+      if (state%isNamedAlias) then
         state%name = trim(name)
       else
         call ESMF_SetName(stypep%base, name=name, rc=localrc)

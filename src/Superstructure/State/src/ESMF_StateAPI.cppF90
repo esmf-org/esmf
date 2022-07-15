@@ -1238,7 +1238,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       stypep => state%statep
 
       if (present(name)) then
-        if (state%namedAlias) then
+        if (state%isNamedAlias) then
           name = trim(state%name)
         else
           call ESMF_GetName(stypep%base, name=name, rc=localrc)
