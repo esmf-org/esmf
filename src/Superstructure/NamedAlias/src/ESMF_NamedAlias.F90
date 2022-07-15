@@ -32,15 +32,10 @@ use ESMF_GridCompMod
 use ESMF_CplCompMod
 use ESMF_SciCompMod
 use ESMF_FieldBundleMod
-use ESMF_ArrayBundleMod
-
-
-use ESMF_ArrayMod
-
-#if 0
 use ESMF_FieldMod
 use ESMF_FieldGetMod
-#endif
+use ESMF_ArrayBundleMod
+use ESMF_ArrayMod
 
 implicit none
 
@@ -59,12 +54,9 @@ interface ESMF_NamedAlias
   module procedure ESMF_NamedAliasCplComp
   module procedure ESMF_NamedAliasSciComp
   module procedure ESMF_NamedAliasFieldBundle
-  module procedure ESMF_NamedAliasArrayBundle
-  
-  module procedure ESMF_NamedAliasArray
-#if 0
   module procedure ESMF_NamedAliasField
-#endif
+  module procedure ESMF_NamedAliasArrayBundle
+  module procedure ESMF_NamedAliasArray
 end interface
 
 contains !=====================================================================
@@ -89,7 +81,9 @@ contains !=====================================================================
 !   \item {\tt ESMF\_CplComp}
 !   \item {\tt ESMF\_SciComp}
 !   \item {\tt ESMF\_FieldBundle}
+!   \item {\tt ESMF\_Field}
 !   \item {\tt ESMF\_ArrayBundle}
+!   \item {\tt ESMF\_Array}
 !   \end{itemize}
 !
 !   The arguments are:
@@ -327,6 +321,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_NamedAliasField()"
+!BOPI
+! !IROUTINE: ESMF_NamedAliasField - Named Alias
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_NamedAlias()
+  function ESMF_NamedAliasField(object, keywordEnforcer, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_NamedAliasField
+!
+! !ARGUMENTS:
+    type(ESMF_Field),intent(in)               :: object
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len = *), intent(in),  optional :: name
+    integer,            intent(out), optional :: rc
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc
+    character(ESMF_MAXSTR)  :: nameDefault
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! first create regular alias
+    ESMF_NamedAliasField = object
+
+    ! next mark as namedAlias
+    ESMF_NamedAliasField%isNamedAlias = .true.
+
+    ! finally set name
+    if (present(name)) then
+      ESMF_NamedAliasField%name = trim(name)
+    else
+      call ESMF_FieldGet(object, name=nameDefault, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_NamedAliasField%name = trim(nameDefault)
+    endif
+
+  end function ESMF_NamedAliasField
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_NamedAliasArrayBundle()"
 !BOPI
 ! !IROUTINE: ESMF_NamedAliasArrayBundle - Named Alias
@@ -383,17 +421,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array) :: ESMF_NamedAliasArray
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),   intent(in)            :: object
+    type(ESMF_Array),intent(in)               :: object
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *), intent(in),  optional :: name
     integer,            intent(out), optional :: rc
 !EOPI
 !------------------------------------------------------------------------------
+    integer                 :: localrc
+    character(ESMF_MAXSTR)  :: nameDefault
 
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! first create regular alias
     ESMF_NamedAliasArray = object
+
+    ! next mark as namedAlias
+    ESMF_NamedAliasArray%isNamedAlias = .true.
+
+    ! finally set name
+    if (present(name)) then
+      ESMF_NamedAliasArray%name = trim(name)
+    else
+      call ESMF_ArrayGet(object, name=nameDefault, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_NamedAliasArray%name = trim(nameDefault)
+    endif
 
   end function ESMF_NamedAliasArray
 !------------------------------------------------------------------------------
-
 
 end module ESMF_NamedAliasMod

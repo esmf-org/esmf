@@ -80,7 +80,13 @@ program ESMF_NamedAliasUTest
   call TestFieldBundleNamedAlias(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  call TestFieldNamedAlias(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call TestArrayBundleNamedAlias(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call TestArrayNamedAlias(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !------------------------------------------------------------------------
@@ -753,6 +759,150 @@ contains !======================================================================
 
   !============================================================================
 
+  subroutine TestFieldNamedAlias(rc)
+    integer, intent(out)        :: rc
+    type(ESMF_Field)            :: object1, object2
+    type(ESMF_Grid)             :: grid
+
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    object1 = ESMF_FieldCreate(name="Test Name 1", typekind=ESMF_TYPEKIND_R8, &
+      grid=grid, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() with default name for Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias is an Alias Field Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_FieldGet(object1, name=name1, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(object2, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Same default name for NamedAlias for Field Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (name1 == name2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_FieldSet(object2, name="Test Name 2", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(object1, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Name change on NamedAlias for Field not affecting Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (name1 == name2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_FieldGet(object2, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Name change on NamedAlias for Field correct setting Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (trim(name2) == "Test Name 2")
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias is still an Alias Field Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroy object through NamedAlias Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_FieldDestroy(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroying NamedAlias destroys object Field Test"
+    write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
+    call ESMF_FieldGet(object1, name=name1, rc=rc)
+    call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    object1 = ESMF_FieldCreate(name="Test Name 1", typekind=ESMF_TYPEKIND_R8, &
+      grid=grid, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() with new name for Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, name="Test Name 2", rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias is an Alias Field Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_FieldGet(object1, name=name1, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(object2, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Different name for NamedAlias for Field Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (name1 /= name2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroy object through NamedAlias Field Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_FieldDestroy(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroying NamedAlias destroys object Field Test"
+    write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
+    call ESMF_FieldGet(object1, name=name1, rc=rc)
+    call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine
+
+  !============================================================================
+
   subroutine TestArrayBundleNamedAlias(rc)
     integer, intent(out)  :: rc
     type(ESMF_ArrayBundle):: object1, object2
@@ -850,6 +1000,150 @@ contains !======================================================================
     write(name, *) "Destroying NamedAlias destroys object ArrayBundle Test"
     write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
     call ESMF_ArrayBundleGet(object1, name=name1, rc=rc)
+    call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine
+
+  !============================================================================
+
+  subroutine TestArrayNamedAlias(rc)
+    integer, intent(out)        :: rc
+    type(ESMF_Array)            :: object1, object2
+    type(ESMF_DistGrid)         :: distgrid
+
+    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/16,20/), rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    object1 = ESMF_ArrayCreate(name="Test Name 1", typekind=ESMF_TYPEKIND_R8, &
+      distgrid=distgrid, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() with default name for Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias is an Alias Array Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_ArrayGet(object1, name=name1, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_ArrayGet(object2, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Same default name for NamedAlias for Array Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (name1 == name2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_ArraySet(object2, name="Test Name 2", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_ArrayGet(object1, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Name change on NamedAlias for Array not affecting Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (name1 == name2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_ArrayGet(object2, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Name change on NamedAlias for Array correct setting Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (trim(name2) == "Test Name 2")
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias is still an Alias Array Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroy object through NamedAlias Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_ArrayDestroy(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroying NamedAlias destroys object Array Test"
+    write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
+    call ESMF_ArrayGet(object1, name=name1, rc=rc)
+    call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    object1 = ESMF_ArrayCreate(name="Test Name 1", typekind=ESMF_TYPEKIND_R8, &
+      distgrid=distgrid, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() with new name for Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, name="Test Name 2", rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias is an Alias Array Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_ArrayGet(object1, name=name1, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_ArrayGet(object2, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Different name for NamedAlias for Array Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (name1 /= name2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroy object through NamedAlias Array Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_ArrayDestroy(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroying NamedAlias destroys object Array Test"
+    write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
+    call ESMF_ArrayGet(object1, name=name1, rc=rc)
     call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
