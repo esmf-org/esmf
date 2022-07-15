@@ -31,28 +31,15 @@ use ESMF_CompMod
 use ESMF_GridCompMod
 use ESMF_CplCompMod
 use ESMF_SciCompMod
+use ESMF_FieldBundleMod
+use ESMF_ArrayBundleMod
 
 
 use ESMF_ArrayMod
 
 #if 0
-use ESMF_VMMod
-use ESMF_StateItemMod
-use ESMF_DistGridMod
 use ESMF_FieldMod
 use ESMF_FieldGetMod
-use ESMF_FieldBundleMod
-use ESMF_ArrayBundleMod
-use ESMF_InfoMod
-use ESMF_UtilTypesMod
-use ESMF_GeomBaseMod
-use ESMF_MeshMod
-use ESMF_GridMod
-use ESMF_XGridMod
-use ESMF_XGridGetMod
-use ESMF_LocStreamMod
-use ESMF_RHandleMod
-use ESMF_InfoDescribeMod
 #endif
 
 implicit none
@@ -71,15 +58,12 @@ interface ESMF_NamedAlias
   module procedure ESMF_NamedAliasGridComp
   module procedure ESMF_NamedAliasCplComp
   module procedure ESMF_NamedAliasSciComp
+  module procedure ESMF_NamedAliasFieldBundle
+  module procedure ESMF_NamedAliasArrayBundle
   
   module procedure ESMF_NamedAliasArray
 #if 0
-  module procedure ESMF_NamedAliasArrayBundle
   module procedure ESMF_NamedAliasField
-  module procedure ESMF_NamedAliasFieldBundle
-  module procedure ESMF_NamedAliasGrid
-  module procedure ESMF_NamedAliasLocStream
-  module procedure ESMF_NamedAliasMesh
 #endif
 end interface
 
@@ -104,7 +88,8 @@ contains !=====================================================================
 !   \item {\tt ESMF\_GridComp}
 !   \item {\tt ESMF\_CplComp}
 !   \item {\tt ESMF\_SciComp}
-!   \item {\tt ESMF\_Array}
+!   \item {\tt ESMF\_FieldBundle}
+!   \item {\tt ESMF\_ArrayBundle}
 !   \end{itemize}
 !
 !   The arguments are:
@@ -294,6 +279,94 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
   end function ESMF_NamedAliasSciComp
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_NamedAliasFieldBundle()"
+!BOPI
+! !IROUTINE: ESMF_NamedAliasFieldBundle - Named Alias
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_NamedAlias()
+  function ESMF_NamedAliasFieldBundle(object, keywordEnforcer, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_FieldBundle) :: ESMF_NamedAliasFieldBundle
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle),intent(in)         :: object
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len = *), intent(in),  optional :: name
+    integer,            intent(out), optional :: rc
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc
+    character(ESMF_MAXSTR)  :: nameDefault
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! first create regular alias
+    ESMF_NamedAliasFieldBundle = object
+
+    ! next mark as namedAlias
+    ESMF_NamedAliasFieldBundle%isNamedAlias = .true.
+
+    ! finally set name
+    if (present(name)) then
+      ESMF_NamedAliasFieldBundle%name = trim(name)
+    else
+      call ESMF_FieldBundleGet(object, name=nameDefault, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_NamedAliasFieldBundle%name = trim(nameDefault)
+    endif
+
+  end function ESMF_NamedAliasFieldBundle
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_NamedAliasArrayBundle()"
+!BOPI
+! !IROUTINE: ESMF_NamedAliasArrayBundle - Named Alias
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_NamedAlias()
+  function ESMF_NamedAliasArrayBundle(object, keywordEnforcer, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_ArrayBundle) :: ESMF_NamedAliasArrayBundle
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle),intent(in)         :: object
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len = *), intent(in),  optional :: name
+    integer,            intent(out), optional :: rc
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc
+    character(ESMF_MAXSTR)  :: nameDefault
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! first create regular alias
+    ESMF_NamedAliasArrayBundle = object
+
+    ! next mark as namedAlias
+    ESMF_NamedAliasArrayBundle%isNamedAlias = .true.
+
+    ! finally set name
+    if (present(name)) then
+      ESMF_NamedAliasArrayBundle%name = trim(name)
+    else
+      call ESMF_ArrayBundleGet(object, name=nameDefault, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_NamedAliasArrayBundle%name = trim(nameDefault)
+    endif
+
+  end function ESMF_NamedAliasArrayBundle
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------

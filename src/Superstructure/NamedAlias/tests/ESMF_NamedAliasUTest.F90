@@ -77,6 +77,12 @@ program ESMF_NamedAliasUTest
   call TestSciCompNamedAlias(rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  call TestFieldBundleNamedAlias(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call TestArrayBundleNamedAlias(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   !------------------------------------------------------------------------
 10 continue
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
@@ -630,6 +636,220 @@ contains !======================================================================
     write(name, *) "Destroying NamedAlias destroys object SciComp Test"
     write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
     call ESMF_SciCompGet(object1, name=name1, rc=rc)
+    call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine
+
+  !============================================================================
+
+  subroutine TestFieldBundleNamedAlias(rc)
+    integer, intent(out)  :: rc
+    type(ESMF_FieldBundle):: object1, object2
+
+    object1 = ESMF_FieldBundleCreate(name="Test Name 1", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() with default name for FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias is an Alias FieldBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_FieldBundleGet(object1, name=name1, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldBundleGet(object2, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Same default name for NamedAlias for FieldBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (name1 == name2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroy object through NamedAlias FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_FieldBundleDestroy(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroying NamedAlias destroys object FieldBundle Test"
+    write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
+    call ESMF_FieldBundleGet(object1, name=name1, rc=rc)
+    call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    object1 = ESMF_FieldBundleCreate(name="Test Name 1", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() with new name for FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, name="Test Name 2", rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias is an Alias FieldBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_FieldBundleGet(object1, name=name1, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldBundleGet(object2, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Different name for NamedAlias for FieldBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (name1 /= name2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroy object through NamedAlias FieldBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_FieldBundleDestroy(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroying NamedAlias destroys object FieldBundle Test"
+    write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
+    call ESMF_FieldBundleGet(object1, name=name1, rc=rc)
+    call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    ! return successfully
+    rc = ESMF_SUCCESS
+
+  end subroutine
+
+  !============================================================================
+
+  subroutine TestArrayBundleNamedAlias(rc)
+    integer, intent(out)  :: rc
+    type(ESMF_ArrayBundle):: object1, object2
+
+    object1 = ESMF_ArrayBundleCreate(name="Test Name 1", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() with default name for ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias is an Alias ArrayBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_ArrayBundleGet(object1, name=name1, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_ArrayBundleGet(object2, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Same default name for NamedAlias for ArrayBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (name1 == name2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroy object through NamedAlias ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_ArrayBundleDestroy(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroying NamedAlias destroys object ArrayBundle Test"
+    write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
+    call ESMF_ArrayBundleGet(object1, name=name1, rc=rc)
+    call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    object1 = ESMF_ArrayBundleCreate(name="Test Name 1", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias() with new name for ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    object2 = ESMF_NamedAlias(object1, name="Test Name 2", rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "NamedAlias is an Alias ArrayBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (object1 == object2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_ArrayBundleGet(object1, name=name1, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_ArrayBundleGet(object2, name=name2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Different name for NamedAlias for ArrayBundle Test"
+    write(failMsg, *) "Incorrect result"
+    testFlag = (name1 /= name2)
+    call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroy object through NamedAlias ArrayBundle Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_ArrayBundleDestroy(object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Destroying NamedAlias destroys object ArrayBundle Test"
+    write(failMsg, *) "Returns ESMF_SUCCESS, but should not"
+    call ESMF_ArrayBundleGet(object1, name=name1, rc=rc)
     call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 

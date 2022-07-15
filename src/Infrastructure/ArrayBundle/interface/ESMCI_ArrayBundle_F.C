@@ -84,7 +84,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -117,7 +117,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -160,7 +160,7 @@ extern "C" {
       delete [] cname;
     }else if(*len_name){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+        "Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
     // return successfully
@@ -202,7 +202,7 @@ extern "C" {
       // opt_arrayList was provided
       if (*len_arrayList < *arrayCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- opt_arrayList must provide arrayCount elements", ESMC_CONTEXT, rc);
+          "opt_arrayList must provide arrayCount elements", ESMC_CONTEXT, rc);
         return;
       }
       // opt_arrayList has correct number of elements
@@ -223,6 +223,12 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    // test if this is a valid ArrayBundle
+    if ((*ptr)->ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "not a valid object", ESMC_CONTEXT, rc);
+      return;
+    }
     // fill simple return values
     if (ESMC_NOT_PRESENT_FILTER(arrayCount) != ESMC_NULL_POINTER)
       *arrayCount = (*ptr)->getCount();
@@ -231,7 +237,7 @@ extern "C" {
       // opt_arrayList was provided
       if (*len_arrayList < (*ptr)->getCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- opt_arrayList must provide arrayCount elements", ESMC_CONTEXT, rc);
+          "opt_arrayList must provide arrayCount elements", ESMC_CONTEXT, rc);
         return;
       }
       // opt_arrayList has correct number of elements
@@ -266,7 +272,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -300,7 +306,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -330,7 +336,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -555,7 +561,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -602,7 +608,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
@@ -628,24 +634,24 @@ extern "C" {
       // must provide valid factorList and factorIndexList args
       if (!present(factorIndexList)){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-          "- Not a valid pointer to factorIndexList array", ESMC_CONTEXT, rc);
+          "Not a valid pointer to factorIndexList array", ESMC_CONTEXT, rc);
         return;
       }
       if ((factorIndexList)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- factorIndexList array must be of rank 2", ESMC_CONTEXT, rc);
+          "factorIndexList array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((factorIndexList)->extent[0] != 2 && 
         (factorIndexList)->extent[0] != 4){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of factorIndexList array must be of size 2 or 4",
+          "1st dimension of factorIndexList array must be of size 2 or 4",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((factorIndexList)->extent[1] != *factorListCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dimension of factorIndexList does not match factorListCount",
+          "2nd dimension of factorIndexList does not match factorListCount",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -674,7 +680,7 @@ extern "C" {
         rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "Caught exception",
         ESMC_CONTEXT, rc);
       return;
     }
