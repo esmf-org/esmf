@@ -140,7 +140,7 @@ module ESMF_CompMod
       .true., & ! vmIsPresent
       .true., & ! isIsPresent
       .true., & ! esIsPresent
-      ESMF_INIT_DEFINED, .false., ""), &
+      ESMF_INIT_DEFINED), &
     ESMF_COMPSTATUS_ALL_NOTPRESENT = ESMF_CompStatus(&
       .false., & ! configIsPresent
       .false., & ! clockIsPresent
@@ -152,7 +152,7 @@ module ESMF_CompMod
       .false., & ! vmIsPresent
       .false., & ! isIsPresent
       .false., & ! esIsPresent
-      ESMF_INIT_DEFINED, .false., "")
+      ESMF_INIT_DEFINED)
 
 !------------------------------------------------------------------------------
 ! ! ESMF_CompTunnel

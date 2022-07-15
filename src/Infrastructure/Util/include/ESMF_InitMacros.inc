@@ -62,7 +62,8 @@ automatic initialization of types.
              if (fget(var) .ne. ESMF_INIT_DEFINED) call \
                  finit(var)
 #else
-#define ESMF_INIT_DECLARE ESMF_INIT_TYPE :: isInit = ESMF_INIT_UNDEFINED ; logical :: namedAlias = .false. ; character(ESMF_MAXSTR) :: name
+#define ESMF_INIT_DECLARE ESMF_INIT_TYPE :: isInit = ESMF_INIT_UNDEFINED
+#define ESMF_INIT_DECLARE_NAMED_ALIAS ESMF_INIT_TYPE :: isInit = ESMF_INIT_UNDEFINED ; logical :: namedAlias = .false. ; character(ESMF_MAXSTR) :: name
 #define ESMF_INIT_CHECK_SET_SHALLOW(fget,finit,var)
 #endif
 
