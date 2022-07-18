@@ -125,6 +125,8 @@ module ESMF
     use ESMF_InfoDescribeMod
     use ESMF_InfoSyncMod
 
+    use ESMF_NamedAliasMod
+
     use ESMF_RegridWeightGenMod
 
 end module ESMF

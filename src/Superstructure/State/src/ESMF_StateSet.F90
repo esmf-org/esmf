@@ -34,6 +34,7 @@ module ESMF_StateSetMod
 !
 ! !USES:
       use ESMF_UtilTypesMod
+      use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_StateTypesMod
       use ESMF_StateVaMod
@@ -80,13 +81,14 @@ module ESMF_StateSetMod
 ! !IROUTINE: ESMF_StateSet - Set State aspects
 !
 ! !INTERFACE:
-  subroutine ESMF_StateSet(state, keywordEnforcer, stateIntent, rc)
+  subroutine ESMF_StateSet(state, keywordEnforcer, stateIntent, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),            intent(inout)         :: state
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_StateIntent_Flag), intent(in),  optional :: stateIntent
-    integer,                     intent(out), optional :: rc             
+     character(len = *),         intent(in),  optional :: name
+    integer,                     intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -99,16 +101,28 @@ module ESMF_StateSetMod
 !      \item[stateIntent]
 !        Intent, e.g. Import or Export, of this {\tt ESMF\_State}.
 !        Possible values are listed in Section~\ref{const:stateintent}.
+!      \item [{[name]}]
+!        The State name.
 !      \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
     type(ESMF_StateClass), pointer :: stypep
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     stypep => state%statep
     if (present(stateIntent)) stypep%st = stateintent
+    if (present(name)) then
+      if (state%isNamedAlias) then
+        state%name = trim(name)
+      else
+        call ESMF_SetName(stypep%base, name=name, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_StateSet

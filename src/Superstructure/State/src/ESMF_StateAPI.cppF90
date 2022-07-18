@@ -1216,13 +1216,15 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       type(ESMF_ItemOrder_Flag)      :: itemorderflagArg
       type(ESMF_StateClass), pointer :: stypep
 
+      localrc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
+
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
       call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       localnestedflag = .false.
       if (present (nestedFlag)) then
@@ -1235,10 +1237,22 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 
       stypep => state%statep
 
-      if (present(name)) call ESMF_GetName(stypep%base, name=name, rc=localrc)
+      if (present(name)) then
+        if (state%isNamedAlias) then
+          name = trim(state%name)
+        else
+          call ESMF_GetName(stypep%base, name=name, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+      endif
+
       if (present(stateintent)) stateintent = stypep%st
 
       localitemcount = infoCountWorker (stypep)
+      ! infoCountWorker can set localrc -> must check on return
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(itemCount))  &
         itemCount = localitemcount

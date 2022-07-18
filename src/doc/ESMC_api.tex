@@ -89,7 +89,7 @@ the internal consistency of a Field object.
 \subsection{Deep and Shallow Classes}
 \label{sec:deepshallow}
 
-The ESMF contains two types of classes.
+ESMF contains two types of classes.
 
 {\bf Deep} classes require
 {\tt ESMC\_<Class>Create()} and {\tt ESMC\_<Class>Destroy()} calls.
@@ -101,20 +101,42 @@ returned. Most classes in ESMF, including GridComp, CplComp, State, Fields, Fiel
 {\bf Shallow} classes do not possess {\tt ESMC\_<Class>Create()}
 and {\tt ESMC\_<Class>Destroy()} calls.  They are simply declared
 and their values set using an {\tt ESMC\_<Class>Set()} call.  
-Examples of shallow classes are Time, TimeInterval, and ArraySpec.  Shallow classes do not take long to set up and can be declared and set within
-a time-critical code segment.  Shallow objects stop existing when
-the method in which they were declared has returned.  
+Examples of shallow classes are Time, TimeInterval, and ArraySpec.
+Shallow classes do not take long to set up and can be declared and set within
+a time-critical code segment.  Shallow objects stop existing when execution
+goes out of the declaring scope.
 
 An exception to this is when a shallow object, such as a Time, 
-is stored in a deep object such as a Clock.  The Clock then
-carries a copy of the Time in persistent memory.  The Time is
-deallocated with the {\tt ESMC\_ClockDestroy()} call.
+is stored in a deep object such as a Clock.  The deep Clock object then
+becomes the declaring scope of the Time object, persisting in memory.
+The Time object is deallocated with the {\tt ESMC\_ClockDestroy()} call.
 
 See Section \ref{sec:overallimpl}, Overall Design and Implementation 
 Notes, for a brief discussion of deep and shallow classes from 
 an implementation perspective.  For an in-depth look at the design
  and inter-language issues related to deep and shallow classes,
 see the \htmladdnormallink{{\it ESMF Implementation Report}}{http://www.earthsystemmodeling.org/documents/IMPL\_repdoc/}.
+
+\subsection{Aliases}
+\label{sec:aliases}
+
+Deep objects, i.e. instances of ESMF deep classes created by the appropriate
+{\tt ESMC\_<Class>Create()}, can be used with the standard assignment (=)
+operator.
+
+The assignment
+\begin{verbatim}
+deep2 = deep1
+\end{verbatim}
+makes {\tt deep2} an {\bf alias} of {\tt deep1}, meaning that both variables
+reference the same deep allocation in memory. Many aliases of the same deep
+object can be created.
+
+All the aliases of a deep object are equivalent. In particular, there is no
+distinction between the variable on the left hand side of the actual
+{\tt ESMC\_<Class>Create()} call, and any aliases created from it. All actions
+taken on any of the aliases of a deep object affect the deep object, and thus
+all other aliases.
 
 \subsection{Special Methods}
 

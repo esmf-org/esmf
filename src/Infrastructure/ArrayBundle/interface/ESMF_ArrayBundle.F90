@@ -61,9 +61,8 @@ module ESMF_ArrayBundleMod
 #ifndef ESMF_NO_SEQUENCE
   sequence
 #endif
-  private
     type(ESMF_Pointer) :: this
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -991,7 +990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
-    
+
     ! Fill arrayNameList
     if (present(arrayNameList)) then
       do i=1, min(size(arrayNameList), opt_arrayCount)
@@ -1000,20 +999,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
-    
+
     ! Garbage collection
     deallocate(opt_arrayPtrList)
 
     ! Special call to get name out of Base class
     if (present(name)) then
-      call c_ESMC_GetName(arraybundle, name, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (arraybundle%isNamedAlias) then
+        name = trim(arraybundle%name)
+      else
+        call c_ESMC_GetName(arraybundle, name, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
-    
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-  
+
   end subroutine ESMF_ArrayBundleGetListAll
 !------------------------------------------------------------------------------
 

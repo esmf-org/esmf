@@ -102,7 +102,8 @@ int Test(
     if (!only)
       fprintf(stderr, "%s\n", msgbuf.str().c_str());
   }else {
-    msgbuf << "FAIL " << name << ", " << file << ", line " << line;
+    msgbuf << "FAIL " << name << ", " << file << ", line " << line << ": "
+      << failMsg;
     whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s\n", msgbuf.str().c_str());
