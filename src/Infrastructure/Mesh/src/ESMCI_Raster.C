@@ -50,15 +50,268 @@
 
 using namespace ESMCI;
 
-  //================== GTOMCELL ========================
+using namespace std;
+
+
+class Globber {
+
+  class Glob {
+
+  public:
+    // Number of ids and ids in glob
+    vector<int> num_ids;
+    vector<int> ids;
+    
+  public:
+    
+    // Add another polygon to glob
+    void add(int num_poly_ids, int *poly_ids) {
+      
+      // Add extra space for num_ids
+      num_ids.reserve(num_ids.size()+1);
+      
+      // Add another count
+      num_ids.push_back(num_poly_ids);
+      
+      // Add extra space for ids
+      ids.reserve(ids.size()+num_poly_ids);
+      
+      // Add ids
+      for (int i=0; i<num_poly_ids; i++) {
+        ids.push_back(poly_ids[i]);
+      }
+    }
+    
+  };
+
   
+  // Map to hold globs that map to the same value
+  map<int, Glob*> glob_map;
+
+public:
+  
+  // Add a new polygon representing a region filled with value
+  void add(int value, int num_ids, int *ids) {
+
+    // Get glob that matches value
+    map<int,Glob *>::iterator vtgi = glob_map.find(value);
+    
+    // Either get the glob or add a new one
+    Glob *glob;
+    if (vtgi == glob_map.end()) {
+
+      // Make a new glob
+      glob = new Glob;
+
+      // Add it to the list
+      glob_map[value]=glob;
+
+    } else {
+      glob = vtgi-> second;
+    }
+
+    // Add ids to glob
+    glob->add(num_ids, ids);    
+  }
+
+  void get_mesh_conn_info(int &num_nodes, int *&node_ids, int *&node_owners, int &num_elems, int *&elem_ids, int *&elem_num_conns, int *&elem_conns) {
+
+    struct NODE_INFO {
+      int node_id;
+      int elem_conns_pos;
+      
+      bool operator< (const NODE_INFO &rhs) const {
+        return node_id < rhs.node_id;
+      }
+      
+    };
+
+
+    // Iterators to loop through globs
+    map<int,Glob *>::iterator gmi;
+    map<int,Glob *>::iterator gme  = glob_map.end();
+    
+    
+    // Init Output
+    num_nodes=0;
+    node_ids=NULL;
+    node_owners=NULL;
+    num_elems=0;
+    elem_ids=NULL;
+    elem_num_conns=NULL;
+    elem_conns=NULL;
+
+    // Get number of elems
+    num_elems=glob_map.size();
+    
+    // Allocate space for elem ids
+    elem_ids=new int[num_elems];
+
+    // Fill elem ids
+    // Right now is just value, eventually should have an option to generate
+    // them independant of the value
+    int id_pos=0;
+    for (gmi  = glob_map.begin(); gmi != gme; gmi++) {
+      elem_ids[id_pos]=gmi->first;
+      id_pos++;
+    }    
+    
+    // Allocate space for number of connections for each elem
+    elem_num_conns=new int[num_elems];
+
+    // Fill number of connections for each elem
+    int tot_elem_num_conns=0;
+    int nec_pos=0;
+    for (gmi  = glob_map.begin(); gmi != gme; gmi++) {
+
+      // Number of connetions is the total number of ids for this elem
+      int num_conns_for_this_elem=gmi->second->ids.size();
+
+      // Plus 1 polybreak indicator after each polygon except the last one (-1) 
+      num_conns_for_this_elem+=gmi->second->num_ids.size()-1;
+
+      // Add to total
+      tot_elem_num_conns += num_conns_for_this_elem;
+      
+      // Add to list
+      elem_num_conns[nec_pos]=num_conns_for_this_elem;
+
+      // Next slot in array
+      nec_pos++;
+    }    
+
+    
+    // Count total number of connections
+    int num_conn=0;
+    for (gmi=glob_map.begin(); gmi != gme; gmi++) {
+      num_conn += gmi->second->ids.size();
+    }
+
+    // If empty, leave
+    if (num_conn < 1) return;
+
+    // Allocate conversion list
+    NODE_INFO *convert_list=new NODE_INFO[num_conn];
+
+    // Copy ids to conversion list
+    int conn_pos=0;
+    int cl_pos=0;
+    for (gmi=glob_map.begin(); gmi != gme; gmi++) {
+      Glob *glob=gmi->second;
+      
+      // Loop through polygons
+      int glob_pos=0;
+      for (int p=0; p<glob->num_ids.size(); p++) {
+
+        // Load polygon ids into list
+        for (int i=0; i<glob->num_ids[p]; i++) {                
+          convert_list[cl_pos].node_id=gmi->second->ids[glob_pos];
+          convert_list[cl_pos].elem_conns_pos=conn_pos;
+          cl_pos++;
+          glob_pos++;
+          conn_pos++;
+        }
+
+        // If not at end of glob, add an extra slot for polybreak indicator
+        if (p < glob->num_ids.size()-1) conn_pos++;
+      }
+    }
+  
+  // Sort list by node_id, to make it easy to find unique node_ids
+  std::sort(convert_list,convert_list+num_conn);
+
+  // Count number of unique node ids in  convert_list
+  int num_unique_node_ids=1;                 // There has to be at least 1, 
+  int prev_node_id=convert_list[0].node_id;  // because we leave if < 1 above
+  for (int i=1; i<num_conn; i++) {
+
+    // If not the same as the last one count a new one
+    if (convert_list[i].node_id != prev_node_id) {
+      num_unique_node_ids++;
+      prev_node_id=convert_list[i].node_id;
+    }
+  }
+
+  // Allocate node_ids
+  node_ids=new int[num_unique_node_ids];
+
+  // Set output number of nodes
+  num_nodes=num_unique_node_ids;
+
+  // Allocate local elem conn
+  elem_conns=new int[tot_elem_num_conns];
+  
+  // Set to polybreak value so that it's in the correct places
+  // after the code below fills in the node connection values
+  for (int i=0; i<tot_elem_num_conns; i++) {
+    elem_conns[i]=MESH_POLYBREAK_IND;
+  }
+  
+  // Translate convert_list to node_ids and elem_conns
+  int node_ids_pos=0;                             // There has to be at least 1, 
+  node_ids[node_ids_pos]=convert_list[0].node_id; // because we leave if < 1 above
+  elem_conns[convert_list[0].elem_conns_pos]=node_ids_pos+1; // +1 to make base-1
+  for (int i=1; i<num_conn; i++) {
+    
+    // If not the same as the last one add a new one
+    if (convert_list[i].node_id != node_ids[node_ids_pos]) {
+      node_ids_pos++;
+      node_ids[node_ids_pos]=convert_list[i].node_id; 
+    }
+    
+    // Add an entry for this in elem_conns
+    elem_conns[convert_list[i].elem_conns_pos]=node_ids_pos+1; // +1 to make base-1
+  }
+  
+  // Get rid of conversion list
+  delete [] convert_list;
+
+  // Allocate node_owners
+  node_owners=new int[num_nodes];
+
+  // For now just init to 0 (since we're just doing serial)
+  for (auto i=0; i<num_nodes; i++) {
+    node_owners[i]=0;
+  }
+  
+}
+  
+};
+
+
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_raster_to_mesh_create_info()"
   
   /* XMRKX */
-  
-#if 0
-  
+
+// Some handy defines
+#define NUM_QUAD_CORNERS 4
+
+//// TODO: Merge the below methods with ones in GridToMesh() so we only have one copy of them!!!!!
+
+  // Calculate index offsets for corners around a given center
+  static void _calc_corner_offset(Grid *grid, int corner_offset[NUM_QUAD_CORNERS][2]) {
+    int default_offset[NUM_QUAD_CORNERS][2]={{0,0},{1,0},{1,1},{0,1}};
+
+    // Get Alignment for staggerloc
+    const int *staggerAlign= grid->getStaggerAlign(ESMCI_STAGGERLOC_CORNER);
+
+    // Get off set due to alignment
+    int align_off[2];
+    for (int i=0; i<2; i++) {
+      if (staggerAlign[i] < 1) align_off[i]=0;
+      else align_off[i]=-1;
+    }
+
+    // Change default offset to correspond with alignment
+    for (int i=0; i<NUM_QUAD_CORNERS; i++) {
+      for (int j=0; j<2; j++) {
+        corner_offset[i][j]=default_offset[i][j]+align_off[j];
+      }
+    }
+  }
+
   // Get global id
   // if there is one returns true, if there isn't returns false
 #define BAD_ID -1
@@ -99,6 +352,32 @@ using namespace ESMCI;
     return true;
   }
 
+  static void _get_quad_corner_ids_from_tile(DistGrid *cnrDistgrid, int tile, int index[2], int cnr_offset[NUM_QUAD_CORNERS][2], int quad_cnr_ids[NUM_QUAD_CORNERS]) {
+
+    // Loop getting global ids
+    int cnr_gids[NUM_QUAD_CORNERS];
+    for (int i=0; i<NUM_QUAD_CORNERS; i++) {
+      
+      // calc index of corner
+      int cnr_index[2];
+      cnr_index[0]=index[0]+cnr_offset[i][0];
+      cnr_index[1]=index[1]+cnr_offset[i][1];
+      
+      // DEBUG
+      //   if (gqcn_debug) {
+      //  printf("%d# in _get_quad_corner_nodes BEFORE cnr_index=%d %d \n",Par::Rank(),cnr_index[0],cnr_index[1]);
+      //}
+      
+      // Get global id, if we can't then leave
+      bool is_local;
+      if (!_get_global_id_from_tile(cnrDistgrid, tile, cnr_index,
+                                    quad_cnr_ids+i, &is_local)) {
+        Throw() << "Can't find global id for corner "<<i<<" of quad.";
+      }
+    }
+  
+  }
+
 
   static void _convert_localDE_to_tile_info(DistGrid *distgrid, int localDE, int *de_index, int *_tile, int *tile_index) {
     // Get DELayout
@@ -136,6 +415,400 @@ using namespace ESMCI;
 #endif
 
   }
+
+
+  static void _get_quad_corner_ids_from_localDE(DistGrid *cnrDistgrid, int localDE, int de_index[2], int cnr_offset[NUM_QUAD_CORNERS][2], int quad_cnr_ids[NUM_QUAD_CORNERS]) {
+
+    //// Translate localDE info into tile info ////
+    int tile;
+    int tile_index[ESMF_MAXDIM];
+    _convert_localDE_to_tile_info(cnrDistgrid, localDE, de_index, &tile, tile_index);
+
+    // Call into get get quad corner nodes from tile
+    _get_quad_corner_ids_from_tile(cnrDistgrid, tile, tile_index, cnr_offset,
+                                   quad_cnr_ids);
+}
+
+
+// Prototype for method that gets coords at seqinds in Grid
+void get_grid_coords_at_seqinds(Grid *grid, int staggerloc, int num_seqinds, int *seqinds, double *seqind_coords);
+
+
+  
+ /* XMRKX */
+
+  void ESMCI_raster_to_mesh_create_info(Grid *raster_grid,
+                                        Array *raster_array,
+                                        InterArray<int> *raster_mask_values,
+                                        int &mesh_pdim, int &mesh_orig_sdim,
+                                        ESMC_CoordSys_Flag &mesh_coordSys,
+                                        int &mesh_num_nodes,
+                                        int *&mesh_node_ids,
+                                        double *&mesh_node_coords,
+                                        int *&mesh_node_owners,
+                                        int &mesh_num_elems,
+                                        int *&mesh_elem_ids,
+                                        int *&mesh_elem_num_conns,
+                                        int *&mesh_elem_conns) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_raster_to_mesh_create_info()"
+    
+    try {
+      // local error code
+      int localrc;
+      
+      //      printf("In ESMCI_raster_to_mesh_create_info\n");
+
+
+      // The Grid needs to have corner coordinates
+      if (!raster_grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CORNER)) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+           "To use this method the Grid must contain coordinates at corner staggerloc.", ESMC_CONTEXT, &localrc);
+        throw localrc;
+      }
+
+      // The Grid currently can't be arbitrarily distributed
+      if (raster_grid->getDecompType() != ESMC_GRID_NONARBITRARY) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                      "To use this method the Grid can't be arbitrarily distributed.", ESMC_CONTEXT, &localrc);
+        throw localrc;
+      }
+
+      // Get Grid dimCount
+      int grid_dimCount=raster_grid->getDimCount();
+
+      // Only supporting 2D right now
+      if (grid_dimCount != 2) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                      "This method currently only supports 2D Grids", ESMC_CONTEXT, &localrc);
+        throw localrc;
+      }
+
+
+      // Currently only support I4
+      if (raster_array->getTypekind() != ESMC_TYPEKIND_I4) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                      "Currently only typekind ESMC_TYPEKIND_I4 is supported for raster Arrays.",
+                                      ESMC_CONTEXT, &localrc);
+        throw localrc;
+      }
+
+
+      
+      // Get Mesh dimension and coordinate info
+      mesh_orig_sdim=grid_dimCount;
+      mesh_pdim=grid_dimCount;
+      mesh_coordSys=raster_grid->getCoordSys();
+      
+
+      // Get distgrid for the center staggerloc
+      DistGrid *centerDistgrid;
+      raster_grid->getStaggerDistgrid(ESMCI_STAGGERLOC_CENTER, &centerDistgrid);
+      
+      // Get centerLocalDECount
+      int centerLocalDECount=centerDistgrid->getDELayout()->getLocalDeCount();
+ 
+      // Get distgrid for the corner staggerloc
+      DistGrid *cnrDistgrid;
+      raster_grid->getStaggerDistgrid(ESMCI_STAGGERLOC_CORNER, &cnrDistgrid);
+      
+      // Get cnrLocalDECount
+      int cnrLocalDECount=cnrDistgrid->getDELayout()->getLocalDeCount();
+
+      // Get index offsets for the corners around a center
+      int cnr_offset[NUM_QUAD_CORNERS][2];
+      _calc_corner_offset(raster_grid, cnr_offset);
+
+      // DO I NEED THIS??
+      // Get index offsets for the centers around a corner
+      //      int center_offset[NUM_QUAD_CORNERS][2];
+      //_calc_center_offset(cnr_offset, center_offset);
+
+      // DEBUG OUTPUT
+      // printf("offset=[%d %d] [%d %d]  [%d %d]  [%d %d]\n",cnr_offset[0][0],
+      //cnr_offset[0][1],cnr_offset[1][0],cnr_offset[1][1],cnr_offset[2][0],cnr_offset[2][1],
+      //cnr_offset[3][0], cnr_offset[3][1]);
+
+      // Create structure to accumulate polygons and use them to create mesh connection info
+      Globber globber;
+      
+      // Loop over center DEs adding cells
+      for (int lDE=0; lDE < centerLocalDECount; lDE++) {
+
+        // Get Center DE bounds
+        int ubnd[ESMF_MAXDIM];
+        int lbnd[ESMF_MAXDIM];
+        raster_grid->getDistExclusiveUBound(centerDistgrid, lDE, ubnd);
+        raster_grid->getDistExclusiveLBound(centerDistgrid, lDE, lbnd);
+        
+        // Get Corner DE bounds
+        int cnr_ubnd[ESMF_MAXDIM];
+        int cnr_lbnd[ESMF_MAXDIM];
+        raster_grid->getDistExclusiveUBound(cnrDistgrid, lDE, cnr_ubnd);
+        raster_grid->getDistExclusiveLBound(cnrDistgrid, lDE, cnr_lbnd);
+        
+        // DEBUG
+        //        printf("%d# lDE=%d CENTER lbnd=%d %d ubnd=%d %d\n",Par::Rank(),lDE,lbnd[0],lbnd[1],ubnd[0],ubnd[1]);
+        //printf("%d# lDE=%d CORNER lbnd=%d %d ubnd=%d %d\n",Par::Rank(),lDE,cnr_lbnd[0],cnr_lbnd[1],cnr_ubnd[0],cnr_ubnd[1]);
+
+        // Get localArray for lDE
+        LocalArray *localArray = raster_array->getLocalarrayList()[lDE];
+        
+        // Loop over bounds
+        for (int i0=lbnd[0]; i0<=ubnd[0]; i0++){
+          for (int i1=lbnd[1]; i1<=ubnd[1]; i1++){
+            
+            // Set index
+            int index[2];
+            index[0]=i0;
+            index[1]=i1;
+            
+            // De based index
+            int de_index[2];
+            de_index[0]=i0-lbnd[0];
+            de_index[1]=i1-lbnd[1];
+            
+            // Get corner ids for quad
+            int quad_cnr_ids[NUM_QUAD_CORNERS];
+            _get_quad_corner_ids_from_localDE(cnrDistgrid, lDE, de_index, cnr_offset,
+                                              quad_cnr_ids);
+
+
+            // Get value in array
+            ESMC_I4 value;
+            localArray->getDataInternal(index, &value);
+            
+            // DEBUG OUTPUT       
+            // printf("elem [%d %d] value=%d corners = %d %d %d %d \n",i0,i1,value,quad_cnr_ids[0],quad_cnr_ids[1],quad_cnr_ids[2],quad_cnr_ids[3]);
+
+            // Add to globber
+            globber.add(value, NUM_QUAD_CORNERS, quad_cnr_ids);
+            
+          }
+        }
+      }
+
+
+      // Get mesh info
+      globber.get_mesh_conn_info(mesh_num_nodes, mesh_node_ids, mesh_node_owners,
+                                 mesh_num_elems, mesh_elem_ids, mesh_elem_num_conns, mesh_elem_conns);
+
+      // Allocate space for node coords
+      mesh_node_coords=new double[mesh_orig_sdim*mesh_num_nodes];
+      
+      // Fill node coords from Grid
+      get_grid_coords_at_seqinds(raster_grid, ESMCI_STAGGERLOC_CORNER, mesh_num_nodes, mesh_node_ids, mesh_node_coords);
+      
+/* XMRKX */
+      
+            
+    } catch(std::exception &x) {
+      // catch Mesh exception return code
+      int rc;
+      if (x.what()) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                      x.what(), ESMC_CONTEXT,&rc);
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                      "UNKNOWN", ESMC_CONTEXT,&rc);
+      }
+      
+      // Throw to be caught one level up so we know where the error came from 
+      throw rc; 
+      
+    }catch(int localrc){
+      // catch standard ESMF return code
+      int rc;
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
+      
+      // Throw to be caught one level up so we know where the error came from 
+      throw rc;
+      
+    } catch(...){
+      
+      // catch standard anything else
+      int rc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                    "Caught unknown exception", ESMC_CONTEXT, &rc);
+      
+      // Throw to be caught one level up so we know where the error came from 
+      throw rc;    
+    }
+    
+  }
+
+// Go from a sequence indice in a distgrid to it's location in that distgrid in
+// terms of pet, localde, index, etc.
+// If not local, then localDE = -1
+// NOTE: for efficiency's sake this method currently only works for 2D distgrids
+void get_location_info_from_seqind_2D(int seqind, DistGrid *distgrid,
+                                   int &pet, int &localDE, int *index) {
+
+  // Local return code
+  int localrc;
+  
+  // This method only supports 2D Distgrids
+  if (distgrid->getDimCount() != 2) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                  "This method only works with 2D Distgrids.",
+                                  ESMC_CONTEXT, &localrc);
+    throw localrc;
+  }
+ 
+  // Calc tile and index from gid
+  int tile=0;
+  std::vector<int> vec_index(2,-1);
+  localrc=distgrid->getIndexTupleFromSeqIndex(seqind, vec_index, tile);
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
+    // Get DeLayout
+    DELayout *delayout=distgrid->getDELayout();
+
+    // Get number of DE's
+   int deCount=delayout->getDeCount();
+
+   // Get de Index lists
+   int const *minIndexPDimPDE=distgrid->getMinIndexPDimPDe();
+   int const *maxIndexPDimPDE=distgrid->getMaxIndexPDimPDe();
+
+   
+    // Get tile
+    const int *DETileList = distgrid->getTileListPDe();
+
+    // Loop through DEs
+    bool found_de=false;
+    int de=-1;
+    for (int d=0; d<deCount; d++) {
+
+      // If de isn't on the correct tile, then go on to next
+      if (tile != DETileList[d]) continue;
+
+      // Get De minIndex
+      int const *minIndex=minIndexPDimPDE+2*d;
+
+      // Get De maxIndex
+      int const *maxIndex=maxIndexPDimPDE+2*d;
+
+      // If de is empty, then skip
+      if ((maxIndex[0] < minIndex[0]) ||
+          (maxIndex[1] < minIndex[1])) continue;
+
+
+      // check if we're smaller than min
+      if ((vec_index[0] < minIndex[0]) ||
+          (vec_index[1] < minIndex[1])) continue;
+
+      // check if we're bigger than max
+      if ((vec_index[0] > maxIndex[0]) ||
+          (vec_index[1] > maxIndex[1])) continue;
+
+      // This point is on this de, so record de and exit loop
+      de=d;
+      found_de=true;
+      break;
+    }
+
+    // if not found then, error
+    if (!found_de) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                    "Sequence index unexpectedly not found in Distgrid.",
+                                    ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+
+    
+    //// Return information
+
+    // Get pet
+    pet=delayout->getPet(de);
+
+    // Get localDE (will be set to -1 if not local)
+    const int *deList=delayout->getDeList();
+    localDE=deList[de];
+    
+    // Get index
+    index[0]=vec_index[0];
+    index[1]=vec_index[1];
+}
+
+
+// This method takes a list of sequence inds (ids) and a corresponding array of doubles (id_coords). It then fills the
+// array of doubles with coords from the grid locations indicated by the ids.
+//
+// NOTE: Currently only supports 2D Grids, but wouldn't be hard to expand to 3D
+// 
+// Inputs:
+//   grid       - the grid to get the coordinates from
+//   staggerloc - the staggerloc in the grid to get the coordinates from
+//   num_seqinds    - the number of seqinds in ids
+//   seqinds        - the list of sequence inds (of size num_seqinds)
+// Outputs:
+//    seqinds_coords - the output coordinates (of size num_seqinds * the coordinate dimension (i.e. dimCount) of the Grid)
+//
+void get_grid_coords_at_seqinds(Grid *grid, int staggerloc, int num_seqinds, int *seqinds, double *seqind_coords) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "get_grid_coords_at_seqinds()"
+  
+  // Declare some useful variables
+  int localrc;
+
+  // Get grid dimCount
+  int dimCount=grid->getDimCount();  
+
+  // Currently only supports 2D grids
+  if (dimCount != 2) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                  "This method currently only supports 2D Grids.",
+                                  ESMC_CONTEXT, &localrc);
+    throw localrc;
+  }
+  
+  // Check if grid contains coordinates at the staggerloc
+  if (!grid->hasCoordStaggerLoc(staggerloc)) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+       "To use this method the Grid must contain coordinates at the requested staggerloc.", ESMC_CONTEXT, &localrc);
+    throw localrc;
+  }
+
+  // Get distgrid at staggerloc
+  DistGrid *distgrid=NULL;
+  grid->getStaggerDistgrid(staggerloc, &distgrid);
+  
+  // Loop over points and fill
+  for (int i=0; i<num_seqinds; i++) {
+
+    // Translate seqind to proc, localde, and indices
+    int pet=-1;
+    int localDE=-1;
+    int index[2]={-1,-1};
+    get_location_info_from_seqind_2D(seqinds[i], distgrid,
+                                     pet, localDE, index);
+
+    // If local, get coordinates
+    if (localDE > -1) {
+      // pointer to coords for current seqind
+      double *coords=seqind_coords+dimCount*i;
+
+      // Get coords at this seqind
+      localrc=grid->getCoordInternalConvert(staggerloc,
+                                            localDE, index, coords);
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+        throw localrc;  // bail out with exception
+      
+    } else { // Until we have parallel, this is an error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                    "This method can currently only get coordinates for local seqInds.", ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
+  }
+}
+
+
+
+// NOT SURE IF I NEED THESE YET
+#if 0
+
 
 
   static bool _get_global_id_from_localDE(DistGrid *distgrid, int localDE, int *index,
@@ -518,28 +1191,6 @@ using namespace ESMCI;
   }
 
 
-  // Calculate index offsets for corners around a given center
-  static void _calc_corner_offset(Grid *grid, int corner_offset[NUM_QUAD_CORNERS][2]) {
-    int default_offset[NUM_QUAD_CORNERS][2]={{0,0},{1,0},{1,1},{0,1}};
-
-    // Get Alignment for staggerloc
-    const int *staggerAlign= grid->getStaggerAlign(ESMCI_STAGGERLOC_CORNER);
-
-    // Get off set due to alignment
-    int align_off[2];
-    for (int i=0; i<2; i++) {
-      if (staggerAlign[i] < 1) align_off[i]=0;
-      else align_off[i]=-1;
-    }
-
-    // Change default offset to correspond with alignment
-    for (int i=0; i<NUM_QUAD_CORNERS; i++) {
-      for (int j=0; j<2; j++) {
-        corner_offset[i][j]=default_offset[i][j]+align_off[j];
-      }
-    }
-  }
-
   // Calculate index offsets for centers around a given corner
   // Since a given corner is one of the corners of the centers
   // surrounding it just invert the corner offsets
@@ -557,98 +1208,6 @@ using namespace ESMCI;
 #define BAD_PROC (std::numeric_limits<UInt>::max())
   bool gqcn_debug=false;
 
-  static void _get_quad_corner_nodes_from_tile(Mesh *mesh, DistGrid *cnrDistgrid, int tile, int index[2], int cnr_offset[NUM_QUAD_CORNERS][2],
-                                     int *local_node_index, std::vector<MeshObj*> *cnr_nodes, bool *_all_nodes_ok) {
-  // Init output
-  *_all_nodes_ok=true;
-
-
-  // Loop getting global ids
-  int cnr_gids[NUM_QUAD_CORNERS];
-  for (int i=0; i<NUM_QUAD_CORNERS; i++) {
-
-    // calc index of corner
-    int cnr_index[2];
-    cnr_index[0]=index[0]+cnr_offset[i][0];
-    cnr_index[1]=index[1]+cnr_offset[i][1];
-
-    // DEBUG
-    //   if (gqcn_debug) {
-    //  printf("%d# in _get_quad_corner_nodes BEFORE cnr_index=%d %d \n",Par::Rank(),cnr_index[0],cnr_index[1]);
-    //}
-
-    // Get global id, if we can't then leave
-    bool is_local;
-    if (!_get_global_id_from_tile(cnrDistgrid, tile, cnr_index,
-                        cnr_gids+i, &is_local)) {
-      *_all_nodes_ok=false;
-      return;
-    }
-
-    //if (gqcn_debug) {
-    //  printf("%d# in _get_quad_corner_nodes AFTER cnr_index=%d %d \n",Par::Rank(),cnr_index[0],cnr_index[1]);
-    //}
-
-  }
-
-  // Convert gids to nodes
-  for (int i=0; i<NUM_QUAD_CORNERS; i++) {
-
-    // get gid of this corner
-    int gid=cnr_gids[i];
-
-    // declare node that we're looking for
-    MeshObj *node;
-
-    // If a node with this gid already exists, then put into list
-    Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::NODE, gid);
-    if (mi != mesh->map_end(MeshObj::NODE)) {
-
-      // Get node pointer
-      node=&*mi;
-
-      // Put into list
-      (*cnr_nodes)[i]=node;
-
-      // Go to next iteration
-      continue;
-    }
-
-    // If we didn't find it then we need to make a new one
-
-    // Create new node in mesh object
-    node = new MeshObj(MeshObj::NODE,     // node...
-                                   gid,               // unique global id
-                                   *local_node_index
-                                   );
-    // Advance to next node index
-    (*local_node_index)++;
-
-    // Set owner to bad proc value and change later
-    node->set_owner(BAD_PROC);
-
-    // Eventually need to figure out pole id stuff
-    UInt nodeset=0; // UInt nodeset = gni->getPoleID();   // Do we need to partition the nodes in any sets?
-    mesh->add_node(node, nodeset);
-
-
-    // Put into list
-    (*cnr_nodes)[i]=node;
-  }
-}
-
-  static void _get_quad_corner_nodes_from_localDE(Mesh *mesh, DistGrid *cnrDistgrid, int localDE, int de_index[2], int cnr_offset[NUM_QUAD_CORNERS][2],
-                                     int *local_node_index, std::vector<MeshObj*> *cnr_nodes, bool *_all_nodes_ok) {
-
-    //// Translate localDE info into tile info ////
-    int tile;
-    int tile_index[ESMF_MAXDIM];
-    _convert_localDE_to_tile_info(cnrDistgrid, localDE, de_index, &tile, tile_index);
-
-    // Call into get get quad corner nodes from tile
-    _get_quad_corner_nodes_from_tile(mesh, cnrDistgrid, tile, tile_index, cnr_offset,
-                                     local_node_index, cnr_nodes, _all_nodes_ok);
-}
 
   void _gid_to_proc(int gid, DistGrid *distgrid, int *_proc) {
 
@@ -832,57 +1391,7 @@ using namespace ESMCI;
   }
 
 #endif
-  
- /* XMRKX */
 
-  void ESMCI_raster_to_mesh_create_info(Grid *raster_grid,
-                                        Array *raster_array,
-                                        InterArray<int> *raster_mask_values) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_raster_to_mesh_create_info()"
-    
-    try {
-      // local error code
-      int localrc;
-      
-      printf("In ESMCI_raster_to_mesh_create_info\n");
-
-      
-      
-    } catch(std::exception &x) {
-      // catch Mesh exception return code
-      int rc;
-      if (x.what()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                      x.what(), ESMC_CONTEXT,&rc);
-      } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                      "UNKNOWN", ESMC_CONTEXT,&rc);
-      }
-      
-      // Throw to be caught one level up so we know where the error came from 
-      throw rc; 
-      
-    }catch(int localrc){
-      // catch standard ESMF return code
-      int rc;
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
-      
-      // Throw to be caught one level up so we know where the error came from 
-      throw rc;
-      
-    } catch(...){
-      
-      // catch standard anything else
-      int rc;
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                    "Caught unknown exception", ESMC_CONTEXT, &rc);
-      
-      // Throw to be caught one level up so we know where the error came from 
-      throw rc;    
-    }
-    
-  }
 
 
 

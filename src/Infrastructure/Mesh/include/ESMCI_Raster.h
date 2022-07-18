@@ -46,6 +46,17 @@ using namespace ESMCI;
 
 void ESMCI_raster_to_mesh_create_info(Grid *raster_grid,
                                       Array *raster_array,
-                                      InterArray<int> *raster_mask_values);
+                                      InterArray<int> *raster_mask_values,
+                                      int &mesh_pdim, int &mesh_orig_sdim,
+                                      ESMC_CoordSys_Flag &mesh_coordSys,
+                                      int &mesh_num_nodes,
+                                      int *&mesh_node_ids,
+                                      double *&mesh_node_coords,
+                                      int *&mesh_node_owners,
+                                      int &mesh_num_elems,
+                                      int *&mesh_elem_ids,
+                                      int *&mesh_elem_num_conns,
+                                      int *&mesh_elem_conns
+                                      );
 
 #endif // ESMCI_RASTER_H

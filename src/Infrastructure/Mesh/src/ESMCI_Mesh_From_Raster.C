@@ -70,6 +70,10 @@ void ESMCI_mesh_create_from_raster(Grid *raster_grid,
                                    
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_raster()"
+
+  // Init out mesh
+  *out_mesh=NULL;
+
   
   // Try-catch block around main part of method
   try {
@@ -77,19 +81,98 @@ void ESMCI_mesh_create_from_raster(Grid *raster_grid,
     int localrc;
 
     printf("In mesh create from raster!! \n");
-
+    
     // Convert Raster information into Mesh create information
+    int orig_sdim;
+    int pdim;
+    ESMC_CoordSys_Flag coordSys;
+    int num_nodes;
+    int *node_ids;
+    double *node_coords;
+    int *node_owners;
+    int num_elems;
+    int *elem_ids;
+    int *elem_num_conns;
+    int *elem_conns;
     ESMCI_raster_to_mesh_create_info(raster_grid,
                                      raster_array,
-                                     raster_mask_values);
+                                     raster_mask_values,
+                                     pdim, orig_sdim, coordSys,
+                                     num_nodes,
+                                     node_ids,
+                                     node_coords,
+                                     node_owners,
+                                     num_elems,
+                                     elem_ids,
+                                     elem_num_conns,
+                                     elem_conns);
 
+    // Debug output
+    printf("MCFR: pdim=%d\n",pdim);
+    printf("MCFR: orig_sdim=%d\n",orig_sdim);
+    printf("MCFR: coordSys=%d\n",coordSys);
+    printf("MCFR: num_nodes=%d\n",num_nodes);
+    printf("MCFR: num_elems=%d\n",num_elems);
+
+    // Debug output node coords
+    // for (int i=0; i< num_nodes; i++) {
+    //  printf("%d ids=%d  coords=%f %f \n",i,node_ids[i],node_coords[2*i],node_coords[2*i+1]);
+    //}
+
+    
+    // Create mesh object
+    Mesh *mesh;
+    ESMCI_meshcreate(&mesh,
+                     &pdim, &orig_sdim, &coordSys, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
+      
+
+    // Add nodes
+    ESMCI_meshaddnodes(&mesh,
+                       &num_nodes, node_ids, node_coords, node_owners, NULL,
+                       &coordSys, &orig_sdim, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
+    
+
+    // Free node info
+    delete [] node_ids;
+    delete [] node_coords;
+    delete [] node_owners;
+
+
+    // Calculate total number of connections
+    int tot_elem_num_conns=0;
+    for (auto i=0; i<num_elems; i++) {
+      tot_elem_num_conns += elem_num_conns[i];
+    }
+
+    // Add elements
+    int areaPresent=0;
+    int elemCoordsPresent=0;
+    ESMCI_meshaddelements(&mesh,
+                          &num_elems, elem_ids, elem_num_conns, NULL,
+                          &areaPresent, NULL,
+                          &elemCoordsPresent, NULL,
+                          &tot_elem_num_conns, elem_conns, 
+                          &coordSys, &orig_sdim, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;
+
+      
+    // Free elem info
+    delete [] elem_ids;
+    delete [] elem_num_conns;
+    delete [] elem_conns;
+
+    
     // Not finished yet
-    Throw() << "Not finished yet!!";
+    //    Throw() << "Not finished yet!!";
     
 
     // Return final mesh
-    //    *out_mesh=tmp_mesh;
-
+    *out_mesh=mesh;
 
   } catch(std::exception &x) {
 

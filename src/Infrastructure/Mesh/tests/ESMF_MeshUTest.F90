@@ -7851,11 +7851,15 @@ subroutine test_mesh_create_from_raster(correct, rc)
 
   type(ESMF_Grid) :: grid
   type(ESMF_Mesh) :: mesh
-  type(ESMF_Field) :: field
-  type(ESMF_Array) :: array
+  type(ESMF_Field) :: field, fieldR8
+  type(ESMF_Array) :: array, arrayR8
   type(ESMF_VM) :: vm
   integer :: localPet, petCount
-
+  integer :: lDE, lDECount
+  integer :: i1,i2,clbnd(2),cubnd(2)
+  integer(ESMF_KIND_I4), pointer :: rasterPtr(:,:)
+  real(ESMF_KIND_R8), pointer :: rasterPtrR8(:,:)
+  
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
   if (rc /= ESMF_SUCCESS) return
@@ -7878,7 +7882,7 @@ subroutine test_mesh_create_from_raster(correct, rc)
     rc=ESMF_FAILURE
     return
   endif
-
+ 
 
   ! Create field
   field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_I4,  rc=localrc)
@@ -7887,23 +7891,116 @@ subroutine test_mesh_create_from_raster(correct, rc)
       return
    endif
 
+   ! Get array from field
+   call ESMF_FieldGet(field, localDECount=lDECount, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   
    ! Fill raster field
+   do lDE=0,lDECount-1
+
+      ! Get pointer
+      call ESMF_FieldGet(field, lDE, rasterPtr, &
+           computationalLBound=clbnd,computationalUBound=cubnd,  rc=localrc)
+      if (localrc /=ESMF_SUCCESS) then
+         rc=ESMF_FAILURE
+         return
+      endif
+
+      ! Loop over DE memory setting raster value
+      do i1=clbnd(1),cubnd(1)
+         do i2=clbnd(2),cubnd(2)
+
+            ! Set raster value to give 4 patches
+            rasterPtr(i1,i2)=((i1+i2)/6) + 1 ! +1 to not have 0
+            
+         enddo
+      enddo
+   enddo
+
    
+   ! Debug output
+
+   ! Create R8 field
+   fieldR8 = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R8,  rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
    
+   ! Copy raster field to R8 version for output
+   do lDE=0,lDECount-1
+
+      ! Get pointer
+      call ESMF_FieldGet(field, lDE, rasterPtr, &
+           computationalLBound=clbnd,computationalUBound=cubnd,  rc=localrc)
+      if (localrc /=ESMF_SUCCESS) then
+         rc=ESMF_FAILURE
+         return
+      endif
+
+      ! Get R8 pointer
+      call ESMF_FieldGet(fieldR8, lDE, rasterPtrR8, &
+           rc=localrc)
+      if (localrc /=ESMF_SUCCESS) then
+         rc=ESMF_FAILURE
+         return
+      endif
+
+      ! Loop over DE memory setting raster value
+      do i1=clbnd(1),cubnd(1)
+         do i2=clbnd(2),cubnd(2)
+
+            ! Set raster value to give 4 patches
+            rasterPtrR8(i1,i2)=REAL(rasterPtr(i1,i2))
+            
+         enddo
+      enddo
+   enddo
+
+   ! Get R8 array from field
+   call ESMF_FieldGet(fieldR8, array=arrayR8, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+   
+
+   ! Write cnrs to file
+   call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CORNER, filename="raster_grid_cnr", &
+        rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   ! Write centers to file
+   call ESMF_GridWriteVTK(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="raster_grid_cntr", &
+        array1=arrayR8, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   
+
    ! Get array from field
    call ESMF_FieldGet(field, array=array, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
    endif
-
+   
    ! Create Mesh structure from raster info
    mesh=ESMF_MeshCreate(grid, array, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
    endif
-#if 0
+#if 1
    ! Output Mesh for debugging
    call ESMF_MeshWrite(mesh,"mesh_from_raster",rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
