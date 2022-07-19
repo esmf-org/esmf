@@ -544,19 +544,6 @@ int IO::write(
 
   for (it = objects.begin(); it < objects.end(); ++it) {
     Array *temp_array_p = (*it)->getArray();  // default to caller-provided Array
-    DistGrid *dg = temp_array_p->getDistGrid ();
-
-    int tilecount = dg->getTileCount ();
-    if (tilecount != 1) {
-      localrc = ESMF_RC_NOT_IMPL;
-    std::stringstream errmsg;
-    errmsg << "tile count of " << tilecount << " != 1 - not supported yet";
-    if (ESMC_LogDefault.MsgFoundError(localrc, errmsg.str(), ESMC_CONTEXT, &rc)) {
-        // Close the file but return original error even if close fails.
-        localrc = close();
-        return rc;
-      }
-    }
 
     std::vector<std::string> dimLabels;
     // Grid-level dimension labels
