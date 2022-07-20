@@ -104,6 +104,9 @@ class BuildCommand(AbstractESMFCommand, _build):
         if isinstance(self.plat_name, type(None)):
             self.plat_name = get_platform()
 
+        if self.ESMFMKFILE is None:
+            raise NameError("ESMFMKFILE environment variable is not set")
+
     def run(self):
         super().run()
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
