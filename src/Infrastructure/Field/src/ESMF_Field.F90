@@ -123,7 +123,7 @@ module ESMF_FieldMod
 #endif
     !private       
     type (ESMF_FieldType), pointer :: ftypep
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------

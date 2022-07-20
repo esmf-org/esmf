@@ -459,9 +459,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Set the name in Base object
     if (present(name)) then
-      call c_ESMC_SetName(array, "Array", name, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (array%isNamedAlias) then
+        array%name = trim(name)
+      else
+        call c_ESMC_SetName(array, "Array", name, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     ! Deal with (optional) array arguments

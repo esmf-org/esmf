@@ -886,6 +886,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (cplcomp%isNamedAlias .and. present(name)) then
+      ! access NamedAlias name
+      name = trim(cplcomp%name)
+    endif
+
     ! call Comp method
     call ESMF_CompStatusGet(compStatus, &
       clockIsPresent = clockIsPresent, &
@@ -1900,12 +1905,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! call Comp method
-    call ESMF_CompSet(cplcomp%compp, name, clock=clock, configFile=configFile, &
-      config=config, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (cplcomp%isNamedAlias .and. present(name)) then
+      ! set NamedAlias name
+      cplcomp%name = trim(name)
+      ! call Comp method (without name)
+      call ESMF_CompSet(cplcomp%compp, clock=clock, &
+        configFile=configFile, config=config, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! call Comp method
+      call ESMF_CompSet(cplcomp%compp, name=name, clock=clock, &
+        configFile=configFile, config=config, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
