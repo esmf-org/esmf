@@ -445,11 +445,7 @@ contains
         return
     case (ESMF_STATEITEM_STATE%ot)
       if (present(name)) then
-        call ESMF_GetName(stateItem%datap%spp%base, name, localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) &
-          return
+        name = stateItem%namep
       endif
     case default
       call ESMF_LogSetError(rcToCheck=ESMF_RC_INTNRL_BAD, &

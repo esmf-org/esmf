@@ -99,6 +99,7 @@ contains !======================================================================
   subroutine TestStateNamedAlias(rc)
     integer, intent(out)  :: rc
     type(ESMF_State)      :: object1, object2
+    type(ESMF_State)      :: state
 
     object1 = ESMF_StateCreate(name="Test Name 1", rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -164,6 +165,36 @@ contains !======================================================================
     call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
 
+    state = ESMF_StateCreate(rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Add Alias and NamedAlias to State State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_StateAdd(state, (/object1, object2/), rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Retrieve Alias from State State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_Stateget(state, name1, object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Retrieve NamedAlias from State State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_Stateget(state, name2, object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_StateDestroy(state, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
     !------------------------------------------------------------------------
     !NEX_UTest
     write(name, *) "Destroy object through NamedAlias State Test"
@@ -211,6 +242,36 @@ contains !======================================================================
     testFlag = (name1 /= name2)
     call ESMF_Test(testFlag, name, failMsg, result, ESMF_SRCLINE)
     !------------------------------------------------------------------------
+
+    state = ESMF_StateCreate(rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Add Alias and NamedAlias to State State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_StateAdd(state, (/object1, object2/), rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Retrieve Alias from State State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_Stateget(state, name1, object1, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Retrieve NamedAlias from State State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_Stateget(state, name2, object2, rc=rc)
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
+    call ESMF_StateDestroy(state, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
 
     !------------------------------------------------------------------------
     !NEX_UTest
@@ -868,7 +929,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Add Alias and NamedAlias to State FieldBundle Test"
+    write(name, *) "Add Alias and NamedAlias to State Field Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_StateAdd(state, (/object1, object2/), rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -876,7 +937,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Retrieve Alias from State FieldBundle Test"
+    write(name, *) "Retrieve Alias from State Field Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Stateget(state, name1, object1, rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -884,7 +945,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Retrieve NamedAlias from State FieldBundle Test"
+    write(name, *) "Retrieve NamedAlias from State Field Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Stateget(state, name2, object2, rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -947,7 +1008,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Add Alias and NamedAlias to State FieldBundle Test"
+    write(name, *) "Add Alias and NamedAlias to State Field Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_StateAdd(state, (/object1, object2/), rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -955,7 +1016,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Retrieve Alias from State FieldBundle Test"
+    write(name, *) "Retrieve Alias from State Field Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Stateget(state, name1, object1, rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -963,7 +1024,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Retrieve NamedAlias from State FieldBundle Test"
+    write(name, *) "Retrieve NamedAlias from State Field Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Stateget(state, name2, object2, rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1085,7 +1146,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Add Alias and NamedAlias to State FieldBundle Test"
+    write(name, *) "Add Alias and NamedAlias to State ArrayBundle Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_StateAdd(state, (/object1, object2/), rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1093,7 +1154,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Retrieve Alias from State FieldBundle Test"
+    write(name, *) "Retrieve Alias from State ArrayBundle Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Stateget(state, name1, object1, rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1101,7 +1162,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Retrieve NamedAlias from State FieldBundle Test"
+    write(name, *) "Retrieve NamedAlias from State ArrayBundle Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Stateget(state, name2, object2, rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1211,7 +1272,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Add Alias and NamedAlias to State FieldBundle Test"
+    write(name, *) "Add Alias and NamedAlias to State Array Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_StateAdd(state, (/object1, object2/), rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1219,7 +1280,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Retrieve Alias from State FieldBundle Test"
+    write(name, *) "Retrieve Alias from State Array Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Stateget(state, name1, object1, rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1227,7 +1288,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Retrieve NamedAlias from State FieldBundle Test"
+    write(name, *) "Retrieve NamedAlias from State Array Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Stateget(state, name2, object2, rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1290,7 +1351,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Add Alias and NamedAlias to State FieldBundle Test"
+    write(name, *) "Add Alias and NamedAlias to State Array Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_StateAdd(state, (/object1, object2/), rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1298,7 +1359,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Retrieve Alias from State FieldBundle Test"
+    write(name, *) "Retrieve Alias from State Array Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Stateget(state, name1, object1, rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1306,7 +1367,7 @@ contains !======================================================================
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Retrieve NamedAlias from State FieldBundle Test"
+    write(name, *) "Retrieve NamedAlias from State Array Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     call ESMF_Stateget(state, name2, object2, rc=rc)
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
