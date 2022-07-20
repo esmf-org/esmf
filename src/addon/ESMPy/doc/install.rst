@@ -82,15 +82,13 @@ with the following command issued from the top level ESMPy directory:
 
 .. code::
 
-    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>/esmf.mk install
+    ESMFMKFILE=<DIR_TO_esmf.mk>/esmf.mk python -m pip install .
 
 - custom install location:
 
 .. code::
 
-    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>/esmf.mk
-
-    python setup.py install --prefix=<custom_install_location>
+    ESMFMKFILE=<DIR_TO_esmf.mk>/esmf.mk python -m pip install . --prefix=<custom_install_location>
 
     setenv PYTHONPATH <custom_install_location>/lib/\*/site_packages
 
