@@ -17,7 +17,7 @@ The following packages are *optional*:
 * ESMF installation with NetCDF - required to create :class:`Grids <ESMF.api.grid.Grid>` and :class:`Meshes <ESMF.api.mesh.Mesh>` from file
     - NetCDF must be built as a shared library for ESMPy installation to succeed
 * `mpi4py <http://mpi4py.scipy.org/>`_- python bindings to MPI, needed to run some of the parallel regridding examples
-* `nose <https://nose.readthedocs.org/en/latest/>`_ - for nose testing
+* `nose2 <https://docs.nose2.io/en/latest/>`_ - for nose testing
 
 ----------------
 Getting the code
@@ -59,40 +59,24 @@ Development versions can be found in the ``esmpy_dev`` channel:
 Installing ESMPy from Source
 ----------------------------
 
-When installing from source, ESMPy requires a pointer to a file named esmf.mk 
-that is generated during an ESMF installation.  The path of this file is:
+When installing from source, ESMPy uses `pip <https://pypi.org/project/pip//>`_ 
+to build and install the package. This requires setting an environment variable 
+pointing to a file named esmf.mk that is generated during an ESMF installation.  
+The path of this file is:
 
 .. code::
 
     <ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
 
-If the ``ESMFMKFILE`` flag is set when building ESMPy then it will not need to be
-referenced again.  If not, an environment variable of the same name must be set
-with the path to the esmf.mk file every time a new shell is initiated.
-
-ESMPy can be installed in a custom location using the
-``--prefix``, ``--home``, or ``--install-base`` flags to the install command.  If this
-is done, then this location needs to be added to the ``PYTHONPATH`` environment
-variable every time a new shell is initiated.  If a
-custom install location is not specified, ESMPy will be installed in the
-standard Python package installation directory on that particular machine.
+If ``ESMFMKFILE`` is set when building ESMPy then it will not need to be
+referenced again. 
 
 An installation of ESMPy in the default location for Python packages can be done
 with the following command issued from the top level ESMPy directory:
 
 .. code::
 
-    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>/esmf.mk install
-
-- custom install location:
-
-.. code::
-
-    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>/esmf.mk
-
-    python setup.py install --prefix=<custom_install_location>
-
-    setenv PYTHONPATH <custom_install_location>/lib/\*/site_packages
+    pip install .
 
 Please contact esmf_support@ucar.edu with any questions.
 
@@ -172,5 +156,3 @@ Testing related:
 
 - Nightly regression testing is limited to a small subset of the ESMF test platforms,
   including Darwin and Linux running gfortran with openMPI.
-
-
