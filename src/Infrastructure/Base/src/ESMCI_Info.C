@@ -858,8 +858,11 @@ void Info::get(ESMCI::Info &info, key_t &key) const {
 #endif
 
   json j;
+  json const *ts = nullptr;
   try {
     j = this->get<json>(key);
+    json::json_pointer jpath = this->formatKey(key);
+    update_json_pointer(this->getTypeStorage(), &ts, jpath, true);
 
 #if 0
     std::string msg2 = std::string(ESMC_METHOD) + ": j dump=" + j.dump();
@@ -867,9 +870,11 @@ void Info::get(ESMCI::Info &info, key_t &key) const {
 #endif
     
     check_init_from_json(j);
+    check_init_from_json(*ts);
   }
   ESMF_CATCH_INFO
   info.getStorageRefWritable() = std::move(j);
+  info.getTypeStorageWritable() = std::move(*ts);
 
 #if 0
   std::string msg3 = std::string(ESMC_METHOD) + ": info dump=" + info.dump(0);

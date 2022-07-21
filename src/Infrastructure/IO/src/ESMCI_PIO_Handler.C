@@ -1117,7 +1117,7 @@ void PIO_Handler::arrayWrite(
       }
     }
     if (gblAttPack) {
-      attPackPut (NULL, gblAttPack, &localrc);
+      attPackPut (NC_GLOBAL, gblAttPack, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) {
         return;
