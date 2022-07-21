@@ -8,6 +8,8 @@ try:
 except ImportError:
     from nose import SkipTest
 
+import unittest
+
 import os
 import inspect
 
@@ -304,7 +306,7 @@ class TestMesh(TestBase):
 
     @attr('data')
     @attr('serial')
-    @expected_failure
+    @unittest.expectedFailure
     #TODO: remove expected failure once we have a smaller data file with mesh element coordinates to use
     # TODO: have to define slicing for mesh element coordinates as well..
     def test_slice_mesh_created_from_file_elem_coords(self):

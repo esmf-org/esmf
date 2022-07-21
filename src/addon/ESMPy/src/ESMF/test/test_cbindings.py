@@ -10,6 +10,7 @@ from ESMF.test.base import TestBase, attr
 
 import numpy as np
 
+import unittest
 
 class TestCbindings(TestBase):
 
@@ -33,7 +34,7 @@ class TestCbindings(TestBase):
         interfaceint = ESMP_InterfaceInt(Narray)
 
 
-    @expected_failure
+    @unittest.expectedFailure
     def test_interfaceint2(self):
         # This test should fail
         try:
@@ -43,7 +44,7 @@ class TestCbindings(TestBase):
         except:
             raise TypeError('FAIL: tuples cannot be used in place of numpy.array')
 
-    @expected_failure
+    @unittest.expectedFailure
     def test_interfaceint3(self):
         # This test should fail
         try:

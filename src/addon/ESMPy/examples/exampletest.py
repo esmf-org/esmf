@@ -60,7 +60,7 @@ class TestExamples(TestBase):
 
     # only example, not in documentation
     @attr('slow')
-    def test_tripole_regrid(self):
+    def _tripole_regrid(self):
         from . import tripole_regrid
 
     # only example, not in documentation

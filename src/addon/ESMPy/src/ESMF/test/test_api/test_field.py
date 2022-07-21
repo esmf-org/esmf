@@ -100,7 +100,7 @@ class TestField(TestBase):
     @attr('serial')
     @attr('slow')
     #nosetests src/ESMF/test/test_api/test_field.py:TestField.test_field_create_2d_grid
-    def test_field_create_2d_grid(self):
+    def _field_create_2d_grid(self):
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
             periodic=[[None, None, None], [None, None, 0], [None, None, 1],
@@ -150,7 +150,7 @@ class TestField(TestBase):
 
     @attr('serial')
     @attr('slow')
-    def test_field_create_3d_grid(self):
+    def _field_create_3d_grid(self):
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
             periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
@@ -201,7 +201,7 @@ class TestField(TestBase):
                 "The following combinations of parameters failed to create a proper Field: " + str(len(fail)))
 
     @attr('slow')
-    def test_field_create_2d_mesh(self):
+    def _field_create_2d_mesh(self):
         parallel = False
         if pet_count() > 1:
             parallel = True

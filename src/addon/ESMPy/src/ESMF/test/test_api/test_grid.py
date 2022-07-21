@@ -11,6 +11,7 @@ from ESMF.test.base import TestBase, attr
 import numpy as np
 import os
 import inspect
+import unittest
 
 class TestGrid(TestBase):
     
@@ -179,7 +180,7 @@ class TestGrid(TestBase):
 
     @attr('serial')
     @attr('slow')
-    def test_grid_create_2d(self):
+    def _grid_create_2d(self):
         keywords = dict(
             # periodic specifies all valid combos of [pole_kind, num_peri_dims, periodic_dim, pole_dim]
             pole_kind=[[PoleKind.NONE, PoleKind.NONE],
@@ -225,7 +226,7 @@ class TestGrid(TestBase):
 
     @attr('serial')
     @attr('slow')
-    def test_grid_create_3d(self):
+    def _grid_create_3d(self):
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
             periodic=[[None, None, None], [None, None, 0], [None, None, 1], [None, None, 2],
@@ -688,7 +689,7 @@ class TestGrid(TestBase):
             raise NameError('grid_create_from_file_scrip_balanced_restlast failed!')
 
     @attr('data')
-    @expected_failure
+    @unittest.expectedFailure
     def test_grid_create_from_file_scrip_decomp_balanced_cyclic(self):
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.BALANCED, DecompFlag.CYCLIC],
@@ -741,7 +742,7 @@ class TestGrid(TestBase):
             raise NameError('grid_create_from_file_scrip_restfirst_restlast failed!')
 
     @attr('data')
-    @expected_failure
+    @unittest.expectedFailure
     def test_grid_create_from_file_scrip_decomp_restfirst_cyclic(self):
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.CYCLIC],
@@ -794,7 +795,7 @@ class TestGrid(TestBase):
             raise NameError('grid_create_from_file_scrip_restlast_restlast failed!')
 
     @attr('data')
-    @expected_failure
+    @unittest.expectedFailure
     def test_grid_create_from_file_scrip_decomp_restlast_cyclic(self):
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.CYCLIC],
@@ -808,7 +809,7 @@ class TestGrid(TestBase):
             raise NameError('grid_create_from_file_scrip_restlast_cyclic failed!')
 
     @attr('data')
-    @expected_failure
+    @unittest.expectedFailure
     def test_grid_create_from_file_scrip_decomp_cyclic_balanced(self):
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.BALANCED],
@@ -822,7 +823,7 @@ class TestGrid(TestBase):
             raise NameError('grid_create_from_file_scrip_cyclic_balanced failed!')
 
     @attr('data')
-    @expected_failure
+    @unittest.expectedFailure
     def test_grid_create_from_file_scrip_decomp_cyclic_restfirst(self):
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.RESTFIRST],
@@ -836,7 +837,7 @@ class TestGrid(TestBase):
             raise NameError('grid_create_from_file_scrip_cyclic_restfirst failed!')
 
     @attr('data')
-    @expected_failure
+    @unittest.expectedFailure
     def test_grid_create_from_file_scrip_decomp_cyclic_restlast(self):
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.RESTLAST],
@@ -850,7 +851,7 @@ class TestGrid(TestBase):
             raise NameError('grid_create_from_file_scrip_cyclic_restlast failed!')
 
     @attr('data')
-    @expected_failure
+    @unittest.expectedFailure
     def test_grid_create_from_file_scrip_decomp_cyclic_cyclic(self):
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.CYCLIC],

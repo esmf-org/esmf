@@ -7,6 +7,8 @@ from ESMF import *
 from ESMF.interface.cbindings import *
 from ESMF.test.base import TestBase, attr
 
+import unittest
+
 class TestLocStream(TestBase):
 
     def test_create(self):
@@ -67,7 +69,7 @@ class TestLocStream(TestBase):
 
         assert(np.all(locstream["ESMF:X"] == np.array([0, 1, 2, 3, 4])))
 
-    @expected_failure
+    @unittest.expectedFailure
     def test_pickle(self):
         locstream = LocStream(10, name="Test LocStream")
 
@@ -75,7 +77,7 @@ class TestLocStream(TestBase):
 
         pickle.dumps(locstream)
 
-    @expected_failure
+    @unittest.expectedFailure
     def test_properties(self):
         locstream = LocStream(10, name="Test LocStream")
         locstream["ESMF:X"] = (1, 2, 3, 4, 5)
