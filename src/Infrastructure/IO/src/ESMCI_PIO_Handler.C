@@ -1917,6 +1917,12 @@ int PIO_IODescHandler::constructPioDecomp(
     return ESMF_RC_NOT_IMPL;
   }
 
+  // FIXME(wjs, 2022-07-20) Do we need a tile argument to this function (replacing the
+  // local tile variable)? Otherwise, need to have a loop over tiles.
+  int tile = 1;
+  // TODO: To support multiple DEs per PE, we would need to extend this to be an array
+  bool thisDeIsThisTile = false;
+
   // We need the total number of elements
   pioDofCount = 0;
   int const *localDeToDeMap = arr_p->getDistGrid()->getDELayout()->getLocalDeToDeMap();
@@ -1924,11 +1930,17 @@ int PIO_IODescHandler::constructPioDecomp(
   for (localDe = 0; localDe < localDeCount; ++localDe) {
     // consider the fact that replicated dimensions may lead to local elements in the
     // Array, that are not accounted for by actual exclusive elements in the DistGrid
-    if (arr_p->getDistGrid()->getElementCountPDe()[localDeToDeMap[localDe]]>0)
+    int globalDe = localDeToDeMap[localDe];
+    int tileOfThisDe = arr_p->getDistGrid()->getTileListPDe()[globalDe];
+    if (tileOfThisDe == tile) {
+      // TODO: As noted above, to support multiple DEs per PE, we would need to extend this to be an array
+      thisDeIsThisTile = true;
+    }
+    if (thisDeIsThisTile && arr_p->getDistGrid()->getElementCountPDe()[globalDe]>0)
       pioDofCount += arr_p->getTotalElementCountPLocalDe()[localDe];
   }
 
-  //  PRINTMSG("(" << my_rank << "): pioDofCount = " << pioDofCount);
+  PRINTMSG("pioDofCount = " << pioDofCount);
   try {
     // Allocate space for the DOF list
     pioDofList = new MPI_Offset[pioDofCount];
@@ -1943,8 +1955,11 @@ int PIO_IODescHandler::constructPioDecomp(
     return localrc;
   }
   // Fill in the PIO DOF list (local to global map)
-  // TODO: This is where we would need to make some magic to include
-  // TODO: multiple DEs.
+  // TODO: This is where we would need to make some magic to include multiple DEs.
+  // TODO: (Particular care may be needed in the multi-tile case, where some DEs on the
+  // TODO: current PE may be part of the current tile, while others are not.
+  // TODO: For now, with one DE, we can assume that, if pioDofCount>0, then this DE
+  // TODO: corresponds to the current tile.)
   localDe = 0;
   if (pioDofCount>0){
     // construct the mapping of the local elements
@@ -1992,12 +2007,9 @@ int PIO_IODescHandler::constructPioDecomp(
     }
   }
 
-  int tile = 0;
   distGrid = arr_p->getDistGrid();
   const int *minIndexPDimPTile = distGrid->getMinIndexPDimPTile();
   const int *maxIndexPDimPTile = distGrid->getMaxIndexPDimPTile();
-  const int *totalLBound = arr_p->getTotalLBound();
-  const int *totalUBound = arr_p->getTotalUBound();
 
 // NB: Is this part of the restrictions on Array I/O?
 //    nDims = arr_p->getRank();
@@ -2008,11 +2020,11 @@ int PIO_IODescHandler::constructPioDecomp(
     handle->dims = (int *)NULL;
   }
   handle->dims = new int[handle->nDims];
-  // Step through the distGrid dimensions, getting the size of the
-  // dimension.
+  // Step through the distGrid dimensions, getting the size of the dimension. (This is the
+  // size of the full array across all PEs.)
   for (int i = 0; i < handle->nDims; i++) {
-    handle->dims[i] = (maxIndexPDimPTile[(tile * handle->nDims) + i] -
-                       minIndexPDimPTile[(tile * handle->nDims) + i] + 1);
+    handle->dims[i] = (maxIndexPDimPTile[((tile - 1) * handle->nDims) + i] -
+                       minIndexPDimPTile[((tile - 1) * handle->nDims) + i] + 1);
   }
 
   handle->arrayRank = arr_p->getRank();
@@ -2021,20 +2033,39 @@ int PIO_IODescHandler::constructPioDecomp(
     handle->arrayShape = (int *)NULL;
   }
   handle->arrayShape = new int[handle->arrayRank];
-  for (int i = 0; i < handle->arrayRank; ++i) {
-    handle->arrayShape[i] = (totalUBound[(tile * handle->arrayRank) + i] -
-                             totalLBound[(tile * handle->arrayRank) + i] +
-                             1);
+  // Get the size of each dimension owned locally.
+  if (thisDeIsThisTile) {
+    const int *totalLBound = arr_p->getTotalLBound();
+    const int *totalUBound = arr_p->getTotalUBound();
+    for (int i = 0; i < handle->arrayRank; ++i) {
+      // TODO: This is another place that would need to be generalized to handle more than
+      // one DE per PE: totalLBound and totalUBound are dimensioned
+      // [redDimCount*ssiLocalDeCount], so the below expression (which doesn't include the
+      // current DE count) would need to be adjusted to handle multiple DEs.
+      handle->arrayShape[i] = (totalUBound[i] - totalLBound[i] + 1);
+    }
+  } else {
+    // This DE is for some other tile, so as far as this tile is concerned, we own 0 elements
+    for (int i = 0; i < handle->arrayRank; ++i) {
+      handle->arrayShape[i] = 0;
+    }
   }
 
 #ifdef ESMFIO_DEBUG
   {
-    char dimstr[64];
+    char shapestr[64];
     for (int i = 0; i < handle->arrayRank; i++) {
-      sprintf((dimstr + (5 * i)), " %03d%c", handle->arrayShape[i],
+      sprintf((shapestr + (5 * i)), " %03d%c", handle->arrayShape[i],
               (((handle->arrayRank - 1) == i) ? ' ' : ','));
     }
-    PRINTMSG(", IODesc shape = [" << dimstr << "], calling pio_initdecomp");
+    PRINTMSG(", IODesc shape = [" << shapestr << "], calling pio_initdecomp");
+
+    char dimstr[64];
+    for (int i = 0; i < handle->nDims; i++) {
+        sprintf((dimstr + (5 * i)), " %03d%c", handle->dims[i],
+                (((handle->nDims - 1) == i) ? ' ' : ','));
+    }
+    PRINTMSG(", IODesc dims = [" << dimstr << "]");
   }
   PIOc_set_log_level(PIO_DEBUG_LEVEL);
 #endif // ESMFIO_DEBUG
