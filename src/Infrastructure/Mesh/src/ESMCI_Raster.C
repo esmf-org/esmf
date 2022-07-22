@@ -53,6 +53,8 @@ using namespace ESMCI;
 using namespace std;
 
 
+// TODO: Better name for Globber and Glob....
+
 class Globber {
 
   class Glob {

@@ -7852,13 +7852,16 @@ subroutine test_mesh_create_from_raster(correct, rc)
   type(ESMF_Grid) :: grid
   type(ESMF_Mesh) :: mesh
   type(ESMF_Field) :: field, fieldR8
+  type(ESMF_Field) :: meshfield
   type(ESMF_Array) :: array, arrayR8
   type(ESMF_VM) :: vm
   integer :: localPet, petCount
   integer :: lDE, lDECount
   integer :: i1,i2,clbnd(2),cubnd(2)
+  integer :: clbnd1D(1),cubnd1D(1)
   integer(ESMF_KIND_I4), pointer :: rasterPtr(:,:)
   real(ESMF_KIND_R8), pointer :: rasterPtrR8(:,:)
+    real(ESMF_KIND_R8), pointer :: farrayPtr1DR8(:)
   
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
@@ -8009,6 +8012,28 @@ subroutine test_mesh_create_from_raster(correct, rc)
    endif
 #endif
 
+
+   ! Create field on Mesh
+   meshField = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_R8, &
+        meshloc=ESMF_MESHLOC_ELEMENT, rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+   
+   ! Get size as a sanity check
+   call ESMF_FieldGet(meshfield, 0, farrayPtr1DR8,&
+        computationalLBound=clbnd1D,computationalUBound=cubnd1D,  rc=localrc)
+   if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
+   write(*,*) "meshField=",clbnd1D(1),cubnd1D(1)
+
+
+
+   
    ! Get rid of Grid
    call ESMF_GridDestroy(grid, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
