@@ -1885,6 +1885,7 @@ int PIO_IODescHandler::constructPioDecomp(
 
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;   // local return code
+  int rc;
   int localDe;                      // The DE being processed
   int localDeCount;                 // The number of DEs on this PET
   int pioDofCount;                  // Number
@@ -1930,13 +1931,14 @@ int PIO_IODescHandler::constructPioDecomp(
   for (localDe = 0; localDe < localDeCount; ++localDe) {
     // consider the fact that replicated dimensions may lead to local elements in the
     // Array, that are not accounted for by actual exclusive elements in the DistGrid
-    int globalDe = localDeToDeMap[localDe];
-    int tileOfThisDe = arr_p->getDistGrid()->getTileListPDe()[globalDe];
+    int tileOfThisDe = arr_p->getDistGrid()->getTilePLocalDe(localDe, &rc);
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc))
+      return localrc;
     if (tileOfThisDe == tile) {
       // TODO: As noted above, to support multiple DEs per PE, we would need to extend this to be an array
       thisDeIsThisTile = true;
     }
-    if (thisDeIsThisTile && arr_p->getDistGrid()->getElementCountPDe()[globalDe]>0)
+    if (thisDeIsThisTile && arr_p->getDistGrid()->getElementCountPDe()[localDeToDeMap[localDe]]>0)
       pioDofCount += arr_p->getTotalElementCountPLocalDe()[localDe];
   }
 
@@ -2073,7 +2075,6 @@ int PIO_IODescHandler::constructPioDecomp(
   for(int i=0; i<handle->nDims; i++)
       ddims[i] = handle->dims[handle->nDims - i - 1];
   // Create the decomposition
-  int *rc;
   ESMCI_IOREGION_ENTER("PIOc_InitDecomp");
   PIOc_InitDecomp(iosys, handle->basepiotype, handle->nDims,
                   ddims, pioDofCount, pioDofList,

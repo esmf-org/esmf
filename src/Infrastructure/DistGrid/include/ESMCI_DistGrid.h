@@ -242,6 +242,7 @@ namespace ESMCI {
       if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
       return tileListPDe;
     }
+    int getTilePLocalDe(int localDe, int *rc) const;
     int const *getContigFlagPDimPDe() const {
       if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
       return contigFlagPDimPDe;
