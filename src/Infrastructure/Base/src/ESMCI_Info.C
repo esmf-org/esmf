@@ -863,7 +863,7 @@ void Info::get(ESMCI::Info &info, key_t &key) const {
     j = this->get<json>(key);
     check_init_from_json(j);    
 
-    const json &type_storage = info.getTypeStorage();    
+    const json &type_storage = this->getTypeStorage();    
     if (!type_storage.is_null() && type_storage.size() > 0) {
       json::json_pointer jpath = this->formatKey(key);
       update_json_pointer(this->getTypeStorage(), &ts, jpath, true);
