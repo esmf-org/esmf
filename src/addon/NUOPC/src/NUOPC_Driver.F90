@@ -4635,6 +4635,16 @@ module NUOPC_Driver
         return  ! bail out
     endif
 
+    ! Call the SetVM on the added component
+    call NUOPC_CompSetVM(cmEntry%wrap%component, &
+      sharedObj=sharedObj, userRc=userrc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
     ! Call the SetServices on the added component
     call NUOPC_CompSetServices(cmEntry%wrap%component, &
       sharedObj=sharedObj, userRc=userrc, rc=localrc)
