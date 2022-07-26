@@ -75,7 +75,7 @@ script_info: test_esmfmkfile
 	-@echo "--------------------------------------------------------------"
 	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
 ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
-	@if [ -d $(ESMF_DIR)/.git ] ; then \
+	@if [ -d $(ESMF_DIR)/.git ] || [ -s $(ESMF_DIR)/.git ]] ; then \
 	echo $(ESMF_VERSION_STRING_GIT);\
 	echo "--------------------------------------------------------------" ;\
 	git status ;\
