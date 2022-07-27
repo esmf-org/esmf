@@ -684,9 +684,12 @@ void PIO_Handler::arrayRead(
         return;
       }
       if (*timeslice > time_len) {
+        // FIXME(wjs, 2022-07-26) Hard-coding tile here for now because it's needed for
+        // the interface. Eventually we'll get it as an argument or in a loop.
+        int tile = 1;
         PRINTMSG(" (" << my_rank << "): " <<
                  "Timeframe is greater than that in file" <<
-                 getFilename() << ", file time = " << time_len <<
+                 getFilename(tile) << ", file time = " << time_len <<
                  ", requested record = " << *timeslice);
         if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
             "Timeframe is greater than max in file",
@@ -1231,6 +1234,9 @@ void PIO_Handler::open(
 
   int iofmt_map_size = sizeof (iofmt_map)/sizeof (iofmt_map_t);
 
+  // FIXME(wjs, 2022-07-26) Get tile as an argument or loop over tiles
+  int tile = 1;
+
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
@@ -1279,7 +1285,10 @@ void PIO_Handler::open(
   }
   // Figure out if we need to call createfile or openfile
   new_file = false;
-  bool file_exists = IO_Handler::fileExists(getFilename(), !readonly);
+  const std::string thisFilename = getFilename(tile, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+    return;
+  bool file_exists = IO_Handler::fileExists(thisFilename, !readonly);
   switch(getFileStatusFlag()) {
   case ESMC_FILESTATUS_UNKNOWN:
     if (file_exists) {
@@ -1331,33 +1340,33 @@ void PIO_Handler::open(
     ESMCI_IOREGION_ENTER("PIOc_createfile");
 
     piorc = PIOc_createfile(pioSystemDesc, &pioFileDesc,
-                                 &iotype, getFilename(), mode);
+                            &iotype, thisFilename.c_str(), mode);
     ESMCI_IOREGION_EXIT("PIOc_createfile");
-    if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ") + getFilename(),
+    if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ") + thisFilename,
       ESMF_RC_FILE_OPEN, (*rc))) {
       return;
     } else {
       new_file = true;
-      PRINTMSG("call to PIOc_createfile: success for " << getFilename() << " iotype= "<< iotype << " Mode "<< mode << " ESMF FMT "<<getFormat() );
+      PRINTMSG("call to PIOc_createfile: success for " << thisFilename << " iotype= "<< iotype << " Mode "<< mode << " ESMF FMT "<<getFormat() );
     }
 #ifdef ESMFIO_DEBUG
     PIOc_set_log_level(0);
 #endif // ESMFIO_DEBUG
     piorc = PIOc_set_fill(pioFileDesc, PIO_NOFILL, NULL);
-    if (!CHECKPIOWARN(piorc, std::string("Unable to set fill on file: ") + getFilename(),
+    if (!CHECKPIOWARN(piorc, std::string("Unable to set fill on file: ") + thisFilename,
                       ESMF_RC_FILE_OPEN, (*rc))) {
         return;
     }
   } else {
     PRINTMSG(" calling PIOc_openfile with mode = " << mode <<
-             ", file = \"" << getFilename() << "\"");
+             ", file = \"" << thisFilename << "\"");
     // Looks like we are ready to go
     ESMCI_IOREGION_ENTER("PIOc_openfile");
     piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc,
-                               &iotype, getFilename(), mode);
+                          &iotype, thisFilename.c_str(), mode);
     ESMCI_IOREGION_EXIT("PIOc_openfile");
-    PRINTMSG(", called PIOc_openfile on " << getFilename());
-    if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + getFilename(),
+    PRINTMSG(", called PIOc_openfile on " << thisFilename);
+    if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + thisFilename,
         ESMF_RC_FILE_OPEN, (*rc))) {
       return;
     }
@@ -1515,7 +1524,10 @@ ESMC_Logical PIO_Handler::isOpen(
   } else {
     // This really should not happen, warn and clean up just in case
     std::string errmsg;
-    errmsg = std::string ("File, ") + getFilename() + ", closed by PIO";
+    // FIXME(wjs, 2022-07-26) Get tile as an argument or loop over tiles
+    int tile = 1;
+    const std::string thisFilename = getFilename(tile);
+    errmsg = std::string ("File, ") + thisFilename + ", closed by PIO";
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     return ESMF_FALSE;
   }

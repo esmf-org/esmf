@@ -25,6 +25,8 @@
 
 // higher level, 3rd party or system includes here
 #include <iostream>
+#include <string>
+#include <algorithm>
 #include <fstream>
 
 // other ESMF include files here.
@@ -83,6 +85,10 @@ IO_Handler::IO_Handler (
   fileStatusFlag = ESMC_FILESTATUS_UNKNOWN;
   overwrite = false;
   filename[0] = '\0';
+  // FIXME(wjs, 2022-07-25) Determine ntiles dynamically, here or later; for now we'll fix
+  // at 6 for testing. If we end up setting it dynamically elsewhere, then it should be
+  // initialized to 1 here.
+  ntiles = 6;
 
 }
 //-----------------------------------------------------------------------------
@@ -410,6 +416,67 @@ int IO_Handler::setFilename(
 } // end IO_Handler::setFilename
 //-------------------------------------------------------------------------
 
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::getFilename()"
+//BOPI
+// !IROUTINE:  IO_Handler::getFilename - get filename for this object, possibly tile-specific
+//
+// !INTERFACE:
+const std::string IO_Handler::getFilename(
+//
+// !RETURN VALUE:
+//    filename associated with this IO_Handler object, possibly tile-specific
+//
+// !ARGUMENTS:
+  int tile,                           // (in)  - tile number for which filename is requested
+  int *rc                             // (out) - return code
+  )const{
+//
+// !DESCRIPTION:
+//      Return the filename for this IO_Handler object.
+//      If doing multi-tile IO, then the tile placeholder in the originally-specified
+//      filename will be replaced by the current tile number.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  if (rc != NULL) {
+    *rc = ESMF_RC_NOT_IMPL;
+  }
+
+  if (ntiles > 1) {
+    const char tilePlaceholder = '#';  // the character that will get replaced by the tile number
+    int numOccurrences = std::count(filename.begin(), filename.end(), tilePlaceholder);
+    if (numOccurrences != 1) {
+      std::stringstream errmsg;
+      errmsg << "For multi-tile IO, the specified file name must have exactly "
+             << "one occurrence of '" << tilePlaceholder << "', which will be "
+             << "replaced by the tile number. Filename <" << filename
+             << "> has " << numOccurrences << " occurrences.";
+      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_VAL_WRONG, errmsg, ESMC_CONTEXT, rc)) {
+        return "";
+      }
+    }
+
+    size_t pos = filename.find(tilePlaceholder);
+    std::string tileStr = std::to_string(tile);
+    std::string actualFilename = filename;
+    actualFilename.replace(pos, 1, tileStr);
+    if (rc != NULL) {
+      *rc = ESMF_SUCCESS;
+    }
+    return actualFilename;
+
+  } else {
+    // Single tile; no need to do any replacement of template character
+    if (rc != NULL) {
+      *rc = ESMF_SUCCESS;
+    }
+    return filename;
+  }
+} // end IO_Handler::getFilename
+//-------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

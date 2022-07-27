@@ -68,9 +68,11 @@ namespace ESMCI {
     int             localPet;
     ESMC_IndexFlag  indexflag;
     ESMC_IOFmt_Flag iofmtFlag;
-    std::string     filename;                 // The filename for this object
+    std::string     filename;                 // The filename for this object (for multi-tile IO,
+                                              // this will contain a placeholder to be replaced by tile number)
     ESMC_FileStatus_Flag fileStatusFlag;      // Store file status
     bool            overwrite;                // OK to overwrite fields if true
+    int             ntiles;                   // Number of tiles in arrays handled by this object
   protected:
     IO_Handler(ESMC_IOFmt_Flag fmtArg);        // native constructor
   private:
@@ -106,11 +108,11 @@ namespace ESMCI {
   public:
     const char *getName(void) const { return "ESMCI::IO_Handler"; }
     ESMC_IOFmt_Flag getFormat(void) { return iofmtFlag; }
+    const int getNtiles(void) const { return ntiles; }
     virtual bool formatOk(ESMC_IOFmt_Flag *newIofmt) {
       return (((ESMC_IOFmt_Flag *)NULL != newIofmt) &&
               (*newIofmt == iofmtFlag));
     }
-    const char *getFilename(void) const { return filename.c_str(); }
     bool overwriteFields(void) { return overwrite; }
     ESMC_FileStatus_Flag getFileStatusFlag(void) { return fileStatusFlag; }
   protected:
@@ -121,6 +123,9 @@ namespace ESMCI {
     }
     int setFilename(const std::string& name);
   public:
+
+    // get filename; if multi-tile IO, tile placeholder will be replaced by the given tile number
+    const std::string getFilename(int tile, int *rc = NULL) const;
 
     // file exists is needed to implement status codes
     static bool fileExists(const std::string& filename, bool needWrite);
