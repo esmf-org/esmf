@@ -73,10 +73,10 @@ test_esmfmkfile:
 script_info: test_esmfmkfile
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
-	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
+	-@echo "ESMF_VERSION_STRING:      $(ESMF_VERSION_STRING)"
 ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
-	@if [ -d $(ESMF_DIR)/.git ] ; then \
-	echo $(ESMF_VERSION_STRING_GIT);\
+	@if [ "$(ESMF_VERSION_STRING_GIT)" != "" ] ; then \
+	echo "ESMF_VERSION_STRING_GIT: $(ESMF_VERSION_STRING_GIT)";\
 	echo "--------------------------------------------------------------" ;\
 	git status ;\
 	else \
@@ -426,7 +426,7 @@ info_mk: chkdir_lib
 	-@echo "#----------------------------------------------" >> $(MKINFO)
 	-@echo "ESMF_VERSION_STRING=$(ESMF_VERSION_STRING)"     >> $(MKINFO)
 ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
-	@if [ -d $(ESMF_DIR)/.git ] ; then \
+	@if [ "$(ESMF_VERSION_STRING_GIT)" != "" ] ; then \
 	echo "ESMF_VERSION_STRING_GIT=$(ESMF_VERSION_STRING_GIT)" >> $(MKINFO) ; \
 	else \
 	echo "# Not a Git repository" >> $(MKINFO) ; \
