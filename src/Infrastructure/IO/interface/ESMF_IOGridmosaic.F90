@@ -930,7 +930,9 @@ subroutine ESMF_GridspecReadStaggerR8(filename, nx, ny, lon, lat, staggerLoc, st
     integer :: start1(2), count1(2)
     real(ESMF_KIND_R8), allocatable :: supercoord(:,:)
     integer :: localrc
-    logical :: foundit
+    logical :: found_grid_tile_spec
+    logical :: found_geo_lon
+    logical :: found_geo_lat
 
     if (present(rc)) rc=ESMF_SUCCESS
 
@@ -946,7 +948,12 @@ subroutine ESMF_GridspecReadStaggerR8(filename, nx, ny, lon, lat, staggerLoc, st
                            ESMF_CONTEXT, rcToReturn=rc)) return
 
 #ifdef ESMF_NETCDF
-    foundit = .false.
+    ! Init variables to ensure that we find the correct things in file    
+    found_grid_tile_spec = .false.
+    found_geo_lon=.false.
+    found_geo_lat=.false.
+    
+    ! Open file
     ncStatus = nf90_open(path=filename, mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
@@ -967,7 +974,7 @@ subroutine ESMF_GridspecReadStaggerR8(filename, nx, ny, lon, lat, staggerLoc, st
           if (attstr(1:attlen) .eq. 'grid_tile_spec') then
             ! skip checking the attributes -- not sure which one should be set to what
             ! but makesure this dummy variable exists
-            foundit = .true.
+            found_grid_tile_spec = .true.
 #if 0
             ! check the projection attribute
             ncStatus = nf90_inquire_attribute(ncid, i, 'projection', len=attlen)  
@@ -1052,8 +1059,10 @@ subroutine ESMF_GridspecReadStaggerR8(filename, nx, ny, lon, lat, staggerLoc, st
             endif
             if (attstr(1:attlen) .eq. 'geographic_latitude') then
                ncStatus = nf90_get_var(ncid, i, lat, start=start1, count=count1, stride=(/2,2/))
+               found_geo_lat=.true.
             else
                ncStatus = nf90_get_var(ncid, i, lon, start=start1, count=count1, stride=(/2,2/))
+               found_geo_lon=.true.
             endif
             if (CDFCheckError (ncStatus, &
                ESMF_METHOD,  &
@@ -1062,15 +1071,40 @@ subroutine ESMF_GridspecReadStaggerR8(filename, nx, ny, lon, lat, staggerLoc, st
                rc)) return
          endif
        endif
-     enddo
-     ncStatus = nf90_close(ncid)
-     if (CDFCheckError (ncStatus, &
-               ESMF_METHOD,  &
-               ESMF_SRCLINE, &
-               "close tile file", &
-               rc)) return
-     if (.not. foundit .and. present(rc)) rc=ESMF_FAILURE
-     return
+    enddo
+
+    ! Close file
+    ncStatus = nf90_close(ncid)
+    if (CDFCheckError (ncStatus, &
+         ESMF_METHOD,  &
+         ESMF_SRCLINE, &
+         "close tile file", &
+         rc)) return
+
+    ! Error check that the correct variables were in file
+    if (.not. found_grid_tile_spec) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_FOUND, & 
+            msg="No variable with a standard_name attribute set to grid_tile_spec found in file "//trim(filename), & 
+            ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
+    
+    if (.not. found_geo_lat) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_FOUND, & 
+            msg="No variable with a standard_name attribute set to geographic_latitude found in file "//trim(filename), & 
+            ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
+    
+    if (.not. found_geo_lon) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_FOUND, & 
+            msg="No variable with a standard_name attribute set to geographic_longitude found in file "//trim(filename), & 
+            ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
+
+    ! Leave
+    return
 #else       
 
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
@@ -1117,8 +1151,10 @@ subroutine ESMF_GridspecReadStaggerR4(filename, nx, ny, lon, lat, staggerLoc, st
     integer :: start1(2), count1(2)
     real(ESMF_KIND_R8), allocatable :: supercoord(:,:)
     integer :: localrc
-    logical :: foundit
-
+    logical :: found_grid_tile_spec
+    logical :: found_geo_lon
+    logical :: found_geo_lat
+    
     if (present(rc)) rc=ESMF_SUCCESS
 
     call ESMF_VMGetCurrent(vm, rc=localrc)
@@ -1133,7 +1169,12 @@ subroutine ESMF_GridspecReadStaggerR4(filename, nx, ny, lon, lat, staggerLoc, st
                            ESMF_CONTEXT, rcToReturn=rc)) return
 
 #ifdef ESMF_NETCDF
-    foundit = .false.
+    ! Init variables to ensure that we find the correct things in file
+    found_grid_tile_spec = .false.
+    found_geo_lon=.false.
+    found_geo_lat=.false.
+
+    ! Open file    
     ncStatus = nf90_open(path=filename, mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
@@ -1154,7 +1195,7 @@ subroutine ESMF_GridspecReadStaggerR4(filename, nx, ny, lon, lat, staggerLoc, st
           if (attstr(1:attlen) .eq. 'grid_tile_spec') then
             ! skip checking the attributes -- not sure which one should be set to what
             ! but makesure this dummy variable exists
-            foundit = .true.
+            found_grid_tile_spec = .true.
 #if 0
             ! check the projection attribute
             ncStatus = nf90_inquire_attribute(ncid, i, 'projection', len=attlen)  
@@ -1239,8 +1280,10 @@ subroutine ESMF_GridspecReadStaggerR4(filename, nx, ny, lon, lat, staggerLoc, st
             endif
             if (attstr(1:attlen) .eq. 'geographic_latitude') then
                ncStatus = nf90_get_var(ncid, i, lat, start=start1, count=count1, stride=(/2,2/))
+               found_geo_lat=.true.
             else
                ncStatus = nf90_get_var(ncid, i, lon, start=start1, count=count1, stride=(/2,2/))
+               found_geo_lon=.true.
             endif
             if (CDFCheckError (ncStatus, &
                ESMF_METHOD,  &
@@ -1249,15 +1292,40 @@ subroutine ESMF_GridspecReadStaggerR4(filename, nx, ny, lon, lat, staggerLoc, st
                rc)) return
          endif
        endif
-     enddo
-     ncStatus = nf90_close(ncid)
-     if (CDFCheckError (ncStatus, &
-               ESMF_METHOD,  &
-               ESMF_SRCLINE, &
-               "close tile file", &
-               rc)) return
-     if (.not. foundit .and. present(rc)) rc=ESMF_FAILURE
-     return
+    enddo
+
+    ! Close file
+    ncStatus = nf90_close(ncid)
+    if (CDFCheckError (ncStatus, &
+         ESMF_METHOD,  &
+         ESMF_SRCLINE, &
+         "close tile file", &
+         rc)) return
+
+    ! Error check that the correct variables were in file
+    if (.not. found_grid_tile_spec) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_FOUND, & 
+            msg="No variable with standard_name attribute set to grid_tile_spec found in file "//trim(filename), & 
+            ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
+    
+    if (.not. found_geo_lat) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_FOUND, & 
+            msg="No variable with standard_name attribute set to geographic_latitude found in file "//trim(filename), & 
+            ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
+    
+    if (.not. found_geo_lon) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_FOUND, & 
+            msg="No variable with standard_name attribute set to geographic_longitude found in file "//trim(filename), & 
+            ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
+
+    ! Leave
+    return
 #else       
 
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
