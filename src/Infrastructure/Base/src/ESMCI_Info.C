@@ -871,7 +871,7 @@ void Info::get(ESMCI::Info &info, key_t &key) const {
     }
       
 #if 0
-    std:string msg2 = std::string(ESMC_METHOD) + ": j dump=" + j.dump();
+    std::string msg2 = std::string(ESMC_METHOD) + ": j dump=" + j.dump();
     ESMC_LogWrite(msg2.c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 
