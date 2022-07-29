@@ -45,8 +45,5 @@ Named Constants
 References
 ----------
 
-.. commented out the Regrid.bib for now because sphinxcontrib-bibtex doesn't seem to handle techreports
-.. ../../../Infrastructure/Regrid/doc/Regrid.bib
-
-.. bibliography:: ../../../Infrastructure/Mesh/doc/Mesh.bib ../../../doc/ESMF_packages.bib
+.. bibliography:: ../../../Infrastructure/Mesh/doc/Mesh.bib ../../../doc/ESMF_packages.bib ../../../Infrastructure/Regrid/doc/Regrid.bib
     :style: unsrt

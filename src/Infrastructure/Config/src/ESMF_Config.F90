@@ -2,7 +2,7 @@
 !==============================================================================
 ! Earth System Modeling Framework
 !
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -179,7 +179,6 @@
 !------------------------------------------------------------------------------
 ! Revised parameter table to fit Fortran 90 standard.
 
-!       integer,   parameter :: LSZ = 256  ! Maximum line size
        integer,   parameter :: LSZ = max (1024,ESMF_MAXPATHLEN)  ! Maximum line size
                                           ! should be at least long enough
                                           ! to read in a file name with full

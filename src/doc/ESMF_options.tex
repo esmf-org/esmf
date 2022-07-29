@@ -389,12 +389,26 @@ The type of this flag is:
 
 The valid values are:
 \begin{description}
-\item [ESMF\_IOFMT\_BIN]
-      Binary format.
 \item [ESMF\_IOFMT\_NETCDF]
-      NETCDF and PNETCDF format.
+      NETCDF and PNETCDF (cdf1) format in NETCDF-3 ``classic'' format. Use
+      of PNETCDF is prioritized if available.
 \item [ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET]
-      NETCDF and PNETCDF 64-bit format.
+      NETCDF and PNETCDF (cdf2) format.  This format allows files greater
+      than 4GiB in NETCDF-3 ``classic'' format.  Use of PNETCDF is prioritized
+      if available.
+\item [ESMF\_IOFMT\_NETCDF\_64BIT\_DATA]
+      NETCDF and PNETCDF (cdf5) format.  This allows individual records greater
+      than 4GiB in NETCDF-3 ``classic'' format.  Use of PNETCDF is prioritized
+      if available.
+\item [ESMF\_IOFMT\_NETCDF4P]
+      NETCDF-4 (HDF-5) format.  If a NETCDF parallel library is available,
+      writes will be in parallel. Writes will use one I/O PET per
+      SSI (node) of the ESMF VM that calls the I/O operation. Otherwise writes
+      will be serial.
+\item [ESMF\_IOFMT\_NETCDF4C]
+      NETCDF-4 (HDF-5) format with lossless compression from HDF-5 applied.
+      This is only available as a serial option, even if a parallel NETCDF
+      library is available.  
 \end{description}
 
 \subsection{ESMF\_IO\_NETCDF\_PRESENT}
@@ -428,7 +442,7 @@ The type of this flag is:
 The valid values are:
 \begin{description}
  \item [.true.]
-      PIO features are enabled..
+      PIO features are enabled.
 \item [.false.]
       PIO  features are not enabled.
 \end{description}
@@ -446,9 +460,9 @@ The type of this flag is:
 The valid values are:
 \begin{description}
 \item [.true.]
-      Parallel netcdf features are enabled.
+      Parallel NETCDF features are enabled.
 \item [.false.]
-      Parallel netcdf features are not enabled.
+      Parallel NETCDF features are not enabled.
 \end{description}
 
 

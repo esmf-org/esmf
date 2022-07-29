@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -144,10 +144,10 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "MeshGetLocalNodeCount");
+  strcpy(name, "MeshGetNodeCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_node_out_s;
-  rc = ESMC_MeshGetLocalNodeCount(srcmesh, &num_node_out_s);
+  rc = ESMC_MeshGetNodeCount(srcmesh, &num_node_out_s);
   ESMC_Test((rc==ESMF_SUCCESS) && num_node_s==num_node_out_s,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -155,10 +155,10 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "MeshGetLocalElementCount");
+  strcpy(name, "MeshGetElementCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_elem_out_s;
-  rc = ESMC_MeshGetLocalElementCount(srcmesh, &num_elem_out_s);
+  rc = ESMC_MeshGetElementCount(srcmesh, &num_elem_out_s);
   ESMC_Test((rc==ESMF_SUCCESS) && num_elem_s==num_elem_out_s,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -250,10 +250,10 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "MeshGetLocalNodeCount");
+  strcpy(name, "MeshGetNodeCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_node_out_d;
-  rc = ESMC_MeshGetLocalNodeCount(dstmesh, &num_node_out_d);
+  rc = ESMC_MeshGetNodeCount(dstmesh, &num_node_out_d);
    ESMC_Test((rc==ESMF_SUCCESS) && num_node_d==num_node_out_d,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -261,10 +261,10 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "MeshGetLocalElementCount");
+  strcpy(name, "MeshGetElementCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_elem_out_d;
-  rc = ESMC_MeshGetLocalElementCount(dstmesh, &num_elem_out_d);
+  rc = ESMC_MeshGetElementCount(dstmesh, &num_elem_out_d);
   ESMC_Test((rc==ESMF_SUCCESS) && num_elem_d==num_elem_out_d,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

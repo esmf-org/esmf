@@ -1042,13 +1042,15 @@ PIOc_freedecomp(int iosysid, int ioid)
     /* Free the dimlens. */
     free(iodesc->dimlen);
 
-    if (iodesc->remap)
+    if (iodesc->remap){
         free(iodesc->remap);
-
+        iodesc->remap = NULL;
+    }
     PLOG((3, "freeing rfrom, rtype"));
-    if (iodesc->rfrom)
+    if (iodesc->rfrom){
         free(iodesc->rfrom);
-
+        iodesc->rfrom = NULL;
+    }
     if (iodesc->rtype)
     {
         for (int i = 0; i < iodesc->nrecvs; i++)

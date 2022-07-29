@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1216,18 +1216,10 @@ int ESMC_FieldSMMStore(
 //  \item[{[overwrite]}]
 //   \begin{sloppypar}
 //     A logical flag, the default is .false., i.e., existing field data may
-//     {\em not} be overwritten. If .true., the overwrite behavior depends
-//     on the value of {\tt iofmt} as shown below:
-//   \begin{description}
-//   \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
-//     be overwritten with each field's data.
-//   \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF}:]\ Only the
-//     data corresponding to each field's name will be
-//     be overwritten. If the {\tt timeslice} option is given, only data for
-//     the given timeslice may be overwritten.
+//     {\em not} be overwritten. If .true., the only the data corresponding to the
+//     field's name will be overwritten.
 //     Note that it is always an error to attempt to overwrite a NetCDF
 //     variable with data which has a different shape.
-//   \end{description}
 //   \end{sloppypar}
 //  \item[{[status]}]
 //   \begin{sloppypar}

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -155,16 +155,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_Initialize()} it inherits all of the MPI implementation 
 !     dependent limitations of what may or may not be done before 
 !     {\tt MPI\_Init()}. For instance, it is unsafe for some MPI
-!     implementations, such as MPICH, to do I/O before the MPI environment
+!     implementations, such as MPICH1, to do I/O before the MPI environment
 !     is initialized. Please consult the documentation of your MPI
 !     implementation for details.
 !
-!     Note that when using MPICH as the MPI library, ESMF needs to use
+!     Note that when using MPICH1 as the MPI library, ESMF needs to use
 !     the application command line arguments for {\tt MPI\_Init()}. However,
 !     ESMF acquires these arguments internally and the user does not need
 !     to worry about providing them. Also, note that ESMF does not alter
 !     the command line arguments, so that if the user obtains them they will
-!     be as specified on the command line (including those which MPICH would
+!     be as specified on the command line (including those which MPICH1 would
 !     normally strip out).
 !
 !     {\tt ESMF\_Initialize()} supports running ESMF inside a user MPI program.

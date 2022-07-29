@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -82,13 +82,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
-      integer, parameter :: ESMF_VERSION_MINOR        = 3
+      integer, parameter :: ESMF_VERSION_MINOR        = 4
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.3.0 beta snapshot"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.4.0 beta snapshot"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -558,7 +558,7 @@
       end type
 
       type(ESMF_IOFmt_Flag), parameter ::  &
-                           ESMF_IOFMT_BIN                 = ESMF_IOFmt_Flag(0), &
+!                           ESMF_IOFMT_BIN                 = ESMF_IOFmt_Flag(0), &
                            ESMF_IOFMT_NETCDF              = ESMF_IOFmt_Flag(1), &
                            ESMF_IOFMT_NETCDF_64BIT_DATA   = ESMF_IOFmt_Flag(2), &
                            ESMF_IOFMT_NETCDF_64BIT_OFFSET = ESMF_IOFmt_Flag(3), &
@@ -1060,7 +1060,7 @@
       public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
       public ESMF_IOFmt_Flag, &
-             ESMF_IOFMT_BIN,  &
+!             ESMF_IOFMT_BIN,  &
              ESMF_IOFMT_NETCDF, &
              ESMF_IOFMT_NETCDF_64BIT_DATA, &
              ESMF_IOFMT_NETCDF_64BIT_OFFSET, &
@@ -2396,7 +2396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2021 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2022 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"
