@@ -1948,6 +1948,9 @@ void ESMCI_MeshGetElemCount(Mesh *mesh, int *elemCount, int *rc){
     for (; ei != ee; ++ei) {
       MeshObj *elem = &(*ei);
 
+      // Only count local ones
+      if (!GetAttr(*elem).is_locally_owned()) continue;
+      
       // If it's a split element, then skip
       if (elem->get_id() > mesh->max_non_split_id) continue;
 
@@ -1959,7 +1962,22 @@ void ESMCI_MeshGetElemCount(Mesh *mesh, int *elemCount, int *rc){
     *elemCount = num_nonsplit_elems;
 
   } else { // ...otherwise, just get usual elem count
-    *elemCount = mesh->num_elems();
+
+    // Count local elements
+    int num_local_elems=0;
+    Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj *elem = &(*ei);
+
+      // Only count local ones
+      if (!GetAttr(*elem).is_locally_owned()) continue;
+      
+      // Count
+      num_local_elems++;
+    }
+
+    // Return the number of local elems
+    *elemCount = num_local_elems;    
   }
 
   // return success
@@ -1982,6 +2000,9 @@ void ESMCI_MeshGetElemConnCount(Mesh *mesh, int *_elemConnCount, int *rc){
     for (; ei != ee; ++ei) {
       MeshObj &elem = *ei;
 
+      // Only count local ones
+      if (!GetAttr(elem).is_locally_owned()) continue;
+      
       // Get topology of element
       const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
 
@@ -2114,12 +2135,20 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
 
   // Try-catch block around main part of method
   try {
-
-    ////// Get some handy information //////
-    int num_elems=mesh->num_elems();
-    int orig_sdim=mesh->orig_spatial_dim;
-    int num_elem_conn = 0;
     int localrc;
+    
+    ////// Get some handy information //////
+    int orig_sdim=mesh->orig_spatial_dim;
+
+    // Number of local elements
+    int num_elems=0;
+    ESMCI_MeshGetElemCount(mesh, &num_elems, &localrc);
+    if(ESMC_LogDefault.MsgFoundError(localrc,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
+
+    // Number of local element connection array
+    int num_elem_conn = 0;
     ESMCI_MeshGetElemConnCount(mesh, &num_elem_conn, &localrc);
     if(ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -2128,6 +2157,7 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     std::vector<int> num_merged_nids;
     std::vector<int> merged_nids;
 
+    // If split, override some info
     if (mesh->is_split) {
       try {
         if (present(elemConn))
@@ -2296,6 +2326,9 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     for (; ei != ee; ++ei) {
       MeshObj *elem = &(*ei);
 
+      // Only do local elements
+      if (!GetAttr(*elem).is_locally_owned()) continue;
+      
       // get data index
       int index = elem->get_data_index();
 
