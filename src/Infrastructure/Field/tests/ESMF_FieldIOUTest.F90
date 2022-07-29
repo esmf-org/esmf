@@ -1330,7 +1330,7 @@ program ESMF_FieldIOUTest
 #if !defined (ESMF_PNETCDF)
     case ("_FillValue")
       call ESMF_AttributeSet (field_att,  &
-          attrNames(i), valueList=(/ -1.e+10 /),  &
+          attrNames(i), valueList=(/ -1.e+10_ESMF_KIND_R8 /),  &
           convention=apConv, purpose=apPurp,  &
           rc=rc)
       if (rc /= ESMF_SUCCESS) exit
@@ -1563,7 +1563,7 @@ program ESMF_FieldIOUTest
 #if !defined (ESMF_PNETCDF)
     case ("_FillValue")
       call ESMF_AttributeSet (field_ugd_att,  &
-          attrNames(i), valueList=(/ -1.e+10 /),  &
+          attrNames(i), valueList=(/ -1.e+10_ESMF_KIND_R8 /),  &
           convention=apConv, purpose=apPurp,  &
           rc=rc)
       if (rc /= ESMF_SUCCESS) exit
