@@ -4110,15 +4110,17 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
     else{
       // must send in multiple stages
       unsigned long long _size = size;
+      char *messageCC = (char *)messageC;
       i=0;
       while(_size > VM_MPI_SIZE_LIMIT){
-        localrc = MPI_Send(messageC, VM_MPI_SIZE_LIMIT, MPI_BYTE, lpid[dest],
+        localrc = MPI_Send(messageCC, VM_MPI_SIZE_LIMIT, MPI_BYTE, lpid[dest],
           tag+i, mpi_c);
         i += 1;
         _size -= VM_MPI_SIZE_LIMIT;
+        messageCC += VM_MPI_SIZE_LIMIT;
       }
       if (_size > 0)
-        localrc = MPI_Send(messageC, _size, MPI_BYTE, lpid[dest], tag+i,
+        localrc = MPI_Send(messageCC, _size, MPI_BYTE, lpid[dest], tag+i,
           mpi_c);
     }
 #ifndef ESMF_NO_PTHREADS
@@ -4458,15 +4460,17 @@ int VMK::recv(void *message, unsigned long long int size, int source, int tag,
     else{
       // must receive in multiple stages
       unsigned long long _size = size;
+      char *messageCC = (char *)message;
       i=0;
       while(_size > VM_MPI_SIZE_LIMIT){
-        localrc = MPI_Recv(message, VM_MPI_SIZE_LIMIT, MPI_BYTE, mpiSource,
+        localrc = MPI_Recv(messageCC, VM_MPI_SIZE_LIMIT, MPI_BYTE, mpiSource,
           tag+i, mpi_c, mpi_s);
         i += 1;
         _size -= VM_MPI_SIZE_LIMIT;
+        messageCC += VM_MPI_SIZE_LIMIT;
       }
       if (_size > 0)
-        localrc = MPI_Recv(message, _size, MPI_BYTE, mpiSource, tag+i, mpi_c,
+        localrc = MPI_Recv(messageCC, _size, MPI_BYTE, mpiSource, tag+i, mpi_c,
           mpi_s);
     }
 
