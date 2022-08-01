@@ -3968,9 +3968,9 @@ void VMK::epochSetFirst(bool testAndClearBuffers){
       sendMap[key].firstFlag = true;
     }
     its->second.firstFlag=true;
-    if(testAndClearBuffers)
+    if(testAndClearBuffers){
       if (its->second.clear(true)) itErase = its;
-    else
+    }else
       itErase = sendMap.end();
   }
   // handle case where the very last element needs to be erased
