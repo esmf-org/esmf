@@ -4073,6 +4073,8 @@ int VMK::getDefaultTag(int src, int dst){
 
 int VMK::send(const void *message, unsigned long long int size, int dest,
   int tag){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::send()"
   // p2p send
 #if (VERBOSITY > 9)
   printf("sending to: %d, %d\n", dest, lpid[dest]);
@@ -4230,7 +4232,9 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
       sync_buffer_flag_fill(&shmp->shms, 0);
     }else{
       // buffer is insufficient
-      // todo: need to throw error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "buffer insufficient!", ESMC_CONTEXT, &localrc);
+        return localrc;
     }
     break;
   default:
@@ -4243,6 +4247,8 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
 
 int VMK::send(const void *message, unsigned long long int size, int dest,
   commhandle **ch, int tag){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::send()"
   // p2p send non-blocking
 //fprintf(stderr, "VMK::send: ch=%p\n", *ch);
 #if (VERBOSITY > 9)
@@ -4397,6 +4403,8 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
 
 int VMK::recv(void *message, unsigned long long int size, int source, int tag,
   status *status){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMK::recv()"
   // p2p recv
 #if (VERBOSITY > 9)
   printf("receiving from: %d, %d\n", source, lpid[source]);
@@ -4590,7 +4598,9 @@ int VMK::recv(void *message, unsigned long long int size, int source, int tag,
       sync_buffer_flag_empty(&shmp->shms, 0);
     }else{
       // buffer is insufficient
-      // todo: need to throw error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "buffer insufficient!", ESMC_CONTEXT, &localrc);
+        return localrc;
     }
     break;
   default:

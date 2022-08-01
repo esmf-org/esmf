@@ -64,7 +64,7 @@ enum vmEpoch  { epochNone=0, epochBuffer};
 #define VM_ANY_TAG                    (-2)
 
 // MPI size limit
-#define VM_MPI_SIZE_LIMIT     (2147483647)
+#define VM_MPI_SIZE_LIMIT     (2147483647)      // 2^31 (signed int)
 
 // define the communication preferences
 #define PREF_INTRA_PROCESS_SHMHACK    (0)       // default
