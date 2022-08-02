@@ -4276,7 +4276,7 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
     if (tag == -1) tag = getDefaultTag(mypet,dest);
     if (epoch==epochBuffer){
       sendBuffer *sm = &(sendMap[dest]);
-#ifdef VM_EPOCHLOG_on
+#if (defined VM_EPOCHLOG_on || defined VM_SIZELOG_on)
       std::stringstream msg;
       msg << "epochBuffer:" << __LINE__ << " non-blocking send to" <<
       " dst=" << dest <<
@@ -4293,7 +4293,7 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
       append(sm->stream, size);
       append(sm->stream, tag);
       sm->stream.write((const char*)message, size);
-#ifdef VM_EPOCHLOG_on
+#if (defined VM_EPOCHLOG_on || defined VM_SIZELOG_on)
       msg.str(""); // clear
       msg << "epochBuffer:" << __LINE__ << " non-blocking send write complete"<<
       ", current stream size=" <<
@@ -4378,6 +4378,13 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
     // Shared memory hack for mpiuni
     // This shared memory implementation is naturally non-blocking.
     // Limited to SHARED_NONBLOCK_CHANNELS per src/dst pair
+#ifdef VM_SIZELOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::send():" << __LINE__ << ", size=" << size;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
     (*ch)->type=-1; // indicate that this is a dummy commhandle
     shmp = sendChannel[dest].shmp;  // shared memory mp channel
     sendCount = shmp->sendCount;
@@ -4653,7 +4660,7 @@ int VMK::recv(void *message, unsigned long long int size, int source,
     else if (tag == VM_ANY_TAG) tag = MPI_ANY_TAG;
     if (epoch==epochBuffer){
       recvBuffer *rm = &(recvMap[source]);
-#ifdef VM_EPOCHLOG_on
+#if (defined VM_EPOCHLOG_on || defined VM_SIZELOG_on)
       std::stringstream msg;
       msg << "epochBuffer:" << __LINE__ << " non-blocking recv" << 
       " firstFlag=" << rm->firstFlag <<
@@ -4802,6 +4809,13 @@ int VMK::recv(void *message, unsigned long long int size, int source,
     // Shared memory hack for mpiuni
     // This shared memory implementation is naturally non-blocking.
     // Limited to SHARED_NONBLOCK_CHANNELS per src/dst pair
+#ifdef VM_SIZELOG_on
+    {
+      std::stringstream msg;
+      msg << "VMK::recv():" << __LINE__ << ", size=" << size;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
     (*ch)->type=-1; // indicate that this is a dummy commhandle
     shmp = recvChannel[source].shmp;  // shared memory mp channel
     recvCount = shmp->recvCount;
