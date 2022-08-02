@@ -4105,7 +4105,7 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
-    if (size < VM_MPI_SIZE_LIMIT)
+    if (size <= VM_MPI_SIZE_LIMIT)
       localrc = MPI_Send(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c);
     else{
       // must send in multiple stages
@@ -4115,7 +4115,7 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
       while(_size > VM_MPI_SIZE_LIMIT){
         localrc = MPI_Send(messageCC, VM_MPI_SIZE_LIMIT, MPI_BYTE, lpid[dest],
           tag+i, mpi_c);
-        i += 1;
+        i++;
         _size -= VM_MPI_SIZE_LIMIT;
         messageCC += VM_MPI_SIZE_LIMIT;
       }
@@ -4261,9 +4261,6 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
   pipc_mp *pipcmp;
   int scpsize;
   char *pdest;
-  char *psrc;
-  int i;
-  char *mess;
   int sendCount;
   // check if this needs a new entry in the request queue
   if (*ch==NULL){
@@ -4305,10 +4302,12 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
     }else{
-      (*ch)->nelements=1;
+      int nelements = size/VM_MPI_SIZE_LIMIT;
+      if (size%VM_MPI_SIZE_LIMIT) nelements++;
+      (*ch)->nelements=nelements;
       (*ch)->type=1;          // MPI
       (*ch)->sendFlag=true;   // send request
-      (*ch)->mpireq = new MPI_Request[1];
+      (*ch)->mpireq = new MPI_Request[nelements];
       // MPI-1 implementation
       void *messageC; // for MPI C interface convert (const void *) -> (void *)
       memcpy(&messageC, &message, sizeof(void *));
@@ -4316,19 +4315,35 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
 #ifndef ESMF_NO_PTHREADS
       if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
-//fprintf(stderr, "MPI_Isend: ch=%p\n", (*ch)->mpireq);
 #ifdef VM_MEMLOG_on
       VM::logMemInfo(std::string("VM::send():1.0"));
 #endif
 #ifdef VM_SIZELOG_on
       {
         std::stringstream msg;
-        msg << "VMK::send():" << __LINE__ << ", size=" << size;
+        msg << "VMK::send():" << __LINE__ << ", size=" << size
+          << " in " << nelements << " chunks";
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
-      localrc = MPI_Isend(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c,
-        (*ch)->mpireq);
+      if (size <= VM_MPI_SIZE_LIMIT)
+        localrc = MPI_Isend(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c,
+          (*ch)->mpireq);
+      else{
+        unsigned long long _size = size;
+        char *messageCC = (char *)messageC;
+        int i=0;
+        while(_size > VM_MPI_SIZE_LIMIT){
+          localrc = MPI_Isend(messageCC, VM_MPI_SIZE_LIMIT, MPI_BYTE,
+            lpid[dest], tag+i, mpi_c, &((*ch)->mpireq[i]));
+          i++;
+          _size -= VM_MPI_SIZE_LIMIT;
+          messageCC += VM_MPI_SIZE_LIMIT;
+        }
+        if (_size > 0)
+          localrc = MPI_Isend(messageCC, _size, MPI_BYTE,
+            lpid[dest], tag+i, mpi_c, &((*ch)->mpireq[i]));
+      }
 #ifdef VM_MEMLOG_on
       VM::logMemInfo(std::string("VM::send():2.0"));
 #endif
@@ -4462,7 +4477,7 @@ int VMK::recv(void *message, unsigned long long int size, int source, int tag,
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
-    if (size < VM_MPI_SIZE_LIMIT)
+    if (size <= VM_MPI_SIZE_LIMIT)
       localrc = MPI_Recv(message, size, MPI_BYTE, mpiSource, tag, mpi_c, mpi_s);
     else{
       // must receive in multiple stages
@@ -4472,7 +4487,7 @@ int VMK::recv(void *message, unsigned long long int size, int source, int tag,
       while(_size > VM_MPI_SIZE_LIMIT){
         localrc = MPI_Recv(messageCC, VM_MPI_SIZE_LIMIT, MPI_BYTE, mpiSource,
           tag+i, mpi_c, mpi_s);
-        i += 1;
+        i++;
         _size -= VM_MPI_SIZE_LIMIT;
         messageCC += VM_MPI_SIZE_LIMIT;
       }
@@ -4635,10 +4650,7 @@ int VMK::recv(void *message, unsigned long long int size, int source,
   pipc_mp *pipcmp;
   shared_mp *shmp;
   int scpsize, rcpsize;
-  char *pdest;
   char *psrc;
-  int i;
-  char *mess;
   int recvCount;
   // check if this needs a new entry in the request queue
   if (*ch==NULL){
@@ -4741,28 +4753,46 @@ int VMK::recv(void *message, unsigned long long int size, int source,
       memcpy(message, cp, size);
       rm->buffer = (void *)(cp+chunkSize);  // next chunk in buffer
     }else{
-      (*ch)->nelements=1;
+      int nelements = size/VM_MPI_SIZE_LIMIT;
+      if (size%VM_MPI_SIZE_LIMIT) nelements++;
+      (*ch)->nelements=nelements;
       (*ch)->type=1;          // MPI
       (*ch)->sendFlag=false;  // not a send request
-      (*ch)->mpireq = new MPI_Request[1];
+      (*ch)->mpireq = new MPI_Request[nelements];
       // MPI-1 implementation
       // use mutex to serialize mpi comm calls if mpi thread support requires it
 #ifndef ESMF_NO_PTHREADS
       if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
-//fprintf(stderr, "MPI_Irecv: ch=%p\n", (*ch)->mpireq);
       int mpiSource;
       if (source == VM_ANY_SRC) mpiSource = MPI_ANY_SOURCE;
       else mpiSource = lpid[source];
 #ifdef VM_SIZELOG_on
       {
         std::stringstream msg;
-        msg << "VMK::recv():" << __LINE__ << ", size=" << size;
+        msg << "VMK::recv():" << __LINE__ << ", size=" << size
+          << " in " << nelements << " chunks";
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
-      localrc = MPI_Irecv(message, size, MPI_BYTE, mpiSource, tag, mpi_c,
-        (*ch)->mpireq);
+      if (size <= VM_MPI_SIZE_LIMIT)
+        localrc = MPI_Irecv(message, size, MPI_BYTE, mpiSource, tag, mpi_c,
+          (*ch)->mpireq);
+      else{
+        unsigned long long _size = size;
+        char *messageCC = (char *)message;
+        int i=0;
+        while(_size > VM_MPI_SIZE_LIMIT){
+          localrc = MPI_Irecv(messageCC, VM_MPI_SIZE_LIMIT, MPI_BYTE, mpiSource,
+            tag+i, mpi_c, &((*ch)->mpireq[i]));
+          i++;
+          _size -= VM_MPI_SIZE_LIMIT;
+          messageCC += VM_MPI_SIZE_LIMIT;
+        }
+        if (_size > 0)
+          localrc = MPI_Irecv(messageCC, _size, MPI_BYTE, mpiSource,
+            tag+i, mpi_c, &((*ch)->mpireq[i]));
+      }
 #ifndef ESMF_NO_PTHREADS
       if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
