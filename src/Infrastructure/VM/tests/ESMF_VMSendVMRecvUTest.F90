@@ -15,17 +15,15 @@ program ESMF_VMSendVMRecvUTest
 !------------------------------------------------------------------------------
 
 #include "ESMF_Macros.inc"
-#define DEBUG_LOG_OFF
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_VMSendVMRecvUTest - Unit test for VM Send and Receive Functions
+! !PROGRAM: ESMF_VMSendVMRecvUTest - Unit test for blocking VM Send and Receive
+!  Functions
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives the F90 VM Send Receive tests.  The VM
-!   Send Receive function is complex enough to require a separate test file.
-!   It runs on multiple processors.
+! The code in this file drives the F90 blocking VM Send Receive tests.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -45,8 +43,6 @@ program ESMF_VMSendVMRecvUTest
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
-      character(len=8) :: strvalue
-
       character(ESMF_MAXSTR) :: msgStr
 
       ! local variables
