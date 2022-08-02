@@ -51,6 +51,8 @@ program ESMF_VMSendVMRecvUTest
       integer:: localPet, petCount
       integer:: count, src, dst
 
+      integer, parameter:: countParameter = 2800000
+
       integer(ESMF_KIND_I4), allocatable  :: i4_data(:)
       integer(ESMF_KIND_I8), allocatable  :: i8_data(:)
       real(ESMF_KIND_R4),    allocatable  :: r4_data(:)
@@ -82,8 +84,12 @@ program ESMF_VMSendVMRecvUTest
       call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-      ! Allocate localData
-      count = 280000000
+      ! check petCount
+      if (petCount < 2) then
+        call ESMF_LogWrite("Must run test with at least 2 PETs", &
+          ESMF_LOGMSG_ERROR, rc=rc)
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif
 
       src = localPet - 1
       if (src < 0) src = petCount - 1
@@ -98,6 +104,7 @@ program ESMF_VMSendVMRecvUTest
 
       !Test with ESMF_KIND_I4 arguments
       !================================
+      count = countParameter
       allocate(i4_data(count))
 
       !------------------------------------------------------------------------
@@ -152,6 +159,7 @@ program ESMF_VMSendVMRecvUTest
 
       !Test with ESMF_KIND_I8 arguments
       !================================
+      count = countParameter
       allocate(i8_data(count))
 
       !------------------------------------------------------------------------
@@ -206,6 +214,7 @@ program ESMF_VMSendVMRecvUTest
 
       !Test with ESMF_KIND_R4 arguments
       !================================
+      count = countParameter
       allocate(r4_data(count))
 
       !------------------------------------------------------------------------
@@ -260,6 +269,7 @@ program ESMF_VMSendVMRecvUTest
 
       !Test with ESMF_KIND_R8 arguments
       !================================
+      count = countParameter
       allocate(r8_data(count))
 
       !------------------------------------------------------------------------
@@ -314,6 +324,7 @@ program ESMF_VMSendVMRecvUTest
 
       !Test with ESMF_Logical arguments
       !================================
+      count = countParameter
       allocate(lg_data(count))
 
       !------------------------------------------------------------------------
@@ -419,7 +430,7 @@ program ESMF_VMSendVMRecvUTest
 
       !Test with character string array arguments
       !==========================================
-      count = 100
+      count = min(1000,countParameter)  ! performance issue for too large
       allocate(ch_data(count))
 
       !------------------------------------------------------------------------
