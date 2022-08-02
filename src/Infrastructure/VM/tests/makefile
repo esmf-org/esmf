@@ -127,7 +127,7 @@ RUN_ESMF_VMUserMpiInitUTestUNI:
 # VM Send VM Recv
 #
 RUN_ESMF_VMSendVMRecvUTest:
-	$(MAKE) TNAME=VMSendVMRecv NP=4 ftest
+	$(MAKE) TNAME=VMSendVMRecv NP=2 ftest
 
 #
 # VM SendNb VM RecvNb
