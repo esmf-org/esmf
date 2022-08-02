@@ -126,7 +126,7 @@ program ESMF_VMNonBlockingEx
 ! started, let along completed. For this reason it is unsafe to overwrite
 ! the data in the {\tt localData} array on {\tt src} PET, or to access
 ! the {\tt localData} array on {\tt dst} PET. However both PETs are free
-! to engage in other work while the data transfer my proceed concurrently.
+! to engage in other work while the data transfer may proceed concurrently.
 !EOE
 
 !BOC
