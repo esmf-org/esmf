@@ -43,6 +43,7 @@
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Bilinear.h"
 #include "Mesh/include/ESMCI_MBMesh_Conserve.h"
+#include "Mesh/include/ESMCI_MBMesh_Pole_Extrap.h"
 #include "Mesh/include/ESMCI_MBMesh_Extrapolation.h"
 #include "Mesh/include/ESMCI_MBMesh_Patch.h"
 
@@ -1197,6 +1198,16 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
     } else {
       Throw() << "This regrid method is not currently supported when using MOAB for internal mesh representation.";
     }
+
+
+    // Do pole extrapolation, if the user has requested it
+    if (*regridPoleType != ESMC_REGRID_POLETYPE_NONE) {
+      MBMesh_Pole_Extrap(srcmbmp, srcpl, dstmbmp, dstpl,
+                         *regridPoleType, *regridPoleNPnts,                         
+                         wts,
+                         set_dst_status, dst_status);
+    }
+
 
     // Do extrapolation if the user has requested it
     if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
