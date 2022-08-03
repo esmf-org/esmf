@@ -2,17 +2,37 @@
 
 
 The following compilers and utilities are required for compiling, linking and
-testing the ESMF software:
+testing the ESMF software. Some combinations of Fortran and C++ compilers,
+e.g. Intel ifort with GNU g++, are supported.
 \begin{itemize}
-\item Fortran90 (or later) compiler;
-\item C++ compiler;
-\item MPI implementation compatible with the above compilers (but see below);
+\item Fortran compiler:
+  \begin{itemize}
+  \item GNU's gfortran v7.0 and newer, or
+  \item Intel's ifort v18.0 and newer.
+  \end{itemize} 
+\item C++ compiler:
+  \begin{itemize}
+  \item GNU's g++ v7.0 and newer, or
+  \item Intel's icpc v18.0 and newer.
+  \end{itemize} 
+\item C compiler:
+  \begin{itemize}
+  \item GNU's gcc v7.0 and newer, or
+  \item Intel's icc v18.0 and newer.
+  \end{itemize} 
+\item MPI implementation compatible with the above compilers (but also see below
+for the MPI-bypass build option):
+  \begin{itemize}
+  \item OpenMPI v3.0 and newer, or
+  \item MPICH v2.1 and newer, or
+  \item IntelMPI v18.0 and newer.
+  \end{itemize} 
 \item GNU's \htmladdnormallink{gcc compiler}{http://gcc.gnu.org} -
-for a standard cpp preprocessor implementation;
-\item \htmladdnormallink{GNU Make}{http://www.gnu.org/software/make/make.html}; 
+for a standard cpp preprocessor implementation.
+\item \htmladdnormallink{GNU Make}{http://www.gnu.org/software/make/make.html}.
 \item \htmladdnormallink{Perl}{http://www.perl.com/download.csp} - for running
 test scripts.
-\end{itemize} 
+\end{itemize}
 
 Internal packages that can optionally reference external libraries:
 \begin{itemize}
