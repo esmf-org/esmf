@@ -4102,6 +4102,10 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
     {
       std::stringstream msg;
       msg << "VMK::send():" << __LINE__ << ", size=" << size;
+      if (size <= VM_MPI_SIZE_LIMIT)
+        msg << " in one chunk";
+      else
+        msg << " in multiple chunks";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
@@ -4396,7 +4400,8 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
 #ifdef VM_SIZELOG_on
     {
       std::stringstream msg;
-      msg << "VMK::send():" << __LINE__ << ", size=" << size;
+      msg << "VMK::send():" << __LINE__ << ", size=" << size
+        << " using MPIUNI channel via memcpy() in one chunk";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
@@ -4474,6 +4479,10 @@ int VMK::recv(void *message, unsigned long long int size, int source, int tag,
       {
         std::stringstream msg;
         msg << "VMK::recv():" << __LINE__ << ", size=" << size;
+        if (size <= VM_MPI_SIZE_LIMIT)
+          msg << " in one chunk";
+        else
+          msg << " in multiple chunks";
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       }
 #endif
@@ -4842,7 +4851,8 @@ int VMK::recv(void *message, unsigned long long int size, int source,
 #ifdef VM_SIZELOG_on
     {
       std::stringstream msg;
-      msg << "VMK::recv():" << __LINE__ << ", size=" << size;
+      msg << "VMK::recv():" << __LINE__ << ", size=" << size
+        << " using MPIUNI channel via memcpy() in one chunk";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
