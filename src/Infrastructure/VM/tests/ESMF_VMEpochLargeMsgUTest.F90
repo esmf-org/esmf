@@ -92,7 +92,8 @@ program ESMF_VMEpochLargeMsgUTest
 
       !Test with ESMF_KIND_R8 arguments
       !================================
-      count = 280000000
+!      count = 250000000   ! just below 2GiB limit
+      count = 280000000   ! just above 2GiB limit
       if (localPet==src .or. localPet==dst) allocate(r8_data(count))
 
       !------------------------------------------------------------------------
@@ -148,7 +149,8 @@ program ESMF_VMEpochLargeMsgUTest
 
       !Test with ESMF_KIND_R8 arguments
       !================================
-      count = 280000000
+!      count = 250000000   ! just below 2GiB limit
+      count = 280000000   ! just above 2GiB limit
       if (localPet==src .or. localPet==dst) allocate(r8_data(count))
 
       !------------------------------------------------------------------------
@@ -220,8 +222,8 @@ program ESMF_VMEpochLargeMsgUTest
 
       !Test with ESMF_KIND_R8 arguments
       !================================
-!      count = 280000000
-      count = 250000000
+!      count = 250000000   ! just below 2GiB limit
+      count = 280000000   ! just above 2GiB limit
       if (localPet==src .or. localPet==dst) allocate(r8_data(count))
 
       !------------------------------------------------------------------------
