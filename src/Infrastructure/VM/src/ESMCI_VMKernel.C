@@ -20,6 +20,7 @@
 #define VM_MEMLOG_off
 #define VM_COMMQUEUELOG_off
 #define VM_EPOCHLOG_on
+#define VM_EPOCHMEMLOG_on
 #define VM_SSISHMLOG_off
 #define VM_SIZELOG_on
 
@@ -3794,11 +3795,11 @@ void VMK::epochFinal(){
 #ifdef USE_STRSTREAM
     // use strstream
     void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
-    int size = sm->stream.pcount();           // bytes in stream buffer
+    unsigned long long int size = sm->stream.pcount(); // bytes in stream buffer
 #else
     // use stringstream
-    void *buffer = (void *)sm->streamBuffer.data();
-    int size = sm->streamBuffer.size();       // bytes in stream buffer
+    void *buffer = (void *)sm->streamBuffer.data(); // access contig. buffer
+    unsigned long long int size = sm->streamBuffer.size(); // bytes in stream buffer
 #endif
     std::stringstream msg;
     msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm:"
@@ -3878,22 +3879,36 @@ void VMK::epochExit(bool keepAlloc){
 #endif
       }
       bool needAck = false;
+#ifdef VM_EPOCHMEMLOG_on
+      VM::logMemInfo(std::string("VMK::epochExit:1.0"));
+#endif
 #ifdef USE_STRSTREAM
       // use strstream
       void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
-      int size = sm->stream.pcount();           // bytes in stream buffer
+      unsigned long long size = sm->stream.pcount(); // bytes in stream buffer
+      sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
+#else
+      // use stringstream
+      sm->streamBuffer = sm->stream.str();  // copy data into contiguous buffer
+      sm->stream.str("");                   // clear out stream
+      void *buffer = (void *)sm->streamBuffer.data(); // access contig. buffer
+      unsigned long long size = sm->streamBuffer.size();
+#endif
+#ifdef VM_EPOCHMEMLOG_on
+      VM::logMemInfo(std::string("VMK::epochExit:2.0"));
+#endif
       if (size > 0){
 #if (defined VM_EPOCHLOG_on || defined VM_SIZELOG_on)
         std::stringstream msg;
         msg << "epochBuffer:" << __LINE__ << " ready to post non-blocking send:"
-          << " dst=" << getVas(lpid[its->first]) << " size=" << size
+          << " dst=" << getVas(lpid[its->first])
+          << " size=" << size
           << " buffer=" << buffer;
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         double t0; wtime(&t0);
 #endif
         MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
           &sm->mpireq);
-        sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
         needAck = true;
 #ifdef VM_EPOCHLOG_on
         double t1; wtime(&t1);
@@ -3903,31 +3918,8 @@ void VMK::epochExit(bool keepAlloc){
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
       }
-#else
-      // use stringstream
-      sm->streamBuffer = sm->stream.str();  // copy data into persistent buffer
-      sm->stream.str("");                   // clear out stream
-      if (sm->streamBuffer.size() > 0){
-#if (defined VM_EPOCHLOG_on || defined VM_SIZELOG_on)
-        std::stringstream msg;
-        msg << "epochBuffer:" << __LINE__ << " ready to post non-blocking send:"
-        << " dst=" << getVas(lpid[its->first]) 
-        << " size=" << sm->streamBuffer.size()
-        << " buffer=" << (void *)sm->streamBuffer.data();
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-        double t0; wtime(&t0);
-#endif
-        MPI_Isend((void *)sm->streamBuffer.data(), sm->streamBuffer.size(),
-          MPI_BYTE, lpid[its->first], tag, mpi_c, &sm->mpireq);
-        needAck = true;
-#ifdef VM_EPOCHLOG_on
-        double t1; wtime(&t1);
-        msg.str(""); // clear
-        msg << "epochBuffer:" << __LINE__ << " time in non-blocking send: "
-          << t1 - t0 << " seconds";
-        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-#endif
-      }
+#ifdef VM_EPOCHMEMLOG_on
+      VM::logMemInfo(std::string("VMK::epochExit:3.0"));
 #endif
       if (needAck){
         // post the receive of the acknowledge message from receiver for throttle
@@ -3943,6 +3935,9 @@ void VMK::epochExit(bool keepAlloc){
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
       }
+#ifdef VM_EPOCHMEMLOG_on
+      VM::logMemInfo(std::string("VMK::epochExit:4.0"));
+#endif
     }
     if (!keepAlloc){
       // clear the recvMap, freeing all receive buffers held
