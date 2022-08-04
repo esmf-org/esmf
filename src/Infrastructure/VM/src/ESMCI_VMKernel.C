@@ -3800,6 +3800,10 @@ void VMK::epochFinal(){
     // use stringstream
     void *buffer = (void *)sm->streamBuffer.data(); // access contig. buffer
     unsigned long long int size = sm->streamBuffer.size(); // bytes in stream buffer
+#elif (EPOCH_BUFFER_OPTION == 2)
+    // use vector<char>
+    void *buffer = (void *)&(sm->charBuffer[0]);  // access the buffer
+    unsigned long long int size = sm->charBuffer.size(); // bytes in buffer
 #endif
     std::stringstream msg;
     msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm:"
@@ -3893,6 +3897,11 @@ void VMK::epochExit(bool keepAlloc){
       sm->stream.str("");                   // clear out stream
       void *buffer = (void *)sm->streamBuffer.data(); // access contig. buffer
       unsigned long long size = sm->streamBuffer.size();
+#elif (EPOCH_BUFFER_OPTION == 2)
+      // use vector<char>
+      void *buffer = (void *)&(sm->charBuffer[0]);  // access the buffer
+      unsigned long long int size = sm->charBuffer.size(); // bytes in buffer
+      sm->charBuffer.resize(0); // reset buffer, without affecting allocation
 #endif
 #ifdef VM_EPOCHMEMLOG_on
       VM::logMemInfo(std::string("VMK::epochExit:2.0"));
@@ -4008,6 +4017,9 @@ bool VMK::sendBuffer::clear(bool justTest){
   msg << "epochBuffer:" << __LINE__ << " ready to clear outstanding comm";
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif
+#ifdef VM_EPOCHMEMLOG_on
+  VM::logMemInfo(std::string("VMK::sendBuffer::clear():1.0"));
+#endif
   bool done = false;
   if (mpireq != MPI_REQUEST_NULL){
     if (justTest){
@@ -4046,12 +4058,21 @@ bool VMK::sendBuffer::clear(bool justTest){
       
     }
   }
+#ifdef VM_EPOCHMEMLOG_on
+  VM::logMemInfo(std::string("VMK::sendBuffer::clear():2.0"));
+#endif
 #if (EPOCH_BUFFER_OPTION == 0)
   // use strstream
   stream.freeze(false); // unfreeze the persistent buffer for deallocation
 #elif (EPOCH_BUFFER_OPTION == 1)
   // use stringstream
   streamBuffer.clear(); // done with buffer
+#elif (EPOCH_BUFFER_OPTION == 2)
+  // use vector<char>
+  std::vector<char>().swap(charBuffer); // done with buffer swap out of scope
+#endif
+#ifdef VM_EPOCHMEMLOG_on
+  VM::logMemInfo(std::string("VMK::sendBuffer::clear():3.0"));
 #endif
   return done;
 }
@@ -4295,9 +4316,15 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
         sm->clear();  // wait for outstanding comm and clear out.
       }
       // append the message into the epoch buffer stream
+#if (EPOCH_BUFFER_OPTION == 0 || EPOCH_BUFFER_OPTION == 1)
       append(sm->stream, size);
       append(sm->stream, tag);
       sm->stream.write((const char*)message, size);
+#elif (EPOCH_BUFFER_OPTION == 2)
+      append(sm->charBuffer, size);
+      append(sm->charBuffer, tag);
+      append(sm->charBuffer, (const char*)message, size);
+#endif
 #if (defined VM_EPOCHLOG_on || defined VM_SIZELOG_on)
       msg.str(""); // clear
       msg << "epochBuffer:" << __LINE__ << " non-blocking send write complete"<<
@@ -4306,6 +4333,8 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
       sm->stream.pcount();
 #elif (EPOCH_BUFFER_OPTION == 1)
       sm->stream.tellp();
+#elif (EPOCH_BUFFER_OPTION == 2)
+      sm->charBuffer.size();
 #endif
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
 #endif

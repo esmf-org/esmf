@@ -17,8 +17,9 @@
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 
-#define EPOCH_BUFFER_OPTION (1) //  0: std:strstream
+#define EPOCH_BUFFER_OPTION (2) //  0: std:strstream
                                 //  1: std:stringstream
+                                //  2: std:vector<char>
 
 #include <mpi.h>
 #include <vector>
@@ -27,6 +28,8 @@
 #include <queue>
 #if (EPOCH_BUFFER_OPTION == 0)
 #include <strstream>
+#elif (EPOCH_BUFFER_OPTION == 2)
+#include <cstring>
 #endif
 #include <map>
 
@@ -128,6 +131,17 @@ template<typename T> void append(std::stringstream &streami, T value){
 #if (EPOCH_BUFFER_OPTION == 0)
 template<typename T> void append(std::strstream &streami, T value){
   streami.write((char*)&value, sizeof(T));
+}
+#elif (EPOCH_BUFFER_OPTION == 2)
+template<typename T> void append(std::vector<char> &charBuffer, T value){
+  unsigned long long int size = charBuffer.size();
+  charBuffer.resize(size+sizeof(T));
+  memcpy(&(charBuffer[size]), (char*)&value, sizeof(T));
+}
+template<typename T> void append(std::vector<char> &charBuffer, const char* message, T _size){
+  unsigned long long int size = charBuffer.size();
+  charBuffer.resize(size+_size);
+  memcpy(&(charBuffer[size]), message, _size);
 }
 #endif
 //-----------------------------------------------------------------------------
@@ -236,6 +250,8 @@ class VMK{
 #elif (EPOCH_BUFFER_OPTION == 1)
     std::stringstream stream;
     std::string streamBuffer;
+#elif (EPOCH_BUFFER_OPTION == 2)
+    std::vector<char> charBuffer;
 #endif
     MPI_Request mpireq;
     bool firstFlag;
