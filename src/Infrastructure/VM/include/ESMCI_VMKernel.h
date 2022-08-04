@@ -17,14 +17,15 @@
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 
-#define USE_STRSTREAM
+#define EPOCH_BUFFER_OPTION (1) //  0: std:strstream
+                                //  1: std:stringstream
 
 #include <mpi.h>
 #include <vector>
 #include <string>
 #include <sstream>
 #include <queue>
-#ifdef USE_STRSTREAM
+#if (EPOCH_BUFFER_OPTION == 0)
 #include <strstream>
 #endif
 #include <map>
@@ -124,7 +125,7 @@ namespace ESMCI {
 template<typename T> void append(std::stringstream &streami, T value){
   streami.write((char*)&value, sizeof(T));
 }
-#ifdef USE_STRSTREAM
+#if (EPOCH_BUFFER_OPTION == 0)
 template<typename T> void append(std::strstream &streami, T value){
   streami.write((char*)&value, sizeof(T));
 }
@@ -230,9 +231,9 @@ class VMK{
   };
 
   struct sendBuffer{
-#ifdef USE_STRSTREAM
+#if (EPOCH_BUFFER_OPTION == 0)
     std::strstream stream;
-#else
+#elif (EPOCH_BUFFER_OPTION == 1)
     std::stringstream stream;
     std::string streamBuffer;
 #endif

@@ -3792,11 +3792,11 @@ void VMK::epochFinal(){
   for (its=sendMap.begin(); its!=sendMap.end(); ++its){
     sendBuffer *sm = &(its->second);
 #ifdef VM_EPOCHLOG_on
-#ifdef USE_STRSTREAM
+#if (EPOCH_BUFFER_OPTION == 0)
     // use strstream
     void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
     unsigned long long int size = sm->stream.pcount(); // bytes in stream buffer
-#else
+#elif (EPOCH_BUFFER_OPTION == 1)
     // use stringstream
     void *buffer = (void *)sm->streamBuffer.data(); // access contig. buffer
     unsigned long long int size = sm->streamBuffer.size(); // bytes in stream buffer
@@ -3882,12 +3882,12 @@ void VMK::epochExit(bool keepAlloc){
 #ifdef VM_EPOCHMEMLOG_on
       VM::logMemInfo(std::string("VMK::epochExit:1.0"));
 #endif
-#ifdef USE_STRSTREAM
+#if (EPOCH_BUFFER_OPTION == 0)
       // use strstream
       void *buffer = (void *)sm->stream.str();  // access the buffer -> freeze
       unsigned long long size = sm->stream.pcount(); // bytes in stream buffer
       sm->stream.seekp(0);  // reset stream to the beginning (not affect buff)
-#else
+#elif (EPOCH_BUFFER_OPTION == 1)
       // use stringstream
       sm->streamBuffer = sm->stream.str();  // copy data into contiguous buffer
       sm->stream.str("");                   // clear out stream
@@ -4046,10 +4046,10 @@ bool VMK::sendBuffer::clear(bool justTest){
       
     }
   }
-#ifdef USE_STRSTREAM
+#if (EPOCH_BUFFER_OPTION == 0)
   // use strstream
   stream.freeze(false); // unfreeze the persistent buffer for deallocation
-#else
+#elif (EPOCH_BUFFER_OPTION == 1)
   // use stringstream
   streamBuffer.clear(); // done with buffer
 #endif
@@ -4302,9 +4302,9 @@ int VMK::send(const void *message, unsigned long long int size, int dest,
       msg.str(""); // clear
       msg << "epochBuffer:" << __LINE__ << " non-blocking send write complete"<<
       ", current stream size=" <<
-#ifdef USE_STRSTREAM
+#if (EPOCH_BUFFER_OPTION == 0)
       sm->stream.pcount();
-#else
+#elif (EPOCH_BUFFER_OPTION == 1)
       sm->stream.tellp();
 #endif
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
