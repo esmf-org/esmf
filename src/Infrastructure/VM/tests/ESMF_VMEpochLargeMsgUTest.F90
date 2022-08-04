@@ -146,14 +146,11 @@ program ESMF_VMEpochLargeMsgUTest
 ! Non-Blocking src -> dst
 !===============================================================================
 
-
       !Test with ESMF_KIND_R8 arguments
       !================================
-     count = 280000000
-!      count = 250000000
+      count = 280000000
       if (localPet==src .or. localPet==dst) allocate(r8_data(count))
 
-!call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
@@ -197,7 +194,6 @@ program ESMF_VMEpochLargeMsgUTest
       endif
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-!call ESMF_VMEpochExit(rc=rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
@@ -215,9 +211,98 @@ program ESMF_VMEpochLargeMsgUTest
       call ESMF_Test( (R8Sum == 0), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      if (localPet==src) call ESMF_VMCommWaitAll(vm, rc=rc)
+      call ESMF_VMCommWaitAll(vm, rc=rc)
       if (localPet==src .or. localPet==dst) deallocate(r8_data)
 
+!===============================================================================
+! Non-Blocking with VMEpoch src -> dst
+!===============================================================================
+
+      !Test with ESMF_KIND_R8 arguments
+      !================================
+!      count = 280000000
+      count = 250000000
+      if (localPet==src .or. localPet==dst) allocate(r8_data(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      write(name, *) "ESMF_VMEpochEnter() Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      if (localPet==src) then
+        write(name, *) "Sending local data R8 Non-Blocking Test"
+        do i=1, count
+          r8_data(i) = real(localPet*100+i, ESMF_KIND_R8)
+        enddo
+        call ESMF_VMSend(vm, sendData=r8_data, count=count, dstPet=dst, &
+          syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      else
+        write(name, *) "Dummy Sending R8 Non-Blocking Test"
+        rc = ESMF_SUCCESS
+      endif
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      if (localPet==dst) then
+        write(name, *) "Receiving local data R8 Non-Blocking Test"
+        call ESMF_VMRecv(vm, recvData=r8_data, count=count, srcPet=src, &
+          syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      else
+        write(name, *) "Dummy Receiving R8 Non-Blocking Test"
+        rc = ESMF_SUCCESS
+      endif
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      if (localPet==dst) then
+        write(name, *) "Waiting for all outstanding comms for R8 Non-Blocking Test"
+        call ESMF_VMCommWaitAll(vm, rc=rc)
+      else
+        write(name, *) "Dummy Waiting for all outstanding comms for R8 Non-Blocking Test"
+        rc = ESMF_SUCCESS
+      endif
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      write(name, *) "ESMF_VMEpochExit() Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMEpochExit(rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Verify localData after VM Receive
+      write(failMsg, *) "Wrong Local Data"
+      R8Sum=0
+      if (localPet==dst) then
+        write(name, *) "Verify local data after receive R8 Non-Blocking Test"
+        do i=1, count
+          R8Sum = R8Sum + (r8_data(i) - real(src*100+i, ESMF_KIND_R8))
+        enddo
+      else
+        write(name, *) "Dummy verify local data after receive R8 Non-Blocking Test"
+      endif
+      call ESMF_Test( (R8Sum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      if (localPet==src .or. localPet==dst) deallocate(r8_data)
+
+      !------------------------------------------------------------------------
       call ESMF_TestEnd(ESMF_SRCLINE)
 
 end program ESMF_VMEpochLargeMsgUTest
