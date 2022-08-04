@@ -121,6 +121,7 @@ typedef DWORD pid_t;
 namespace ESMCI {
 
 // Definition of class static data members
+std::vector<MPI_Datatype> VMK::customType(10);  // up to 2^10 = 1024 byte
 MPI_Comm VMK::default_mpi_c;
 int VMK::mpi_thread_level;
 int VMK::mpi_init_outside_esmf;
@@ -623,6 +624,13 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   MPI_Allgather(&num_adevices, 1, MPI_INTEGER,
                 nadevs, 1, MPI_INTEGER, mpi_c);
 #endif
+  // Creating large contiguous MPI data types
+  int byteCount=1;
+  for (auto i=0; i<(signed)customType.size(); i++){
+    byteCount *= 2;
+    MPI_Type_contiguous(byteCount, MPI_BYTE, &(customType[i]));
+    MPI_Type_commit(&(customType[i]));
+  }
   // Start epoch support in the global VM
   epochInit();
 }
@@ -3916,8 +3924,46 @@ void VMK::epochExit(bool keepAlloc){
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         double t0; wtime(&t0);
 #endif
-        MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
-          &sm->mpireq);
+        if (size <= VM_MPI_SIZE_LIMIT)
+          // small message
+          MPI_Isend(buffer, size, MPI_BYTE, lpid[its->first], tag, mpi_c,
+            &sm->mpireq);
+        else{
+#if (EPOCH_BUFFER_OPTION == 2)
+          // large message
+          // - determine smallest customType to keep count < VM_MPI_SIZE_LIMIT
+          int byteCount = 1;
+          int i;
+          for (i=0; i<(signed)customType.size(); i++){
+            byteCount *= 2;
+            if (size / byteCount < VM_MPI_SIZE_LIMIT) break;
+          }
+          if (i>=(signed)customType.size()){
+            int localrc;
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+              "Message too large to be supported",
+              ESMC_CONTEXT, &localrc);
+            throw localrc;  // bail out with exception
+          }
+          // - might need to pad the buffer to be a multiple of the customType
+          int extra = size%byteCount;
+          if (extra){
+            size += byteCount - extra;
+            sm->charBuffer.resize(size);
+          }
+          // - use the determined customType to send the message
+          int count = size/byteCount;
+          MPI_Isend(buffer, count, customType[i], lpid[its->first], tag, mpi_c,
+            &sm->mpireq);
+#else
+          // large messages not supported
+          int localrc;
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            "Message larger than 2GiB only supported for EPOCH_BUFFER_OPTION 2.",
+            ESMC_CONTEXT, &localrc);
+          throw localrc;  // bail out with exception
+#endif
+        }
         needAck = true;
 #ifdef VM_EPOCHLOG_on
         double t1; wtime(&t1);
@@ -4738,11 +4784,29 @@ int VMK::recv(void *message, unsigned long long int size, int source,
         MPI_Status mpistat;
         MPI_Probe(lpid[source], defaultTag, mpi_c, &mpistat);
 
-        int bytecount;
-        MPI_Get_count(&mpistat, MPI_BYTE, &bytecount);
-
-        rm->streamBuffer.resize(bytecount);
+        // - determine smallest customType to keep count < VM_MPI_SIZE_LIMIT
+        int count;
+        int i;
+        for (i=(signed)customType.size()-1; i>=0; i--){
+          MPI_Get_count(&mpistat, customType[i], &count);
+          if (count > VM_MPI_SIZE_LIMIT/2) break;
+        }
+        unsigned long long int byteCount;
+        if (i<0){
+          // small message
+          MPI_Get_count(&mpistat, MPI_BYTE, &count);
+          byteCount = count;
+        }else{
+          // large message
+          byteCount = 2;
+          for (int j=0; j<i; j++)
+            byteCount *= 2;
+          byteCount *= count;
+        }
+        // prepare the receive buffer
+        rm->streamBuffer.resize(byteCount);
         rm->buffer = (void *)rm->streamBuffer.data();
+
 #ifdef VM_EPOCHLOG_on
         double t1; wtime(&t1);
         msg.str(""); // clear
@@ -4770,8 +4834,15 @@ int VMK::recv(void *message, unsigned long long int size, int source,
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
         double t2; wtime(&t2);
 #endif
-        MPI_Recv(rm->buffer, bytecount, MPI_BYTE,
-          lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
+        if (i<0){
+          // small message
+          MPI_Recv(rm->buffer, count, MPI_BYTE,
+            lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
+        }else{
+          // large message
+          MPI_Recv(rm->buffer, count, customType[i],
+            lpid[source], defaultTag, mpi_c, MPI_STATUS_IGNORE);
+        }
 #ifdef VM_EPOCHLOG_on
         double t3; wtime(&t3);
         msg.str(""); // clear

@@ -17,9 +17,9 @@
 #define MPICH_IGNORE_CXX_SEEK
 #endif
 
-#define EPOCH_BUFFER_OPTION (2) //  0: std:strstream
-                                //  1: std:stringstream
-                                //  2: std:vector<char>
+#define EPOCH_BUFFER_OPTION (2) //  0: std::strstream
+                                //  1: std::stringstream
+                                //  2: std::vector<char>
 
 #include <mpi.h>
 #include <vector>
@@ -148,10 +148,14 @@ template<typename T> void append(std::vector<char> &charBuffer, const char* mess
 
 
 class VMK{
-  
-  // structs
+
   public:
-  
+
+  // custom MPI types for large message support
+  static std::vector<MPI_Datatype> customType;
+
+  // structs
+
   struct commhandle{
     commhandle *prev_handle;// previous handle in the queue
     commhandle *next_handle;// next handle in the queue
