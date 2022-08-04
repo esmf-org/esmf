@@ -91,7 +91,7 @@ enum vmEpoch  { epochNone=0, epochBuffer};
 
 // - buffer lenghts in bytes
 #define PIPC_BUFFER                   (4096)
-#define SHARED_BUFFER                 (64)
+#define SHARED_BUFFER                 (256)
 
 // - number of shared memory non-blocking channels
 #define SHARED_NONBLOCK_CHANNELS      (16)
