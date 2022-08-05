@@ -1,10 +1,9 @@
-Settings for Darwin (Mac OS X), using the GNU gfortran compiler
-(part of the GCC 4.0 release) and GNU C++ compiler (g++).  Due to bugs
-in early versions of gfortran, ESMF requires gfortran version 4.3 or newer.
+Settings for Darwin (Mac OS X), using the GNU gfortran compiler 
+and GNU C++ compiler (g++).
 
 On some Darwin systems, the clang compiler is provided as an alias to g++.
 This is detected and properly supported.  On systems where both g++ and clang
-exist, ensure that the PATH environement variable is set correctly such that
+exist, ensure that the PATH environment variable is set correctly such that
 the desired c++ environment is used.  For example, if clang is the desired
 compiler, the path to it should be prior to the path to the gcc bin directory.
 
