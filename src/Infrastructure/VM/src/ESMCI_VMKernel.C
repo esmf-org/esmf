@@ -20,7 +20,7 @@
 #define VM_MEMLOG_off
 #define VM_COMMQUEUELOG_off
 #define VM_EPOCHLOG_on
-#define VM_EPOCHMEMLOG_on
+#define VM_EPOCHMEMLOG_off
 #define VM_SSISHMLOG_off
 #define VM_SIZELOG_on
 
