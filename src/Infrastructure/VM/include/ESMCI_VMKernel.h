@@ -422,13 +422,13 @@ class VMK{
     void exit(class VMKPlan *vmp, void *arg);
     void shutdown(class VMKPlan *vmp, void *arg);
       // exit a vm derived from current vm according to the VMKPlan
-  
+
     void print() const;
     void log(std::string prefix,
       ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;
     static void logSystem(std::string prefix,
       ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO);
-    
+
     // get() calls    <-- to be replaced by following new inlined section
     int getNpets();                // return npets
     int getMypet();                // return mypet
@@ -441,13 +441,13 @@ class VMK{
     int getTid(int i);             // return tid for PET
     int getVas(int i);             // return vas for PET
     int getLpid(int i);            // return lpid for PET
-    
+
     int getDefaultTag(int src, int dst);   // return default tag
     int getMaxTag();               // return maximum value of tag
-    
+
     const int *getSsipe() const {return ssipe;}
     int **getCid() const {return cid;}
-        
+
     // get() calls
     int getLocalPet() const {return mypet;}
     int getCurrentSsiPe() const;
@@ -497,14 +497,15 @@ class VMK{
     static std::string getEsmfComm(){return std::string(XSTR(ESMF_COMM));}
 
     // p2p communication calls
-    int send(const void *message, unsigned long long int size, int dest, int tag=-1);
-    int send(const void *message, unsigned long long int size, int dest, commhandle **commh,
+    int send(const void *message, unsigned long long int size, int dest,
       int tag=-1);
-    int recv(void *message, unsigned long long int size, int source, int tag=-1,
-      status *status=NULL);
-    int recv(void *message, unsigned long long int size, int source, commhandle **commh,
-      int tag=-1);
-    
+    int send(const void *message, unsigned long long int size, int dest,
+      commhandle **commh, int tag=-1);
+    int recv(void *message, unsigned long long int size, int source,
+      int tag=-1, status *status=NULL);
+    int recv(void *message, unsigned long long int size, int source,
+      commhandle **commh, int tag=-1);
+
     int sendrecv(void *sendData, int sendSize, int dst, void *recvData,
       int recvSize, int src, int dstTag=-1, int srcTag=-1);
     int sendrecv(void *sendData, int sendSize, int dst, void *recvData,
@@ -525,7 +526,7 @@ class VMK{
     int allreduce(void *in, void *out, int len, vmType type, vmOp op);
     int allfullreduce(void *in, void *out, int len, vmType type,
       vmOp op);
-    
+
     int reduce_scatter(void *in, void *out, int *outCounts, vmType type,
       vmOp op);
 
@@ -533,7 +534,7 @@ class VMK{
     int scatter(void *in, void *out, int len, int root, commhandle **commh);
     int scatterv(void *in, int *inCounts, int *inOffsets, void *out,
       int outCount, vmType type, int root);
-    
+
     int gather(void *in, void *out, int len, int root);
     int gather(void *in, void *out, int len, int root, commhandle **commh);
     int gatherv(void *in, int inCount, void *out, int *outCounts, 
@@ -550,14 +551,14 @@ class VMK{
 
     int broadcast(void *data, int len, int root);
     int broadcast(void *data, int len, int root, commhandle **commh);
-    
+
     // non-blocking service calls
     int commtest(commhandle **commh, int *completeFlag, status *status=NULL);
     int commwait(commhandle **commh, status *status=NULL, int nanopause=0);
     void commqueuewait();
     void commcancel(commhandle **commh);
     bool cancelled(status *status);
-    
+
     // SSI shared memory methods
     int ssishmAllocate(std::vector<unsigned long>&bytes, memhandle *memh,
       bool contigFlag=false);
@@ -567,7 +568,7 @@ class VMK{
     int ssishmGetLocalPet(memhandle memh){return memh.localPet;}
     int ssishmGetLocalPetCount(memhandle memh){return memh.localPetCount;}
     int ssishmSync(memhandle memh);
-        
+
     // IntraProcessSharedMemoryAllocation Table Methods
     void *ipshmallocate(int bytes, int *firstFlag=NULL);
     void ipshmdeallocate(void *);
@@ -577,7 +578,7 @@ class VMK{
     void ipmutexdeallocate(ipmutex *ipmutex);
     int ipmutexlock(ipmutex *ipmutex);
     int ipmutexunlock(ipmutex *ipmutex);
-    
+
     // Simple thread-safety lock/unlock using internal pth_mutex
     int lock();
     int unlock();
@@ -589,7 +590,7 @@ class VMK{
     void epochEnter(vmEpoch epoch, bool keepAlloc=true, int throttle=10);
     void epochExit(bool keepAlloc=true);
     vmEpoch getEpoch() const {return epoch;}
-        
+
     // Timer methods
     static void wtime(double *time);
     static void wtimeprec(double *prec);
