@@ -1006,7 +1006,7 @@ int IO::addArray(
 //EOP
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMF_SUCCESS;             // local return code
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   PRINTPOS;
@@ -1024,23 +1024,22 @@ int IO::addArray(
         variableName, dimAttPack, varAttPack, gblAttPack);
 
     if ((IO_ObjectContainer *)NULL == newObj) {
-      localrc = ESMC_RC_MEM_ALLOCATE;
       ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
       ESMC_LogDefault.Write("Unable to allocate storage for IO object",
                             ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+      return rc;
     } else {
       objects.push_back(newObj);
     }
   } catch(...) {
     PRINTMSG("CATCH: Alloc error!!");
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
+    return rc;
   }
 
-  // return
-  if (ESMC_RC_NOT_IMPL == rc) {
-    rc = localrc;
-  }
-  return (rc);
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
 }  // end IO::addArray
 //-------------------------------------------------------------------------
 
