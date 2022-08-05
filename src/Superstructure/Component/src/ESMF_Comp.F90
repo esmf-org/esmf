@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -55,6 +55,7 @@ module ESMF_CompMod
   use ESMF_StateMod
   use ESMF_InitMacrosMod
   use ESMF_IOUtilMod
+  use ESMF_UtilMod
   
   implicit none
 
@@ -175,7 +176,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -248,7 +249,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -264,7 +265,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -280,7 +281,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -332,7 +333,7 @@ module ESMF_CompMod
   public ESMF_CompWait
 
   public ESMF_CWrapSetInitCreated
-  
+
   public ESMF_CompStatusGet
 
 !EOPI
@@ -362,7 +363,6 @@ module ESMF_CompMod
     module procedure ESMF_ctne
   end interface
 !------------------------------------------------------------------------------
-
 
 !------------------------------------------------------------------------------
 
@@ -927,6 +927,15 @@ contains
 
         if (compp%vm_info /= ESMF_NULL_POINTER) then
           ! shut down this component's VM
+#if 0
+  block
+    character(160):: msg, compName
+    call ESMF_GetName(compp%base, compName, rc=localrc)
+    write(msg,*) "ESMF_CompDestruct() calling ESMF_VMShutdown() for: ",&
+      trim(compName)
+    call ESMF_LogWrite(msg, logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+  end block
+#endif
           call ESMF_VMShutdown(vm=compp%vm_parent, vmplan=compp%vmplan, &
             vm_info=compp%vm_info, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
@@ -1051,6 +1060,7 @@ contains
     integer                 :: portArg
     integer                 :: timeoutArg
     real(ESMF_KIND_R8)      :: usedTime
+    character(160)          :: msgString
         
     ! dummys that will provide initializer values if args are not present
     type(ESMF_State)        :: dummyis, dummyes
@@ -1180,6 +1190,7 @@ contains
     ! Wrap comp so it's passed to C++ correctly.
     compp%compw%compp => compp
     ESMF_INIT_SET_CREATED(compp%compw)
+    compp%compw%isNamedAlias = .false.
 
     ! Set up the arguments
     if (compp%iAmParticipant) then
@@ -1205,7 +1216,10 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! callback into user code
-!print *, "ESMF_CompExecute(), calling c_ESMC_FTableCallEntryPointVM(): timeoutArg=",timeoutArg
+#if 0
+write (msgString,*) "ESMF_CompExecute(), calling c_ESMC_FTableCallEntryPointVM(): timeoutArg=",timeoutArg
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
+#endif
       call c_ESMC_FTableCallEntryPointVM(compp%compw, compp%vm_parent, &
         compp%vmplan, compp%vm_info, compp%vm_cargo, compp%ftable, method, &
         phaseArg, portArg, timeoutArg, compp%vm_recursionCount, localrc)
@@ -1228,7 +1242,10 @@ contains
         usedTime = usedTime - compp%startTime
         ! allow remaining time for timeout, but at least 1 second to wrap up
         timeoutArg = max(timeoutArg - int(usedTime), 1)
-!print *, "ESMF_CompExecute(), calling c_ESMC_CompWait(): usedTime=",usedTime,"timeoutArg=",timeoutArg
+#if 0
+write (msgString,*) "ESMF_CompExecute(), calling c_ESMC_CompWait(): usedTime=",usedTime,"timeoutArg=",timeoutArg
+call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
+#endif
         call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
           compp%vm_cargo, timeoutArg, compp%vm_recursionCount, localUserRc, &
           localrc)
@@ -2040,7 +2057,8 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMaxPEs(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, rc)
+    pref_intra_ssi, pref_inter_ssi, pthreadMinStackSize, openMpHandling, &
+    openMpNumThreads, forceChildPthreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2048,6 +2066,10 @@ contains
     integer,              intent(in),  optional :: pref_intra_process
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
+    integer,              intent(in),  optional :: pthreadMinStackSize
+    character(*),         intent(in),  optional :: openMpHandling
+    integer,              intent(in),  optional :: openMpNumThreads
+    logical,              intent(in),  optional :: forceChildPthreads
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2065,6 +2087,20 @@ contains
 !          Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
+!     \item[{[pthreadMinStackSize]}] 
+!          Minimum stack size for child PETs executing as Pthreads.
+!     \item[{[openMpHandling]}] 
+!          Handling of OpenMP threads. Supported: "none", "set", "init", "pin"
+!          (default).
+!     \item[{[openMpNumThreads]}] 
+!          Number of OpenMP threads under each PET. By default each PET uses
+!          its local peCount.
+!     \item[{[forceChildPthreads]}] 
+!          For {\tt .true.}, force each child PET to execute in its own Pthread.
+!          By default, {\tt .false.}, single PETs spawned from a parent PET
+!          execute in the same thread (or MPI process) as the parent PET. Multiple
+!          child PETs spawned by the same parent PET always execute as their own
+!          Pthreads.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2072,6 +2108,8 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    integer                 :: intOpenMpHandling
+    character(len=:), allocatable  :: lowerOpenMpHandling
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2107,14 +2145,53 @@ contains
     ! call CompClass method
     call ESMF_VMPlanMaxPEs(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      compp%npetlist, compp%petlist, rc=localrc)
+      compp%npetlist, compp%petlist, forceChildPthreads, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set pthreadMinStackSize
+    call ESMF_VMPlanSetMinStackSize(compp%vmplan, pthreadMinStackSize, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set openMpHandling
+    intOpenMpHandling = 3 ! default: pin OpenMP threads to PEs
+    if (present(openMpHandling)) then
+      lowerOpenMpHandling = ESMF_UtilStringLowerCase(openMpHandling, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+      if (trim(lowerOpenMpHandling) == "none") then
+        intOpenMpHandling = 0
+      else if (trim(lowerOpenMpHandling) == "set") then
+        intOpenMpHandling = 1
+      else if (trim(lowerOpenMpHandling) == "init") then
+        intOpenMpHandling = 2
+      else if ((trim(lowerOpenMpHandling) == "pin") .or. &
+        (trim(lowerOpenMpHandling) == "")) then
+        intOpenMpHandling = 3 ! default
+      else
+        ! not a supported option -> error out
+        deallocate(lowerOpenMpHandling)
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+          msg="Invalid 'openMpHandling' option provided.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+      deallocate(lowerOpenMpHandling)
+    endif
+    call ESMF_VMPlanSetOpenMP(compp%vmplan, intOpenMpHandling, &
+      openMpNumThreads, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_CompSetVMMaxPEs
 !------------------------------------------------------------------------------
 
@@ -2127,7 +2204,8 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMaxThreads(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, rc)
+    pref_intra_ssi, pref_inter_ssi, pthreadMinStackSize, forceChildPthreads, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2135,7 +2213,9 @@ contains
     integer,              intent(in),  optional :: pref_intra_process
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
-    integer,              intent(out), optional :: rc           
+    integer,              intent(in),  optional :: pthreadMinStackSize
+    logical,              intent(in),  optional :: forceChildPthreads
+    integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Print VM internals
@@ -2152,6 +2232,14 @@ contains
 !          Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
+!     \item[{[pthreadMinStackSize]}] 
+!          Minimum stack size for child PETs executing as Pthreads.
+!     \item[{[forceChildPthreads]}] 
+!          For {\tt .true.}, force each child PET to execute in its own Pthread.
+!          By default, {\tt .false.}, single PETs spawned from a parent PET
+!          execute in the same thread (or MPI process) as the parent PET. Multiple
+!          child PETs spawned by the same parent PET always execute as their own
+!          Pthreads.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2194,14 +2282,20 @@ contains
     ! call CompClass method
     call ESMF_VMPlanMaxThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      compp%npetlist, compp%petlist, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      compp%npetlist, compp%petlist, forceChildPthreads, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set MinStackSize
+    call ESMF_VMPlanSetMinStackSize(compp%vmplan, pthreadMinStackSize, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_CompSetVMMaxThreads
 !------------------------------------------------------------------------------
 
@@ -2214,7 +2308,8 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_CompSetVMMinThreads(compp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, rc)
+    pref_intra_ssi, pref_inter_ssi, pthreadMinStackSize, forceChildPthreads, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
@@ -2222,6 +2317,8 @@ contains
     integer,              intent(in),  optional :: pref_intra_process
     integer,              intent(in),  optional :: pref_intra_ssi
     integer,              intent(in),  optional :: pref_inter_ssi
+    integer,              intent(in),  optional :: pthreadMinStackSize
+    logical,              intent(in),  optional :: forceChildPthreads
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2239,6 +2336,14 @@ contains
 !          Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
+!     \item[{[pthreadMinStackSize]}] 
+!          Minimum stack size for child PETs executing as Pthreads.
+!     \item[{[forceChildPthreads]}] 
+!          For {\tt .true.}, force each child PET to execute in its own Pthread.
+!          By default, {\tt .false.}, single PETs spawned from a parent PET
+!          execute in the same thread (or MPI process) as the parent PET. Multiple
+!          child PETs spawned by the same parent PET always execute as their own
+!          Pthreads.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2281,14 +2386,20 @@ contains
     ! call CompClass method
     call ESMF_VMPlanMinThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      compp%npetlist, compp%petlist, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      compp%npetlist, compp%petlist, forceChildPthreads, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set MinStackSize
+    call ESMF_VMPlanSetMinStackSize(compp%vmplan, pthreadMinStackSize, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_CompSetVMMinThreads
 !------------------------------------------------------------------------------
 
@@ -2521,9 +2632,10 @@ contains
 !------------------------------------------------------------------------------
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Set init code
     ESMF_INIT_SET_CREATED(cw)
+    cw%isNamedAlias = .false.
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS

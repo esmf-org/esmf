@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -54,7 +54,6 @@ void ESMCI_regrid_create(Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Poi
                          int *map_type,
                          int *norm_type,
                          int *regridPoleType, int *regridPoleNPnts,
-                         int *regridScheme,
                          int *extrapMethod,
                          int *extrapNumSrcPnts,
                          ESMC_R8 *extrapDistExponent,
@@ -66,15 +65,16 @@ void ESMCI_regrid_create(Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Poi
                          int *nentries, ESMCI::TempWeights **tweights,
                          int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                          int *has_statusArray, ESMCI::Array **statusArray,
+                         int *checkFlag,
                          int*rc);
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
-                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                          int *regridScheme, int*rc);
+                          Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
+                          int*rc);
 
 void ESMCI_regrid_getarea(Grid **gridpp,
-                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                          int *regridScheme, int*rc);
+                          Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
+                          int*rc);
 
 void ESMCI_regrid_getfrac(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,

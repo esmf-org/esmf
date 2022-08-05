@@ -8,6 +8,7 @@
 #
 ESMF_F90DEFAULT         = ftn
 ESMF_CXXDEFAULT         = CC
+ESMF_CDEFAULT           = cc
 
 ############################################################
 # Default MPI setting.
@@ -46,12 +47,13 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -V
 
 ############################################################
 # Special debug flags
 #
+ESMF_F90OPTFLAG_G       += -traceback -check arg_temp_created,bounds,format,output_conversion,stack,uninit
 ESMF_CXXOPTFLAG_G       += -traceback -Wcheck
-ESMF_F90OPTFLAG_G       += -traceback -check bounds
 
 ############################################################
 # Enable TR15581/F2003 Allocatable array resizing
@@ -59,39 +61,28 @@ ESMF_F90OPTFLAG_G       += -traceback -check bounds
 ESMF_F90COMPILEOPTS += -assume realloc_lhs
 
 ############################################################
-# XT compute nodes do not have support for POSIX IPC (memory mapped files)
+# Disable POSIX IPC (memory mapped files) support on Cray XC
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 
 ############################################################
-# XT compute nodes do not have support for POSIX dynamic linking
+# Conditionally add pthread compiler and linker flags
 #
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_F90COMPILEOPTS += 
+ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_F90LINKOPTS    +=
+ESMF_CXXLINKOPTS    += -pthread
+ESMF_SL_LIBOPTS     += -pthread
+endif
 
 ############################################################
-# XT compute nodes do not have support for "gethostid()"
+# OpenMP compiler and linker flags
 #
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_GETHOSTID
-
-############################################################
-# XT compute nodes do not have support for signals
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SIGNALS
-
-############################################################
-# XT compute nodes do not have support for system call
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SYSTEMCALL
-
-############################################################
-# XT compute nodes do not have support for Pthreads
-#
-ESMF_PTHREADS := OFF
-
-############################################################
-# XT compute nodes do not have support for OpenMP
-#
-ESMF_OPENMP := OFF
+ESMF_OPENMP_F90COMPILEOPTS += -qopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -qopenmp
+ESMF_OPENMP_F90LINKOPTS    += -qopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -qopenmp
 
 ############################################################
 # MKL specific options for external LAPACK
@@ -102,10 +93,11 @@ endif
 endif
 
 ############################################################
-# Blank out variables to prevent rpath encoding
+# Set rpath syntax
 #
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ###########################################################
 # Determine where ifort's libraries are located
@@ -125,12 +117,35 @@ ESMF_F90LINKLIBS += -cxxlib -lrt -ldl
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)") -lrt -ldl
+ESMF_CXXLINKLIBS += -lrt -ldl
 
 ############################################################
-# Blank out shared library options
+# Linker option that ensures that the specified libraries are 
+# used to also resolve symbols needed by other libraries.
 #
-ESMF_SL_LIBS_TO_MAKE  =
+ESMF_F90LINKOPTS          += -Wl,--no-as-needed
+ESMF_CXXLINKOPTS          += -Wl,--no-as-needed
+
+############################################################
+# Link executables dynamically
+#
+ESMF_EXE_F90LINKOPTS          += -dynamic
+ESMF_EXE_CXXLINKOPTS          += -dynamic
+
+############################################################
+# Shared library options
+#
+ESMF_SL_LIBOPTS  += -shared
+
+############################################################
+# Shared object options
+#
+ESMF_SO_F90COMPILEOPTS  = -fPIC
+ESMF_SO_F90LINKOPTS     = -shared
+ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+ESMF_SO_CXXLINKOPTS     = -shared
+ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
 
 ############################################################
 # Disable WebService testing for now

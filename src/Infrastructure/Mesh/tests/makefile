@@ -8,87 +8,59 @@ LOCDIR    = src/Infrastructure/Mesh/tests
 
 .NOTPARALLEL:
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
-               $(ESMF_TESTDIR)/ESMC_MeshUTest \
-               $(ESMF_TESTDIR)/ESMC_MeshMOABUTest \
-               $(ESMF_TESTDIR)/ESMC_Proj4UTest \
-               $(ESMF_TESTDIR)/ESMC_MeshVTKUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearParUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearSingleElemUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearEdgeCasesUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearEdgeCases3DUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_CreateUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_CreateParUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_ExtrapolateUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_RedistUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousParUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_SearchUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_SerializeUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_UtilUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_UtilParUTest \
-               $(ESMF_TESTDIR)/ESMC_NearestUTest \
-               $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
-               $(ESMF_TESTDIR)/ESMF_MeshUTest
+TESTS_BUILD	  = \
+                $(ESMF_TESTDIR)/ESMC_MBMesh_ExtrapolateUTest \
+                $(ESMF_TESTDIR)/ESMC_MBMesh_UtilUTest \
+                $(ESMF_TESTDIR)/ESMC_MeshCapUTest \
+                $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest \
+                $(ESMF_TESTDIR)/ESMC_MeshMOABUTest \
+                $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
+                $(ESMF_TESTDIR)/ESMC_MeshUTest \
+                $(ESMF_TESTDIR)/ESMC_MeshVTKUTest \
+                $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
+                $(ESMF_TESTDIR)/ESMF_MeshUTest \
+                $(ESMF_TESTDIR)/ESMC_NearestUTest \
+                $(ESMF_TESTDIR)/ESMF_MeshFileIOUTest \
+                $(ESMF_TESTDIR)/ESMC_Proj4UTest
 
+# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapUTest
+# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_MeshUTest
 
-# not quite ready for primetime
-               # $(ESMF_TESTDIR)/ESMC_MBMesh_DualUTest \
-
-TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
-                RUN_ESMC_MeshUTest \
-                RUN_ESMC_MeshMOABUTest \
-                RUN_ESMC_Proj4UTest \
-                RUN_ESMC_MeshVTKUTest \
-                RUN_ESMC_MBMesh_BilinearUTest \
-                RUN_ESMC_MBMesh_BilinearParUTest \
-                RUN_ESMC_MBMesh_BilinearSingleElemUTest \
-                RUN_ESMC_MBMesh_BilinearEdgeCasesUTest \
-                RUN_ESMC_MBMesh_BilinearEdgeCases3DUTest \
-                RUN_ESMC_MBMesh_CreateUTest \
-                RUN_ESMC_MBMesh_CreateParUTest \
-                RUN_ESMC_MBMesh_DualUTest \
+TESTS_RUN    =  \
                 RUN_ESMC_MBMesh_ExtrapolateUTest \
-                RUN_ESMC_MBMesh_SearchUTest \
-                RUN_ESMC_MBMesh_SerializeUTest \
                 RUN_ESMC_MBMesh_UtilUTest \
-                RUN_ESMC_MBMesh_UtilParUTest \
-                RUN_ESMC_NearestUTest \
+                RUN_ESMC_MeshCapUTest \
+                RUN_ESMC_MeshCapRegridUTest \
+                RUN_ESMC_MeshMOABUTest \
+                RUN_ESMCI_IntegrateUTest \
+                RUN_ESMC_MeshUTest \
+                RUN_ESMC_MeshVTKUTest \
                 RUN_ESMF_MeshOpUTest \
-                RUN_ESMF_MeshUTest
+                RUN_ESMF_MeshUTest \
+                RUN_ESMF_MeshFileIOUTest \
+                RUN_ESMC_NearestUTest \
+                RUN_ESMC_Proj4UTest
 
-# this test is not complete, should test both elem and node rendezvous 
-#   current version fails in uni on electra intel
-#                RUN_ESMC_MBMesh_RendezvousUTest \
-#                RUN_ESMC_MBMesh_RendezvousParUTest \
-
-TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
-                RUN_ESMC_MeshUTestUNI \
-                RUN_ESMC_MeshMOABUTestUNI \
-                RUN_ESMC_Proj4UTestUNI \
-                RUN_ESMC_MBMesh_BilinearUTestUNI \
-                RUN_ESMC_MBMesh_BilinearSingleElemUTestUNI \
-                RUN_ESMC_MBMesh_BilinearEdgeCasesUTestUNI \
-                RUN_ESMC_MBMesh_BilinearEdgeCases3DUTestUNI \
-                RUN_ESMC_MBMesh_CreateUTestUNI \
-                RUN_ESMC_MBMesh_DualUTestUNI \
-                RUN_ESMC_MBMesh_SearchUTestUNI \
-                RUN_ESMC_MBMesh_SerializeUTestUNI \
+TESTS_RUN_UNI = \
                 RUN_ESMC_MBMesh_UtilUTestUNI \
+                RUN_ESMC_MeshCapUTestUNI \
+                RUN_ESMC_MeshCapRegridUTestUNI \
+                RUN_ESMC_MeshMOABUTestUNI \
+                RUN_ESMCI_IntegrateUTestUNI \
+                RUN_ESMC_MeshUTestUNI \
                 RUN_ESMF_MeshOpUTestUNI \
-                RUN_ESMF_MeshUTestUNI
-
-# this test is not complete, should test both elem and node rendezvous 
-#   current version fails in uni on electra intel
-#                RUN_ESMC_MBMesh_RendezvousUTestUNI \
-
+                RUN_ESMF_MeshUTestUNI \
+                RUN_ESMF_MeshFileIOUTestUNI \
+                RUN_ESMC_Proj4UTestUNI
 
 include ${ESMF_DIR}/makefile
 
 CLEANDIRS   =
-CLEANFILES  = $(TESTS_BUILD)
+CLEANFILES  = $(TESTS_BUILD) \
+              $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest \
+              $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest \
+              $(ESMF_DIR)/$(LOCDIR)/ESMC_*GenUTest.C
 CLOBBERDIRS =
 
 
@@ -127,6 +99,14 @@ RUN_ESMF_MeshUTest:
 RUN_ESMF_MeshUTestUNI:
 	$(MAKE) TNAME=Mesh NP=1 ftest
 
+RUN_ESMF_MeshFileIOUTest:
+	cp -r data $(ESMF_TESTDIR)
+	$(MAKE) TNAME=MeshFileIO NP=4 ftest
+
+RUN_ESMF_MeshFileIOUTestUNI:
+	cp -r data $(ESMF_TESTDIR)
+	$(MAKE) TNAME=MeshFileIO NP=1 ftest
+
 RUN_ESMC_MeshVTKUTest:
 	cp -r data $(ESMF_TESTDIR)
 	chmod u+rw $(ESMF_TESTDIR)/data/*
@@ -153,94 +133,65 @@ RUN_ESMC_Proj4UTestUNI:
 	$(MAKE) TNAME=Proj4 NP=1 ctest
 
 
-RUN_ESMC_MBMesh_BilinearUTestUNI:
-	$(MAKE) TNAME=MBMesh_Bilinear NP=1 ctest
+RUN_ESMC_MeshCapUTest:
+	# copy executable to name of the alternate test file (in execution directory)
+	cp $(ESMF_TESTDIR)/ESMC_MeshCapUTest $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest
+	# remove the old alternate test file in the source directory
+	rm -f $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapGenUTest.C
+	# copy the source file to the execution directory under the new name
+	cp $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapUTest.C $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest.C
+	# run the test
+	$(MAKE) TNAME=MeshCapGen NP=4 ctest
+	# move the updated source file from the execution directory to the source directory
+	mv $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest.C $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapGenUTest.C
 
-RUN_ESMC_MBMesh_BilinearUTest:
-	$(MAKE) TNAME=MBMesh_Bilinear NP=1 ctest
-
-RUN_ESMC_MBMesh_BilinearParUTest:
-	$(MAKE) TNAME=MBMesh_BilinearPar NP=4 ctest
-
-
-RUN_ESMC_MBMesh_BilinearSingleElemUTestUNI:
-	$(MAKE) TNAME=MBMesh_BilinearSingleElem NP=1 ctest
-
-RUN_ESMC_MBMesh_BilinearSingleElemUTest:
-	$(MAKE) TNAME=MBMesh_BilinearSingleElem NP=1 ctest
-
-
-RUN_ESMC_MBMesh_BilinearEdgeCasesUTestUNI:
-	$(MAKE) TNAME=MBMesh_BilinearEdgeCases NP=1 ctest
-
-RUN_ESMC_MBMesh_BilinearEdgeCasesUTest:
-	$(MAKE) TNAME=MBMesh_BilinearEdgeCases NP=1 ctest
-
-
-RUN_ESMC_MBMesh_BilinearEdgeCases3DUTestUNI:
-	$(MAKE) TNAME=MBMesh_BilinearEdgeCases3D NP=1 ctest
-
-RUN_ESMC_MBMesh_BilinearEdgeCases3DUTest:
-	$(MAKE) TNAME=MBMesh_BilinearEdgeCases3D NP=1 ctest
+RUN_ESMC_MeshCapUTestUNI:
+	# copy executable to name of the alternate test file (in execution directory)
+	cp $(ESMF_TESTDIR)/ESMC_MeshCapUTest $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest
+	# remove the old alternate test file in the source directory
+	rm -f $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapGenUTest.C
+	# copy the source file to the execution directory under the new name
+	cp $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapUTest.C $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest.C
+	# run the test
+	$(MAKE) TNAME=MeshCapGen NP=1 ctest
+	# move the updated source file from the execution directory to the source directory
+	mv $(ESMF_TESTDIR)/ESMC_MeshCapGenUTest.C $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapGenUTest.C
 
 
-RUN_ESMC_MBMesh_CreateUTestUNI:
-	$(MAKE) TNAME=MBMesh_Create NP=1 ctest
+RUN_ESMC_MeshCapRegridUTest:
+	# copy executable to name of the alternate test file (in execution directory)
+	cp $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest $(ESMF_TESTDIR)/ESMC_MeshCapRegridGenUTest
+	# remove the old alternate test file in the source directory
+	rm -f $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridGenUTest.C
+	# copy the source file to the execution directory under the new name
+	cp $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridUTest.C $(ESMF_TESTDIR)/ESMC_MeshCapRegridGenUTest.C
+	# run the test
+	$(MAKE) TNAME=MeshCapRegridGen NP=4 ctest
+	# move the updated source file from the execution directory to the source directory
+	mv $(ESMF_TESTDIR)/ESMC_MeshCapRegridGenUTest.C $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridGenUTest.C
 
-RUN_ESMC_MBMesh_CreateUTest:
-	$(MAKE) TNAME=MBMesh_Create NP=1 ctest
-
-RUN_ESMC_MBMesh_CreateParUTest:
-	$(MAKE) TNAME=MBMesh_CreatePar NP=4 ctest
-
-
-RUN_ESMC_MBMesh_DualUTestUNI:
-	$(MAKE) TNAME=MBMesh_Dual NP=1 ctest
-
-RUN_ESMC_MBMesh_DualUTest:
-	$(MAKE) TNAME=MBMesh_Dual NP=4 ctest
-
-RUN_ESMC_MBMesh_DualParUTest:
-	$(MAKE) TNAME=MBMesh_DualPar NP=4 ctest
+RUN_ESMC_MeshCapRegridUTestUNI:
+	# copy executable to name of the alternate test file (in execution directory)
+	cp $(ESMF_TESTDIR)/ESMC_MeshCapRegridUTest $(ESMF_TESTDIR)/ESMC_MeshCapRegridGenUTest
+	# remove the old alternate test file in the source directory
+	rm -f $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridGenUTest.C
+	# copy the source file to the execution directory under the new name
+	cp $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridUTest.C $(ESMF_TESTDIR)/ESMC_MeshCapRegridGenUTest.C
+	# run the test
+	$(MAKE) TNAME=MeshCapRegridGen NP=1 ctest
+	# move the updated source file from the execution directory to the source directory
+	mv $(ESMF_TESTDIR)/ESMC_MeshCapRegridGenUTest.C $(ESMF_DIR)/$(LOCDIR)/ESMC_MeshCapRegridGenUTest.C
 
 
 RUN_ESMC_MBMesh_ExtrapolateUTest:
 	$(MAKE) TNAME=MBMesh_Extrapolate NP=4 ctest
 
 
-
-RUN_ESMC_MBMesh_RendezvousUTest:
-	$(MAKE) TNAME=MBMesh_Rendezvous NP=1 ctest
-
-RUN_ESMC_MBMesh_RendezvousUTestUNI:
-	$(MAKE) TNAME=MBMesh_Rendezvous NP=1 ctest
-
-RUN_ESMC_MBMesh_RendezvousParUTest:
-	$(MAKE) TNAME=MBMesh_RendezvousPar NP=4 ctest
-
-
 RUN_ESMC_MBMesh_UtilUTest:
-	$(MAKE) TNAME=MBMesh_Util NP=1 ctest
+	$(MAKE) TNAME=MBMesh_Util NP=4 ctest
 
 RUN_ESMC_MBMesh_UtilUTestUNI:
 	$(MAKE) TNAME=MBMesh_Util NP=1 ctest
-
-RUN_ESMC_MBMesh_UtilParUTest:
-	$(MAKE) TNAME=MBMesh_UtilPar NP=4 ctest
-
-
-RUN_ESMC_MBMesh_SearchUTest:
-	$(MAKE) TNAME=MBMesh_Search NP=4 ctest
-
-RUN_ESMC_MBMesh_SearchUTestUNI:
-	$(MAKE) TNAME=MBMesh_Search NP=1 ctest
-
-
-RUN_ESMC_MBMesh_SerializeUTest:
-	$(MAKE) TNAME=MBMesh_Serialize NP=4 ctest
-
-RUN_ESMC_MBMesh_SerializeUTestUNI:
-	$(MAKE) TNAME=MBMesh_Serialize NP=1 ctest
 
 
 RUN_ESMC_NearestUTest:

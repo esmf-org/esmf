@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -202,7 +202,8 @@ void FTN_X(c_esmc_xgridregrid_create)(MeshCap **meshsrcpp, MeshCap **meshdstpp,
                    MeshCap **mesh,
                    int *compute_midmesh,
                    int *regridMethod, 
-                    int *unmappedaction,
+                   int *unmappedaction,
+                   ESMC_CoordSys_Flag *coordSys,
                    int *nentries, ESMCI::TempWeights **tweights,
                    int*rc) {
 #undef  ESMC_METHOD
@@ -213,6 +214,7 @@ void FTN_X(c_esmc_xgridregrid_create)(MeshCap **meshsrcpp, MeshCap **meshdstpp,
                               compute_midmesh,
                               regridMethod, 
                               unmappedaction,
+                              coordSys,
                               nentries, tweights,
                               rc);
 }
@@ -221,7 +223,8 @@ void FTN_X(c_esmc_xgridregrid_createp)(MeshCap **meshsrcpp, MeshCap **meshdstpp,
                    MeshCap **mesh,
                    int *compute_midmesh,
                    int *regridMethod, 
-                    int *unmappedaction,
+                   int *unmappedaction,
+                   ESMC_CoordSys_Flag *coordSys,
                    int *nentries, ESMCI::TempWeights **tweights,
                    int*rc) {
   FTN_X(c_esmc_xgridregrid_create)(meshsrcpp, meshdstpp,
@@ -229,9 +232,31 @@ void FTN_X(c_esmc_xgridregrid_createp)(MeshCap **meshsrcpp, MeshCap **meshdstpp,
                    compute_midmesh,
                    regridMethod, 
                    unmappedaction,
+                   coordSys,
                    nentries, tweights,
                    rc);
 }
+
+
+void FTN_X(c_esmc_xgrid_calc_wgts_from_mesh)(MeshCap **src_side_mesh, MeshCap **dst_xgrid_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc) {
+
+  MeshCap::xgrid_calc_wgts_from_side_mesh(*src_side_mesh, *dst_xgrid_mesh,
+                                          nentries, tweights,
+                                          rc);
+}
+
+void FTN_X(c_esmc_xgrid_calc_wgts_to_mesh)(MeshCap **src_xgrid_mesh, MeshCap **dst_side_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc) {
+
+  MeshCap::xgrid_calc_wgts_to_side_mesh(*src_xgrid_mesh, *dst_side_mesh,
+                                        nentries, tweights,
+                                        rc);
+}
+
+
 
 void FTN_X(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, double *w) {
 #undef ESMC_METHOD

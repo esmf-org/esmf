@@ -58,67 +58,83 @@ clock does not match the current time of the internal clock.
     integer, intent(out)  :: rc
 \end{verbatim}
 
-\bigskip{\sf SPECIALIZATION LABELS:}
+\bigskip{\sf SEMANTIC SPECIALIZATION LABELS:}
 \begin{itemize}
-\item label\_Advertise
-\item label\_ModifyAdvertised
-\item label\_RealizeProvided
-\item label\_AcceptTransfer
-\item label\_RealizeAccepted
-\item label\_SetClock
-\item label\_DataInitialize
-\item label\_Advance
-\item label\_AdvanceClock
-\item label\_CheckImport
-\item label\_SetRunClock
-\item label\_TimestampExport
-\item label\_Finalize
-\end{itemize}
-
-\bigskip{\sf INITIALIZE:}
-\begin{itemize}
-\item phase 0: ({\sc Required, NUOPC Provided})
+  \item Initialize:
   \begin{itemize}
-  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition). The default implementation sets the following mapping:
+    \item {\bf label\_Advertise}
     \begin{itemize}
-    \item IPDv00p1 = 1: ({\sc Required, Implementor Provided})
-    \item IPDv00p2 = 2: ({\sc Required, Implementor Provided})
-    \item IPDv00p3 = 3: ({\sc Required, Implementor Provided})
-    \item IPDv00p4 = 4: ({\sc Required, Implementor Provided})
-    \end{itemize}  
-  \end{itemize}  
-\end{itemize}
-
-\bigskip{\sf RUN:}
-\begin{itemize}
-\item phase 1: ({\sc NUOPC Provided})
-  \begin{itemize}
-  \item {\sc Specialization Required/Provided}: {\tt label\_SetRunClock} to check and set the internal Clock against the incoming Clock.
-  \begin{itemize}
-  \item {\tt IF} (Phase specific specialization present): Execute the phase specific specialization.
-  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: By default check that internal Clock and incoming Clock agree on current time and that the time step of the incoming Clock is a multiple of the internal Clock time step. Under these conditions set the internal stop time to one time step interval of the incoming Clock. Otherwise exit with error, flagging an incompatibility.
+      \item Required in order to advertise fields.
+      \item Use {\tt NUOPC\_Advertise()} to advertise specific fields in the Import- and ExportState of the component.
+      \item Alternatively set the FieldTransferPolicy attribute on the Import- and ExportState of the component to request field mirroring.
+    \end{itemize}
+    \item {\bf label\_ModifyAdvertised}
+    \begin{itemize}
+      \item Optional. By default do not modify the advertised fields.
+      \item Mostly used when field mirroring was requested during Advertise.
+      \item Remove undesired advertised fields in the Import- and ExportState of the component.
+      \item Adjust attributes e.g. for TransferOffer on advertised fields.
+    \end{itemize}
+    \item {\bf label\_RealizeProvided}
+    \begin{itemize}
+      \item Required in order to realize fields.
+      \item Use {\tt NUOPC\_Realize()} to realize fields previously advertised, and for which this component is responsible for providing the Field allocation and/or the GeomObject.
+    \end{itemize}
+    \item {\bf label\_AcceptTransfer}
+    \begin{itemize}
+      \item Optional. By default accept the Distribution of the transferred GeomObjects.
+      \item Change the distribution of any of the transferred GeomObjects.
+    \end{itemize}
+    \item {\bf label\_RealizeAccepted}
+    \begin{itemize}
+      \item Optional. Needed for any fields for which component is accepting the GeomObject.
+      \item Use {\tt NUOPC\_Realize()} to realize fields previously advertised, and for which this component is accepting the GeomObject.
+    \end{itemize}
+    \item {\bf label\_SetClock}
+    \begin{itemize}
+      \item Optional. By default create clock according to time information provided by driver.
+      \item Adjust and set the component clock.
+    \end{itemize}
+    \item {\bf label\_DataInitialize}
+    \begin{itemize}
+      \item Optional. Needed to initialize data, and to participate in resolution of data dependencies between components during initialize.
+      \item Initialize data in fields.
+      \item Set NUOPC attributes used for data dependency resolution.
+    \end{itemize}
   \end{itemize}
-  \item {\sc Specialization Required/Provided}: {\tt label\_CheckImport} to check Fields in the import State.
+  \item Run:
   \begin{itemize}
-  \item {\tt IF} (Phase specific specialization is present): Execute the phase specific specialization.
-  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: By default check that all import Fields are at the current time of the internal Clock.
+    \item {\bf label\_Advance}
+    \begin{itemize}
+      \item Called every timeStep on the component internal clock.
+      \item Implement the forward integration of the model.
+      \item Ensure data in the export fields is updated before returning.
+    \end{itemize}
+    \item {\bf label\_AdvanceClock}
+    \begin{itemize}
+      \item Optional. By default the component internal clock is advanced by one internal timeStep at the end of the Advance step.
+    \end{itemize}
+    \item {\bf label\_CheckImport}
+    \begin{itemize}
+      \item Optional. By default check the timestamp of all import fields against the current time of the internal clock.
+    \end{itemize}
+    \item {\bf label\_SetRunClock}
+    \begin{itemize}
+      \item Optional. By default do not adjust the internal clock when entering Run.
+    \end{itemize}
+    \item {\bf label\_TimestampExport}
+    \begin{itemize}
+      \item Optinal. By default timestamp all export fields according to the current time of the component internal clock before returning.
+    \end{itemize}
   \end{itemize}
-  \item Time stepping loop: starting at current time, running to stop time of the internal Clock.
+  \item Finalize:
   \begin{itemize}
-  \item Timestamp the Fields in the export State according to the current time of the internal Clock.
-  \item {\sc Specialization Required}: {\tt label\_Advance} to execute model or mediation code.
-  \item {\sc Specialization Optional}: {\tt label\_AdvanceClock} to advance the current time of the internal Clock. By default (without specialization) advance the current time of the internal Clock according to the time step of the internal Clock.
+    \item {\bf label\_Finalize}
+    \begin{itemize}
+      \item Optional. By default do nothing.
+      \item Destroy any objects created during Initalize.
+    \end{itemize}
   \end{itemize}
-  \item {\sc Specialization Optional}: {\tt label\_TimestampExport} to timestamp Fields in the export State.
-  \end{itemize}    
-\end{itemize}
-
-\bigskip{\sf FINALIZE:}
-\begin{itemize}
-\item phase 1: ({\sc Required, NUOPC Provided})
-  \begin{itemize}
-  \item {\it Optional specialization} to finalize custom parts of the component: {\tt label\_Finalize}.
-  \end{itemize}      
 \end{itemize}
 
 \mbox{}\hrulefill\ 

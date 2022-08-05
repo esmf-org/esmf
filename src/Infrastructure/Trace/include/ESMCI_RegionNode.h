@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -40,32 +40,45 @@ namespace ESMCI {
   RegionNode(RegionNode *parent, uint16_t local_id, bool isUserRegion):
     _parent(parent), _global_id(next_global_id()),
       _local_id(local_id), _isUserRegion(isUserRegion),
-      _count(0), _total(0), _min(UINT64T_BIG), _max(0),
+      _pecount(0), _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
-      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
+      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {
+      int localrc;
+      if (VM::isInitialized(&localrc)){
+        VM *vm = VM::getCurrent(&localrc);
+        _pecount = vm->getNcpet(vm->getLocalPet());
+      }
+    }
     
   RegionNode():
     _parent(NULL), _global_id(next_global_id()),
       _local_id(0), _isUserRegion(false),
-      _count(0), _total(0), _min(UINT64T_BIG), _max(0),
+      _pecount(0), _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
-      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
+      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {
+      int localrc;
+      VM *vm = VM::getCurrent(&localrc);
+      _pecount = vm->getNcpet(vm->getLocalPet());
+    }
 
   RegionNode(bool nextGlobalId):
     _parent(NULL), _global_id(0),
       _local_id(0), _isUserRegion(false),
-      _count(0), _total(0), _min(UINT64T_BIG), _max(0),
+      _pecount(0), _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
-      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {      
+      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {
       if (nextGlobalId) {
 	_global_id = next_global_id();
-      }           
+      }
+      int localrc;
+      VM *vm = VM::getCurrent(&localrc);
+      _pecount = vm->getNcpet(vm->getLocalPet());
     }
 
   RegionNode(char *deserializeBuffer, size_t bufferSize):
     _parent(NULL), _global_id(0),
       _local_id(0), _isUserRegion(false),
-      _count(0), _total(0), _min(UINT64T_BIG), _max(0),
+      _pecount(0), _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
       _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {
       
@@ -78,6 +91,7 @@ namespace ESMCI {
       _local_id(toClone->getLocalId()),
       _name(toClone->getName()),
       _isUserRegion(toClone->isUserRegion()),
+      _pecount(toClone->getPeCount()),
       _count(toClone->getCount()), _total(toClone->getTotal()),
       _min(toClone->getMin()), _max(toClone->getMax()),
       _mean(toClone->getMean()), _variance(toClone->_variance),
@@ -216,6 +230,10 @@ namespace ESMCI {
 
     uint64_t getTotal() const {
       return _total;
+    }
+
+    size_t getPeCount() const {
+      return _pecount;
     }
 
     size_t getCount() const {
@@ -386,6 +404,9 @@ namespace ESMCI {
       memcpy(buffer+(*offset), (const void *) &_total, sizeof(_total));
       *offset += sizeof(_total);
 
+      memcpy(buffer+(*offset), (const void *) &_pecount, sizeof(_pecount));
+      *offset += sizeof(_pecount);
+
       memcpy(buffer+(*offset), (const void *) &_count, sizeof(_count));
       *offset += sizeof(_count);
 
@@ -527,6 +548,9 @@ namespace ESMCI {
       memcpy( (void *) &_total, buffer+(*offset), sizeof(_total) );
       *offset += sizeof(_total);
       
+      memcpy( (void *) &_pecount, buffer+(*offset), sizeof(_pecount) );
+      *offset += sizeof(_pecount);
+
       memcpy( (void *) &_count, buffer+(*offset), sizeof(_count) );
       *offset += sizeof(_count);
 
@@ -573,6 +597,7 @@ namespace ESMCI {
         sizeof(_global_id) + // parent id
         sizeof(_local_id) + 
         sizeof(_total) +
+        sizeof(_pecount) +
         sizeof(_count) +
         sizeof(_min) +
         sizeof(_max) +
@@ -634,6 +659,8 @@ namespace ESMCI {
     bool _isUserRegion;
    
     vector<RegionNode *> _children;
+
+    size_t _pecount;
 
     size_t _count;
     uint64_t _total;

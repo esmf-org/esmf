@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -117,6 +117,15 @@ void MBMesh_Extrapolate(MBMesh *srcmesh, PointList *srcpointlist,
 #define ESMC_METHOD "MBMesh_Extrapolate()"
 
   int localrc;
+
+  // Error out for extrap methods not handled right now
+  if (*extrapMethod == ESMC_EXTRAPMETHOD_CREEP) {
+    Throw() << "Creep fill extrapolation is currently not available when using MOAB internal mesh representation.";
+  } else if (*extrapMethod == ESMC_EXTRAPMETHOD_CREEP_NRST_D) {
+    Throw() << "Creep fill nearest destination extrapolation is currently not available when using MOAB internal mesh representation.";
+  } else if (*extrapMethod == ESMC_EXTRAPMETHOD_NEAREST_D) {
+    Throw() << "Nearest mapped destination extrapolation is currently not available when using MOAB internal mesh representation.";
+  }
 
   // printf("MBMesh_Extrapolate: extrapMethod=%d\n", *extrapMethod);
 

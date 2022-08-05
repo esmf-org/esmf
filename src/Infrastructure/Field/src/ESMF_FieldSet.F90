@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -51,6 +51,7 @@ module ESMF_FieldSetMod
   use ESMF_TimeMod
   use ESMF_InitMacrosMod
   use ESMF_FieldMod
+  use ESMF_FieldGetMod
 
   implicit none
 
@@ -63,7 +64,7 @@ module ESMF_FieldSetMod
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 ! - ESMF-public methods:
-   public ESMF_FieldSet
+   public ESMF_FieldSet, ESMF_FieldSetTimestamp, ESMF_FieldSync
 
 
 !------------------------------------------------------------------------------
@@ -92,7 +93,6 @@ contains
 ! !IROUTINE: ESMF_FieldSet - Set object-wide Field information
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_FieldSet()
   subroutine ESMF_FieldSet(field, keywordEnforcer, name, rc)
 
 !
@@ -128,17 +128,116 @@ contains
     
     ! Set the name in Base object
     if (present(name)) then
-      !call ESMF_ArraySet(field%ftypep%array, name=name, rc=localrc)
-      !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      !  ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_SetName(field%ftypep%base, name=name, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (field%isNamedAlias) then
+        field%name = trim(name)
+      else
+        call ESMF_SetName(field%ftypep%base, name=name, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_FieldSet
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-private method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetTimestamp()"
+!BOPI
+! !IROUTINE: ESMF_FieldSetTimestamp - Set timestamp on Field
+!
+! !INTERFACE:
+  subroutine ESMF_FieldSetTimestamp(field, timestamp, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_Field),   intent(inout)         :: field
+    integer,            intent(in)            :: timestamp(10)
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Set timestamp on an {\tt ESMF\_Field} object. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!       {\tt ESMF\_Field} object for which to set properties.
+!     \item [timestamp]
+!       Timestamp, an array of 10 integer values.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc)
+
+    ! Set timestamp
+    field%ftypep%timestamp(:) = timestamp(:)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldSetTimestamp
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSync()"
+!BOP
+! !IROUTINE: ESMF_FieldSync - Synchronize DEs across the Field in case of sharing
+
+! !INTERFACE:
+  subroutine ESMF_FieldSync(field, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Field), intent(in)            :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,          intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!     Synchronizes access to DEs across {\tt field} to make sure PETs correctly
+!     access the data for read and write when DEs are shared. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[field] 
+!          Specified {\tt ESMF\_Field} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Array)        :: array
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, field, rc)
+    
+    ! Retrieve the Array object and call into the Array API
+    call ESMF_FieldGet(field, array=array, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_ArraySync(array, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_FieldSync
+!------------------------------------------------------------------------------
 
 end module ESMF_FieldSetMod

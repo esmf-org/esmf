@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -81,7 +81,7 @@
       integer :: offset, offset_inq
 
       type(ESMF_Grid)             :: gridxy
-      type(ESMF_FieldBundle)      :: packedFB
+      type(ESMF_FieldBundle)      :: packedFB, packedFBDeserialized
       !real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:,:) !fieldIdx,t,z,y,x
       real(ESMF_KIND_R8), pointer :: packedPtr(:,:,:,:)
       real(ESMF_KIND_R8), pointer :: packedPtr3D(:,:,:)
@@ -2303,7 +2303,9 @@
       !------------------------------------------------------------------------
       !EX_UTest
       Call ESMF_FieldDestroy(ft, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       Call ESMF_FieldDestroy(fp, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_FieldBundleDestroy(bundle5, rc=rc)
       write(failMsg, *) "Destroy FieldBundle"
       write(name, *) "Destroy FieldBundle"
@@ -2327,10 +2329,11 @@
       fieldIdx = 1
       packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldIdx, &
         gridToFieldMap=(/3,4/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
-      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Create 2nd packed FieldBundle"
       write(name, *) "Create 2nd packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -2339,10 +2342,11 @@
       fieldIdx = 2
       packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr, gridxy, fieldIdx, &
         gridToFieldMap=(/4,3/), staggerloc=ESMF_Staggerloc_Center, rc=rc)
-      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Create 3rd packed FieldBundle"
       write(name, *) "Create 3rd packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -2366,12 +2370,13 @@
       !EX_UTest_Multi_Proc_Only
       allocate(fieldNameListAlloc(fieldcount))
       call ESMF_FieldBundleGet(packedFB, fieldNameList=fieldNameListAlloc, rc=rc)
-      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Get fieldNameList from packed FieldBundle"
       write(name, *) "Get fieldNameList from packed FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       deallocate(fieldNameListAlloc)
       deallocate(packedPtr)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -2379,15 +2384,16 @@
       fieldIdx = 1
       packedFB = ESMF_FieldBundleCreate(fieldNameList, packedPtr3D, meshTst1, fieldIdx, &
         gridToFieldMap=(/2/), meshloc=ESMF_MESHLOC_ELEMENT, rc=rc)
-      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Create packed FieldBundle on Mesh"
       write(name, *) "Create packed FieldBundle on Mesh"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       deallocate(packedPtr3D)
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      fieldcount = 135
+      fieldcount = 15
       allocate(fieldNameListAlloc(fieldcount))
       do i = 1, fieldcount
         fieldNameListAlloc(i) = 'ThisReallyIsASuperLongFieldNameThatYouCanUseInESMF'
@@ -2396,20 +2402,91 @@
       fieldIdx = 1
       packedFB = ESMF_FieldBundleCreate(fieldNameListAlloc, packedPtr3D, meshTst1, fieldIdx, &
         gridToFieldMap=(/2/), meshloc=ESMF_MESHLOC_ELEMENT, rc=rc)
-      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
       write(failMsg, *) "Create packed FieldBundle with variable many long Field names"
       write(name, *) "Create packed FieldBundle with variable many long Field names"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      do i = 1, fieldcount
+        fieldNameListAlloc(i) = ''
+      enddo
+      call ESMF_FieldBundleGet(packedFB, fieldNameList=fieldNameListAlloc, rc=rc)
+      write(failMsg, *) "Get fieldNameList from packed FieldBundle"
+      write(name, *) "Get fieldNameList from packed FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! Serialization and deserialization - these are internal methods that are
+      ! NOT part of the ESMF API.
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Serialization test, inquire only
+      allocate (buffer(1))
+      buffer_len = 1
+      offset_inq = 0
+      call ESMF_FieldBundleSerialize (packedFB,  &
+          buffer, buffer_len, offset_inq,  &
+          ESMF_ATTRECONCILE_ON, ESMF_INQUIREONLY,  &
+          rc=rc)
+      write(name, *) "Test serialization, inquire only"
+      write(failMsg, *) "Serialization inquiry failed"
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! Serialization test
+      deallocate (buffer)
+      allocate (buffer(offset_inq))
+      buffer_len = offset_inq
+      offset = 0
+      call ESMF_FieldBundleSerialize (packedFB,  &
+          buffer, buffer_len, offset,  &
+          ESMF_ATTRECONCILE_ON, ESMF_NOINQUIRE,  &
+          rc=rc)
+      write(name, *) "Test serialization for real"
+      write(failMsg, *) "Serialization failed"
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      print *, 'offset_inq, offset =', offset_inq, offset
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      ! DeSerialization test
+      buffer_len = offset_inq
+      offset = 0
+      packedFBDeserialized = ESMF_FieldBundleDeserialize ( &
+          buffer, offset,  &
+          ESMF_ATTRECONCILE_ON, &
+          rc=rc)
+      write(name, *) "Test deserialization"
+      write(failMsg, *) "DeSerialization failed"
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+     
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only
+      do i = 1, fieldcount
+        fieldNameListAlloc(i) = ''
+      enddo
+      call ESMF_FieldBundleGet(packedFBDeserialized, fieldNameList=fieldNameListAlloc, rc=rc)
+      write(failMsg, *) "Get fieldNameList from deserializated packed FieldBundle"
+      write(name, *) "Get fieldNameList from deserializated packed FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! Release resources used for the packed FB tests
       deallocate(packedPtr3D)
       deallocate(fieldNameListAlloc)
-     
+      call ESMF_FieldBundleDestroy(packedFB, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_FieldBundleDestroy(packedFBDeserialized, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
       endif ! Petcount = 4
 
       ! Destroy MeshTst1
       if ((petCount .eq. 1) .or. (petCount .eq. 4)) then
         call ESMF_MeshDestroy(meshTst1, rc=rc)
-        if (rc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
 #endif
 

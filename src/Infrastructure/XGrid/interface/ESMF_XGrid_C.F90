@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -424,16 +424,14 @@
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get internal pointer
-    call ESMF_MeshGetIntPtr(mesh, meshp, rc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    meshp = mesh%this
 
     ! Get other information
     call ESMF_MeshGet(mesh, &
-         parametricDim=parametricDim, &
-         spatialDim=spatialDim, &
-         coordSys=coordSys, &
-         rc=rc)
+                      parametricDim=parametricDim, &
+                      spatialDim=spatialDim, &
+                      coordSys=coordSys, &
+                      rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

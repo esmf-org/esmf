@@ -383,6 +383,26 @@ def ESMP_VMGetGlobal():
                         constants._errmsg)
     return vm.ptr
 
+_ESMF.ESMC_VMLogMemInfo.argtypes = [ct.c_int]
+_ESMF.ESMC_VMLogMemInfo.argtypes = [ct.c_char_p]
+
+def ESMP_VMLogMemInfo(str):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions: Memory measurements have been output to the log file.\n
+    Arguments:\n
+        string :: str\n
+    """
+    # Need to create a C string buffer for Python 3.
+    b_str = str.encode('utf-8')
+    b_str = ct.create_string_buffer(b_str)
+
+    
+    rc = _ESMF.ESMC_VMLogMemInfo(b_str)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_VMLogMemInfo() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
 _ESMF.ESMC_VMPrint.restype = ct.c_int
 _ESMF.ESMC_VMPrint.argtypes = [ct.c_void_p]
 
@@ -1026,6 +1046,46 @@ def ESMP_GridWrite(grid, filename, staggerloc=constants.StaggerLoc.CENTER):
         raise ValueError('ESMC_GridWrite() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
+#### MOAB #####################################################################
+
+_ESMF.ESMC_MeshGetMOAB.restype = None
+_ESMF.ESMC_MeshGetMOAB.argtypes = [ct.POINTER(ct.c_bool), ct.POINTER(ct.c_int)]
+
+def ESMP_MeshGetMOAB(moab_on):
+    """
+    Preconditions: ESMP has been initialized\n
+    Postconditions: The setting for the Mesh backend has been retrieved.\n
+    Arguments:\n
+        bool :: moab_on\n
+    """
+    lrc = ct.c_int(0)
+    lmb = ct.c_bool(moab_on)
+    _ESMF.ESMC_MeshGetMOAB(ct.byref(lmb), ct.byref(lrc))
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_MeshGetMOAB() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+    mb = lmb.value
+                        
+    return mb
+
+_ESMF.ESMC_MeshSetMOAB.restype = None
+_ESMF.ESMC_MeshSetMOAB.argtypes = [ct.c_bool, ct.POINTER(ct.c_int)]
+
+def ESMP_MeshSetMOAB(moab_on):
+    """
+    Preconditions: ESMP has been initialized\n
+    Postconditions: The Mesh backend has been set to the value of 'moab_on'.\n
+    Arguments:\n
+        bool :: moab_on\n
+    """
+    lrc = ct.c_int(0)
+    _ESMF.ESMC_MeshSetMOAB(moab_on, ct.byref(lrc))
+    rc = lrc.value
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_MeshSetMOAB() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
 #### MESH #####################################################
 
 _ESMF.ESMC_MeshAddElements.restype = ct.c_int
@@ -1249,7 +1309,7 @@ def ESMP_MeshGetCoordPtr(mesh):
     lrc = ct.c_int(0)
     lnum_nodes = ct.c_int(0)
     lnum_dims = ct.c_int(0)
-    num_nodes = ESMP_MeshGetLocalNodeCount(mesh)
+    num_nodes = ESMP_MeshGetOwnedNodeCount(mesh)
     nodeCoords = np.array(np.zeros(num_nodes*3),dtype=np.float64)
     _ESMF.ESMC_MeshGetCoord(mesh.struct.ptr, nodeCoords,
                             ct.byref(lnum_nodes),
@@ -1283,7 +1343,7 @@ def ESMP_MeshGetElemCoordPtr(mesh):
     lrc = ct.c_int(0)
     lnum_elems = ct.c_int(0)
     lnum_dims = ct.c_int(0)
-    num_elems = ESMP_MeshGetLocalElementCount(mesh)
+    num_elems = ESMP_MeshGetOwnedElementCount(mesh)
     elemCoords = np.array(np.zeros(num_elems*3),dtype=np.float64)
     _ESMF.ESMC_MeshGetElemCoord(mesh.struct.ptr, elemCoords,
                             ct.byref(lnum_elems),
@@ -1311,8 +1371,8 @@ def ESMP_MeshGetConnectivityPtr(mesh):
         ESMP_Mesh                           :: mesh\n
     """
     lrc = ct.c_int(0)
-    num_elems = ESMP_MeshGetLocalElementCount(mesh)
-    num_nodes = ESMP_MeshGetLocalNodeCount(mesh)
+    num_elems = ESMP_MeshGetElementCount(mesh)
+    num_nodes = ESMP_MeshGetNodeCount(mesh)
     # NOTE: the size of the connectivity array is hardcoded way too big to handle the GIS data case until we can
     #       pull the correct info from file (nMaxMesh2_face_nodes*faces)
     connCoord = np.zeros(num_nodes*num_elems*3, dtype=np.float64)
@@ -1325,42 +1385,42 @@ def ESMP_MeshGetConnectivityPtr(mesh):
                         constants._errmsg)
     return connCoord, nodesPerElem
 
-_ESMF.ESMC_MeshGetLocalElementCount.restype = ct.c_int
-_ESMF.ESMC_MeshGetLocalElementCount.argtypes = [ct.c_void_p,
+_ESMF.ESMC_MeshGetElementCount.restype = ct.c_int
+_ESMF.ESMC_MeshGetElementCount.argtypes = [ct.c_void_p,
                                                 ct.POINTER(ct.c_int)]
 
-def ESMP_MeshGetLocalElementCount(mesh):
+def ESMP_MeshGetElementCount(mesh):
     """
     Preconditions: An ESMP_Mesh has been created.\n
-    Postconditions: The local elementCount for 'mesh' has been
+    Postconditions: The elementCount for 'mesh' has been
                     returned.\n
     Arguments:\n
         :RETURN: integer :: elementCount\n
         ESMP_Mesh        :: mesh\n
     """
     lec = ct.c_int(0)
-    rc = _ESMF.ESMC_MeshGetLocalElementCount(mesh.struct.ptr, ct.byref(lec))
+    rc = _ESMF.ESMC_MeshGetElementCount(mesh.struct.ptr, ct.byref(lec))
     if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_MeshGetLocalElementCount() failed with rc = '+
+        raise ValueError('ESMC_MeshGetElementCount() failed with rc = '+
                         str(rc)+'.    '+constants._errmsg)
     elementCount = lec.value
     return elementCount
 
-_ESMF.ESMC_MeshGetLocalNodeCount.restype = ct.c_int
-_ESMF.ESMC_MeshGetLocalNodeCount.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int)]
+_ESMF.ESMC_MeshGetNodeCount.restype = ct.c_int
+_ESMF.ESMC_MeshGetNodeCount.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int)]
 
-def ESMP_MeshGetLocalNodeCount(mesh):
+def ESMP_MeshGetNodeCount(mesh):
     """
     Preconditions: An ESMP_Mesh has been created.\n
-    Postconditions: The local nodeCount for 'mesh' is returned.\n
+    Postconditions: The nodeCount for 'mesh' is returned.\n
     Arguments:\n
         :RETURN: integer :: nodeCount\n
         ESMP_Mesh        :: mesh\n
     """
     lnc = ct.c_int(0)
-    rc = _ESMF.ESMC_MeshGetLocalNodeCount(mesh.struct.ptr, ct.byref(lnc))
+    rc = _ESMF.ESMC_MeshGetNodeCount(mesh.struct.ptr, ct.byref(lnc))
     if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_MeshGetLocalNodeCount() failed with rc = '+
+        raise ValueError('ESMC_MeshGetNodeCount() failed with rc = '+
                         str(rc)+'.    '+constants._errmsg)
     nodeCount = lnc.value
     return nodeCount
@@ -2385,4 +2445,3 @@ def ESMP_RouteHandleWrite(routehandle, filename):
     if rc != constants._ESMP_SUCCESS:
         raise NameError('ESMC_RouteHandleWrite() failed with rc = '+str(rc))
     return
-

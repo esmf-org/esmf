@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -756,7 +756,7 @@ int Grid::addCoordArray(
   int rc, localrc;
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap;
   Array *array;
   DistGrid *staggerDistgrid;
@@ -893,18 +893,23 @@ int Grid::addCoordArray(
                           (InterArray<int> *)ESMC_NULL_POINTER,
                           (InterArray<int> *)ESMC_NULL_POINTER,
                           (InterArray<int> *)ESMC_NULL_POINTER,
-                          &indexflag, NULL, staggerMemLBoundIntInt, 
+                          &indexflag, NULL, staggerMemLBoundIntInt,
                           (InterArray<int> *)ESMC_NULL_POINTER,
-                          (InterArray<int> *)ESMC_NULL_POINTER, 
+                          (InterArray<int> *)ESMC_NULL_POINTER,
                           &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
+
+    // name the Array
+    std::stringstream aName;
+    aName << "Array-" << std::string(getName()) << "-sloc:" << staggerloc << "-coord:" << coord;
+    array->setName(aName.str());
 
     // Set newly created Array into Grid
     localrc=this->setCoordArrayInternal(staggerloc, coord, array, true);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
-    
+
   } // end of coord loop
 
 
@@ -1041,6 +1046,11 @@ int Grid::addCoordArrayArb(
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
 
+    // name the Array
+    std::stringstream aName;
+    aName << "Array-" << std::string(getName()) << "-sloc:" << staggerloc << "-coord:" << coord;
+    array->setName(aName.str());
+
     // Set newly created Array into Grid
     localrc=this->setCoordArrayInternal(staggerloc, coord, array, true);
     if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -1077,7 +1087,7 @@ int Grid::addCoordFromArrayList(
                         int *staggerlocArg,        // (in) optional
                         int arrayCount,             // (in) 
                         Array **arrayList,           // (in)
-                        CopyFlag *docopyArg,   // (in) optional
+                        DataCopyFlag *docopyArg,   // (in) optional
                         InterArray<int> *staggerEdgeLWidthArg, // (in) optional
                         InterArray<int> *staggerEdgeUWidthArg, // (in) optional
                         InterArray<int> *staggerAlignArg   // (in) optional 
@@ -1102,7 +1112,7 @@ int Grid::addCoordFromArrayList(
   int rc;
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   int *staggerAlign;
   int *staggerEdgeLWidth;
   int *staggerEdgeUWidth;
@@ -1328,6 +1338,11 @@ int Grid::addItemArray(
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
 
 
+    // name the Array
+    std::stringstream aName;
+    aName << "Array-" << std::string(getName()) << "-sloc:" << staggerloc << "-coord";
+    array->setName(aName.str());
+
    // Set newly created Array into Grid
    localrc=this->setItemArrayInternal(staggerloc, item, array, true);
    if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -1377,7 +1392,7 @@ int Grid::addItemArrayArb(
   // local vars
   int rc, localrc;
   int staggerloc,item;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap;
   Array *array;
   int extent[1];
@@ -1489,6 +1504,11 @@ int Grid::addItemArrayArb(
 
    if (ESMC_LogDefault.MsgFoundError(localrc,
        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
+
+    // name the Array
+    std::stringstream aName;
+    aName << "Array-" << std::string(getName()) << "-sloc:" << staggerloc << "-coord";
+    array->setName(aName.str());
 
    // Set newly created Array into Grid
    localrc=this->setItemArrayInternal(staggerloc, item, array, true);
@@ -1891,7 +1911,7 @@ Array *Grid::getCoordArray(
 //
                         int *staggerlocArg,        // (in) optional
                         int coordArg,              // (in) base-1
-                        CopyFlag *docopyArg,  // (in) optional
+                        DataCopyFlag *docopyArg,  // (in) optional
                         int *rcArg                 // (out) optional return code 
   ) {
 //
@@ -1904,7 +1924,7 @@ Array *Grid::getCoordArray(
   int localrc;                 // local error status
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   int dimCount;
   Array *array;
 
@@ -1935,13 +1955,13 @@ Array *Grid::getCoordArray(
 
   // If docopyArg wasn't passed in, use default, else copy the value
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Copy option isn't working for now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, rcArg);
       return ESMC_NULL_POINTER;
@@ -1978,7 +1998,7 @@ Array *Grid::getItemArray(
 //
                         int *staggerlocArg,        // (in) optional
                         int *itemArg,              // (in) required
-                        CopyFlag *docopyArg,  // (in) optional
+                        DataCopyFlag *docopyArg,  // (in) optional
                         int *rcArg                 // (out) optional return code 
   ) {
 //
@@ -1990,7 +2010,7 @@ Array *Grid::getItemArray(
   // local vars
   int localrc;                 // local error status
   int staggerloc, item;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   int dimCount;
   Array *array;
 
@@ -2032,13 +2052,13 @@ Array *Grid::getItemArray(
 
   // If docopyArg wasn't passed in, use default, else copy the value
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Copy option isn't working for now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, rcArg);
       return ESMC_NULL_POINTER;
@@ -3563,7 +3583,7 @@ int Grid::setCoordArray(
                         int *staggerlocArg,        // (in) optional
                         int *coordArg,             // (in) 
                         Array *arrayArg,           // (in)
-                        CopyFlag *docopyArg   // (in) optional
+                        DataCopyFlag *docopyArg   // (in) optional
   ) {
 //
 // !DESCRIPTION:
@@ -3577,7 +3597,7 @@ int Grid::setCoordArray(
   int rc;
   int staggerloc;
   int coord;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap, *arrayUndistLBound, *arrayUndistUBound;
   const int *gridUndistLBound, *gridUndistUBound;
   bool ok;  
@@ -3639,13 +3659,13 @@ int Grid::setCoordArray(
 
   // If docopyArg hasn't been passed in use a default otherwise, copy it. 
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Don't support copy right now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, &rc);
       return rc;
@@ -3754,7 +3774,7 @@ int Grid::setItemArray(
                         int *staggerlocArg,        // (in) optional
                         int *itemArg,              // (in)
                         Array *arrayArg,           // (in)
-                        CopyFlag *docopyArg   // (in) optional
+                        DataCopyFlag *docopyArg   // (in) optional
   ) {
 //
 // !DESCRIPTION:
@@ -3767,7 +3787,7 @@ int Grid::setItemArray(
   int localrc;
   int rc;
   int staggerloc, item;
-  CopyFlag docopy;
+  DataCopyFlag docopy;
   const int *distgridToArrayMap;
   bool ok;  
   DistGrid *staggerDistgrid;
@@ -3816,13 +3836,13 @@ int Grid::setItemArray(
 
   // If docopyArg hasn't been passed in use a default otherwise, copy it. 
   if (docopyArg==NULL) {
-    docopy=DATA_REF;  // default
+    docopy=DATACOPY_REFERENCE;  // default
   } else {
     docopy=*docopyArg;
   }
 
   // Don't support copy right now
-  if (docopy==DATA_COPY) {
+  if (docopy==DATACOPY_VALUE) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "- Data Copy Flag not implemented yet", ESMC_CONTEXT, &rc);
       return rc;
@@ -5383,7 +5403,12 @@ int Grid::getStaggerDistgrid(
                                                          &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                           &rc)) return rc;
-        
+
+        // name the DistGrid
+        std::stringstream dgName;
+        dgName << "DG-" << std::string(getName()) << "-sloc:" << staggerloc;
+        staggerDistgridList[staggerloc]->setName(dgName.str());
+
         // Get rid of Interface ints
         delete staggerEdgeLWidthIntInt;
         delete [] staggerEdgeLWidthIntIntArray;
@@ -5463,6 +5488,12 @@ int Grid::getStaggerDistgrid(
                                                            &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
+
+          // name the DistGrid
+          std::stringstream dgName;
+          dgName << "DG-" << std::string(getName()) << "-sloc:" << staggerloc;
+          staggerDistgridList[staggerloc]->setName(dgName.str());
+
           // Get rid of connections
           delete emptyConnListII;
 
@@ -5477,6 +5508,11 @@ int Grid::getStaggerDistgrid(
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
  
+          // name the DistGrid
+          std::stringstream dgName;
+          dgName << "DG-" << std::string(getName()) << "-sloc:" << staggerloc;
+          staggerDistgridList[staggerloc]->setName(dgName.str());
+
         }
 
         // Get rid of Interface ints
@@ -10420,7 +10456,13 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
                                       (ESMC_IndexFlag *)NULL, (InterArray<int> *)NULL, false,
                                       NULL, NULL, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-       rc)) return; 
+       rc)) return;
+
+    // name the DistGrid
+    std::stringstream dgName;
+    dgName << "DG-" << std::string(distgrid->getName()) << "-nopole";
+    (*distgrid_nopole)->setName(dgName.str());
+
     return;
   }
 
@@ -10440,6 +10482,11 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
                                    NULL, NULL, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       rc)) return; 
+
+    // name the DistGrid
+    std::stringstream dgName;
+    dgName << "DG-" << std::string(distgrid->getName()) << "-nopole";
+    (*distgrid_nopole)->setName(dgName.str());
 
     return;
   }
@@ -10505,6 +10552,11 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
                                    NULL, NULL, true, &localrc);
  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
      rc)) return; 
+
+  // name the DistGrid
+  std::stringstream dgName;
+  dgName << "DG-" << std::string(distgrid->getName()) << "-nopole";
+  (*distgrid_nopole)->setName(dgName.str());
 
 #if 0
  int tstconnCount=(*distgrid_nopole)->getConnectionCount();

@@ -96,12 +96,12 @@ program ESMF_ArraySharedDeSSISTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_VMLogSystem(logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
+  call ESMF_VMLogSystem(rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_VMLog(vm, prefix="main: ", logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
+  call ESMF_VMLog(vm, prefix="main: ", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -186,13 +186,13 @@ program ESMF_ArraySharedDeSSISTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-    
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-  
+
   ! Comp1 Run -> initialize the data array
   call ESMF_GridCompRun(comp1, exportState=state, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -201,7 +201,7 @@ program ESMF_ArraySharedDeSSISTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-    
+
   ! Because DEs are shared across PETs on the same SSI, must call ArraySync()
   ! before comp2 gets to access the Array. In order to do this here, the
   ! state must be reconciled in case comp1 was only active on a subset of
@@ -227,6 +227,27 @@ program ESMF_ArraySharedDeSSISTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+#if 1
+  ! Call Run Methods a second time to test context switching
+
+  ! Comp1 Run -> initialize the data array
+  call ESMF_GridCompRun(comp1, exportState=state, userRc=userrc, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  ! Comp2 Run -> validate the data array
+  call ESMF_GridCompRun(comp2, importState=state, userRc=userrc, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+#endif
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -75,8 +75,8 @@ extern "C" {
   // nested States.
   size_t slc = cname.find_first_of ("/");
   if (slc != string::npos) {
-    ESMC_LogDefault.Write(cname+" must not have a slash (/) in its name", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
+    ESMC_LogDefault.Write(cname+" must not have a slash (/) in its name",
+      ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc) *rc = ESMF_RC_ARG_VALUE;
     return;
   }
@@ -140,6 +140,38 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  c_ESMC_BaseDestroyWoGarbage - release resources from a Base object without garbage collection
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_basedestroywogarbage)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basedestroywogarbage()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Free resources associated with a base object.
+//
+//EOP
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  delete *base;
+  
+  // return successfully
+  *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_BaseDestroyWoGarbage
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  c_ESMC_BasePrint - print Base object 
 //
 // !INTERFACE:
@@ -171,7 +203,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_WARN,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;
@@ -231,7 +263,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_WARN,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;
@@ -283,7 +315,7 @@ extern "C" {
   *base = new ESMC_Base(-1);
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object error", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    ESMC_LogDefault.Write("Base object error", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }
@@ -293,6 +325,56 @@ extern "C" {
   return;
 
 }  // end c_ESMC_BaseDeserialize
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_BaseDeserializeWoGarbage - Deserialize Base object outside of garbage collection
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_basedeserializewogarbage)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basedeserializewogarbage()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *buf,                // in/out - really a byte stream
+      int *offset,              // in/out - current offset in the stream
+      ESMC_AttReconcileFlag *attreconflag, // in - attreconcile flag
+      int *rc,                  // out - return code
+      ESMCI_FortranStrLenArg buf_l) { // hidden/in - buffer length
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a base object.
+//
+//EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  // CAUTION:
+  // Allocate Base object in glue code because the ESMCI implementation
+  // of deserialize() does _not_ allocate, since it is meant to be called
+  // on an object of a class derived from Base. On the Fortran side, however,
+  // there is no such thing as a derived class, and Base is held as a data
+  // member in each class -> need allocation here! *gjt*
+  // Must explicitly set dummy ID (here -1) to prevent inconsistency in
+  // Base object counting. ID will be overwritten by StateReconcile() anyway.
+  *base = new ESMC_Base(-1, true);  // without connecting to garbage collection
+  if (!base) {
+    //printf("uninitialized Base object\n");
+    ESMC_LogDefault.Write("Base object error", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  *rc = (*base)->ESMC_Deserialize(buf, offset, *attreconflag);
+
+  return;
+
+}  // end c_ESMC_BaseDeserializeWoGarbage
 
 //-----------------------------------------------------------------------------
 //BOPI
@@ -368,9 +450,15 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_ERROR,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  if ((*base)->ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "not a valid object", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -407,6 +495,12 @@ extern "C" {
 
   if (!base) {
     if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  if ((*base)->ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "not a valid object", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -500,8 +594,8 @@ extern "C" {
   // nested States.
   size_t slc = oname.find_first_of ("/");
   if (slc != string::npos) {
-    ESMC_LogDefault.Write(oname+" must not have a slash (/) in its name", ESMC_LOGMSG_INFO,
-      ESMC_CONTEXT);
+    ESMC_LogDefault.Write(oname+" must not have a slash (/) in its name",
+      ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc) *rc = ESMF_RC_ARG_VALUE;
     return;
   }

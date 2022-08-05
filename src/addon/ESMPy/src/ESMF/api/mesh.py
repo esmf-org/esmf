@@ -38,9 +38,9 @@ class Mesh(object):
     along their boundaries. :class:`~ESMF.api.field.Field` data may be located on either the nodes or
     elements of a :class:`~ESMF.api.mesh.Mesh`.
 
-    For more information about the ESMF Mesh class, please see the `ESMF Mesh
-    documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
+    Refer to the Mesh Class of the 
+    `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
+    for more information.
 
     An unstructured :class:`~ESMF.api.mesh.Mesh` can be created in two different ways, as a :class:`~ESMF.api.mesh.Mesh` in
     memory, or from a SCRIP formatted or CF compliant UGRID file. The arguments
@@ -200,9 +200,9 @@ class Mesh(object):
                                                   add_user_area, meshname, 
                                                   mask_flag, varname)
             # get the sizes
-            self._size[node] = ESMP_MeshGetLocalNodeCount(self)
+            self._size[node] = ESMP_MeshGetNodeCount(self)
             self._size_owned[node] = ESMP_MeshGetOwnedNodeCount(self)
-            self._size[element] = ESMP_MeshGetLocalElementCount(self)
+            self._size[element] = ESMP_MeshGetElementCount(self)
             self._size_owned[element] = ESMP_MeshGetOwnedElementCount(self)
 
             # link the coords here for meshes created from file, in add_elements for others
@@ -470,9 +470,9 @@ class Mesh(object):
                              self.element_coords)
         
         # get the sizes
-        self.size[node] = ESMP_MeshGetLocalNodeCount(self)
+        self.size[node] = ESMP_MeshGetNodeCount(self)
         self.size_owned[node] = ESMP_MeshGetOwnedNodeCount(self)
-        self.size[element] = ESMP_MeshGetLocalElementCount(self)
+        self.size[element] = ESMP_MeshGetElementCount(self)
         self.size_owned[element] = ESMP_MeshGetOwnedElementCount(self)
         
         # link the coords here for meshes not created from file

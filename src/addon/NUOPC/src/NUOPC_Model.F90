@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -38,6 +38,7 @@ module NUOPC_Model
     label_SetRunClock, &
     label_TimestampExport, &
     label_Finalize, &
+    type_InternalStateStruct, type_InternalState, label_InternalState, &
     NUOPC_ModelBaseGet
 
   implicit none
@@ -113,9 +114,9 @@ module NUOPC_Model
     integer, intent(out)  :: rc
 
     ! local variables
-    type(ESMF_Clock)      :: clock
-    type(ESMF_State)      :: exportState
-    character(ESMF_MAXSTR):: name
+    type(ESMF_Clock)          :: clock
+    character(ESMF_MAXSTR)    :: name
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -125,17 +126,30 @@ module NUOPC_Model
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
-    ! get to the clock and exportState
-    call ESMF_GridCompGet(gcomp, clock=clock, exportState=exportState, rc=rc)
+    ! get to the clock
+    call ESMF_GridCompGet(gcomp, clock=clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
-    ! update timestamp on export Fields
-    call NUOPC_SetTimestamp(exportState, clock, rc=rc)
+    ! query Component for the internal State
+    nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+
+    ! update timestamp on export Fields
+    if (associated(is%wrap%cachedExportFieldList)) then
+      call NUOPC_SetTimestamp(is%wrap%cachedExportFieldList, clock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+    endif
 
   end subroutine
 

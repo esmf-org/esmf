@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -286,19 +286,19 @@ void ESMC_InfoIsEqual(ESMCI::Info *lhs, ESMCI::Info *rhs, int &res, int &esmc_rc
     std::string msg;
 
     msg = prefix + "local_res=" + std::to_string(local_res);
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
 
     std::string lhs_dump = lhs->getStorageRef().dump();
     std::string rhs_dump = rhs->getStorageRef().dump();
 
     msg = prefix + "lhs_dump=" + lhs_dump;
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
     msg = prefix + "rhs_dump=" + rhs_dump;
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
 
     bool as_strings_eq = lhs_dump == rhs_dump;
     msg = prefix + "as_strings_eq=" + std::to_string(as_strings_eq);
-    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_INFO);
+    ESMC_LogWrite(msg.c_str(), ESMC_LOGMSG_DEBUG);
 #endif
 
     res = 0;  //false

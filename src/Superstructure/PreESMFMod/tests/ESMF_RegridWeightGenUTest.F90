@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -29,7 +29,7 @@ program ESMF_RegridWeightGenUTest
 !-----------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod     ! test methods
-  use ESMF_RegridWeightGenMod
+  use ESMF
 
   implicit none
 
@@ -71,7 +71,7 @@ program ESMF_RegridWeightGenUTest
 
   !----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "RegridWeightGen bilinear routehandle Test"
+  write(name, *) "RegridWeightGen bilinear Test"
   write(failmsg, *) "Did not return ESMF_SUCCESS"
 
   srcfile = 'data/T42_grid.nc'
@@ -216,13 +216,14 @@ program ESMF_RegridWeightGenUTest
        unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
 
-#ifdef ESMF_NETCDF
+#ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
   call ESMF_FieldSMMRelease(routehandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test(((rc==ESMF_RC_LIB_NOT_PRESENT) .or. (rc==ESMC_RC_LIB_NOT_PRESENT)), &
+       name, failMsg, result, ESMF_SRCLINE)
 #endif
 
   !----------------------------------------------------------------------------
@@ -237,13 +238,14 @@ program ESMF_RegridWeightGenUTest
        unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
 
-#if defined(ESMF_NETCDF) && defined(ESMF_LAPACK)
+#if defined(ESMF_PIO) && defined(ESMF_LAPACK)
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
   call ESMF_FieldSMMRelease(routehandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test(((rc==ESMF_RC_LIB_NOT_PRESENT) .or. (rc==ESMC_RC_LIB_NOT_PRESENT)), &
+       name, failMsg, result, ESMF_SRCLINE)
 #endif
 
   !----------------------------------------------------------------------------
@@ -259,13 +261,14 @@ program ESMF_RegridWeightGenUTest
        unmappedaction = unmappedaction, &
        verboseFlag = .true., rc=rc)
 
-#ifdef ESMF_NETCDF
+#ifdef ESMF_PIO
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
   call ESMF_FieldSMMRelease(routehandle, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test(((rc==ESMF_RC_LIB_NOT_PRESENT) .or. (rc==ESMC_RC_LIB_NOT_PRESENT)), &
+       name, failMsg, result, ESMF_SRCLINE)
 #endif
 
   !-----------------------------------------------------------------------------

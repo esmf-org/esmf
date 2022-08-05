@@ -30,7 +30,7 @@ CLOBBERDIRS =
 
 
 RUN_ArraySharedDeSSI:
-	$(MAKE) TNAME=ArraySharedDeSSI NP=6 stest
+	env OMP_WAIT_POLICY=passive $(MAKE) TNAME=ArraySharedDeSSI NP=6 stest
 
 RUN_ArraySharedDeSSIUNI:
 	$(MAKE) TNAME=ArraySharedDeSSI NP=1 stest

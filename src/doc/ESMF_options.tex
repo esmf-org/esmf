@@ -136,7 +136,8 @@ The valid values are:
 \subsection{ESMF\_DATACOPY}
 \label{const:datacopyflag}
 {\sf DESCRIPTION:\\}
-Indicates whether to reference a data item or make a copy of it.
+Indicates how data references, copies, and memory allocations to hold data are
+handled.
 
 The type of this flag is:
 
@@ -144,10 +145,13 @@ The type of this flag is:
 
 The valid values are:
 \begin{description}
-\item [ESMF\_DATACOPY\_VALUE]
-      Copy the data item to another buffer.
+\item [ESMF\_DATACOPY\_ALLOC]
+      Create a new allocation that is sufficient in size to hold the data.
+      However, no data is copied and the allocation is returned uninitialized.
 \item [ESMF\_DATACOPY\_REFERENCE]
-      Reference the data item.
+      Reference the data within the existing allocation.
+\item [ESMF\_DATACOPY\_VALUE]
+      Copy the data to another allocation. If needed create the new allocation.
 \end{description}
 
 \subsection{ESMF\_DECOMP}
@@ -385,12 +389,26 @@ The type of this flag is:
 
 The valid values are:
 \begin{description}
-\item [ESMF\_IOFMT\_BIN]
-      Binary format.
 \item [ESMF\_IOFMT\_NETCDF]
-      NETCDF and PNETCDF format.
+      NETCDF and PNETCDF (cdf1) format in NETCDF-3 ``classic'' format. Use
+      of PNETCDF is prioritized if available.
 \item [ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET]
-      NETCDF and PNETCDF 64-bit format.
+      NETCDF and PNETCDF (cdf2) format.  This format allows files greater
+      than 4GiB in NETCDF-3 ``classic'' format.  Use of PNETCDF is prioritized
+      if available.
+\item [ESMF\_IOFMT\_NETCDF\_64BIT\_DATA]
+      NETCDF and PNETCDF (cdf5) format.  This allows individual records greater
+      than 4GiB in NETCDF-3 ``classic'' format.  Use of PNETCDF is prioritized
+      if available.
+\item [ESMF\_IOFMT\_NETCDF4P]
+      NETCDF-4 (HDF-5) format.  If a NETCDF parallel library is available,
+      writes will be in parallel. Writes will use one I/O PET per
+      SSI (node) of the ESMF VM that calls the I/O operation. Otherwise writes
+      will be serial.
+\item [ESMF\_IOFMT\_NETCDF4C]
+      NETCDF-4 (HDF-5) format with lossless compression from HDF-5 applied.
+      This is only available as a serial option, even if a parallel NETCDF
+      library is available.  
 \end{description}
 
 \subsection{ESMF\_IO\_NETCDF\_PRESENT}
@@ -424,7 +442,7 @@ The type of this flag is:
 The valid values are:
 \begin{description}
  \item [.true.]
-      PIO features are enabled..
+      PIO features are enabled.
 \item [.false.]
       PIO  features are not enabled.
 \end{description}
@@ -442,9 +460,9 @@ The type of this flag is:
 The valid values are:
 \begin{description}
 \item [.true.]
-      Parallel netcdf features are enabled.
+      Parallel NETCDF features are enabled.
 \item [.false.]
-      Parallel netcdf features are not enabled.
+      Parallel NETCDF features are not enabled.
 \end{description}
 
 
@@ -772,20 +790,20 @@ The type of this flag is:
 
 The valid values for all regrid methods are:
 \begin{description}
-\item [ESMF\_REGRIDSTATUS\_DSTMASKED] The destination location is masked, so no regridding has been peformed on it. 
-\item [ESMF\_REGRIDSTATUS\_SRCMASKED] The destination location is within a masked part of the source grid, so no regridding has been performed on it. 
-\item [ESMF\_REGRIDSTATUS\_OUTSIDE] The destination location is outside the source grid, so no regridding has been performed on it. 
-\item [ESMF\_REGRIDSTATUS\_MAPPED] The destination location is within the unmasked source grid, and so has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
-\item [ESMF\_REGRIDSTATUS\_EXMAPPED] The destination location was not within the unmasked source grid, and so typically it wouldn't be regridded. However, extrapolation was used, and so it has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
+\item [ESMF\_REGRIDSTATUS\_DSTMASKED] The destination location is masked, so no regridding has been peformed on it. This status has a numeric value of 0.
+\item [ESMF\_REGRIDSTATUS\_SRCMASKED] The destination location is within a masked part of the source grid, so no regridding has been performed on it. This status has a numeric value of 1.
+\item [ESMF\_REGRIDSTATUS\_OUTSIDE] The destination location is outside the source grid, so no regridding has been performed on it. This status has a numeric value of 2.
+\item [ESMF\_REGRIDSTATUS\_MAPPED] The destination location is within the unmasked source grid, and so has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). This status has a numeric value of 4. 
+\item [ESMF\_REGRIDSTATUS\_EXMAPPED] The destination location was not within the unmasked source grid, and so typically it wouldn't be regridded. However, extrapolation was used, and so it has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). This status has a numeric value of 8.
 \end{description}
 
 In addition to the above, regridding using the conservative method can result in other values. The reason for this is that in that method one destination cell can overlap multiple source cells, so a single destination can have a combination of values.  
 The following are the additional values that apply to the conservative method:
 \begin{description}
-\item [ESMF\_REGRIDSTATUS\_SMSK\_OUT] The destination cell overlaps a masked source cell, and extends outside the source grid. 
-\item [ESMF\_REGRIDSTATUS\_SMSK\_MP] The destination cell overlaps a masked source cell, and an unmasked source cell. (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle).  
-\item [ESMF\_REGRIDSTATUS\_OUT\_MP] The destination cell overlaps an unmasked source cell, and extends outside the source grid.  (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle). 
-\item [ESMF\_REGRIDSTATUS\_SMSK\_OUT\_MP] The destination cell overlaps a masked source cell, an unmasked source cell, and extends outside the source grid. (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle).  
+\item [ESMF\_REGRIDSTATUS\_SMSK\_OUT] The destination cell overlaps a masked source cell, and extends outside the source grid. This status has a numeric value of 3.
+\item [ESMF\_REGRIDSTATUS\_SMSK\_MP] The destination cell overlaps a masked source cell, and an unmasked source cell. (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle). This status has a numeric value of 5.  
+\item [ESMF\_REGRIDSTATUS\_OUT\_MP] The destination cell overlaps an unmasked source cell, and extends outside the source grid.  (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle). This status has a numeric value of 6.
+\item [ESMF\_REGRIDSTATUS\_SMSK\_OUT\_MP] The destination cell overlaps a masked source cell, an unmasked source cell, and extends outside the source grid. (Because it overlaps with the unmasked source grid, there will be an entry for the destination cell within the factorIndexList or routeHandle).  This status has a numeric value of 7.
 \end{description}
 
 

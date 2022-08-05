@@ -6,5 +6,10 @@ OPENMPI_LIBDIR=`dirname ${OPENMPI_MPIF90}`/../lib*
 ls ${OPENMPI_LIBDIR} | grep libmpi_cxx 2>&1 > /dev/null
 if [ $? = 0 ]; then
   echo -lmpi_cxx;
+else
+    mpicxx --showme 2>&1 | grep lmpi_cxx > /dev/null
+    if [ $? = 0 ]; then
+	echo -lmpi_cxx;
+    fi
 fi
 

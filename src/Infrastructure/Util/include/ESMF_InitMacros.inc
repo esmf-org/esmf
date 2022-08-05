@@ -2,7 +2,7 @@
 $Id$
 
 Earth System Modeling Framework
-Copyright 2002-2020, University Corporation for Atmospheric Research,
+Copyright 2002-2022, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -63,6 +63,7 @@ automatic initialization of types.
                  finit(var)
 #else
 #define ESMF_INIT_DECLARE ESMF_INIT_TYPE :: isInit = ESMF_INIT_UNDEFINED
+#define ESMF_INIT_DECLARE_NAMED_ALIAS ESMF_INIT_TYPE :: isInit = ESMF_INIT_UNDEFINED ; logical :: isNamedAlias = .false. ; character(ESMF_MAXSTR) :: name
 #define ESMF_INIT_CHECK_SET_SHALLOW(fget,finit,var)
 #endif
 

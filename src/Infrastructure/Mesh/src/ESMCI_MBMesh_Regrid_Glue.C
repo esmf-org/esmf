@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -44,6 +44,7 @@
 #include "Mesh/include/ESMCI_MBMesh_Bilinear.h"
 #include "Mesh/include/ESMCI_MBMesh_Conserve.h"
 #include "Mesh/include/ESMCI_MBMesh_Extrapolation.h"
+#include "Mesh/include/ESMCI_MBMesh_Patch.h"
 
 #include <iostream>
 #include <vector>
@@ -64,7 +65,6 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
                      PointList *srcpl, PointList *dstpl, IWeights &wts,
                      int *regridConserve, int *regridMethod,
                      int *regridPoleType, int *regridPoleNPnts,
-                     int *regridScheme,
                      int *map_type, 
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
@@ -89,15 +89,14 @@ extern "C" void FTN_X(c_esmc_arraysmmstoreind4)(ESMCI::Array **srcArray,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 
-void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, 
+void MBMesh_regrid_create(MBMesh **meshsrcpp, ESMCI::Array **arraysrcpp, 
                           ESMCI::PointList **plsrcpp,
-                          void **meshdstpp, ESMCI::Array **arraydstpp, 
+                          MBMesh **meshdstpp, ESMCI::Array **arraydstpp, 
                           ESMCI::PointList **pldstpp,
                           int *regridMethod,
                           int *map_type,
                           int *norm_type,
                           int *regridPoleType, int *regridPoleNPnts,
-                          int *regridScheme,
                           int *extrapMethod,
                           int *extrapNumSrcPnts,
                           ESMC_R8 *extrapDistExponent,
@@ -122,8 +121,8 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
     throw localrc;  // bail out with exception
 
   // Get Moab Mesh wrapper
-  MBMesh *mbmsrcp=*((MBMesh **)meshsrcpp);
-  MBMesh *mbmdstp=*((MBMesh **)meshdstpp);
+  MBMesh *mbmsrcp=*meshsrcpp;
+  MBMesh *mbmdstp=*meshdstpp;
 
 // #define MOAB_REGRID
 #ifdef MOAB_REGRID
@@ -265,7 +264,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
     if(!calc_regrid_wgts(mbmsrcp, mbmdstp, srcpl, dstpl, wts, 
                          &regridConserve, regridMethod,
                          regridPoleType, regridPoleNPnts,
-                         regridScheme, map_type, 
+                         map_type, 
                          extrapMethod,
                          extrapNumSrcPnts,
                          extrapDistExponent,
@@ -466,14 +465,24 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
 //////////////////////////////////////////////////////////////////////////////////////
 
 
+// split id translation currently not supported, so return an error
+// When implementing, do inside conservative weight calc. method instead of here
 #if 0
     ///// If conservative, translate split element weights to non-split //////
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       if (mbmsrcp.is_split) translate_split_src_elems_in_wts(mbmsrcp, num_entries, iientries);
       if (mbmdstp.is_split) translate_split_dst_elems_in_wts(mbmdstp, num_entries, iientries, factors);
     }
+#else
+    ///// Split translation not implemented yet
+    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      if (mbmsrcp->is_split) Throw() << "Cells with >4 sides currently not supported with conservative regridding using MOAB internal mesh representation.";
+      if (mbmdstp->is_split) Throw() << "Cells with >4 sides currently not supported with conservative regridding using MOAB internal mesh representation.";
+    }
+#endif
 
 
+#if 0
     ///// If conservative then modify weights according to norm type //////
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       if (*norm_type==ESMC_NORMTYPE_FRACAREA) change_wts_to_be_fracarea(mbmdstp, num_entries, iientries, factors);
@@ -596,27 +605,8 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
     }
 
 
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                                  "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  } catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
   }
+  CATCH_MBMESH_RETURN(rc)
 
 #ifdef PROGRESSLOG_on
   ESMC_LogDefault.Write("c_esmc_regrid_create(): Final return.", ESMC_LOGMSG_INFO);
@@ -1164,7 +1154,6 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
                      IWeights &wts,
                      int *regridConserve, int *regridMethod,
                      int *regridPoleType, int *regridPoleNPnts,
-                     int *regridScheme,
                      int *map_type, 
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
@@ -1177,43 +1166,51 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
 #define ESMC_METHOD "calc_regrid_wgts()"
   Trace __trace("calc_regrid_wgts()");
 
-  int localrc;
+  try {
+    int localrc;
 
-  // Branch to different subroutines based on method
-  if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
-    calc_cnsrv_regrid_wgts(srcmbmp, dstmbmp, wts);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
-    calc_bilinear_regrid_wgts(srcmbmp, dstpl, wts, map_type,
-                              set_dst_status, dst_status);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) {
-    calc_nearest_regrid_wgts(srcpl, dstpl, wts,
-                             set_dst_status, dst_status, 
-                             regridMethod, extrapNumSrcPnts,
-                             extrapDistExponent);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_IDAVG) {
-    calc_nearest_regrid_wgts(srcpl, dstpl, wts, 
-                             set_dst_status, dst_status, 
-                             regridMethod, extrapNumSrcPnts, 
-                             extrapDistExponent);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
-    calc_nearest_regrid_wgts(dstpl, srcpl, wts,
-                             set_dst_status, dst_status,
-                             regridMethod, extrapNumSrcPnts,
-                             extrapDistExponent);
-  } else {
-    Throw() << "This regrid method is not currently supported.";
-  }
+    // Branch to different subroutines based on method
+    if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
+      calc_cnsrv_regrid_wgts(srcmbmp, dstmbmp, wts);
+    } else if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
+      calc_bilinear_regrid_wgts(srcmbmp, dstpl, wts, map_type,
+                                set_dst_status, dst_status);
+    } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) {
+      calc_nearest_regrid_wgts(srcpl, dstpl, wts,
+                               set_dst_status, dst_status, 
+                               regridMethod, extrapNumSrcPnts,
+                               extrapDistExponent);
+    } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_IDAVG) {
+      calc_nearest_regrid_wgts(srcpl, dstpl, wts, 
+                               set_dst_status, dst_status, 
+                               regridMethod, extrapNumSrcPnts, 
+                               extrapDistExponent);
+    } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
+      calc_nearest_regrid_wgts(dstpl, srcpl, wts,
+                               set_dst_status, dst_status,
+                               regridMethod, extrapNumSrcPnts,
+                               extrapDistExponent);
+      // PATCH NOT WORKING YET
+      //    } else if (*regridMethod == ESMC_REGRID_METHOD_PATCH) {
+      //calc_patch_regrid_wgts(srcmbmp, dstpl, wts, map_type,
+      //                           set_dst_status, dst_status);
+    } else {
+      Throw() << "This regrid method is not currently supported when using MOAB for internal mesh representation.";
+    }
 
-  // Do extrapolation if the user has requested it
-  if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
-    MBMesh_Extrapolate(srcmbmp, srcpl, dstmbmp, dstpl,
-                       wts, 
-                       // map_type, // RLO: not sure if this is needed
-                       NULL, // pole_constraint_id only used with src_mesh
-                       extrapMethod, extrapNumSrcPnts, extrapDistExponent,
-                       extrapNumLevels, extrapNumInputLevels,
-                       set_dst_status, dst_status, &localrc);
+    // Do extrapolation if the user has requested it
+    if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+      MBMesh_Extrapolate(srcmbmp, srcpl, dstmbmp, dstpl,
+                         wts, 
+                         // map_type, // RLO: not sure if this is needed
+                         NULL, // pole_constraint_id only used with src_mesh
+                         extrapMethod, extrapNumSrcPnts, extrapDistExponent,
+                         extrapNumLevels, extrapNumInputLevels,
+                         set_dst_status, dst_status, &localrc);
+    }
+
   }
+  CATCH_MBMESH_RETHROW
 
   return 1;
 

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -455,7 +455,9 @@ module ESMF_VMMod
   public ESMF_CommHandleValidate
   
 ! - ESMF-internal methods:
+  public ESMF_VMInitializePreMPI
   public ESMF_VMInitialize
+  public ESMF_VMSet
   public ESMF_VMFinalize
   public ESMF_VMAbort
   public ESMF_VMShutdown
@@ -468,6 +470,8 @@ module ESMF_VMMod
   public ESMF_VMPlanGetInit
   public ESMF_VMPlanGetThis
   public ESMF_VMPlanSetThis
+  public ESMF_VMPlanSetMinStackSize
+  public ESMF_VMPlanSetOpenMP
   public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
@@ -483,6 +487,8 @@ module ESMF_VMMod
   public ESMF_VMTranslateVMId
   
   public ESMF_CommHandleGetInit
+
+  public ESMF_PointerLog
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -3434,13 +3440,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_VMBarrier(vm, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),  intent(in)            :: vm
+    type(ESMF_VM),  intent(in),  optional :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,        intent(out), optional :: rc           
+    integer,        intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Made argument {\tt vm} optional to simplify usage when calling
+!   on the current VM.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3449,8 +3460,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
+!   \item[{[vm]}] 
+!        {\tt ESMF\_VM} object. Default use current VM.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3458,6 +3469,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_VM)           :: currentVM
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3467,9 +3479,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface.
-    call c_ESMC_VMBarrier(vm, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(vm)) then
+      call c_ESMC_VMBarrier(vm, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_VMGetCurrent(currentVM, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_ESMC_VMBarrier(currentVM, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -4239,12 +4260,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMEpochEnter - Enter an ESMF epoch
 
 ! !INTERFACE:
-  subroutine ESMF_VMEpochEnter(keywordEnforcer, vm, epoch, rc)
+  subroutine ESMF_VMEpochEnter(keywordEnforcer, vm, epoch, keepAlloc, throttle, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),            intent(in),  optional :: vm
     type(ESMF_VMEpoch_Flag),  intent(in),  optional :: epoch
+    logical,                  intent(in),  optional :: keepAlloc
+    integer,                  intent(in),  optional :: throttle
     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4260,6 +4283,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[epoch]}]
 !        The epoch to be entered. See section \ref{const:vmepoch_flag} for a
 !        complete list of options. Defaults to {\tt ESMF\_VMEPOCH\_NONE}.
+!   \item[{[keepAlloc]}]
+!        For {\tt .true.}, keep internal allocations to be reused by consecutive
+!        epoch phases. For {\tt .false.}, deallocate all internal buffers not
+!        actively used.
+!        The flag only affects the local PET. Defaults to {\tt .true.}.
+!   \item[{[throttle]}]
+!        Maximum number of outstanding communication calls beween any two PETs.
+!        Lower numbers reduce memory pressure at the expense of the level of
+!        asynchronizity achievable. Defaults to 10.
 !   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4269,11 +4301,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc      ! local return code
     type(ESMF_VM)           :: vm_opt
     type(ESMF_VMEpoch_Flag) :: epoch_opt
-    
+    type(ESMF_Logical)      :: keepAlloc_opt  ! helper variable
+
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! deal with optional arguments
     if (present(vm)) then
       vm_opt = vm
@@ -4282,6 +4315,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    keepAlloc_opt = ESMF_TRUE ! default
+    if (present(keepAlloc)) keepAlloc_opt = keepAlloc
 
     if (present(epoch)) then
       epoch_opt = epoch
@@ -4293,7 +4329,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm_opt, rc)
 
     ! Call into the C++ interface
-    call c_ESMC_VMEpochEnter(vm_opt, epoch_opt, localrc)
+    call c_ESMC_VMEpochEnter(vm_opt, epoch_opt, keepAlloc_opt, throttle, &
+      localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4327,8 +4364,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[vm]}]
 !        {\tt ESMF\_VM} object. Defaults to the current VM.
 !   \item[{[keepAlloc]}]
-!        For {\tt .true.}, keep internal allocations to be reused during the 
-!        epoch phase. For {\tt .false.}, deallocate all internal buffers.
+!        For {\tt .true.}, keep internal allocations to be reused by consecutive
+!        epoch phases. For {\tt .false.}, deallocate all internal buffers not
+!        actively used.
 !        The flag only affects the local PET. Defaults to {\tt .true.}.
 !   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4339,11 +4377,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc      ! local return code
     type(ESMF_VM)           :: vm_opt         ! helper variable
     type(ESMF_Logical)      :: keepAlloc_opt  ! helper variable
-    
+
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! deal with optional arguments
     if (present(vm)) then
       vm_opt = vm
@@ -5137,7 +5175,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
     currentSsiPe, petCount, peCount, ssiCount, ssiMap, ssiMinPetCount, ssiMaxPetCount, &
     ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
-    ssiSharedMemoryEnabledFlag, rc)
+    ssiSharedMemoryEnabledFlag, esmfComm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),        intent(in)            :: vm
@@ -5155,6 +5193,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,              intent(out), optional :: pthreadsEnabledFlag
     logical,              intent(out), optional :: openMPEnabledFlag
     logical,              intent(out), optional :: ssiSharedMemoryEnabledFlag
+    character(:), allocatable, intent(out), optional :: esmfComm
     integer,              intent(out), optional :: rc
 !
 ! !STATUS:
@@ -5174,6 +5213,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   current PE within the local SSI that is executing the request.\newline
 !   Added argument {\tt ssiMap} for a convenient way to obtain a view
 !   of the mapping of PETs to single system images across the entire VM.
+! \item[8.2.0] Added argument {\tt esmfComm} to provide easy access to the
+!   {\tt ESMF\_COMM} setting used by the ESMF installation.
 ! \end{description}
 ! \end{itemize}
 !
@@ -5246,6 +5287,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !             ESMF has {\em not} been compiled to support shared memory access
 !             between PETs that are on the same single system image (SSI).
 !        \end{description}
+!   \item[{[esmfComm]}]
+!        Upon return this string is allocated to the appropriate size and holds
+!        the exact value of the {\tt ESMF\_COMM} build environment variable used
+!        by the ESMF installation. This provides a convenient way for the user
+!        to determine the underlying MPI implementation.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5257,6 +5303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)      :: ssiSharedMemoryEnabledFlagArg  ! helper variable
     integer                 :: petCountArg, i;                ! helper variable
     integer                 :: localrc  ! local return code
+    character(len=40)       :: esmfCommArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -5309,6 +5356,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
+    endif
+
+    ! deal with esmfComm directly on Fortran layer
+    if (present(esmfComm)) then
+      call c_esmc_initget_esmf_comm(esmfCommArg, localrc)
+      esmfComm = trim(esmfCommArg)  ! implicit allocation of esmfComm
     endif
 
     ! return successfully
@@ -5418,7 +5471,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM), intent(out)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,       intent(out), optional  :: rc           
+    integer,       intent(out), optional  :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -5482,7 +5535,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM), intent(out)           :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,       intent(out), optional :: rc           
+    integer,       intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -5558,7 +5611,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId), intent(out)           :: vmId
-    integer,         intent(out), optional :: rc           
+    integer,         intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Get the {\tt ESMF\_VMId} of the current execution context.
@@ -5601,9 +5654,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_VMGetCurrentGarbageInfo(fobjCount, objCount, rc)
 !
 ! !ARGUMENTS:
-    integer, intent(in)             :: fobjCount
-    integer, intent(in)             :: objCount
-    integer, intent(out), optional  :: rc           
+    integer, intent(out)            :: fobjCount
+    integer, intent(out)            :: objCount
+    integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 !   Get garbage collection information of the current execution context.
@@ -5653,9 +5706,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc)
 !
 ! !ARGUMENTS:
-    integer, intent(in)             :: virtMemPet
-    integer, intent(in)             :: physMemPet
-    integer, intent(out), optional  :: rc           
+    integer, intent(out)            :: virtMemPet
+    integer, intent(out)            :: physMemPet
+    integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 !   Get memory info from the system for this PET.
@@ -5742,7 +5795,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),          intent(in)              :: vm
     character(len=*),       intent(in),   optional  :: prefix
     type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
-    integer, intent(out),                 optional  :: rc           
+    integer, intent(out),                 optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log the VM.
@@ -5792,11 +5845,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMLogBacktrace - Log backtrace
 
 ! !INTERFACE:
-  subroutine ESMF_VMLogBacktrace(prefix, rc)
+  subroutine ESMF_VMLogBacktrace(prefix, logMsgFlag, rc)
 !
 ! !ARGUMENTS:
-    character (len=*),    intent(in),   optional  :: prefix
-    integer, intent(out),               optional  :: rc           
+    character (len=*),      intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log backtrace of the current call stack.
@@ -5805,20 +5859,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [{[prefix]}]
 !     String to prefix the backtrace message. Default is no prefix.
-!   \item[{[rc]}] 
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
     ! Call into the C++ interface.
-    call c_esmc_vmlogbacktrace(prefix, localrc)
+    call c_esmc_vmlogbacktrace(prefix, logMsg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5836,11 +5898,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMLogCurrentGarbageInfo - Log garbage collection info
 
 ! !INTERFACE:
-  subroutine ESMF_VMLogCurrentGarbageInfo(prefix, rc)
+  subroutine ESMF_VMLogCurrentGarbageInfo(prefix, logMsgFlag, rc)
 !
 ! !ARGUMENTS:
-    character (len=*),    intent(in),   optional  :: prefix
-    integer, intent(out),               optional  :: rc           
+    character (len=*),      intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log gargbage collection info of the current VM on this PET.
@@ -5849,6 +5912,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [{[prefix]}]
 !     String to prefix the garbage info message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5856,13 +5922,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
     ! Call into the C++ interface.
-    call c_esmc_vmlogcurrentgarbageinfo(prefix, localrc)
+    call c_esmc_vmlogcurrentgarbageinfo(prefix, logMsg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5880,11 +5951,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMLogGarbageInfo - Log garbage collection info
 
 ! !INTERFACE:
-  subroutine ESMF_VMLogGarbageInfo(prefix, rc)
+  subroutine ESMF_VMLogGarbageInfo(prefix, logMsgFlag, rc)
 !
 ! !ARGUMENTS:
-    character (len=*),    intent(in),   optional  :: prefix
-    integer, intent(out),               optional  :: rc           
+    character (len=*),      intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log gargbage collection info for all VMs on this PET.
@@ -5893,6 +5965,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [{[prefix]}]
 !     String to prefix the garbage info message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5900,13 +5975,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
     ! Call into the C++ interface.
-    call c_esmc_vmloggarbageinfo(prefix, localrc)
+    call c_esmc_vmloggarbageinfo(prefix, logMsg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5924,12 +6004,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMLogMemInfo - Log memory info for this PET
 
 ! !INTERFACE:
-  subroutine ESMF_VMLogMemInfo(prefix, log, rc)
+  subroutine ESMF_VMLogMemInfo(prefix, logMsgFlag, log, rc)
 !
 ! !ARGUMENTS:
-    character (len=*),    intent(in),   optional  :: prefix
-    type(ESMF_Log),       intent(inout),optional  :: log
-    integer, intent(out),               optional  :: rc           
+    character (len=*),      intent(in),    optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),    optional  :: logMsgFlag
+    type(ESMF_Log),         intent(inout), optional  :: log
+    integer,                intent(out),   optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log memory info from the system for this PET.
@@ -5938,6 +6019,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [{[prefix]}]
 !     String to prefix the memory info message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
 !   \item [{[log]}] !TODO: BROKEN!!!
 !     {\tt ESMF\_Log} object that can be used instead of the default Log.
 !     Default is to use the default log.
@@ -5948,13 +6032,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
     ! Call into the C++ interface.
-    call c_esmc_vmlogmeminfo(prefix, log, localrc)
+    call c_esmc_vmlogmeminfo(prefix, logMsg, log, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5977,7 +6066,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     character(len=*),       intent(in),   optional  :: prefix
     type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
-    integer, intent(out),                 optional  :: rc           
+    integer, intent(out),                 optional  :: rc
 !
 ! !DESCRIPTION:
 !   Log the VM.
@@ -6030,7 +6119,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM),   intent(in)            :: vm
     type(ESMF_VMId), intent(out)           :: vmId
-    integer,         intent(out), optional :: rc           
+    integer,         intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Get the {\tt ESMF\_VMId} of the {\tt ESMF\_VM} object.
@@ -6080,7 +6169,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM),  intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,        intent(out), optional :: rc           
+    integer,        intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -6143,7 +6232,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),              intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),             intent(out), optional :: commhandle
-!    integer,                           intent(out), optional :: rc           
+!    integer,                           intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -6209,7 +6298,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -6282,7 +6371,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -6355,7 +6444,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -6428,7 +6517,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -6501,7 +6590,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -6574,7 +6663,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
-    integer,                 intent(out), optional :: rc           
+    integer,                 intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -7723,7 +7812,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
-!    integer,                          intent(out), optional :: rc           
+!    integer,                          intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -7788,7 +7877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
@@ -7860,7 +7949,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
@@ -7932,7 +8021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8005,7 +8094,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8078,7 +8167,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8151,7 +8240,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
-    integer,                 intent(out), optional :: rc           
+    integer,                 intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8297,7 +8386,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
-!    integer,                          intent(out), optional :: rc           
+!    integer,                          intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -8374,7 +8463,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8450,7 +8539,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
-    integer,                       intent(out), optional :: rc           
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8526,7 +8615,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8602,7 +8691,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8678,7 +8767,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
-    integer,                    intent(out), optional :: rc           
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8754,7 +8843,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
-    integer,                 intent(out), optional :: rc           
+    integer,                 intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -8820,7 +8909,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,       intent(out), optional :: rc           
+    integer,       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Partially collective {\tt ESMF\_VM} communication call that blocks calling
@@ -9079,26 +9168,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMInitialize()"
+#define ESMF_METHOD "ESMF_VMInitializePreMPI()"
 !BOPI
-! !IROUTINE: ESMF_VMInitialize - Initialize the Global VM
+! !IROUTINE: ESMF_VMInitializePreMPI - Initialize parts of the Global VM that must happen before MPI is initialized
 
 ! !INTERFACE:
-  subroutine ESMF_VMInitialize(mpiCommunicator, rc)
+  subroutine ESMF_VMInitializePreMPI(rc)
 !
 ! !ARGUMENTS:
-    integer, intent(in),  optional :: mpiCommunicator
-    integer, intent(out), optional :: rc           
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Initialize the Global VM.
+!   Initialize parts of the Global VM that must happen before MPI is initialized.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[{[mpiCommunicator]}] 
-!        MPI communicator defining the group of processes on which the
-!        ESMF application is running.
-!        If not sepcified, defaults to {\tt MPI\_COMM\_WORLD}
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -9112,13 +9196,80 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface.
-    call c_ESMC_VMInitialize(GlobalVM, mpiCommunicator, localrc)
+    call c_ESMC_VMInitializePreMPI(localrc)
     ! Cannot use LogErr here because LogErr initializes _after_ VM
     if (localrc /= ESMF_SUCCESS) then
       if (present(rc)) rc = localrc
       return
     endif
     
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMInitializePreMPI
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMInitialize()"
+!BOPI
+! !IROUTINE: ESMF_VMInitialize - Initialize the Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMInitialize(mpiCommunicator, globalResourceControl, rc)
+!
+! !ARGUMENTS:
+    integer, intent(in),  optional :: mpiCommunicator
+    logical, intent(in),  optional :: globalResourceControl
+    integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Initialize the Global VM.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[mpiCommunicator]}] 
+!        MPI communicator defining the group of processes on which the
+!        ESMF application is running.
+!        If not sepcified, defaults to {\tt MPI\_COMM\_WORLD}
+!     \item [{[globalResourceControl]}]
+!        For {\tt .true.}, each global PET is pinned to the corresponding
+!        PE (i.e. CPU core) in order. If OpenMP support is enabled,
+!        {\tt OMP\_NUM\_THREADS} is set to {\tt 1} on every PET, regardless
+!        of the setting in the launching environment. The {\tt .true.}
+!        setting is recommended for applications that utilize the ESMF-aware
+!        threading and resource control features.
+!        For {\tt .false.}, global PETs are {\em not} pinned by ESMF, and
+!        {\tt OMP\_NUM\_THREADS} is {\em not} modified.
+!        The default setting is {\tt .false.}.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: globalResourceControl_opt  ! helper variable
+
+    ! deal with logical argument
+    globalResourceControl_opt = ESMF_FALSE ! default
+    if (present(globalResourceControl)) &
+      globalResourceControl_opt = globalResourceControl
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMInitialize(GlobalVM, mpiCommunicator, &
+      globalResourceControl_opt, localrc)
+    ! Cannot use LogErr here because LogErr initializes _after_ VM
+    if (localrc /= ESMF_SUCCESS) then
+      if (present(rc)) rc = localrc
+      return
+    endif
+
     ! Set init code
     ESMF_INIT_SET_CREATED(GlobalVM)
 
@@ -9126,6 +9277,64 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMInitialize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSet()"
+!BOPI
+! !IROUTINE: ESMF_VMSet - Set properties of the Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMSet(globalResourceControl, rc)
+!
+! !ARGUMENTS:
+    logical, intent(in),  optional :: globalResourceControl
+    integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set properties of the Global VM.
+!
+!   The arguments are:
+!   \begin{description}
+!     \item [{[globalResourceControl]}]
+!        For {\tt .true.}, each global PET is pinned to the corresponding
+!        PE (i.e. CPU core) in order. If OpenMP support is enabled,
+!        {\tt OMP\_NUM\_THREADS} is set to {\tt 1} on every PET, regardless
+!        of the setting in the launching environment. The {\tt .true.}
+!        setting is recommended for applications that utilize the ESMF-aware
+!        threading and resource control features.
+!        For {\tt .false.}, global PETs are {\em not} pinned by ESMF, and
+!        {\tt OMP\_NUM\_THREADS} is {\em not} modified.
+!        The default setting is {\tt .false.}.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: globalResourceControl_opt  ! helper variable
+
+    ! deal with logical argument
+    globalResourceControl_opt = ESMF_FALSE ! default
+    if (present(globalResourceControl)) &
+      globalResourceControl_opt = globalResourceControl
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMSet(globalResourceControl_opt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMSet
 !------------------------------------------------------------------------------
 
 
@@ -9236,7 +9445,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),      intent(in)              :: vm
     type(ESMF_VMPlan),  intent(in)              :: vmplan
     type(ESMF_Pointer), intent(inout)           :: vm_info
-    integer,            intent(out),  optional  :: rc           
+    integer,            intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Shutdown a VM.
@@ -9458,7 +9667,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: npetlist
     integer,                 intent(in)            :: petlist(:)
     type(ESMF_Context_Flag), intent(in)            :: contextflag
-    integer,                 intent(out), optional :: rc           
+    integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Construct a default plan.
@@ -9515,7 +9724,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)  :: vmplan
-    integer, intent(out), optional    :: rc           
+    integer, intent(out), optional    :: rc
 !
 ! !DESCRIPTION:
 !   Destruct a vmplan.
@@ -9681,13 +9890,118 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanSetMinStackSize()"
+!BOPI
+! !IROUTINE: ESMF_VMPlanSetMinStackSize - Set the minimum stack size
+
+! !INTERFACE:
+  subroutine ESMF_VMPlanSetMinStackSize(vmplan, minStackSize, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMPlan), intent(inout)         :: vmplan
+    integer,           intent(in),  optional :: minStackSize
+    integer,           intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set the minimum stack size.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmplan] 
+!        VMPlan
+!     \item[{[minStackSize]}] 
+!        Minimum stack size for Pthreads created to execute user code.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMPlanSetMinStackSize(vmplan, minStackSize, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMPlanSetMinStackSize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanSetOpenMP()"
+!BOPI
+! !IROUTINE: ESMF_VMPlanSetOpenMP - Set OpenMP handling
+
+! !INTERFACE:
+  subroutine ESMF_VMPlanSetOpenMP(vmplan, openMpHandling, openMpNumThreads, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMPlan), intent(inout)         :: vmplan
+    integer,           intent(in),  optional :: openMpHandling
+    integer,           intent(in),  optional :: openMpNumThreads
+    integer,           intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Set the minimum stack size.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmplan] 
+!        VMPlan
+!   \item[{[openMpHandling]}] 
+!        OpenMP handling mode. Defaults to pinning.
+!   \item[{[openMpNumThreads]}] 
+!        Number of OpenMP threads under the local PET. Defaults to local peCount.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMPlanSetOpenMP(vmplan, openMpHandling, openMpNumThreads, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMPlanSetOpenMP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanMaxPEs()"
 !BOPI
 ! !IROUTINE: ESMF_VMPlanMaxPEs - Set up a MaxPEs vmplan
 
 ! !INTERFACE:
   subroutine ESMF_VMPlanMaxPEs(vmplan, vm, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, &
+    forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
@@ -9698,7 +10012,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
-    integer,           intent(out), optional :: rc           
+    logical,           intent(in),  optional :: forceEachChildPetOwnPthread
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set up a MaxPEs vmplan.
@@ -9721,6 +10036,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of PETs in petlist
 !   \item[petlist] 
 !        List of PETs that the parent VM will provide to the child VM
+!   \item[{[forceEachChildPetOwnPthread]}] 
+!        For {\tt .true.}, force each child PET to execute in its own Pthread.
+!        By default, {\tt .false.}, single PETs spawned from a parent PET
+!        execute in the same thread (or MPI process) as the parent PET. Multiple
+!        child PETs spawned by the same parent PET always execute as their own
+!        Pthreads.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -9740,7 +10061,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface.
     call c_ESMC_VMPlanMaxPEs(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, localrc)
+      npetlist, petlist, forceEachChildPetOwnPthread, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -9759,7 +10080,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_VMPlanMaxThreads(vmplan, vm, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, &
+    forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
@@ -9770,7 +10092,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
-    integer,           intent(out), optional :: rc           
+    logical,           intent(in),  optional :: forceEachChildPetOwnPthread
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set up a MaxThreads vmplan.
@@ -9793,6 +10116,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of PETs in petlist
 !   \item[petlist] 
 !        List of PETs that the parent VM will provide to the child VM
+!   \item[{[forceEachChildPetOwnPthread]}] 
+!        For {\tt .true.}, force each child PET to execute in its own Pthread.
+!        By default, {\tt .false.}, single PETs spawned from a parent PET
+!        execute in the same thread (or MPI process) as the parent PET. Multiple
+!        child PETs spawned by the same parent PET always execute as their own
+!        Pthreads.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -9812,7 +10141,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface.
     call c_ESMC_VMPlanMaxThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, localrc)
+      npetlist, petlist, forceEachChildPetOwnPthread, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -9831,7 +10160,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_VMPlanMinThreads(vmplan, vm, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, &
+    forceEachChildPetOwnPthread, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
@@ -9842,7 +10172,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(in),  optional :: pref_inter_ssi
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
-    integer,           intent(out), optional :: rc           
+    logical,           intent(in),  optional :: forceEachChildPetOwnPthread
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set up a MinThreads vmplan.
@@ -9865,6 +10196,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of PETs in petlist
 !   \item[petlist] 
 !        List of PETs that the parent VM will provide to the child VM
+!   \item[{[forceEachChildPetOwnPthread]}] 
+!        For {\tt .true.}, force each child PET to execute in its own Pthread.
+!        By default, {\tt .false.}, single PETs spawned from a parent PET
+!        execute in the same thread (or MPI process) as the parent PET. Multiple
+!        child PETs spawned by the same parent PET always execute as their own
+!        Pthreads.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -9884,7 +10221,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface.
     call c_ESMC_VMPlanMinThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, localrc)
+      npetlist, petlist, forceEachChildPetOwnPthread, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -9915,7 +10252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId1
     type(ESMF_VMId),   intent(in)            :: vmId2
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Compare two ESMF_VMId objects.
@@ -9964,7 +10301,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: dest(:)
     type(ESMF_VMId),   intent(in)            :: source(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Copy the contents of ESMF_VMId objects.  Note that the destination
@@ -10018,12 +10355,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMIdLog - Log an ESMF_VMId object
 
 ! !INTERFACE:
-  subroutine ESMF_VMIdLog(vmId, prefix, rc)
+  subroutine ESMF_VMIdLog(vmId, prefix, logMsgFlag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VMId),      intent(in)              :: vmId
-    character (len=*),    intent(in),   optional  :: prefix
-    integer,              intent(out),  optional  :: rc           
+    type(ESMF_VMId),        intent(in)              :: vmId
+    character (len=*),      intent(in),   optional  :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),   optional  :: logMsgFlag
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Write an ESMF_VMId object to the default Log.
@@ -10034,20 +10372,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     ESMF_VMId object
 !   \item [{[prefix]}]
 !     String to prefix the memory info message. Default is no prefix.
-!   \item[{[rc]}] 
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
     ! Call into the C++ interface
-    call c_ESMC_VMIdLog(vmId, prefix, localrc)
+    call c_ESMC_VMIdLog(vmId, prefix, logMsg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -10069,7 +10415,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Print an ESMF_VMId object.
@@ -10118,7 +10464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Print an ESMF_VMId object.
@@ -10173,7 +10519,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: vmId
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create an ESMF_VMId object. This allocates memory on the C side.
@@ -10217,7 +10563,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: vmId(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create an ESMF_VMId object. This allocates memory on the C side.
@@ -10264,7 +10610,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: vmId
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Destroy an ESMF_VMId object. This frees memory on the C side.
@@ -10308,7 +10654,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: vmId(:)
-    integer,           intent(out), optional :: rc           
+    integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Destroy an ESMF_VMId object. This frees memory on the C side.
@@ -10486,7 +10832,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),            intent(in)              :: vm
     type(ESMF_VMId),          intent(out)             :: vmId
     integer,                  intent(in)              :: srcPet
-    integer,                  intent(out),  optional  :: rc           
+    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Receive {\tt ESMF\_VMId}.
@@ -10536,7 +10882,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),            intent(in)              :: vm
     type(ESMF_VMId),          intent(in)              :: vmId
     integer,                  intent(in)              :: dstPet
-    integer,                  intent(out),  optional  :: rc           
+    integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !   Send {\tt ESMF\_VMId}.
@@ -10829,8 +11175,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end function ESMF_CommHandleGetInit
 !------------------------------------------------------------------------------
 
+!==============================================================================
+! ESMF_PointerLog, which has to be built _after_ ESMF_LogErrMod
+!==============================================================================
 
+subroutine ESMF_PointerLog(ptr, prefix, logMsgFlag, rc)
+  type(ESMF_Pointer),     intent(in)             :: ptr
+  character (len=*),      intent(in),  optional  :: prefix
+  type(ESMF_LogMsg_Flag), intent(in),  optional  :: logMsgFlag
+  integer,                intent(out), optional  :: rc
+  type(ESMF_LogMsg_Flag)  :: logMsg
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  ! deal with optionl logMsgFlag
+  logMsg = ESMF_LOGMSG_INFO ! default
+  if (present(logMsgFlag)) logMsg = logMsgFlag
+  call c_pointerlog(ptr, prefix, logMsg)
+  ! return successfully
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine
 
+!------------------------------------------------------------------------------
 
 end module ESMF_VMMod
 

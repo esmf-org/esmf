@@ -17,7 +17,8 @@ from ESMF.test.base import TestBase, attr
 from ESMF.util.mesh_utilities import *
 
 class TestMesh(TestBase):
-    Manager(debug=True)
+    mg = Manager(debug=True)
+
     def check_mesh(self, mesh, nodeCoord, nodeOwner, elemCoord=None):
 
         xcoords = mesh.get_coords(0)
@@ -105,6 +106,37 @@ class TestMesh(TestBase):
                 mesh_create_50()
 
         self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
+
+    def test_mesh_50_moab(self):
+        
+        # set this mesh to be created with the MOAB backend
+        mg = Manager()
+        mg.set_moab()
+        
+        elemCoord = None
+        parallel = False
+        if pet_count() > 1:
+            parallel = True
+
+        if parallel:
+            if constants._ESMF_MPIRUN_NP != 4:
+                raise SkipTest('This test must be run with 4 processors.')
+
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord = \
+                mesh_create_50()
+
+        self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
+
+        assert (mg.moab == True)
+
+        # set back to using the native ESMF mesh for the remaining tests
+        mg.set_moab(moab_on=False)
+        
+        assert (mg.moab == False)
 
     def test_mesh_50_ngons(self):
         parallel = False
@@ -206,7 +238,7 @@ class TestMesh(TestBase):
 
         mesh2 = mesh[0:5]
         mesh3 = mesh2[1:3]
-
+        
         assert mesh.coords[0][0].shape == (12,)
         assert mesh.size == [12, 5]
         assert mesh.size_owned == [12, 5]

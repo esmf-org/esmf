@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -572,15 +572,6 @@ contains
             !    line=__LINE__, &
             !    file=FILENAME)) &
             !    return  ! bail out
-
-            ! Component Attributes should be set up -> ready to output
-            !    call ESMF_AttributeWrite(comp, convention='CIM 1.5', &
-            !      purpose='ModelComp', &
-            !      attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-            !    if (ESMF_LogFoundError(rc, &
-            !      line=__LINE__, &
-            !      file=FILENAME)) &
-            !      return  ! bail out
 
             call dispatchPhaseChecks(prefix, comp, ESMF_METHOD_INITIALIZE, &
                 phase, importState, exportState, clock, .false., rc=rc)

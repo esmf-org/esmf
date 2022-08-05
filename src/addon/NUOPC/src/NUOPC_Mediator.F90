@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -120,7 +120,6 @@ module NUOPC_Mediator
 
     ! local variables
     character(ESMF_MAXSTR)    :: name
-    type(ESMF_State)          :: exportState
     type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
@@ -131,24 +130,25 @@ module NUOPC_Mediator
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
-    ! get to the clock and exportState
-    call ESMF_GridCompGet(gcomp, exportState=exportState, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
     ! update timestamp on export Fields
-    call NUOPC_SetTimestamp(exportState, is%wrap%preAdvanceCurrTime, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
+    if (associated(is%wrap%cachedExportFieldList)) then
+      call NUOPC_SetTimestamp(is%wrap%cachedExportFieldList, &
+        is%wrap%preAdvanceCurrTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+    endif
 
   end subroutine
 

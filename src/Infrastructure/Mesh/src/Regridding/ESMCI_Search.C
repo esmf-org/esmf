@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -334,7 +334,7 @@ static int found_func(void *c, void *y) {
 
 
   // if we're too far away don't even consider this as a fall back candidate
-  if (!in && (dist > 1.0E-8)) return 0;
+  if (!in && (dist > 1.0E-7)) return 0;
 
 
   // In or close enough, so set as a candidate, until someone better comes along...

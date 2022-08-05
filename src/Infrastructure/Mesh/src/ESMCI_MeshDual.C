@@ -1,7 +1,8 @@
+
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -83,6 +84,7 @@ namespace ESMCI {
   void get_unique_elems_around_node(MeshObj *node, Mesh *mesh, MDSS *tmp_mdss,
                                 int *_num_ids, UInt *ids);
 
+  void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm);
 
 
   // Create a dual of the input Mesh 
@@ -244,6 +246,7 @@ namespace ESMCI {
   dual_mesh->set_spatial_dimension(sdim);
   dual_mesh->set_parametric_dimension(pdim);
   dual_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
+  dual_mesh->coordsys=src_mesh->coordsys;
 
   // Get element coordinates
   MEField<> *elem_coords=src_mesh->GetField("elem_coordinates"); 
@@ -798,7 +801,6 @@ namespace ESMCI {
       // The object
       UInt eid = elemId[e];
       MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
-      elem->set_owner(elemOwner[e]);
 
       for (int n = 0; n < nnodes; ++n) {
       
@@ -813,7 +815,7 @@ namespace ESMCI {
       }
 
       dual_mesh->add_element(elem, nconnect, topo->number, topo);
-
+      elem->set_owner(elemOwner[e]); // Need to do after add_element(), because for some reason that resets the element owner.
 
     } // for e
 
@@ -836,6 +838,9 @@ namespace ESMCI {
                   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
     }
 
+    // Change owners to be on the current communicator rather than the source mesh's communicator
+    _change_owners_from_src_to_curr_comm(dual_mesh, src_mesh->orig_comm);
+
     // Commit Mesh
     dual_mesh->build_sym_comm_rel(MeshObj::NODE);
     dual_mesh->Commit();
@@ -845,6 +850,41 @@ namespace ESMCI {
     // Output 
     *_dual_mesh=dual_mesh;
 }
+
+
+  void _change_owners_from_src_to_curr_comm(Mesh *dual_mesh, MPI_Comm src_comm) {
+    
+    // If not in src comm, just leave because there is nothing to do
+    if (src_comm == MPI_COMM_NULL) return;
+
+    // Save rank in current comm
+    int curr_rank=Par::Rank();
+
+    // Save current comm
+    MPI_Comm curr_comm=Par::Comm();
+
+    // Switch to src comm
+    ESMCI::Par::Init("MESHLOG", false, src_comm);
+
+    // Get size
+    int src_comm_size=Par::Size();
+
+    // Allocate map
+    int *src_to_curr_map = new int[src_comm_size];
+
+    // Fill map
+    MPI_Allgather(&curr_rank, 1, MPI_INT, src_to_curr_map, 1, MPI_INT, src_comm);
+
+    // Move nodes and elems to new owners
+    dual_mesh->map_obj_owners(src_comm_size, src_to_curr_map);
+
+    // Deallocate map
+    delete [] src_to_curr_map;
+
+
+    // Switch back to current comm
+    ESMCI::Par::Init("MESHLOG", false, curr_comm);
+  }
 
 
 

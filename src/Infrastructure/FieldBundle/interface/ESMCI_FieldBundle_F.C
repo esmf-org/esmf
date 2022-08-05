@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -22,6 +22,7 @@
  // insert any higher level, 3rd party or system includes here
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
+#include <string.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -85,6 +86,51 @@ void FTN_X(c_esmc_fieldbundleserialize)(
     return;
 } 
 
+// non-method functions
+void FTN_X(c_esmc_fieldbundleserializeencodename)(
+                            int *encodenamelength,
+                            char *encodename,
+                            char *buffer, int *length, int *offset,
+                            ESMC_InquireFlag *inquireflag, int *rc,
+                            ESMCI_FortranStrLenArg name_l, ESMCI_FortranStrLenArg buffer_l){
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_fieldbundleserialize()"
+    // either put the code here, or call into a real C++ function
+    int *ip;
+
+    // TODO: verify length > need, and if not, make room.
+    int fixedpart = *encodenamelength+8*sizeof(int *);  
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      if ((*length - *offset) < fixedpart) {
+         std::stringstream msg;
+         msg << "Buffer too short to add a FieldBundle object, length = "
+             << (*length - *offset) << " bytes";
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          msg, ESMC_CONTEXT,
+          rc);
+         return;
+ 
+        //buffer = (char *)realloc((void *)buffer,
+        //                         *length + 2*fixedpart + byte_count);
+        //*length += 2 * fixedpart;
+      }
+    }
+
+
+    ip = (int *)(buffer + *offset);
+    if (*inquireflag != ESMF_INQUIREONLY) {
+      *ip++ = *encodenamelength; 
+      strncpy((char *)ip, encodename, *encodenamelength);
+      ip += *encodenamelength;
+    } else
+      ip += fixedpart;  // matches fixedpart
+
+    *offset = (char *)ip - buffer;
+
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+} 
 
 // non-method functions
 void FTN_X(c_esmc_fieldbundledeserialize)( 
@@ -109,5 +155,46 @@ void FTN_X(c_esmc_fieldbundledeserialize)(
     return;
 } 
 
+// non-method functions
+void FTN_X(c_esmc_fieldbundledeserializeint)( 
+                              int *encodenamelength,
+                              char *buffer, int *offset, int *rc,
+                              ESMCI_FortranStrLenArg buffer_l){
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_fieldbundledeserialize()"
+    // either put the code here, or call into a real C++ function
+    int *ip;
+
+    ip = (int *)(buffer + *offset);
+    *encodenamelength = *ip++;
+
+    *offset = (char *)ip - buffer;
+
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+} 
+
+// non-method functions
+void FTN_X(c_esmc_fieldbundledeserializeencodename)( 
+                              int *encodenamelength,
+                              char*encodename,
+                              char *buffer, int *offset, int *rc,
+                              ESMCI_FortranStrLenArg name_l, ESMCI_FortranStrLenArg buffer_l){
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_fieldbundledeserialize()"
+    // either put the code here, or call into a real C++ function
+    int *ip;
+
+    ip = (int *)(buffer + *offset);
+    strncpy(encodename, (char *)ip, *encodenamelength);
+    ip += *encodenamelength; 
+
+    *offset = (char *)ip - buffer;
+
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+} 
 
 }

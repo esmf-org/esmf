@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -245,12 +245,6 @@ module ESMF_AttributeUpdateUTestMod
 
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    ! call ESMF_StateReconcile(importState, vm=vm, &
-    !   attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
-    ! if (rc/=ESMF_SUCCESS) return
-    ! call ESMF_StateReconcile(exportState, vm=vm, &
-    !   attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
-    ! if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl_init
 

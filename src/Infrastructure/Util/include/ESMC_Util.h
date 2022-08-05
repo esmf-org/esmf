@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -84,9 +84,9 @@ enum ESMC_GridItem_Flag {ESMC_GRIDITEM_INVALID=-2,
                          ESMC_GRIDITEM_AREA};
 
 enum ESMC_GridStatus_Flag {ESMC_GRIDSTATUS_INVALID=-1,
-                      ESMC_GRIDSTATUS_UNINIT,
-                      ESMC_GRIDSTATUS_NOT_READY,
-                      ESMC_GRIDSTATUS_SHAPE_READY};
+                           ESMC_GRIDSTATUS_UNINIT,
+                           ESMC_GRIDSTATUS_NOT_READY,
+                           ESMC_GRIDSTATUS_SHAPE_READY};
 
 // indexflag type
 enum ESMC_IndexFlag { ESMC_INDEX_DELOCAL=0,
@@ -94,8 +94,9 @@ enum ESMC_IndexFlag { ESMC_INDEX_DELOCAL=0,
                       ESMC_INDEX_USER};
 
 // io format type
-typedef enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
-                       ESMF_IOFMT_NETCDF,
+typedef enum ESMC_IOFmt_Flag { //ESMF_IOFMT_BIN=0,
+                       ESMF_IOFMT_NETCDF=1,
+                       ESMF_IOFMT_NETCDF_64BIT_DATA,
                        ESMF_IOFMT_NETCDF_64BIT_OFFSET,
                        ESMF_IOFMT_NETCDF4,
                        ESMF_IOFMT_NETCDF4P,
@@ -127,6 +128,12 @@ enum ESMC_LogMsgType_Flag{
 
 enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=0,
                         ESMC_MESHLOC_ELEMENT};
+
+enum ESMC_MeshStatus_Flag {ESMC_MESHSTATUS_UNINIT=0,
+                           ESMC_MESHSTATUS_EMPTY,
+                           ESMC_MESHSTATUS_STRUCTCREATED,
+                           ESMC_MESHSTATUS_NODESADDED,
+                           ESMC_MESHSTATUS_COMPLETE};
 
 enum ESMC_NormType_Flag {ESMC_NORMTYPE_DSTAREA=0,
                         ESMC_NORMTYPE_FRACAREA=1};

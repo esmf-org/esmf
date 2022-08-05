@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -91,6 +91,7 @@ program ESMF_MeshUTest
   logical :: nodalIsPresent, elementIsPresent
   type(ESMF_MESHSTATUS_FLAG) :: status
   character(len=80)      :: meshName, meshNameOut
+  logical :: isMOABOn
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -100,7 +101,6 @@ program ESMF_MeshUTest
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
-  call ESMF_MeshSetMOAB(.false.)
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -112,6 +112,10 @@ program ESMF_MeshUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Make sure MOAB is off
+  call ESMF_MeshSetMOAB(.false.)
+
 
  ! This surrounds all the tests to make turning off everything but one test easier
 #if 1
@@ -694,7 +698,7 @@ program ESMF_MeshUTest
   deallocate(elemConn)
 
   ! deallocate owned node coords
-   deallocate(ownedNodeCoords)
+  deallocate(ownedNodeCoords)
   deallocate(ownedElemCoords)
 
   ! Make sure node distgrid is ok
@@ -705,16 +709,16 @@ program ESMF_MeshUTest
   call ESMF_DistGridValidate(elemDistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
   
-  ! ! Free memory
-  ! call ESMF_MeshFreeMemory(mesh, rc=localrc)
-  ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  ! 
-  ! ! Test isMemFreed flag
-  ! call ESMF_MeshGet(mesh, isMemFreed=isMemFreed, rc=localrc)
-  ! if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  ! 
-  ! ! now it should indicate freed memory
-  ! if (.not. isMemFreed) correct=.false. ! Has been freed
+  ! Free memory
+  call ESMF_MeshFreeMemory(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! Test isMemFreed flag
+  call ESMF_MeshGet(mesh, isMemFreed=isMemFreed, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! now it should indicate freed memory
+  if (.not. isMemFreed) correct=.false. ! Has been freed
   
   !! Write mesh for debugging
   !! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
@@ -926,7 +930,7 @@ program ESMF_MeshUTest
 
   deallocate (buf)
   bufCount=2*offset ! a little more room
-  print *, 'ESMF_MeshUTest: serialization buffer size =', bufCount
+  ! print *, 'ESMF_MeshUTest: serialization buffer size =', bufCount
   allocate(buf(bufCount))
 
   ! Serialize
@@ -934,7 +938,7 @@ program ESMF_MeshUTest
    call ESMF_MeshSerialize(mesh, buf, bufCount, offset, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  print *, 'ESMF_MeshUTest: serialized buffer size =', offset
+  ! print *, 'ESMF_MeshUTest: serialized buffer size =', offset
 
   ! Deserialize
   offset=0
@@ -949,9 +953,17 @@ program ESMF_MeshUTest
                    isMemFreed=isMemFreed,  coordSys=coordSys, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  ! check results
-  if (numOwnedNodesTst .ne. 0) correct=.false.
-  if (numOwnedElemsTst .ne. 0) correct=.false.
+  ! removed this check because no longer correct after counts migrated to C
+  ! ! check results
+  ! if (numOwnedNodesTst .ne. 0) then
+  !   ! correct=.false.
+  !   print *, "numOwnedNodes = ", numOwnedNodesTst
+  ! endif
+  ! if (numOwnedElemsTst .ne. 0) then
+  !   ! correct=.false.
+  !   print *, "numOwnedElems = ", numOwnedElemsTst
+  ! endif
+
   if (spatialDim .ne. 2) correct=.false.
   if (parametricDim .ne. 2) correct=.false.
   if (isMemFreed) correct=.false.
@@ -1754,18 +1766,16 @@ endif
 
   ! Create elem Distgrid
   elemdistgrid=ESMF_DistGridCreate(minIndex=(/1,1/), &
-                                    maxIndex=(/3,3/), &
+                                   maxIndex=(/3,3/), &
                                    regDecomp=(/2,2/),&
                                    indexflag=ESMF_INDEX_GLOBAL, &
                                    rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-
   ! Create redisted mesh
   mesh2=ESMF_MeshCreate(mesh, nodalDistgrid=nodedistgrid, &
      elementDistgrid=elemdistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
 
   ! Test creating field
   nodeField = ESMF_FieldCreate(mesh2, typekind=ESMF_TYPEKIND_R8, &
@@ -2337,7 +2347,7 @@ endif
   if (nodalIsPresent .or. elementIsPresent) then
      correct=.false.
   endif
-
+  
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2352,7 +2362,6 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test creating a MOAB Mesh"
@@ -2482,6 +2491,7 @@ endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+#if 1
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test get of element mask and area info"
@@ -2715,7 +2725,7 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
+#endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -2783,11 +2793,100 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "MOAB Mesh Create with a pentagon and hexagon element"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Don't test if MOAB isn't available
+#if defined ESMF_MOAB
+
+  ! Turn on MOAB mesh creation
+  call ESMF_MeshSetMOAB(.true., rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create Test mesh
+  call createTestMeshPH(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Turn off MOAB mesh creation
+  call ESMF_MeshSetMOAB(.false., rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  !  call ESMF_MeshWrite(mesh, filename="meshPH", rc=rc)
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+ ! end of if defined MOAB
+#endif
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Mesh Set/Get MOAB"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Don't test if MOAB isn't available
+#if defined ESMF_MOAB
+
+  ! Turn on MOAB mesh creation
+  call ESMF_MeshSetMOAB(.true., rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get MOAB status
+  call ESMF_MeshGetMOAB(isMOABOn, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check Status
+  if (.not. isMOABOn) correct=.false.
+
+
+  ! Finish with MOAB off
+  call ESMF_MeshSetMOAB(.false., rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get MOAB status
+  call ESMF_MeshGetMOAB(isMOABOn, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check Status
+  if (isMOABOn) correct=.false.
+
+#endif
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Optional nodeOwners"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  call test_optionalNodeOwners(correct, rc)
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
   !  to be called until then".
-  !UTest
+  !NEX_deactivate_UTest
   !write(name, *) "MeshWrite Test"
   !write(failMsg, *) "Did not return ESMF_SUCCESS"
   !  call ESMF_MeshWrite(meshSrc, filename="mesh_out", rc=rc)
@@ -7744,6 +7843,412 @@ subroutine test_meshset_with_gt4sided(correct, rc)
 
 
 end subroutine test_meshset_with_gt4sided
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !
+  ! Creates the following mesh on
+  ! 1 or 4 PETs. Returns an error
+  ! if run on other than 1 or 4 PETs
+  !
+  !                     Mesh Ids
+  !
+  !   3.0   13 ------ 14 ------- 15 ------- 16
+  !         |         |          |  10    / |
+  !   2.5   |    7    |    8     |     /    |
+  !         |         |          |  /    9  |
+  !   2.0   9 ------- 10 ------- 11 ------- 12
+  !         |         |          |          |
+  !   1.5   |    4    |    5     |    6     |
+  !         |         |          |          |
+  !   1.0   5 ------- 6 -------- 7 -------- 8
+  !         |         |          |          |
+  !   0.5   |    1    |    2     |    3     |
+  !         |         |          |          |
+  !   0.0   1 ------- 2 -------- 3 -------- 4
+  !
+  !        0.0  0.5  1.0  1.5   2.0  2.5   3.0
+   !
+  !               Node Ids at corners
+  !              Element Ids in centers
+  !
+   !!!!!
+  !
+  ! The owners for 1 PET are all Pet 0.
+  ! The owners for 4 PETs are as follows:
+  !
+  !                   Mesh Owners
+  !
+  !   3.0   2 ------- 2 -------- 3 -------- 3
+  !         |         |          |  3    /  |
+  !         |    2    |    2     |     /    |
+  !         |         |          |  /    3  |
+  !   2.0   2 ------- 2 -------- 3 -------- 3
+  !         |         |          |          |
+  !         |    2    |    2     |    3     |
+  !         |         |          |          |
+  !   1.0   0 ------- 0 -------- 1 -------- 1
+  !         |         |          |          |
+  !         |    0    |    1     |    1     |
+  !         |         |          |          |
+  !   0.0   0 ------- 0 -------- 1 -------- 1
+  !
+  !        0.0       1.0        2.0        3.0
+  !
+  !               Node Owners at corners
+  !              Element Owners in centers
+  !
+
+subroutine test_optionalNodeOwners(correct, rc)
+  logical :: correct
+  integer :: rc
+
+  type(ESMF_Mesh) :: mesh
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+  integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+  integer :: numElems,numOwnedElemsTst
+  integer :: numElemConns, numTriElems, numQuadElems
+  real(ESMF_KIND_R8), pointer :: elemCoords(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! return with an error if not 1 or 4 PETs
+  if ((petCount /= 1) .and. (petCount /=4)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+
+  ! Setup mesh info depending on the
+  ! number of PETs
+  if (petCount .eq. 1) then
+
+     ! Fill in node data
+     numNodes=16
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8, &
+               9,10,11,12,13,14,&
+               15,16/)
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.0,0.0, & ! 1
+                 1.0,0.0, &  ! 2
+                 2.0,0.0, &  ! 3
+                 3.0,0.0, &  ! 4
+                 0.0,1.0, &  ! 5
+                 1.0,1.0, &  ! 6
+                 2.0,1.0, &  ! 7
+                 3.0,1.0, &  ! 8
+                 0.0,2.0, &  ! 9
+                 1.0,2.0, &  ! 10
+                 2.0,2.0, &  ! 11
+                 3.0,2.0, &  ! 12
+                  0.0,3.0, &  ! 13
+                 1.0,3.0, &  ! 14
+                 2.0,3.0, &  ! 15
+                 3.0,3.0 /)  ! 16
+
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=8
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,2,3,4,5,6,7,8,9,10/)
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 1
+                  ESMF_MESHELEMTYPE_QUAD, & ! 2
+                  ESMF_MESHELEMTYPE_QUAD, & ! 3
+                  ESMF_MESHELEMTYPE_QUAD, & ! 4
+                  ESMF_MESHELEMTYPE_QUAD, & ! 5
+                  ESMF_MESHELEMTYPE_QUAD, & ! 6
+                   ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_QUAD, & ! 8
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.5,0.5, & ! 1
+                   1.5,0.5, & ! 2
+                   2.5,0.5, & ! 3
+                   0.5,1.5, & ! 4
+                   1.5,1.5, & ! 5
+                   2.5,1.5, & ! 6
+                   0.5,2.5, & ! 7
+                   1.5,2.5, & ! 8
+                   2.75,2.25,& ! 9
+                   2.25,2.75/)  ! 10
+
+      !! elem conn
+      allocate(elemConn(numElemConns))
+      elemConn=(/1,2,6,5,   & ! 1
+                 2,3,7,6,   & ! 2
+                 3,4,8,7,   & ! 3
+                 5,6,10,9,  & ! 4
+                 6,7,11,10, & ! 5
+                 7,8,12,11, & ! 6
+                 9,10,14,13, & ! 7
+                 10,11,15,14, & ! 8
+                 11,12,16, & ! 9
+                  11,16,15/) ! 10
+
+   else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+
+     ! Fill in node data
+     numNodes=4
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,5,6/)
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.0,0.0, & ! 1
+                 1.0,0.0, &  ! 2
+                 0.0,1.0, &  ! 5
+                 1.0,1.0 /)  ! 6
+
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1/)
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD/) ! 1
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.5,0.5/)  ! 1
+
+      !! elem conn
+      allocate(elemConn(numElemConns))
+      elemConn=(/1,2,4,3/) ! 1
+
+     else if (localPet .eq. 1) then
+
+     ! Fill in node data
+     numNodes=6
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/2,3,4,6,7,8/)
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/1.0,0.0, &  ! 2
+                   2.0,0.0, &  ! 3
+                  3.0,0.0, &  ! 4
+                  1.0,1.0, &  ! 6
+                  2.0,1.0, &  ! 7
+                  3.0,1.0 /)  ! 8
+
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=2
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/2,3/)
+
+      !! elem types
+      allocate(elemTypes(numElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 2
+                  ESMF_MESHELEMTYPE_QUAD/)  ! 3
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/1.5,0.5, & ! 2
+                   2.5,0.5/)  ! 3
+
+
+      !! elem conn
+      allocate(elemConn(numElemConns))
+      elemConn=(/1,2,5,4,   & ! 2
+                 2,3,6,5/)    ! 3
+
+     else if (localPet .eq. 2) then
+
+     ! Fill in node data
+     numNodes=9
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/5,6,7,   &
+               9,10,11, &
+               13,14,15/)
+
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.0,1.0, &  ! 5
+                   1.0,1.0, &  ! 6
+                  2.0,1.0, &  ! 7
+                  0.0,2.0, &  ! 9
+                  1.0,2.0, &  ! 10
+                  2.0,2.0, &  ! 11
+                  0.0,3.0, &  ! 13
+                  1.0,3.0, &  ! 14
+                  2.0,3.0/)  ! 15
+
+
+      ! Fill in elem data
+      numTriElems=0
+      numQuadElems=4
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+       !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/4,5,7,8/)
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 4
+                  ESMF_MESHELEMTYPE_QUAD, & ! 5
+                  ESMF_MESHELEMTYPE_QUAD, & ! 7
+                  ESMF_MESHELEMTYPE_QUAD/)  ! 8
+
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/0.5,1.5, & ! 4
+                   1.5,1.5, & ! 5
+                   0.5,2.5, & ! 7
+                   1.5,2.5/)  ! 8
+
+      !! elem conn
+      allocate(elemConn(numElemConns))
+      elemConn=(/1,2,5,4,  & ! 4
+                 2,3,6,5,  & ! 5
+                 4,5,8,7,  & ! 7
+                 5,6,9,8/)   ! 8
+     else if (localPet .eq. 3) then
+
+     ! Fill in node data
+     numNodes=6
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/7,8,11,12,15,16/)
+
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/2.0,1.0, &  ! 7
+                  3.0,1.0, &  ! 8
+                  2.0,2.0, &  ! 11
+                  3.0,2.0, &  ! 12
+                  2.0,3.0, &  ! 15
+                  3.0,3.0 /)  ! 16
+
+      ! Fill in elem data
+      numTriElems=2
+      numQuadElems=1
+      numElems=numTriElems+numQuadElems
+      numElemConns=3*numTriElems+4*numQuadElems
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/6,9,10/)
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! 6
+                  ESMF_MESHELEMTYPE_TRI,  & ! 9
+                  ESMF_MESHELEMTYPE_TRI/)   ! 10
+
+      !! elem coords
+      allocate(elemCoords(2*numElems))
+      elemCoords=(/2.5,1.5, & ! 6
+                   2.75,2.25,& ! 9
+                   2.25,2.75/)  ! 10
+
+      !! elem conn
+      allocate(elemConn(numElemConns))
+      elemConn=(/1,2,4,3, & ! 6
+                 3,4,6, & ! 9
+                 3,6,5/) ! 10
+     endif
+   endif
+
+
+   ! Create Mesh structure in 1 step
+   mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_CART, &
+        nodeIds=nodeIds, nodeCoords=nodeCoords, &
+        !nodeOwners=nodeOwners, & ! Don't pass in node owners
+        elementIds=elemIds,&
+        elementTypes=elemTypes, elementConn=elemConn, &
+        elementCoords=elemCoords, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Allocate node owners
+   allocate(nodeOwners(numNodes))
+
+   ! Set to value outside of range
+   nodeOwners=-1
+
+   ! Get nodeOwners
+   call ESMF_MeshGet(mesh, nodeOwners=nodeOwners, rc=rc) 
+   if (rc /= ESMF_SUCCESS) return
+
+   ! Debug output
+   !write(*,*) "nodeIds   =",nodeIds
+   !write(*,*) "nodeOwners=",nodeOwners
+
+   ! Check nodeOwners
+    correct=.true.
+    do i=1,numNodes
+       if ((nodeOwners(i) < 0) .or. (nodeOwners(i) > petCount-1)) correct=.false.
+    enddo
+   
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeOwners)
+   deallocate(nodeCoords)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemCoords)
+   deallocate(elemConn)
+
+   ! Return success
+   rc = ESMF_SUCCESS
+
+end subroutine test_optionalNodeOwners
+
 
 
 

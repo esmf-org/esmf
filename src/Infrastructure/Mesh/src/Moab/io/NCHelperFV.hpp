@@ -11,21 +11,27 @@
 
 #include "NCHelper.hpp"
 
-namespace moab {
+namespace moab
+{
 
 //! Child helper class for Finite Volume grid (CAM_FV)
 class NCHelperFV : public ScdNCHelper
 {
-public:
-  NCHelperFV(ReadNC* readNC, int fileId, const FileOptions& opts, EntityHandle fileSet)
-: ScdNCHelper(readNC, fileId, opts, fileSet) {}
-  static bool can_read_file(ReadNC* readNC, int fileId);
+  public:
+    NCHelperFV( ReadNC* readNC, int fileId, const FileOptions& opts, EntityHandle fileSet )
+        : ScdNCHelper( readNC, fileId, opts, fileSet )
+    {
+    }
+    static bool can_read_file( ReadNC* readNC, int fileId );
 
-private:
-  virtual ErrorCode init_mesh_vals();
-  virtual std::string get_mesh_type_name() { return "CAM_FV"; }
+  private:
+    virtual ErrorCode init_mesh_vals();
+    virtual std::string get_mesh_type_name()
+    {
+        return "CAM_FV";
+    }
 };
 
-} // namespace moab
+}  // namespace moab
 
 #endif

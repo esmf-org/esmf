@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -150,8 +150,7 @@ end function my_xor
                  regridmethod, &
                  lineType, &
                  normType, &
-                  polemethod, regridPoleNPnts, &
-                 regridScheme, &
+                 polemethod, regridPoleNPnts, &
                  hasStatusArray, &
                  statusArray, &
                  extrapMethod, &
@@ -166,6 +165,7 @@ end function my_xor
                  routehandle, &
                  indices, weights, &
                  unmappedDstList, &
+                 checkFlag, &
                  rc)
 !
 ! !ARGUMENTS:
@@ -182,7 +182,6 @@ end function my_xor
       type(ESMF_NormType_Flag), intent(in)    :: normType
       type(ESMF_PoleMethod_Flag), intent(in)      :: polemethod
       integer, intent(in)                    :: regridPoleNPnts
-      integer, intent(in)                    :: regridScheme
       type(ESMF_ExtrapMethod_Flag),   intent(in) :: extrapMethod
       integer, intent(in)                    :: extrapNumSrcPnts
       real(ESMF_KIND_R8)                     :: extrapDistExponent
@@ -198,6 +197,7 @@ end function my_xor
       integer(ESMF_KIND_I4),       pointer, optional   :: unmappedDstList(:)
       logical                     :: hasStatusArray
       type(ESMF_Array)            :: statusArray
+      logical :: checkFlag
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -213,9 +213,8 @@ end function my_xor
 !          The destination array.
 !     \item[regridmethod]
 !          The interpolation method to use.
-!     \item[regridScheme]
-!          Whether to use 3d or native coordinates
- !     \item [{[regridConserve]}]
+
+!     \item [{[regridConserve]}]
 !           Specifies whether to implement the mass conservation 
 !           correction or not.  Options are 
 !           {\tt ESMF\_REGRID_CONSERVE\_OFF} or 
@@ -248,7 +247,7 @@ end function my_xor
        integer :: localIgnoreDegenerate
        integer :: src_pl_used_int, dst_pl_used_int
        integer ::  has_statusArrayInt
-
+       integer :: checkFlagInt
 
 
        ! Logic to determine if valid optional args are passed.  
@@ -339,6 +338,9 @@ end function my_xor
           has_statusArrayInt=1
        endif
 
+       ! Covert checkFlag to int
+       checkFlagInt=0
+       if (checkFlag) checkFlagInt=1
 
         ! Call through to the C++ object that does the work
         call c_ESMC_regrid_create(srcMesh%this, srcArray, srcPointList, src_pl_used_int, &
@@ -347,7 +349,6 @@ end function my_xor
                    lineType, &
                    normType, &
                    polemethod, regridPoleNPnts, &    
-                   regridScheme, &
                    extrapMethod, &
                    extrapNumSrcPnts, &
                    extrapDistExponent, &
@@ -360,6 +361,7 @@ end function my_xor
                    nentries, tweights, &
                    has_udl, num_udl, tudl, &
                    has_statusArrayInt, statusArray, &
+                   checkFlagInt, &
                    localrc)
 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -368,12 +370,8 @@ end function my_xor
 #ifdef C_SIDE_REGRID_FREE_MESH
 ! enabling this freature currently breaks several tests
        ! Mark Meshes as CMemFreed
-       call ESMF_MeshSetIsCMeshFreed(srcMesh, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_MeshSetIsCMeshFreed(dstMesh, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+       call C_ESMC_MeshSetIsFree(srcMesh)
+       call C_ESMC_MeshSetIsFree(dstMesh)
 #endif
        ! Now we must allocate the F90 pointers and copy weights
        if (present(indices)) then
@@ -414,14 +412,13 @@ end function my_xor
 
 ! !INTERFACE:
       subroutine ESMF_RegridGetIwts(Grid, Mesh, Array, staggerLoc, &
-                 regridScheme, rc)
+           rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout)         :: Grid
       type(ESMF_Mesh), intent(inout)         :: Mesh
       type(ESMF_Array), intent(inout)        :: Array
       type(ESMF_StaggerLoc), intent(in)      :: staggerLoc
-      integer, intent(in)                    :: regridScheme
       integer, intent(out), optional         :: rc
 !
 ! !DESCRIPTION:
@@ -431,8 +428,6 @@ end function my_xor
 !          The mesh.
 !     \item[Array]
 !          The grid array.
-!     \item[regridScheme]
-!          Whether to use 3d or native coordinates
 !     \item[{rc}]
 !          Return code.
 !     \end{description}
@@ -460,7 +455,7 @@ end function my_xor
 
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_getiwts(Grid, Mesh, Array, staggerLoc, &
-                                  regridScheme, localrc)
+                                   localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -478,14 +473,13 @@ end function my_xor
 
 ! !INTERFACE:
       subroutine ESMF_RegridGetArea(Grid, Mesh, Array, staggerLoc, &
-                 regridScheme, rc)
+                  rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout)         :: Grid
       type(ESMF_Mesh), intent(inout)         :: Mesh
       type(ESMF_Array), intent(inout)        :: Array
       type(ESMF_StaggerLoc), intent(in)      :: staggerLoc
-      integer, intent(in)                    :: regridScheme
       integer, intent(out), optional         :: rc
 !
 ! !DESCRIPTION:
@@ -495,8 +489,6 @@ end function my_xor
 !          The mesh.
 !     \item[Array]
 !          The grid array.
-!     \item[regridScheme]
-!          Whether to use 3d or native coordinates
 !     \item[{rc}]
 !          Return code.
 !     \end{description}
@@ -525,7 +517,7 @@ end function my_xor
 
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_getarea(Grid, Mesh, Array, staggerLoc, &
-                                  regridScheme, localrc)
+                                  localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 

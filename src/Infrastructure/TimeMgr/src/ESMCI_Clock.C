@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -675,8 +675,6 @@ int Clock::count=0;
         }
       }
     }
-
-    if (userChangedDirection) userChangedDirection = false;
 
     return(rc);
 
@@ -2063,8 +2061,6 @@ int Clock::count=0;
 
     // check new alarm to see if it's time to ring
     alarm->Alarm::checkRingTime(&rc);
-
-    if (userChangedDirection) userChangedDirection = false;
 
     return(rc);
 

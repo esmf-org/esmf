@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -60,15 +60,14 @@
 using namespace ESMCI;
 
  
-void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, 
+void MBMesh_regrid_create(MBMesh **meshsrcpp, ESMCI::Array **arraysrcpp, 
                           ESMCI::PointList **plsrcpp,
-                          void **meshdstpp, ESMCI::Array **arraydstpp, 
+                          MBMesh **meshdstpp, ESMCI::Array **arraydstpp, 
                           ESMCI::PointList **pldstpp,
                           int *regridMethod,
                           int *map_type,
                           int *norm_type,
                           int *regridPoleType, int *regridPoleNPnts,  
-                          int *regridScheme, 
                           int *extrapMethod,
                           int *extrapNumSrcPnts,
                           ESMC_R8 *extrapDistExponent,

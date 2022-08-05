@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -140,19 +140,62 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
       InterArray<int> *petList=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(ESMCI::DELayout **layout, bool noGarbage=false);
     // get() and set()
-    VM *getVM()                       const {return vm;}
-    int getDeCount()                  const {return deCount;}
-    const int *getDeList()            const {return deList;}
-    int getLocalDeCount()             const {return localDeCount;}
-    const int *getLocalDeToDeMap()    const {return localDeToDeMap;}
-    int getVasLocalDeCount()          const {return vasLocalDeCount;}
-    int getSsiLocalDeCount()          const {return ssiLocalDeCount;}
-    const int *getVasLocalDeToDeMap() const {return vasLocalDeToDeMap;}
-    int getPet(int i)                 const {return deInfoList[i].pet;}
-    int getVas(int i)                 const {return deInfoList[i].vas;}
-    int getSsi(int i)                 const {return deInfoList[i].ssi;}
-    ESMC_Logical getOneToOneFlag()    const {return oneToOneFlag;}
-    ESMC_Pin_Flag getPinFlag()        const {return pinFlag;}
+    VM *getVM()                       const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return vm;
+    }
+    int getDeCount()                  const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return deCount;
+    }
+    const int *getDeList()            const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return deList;
+    }
+    int getLocalDeCount()             const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return localDeCount;
+    }
+    int getLocalDeCountX()             const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return localDeCount;
+    }
+    const int *getLocalDeToDeMap()    const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return localDeToDeMap;
+    }
+    int getVasLocalDeCount()          const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return vasLocalDeCount;
+    }
+    int getSsiLocalDeCount()          const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return ssiLocalDeCount;
+    }
+    const int *getVasLocalDeToDeMap() const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return vasLocalDeToDeMap;
+    }
+    int getPet(int i)                 const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return deInfoList[i].pet;
+    }
+    int getVas(int i)                 const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return deInfoList[i].vas;
+    }
+    int getSsi(int i)                 const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return deInfoList[i].ssi;
+    }
+    ESMC_Logical getOneToOneFlag()    const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return oneToOneFlag;
+    }
+    ESMC_Pin_Flag getPinFlag()        const {
+      if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+      return pinFlag;
+    }
     int getDEMatchDE(int DEid, DELayout &layoutMatch, int *deMatchCount, 
       int *deMatchList, int len_deMatchList)const;
     int getDEMatchPET(int DEid, VM &vmMatch, int *petMatchCount,
@@ -390,7 +433,7 @@ class XXE{
       xxeSubList = new XXE*[xxeSubMaxCountArg];
       xxeSubCount  = 0;
       xxeSubMaxCount = xxeSubMaxCountArg;
-      bufferInfoList.reserve(10000);  // initial preparation
+      bufferInfoList.reserve(20000);  // initial preparation
       lastFilterBitField = 0x0;
       superVectorOkay = true;
       rh = NULL;

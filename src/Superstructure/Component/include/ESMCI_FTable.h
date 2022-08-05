@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -123,6 +123,8 @@ class FTable {
     static void setDP(FTable ***ptr, void **datap, int *rc);
     int getDataPtr(char const *name, void **data, enum dtype *dtype);
     int setDataPtr(char const *name, void **data, enum dtype dtype);
+    int getDataPtrCount(int *count, int *maxLen);
+    int getDataPtrList(char *labelList);
     // func
     static void setServices(void *ptr, void (*func)(), int *userRc, int *rc);
     static void setVM(void *ptr, void (*func)(), int *userRc, int *rc);

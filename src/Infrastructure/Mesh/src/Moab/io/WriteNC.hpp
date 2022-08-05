@@ -36,29 +36,30 @@
 
 #ifdef MOAB_HAVE_PNETCDF
 #include "pnetcdf.h"
-#define NCFUNC(func) ncmpi_ ## func
+#define NCFUNC( func ) ncmpi_##func
 
 //! Collective I/O mode put
-#define NCFUNCAP(func) ncmpi_put ## func ## _all
+#define NCFUNCAP( func ) ncmpi_put##func##_all
 
 //! Independent I/O mode put
-#define NCFUNCP(func) ncmpi_put ## func
+#define NCFUNCP( func ) ncmpi_put##func
 
 //! Nonblocking put (request aggregation)
-#define NCFUNCREQP(func) ncmpi_iput ## func
+#define NCFUNCREQP( func ) ncmpi_iput##func
 
 #define NCDF_SIZE MPI_Offset
 #define NCDF_DIFF MPI_Offset
 #else
 #include "netcdf.h"
-#define NCFUNC(func) nc_ ## func
-#define NCFUNCAP(func) nc_put ## func
-#define NCFUNCP(func) nc_put ## func
-#define NCDF_SIZE size_t
-#define NCDF_DIFF ptrdiff_t
+#define NCFUNC( func )   nc_##func
+#define NCFUNCAP( func ) nc_put##func
+#define NCFUNCP( func )  nc_put##func
+#define NCDF_SIZE        size_t
+#define NCDF_DIFF        ptrdiff_t
 #endif
 
-namespace moab {
+namespace moab
+{
 
 class WriteUtilIface;
 class NCWriteHelper;
@@ -68,140 +69,142 @@ class NCWriteHelper;
  */
 class WriteNC : public WriterIface
 {
-  friend class NCWriteHelper;
-  friend class ScdNCWriteHelper;
-  friend class UcdNCWriteHelper;
-  friend class NCWriteEuler;
-  friend class NCWriteFV;
-  friend class NCWriteHOMME;
-  friend class NCWriteMPAS;
-  friend class NCWriteGCRM;
+    friend class NCWriteHelper;
+    friend class ScdNCWriteHelper;
+    friend class UcdNCWriteHelper;
+    friend class NCWriteEuler;
+    friend class NCWriteFV;
+    friend class NCWriteHOMME;
+    friend class NCWriteMPAS;
+    friend class NCWriteGCRM;
 
-public:
-  //! Factory method
-  static WriterIface* factory(Interface*);
+  public:
+    //! Factory method
+    static WriterIface* factory( Interface* );
 
-  //! Constructor
-  WriteNC(Interface* impl = NULL);
+    //! Constructor
+    WriteNC( Interface* impl = NULL );
 
-  //! Destructor
-  virtual ~WriteNC();
+    //! Destructor
+    virtual ~WriteNC();
 
-  //! Writes out a file
-  ErrorCode write_file(const char* file_name,
-                       const bool overwrite,
-                       const FileOptions& opts,
-                       const EntityHandle* output_list,
-                       const int num_sets,
-                       const std::vector<std::string>& qa_list,
-                       const Tag* tag_list = NULL,
-                       int num_tags = 0,
-                       int export_dimension = 3);
+    //! Writes out a file
+    ErrorCode write_file( const char* file_name, const bool overwrite, const FileOptions& opts,
+                          const EntityHandle* output_list, const int num_sets,
+                          const std::vector< std::string >& qa_list, const Tag* tag_list = NULL, int num_tags = 0,
+                          int export_dimension = 3 );
 
-private:
-  //! ENTLOCNSEDGE for north/south edge
-  //! ENTLOCWEEDGE for west/east edge
-  enum EntityLocation {ENTLOCVERT = 0, ENTLOCNSEDGE, ENTLOCEWEDGE, ENTLOCFACE, ENTLOCSET, ENTLOCEDGE, ENTLOCREGION};
+  private:
+    //! ENTLOCNSEDGE for north/south edge
+    //! ENTLOCWEEDGE for west/east edge
+    enum EntityLocation
+    {
+        ENTLOCVERT = 0,
+        ENTLOCNSEDGE,
+        ENTLOCEWEDGE,
+        ENTLOCFACE,
+        ENTLOCSET,
+        ENTLOCEDGE,
+        ENTLOCREGION
+    };
 
-  class AttData
-  {
-    public:
-    AttData() : attId(-1), attLen(0), attVarId(-2), attDataType(NC_NAT) {}
-    int attId;
-    NCDF_SIZE attLen;
-    int attVarId;
-    nc_type attDataType;
-    std::string attValue;
-  };
+    class AttData
+    {
+      public:
+        AttData() : attId( -1 ), attLen( 0 ), attVarId( -2 ), attDataType( NC_NAT ) {}
+        int attId;
+        NCDF_SIZE attLen;
+        int attVarId;
+        nc_type attDataType;
+        std::string attValue;
+    };
 
-  class VarData
-  {
-    public:VarData() : varId(-1), numAtts(-1), entLoc(ENTLOCSET), numLev(0), sz(0), has_tsteps(false) {}
-    int varId;
-    int numAtts;
-    nc_type varDataType;
-    std::vector<int> varDims; // The dimension indices making up this multi-dimensional variable
-    std::map<std::string, AttData> varAtts;
-    std::string varName;
-    std::vector<Tag> varTags; // Tags created for this variable, e.g. one tag per timestep
-    std::vector<void*> memoryHogs; // These will point to the real data; fill before writing the data
-    std::vector<NCDF_SIZE> writeStarts; // Starting index for writing data values along each dimension
-    std::vector<NCDF_SIZE> writeCounts; // Number of data values to be written along each dimension
-    int entLoc;
-    int numLev;
-    int sz;
-    bool has_tsteps; // Indicate whether timestep numbers are appended to tag names
-  };
+    class VarData
+    {
+      public:
+        VarData() : varId( -1 ), numAtts( -1 ), entLoc( ENTLOCSET ), numLev( 0 ), sz( 0 ), has_tsteps( false ) {}
+        int varId;
+        int numAtts;
+        nc_type varDataType;
+        std::vector< int > varDims;  // The dimension indices making up this multi-dimensional variable
+        std::map< std::string, AttData > varAtts;
+        std::string varName;
+        std::vector< Tag > varTags;            // Tags created for this variable, e.g. one tag per timestep
+        std::vector< void* > memoryHogs;       // These will point to the real data; fill before writing the data
+        std::vector< NCDF_SIZE > writeStarts;  // Starting index for writing data values along each dimension
+        std::vector< NCDF_SIZE > writeCounts;  // Number of data values to be written along each dimension
+        int entLoc;
+        int numLev;
+        int sz;
+        bool has_tsteps;  // Indicate whether timestep numbers are appended to tag names
+    };
 
-  //! This info will be reconstructed from metadata stored on conventional fileSet tags
-  //! Dimension names
-  std::vector<std::string> dimNames;
+    //! This info will be reconstructed from metadata stored on conventional fileSet tags
+    //! Dimension names
+    std::vector< std::string > dimNames;
 
-  //! Dimension lengths
-  std::vector<int> dimLens;
+    //! Dimension lengths
+    std::vector< int > dimLens;
 
-  //! Will collect used dimensions (coordinate variables)
-  std::set<std::string> usedCoordinates;
+    //! Will collect used dimensions (coordinate variables)
+    std::set< std::string > usedCoordinates;
 
-  //! Dummy variables (for dimensions that have no corresponding coordinate variables)
-  std::set<std::string> dummyVarNames;
+    //! Dummy variables (for dimensions that have no corresponding coordinate variables)
+    std::set< std::string > dummyVarNames;
 
-  //! Global attribs
-  std::map<std::string, AttData> globalAtts;
+    //! Global attribs
+    std::map< std::string, AttData > globalAtts;
 
-  //! Variable info
-  std::map<std::string, VarData> varInfo;
+    //! Variable info
+    std::map< std::string, VarData > varInfo;
 
-  ErrorCode parse_options(const FileOptions& opts,
-                          std::vector<std::string>& var_names,
-                          std::vector<std::string>& desired_names,
-                          std::vector<int>& tstep_nums,
-                          std::vector<double>& tstep_vals);
-  /*
-   * Map out the header, from tags on file set; it is the inverse process from
-   * ErrorCode NCHelper::create_conventional_tags
-   */
-  ErrorCode process_conventional_tags(EntityHandle fileSet);
+    ErrorCode parse_options( const FileOptions& opts, std::vector< std::string >& var_names,
+                             std::vector< std::string >& desired_names, std::vector< int >& tstep_nums,
+                             std::vector< double >& tstep_vals );
+    /*
+     * Map out the header, from tags on file set; it is the inverse process from
+     * ErrorCode NCHelper::create_conventional_tags
+     */
+    ErrorCode process_conventional_tags( EntityHandle fileSet );
 
-  ErrorCode process_concatenated_attribute(const void* attPtr, int attSz,
-                                           std::vector<int>& attLen,
-                                           std::map<std::string, AttData>& attributes);
+    ErrorCode process_concatenated_attribute( const void* attPtr, int attSz, std::vector< int >& attLen,
+                                              std::map< std::string, AttData >& attributes );
 
-  //! Interface instance
-  Interface* mbImpl;
-  WriteUtilIface* mWriteIface;
+    //! Interface instance
+    Interface* mbImpl;
+    WriteUtilIface* mWriteIface;
 
-  //! File var
-  const char* fileName;
+    //! File var
+    const char* fileName;
 
-  //! File numbers assigned by (p)netcdf
-  int fileId;
+    //! File numbers assigned by (p)netcdf
+    int fileId;
 
-  //! Debug stuff
-  DebugOutput dbgOut;
+    //! Debug stuff
+    DebugOutput dbgOut;
 
 #ifdef MOAB_HAVE_MPI
-  ParallelComm* myPcomm;
+    ParallelComm* myPcomm;
 #endif
 
-  //! Write options
-  bool noMesh;
-  bool noVars;
-  bool append;
+    //! Write options
+    bool noMesh;
+    bool noVars;
+    bool append;
 
-  //! Cached tags for writing. This will be important for ordering the data, in parallel
-  Tag mGlobalIdTag;
+    //! Cached tags for writing. This will be important for ordering the data, in parallel
+    Tag mGlobalIdTag;
 
-  //! Are we writing in parallel? (probably in the future)
-  bool isParallel;
+    //! Are we writing in parallel? (probably in the future)
+    bool isParallel;
 
-  //! CAM Euler, etc,
-  std::string grid_type;
+    //! CAM Euler, etc,
+    std::string grid_type;
 
-  //! Helper class instance
-  NCWriteHelper* myHelper;
+    //! Helper class instance
+    NCWriteHelper* myHelper;
 };
 
-} // namespace moab
+}  // namespace moab
 
 #endif

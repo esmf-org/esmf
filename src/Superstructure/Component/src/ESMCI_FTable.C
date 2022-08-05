@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -232,7 +232,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setvmshobj"
   void FTN_X(c_esmc_setvmshobj)(void *ptr, char const *routineArg,
-    char const *sharedObjArg, int *userRc, int *rc,
+    char const *sharedObjArg, ESMC_Logical *foundRoutine, int *userRc, int *rc,
     ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -241,6 +241,7 @@ extern "C" {
       "- System does not support dynamic loading.", ESMC_CONTEXT, rc);
     return;
 #else
+    *foundRoutine = ESMF_FALSE; // initialize
     void *lib;
     if (llen>0){
       string sharedObj(sharedObjArg, llen);
@@ -256,14 +257,13 @@ extern "C" {
     string routine(routineArg, rlen);
     routine.resize(routine.find_last_not_of(" ")+1);
     void (*func)() = (void (*)())dlsym(lib, routine.c_str());
-    if ((void *)func == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "routine not found", ESMC_CONTEXT, rc);
-      return;
+    if ((void *)func != NULL){
+      // Routine was found
+      *foundRoutine = ESMF_TRUE;
+      ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc)) return;
     }
-    ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
 #endif
@@ -506,23 +506,55 @@ extern "C" {
 
 
 //==============================================================================
-// these functions have no leading c_ and are ESMF and not ESMC because
+// These functions have no leading c_ and are ESMF and not ESMC because
 // they're intended to be called directly by F90 user code.
 //
-// also note they CANNOT have prototypes in fortran because the routine
-// types and data types are private/different for each call so there
-// is no correct prototype syntax which will work.
+// The Fortran interfaces for these entry points are defined in ESMF_Comp.F90.
 //
-// and finally, note that they have an extra level of indirection,
-// because the first arg is actually being called with a component
-// pointer - and after one dereference we are at the component derived
-// type.  the second dereference finds the ftable pointer which must
-// be the first entry in the comp derived type.
-//
-// these interface subroutine names MUST be in lower case
+// These interface subroutine names MUST be in lower case.
 extern "C" {
 
+  // ---------- Official ESMF_InternalState API ---------------
+  // TODO: Official ESMF_InternalState API will depend on Fortran 2018
+  // TODO: assumed-type dummy arguments!!!
+  // TODO: To be implemented... to match ESMF_Method API:
+  //  ESMF_InternalStateAdd()
+  //  ESMF_InternalStateAddReplace()
+  //  ESMF_InternalStateGet()
+  //  ESMF_InternalStateRemove()
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_internalstategetinfo"
+  void FTN_X(c_esmc_internalstategetinfo)(ESMCI::FTable ***ptr, int *count,
+    int *maxLen, int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    localrc = (**ptr)->getDataPtrCount(count, maxLen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return;
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_internalstategetlabels"
+  void FTN_X(c_esmc_internalstategetlabels)(ESMCI::FTable ***ptr,
+    char *labelList, int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    localrc = (**ptr)->getDataPtrList(labelList);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return;
+
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
   // ---------- GridComp ---------------
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_gridcompsetinternalstate"
   void FTN_X(esmf_gridcompsetinternalstate)(ESMCI::FTable ***ptr, void **datap,
@@ -536,6 +568,7 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_gridcompgetinternalstate"
   void FTN_X(esmf_gridcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
@@ -550,6 +583,7 @@ extern "C" {
   }
 
   // ---------- CplComp ---------------
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_cplcompsetinternalstate"
   void FTN_X(esmf_cplcompsetinternalstate)(ESMCI::FTable ***ptr, void **datap,
@@ -563,6 +597,7 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_cplcompgetinternalstate"
   void FTN_X(esmf_cplcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
@@ -577,6 +612,7 @@ extern "C" {
   }
 
   // ---------- UserComp ---------------
+  //TODO: DEPRECATED -> NOT USED
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompsetvm"
   void FTN_X(esmf_usercompsetvm)(void *ptr, void (*func)(), int *userRc,
@@ -590,6 +626,7 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+  //TODO: DEPRECATED -> NOT USED
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompsetservices"
   void FTN_X(esmf_usercompsetservices)(void *ptr, void (*func)(), int *userRc,
@@ -603,6 +640,7 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompsetinternalstate"
   void FTN_X(esmf_usercompsetinternalstate)(ESMCI::FTable ***ptr,
@@ -617,21 +655,32 @@ extern "C" {
       return;
     }
 
-    char *tbuf;
-    ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
-    //printf("after newtrim, name = '%s'\n", tbuf);
+    if (name){
 
-    enum ESMCI::dtype dtype = ESMCI::DT_FORTRAN_UDT_POINTER;
-    localrc = (**ptr)->setDataPtr(tbuf, datap, dtype);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) return;
+      char *tbuf;
+      ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
+      //printf("after newtrim, name = '%s'\n", tbuf);
 
-    delete[] tbuf;
+      enum ESMCI::dtype dtype = ESMCI::DT_FORTRAN_UDT_POINTER;
+      localrc = (**ptr)->setDataPtr(tbuf, datap, dtype);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+
+      delete[] tbuf;
+
+    }else{
+
+      ESMCI::FTable::setDP(ptr, datap, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+
+    }
 
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+  //TODO: DEPRECATED -> transition to ESMF_InternalState API
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_usercompgetinternalstate"
   void FTN_X(esmf_usercompgetinternalstate)(ESMCI::FTable ***ptr,
@@ -646,16 +695,26 @@ extern "C" {
       return;
     }
 
-    char *tbuf;
-    ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
-    //printf("after newtrim, name = '%s'\n", tbuf);
+    if (name){
 
-    enum ESMCI::dtype dtype;
-    localrc = (**ptr)->getDataPtr(tbuf, datap, &dtype);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) return;
+      char *tbuf;
+      ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
+      //printf("after newtrim, name = '%s'\n", tbuf);
 
-    delete[] tbuf;
+      enum ESMCI::dtype dtype;
+      localrc = (**ptr)->getDataPtr(tbuf, datap, &dtype);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+
+      delete[] tbuf;
+
+    }else{
+
+      ESMCI::FTable::getDP(ptr, datap, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+
+    }
 
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -677,6 +736,15 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
   // The first argument must be of type (void *) and points to a derived
   // ESMCI::VMK class object. The second argument is also of type (void *)
   // and points to a cargotype structure.
+
+#if 0
+  {
+    std::stringstream msg;
+    msg << "ESMCI_FTableCallEntryPointVMHop()#" << __LINE__
+      << " entering.";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
 
   // pull out info from cargo
   ESMCI::cargotype *cargo = (ESMCI::cargotype *)cargoCast;
@@ -702,6 +770,15 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
     }
   }
   ((ESMCI::VM*)vm)->threadbarrier();  // synchronize all threads in local group
+
+#if 0
+  {
+    std::stringstream msg;
+    msg << "ESMCI_FTableCallEntryPointVMHop()#" << __LINE__
+      << " after threadbarrier().";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
 
   // get a pointer to the CompTunnel object
   ESMCI::Comp *f90comp = cargo->f90comp;
@@ -841,7 +918,7 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
       <<  recursionCount << " *recursionCount="
       << (recursionCount ? *recursionCount : -1)
       << " vm_cargo=" << vm_cargo << " newCargoFlag=" << newCargoFlag;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
   }
 #endif
 
@@ -893,15 +970,24 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
 #if 0
-std::cout << ">>> calling into vm_parent->enter() with parentVMflag:" 
-  <<  vmplan->parentVMflag <<"\n";
+  {
+    std::stringstream msg;
+    msg << "FTN_X(c_esmc_ftablecallentrypointvm)#" << __LINE__
+      << " calling into into vm_parent->enter() with parentVMflag:" 
+      <<  vmplan->parentVMflag;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
 #endif
   localrc = vm_parent->enter(vmplan, *vm_info, *vm_cargo);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return; // bail out
-
 #if 0
-std::cout << "<<< parent thread returned from vm_parent->enter()" << "\n";
+  {
+    std::stringstream msg;
+    msg << "FTN_X(c_esmc_ftablecallentrypointvm)#" << __LINE__
+      << " parent thread returned from vm_parent->enter()";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
 #endif
 
   // ... if the child VM uses threads (multi-threading or single-threading)
@@ -1082,7 +1168,7 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::getDP()"
 void FTable::getDP(FTable ***ptr, void **datap, int *rc){
-  char const *name = "localdata";
+  char const *name = "ESMF-default-localdata";
   enum dtype dtype;
   int localrc;
 
@@ -1107,7 +1193,7 @@ void FTable::getDP(FTable ***ptr, void **datap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::setDP()"
 void FTable::setDP(FTable ***ptr, void **datap, int *rc){
-  char const *name = "localdata";
+  char const *name = "ESMF-default-localdata";
   enum dtype dtype = DT_FORTRAN_UDT_POINTER;
   int localrc;
 
@@ -1150,9 +1236,7 @@ int FTable::getDataPtr(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int i;
-
-  for (i=datacount-1; i>=0; i--) {    // go backwards for: "last in first out"
+  for (int i=datacount-1; i>=0; i--) {    // go backwards for: "last in first out"
     if (strcmp(namep, data[i].dataname)) continue;
 
     *dtype = data[i].dtype;
@@ -1217,6 +1301,80 @@ int FTable::setDataPtr(
 
   rc = ESMF_SUCCESS;
   return rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::FTable::getDataPtrCount()"
+//BOPI
+// !IROUTINE:  getDataPtrCount - get data pointer count
+//
+// !INTERFACE:
+int FTable::getDataPtrCount(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *count,           // out, number of internal states with label
+      int *maxLen){         // out, length of the longest currently set label
+//
+// !DESCRIPTION:
+//    Returns info about set data pointers.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  *count = datacount;
+
+  *maxLen = 0;  // reset
+
+  for (int i=datacount-1; i>=0; i--) {    // go backwards for: "last in first out"
+    auto len = strlen(data[i].dataname);
+    if ((int)len > *maxLen) *maxLen = len;
+  }
+
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::FTable::getDataPtrList()"
+//BOPI
+// !IROUTINE:  getDataPtrList - get data pointer list
+//
+// !INTERFACE:
+int FTable::getDataPtrList(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      char *labelList){      // out, list of currently set labels
+//
+// !DESCRIPTION:
+//    Returns list of labels of currently set data pointers.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int maxLen = 0;  // reset
+
+  for (int i=datacount-1; i>=0; i--) {    // go backwards for: "last in first out"
+    auto len = strlen(data[i].dataname);
+    if ((int)len > maxLen) maxLen = len;
+  }
+
+  int k = 0;
+  for (int i=datacount-1; i>=0; i--, k++) {    // go backwards for: "last in first out"
+    auto len = strlen(data[i].dataname);
+    memcpy(labelList+k*maxLen, data[i].dataname, len);
+    memset(labelList+k*maxLen+len, ' ', maxLen-len);  // fill with white space
+  }
+
+  // return successfully
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 

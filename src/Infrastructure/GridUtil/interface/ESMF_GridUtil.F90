@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -460,10 +460,6 @@ module ESMF_GridUtilMod
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ESMF_GridToMesh%coordSys=coordSys
-    ESMF_GridToMesh%parametricDim=dimCount
-    ESMF_GridToMesh%spatialDim=dimCount
-
     if (present(rc)) rc = ESMF_SUCCESS
 
     end function ESMF_GridToMesh
@@ -525,10 +521,6 @@ module ESMF_GridUtilMod
                       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ESMF_GridToMeshCell%coordSys=coordSys
-    ESMF_GridToMeshCell%parametricDim=dimCount
-    ESMF_GridToMeshCell%spatialDim=dimCount
 
     if (present(rc)) rc = ESMF_SUCCESS
 

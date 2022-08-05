@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -792,10 +792,6 @@
       write(name, *) "Creating a custom Attribute package on ", mobj, " Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
- @\
-    !------------------------------------------------------------------------- @\
-    !  AttributeWrite @\
-    !------------------------------------------------------------------------- @\
  @\
     !------------------------------------------------------------------------- @\
     !  Get an Attribute which was not set from an Attribute package @\

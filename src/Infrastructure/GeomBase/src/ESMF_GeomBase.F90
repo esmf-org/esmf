@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -478,9 +478,6 @@ end interface
     ! Set GeomBase Type into GeomBase
      ESMF_GeomBaseCreateGrid%gbcp=>gbcp
 
-    ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateGrid, ESMF_ID_GEOMBASE%objectID)
-
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateGrid)
 
@@ -625,9 +622,6 @@ end interface
     ! Set GeomBase Type into GeomBase
      ESMF_GeomBaseCreateMesh%gbcp=>gbcp
 
-    ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateMesh, ESMF_ID_GEOMBASE%objectID)
-
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateMesh)
 
@@ -692,9 +686,6 @@ end interface
 
     ! Set GeomBase Type into GeomBase
      ESMF_GeomBaseCreateLocStream%gbcp=>gbcp
-
-    ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateLocStream, ESMF_ID_GEOMBASE%objectID)
 
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateLocStream)
@@ -785,9 +776,6 @@ end interface
     ! Set GeomBase Type into GeomBase
     ESMF_GeomBaseCreateXGrid%gbcp=>gbcp
 
-    ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(ESMF_GeomBaseCreateXGrid, ESMF_ID_GEOMBASE%objectID)
-
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseCreateXGrid)
 
@@ -804,11 +792,10 @@ end interface
 ! !IROUTINE: ESMF_GeomBaseDestroy - Release resources associated with a GeomBase
 
 ! !INTERFACE:
-      subroutine ESMF_GeomBaseDestroy(geombase, noGarbage, rc)
+      subroutine ESMF_GeomBaseDestroy(geombase, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GeomBase)            :: geombase
-      logical, intent(in),  optional :: noGarbage
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -819,25 +806,6 @@ end interface
 !     \begin{description}
 !     \item[geombase]
 !          {\tt ESMF\_GeomBase} to be destroyed.
-! \item[{[noGarbage]}]
-!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
-!      from the ESMF garbage collection system. Note however that under this
-!      condition ESMF cannot protect against accessing the destroyed object
-!      through dangling aliases -- a situation which may lead to hard to debug
-!      application crashes.
-!
-!      It is generally recommended to leave the {\tt noGarbage} argument
-!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF
- !      garbage collection system which will prevent problems with dangling
-!      aliases or incorrect sequences of destroy calls. However this level of
-!      support requires that a small remnant of the object is kept in memory
-!      past the destroy call. This can lead to an unexpected increase in memory
-!      consumption over the course of execution in applications that use
-!      temporary ESMF objects. For situations where the repeated creation and
-!      destruction of temporary objects leads to memory issues, it is
-!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully
-!      removing the entire temporary object from memory.
-!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -845,27 +813,17 @@ end interface
 
     ! Initialize return code; assume failure until success is certain
     integer                 :: localrc ! local error status
-    logical                 :: opt_noGarbage  ! helper variable
 
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit, geombase, rc)
 
-    ! Set default flags
-    opt_noGarbage = .false.
-    if (present(noGarbage)) opt_noGarbage = noGarbage
-
-    ! Conditionally remove object from memory
-    if (opt_noGarbage) then
-      ! remove reference to this object from ESMF garbage collection table
-      call c_ESMC_VMRmFObject(geombase)
-      ! deallocate GeomBase type
-      deallocate(geombase%gbcp, stat=localrc)
-      if (ESMF_LogFoundDeallocError(localrc, &
-        msg="Deallocating GeomBase type object", &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    ! deallocate GeomBase type
+    deallocate(geombase%gbcp, stat=localrc)
+    if (ESMF_LogFoundDeallocError(localrc, &
+      msg="Deallocating GeomBase type object", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
     ESMF_INIT_SET_DELETED(geombase)
@@ -1080,7 +1038,6 @@ end interface
                     msg=" Bad Mesh Location value", &
                     ESMF_CONTEXT, rcToReturn=rc)) return
             endif
-
 
             if (present(dimCount)) then
                call ESMF_DistGridGet(localDistgrid, &
@@ -1681,9 +1638,6 @@ end subroutine ESMF_GeomBaseGet
     ! Set pointer
     ESMF_GeomBaseDeserialize%gbcp=>gbcp
 
-    ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(ESMF_GeomBaseDeserialize, ESMF_ID_GEOMBASE%objectID)
-
     ! Set init status
     ESMF_INIT_SET_CREATED(ESMF_GeomBaseDeserialize)
 
@@ -1883,37 +1837,3 @@ end subroutine ESMF_GeomBaseGet
 #undef  ESMF_METHOD
 
 end module ESMF_GeomBaseMod
-
-
-  subroutine f_esmf_geombasecollectgarbage(gb, rc)
-#undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_geombasecollectgarbage()"
-    use ESMF_UtilTypesMod
-    use ESMF_LogErrMod
-    use ESMF_GeomBaseMod
-
-    implicit none
-
-    type(ESMF_GeomBase)  :: gb
-    integer, intent(out) :: rc
-
-    integer :: localrc
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    rc = ESMF_RC_NOT_IMPL
-
-    !print *, "collecting GeomBase garbage"
-
-    ! deallocate actual GeomBaseClass allocation
-    if (associated(gb%gbcp)) then
-      deallocate(gb%gbcp, stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, msg="Deallocating GeomBase", &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-    nullify(gb%gbcp)
-
-    ! return successfully
-    rc = ESMF_SUCCESS
-
-  end subroutine f_esmf_geombasecollectgarbage

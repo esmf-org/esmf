@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -42,7 +42,9 @@
 #include <vector>
 
 // PIO include files
-#include "pio.h"
+#include <pio.h>
+
+
 
 //-------------------------------------------------------------------------
 
@@ -66,14 +68,13 @@ namespace ESMCI {
   private:
 
     // global information
-    static std::vector<pio_iosystem_desc_t> activePioInstances;
-    pio_iosystem_desc_t pioSystemDesc; // Descriptor for initialized PIO inst.
-    pio_file_desc_t pioFileDesc;       // Descriptor for open PIO file
-    pio_io_desc_t pioIODesc;           // Descriptor created by initdecomp
+    static std::vector<int> activePioInstances;
+    int pioSystemDesc; // Descriptor for initialized PIO inst.
+    int pioFileDesc;       // Descriptor for open PIO file
+    int pioIODesc;           // Descriptor created by initdecomp
     MPI_Comm communicator;
     int my_rank;
     int num_iotasks;
-    int num_aggregators;
     int stride;
     int rearr;
     int base;
@@ -85,7 +86,7 @@ namespace ESMCI {
     PIO_Handler(ESMC_IOFmt_Flag fmtArg, int *rc);
     // Static initialize and finalize routines for PIO
     static void initialize(int comp_rank, MPI_Comm comp_comm,
-                           int num_iotasks, int num_aggregator,
+                           int num_iotasks, 
                            int stride, int rearr, int *base_p, int *rc = NULL);
 // Deferred for when intercom support is desired
 //    static PIO_Handler *initialize(int component_count, MPI_Comm peer_comm,
@@ -139,14 +140,16 @@ namespace ESMCI {
     void close(int *rc = NULL);
 
   private:
-    pio_io_desc_t getIODesc(pio_iosystem_desc_t iosys, Array *arr_p,
+    int getIODesc(int iosys, Array *arr_p,
                             int ** iodims = (int **)NULL,
                             int *nioDims = (int *)NULL,
                             int ** arrdims = (int **)NULL,
                             int *narrDims = (int *)NULL,
                             int *basepiotype = (int *)NULL,
                             int *rc = (int *)NULL);
-    void attPackPut (pio_var_desc_t vardesc, const ESMCI::Info *attPack, int *rc);
+    void attPackPut (int vardesc, const ESMCI::Info *attPack, int *rc);
+
+  public:
     // Error recording routine
     static bool CheckPIOError(int pioRetCode,
                               int line, const char * const file,
@@ -184,6 +187,15 @@ namespace ESMCI {
   };  // class IO_Handler
   //===========================================================================
   
+// Macros
+
+// For error checking
+#define CHECKPIOERROR(_err, _str, _rc_code, _rc)                                        \
+  PIO_Handler::CheckPIOError((_err), ESMC_CONTEXT, (_str), _rc_code, &(_rc))
+#define CHECKPIOWARN(_err, _str, _rc_code, _rc)                                         \
+  PIO_Handler::CheckPIOError((_err), ESMC_CONTEXT, (_str), _rc_code, &(_rc), true)
+
+
 } // namespace ESMCI
 
 #endif // __ESMCI_PIO_HANDLER_H

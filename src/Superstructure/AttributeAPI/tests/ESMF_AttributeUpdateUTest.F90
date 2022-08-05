@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -447,7 +447,6 @@ module ESMF_AttributeUpdateUTestMod
 
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
-    character(ESMF_MAXSTR)      :: convESMF,purpGen
 
     rc = ESMF_SUCCESS
 
@@ -455,18 +454,6 @@ module ESMF_AttributeUpdateUTestMod
     if (status .ne. ESMF_SUCCESS) return
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) return
-
-    convESMF = 'ESMF'
-    purpGen = 'General'
-
-#if 0
-    if (myPet .eq. 2) then
-      call ESMF_AttributeWrite(importState,convESMF,purpGen, &
-        attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      call ESMF_AttributeWrite(importState,convESMF,purpGen,rc=rc)
-      if (rc .ne. ESMF_SUCCESS) return
-    endif
-#endif
 
   end subroutine userm2_run
 

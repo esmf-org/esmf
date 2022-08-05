@@ -75,6 +75,10 @@ class Manager(object):
     will always be called prior to exiting Python.  Calling __init__
     explicitly results in a no-op.
 
+    The Manager can be used to enable the 
+    `MOAB <https://sigma.mcs.anl.gov/moab-library/>`_
+    mesh backend to the Mesh. This is done by calling ``set_moab()`` with ``moab_on=True``.
+
     :param bool debug: outputs logging information to ESMF logfiles. If
         ``None``, defaults to False.
     '''
@@ -119,14 +123,36 @@ class Manager(object):
 
             # Increase frequency of log buffering upon user request
             ESMP_LogSet(debug)
+            
+            # set up to use the ESMF native mesh backend by default
+            self._moab = False
+
         return
 
     @property
     def local_pet(self):
+        """
+        :rtype: int
+        :return: The id of the current Persistent Execution Thread (PET i.e. processing core).
+        """
         return self._local_pet
 
     @property
+    def moab(self):
+        """
+        :rtype: bool
+        :return: A boolean value to indicate if the MOAB mesh backend is in use.
+        """
+        ESMP_MeshGetMOAB(self._moab)
+        return self._moab
+
+    @property
     def pet_count(self):
+        """
+        :rtype: int
+        :return: The number of Persistent Execution Threads (PETs i.e. processing cores)
+                 available in this execution.
+        """
         return self._pet_count
 
     @property
@@ -155,10 +181,12 @@ class Manager(object):
     def __repr__(self):
         string = ("ESMPyManager:\n"
                   "    local_pet = %r\n"
-                  "    pet_count = %r\n)" 
+                  "    pet_count = %r\n" 
+                  "    moab = %r\n" 
                   %
                   (self.local_pet,
-                   self.pet_count))
+                   self.pet_count,
+                   self.moab))
 
         return string
 
@@ -169,6 +197,14 @@ class Manager(object):
         '''
         ESMP_VMBarrier(self.vm)
         
+    def set_moab(self, moab_on=True):
+        """
+        Set the Mesh backend to use MOAB or the Native ESMF mesh.
+        """
+        
+        ESMP_MeshSetMOAB(moab_on)
+        self._moab = moab_on
+
     def _broadcast_(self, bcstBuf, count, rootPet=0):
         '''
         Broadcast data from bcstBuf across the VM.\n
@@ -179,6 +215,15 @@ class Manager(object):
 
         '''
         ESMP_VMBroadcast(self.vm, bcstBuf, count, rootPet)
+
+    def _logmem_(self, str):
+        '''
+        Send memory measurement to the log file.\n
+            Arguments:\n
+                string :: str\n
+
+        '''
+        ESMP_VMLogMemInfo(str)
 
     def _reduce_(self, sendBuf, recvBuf, count, reduceflag=Reduce.SUM, rootPet=0):
         '''

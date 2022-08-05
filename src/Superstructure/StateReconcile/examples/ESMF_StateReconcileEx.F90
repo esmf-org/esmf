@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -252,10 +252,7 @@ end module ESMF_StateReconcileEx_Mod
 ! {\tt state1} containing {\tt field2} on PETs 2 and 3.  For the code
 ! to have a rational view of the data, we call {\tt ESMF\_StateReconcile}
 ! which determines which objects are missing from any PET, and communicates
-! information about the object.  There is the option of turning metadata
-! reconciliation on or off with the optional parameter shown in the call 
-! below.  The default behavior is for metadata reconciliation to be off.
-! After the call to reconcile, all
+! information about the object. After the call to reconcile, all
 ! {\tt ESMF\_State} objects now have a consistent view of the data.
 !EOE
 

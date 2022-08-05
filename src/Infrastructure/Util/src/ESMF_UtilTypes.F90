@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -82,13 +82,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
-      integer, parameter :: ESMF_VERSION_MINOR        = 1
+      integer, parameter :: ESMF_VERSION_MINOR        = 4
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.1.0 beta snapshot"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.4.0 beta snapshot"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -558,14 +558,15 @@
       end type
 
       type(ESMF_IOFmt_Flag), parameter ::  &
-                           ESMF_IOFMT_BIN      = ESMF_IOFmt_Flag(0), &
-                           ESMF_IOFMT_NETCDF   = ESMF_IOFmt_Flag(1), &
-                           ESMF_IOFMT_NETCDF_64BIT_OFFSET = ESMF_IOFmt_Flag(2), &
-                           ESMF_IOFMT_NETCDF4  = ESMF_IOFmt_Flag(3), &
-                           ESMF_IOFMT_NETCDF4P = ESMF_IOFmt_Flag(4), &
-                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmt_Flag(5), &
-                           ESMF_IOFMT_CONFIG   = ESMF_IOFmt_Flag(6), &
-                           ESMF_IOFMT_YAML     = ESMF_IOFmt_Flag(7)
+!                           ESMF_IOFMT_BIN                 = ESMF_IOFmt_Flag(0), &
+                           ESMF_IOFMT_NETCDF              = ESMF_IOFmt_Flag(1), &
+                           ESMF_IOFMT_NETCDF_64BIT_DATA   = ESMF_IOFmt_Flag(2), &
+                           ESMF_IOFMT_NETCDF_64BIT_OFFSET = ESMF_IOFmt_Flag(3), &
+                           ESMF_IOFMT_NETCDF4             = ESMF_IOFmt_Flag(4), &
+                           ESMF_IOFMT_NETCDF4P            = ESMF_IOFmt_Flag(5), &
+                           ESMF_IOFMT_NETCDF4C            = ESMF_IOFmt_Flag(6), &
+                           ESMF_IOFMT_CONFIG              = ESMF_IOFmt_Flag(7), &
+                           ESMF_IOFMT_YAML                = ESMF_IOFmt_Flag(8)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Index_Flag
@@ -871,6 +872,7 @@
   end type
 
   type(ESMF_CoordSys_Flag), parameter :: &
+    ESMF_COORDSYS_UNINIT  = ESMF_CoordSys_Flag(-1), &
     ESMF_COORDSYS_CART    = ESMF_CoordSys_Flag(0), &
     ESMF_COORDSYS_SPH_DEG = ESMF_CoordSys_Flag(1), &
     ESMF_COORDSYS_SPH_RAD = ESMF_CoordSys_Flag(2)
@@ -1058,8 +1060,9 @@
       public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
       public ESMF_IOFmt_Flag, &
-             ESMF_IOFMT_BIN, &
+!             ESMF_IOFMT_BIN,  &
              ESMF_IOFMT_NETCDF, &
+             ESMF_IOFMT_NETCDF_64BIT_DATA, &
              ESMF_IOFMT_NETCDF_64BIT_OFFSET, &
              ESMF_IOFMT_NETCDF4, &
              ESMF_IOFMT_NETCDF4P, &
@@ -1215,7 +1218,7 @@
 
       public ESMF_MapPtr
 
-      public ESMF_PointerPrint, ESMF_PointerLog
+      public ESMF_PointerPrint
 
       public ESMF_UnmappedAction_Flag, ESMF_UNMAPPEDACTION_ERROR, &
                                    ESMF_UNMAPPEDACTION_IGNORE
@@ -1244,7 +1247,9 @@
 
 
       public ESMF_CoordSys_Flag
-      public ESMF_COORDSYS_CART, ESMF_COORDSYS_SPH_DEG, &
+      public ESMF_COORDSYS_UNINIT,  &
+             ESMF_COORDSYS_CART,    &
+             ESMF_COORDSYS_SPH_DEG, &
              ESMF_COORDSYS_SPH_RAD
 
       public ESMF_COORDSYS_DEG2RAD, &
@@ -1277,6 +1282,7 @@ interface operator (==)
   module procedure ESMF_bfeq
   module procedure ESMF_ctfeq
   module procedure ESMF_tnfeq
+  module procedure ESMF_pineq
   module procedure ESMF_freq
   module procedure ESMF_ifeq
   module procedure ESMF_inqfeq
@@ -1305,6 +1311,7 @@ interface operator (/=)
   module procedure ESMF_ctfne
   module procedure ESMF_tnfne
   module procedure ESMF_ifneq
+  module procedure ESMF_pinne
   module procedure ESMF_frne
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
@@ -1737,6 +1744,23 @@ subroutine ESMF_tfas2_v (tfval, lval)
 end subroutine
 
 !------------------------------------------------------------------------------
+! function to compare two ESMF_Pin_Flag types
+
+function ESMF_pineq(pin1, pin2)
+ logical ESMF_pineq
+ type(ESMF_Pin_Flag), intent(in) :: pin1, pin2
+
+ ESMF_pineq = (pin1%value == pin2%value)
+end function
+
+function ESMF_pinne(pin1, pin2)
+ logical ESMF_pinne
+ type(ESMF_Pin_Flag), intent(in) :: pin1, pin2
+
+ ESMF_pinne = (pin1%value /= pin2%value)
+end function
+
+!------------------------------------------------------------------------------
 ! function to compare two ESMF_Direction_Flag types
 
 function ESMF_freq(fr1, fr2)
@@ -1832,16 +1856,6 @@ end function
 subroutine ESMF_PointerPrint(ptr)
   type(ESMF_Pointer), intent(in) :: ptr
   call c_pointerprint(ptr)
-end subroutine
-
-subroutine ESMF_PointerLog(ptr, prefix, rc)
-  type(ESMF_Pointer),  intent(in)             :: ptr
-  character (len=*),   intent(in),  optional  :: prefix
-  integer,             intent(out), optional  :: rc           
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
-  call c_pointerlog(ptr, prefix)
-  ! return successfully
-  if (present(rc)) rc = ESMF_SUCCESS
 end subroutine
 
 !------------------------------------------------------------------------------
@@ -2368,6 +2382,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (versionFlag)) then
       if (versionFlag) then
         print *, "  ESMF_VERSION_STRING:       ", ESMF_VERSION_STRING
+#ifdef ESMF_VERSION_STRING_GIT
+        print *, "  ESMF_VERSION_STRING_GIT:   ", ESMF_VERSION_STRING_GIT
+#else
+        print *, "  ESMF_VERSION_STRING_GIT:   ", "(not available)"
+#endif
         print *, "  ESMF_VERSION_MAJOR:        ", ESMF_VERSION_MAJOR
         print *, "  ESMF_VERSION_MINOR:        ", ESMF_VERSION_MINOR
         print *, "  ESMF_VERSION_REVISION:     ", ESMF_VERSION_REVISION
@@ -2377,7 +2396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2020 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2022 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"

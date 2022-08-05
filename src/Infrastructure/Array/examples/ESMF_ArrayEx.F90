@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -23,13 +23,14 @@ program ESMF_ArrayEx
   implicit none
   
   ! local variables
-  integer:: rc, i, j, k, petCount, localDeCount, localPet, localDe
+  integer:: rc, i, j, k, petCount, localDeCount, ssiLocalDeCount
+  integer:: localPet, localDe
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
   type(ESMF_DistGrid):: distgrid, distgrid3D, distgrid2D, distgrid1D
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Array):: array, array1, array2, array1D, array2D, array3D
-  type(ESMF_Array):: arrayTracer, arrayScalar
+  type(ESMF_Array):: arrayTracer, arrayScalar, arrayMigrated
   type(ESMF_LocalArray), allocatable:: larrayList(:)
   type(ESMF_LocalArray), allocatable:: larrayList1(:), larrayList2(:)
   real(ESMF_KIND_R8), pointer:: myFarray(:,:)
@@ -49,6 +50,9 @@ program ESMF_ArrayEx
   integer, allocatable:: computationalLBound(:,:), computationalUBound(:,:)
 !  integer, allocatable:: haloLDepth(:), haloUDepth(:)
 !  type(ESMF_RouteHandle):: haloHandle, haloHandle2
+
+  logical :: ssiSharedMemoryEnabled
+
   character(ESMF_MAXSTR) :: testname
   character(ESMF_MAXSTR) :: failMsg
 
@@ -76,7 +80,9 @@ program ESMF_ArrayEx
     finalrc = ESMF_FAILURE
     goto 10
   endif
-  
+
+!===============================================================================
+
 !BOE
 ! \subsubsection{Create Array with automatic memory allocation}
 !
@@ -176,8 +182,11 @@ program ESMF_ArrayEx
 ! object. As such it must follow the ESMF convention that requires that 
 ! the call to {\tt ESMF\_ArrayCreate()} must be issued in unison by all 
 ! PETs of the current context.
-!
+!EOE
 
+!===============================================================================
+
+!BOE
 ! \subsubsection{Native language memory access}
 ! \label{Array_native_language_localde}
 !
@@ -257,8 +266,11 @@ program ESMF_ArrayEx
 ! In most cases memory access through a LocalArray list is less convenient than
 ! the direct {\tt farrayPtr} method because it adds an extra object level 
 ! between the ESMF Array and the native language array. 
-!
-!
+!EOE
+
+!===============================================================================
+
+!BOE
 ! \subsubsection{Regions and default bounds}
 ! \label{Array_regions_and_default_bounds}
 !
@@ -418,8 +430,10 @@ program ESMF_ArrayEx
     enddo
   enddo
 !EOC
-!BOE
 
+!===============================================================================
+
+!BOE
 ! \subsubsection{Array bounds}
 !
 ! The loop over Array elements at the end of the last section only works
@@ -495,8 +509,11 @@ program ESMF_ArrayEx
 ! {\tt ESMF\_INDEX\_DELOCAL} option is used the correspondence between local
 ! and global index space must be made by querying the associated DistGrid for
 ! the DE-local {\tt indexList} arguments.
+!EOE
 
+!===============================================================================
 
+!BOE
 ! \subsubsection{Computational region and extra elements for halo or padding}
 ! \label{Array:padding}
 !
@@ -684,8 +701,11 @@ program ESMF_ArrayEx
 ! defined in the corresponding DistGrid object.
 ! %Please see section 
 ! %\ref{ArrayEx_interiorRegion} for details.
-!
-!
+!EOEI
+
+!===============================================================================
+
+!BOEI
 ! \subsubsection{Interior region and Array's total element mask}
 ! \label{ArrayEx_interiorRegion}
 !
@@ -1023,8 +1043,10 @@ program ESMF_ArrayEx
     maxIndex=(/16,16,16/), regDecomp=(/1,4,4/), rc=rc)
   array3D = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid3D, rc=rc)
 !EOC
-!BOE
 
+!===============================================================================
+
+!BOE
 ! \subsubsection{Working with Arrays of different rank}
 ! Assume a computational kernel that involves the {\tt array3D} object as it was
 ! created at the end of the previous section. Assume further that the kernel 
@@ -1081,8 +1103,9 @@ program ESMF_ArrayEx
   call ESMF_DistGridDestroy(distgrid3D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!===============================================================================
+
 !BOE
-!
 ! \subsubsection{Array and DistGrid rank -- 2D+1 Arrays}
 !
 ! Except for the special Array create interface that implements a copy from
@@ -1281,8 +1304,9 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
+!===============================================================================
+
 !BOE
-!
 ! \subsubsection{Arrays with replicated dimensions}
 !
 ! Thus far most examples demonstrated cases where the DistGrid {\tt dimCount}
@@ -1580,10 +1604,294 @@ program ESMF_ArrayEx
 
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 
-
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #endif
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+!===============================================================================
+
+!BOE
+! \subsubsection{Shared memory features: DE pinning, sharing, and migration}
+! \label{Array_shared_memory_features}
+!
+! Practically all modern computer systems today utilize multi-core processors,
+! supporting the concurrent execution of multiple hardware threads.
+! A number of these multi-core processors are commonly packaged into the same
+! compute node, having access to the same physical memory. Under ESMF each
+! hardware thread (or core) is identified as a unique Processing Element (PE).
+! The collection of PEs that share the same physical memory (i.e. compute node)
+! is referred to as a Single System Image (SSI). The ESMF Array class implements
+! features that allow the user to leverage the shared memory within each SSI to
+! efficiently exchange data without copies or explicit communication calls.
+!
+! The software threads executing an ESMF application on the hardware, and that
+! ESMF is aware of, are referred to as Persistent Execution Threads (PETs). In
+! practice a PET can typically be thought of as an MPI rank, i.e. an OS process,
+! defining its own private virtual address space (VAS). 
+! The ESMF Virtual Machine (VM) class keeps track of the mapping between PETs
+! and PEs, and their location on the available SSIs.
+!
+! When an ESMF Array object is created, the specified DistGrid indicates how
+! many Decomposition Elements (DEs) are created. Each DE has its own memory
+! allocation to hold user data. The DELayout, referenced by the DistGrid,
+! determines which PET is considered the {\em owner} of each of the DEs. Queried
+! for the local DEs, the Array object returns the list of DEs that are owned by
+! the local PET making the query.
+!
+! By default DEs are {\em pinned} to the PETs under which they were created.
+! The memory allocation associated with a specific DE is only defined in the
+! VAS of the PET to which the DE is pinned. As a consequence, only the PET
+! owning a DE has access to its memory allocation.
+!
+! On shared memory systems, however, ESMF allows DEs to be pinned to SSIs
+! instead of PETs. In this case the PET under which a DE was created is still
+! consider the owner, but now {\em all} PETs under the same SSI have access to
+! the DE. For this the memory allocation associated with the DE is mapped into
+! the VAS of all the PETs under the SSI.
+!
+! To create an Array with each DE pinned to SSI instead of PET, first query the
+! VM for the available level of support.
+!EOE
+
+!BOC
+  call ESMF_VMGet(vm, ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, rc=rc)
+!EOC  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  if (ssiSharedMemoryEnabled) then
+!EOC  
+!BOE
+! Knowing that the SSI shared memory feature is available, it is now possible
+! to create an Array object with DE to SSI pinning.
+!EOE
+
+!BOC
+    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+      pinflag=ESMF_PIN_DE_TO_SSI, rc=rc)
+!EOC  
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Just as in the cases discussed before, where the same DistGrid was used, a
+! default DELayout with as many DEs as PETs in the VM is constructed. Setting
+! the {\tt pinflag} to {\tt ESMF\_PIN\_DE\_TO\_SSI} does not change the
+! fact that each PET owns exactly one of the DEs. However, assuming that this
+! code is run on a set of PETs that are all located under the same SSI, every
+! PET now has {\em access} to all of the DEs. The situation can be observed by
+! querying for both the {\tt localDeCount}, and the {\tt ssiLocalDeCount}.
+!EOE
+!BOC
+    call ESMF_ArrayGet(array, localDeCount=localDeCount, &
+      ssiLocalDeCount=ssiLocalDeCount, rc=rc)
+!EOC  
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! \begin{sloppypar}
+! Assuming execution on 4 PETs, all located on the same SSI, the values of the
+! returned variable are {\tt localDeCount==1} and {\tt ssiLocalDeCount==4} on 
+! all of the PETs. The mapping between each PET's local DE, and the global DE
+! index is provided through the {\tt localDeToDeMap} array argument. The amount
+! of mapping information returned is dependent on how large {\tt localDeToDeMap}
+! has been sized by the user. For {\tt size(localDeToDeMap)==localDeCount},
+! only mapping information for those DEs {\em owned} by the local PET is filled
+! in. However for {\tt size(localDeToDeMap)==ssiLocalDeCount}, mapping
+! information for all locally {\em accessible} DEs is returned, including
+! those owned by other PETs on the same SSI.
+! \end{sloppypar}
+!EOE
+!BOC
+    allocate(localDeToDeMap(0:ssiLocalDeCount-1))
+    call ESMF_ArrayGet(array, localDeToDeMap=localDeToDeMap, rc=rc)
+!EOC  
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! The first {\tt localDeCount} entries of {\tt localDeToDeMap} are always the
+! global DE indices of the DEs {\em owned} by the local PET. The remaining 
+! {\tt ssiLocalDeCount}-{\tt localDeCount} entries are the global DE indices of
+! DEs {\em shared} by other PETs. The ordering of the shared DEs is from
+! smallest to greatest, excluding the locally owned DEs, which were already
+! listed at the beginning of {\tt localDeToDeMap}. For the current case, again
+! assuming execution on 4 PETs all located on the same SSI, we expect the
+! following situation:
+!
+! PET 0: {\tt localDeToDeMap}=={\tt(/0,1,2,3/)}\newline
+! PET 1: {\tt localDeToDeMap}=={\tt(/1,0,2,3/)}\newline
+! PET 2: {\tt localDeToDeMap}=={\tt(/2,0,1,3/)}\newline
+! PET 3: {\tt localDeToDeMap}=={\tt(/3,0,1,2/)}\newline
+!
+! Each PET can access the memory allocations associated with {\em all} of the
+! DEs listed in the {\tt localDeToDeMap} returned by the Array object. Direct
+! access to the Fortran array pointer of a specific memory allocation is
+! available through {\tt ESMF\_ArrayGet()}. Here each PET queries for the
+! {\tt farrayPtr} of {\tt localDe==2}, i.e. the 2nd shared DE.
+!EOE
+!BOC
+    call ESMF_ArrayGet(array, farrayPtr=myFarray, localDe=2, rc=rc)
+!EOC  
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Now variable {\tt myFarray} on PETs 0 and 1 both point to the {\em same}
+! memory allocation for global DE 2. Both PETs have access to the same
+! piece of shared memory! The same is true for PETs 2 and 3, pointing to the
+! shared memory allocation of global DE 1.
+
+! It is important to note that all of the typical considerations surrounding
+! shared memory programming apply when accessing shared DEs! Proper
+! synchronization between PETs accessing shared DEs is critical to avoid
+! {\em race conditions}. Also performance issues like {\em false sharing}
+! need to be considered for optimal use.
+!
+! For a simple demonstration, PETs 0 and 2 fill the entire memory allocation of
+! DE 2 and 1, respectively, to a unique value.
+!EOE
+!BOC
+    if (localPet==0) then
+      myFarray = 12345.6789d0
+    else if (localPet==2) then
+      myFarray = 6789.12345d0
+    endif
+!EOC
+!BOE
+! Here synchronization is needed before any PETs that share access to the same
+! DEs can safely access the data without race condition. The Array class provides
+! a simple synchronization method that can be used.
+!EOE
+!BOC
+    call ESMF_ArraySync(array, rc=rc) ! prevent race condition
+!EOC  
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Now it is safe for PETs 1 and 3 to access the shared DEs. We expect to find
+! the data that was set above. For simplicity of the code only the first
+! array element is inspected here.
+!EOE
+!BOC
+    if (localPet==1) then
+      if (abs(myFarray(1,1)-12345.6789d0)>1.d10) print *, "bad data detected"
+    else if (localPet==3) then
+      if (abs(myFarray(1,1)-6789.12345d0)>1.d10) print *, "bad data detected"
+    endif
+!EOC
+
+!BOE
+! Working with shared DEs requires additional bookkeeping on the user code
+! level. In some situations, however, DE sharing is simply used as a mechanism
+! to {\em move} DEs between PETs without requiring data copies. One practical
+! application of this case is the transfer of an Array between two components,
+! both of which use the same PEs, but run with different number of PETs.
+! These would typically be sequential components that use OpenMP on the user
+! level with varying threading levels.
+!
+! DEs that are pinned to SSI can be moved or {\em migrated} to any PET within
+! the SSI. This is accomplished by creating a new Array object from an
+! existing Array that was created with {\tt pinflag=ESMF\_PIN\_DE\_TO\_SSI}.
+! The information of how the DEs are to migrate between the old and the new
+! Array is provided through a DELayout object. This object must have the
+! same number of DEs and describes how they map to the PETs on the current VM.
+! If this is in the context of a different component, the number of PETs might
+! differ from the original VM under which the existing Array was created. This
+! situation is explicitly supported, still the number of DEs must match.
+!
+! Here a simple DELayout is created on the same 4 PETs, but with rotated
+! DE ownerships:
+!
+! DE 0 -> PET 1 (old PET 0)\newline
+! DE 1 -> PET 2 (old PET 1)\newline
+! DE 2 -> PET 3 (old PET 2)\newline
+! DE 3 -> PET 0 (old PET 3)\newline
+!EOE
+!BOC
+    delayout = ESMF_DELayoutCreate(petMap=(/1,2,3,0/), rc=rc) ! DE->PET mapping
+!EOC  
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! The creation of the new Array is done by reference, i.e. 
+! {\tt datacopyflag=ESMF\_DATACOPY\_REFERENCE}, since the new Array does
+! not create its own memory allocations. Instead the new Array references the
+! shared memory resources held by the incoming Array object.
+!EOE
+!BOC
+    arrayMigrated = ESMF_ArrayCreate(array, delayout=delayout, &
+      datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
+!EOC  
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Querying {\tt arrayMigrated} for the number of local DEs will return 1 on
+! each PET. Sizing the {\tt localDeToDeMap} accordingly and querying for it.
+!EOE
+!BOC
+    deallocate(localDeToDeMap) ! free previous allocation
+    allocate(localDeToDeMap(0:1))
+    call ESMF_ArrayGet(arrayMigrated, localDeToDeMap=localDeToDeMap, rc=rc)
+!EOC  
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! This yields the following expected outcome:
+!
+! PET 0: {\tt localDeToDeMap}=={\tt(/1/)}\newline
+! PET 1: {\tt localDeToDeMap}=={\tt(/2/)}\newline
+! PET 2: {\tt localDeToDeMap}=={\tt(/3/)}\newline
+! PET 3: {\tt localDeToDeMap}=={\tt(/0/)}\newline
+!
+! On each PET the respective Fortran array pointer is returned by the Array.
+!EOE
+!BOC
+    call ESMF_ArrayGet(arrayMigrated, farrayPtr=myFarray, rc=rc)
+!EOC  
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! The same situation could have been achieved with the original {\tt array}.
+! However, it would have required first finding the correct local DE
+! for the target global DE on each PET, and then querying {\tt array}
+! accordingly. If needed more repeatedly, this bookkeeping would need to be
+! kept in a user code data structure. The DE migration feature on the other
+! hand provides a formal way to create a standard ESMF Array object that can be
+! used directly in any Array level method as usual, letting ESMF handle the
+! extra bookkeeping needed.
+!EOE
+    deallocate(localDeToDeMap)
+
+!BOE
+! Before destroying an Array whose DEs are shared between PETs, it is
+! advisable to issue one more synchronization. This prevents cases where a
+! PET still might be accessing a shared DE, while the owner PET is already
+! destroying the Array, therefore deallocating the shared memory resource.
+!EOE
+!BOC
+    call ESMF_ArraySync(array, rc=rc) ! prevent race condition
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    call ESMF_ArrayDestroy(array, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Remember that {\tt arrayMigrated} shares the same memory allocations that were
+! held by {\tt array}. Array {\tt arrayMigrated} must therefore not be used
+! beyond the life time of {\tt array}. Best to destroy it now.
+!EOE
+!BOC
+    call ESMF_ArrayDestroy(arrayMigrated, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    call ESMF_DistGridDestroy(distgrid, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  endif ! ending the ssiSharedMemoryEnabled conditional
+!EOC
+
+!===============================================================================
 
 10 continue
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -41,6 +41,7 @@ module NUOPC_Comp
   public NUOPC_CompSetEntryPoint
   public NUOPC_CompSetInternalEntryPoint
   public NUOPC_CompSetServices
+  public NUOPC_CompSetVM
   public NUOPC_CompSpecialize
 
   ! public labels
@@ -145,6 +146,10 @@ module NUOPC_Comp
   !---------------------------------------------
   interface NUOPC_CompSetServices
     module procedure NUOPC_GridCompSetServices
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompSetVM
+    module procedure NUOPC_GridCompSetVM
   end interface
   !---------------------------------------------
   interface NUOPC_CompSpecialize
@@ -545,7 +550,11 @@ module NUOPC_Comp
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_GridCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -634,7 +643,11 @@ module NUOPC_Comp
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -723,7 +736,11 @@ module NUOPC_Comp
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_GridCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -811,7 +828,11 @@ module NUOPC_Comp
 !   convention {\tt NUOPC} and purpose {\tt Instance}.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -903,7 +924,11 @@ module NUOPC_Comp
 !   the attribute is not present or not set.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_GridCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1042,7 +1067,11 @@ module NUOPC_Comp
 !   the attribute is not present or not set.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1181,7 +1210,11 @@ module NUOPC_Comp
 !   the attribute is not present or not set.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_GridCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1318,7 +1351,11 @@ module NUOPC_Comp
 !   the attribute is not present or not set.
 !
 !   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
-!   the Attribute is not present or not set, respectively.
+!   the attribute is not present or not set, respectively.
+!
+!   Note that attributes ingested by {\tt NUOPC\_CompAttributeIngest()} are
+!   stored and returned as type character string.
+!   See \ref{NUOPC_CplCompAttributeIng} for details.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1445,10 +1482,16 @@ module NUOPC_Comp
     logical,                intent(in),  optional :: addFlag
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{NUOPC_GridCompAttributeIng}
 !   Ingest the Attributes from a FreeFormat object onto the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-! 
+!
+!   Important: Attributes ingested by this method are stored as type character
+!   strings, and must be accessed accordingly. Conversion from string into a
+!   different data type, e.g. {\tt integer} or {\tt real}, is the user's
+!   responsibility.
+!
 !   If {\tt addFlag} is {\tt .false.} (default), an error will be returned if 
 !   an attribute is to be ingested that was not previously added to the 
 !   {\tt comp} object. If {\tt addFlag} is {\tt .true.}, all missing attributes
@@ -1590,10 +1633,16 @@ module NUOPC_Comp
     logical,                intent(in),  optional :: addFlag
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{NUOPC_CplCompAttributeIng}
 !   Ingest the Attributes from a FreeFormat object onto the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-! 
+!
+!   Important: Attributes ingested by this method are stored as type character
+!   strings, and must be accessed accordingly. Conversion from string into a
+!   different data type, e.g. {\tt integer} or {\tt real}, is the user's
+!   responsibility.
+!
 !   If {\tt addFlag} is {\tt .false.} (default), an error will be returned if 
 !   an attribute is to be ingested that was not previously added to the 
 !   {\tt comp} object. If {\tt addFlag} is {\tt .true.}, all missing attributes
@@ -1778,15 +1827,16 @@ module NUOPC_Comp
     endif
 
     ! Add NUOPC/Driver, NUOPC/Model, NUOPC/Mediator Attributes
-    allocate(attrList(8))
+    allocate(attrList(9))
     attrList(1) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
     attrList(2) = "InternalRunPhaseMap"  ! list of strings to map str to phase #
     attrList(3) = "InternalFinalizePhaseMap"  ! list of strings to map str to phase #
     attrList(4) = "NestingGeneration" ! values: integer starting 0 for parent
     attrList(5) = "Nestling"  ! values: integer starting 0 for first nestling
-    attrList(6) = "InitializeDataComplete"  ! values: strings "false"/"true"
-    attrList(7) = "InitializeDataProgress"  ! values: strings "false"/"true"
-    attrList(8) = "HierarchyProtocol"       ! strings
+    attrList(6) = "InitializeDataResolution"! values: strings "false"/"true"
+    attrList(7) = "InitializeDataComplete"  ! values: strings "false"/"true"
+    attrList(8) = "InitializeDataProgress"  ! values: strings "false"/"true"
+    attrList(9) = "HierarchyProtocol"       ! strings
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
       attrList=attrList, rc=localrc)
@@ -1831,6 +1881,11 @@ module NUOPC_Comp
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     call NUOPC_CompAttributeSet(comp, &
       name="Nestling", value=0, &                 ! default to first nestling
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="InitializeDataResolution", value="true", &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
@@ -1894,10 +1949,11 @@ module NUOPC_Comp
       rcToReturn=rc)) return  ! bail out
     
     ! The NUOPC/Connector Attributes
-    allocate(attrList(3))
+    allocate(attrList(4))
     attrList(1) = "CplList"
     attrList(2) = "CplSetList"
     attrList(3) = "ConnectionOptions"
+    attrList(4) = "EpochThrottle"
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Instance", &
       attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2014,8 +2070,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2057,8 +2111,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2100,8 +2152,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2143,8 +2193,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2187,8 +2235,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2230,8 +2276,6 @@ module NUOPC_Comp
 !   Set the Attribute {\tt name} inside of {\tt comp} on the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -2263,21 +2307,23 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompCheckSetClock - Check Clock compatibility and set stopTime
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompCheckSetClock() 
-  subroutine NUOPC_GridCompCheckSetClock(comp, externalClock, forceTimeStep, rc)
+  subroutine NUOPC_GridCompCheckSetClock(comp, externalClock, checkTimeStep, &
+    forceTimeStep, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: comp
     type(ESMF_Clock),        intent(in)            :: externalClock
+    logical,                 intent(in),  optional :: checkTimeStep
     logical,                 intent(in),  optional :: forceTimeStep
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Compare {\tt externalClock} to the internal clock of {\tt comp} to make sure
-!   they match in their current time. Also ensure that the time step of the 
-!   external clock is a multiple of the time step of the internal clock. If 
+!   they match in their current time. Also ensure that the time step of the
+!   external clock is a multiple of the time step of the internal clock. If
 !   both conditions are satisfied then set the stop time of the internal clock
 !   so it is reached in one time step of the external clock. Otherwise leave the
 !   internal clock unchanged and return with error. The direction of
 !   the involved clocks is taking into account.
-!   Setting the {\tt forceTimeStep} argument to {\tt .true.} forces the 
+!   Setting the {\tt forceTimeStep} argument to {\tt .true.} forces the
 !   {\tt timeStep} of the {\tt externalClock} to be used to reset the
 !   {\tt timeStep} of the internal clock.
 !EOP
@@ -2287,16 +2333,17 @@ module NUOPC_Comp
     type(ESMF_Clock)        :: internalClock
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     call ESMF_GridCompGet(comp, clock=internalClock, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    
+
     call NUOPC_CheckSetClock(setClock=internalClock, &
-      checkClock=externalClock, forceTimeStep=forceTimeStep, rc=localrc)
+      checkClock=externalClock, checkTimeStep=checkTimeStep, &
+      forceTimeStep=forceTimeStep, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
@@ -2675,7 +2722,7 @@ module NUOPC_Comp
       ! set component kind specific verbosity levels
       if (trim(valueString)=="Driver") then
         max   = 65535  ! all 16 lower bits set
-        high  = 32513  ! bits 0, 8, 9, 10, 11, 12, 13, 14
+        high  = 32529  ! bits 0, 4, 8, 9, 10, 11, 12, 13, 14
         low   =  9985  ! bits 0, 8, 9, 10, 13 
       else if (trim(valueString)=="Model") then
         max   = 65535  ! all 16 lower bits set
@@ -2712,7 +2759,7 @@ module NUOPC_Comp
         return  ! bail out
       profiling = ESMF_UtilString2Int(valueString, &
         specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 219, 73, 0/), &
+        specialValueList=(/65535, 511, 73, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -2807,7 +2854,7 @@ module NUOPC_Comp
         return  ! bail out
       profiling = ESMF_UtilString2Int(valueString, &
         specialStringList=(/"max ", "high", "low ", "off "/), &
-        specialValueList=(/65535, 219, 73, 0/), &
+        specialValueList=(/65535, 511, 73, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -3796,10 +3843,10 @@ module NUOPC_Comp
     logical           :: userRoutineFound
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     ! attempt to find something called SetServices, allowing variations
     ! caused by compiler name mangling
-    
+
     call ESMF_GridCompSetServices(comp, userRoutine="setservices", &
       sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
       userRc=userRc, rc=localrc)
@@ -3809,7 +3856,7 @@ module NUOPC_Comp
       rcToReturn=rc)) &
       return  ! bail out
     if (userRoutineFound) return ! bail out successfully
-      
+
     call ESMF_GridCompSetServices(comp, userRoutine="setservices_", &
       sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
       userRc=userRc, rc=localrc)
@@ -3819,7 +3866,7 @@ module NUOPC_Comp
       rcToReturn=rc)) &
       return  ! bail out
     if (userRoutineFound) return ! bail out successfully
-      
+
     call ESMF_GridCompSetServices(comp, userRoutine="setservices__", &
       sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
       userRc=userRc, rc=localrc)
@@ -3829,7 +3876,7 @@ module NUOPC_Comp
       rcToReturn=rc)) &
       return  ! bail out
     if (userRoutineFound) return ! bail out successfully
-      
+
     call ESMF_GridCompSetServices(comp, userRoutine="SETSERVICES", &
       sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
       userRc=userRc, rc=localrc)
@@ -3839,7 +3886,7 @@ module NUOPC_Comp
       rcToReturn=rc)) &
       return  ! bail out
     if (userRoutineFound) return ! bail out successfully
-      
+
     call ESMF_GridCompSetServices(comp, userRoutine="SETSERVICES_", &
       sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
       userRc=userRc, rc=localrc)
@@ -3849,7 +3896,7 @@ module NUOPC_Comp
       rcToReturn=rc)) &
       return  ! bail out
     if (userRoutineFound) return ! bail out successfully
-      
+
     call ESMF_GridCompSetServices(comp, userRoutine="SETSERVICES__", &
       sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
       userRc=userRc, rc=localrc)
@@ -3859,7 +3906,7 @@ module NUOPC_Comp
       rcToReturn=rc)) &
       return  ! bail out
     if (userRoutineFound) return ! bail out successfully
-      
+
     call ESMF_GridCompSetServices(comp, userRoutine="SetServices", &
       sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
       userRc=userRc, rc=localrc)
@@ -3869,7 +3916,7 @@ module NUOPC_Comp
       rcToReturn=rc)) &
       return  ! bail out
     if (userRoutineFound) return ! bail out successfully
-      
+
     call ESMF_GridCompSetServices(comp, userRoutine="SetServices_", &
       sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
       userRc=userRc, rc=localrc)
@@ -3904,10 +3951,145 @@ module NUOPC_Comp
         file=FILENAME, &
         rcToReturn=rc)
     endif
-      
+
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompSetVM - Try to find and call SetVM in a shared object
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompSetVM()
+  recursive subroutine NUOPC_GridCompSetVM(comp, sharedObj, userRc, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp),     intent(inout)         :: comp
+    character(len=*),        intent(in),  optional :: sharedObj
+    integer,                 intent(out), optional :: userRc
+    integer,                 intent(out), optional :: rc
+! !DESCRIPTION:
+!   Try to find a routine called "{\tt SetVM}" in the {\tt sharedObj} file
+!   and execute the routine. An attempt is made to find a routine that
+!   is close in name to "{\tt SetVM}", allowing for compiler name
+!   mangling, i.e. upper and lower case, as well as trailing underscores.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer           :: localrc
+    logical           :: userRoutineFound
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! attempt to find something called SetVM, allowing variations
+    ! caused by compiler name mangling
+
+    call ESMF_GridCompSetVM(comp, userRoutine="setvm", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    call ESMF_GridCompSetVM(comp, userRoutine="setvm_", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    call ESMF_GridCompSetVM(comp, userRoutine="setvm__", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    call ESMF_GridCompSetVM(comp, userRoutine="SETVM", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    call ESMF_GridCompSetVM(comp, userRoutine="SETVM_", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    call ESMF_GridCompSetVM(comp, userRoutine="SETVM__", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    call ESMF_GridCompSetVM(comp, userRoutine="SetVM", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    call ESMF_GridCompSetVM(comp, userRoutine="SetVM_", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    call ESMF_GridCompSetVM(comp, userRoutine="SetVM__", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    ! getting down to here means that none of the attempts were successful
+    if (present(sharedObj)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Could not find a matching SetVM routine in "//trim(sharedObj),&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Could not find a matching SetVM routine in the executable.", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+    endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_CompSpecialize - Specialize a derived GridComp

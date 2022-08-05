@@ -21,18 +21,34 @@ guarantees of the stability of development snapshots. New APIs available
 in development snapshots may change before the next release.
 
 Users aware of these risks may check out development snapshots
-using the appropriate git tag.  The standard naming convention
-for development tags is:
+using the appropriate git tag.
+
+Starting with ESMF 8.3.0 beta snapshot 07, the naming convention for development tags has the form:
+
+\begin{verbatim}
+v<VERSION>b<NUMBER>
+\end{verbatim}
+
+For example:
+\begin{verbatim}
+v8.3.0b07
+\end{verbatim}
+
+Prior to this version, the tag naming convention for development tags is:
 
 \begin{verbatim}
 ESMF_<VERSION>_beta_snapshot_<NUMBER>
 \end{verbatim}
 
-For example, to check out ESMF version 8.1.0 beta snapshot 16, use the
-following command:
+For example:
+\begin{verbatim}
+ESMF_8_2_0_beta_snapshot_23
+\end{verbatim}
+
+Use the following example command as a guide to check out a specific development tag:
 
 \begin{verbatim}
-  git clone https://github.com/esmf-org/esmf.git --branch ESMF_8_1_0_beta_snapshot_16 --depth 1
+  git clone https://github.com/esmf-org/esmf.git --branch v8.3.0b13 --depth 1
 \end{verbatim}
 
 Once downloaded, development snapshots are built in the same way as releases.
@@ -196,7 +212,7 @@ desired setting.  E.g. {\tt "-lnetcdff -lnetcdf -lhdf5\_hl -lhdf5"}
 
 \subsubsection{Parallel-NetCDF}
 \label{sec:pnetcdf}
-ESMF provides the ability to write Mesh weights using
+ESMF provides the ability to write data using
 \htmladdnormallink{Parallel-NetCDF}{http://trac.mcs.anl.gov/projects/parallel-netcdf}.
 
 Some file systems, for example \htmladdnormallink{Lustre}{http://wiki.lustre.org}, may need
@@ -251,34 +267,49 @@ application.
 
 \subsubsection{PIO}
 \label{sec:pio}
-ESMF provides the ability to read and write data in both binary and
-NetCDF formats through \htmladdnormallink{ParallelIO (PIO)}
-{http://code.google.com/p/parallelio/}, a third-party I/O software
-library that is integrated in the ESMF library. The following environment
-variable enables PIO functionalities inside of ESMF.
+ESMF provides the ability to read and write data in
+NetCDF format through \htmladdnormallink{ParallelIO (PIO)}
+{https://github.com/NCAR/ParallelIO}, a third-party I/O software
+library that is integrated into the ESMF library. The following environment
+variable enables PIO functionality inside of ESMF.
 
 The PIO code depends on MPI I/O support by the underlying MPI
-implementation to provide the binary format. Almost all current MPI
+implementation for parallel I/O. Almost all current MPI
 implementations support MPI I/O to the required degree. For NetCDF format
-support the integrated PIO code depends on {\tt ESMF\_PNETCDF}
-(see \ref{sec:pnetcdf}) and/or {\tt ESMF\_NETCDF} (see \ref{sec:netcdf})
+support the integrated PIO code depends on {\tt ESMF\_NETCDF} (see \ref{sec:netcdf})
+being enabled and optionally {\tt ESMF\_PNETCDF} (see \ref{sec:pnetcdf})
 being enabled.
 
 \begin{description}
 \item[ESMF\_PIO] Possible value: {\it not set} (default), {\tt "internal"},
-{\tt "OFF"}.
+{\tt "external"}, {\tt "OFF"}.
 
 \begin{description}
-\item[{\it not set} (default)] PIO-dependent features will be enabled on platforms where
-certain Fortran-2003 C Interoperability features are available.  Most currently supported
-compilers support these features.
+\item[{\it not set} (default)] PIO-dependent features will be enabled on supported
+platforms, as determined by the ESMF build configuration.
 
 \item[{\tt "internal"}] PIO-dependent features will be enabled and will use the
-PIO library that is included and built with ESMF.
+PIO library that is included and built with ESMF. Internal builds of PIO require
+CMake version 2.8.12 or newer be available in the path.
+
+\item[{\tt "external"}] PIO-dependent features will be enabled and will use an
+external PIO library.  The additional parameters {\tt ESMF\_PIO\_INCLUDE} 
+(path to PIO include files) and {\tt ESMF\_PIO\_LIBPATH} (path to PIO library files)
+should also be set when using this option. The minimum version of PIO for
+this option is 2.5.7. 
 
 \item[{\tt "OFF"}] Disables PIO-dependent code.
 
 \end{description}
+
+
+\item[ESMF\_PIO\_INCLUDE] (no default)
+
+Specifies the path where the PIO header files are located.
+
+\item[ESMF\_PIO\_LIBPATH] (no default)
+
+Specifies the path where the PIO library is located.
 
 \end{description}
 
@@ -468,6 +499,56 @@ typical case where {\tt ESMF\_YAMLCPP} is set to {\tt "standard"},
 \end{description}
 
 
+\subsubsection{MOAB}
+\label{sec:MOAB}
+
+The Mesh Oriented datABase
+(\htmladdnormallink{MOAB}{https://sigma.mcs.anl.gov/moab-library/})
+can be used to build an ESMF unstructured Mesh as an alternative to the 
+"native" ESMF Mesh implementation. The decision to use either MOAB or the 
+native ESMF Mesh implementation is made at run time. This aspect is described 
+in the Reference Manual, section {\tt ESMF\_MeshSetMOAB()} .The default is to use 
+the native ESMF Mesh. ESMF will build an internal version of MOAB by default, 
+but an external MOAB installation can be used if desired. The build parameters 
+covered in this section are used to determine which version of MOAB is 
+available to ESMF. 
+
+\begin{description}
+
+\item[ESMF\_MOAB] Possible values: {\tt "internal"} (default), {\tt "OFF"},
+{\tt "external"}.
+
+\begin{description}
+\item[{\tt "internal"} (default)] The MOAB dependent code inside of ESMF will
+be enabled.
+The MOAB sources included with ESMF will be used to provide MOAB support.
+The {\tt ESMF\_MOAB\_INCLUDE}, {\tt ESMF\_MOAB\_LIBPATH}, and
+{\tt ESMF\_MOAB\_LIBS} environment variables will be ignored.
+
+\item[{\tt "OFF"}] Disables MOAB dependent code.
+
+\item[{\tt "external"}] The MOAB dependent code inside of ESMF will
+be enabled.
+The {\tt ESMF\_MOAB\_INCLUDE}, {\tt ESMF\_MOAB\_LIBPATH} and 
+{\tt ESMF\_MOAB\_LIBS} environment variables must also be specified.
+\end{description}
+
+\item[ESMF\_MOAB\_INCLUDE] Typical value: {\tt /usr/local/include}
+(no default).
+
+Specifies the path where the MOAB C++ header files are located.
+
+\item[ESMF\_MOAB\_LIBPATH] Typical value: {\tt /usr/local/lib} (no default).
+
+Specifies the path where the MOAB C++ library file is located.
+
+\item[ESMF\_MOAB\_LIBS] Typical value: {\tt "-lMOAB"} (no default).
+
+Specifies the linker directives needed to link the MOAB C++ library to
+the application.
+
+\end{description}
+
 \subsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
 
@@ -517,7 +598,7 @@ implementation.
 For other systems (e.g. Linux or Darwin) where a multitude of MPI
 implementations are available, {\tt ESMF\_COMM} must be set to indicate which
 implementation is used to build the ESMF library. Set {\tt ESMF\_COMM} according
-to your situation to: {\tt mpt, mpich, mpich2, mpich3, mvapich2, lam, openmpi}
+to your situation to: {\tt mpt, mpich, mpich1, mpich2, mpich3, mvapich2, lam, openmpi}
 or {\tt intelmpi}. {\tt ESMF\_COMM} may also be set to {\tt user} indicating
 that the user will set all the required flags using advanced ESMF environment
 variables.  Some individual MPI builds may create additional libraries that
@@ -1146,4 +1227,4 @@ Additionally, it is typically convenient to append the user's {\tt PATH} environ
 
 {\em Hint.} By default, file {\tt esmf.mk} is located next to the ESMF library file in  directory {\tt ESMF\_INSTALL\_LIBDIR}. Consequently, unless {\tt esmf.mk} has been moved to a different location after the installation, the correct setting for {\tt ESMFMKFILE} is {\tt \$(ESMF\_INSTALL\_LIBDIR)/esmf.mk}.
 
-{\em Rationale.} The only piece of information that is needed to use an ESMF installation is the exact location of the associated {\tt esmf.mk} file. This file contains all of the relevant settings and flags that allow a user to build their application against the ESMF installation. Standardizing the mechanism by which the location of {\tt esmf.mk} is made available to the user by the system will help users in the design of portable application build systems. (See sections \ref{sec:Use} and \ref{sec:Apps} for details about the usage of {\tt esmf.mk}.) Further, modifying the user's {\tt PATH} environment variable is optional, since the location of the ESMF application binaries is available through the {\tt esmf.mk} file. However, setting the user's {\tt PATH} variable so that the ESMF applications are directly and conveniently accessible from the command line is recommended, especially if management software (e.g. {\em modules, softenv, ...}) is used on the system.
+{\em Rationale.} The only piece of information that is needed to use an ESMF installation is the exact location of the associated {\tt esmf.mk} file. This file contains all of the relevant settings and flags that allow a user to build their application against the ESMF installation. Standardizing the mechanism by which the location of {\tt esmf.mk} is made available to the user by the system will help users in the design of portable application build systems. (See sections \ref{sec:Use} and \ref{sec:CLTs} for details about the usage of {\tt esmf.mk}.) Further, modifying the user's {\tt PATH} environment variable is optional, since the location of the ESMF application binaries is available through the {\tt esmf.mk} file. However, setting the user's {\tt PATH} variable so that the ESMF applications are directly and conveniently accessible from the command line is recommended, especially if management software (e.g. {\em modules, softenv, ...}) is used on the system.

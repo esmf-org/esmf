@@ -1,7 +1,7 @@
 // $Id$"
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1925,5 +1925,11 @@ namespace ESMCI{
     return(rc);
 
  }  // end Time::getDayOfYear
+
+ // Accessor method to retrieve calendar pointer
+ Calendar * Time::getCalendar(void) const
+ {
+   return calendar;
+ }
 
 }   // namespace ESMCI

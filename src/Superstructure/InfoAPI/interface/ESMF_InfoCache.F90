@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -147,8 +147,7 @@ subroutine ESMF_InfoCacheUpdateFields(self, target, vmIdMap, rc)
 
   type(ESMF_InfoDescribe) :: idesc
 
-  call idesc%Initialize(createInfo=.true., addBaseAddress=.true., vmIdMap=vmIdMap, &
-    vmIdMapGeomExc=.true., rc=rc)
+  call idesc%Initialize(createInfo=.true., addBaseAddress=.true., vmIdMap=vmIdMap, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
 
   call idesc%Update(target, "", rc=rc)

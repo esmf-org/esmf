@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -25,11 +25,11 @@ module ESMF
     use ESMF_InitMacrosMod
     use ESMF_TraceMod
     use ESMF_TraceAPIMod
-    
+
     use ESMF_F90InterfaceMod
     use ESMF_FortranWordsizeMod
     use ESMF_TypeKindGetMod
-    
+
     use ESMF_BaseMod
     use ESMF_IOUtilMod
 
@@ -44,8 +44,8 @@ module ESMF
 
     use ESMF_ArraySpecMod
     use ESMF_LocalArrayMod
-    
-    use ESMF_VMMod 
+
+    use ESMF_VMMod
     use ESMF_DELayoutMod
     use ESMF_DistGridMod
     use ESMF_DynamicMaskMod
@@ -99,19 +99,21 @@ module ESMF
     use ESMF_GridCompMod
     use ESMF_CplCompMod
     use ESMF_SciCompMod
-    
+
+    use ESMF_InternalStateMod
+
     use ESMF_AttachMethodsMod
-    
+
     use ESMF_ContainerMod
-    
+
     use ESMF_InitMod
 
     use ESMFIOMod
 
     use ESMF_IO_YAMLMod
-    
+
     use ESMF_IOScripMod, only: ESMF_SparseMatrixWrite
-    
+
 #ifdef ESMF_MAPPER
     use & ! prevent MOD_FUNC from grabbing this dependency during build
       ESMF_MapperMod
@@ -122,5 +124,9 @@ module ESMF
     use ESMF_InfoMod
     use ESMF_InfoDescribeMod
     use ESMF_InfoSyncMod
+
+    use ESMF_NamedAliasMod
+
+    use ESMF_RegridWeightGenMod
 
 end module ESMF

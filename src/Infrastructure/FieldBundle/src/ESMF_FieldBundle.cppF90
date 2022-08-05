@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -99,6 +99,7 @@ module ESMF_FieldBundleMod
     type(ESMF_FieldBundleStatus) :: status    ! status of this FieldBundle
     logical                      :: is_proxy  ! true if this is a proxy FB
     logical                      :: is_packed ! true if this is a packed FB
+    character(len=:), allocatable:: encodeName! storage for packed FB
     ESMF_INIT_DECLARE
   end type
 
@@ -108,7 +109,7 @@ module ESMF_FieldBundleMod
   sequence
 ^endif
     type(ESMF_FieldBundleType), pointer :: this
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -1205,10 +1206,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set init code @\
     ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateGridDataPtr##mrank##D##mtypekind) @\
 @\
-    encodeName = fieldNameList(1) @\
+    encodeName = trim(fieldNameList(1)) @\
     do i = 2, size(fieldNameList) @\
-      call concatName(encodeName, ":", fieldNameList(i)) @\
+      encodeName = concatName(trim(encodeName), ':', trim(fieldNameList(i))) @\
     enddo @\
+    this%encodeName = encodeName @\
 @\
     ! Create an internal g2f map @\
     if(present(gridToFieldMap)) then @\
@@ -1234,7 +1236,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     fieldList(1) = ESMF_FieldCreate(grid, farrayPtr, staggerloc=staggerloc, & @\
       gridToFieldMap=gridToFieldMap, totalLWidth=totalLWidth, totalUWidth=totalUWidth, & @\
-      name=encodeName, rc=localrc) @\
+      name='packedFieldBundleField', rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -1407,14 +1409,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set init code @\
     ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateMeshDataPtr##mrank##D##mtypekind) @\
 @\
-    encodeName = fieldNameList(1) @\
+    encodeName = trim(fieldNameList(1)) @\
     do i = 2, size(fieldNameList) @\
-      call concatName(encodeName, ":", fieldNameList(i)) @\
+      encodeName = concatName(trim(encodeName), ':', trim(fieldNameList(i))) @\
     enddo @\
+    this%encodeName = encodeName @\
 @\
     fieldList(1) = ESMF_FieldCreate(mesh, farrayPtr, meshloc=meshloc, & @\
       gridToFieldMap=gridToFieldMap, & @\
-      name=encodeName, rc=localrc) @\
+      name='packedFieldBundleField', rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -1596,6 +1599,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Destroy all the internal Fields if this is a proxy fieldBundle
+#if 0
+!gjt: dont do this, Fields do their own garbage collection under their VM
       if(this%is_proxy) then
         nullify(flist)
         call ESMF_ContainerGet(this%container, itemCount=fcount, &
@@ -1611,6 +1616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
         deallocate(flist)
       endif
+#endif
 
       ! Destroy internal container
       call ESMF_ContainerDestroy(this%container, rc=localrc)
@@ -1860,10 +1866,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-      call ESMF_FieldGet(l_fieldList(1), name=packedName, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      call decodeName(packedName, ':', l_fieldCount, fieldNameListPtr)
+      call decodeName(fieldBundle%this%encodeName, ':', l_fieldCount, fieldNameListPtr)
       if(present(fieldCount)) fieldCount = l_fieldCount
       if(present(fieldList)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
@@ -1892,10 +1895,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(name)) then
+      if (fieldbundle%isNamedAlias) then
+        name = trim(fieldbundle%name)
+      else
         call ESMF_GetName(fieldbundle%this%base, name, localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
     
     ! Return successfully
@@ -2784,10 +2790,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
 !    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
-!    of options. If not present, file names with a {\tt .bin} extension will
-!    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
-!    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
-!    {\tt ESMF\_IOFMT\_NETCDF}.
+!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !     \end{sloppypar}
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2826,19 +2829,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (fileName, '.') > 0) then
-        file_ext_p = index (fileName, '.', back=.true.)
-        select case (fileName(file_ext_p:))
-        case ('.nc')
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        case ('.bin')
-          opt_iofmt = ESMF_IOFMT_BIN
-        case default
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        end select
-      else
-        opt_iofmt = ESMF_IOFMT_NETCDF
-      end if
+      opt_iofmt = ESMF_IOFMT_NETCDF     
     end if
 
     time = 0
@@ -6288,18 +6279,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing field data may
-!      {\em not} be overwritten.  If .true., the overwrite behavior depends
-!      on the value of {\tt iofmt} as shown below:
-!    \begin{description}
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
-!      be overwritten with each fields data.
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF, ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET}:]\ Only the
-!      data corresponding to each fields name will be
+!      {\em not} be overwritten.  If .true., only the
+!      data corresponding to the fields name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
-!      the given timeslice may be overwritten.
+!      the given timeslice will be overwritten.
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
-!    \end{description}
 !    \end{sloppypar}
 !   \item[{[status]}]
 !    \begin{sloppypar}
@@ -6326,10 +6311,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
 !    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
-!    of options. If not present, file names with a {\tt .bin} extension will
-!    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
-!    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
-!    {\tt ESMF\_IOFMT\_NETCDF}.
+!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !     \end{sloppypar}
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -6377,19 +6359,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (fileName, '.') > 0) then
-        file_ext_p = index (fileName, '.', back=.true.)
-        select case (fileName(file_ext_p:))
-        case ('.nc')
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        case ('.bin')
-          opt_iofmt = ESMF_IOFMT_BIN
-        case default
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        end select
-      else
-        opt_iofmt = ESMF_IOFMT_NETCDF
-      end if
+      opt_iofmt = ESMF_IOFMT_NETCDF
     end if
 
     if (present (convention) .neqv. present (purpose)) then
@@ -6558,8 +6528,8 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 !
 !EOPI
 
-      integer :: localrc                     ! Error status
-      integer :: i, fieldCount, packedVal
+      integer :: localrc                          ! Error status
+      integer :: i, fieldCount, packedVal, encodeNameLength
       type(ESMF_FieldBundleType), pointer :: bp   ! fieldbundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_InquireFlag) :: linquireflag
@@ -6670,6 +6640,15 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 
       deallocate(l_fieldList)
 
+      if(bp%is_packed) then
+        encodeNameLength = len(bp%encodeName)
+        call c_ESMC_FieldBundleSerializeEncodeName(encodeNameLength, bp%encodeName, &
+                                   buffer, length, offset, linquireflag, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+        
       if  (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_FieldBundleSerialize
@@ -6718,7 +6697,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 !EOPI
 
       integer :: localrc, status             ! Error status, allocation status
-      integer :: i, fieldCount, packedVal
+      integer :: i, fieldCount, packedVal, encodeNameLength
       type(ESMF_FieldBundleType), pointer :: bp   ! fieldbundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_Grid) :: grid
@@ -6856,6 +6835,20 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       deallocate(flist)
+
+      if(bp%is_packed) then
+        call c_ESMC_FieldBundleDeserializeInt(encodeNameLength, &
+                                   buffer, offset, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        allocate(character(encodeNameLength) :: bp%encodeName)
+        call c_ESMC_FieldBundleDeSerializeEncodeName(encodeNameLength, bp%encodeName, &
+                                   buffer, offset, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -7182,7 +7175,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       ! Local Variables
       integer   :: n, m, p
       integer   :: i, idx
-      character(len=ESMF_MAXSTR):: strtmp
+      character(len=:), allocatable:: strtmp
 
 
       ! 0. remove initial blanks if any
@@ -7214,15 +7207,17 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
     ! Have to work around macro expansion not allowing //
     ! We will want to inline this for performance
     !dir$ attributes forceinline :: frob
-    subroutine concatName(str, delim, append)
 
-      character(len=*), intent(inout)          :: str
+    function concatName(str, delim, append)
+      character(len=*), intent(in)             :: str
       character(len=*), intent(in)             :: delim
       character(len=*), intent(in)             :: append
 
-      str = trim(str)//trim(delim)//trim(append)
+      character(len=len(str)+len(delim)+len(append)) :: concatName
 
-    end subroutine concatName
-
+      concatName(:len(str)) = str
+      concatName(len(str)+1:len(str)+len(delim)) = delim
+      concatName(len(str)+len(delim)+1:) = append
+    end function
 
 end module ESMF_FieldBundleMod

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -56,7 +56,6 @@ extern "C" void FTN_X(c_esmc_regrid_create)(MeshCap **meshsrcpp,
                                             int *map_type,
                                             int *norm_type,
                                             int *regridPoleType, int *regridPoleNPnts,
-                                            int *regridScheme,
                                             int *extrapMethod,
                                             int *extrapNumSrcPnts,
                                             ESMC_R8 *extrapDistExponent,
@@ -68,6 +67,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(MeshCap **meshsrcpp,
                                             int *nentries, ESMCI::TempWeights **tweights,
                                             int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                                             int *has_statusArray, ESMCI::Array **statusArray,
+                                            int *checkFlag, 
                                             int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()"
@@ -94,7 +94,6 @@ MeshCap::regrid_create(meshsrcpp, arraysrcpp, plsrcpp,
                        map_type,
                        norm_type,
                        regridPoleType, regridPoleNPnts,
-                       regridScheme,
                        extrapMethod,
                        extrapNumSrcPnts,
                        extrapDistExponent,
@@ -106,28 +105,29 @@ MeshCap::regrid_create(meshsrcpp, arraysrcpp, plsrcpp,
                        nentries, tweights,
                        has_udl, _num_udl, _tudl,
                        has_statusArray, statusArray,
+                       checkFlag, 
                        rc);
 }
 
 extern "C" void FTN_X(c_esmc_regrid_getiwts)(Grid **gridpp,
                    MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()"
   MeshCap::regrid_getiwts(gridpp,
                           meshpp, arraypp, staggerLoc,
-                          regridScheme, rc);
+                          rc);
 }
 
 
 extern "C" void FTN_X(c_esmc_regrid_getarea)(Grid **gridpp,
                    MeshCap **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getarea()"
   MeshCap::regrid_getarea(gridpp,
                           meshpp, arraypp, staggerLoc,
-                          regridScheme, rc);
+                          rc);
 }
 
 

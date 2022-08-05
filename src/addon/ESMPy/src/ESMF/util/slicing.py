@@ -115,7 +115,7 @@ def get_none_or_ssslice(target, slc, stagger, rank):
         else:
             raise ValueError("Grid cannot have less than 2 or more than 3 dimensions")
 
-        ret = target[slc2]
+        ret = target[tuple(slc2)]
 
     return ret
 

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -11,8 +11,7 @@
 !==============================================================================
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Base.F90"
 !==============================================================================
-
-#define PROFILE_off
+#define DEBUG_SETVM_on
 
 module NUOPC_Base
 
@@ -23,6 +22,7 @@ module NUOPC_Base
   use ESMF
   use NUOPC_FieldDictionaryApi
   use NUOPC_Auxiliary
+  use NUOPC_FreeFormatDef
 
   implicit none
   
@@ -30,7 +30,7 @@ module NUOPC_Base
   
   ! public
   public NUOPC_PhaseMapStringLength       ! parameter
-  integer, parameter :: NUOPC_PhaseMapStringLength = 160
+  integer, parameter :: NUOPC_PhaseMapStringLength = 400
 
   ! public FieldDictionary API
   public NUOPC_FieldDictionary            ! variable
@@ -52,8 +52,10 @@ module NUOPC_Base
   public NUOPC_CheckSetClock              ! method
   public NUOPC_GetAttribute               ! method
   public NUOPC_GetStateMemberLists        ! method
+  public NUOPC_GetStateMemberCount        ! method
   public NUOPC_GetTimestamp               ! method
   public NUOPC_InitAttributes             ! method
+  public NUOPC_IngestPetList              ! method
   public NUOPC_IsAtTime                   ! method
   public NUOPC_IsConnected                ! method
   public NUOPC_IsUpdated                  ! method
@@ -69,6 +71,7 @@ module NUOPC_Base
   ! internal Utility API
   public NUOPC_ChopString                 ! method
   public NUOPC_LogPetList                 ! method
+  public NUOPC_SetVM                      ! method
 
 !==============================================================================
 ! 
@@ -122,6 +125,8 @@ module NUOPC_Base
 
   interface NUOPC_SetTimestamp
     module procedure NUOPC_SetTimestampField
+    module procedure NUOPC_SetTimestampFieldList
+    module procedure NUOPC_SetTimestampFieldListClk
     module procedure NUOPC_SetTimestampState
     module procedure NUOPC_SetTimestampStateClk
   end interface
@@ -231,6 +236,7 @@ module NUOPC_Base
     type(ESMF_State), intent(out), optional :: nestedState
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
+!   \label{NUOPC_AddNestedState}
 !   Create a nested state inside of {\tt state}. The arguments {\tt Namespace}
 !   and {tt\ CplSet} are used to set NUOPC attributes on the newly created
 !   state. The nested state is returned as {\tt nestedState}. If provided,
@@ -753,13 +759,14 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_CheckSetClock - Check a Clock for compatibility and set its values
 ! !INTERFACE:
   subroutine NUOPC_CheckSetClock(setClock, checkClock, setStartTimeToCurrent, &
-    currTime, forceCurrTime, forceTimeStep, rc)
+    currTime, forceCurrTime, checkTimeStep, forceTimeStep, rc)
 ! !ARGUMENTS:
     type(ESMF_Clock),        intent(inout)         :: setClock
     type(ESMF_Clock),        intent(in)            :: checkClock
     logical,                 intent(in),  optional :: setStartTimeToCurrent
     type(ESMF_Time),         intent(in),  optional :: currTime
     logical,                 intent(in),  optional :: forceCurrTime
+    logical,                 intent(in),  optional :: checkTimeStep
     logical,                 intent(in),  optional :: forceTimeStep
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -791,6 +798,11 @@ module NUOPC_Base
 !     If {\tt .true.} then do {\em not} check the current time of the
 !     {\tt setClock}, but instead force it to align with the {\tt checkClock},
 !     or {\tt currTime}, if it was provided. The default is {\tt .false.}.
+!   \item[{[checkTimeStep]}]
+!     If {\tt .true.} then check that {\tt timeStep} of the 
+!     {\tt setClock} can reach the next increment on the {\tt checkClock}
+!     by an integer number of steps. For {\tt .false.} do not check this
+!     condition. The default is {\tt .true.}.
 !   \item[{[forceTimeStep]}]
 !     If {\tt .true.} then do {\em not} use the {\tt timeStep} of the 
 !     {\tt setClock} to check if the next increment on the {\tt checkClock}
@@ -806,27 +818,28 @@ module NUOPC_Base
     ! local variables
     type(ESMF_Time)           :: checkCurrTime, setCurrTime, actCurrTime
     type(ESMF_Time)           :: stopTime, startTime
-    type(ESMF_TimeInterval)   :: checkTimeStep, timeStep, runDuration
+    type(ESMF_TimeInterval)   :: timeStepCheck, timeStep, runDuration
     integer                   :: aSec, bSec
     type(ESMF_Direction_Flag) :: direction
     character(len=160)        :: msgString
     character(len=80)         :: aString, bString
     logical                   :: forceCurrTimeOpt
+    logical                   :: checkTimeStepOpt
     integer                   :: localrc
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     call ESMF_ClockGet(checkClock, currTime=checkCurrTime, &
-      timeStep=checkTimeStep, direction=direction, rc=localrc)
+      timeStep=timeStepCheck, direction=direction, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    
+
     if (present(forceTimeStep)) then
       if (forceTimeStep) then
-        call ESMF_ClockSet(setClock, timeStep=checkTimeStep, rc=localrc)
+        call ESMF_ClockSet(setClock, timeStep=timeStepCheck, rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=FILENAME, &
@@ -834,7 +847,7 @@ module NUOPC_Base
           return  ! bail out
       endif
     endif
-    
+
     call ESMF_ClockGet(setClock, currTime=setCurrTime, timeStep=timeStep, &
       runDuration=runDuration, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -842,14 +855,16 @@ module NUOPC_Base
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    
+
     ! Make sure to use the correct runDuration
-    if (runDuration > checkTimeStep) runDuration = checkTimeStep
-    
+    if (runDuration > timeStepCheck) runDuration = timeStepCheck
+
     ! deal with optional arguments
     if (present(currTime)) checkCurrTime = currTime
     forceCurrTimeOpt = .false.  ! default
     if (present(forceCurrTime)) forceCurrTimeOpt = forceCurrTime
+    checkTimeStepOpt = .true. ! default
+    if (present(checkTimeStep)) checkTimeStepOpt = checkTimeStep
 
     ! set the new stopTime of the setClock
     if (direction==ESMF_DIRECTION_FORWARD) then
@@ -898,7 +913,7 @@ module NUOPC_Base
         return  ! bail out
       endif
     endif
-    
+
     ! conditionally set startTime of the setClock
     if (present(setStartTimeToCurrent)) then
       if (setStartTimeToCurrent) then
@@ -910,34 +925,36 @@ module NUOPC_Base
           return  ! bail out
       endif
     endif
-    
-    ! ensure that the check timestep is a multiple of the internal one
-    if (ceiling(runDuration/timeStep) /= floor(runDuration/timeStep)) then
-      call ESMF_TimeIntervalGet(timeStep, s=aSec, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
+
+    if (checkTimeStepOpt) then
+      ! ensure that the check timestep is a multiple of the internal one
+      if (ceiling(runDuration/timeStep) /= floor(runDuration/timeStep)) then
+        call ESMF_TimeIntervalGet(timeStep, s=aSec, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+        call ESMF_TimeIntervalGet(runDuration, s=bSec, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+        write (aString, *) aSec
+        write (bString, *) bSec
+        write (msgString,"(A)") "setClock timeStep="//&
+          trim(adjustl(aString))//&
+          "s is not a divisor of runDuration="//&
+          trim(adjustl(bString))//"s"
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg=msgString, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
         return  ! bail out
-      call ESMF_TimeIntervalGet(runDuration, s=bSec, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-      write (aString, *) aSec
-      write (bString, *) bSec
-      write (msgString,"(A)") "setClock timeStep="//&
-        trim(adjustl(aString))//&
-        "s is not a divisor of runDuration="//&
-        trim(adjustl(bString))//"s"
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg=msgString, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
+      endif
     endif
-    
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -1263,7 +1280,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_GetStateMemberLists - Build lists of information of State members
 ! !INTERFACE:
-  recursive subroutine NUOPC_GetStateMemberLists(state, StandardNameList, &
+  subroutine NUOPC_GetStateMemberLists(state, StandardNameList, &
     ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, &
     stateList, nestedFlag, rc)
 ! !ARGUMENTS:
@@ -1336,21 +1353,10 @@ module NUOPC_Base
     ! local variables
     integer           :: localrc
     logical           :: l_nestedFlag
-    integer           :: item, itemCount, fieldCount, stat, i
-    type(ESMF_Field)  :: field
-    character(ESMF_MAXSTR), allocatable     :: ll_itemNameList(:)
+    integer           :: itemIndex, itemCount, fieldCount, stat
+    character(ESMF_MAXSTR),    allocatable  :: ll_itemNameList(:)
     type(ESMF_StateItem_Flag), allocatable  :: stateitemtypeList(:)
     type(ESMF_State)                        :: nestedState
-    character(ESMF_MAXSTR), pointer         :: l_StandardNameList(:)
-    character(ESMF_MAXSTR), pointer         :: l_itemNameList(:)
-    character(ESMF_MAXSTR), pointer         :: l_ConnectedList(:)
-    character(ESMF_MAXSTR), pointer         :: l_NamespaceList(:)
-    character(ESMF_MAXSTR), pointer         :: l_CplSetList(:)
-    type(ESMF_Field),       pointer         :: l_fieldList(:)
-    type(ESMF_State),       pointer         :: l_stateList(:)
-    character(ESMF_MAXSTR)                  :: namespace
-    character(ESMF_MAXSTR)                  :: cplSet
-    type(ESMF_Info)                         :: info
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1366,7 +1372,278 @@ module NUOPC_Base
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-          
+
+    if (itemCount > 0) then
+
+      ! determine fieldCount, potentially throughout nested state structure
+!call ESMF_TraceRegionEnter("calling NUOPC_GetStateMemberCount", rc=rc)
+      call NUOPC_GetStateMemberCount(state, fieldCount=fieldCount, &
+        nestedFlag=l_nestedFlag, rc=localrc)
+!call ESMF_TraceRegionExit("calling NUOPC_GetStateMemberCount", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+        
+    else
+      fieldCount = 0
+    endif
+
+!call ESMF_TraceRegionEnter("deal with allocs", rc=rc)
+    ! deal with optional StandardNameList
+    if (present(StandardNameList)) then
+      if (associated(StandardNameList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="StandardNameList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(StandardNameList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating StandardNameList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+
+    ! deal with optional itemNameList
+    if (present(itemNameList)) then
+      if (associated(itemNameList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="itemNameList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(itemNameList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating itemNameList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+
+    ! deal with optional ConnectedList
+    if (present(ConnectedList)) then
+      if (associated(ConnectedList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="ConnectedList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(ConnectedList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating ConnectedList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+
+    ! deal with optional NamespaceList
+    if (present(NamespaceList)) then
+      if (associated(NamespaceList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="NamespaceList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(NamespaceList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating NamespaceList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+
+    ! deal with optional CplSetList
+    if (present(CplSetList)) then
+      if (associated(CplSetList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="CplSetList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(CplSetList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating CplSetList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+
+    ! deal with optional fieldList
+    if (present(fieldList)) then
+      if (associated(fieldList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="fieldList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(fieldList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating fieldList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+
+    ! deal with optional stateList
+    if (present(stateList)) then
+      if (associated(stateList)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="stateList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      else
+        allocate(stateList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating stateList", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+!call ESMF_TraceRegionExit("deal with allocs", rc=rc)
+
+    if (fieldCount > 0) then
+!call ESMF_TraceRegionEnter("call first level NUOPC_GetStateMemberListsIntrnl", rc=rc)
+      ! fill lists that are present
+      itemIndex = 1 ! initialize
+      call NUOPC_GetStateMemberListsIntrnl(state, StandardNameList, &
+        ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, &
+        stateList, l_nestedFlag, "", itemIndex, rc=localrc)
+!call ESMF_TraceRegionExit("call first level NUOPC_GetStateMemberListsIntrnl", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+
+    endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_GetStateMemberListsIntrnl - Fill information of State members into lists
+! !INTERFACE:
+  recursive subroutine NUOPC_GetStateMemberListsIntrnl(state, StandardNameList, &
+    ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, &
+    stateList, nestedFlag, namespaceRoot, itemIndex, rc)
+! !ARGUMENTS:
+    type(ESMF_State),       intent(in)            :: state
+    character(ESMF_MAXSTR), pointer, optional     :: StandardNameList(:)
+    character(ESMF_MAXSTR), pointer, optional     :: ConnectedList(:)
+    character(ESMF_MAXSTR), pointer, optional     :: NamespaceList(:)
+    character(ESMF_MAXSTR), pointer, optional     :: CplSetList(:)
+    character(ESMF_MAXSTR), pointer, optional     :: itemNameList(:)
+    type(ESMF_Field),       pointer, optional     :: fieldList(:)
+    type(ESMF_State),       pointer, optional     :: stateList(:)
+    logical,                intent(in)            :: nestedFlag
+    character(*),           intent(in)            :: namespaceRoot
+    integer,                intent(inout)         :: itemIndex
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Fill lists containing the StandardNames, field names, and connected 
+!   status of the fields in {\tt state}. Return this information in the
+!   list arguments. Recursively parse through nested States.
+!
+!   All pointer arguments present must enter this method associated. For optimal
+!   performance, to reduce overhead, there is no check of this on this internal
+!   level. Also, present list arguments are assumed to be correctly allocated
+!   on the top level, and no check is performed on this level to minimize
+!   overhead.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to be queried.
+!   \item[{[StandardNameList]}]
+!     If present, return a list of the "StandardName" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
+!   \item[{[ConnectedList]}]
+!     If present, return a list of the "Connected" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
+!   \item[{[NamespaceList]}]
+!     If present, return a list of the "Namespace" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
+!   \item[{[CplSetList]}]
+!     If present, return a list of the "CplSet" attribute of each member.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
+!   \item[{[itemNameList]}]
+!     If present, return a list of each member name.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
+!   \item[{[fieldList]}]
+!     If present, return a list of the member fields.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
+!   \item[{[stateList]}]
+!     If present, return a list of the states corresonding to the owner of the
+!     fields returned under {\tt fieldList}.
+!     See the note about pointer arguments in the description section above for
+!     correct usage.
+!   \item[nestedFlag]
+!     When set to .true., returns information from nested States.
+!     When set to .false., returns information at the current State level only.
+!   \item[namespaceRoot]
+!     The root of the namespace considering all parent levels are traversing the
+!     nested state structure.
+!   \item[itemIndex]
+!     This is the index of the next item to be filled into the present lists.
+!     It will be incremented by this routine.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer           :: localrc
+    integer           :: item, itemCount
+    type(ESMF_Field)  :: field
+    character(ESMF_MAXSTR),    allocatable  :: ll_itemNameList(:)
+    type(ESMF_StateItem_Flag), allocatable  :: stateitemtypeList(:)
+    type(ESMF_State)                        :: nestedState
+    type(ESMF_Info)                         :: info
+    character(ESMF_MAXSTR)                  :: l_namespaceRoot
+    character(ESMF_MAXSTR)                  :: namespace
+    character(ESMF_MAXSTR)                  :: cplSet
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_StateGet(state, itemCount=itemCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
     if (itemCount > 0) then
       allocate(ll_itemNameList(itemCount))
       allocate(stateitemtypeList(itemCount))
@@ -1377,184 +1654,42 @@ module NUOPC_Base
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-        
-      fieldCount = 0  ! reset
-      do item=1, itemCount
-        if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
-          fieldCount = fieldCount + 1
-        else if ((stateitemtypeList(item) == ESMF_STATEITEM_STATE) .AND. &
-                 (l_nestedFlag)) then
-          ! recursively parse the nested state
-          nullify(l_StandardNameList)
-          call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
-            nestedState=nestedState, rc=localrc)
+
+      if (present(NamespaceList).or.present(CplSetList)) then
+        call ESMF_InfoGetFromHost(state, info=info, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+        if (present(NamespaceList)) then
+          call ESMF_InfoGet(info, key="/NUOPC/Instance/Namespace", &
+            value=namespace, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME, &
             rcToReturn=rc)) &
             return  ! bail out
-          call NUOPC_GetStateMemberLists(nestedState, l_StandardNameList, &
-            nestedFlag=l_nestedFlag, rc=localrc)
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-          if (associated(l_StandardNameList)) then
-            fieldCount = fieldCount + size(l_StandardNameList)
-            deallocate(l_StandardNameList)
+          if (trim(namespaceRoot) == "") then
+            l_namespaceRoot = trim(namespace)
+          else
+            if (trim(namespace).EQ."__UNSPECIFIED__") then
+              l_namespaceRoot = trim(namespaceRoot)
+            else
+              l_namespaceRoot = trim(namespaceRoot)//":"//trim(namespace)
+            endif
           endif
         endif
-      enddo
-      
-      if (present(StandardNameList)) then
-        if (associated(StandardNameList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="StandardNameList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
-          return  ! bail out
-        else
-          allocate(StandardNameList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating StandardNameList", &
+        if (present(CplSetList)) then
+          call ESMF_InfoGet(info, key="/NUOPC/Instance/CplSet", &
+            value=cplSet, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME, &
             rcToReturn=rc)) &
             return  ! bail out
         endif
       endif
-      
-      if (present(itemNameList)) then
-        if (associated(itemNameList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="itemNameList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
-          return  ! bail out
-        else
-          allocate(itemNameList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating itemNameList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
-      endif
-
-      if (present(ConnectedList)) then
-        if (associated(ConnectedList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="ConnectedList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
-          return  ! bail out
-        else
-          allocate(ConnectedList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating ConnectedList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
-      endif
-
-      if (present(NamespaceList)) then
-        if (associated(NamespaceList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="NamespaceList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
-          return  ! bail out
-        else
-          allocate(NamespaceList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating NamespaceList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
-      endif
-
-      if (present(CplSetList)) then
-        if (associated(CplSetList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="CplSetList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
-          return  ! bail out
-        else
-          allocate(CplSetList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating CplSetList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
-      endif
-
-      if (present(fieldList)) then
-        if (associated(fieldList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="fieldList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
-          return  ! bail out
-        else
-          allocate(fieldList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating fieldList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
-      endif
-
-      if (present(stateList)) then
-        if (associated(stateList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="stateList must enter unassociated", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
-          return  ! bail out
-        else
-          allocate(stateList(fieldCount), stat=stat)
-          if (ESMF_LogFoundAllocError(stat, msg="allocating stateList", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        endif
-      endif
-
-      call ESMF_InfoGetFromHost(state, info=info, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-      call ESMF_InfoGet(info, key="/NUOPC/Instance/Namespace", &
-        value=namespace, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-      call ESMF_InfoGet(info, key="/NUOPC/Instance/CplSet", &
-        value=cplSet, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-
-      fieldCount = 1  ! reset
 
       do item=1, itemCount
         if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
@@ -1575,19 +1710,19 @@ module NUOPC_Base
           endif
           if (present(StandardNameList)) then
             call ESMF_InfoGet(info, key="/NUOPC/Instance/StandardName", &
-              value=StandardNameList(fieldCount), rc=localrc)
+              value=StandardNameList(itemIndex), rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=FILENAME, &
               rcToReturn=rc)) &
               return  ! bail out
           endif
-          if (present(itemNameList)) then
-            itemNameList(fieldCount)=ll_itemNameList(item)
+          if (present(ItemNameList)) then
+            itemNameList(itemIndex)=ll_itemNameList(item)
           endif
           if (present(ConnectedList)) then
             call ESMF_InfoGet(info, key="/NUOPC/Instance/Connected", &
-              value=ConnectedList(fieldCount), rc=localrc)
+              value=ConnectedList(itemIndex), rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=FILENAME, &
@@ -1595,28 +1730,21 @@ module NUOPC_Base
               return  ! bail out
           endif
           if (present(NamespaceList)) then
-            NamespaceList(fieldCount)=trim(namespace)
+            NamespaceList(itemIndex)=trim(l_namespaceRoot)
           endif
           if (present(CplSetList)) then
-            CplSetList(fieldCount)=trim(cplSet)
+            CplSetList(itemIndex)=trim(cplSet)
           endif
-          if (present(fieldList)) then
-            fieldList(fieldCount)=field
+          if (present(FieldList)) then
+            fieldList(itemIndex)=field
           endif
-          if (present(stateList)) then
-            stateList(fieldCount)=state
+          if (present(StateList)) then
+            stateList(itemIndex)=state
           endif
-          fieldCount = fieldCount + 1
-        else if ((stateitemtypeList(item) == ESMF_STATEITEM_STATE) .AND. &
-                 (l_nestedFlag)) then
-          ! recursively parse the nested state
-          nullify(l_StandardNameList)
-          nullify(l_itemNameList)
-          nullify(l_ConnectedList)
-          nullify(l_NamespaceList)
-          nullify(l_CplSetList)
-          nullify(l_fieldList)
-          nullify(l_stateList)
+          itemIndex = itemIndex + 1
+        elseif ((stateitemtypeList(item) == ESMF_STATEITEM_STATE) .and. &
+          (nestedFlag)) then
+          ! Recursively parse the nested state
           call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
             nestedState=nestedState, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1624,65 +1752,157 @@ module NUOPC_Base
             file=FILENAME, &
             rcToReturn=rc)) &
             return  ! bail out
-          call NUOPC_GetStateMemberLists(nestedState, &
-            StandardNameList=l_StandardNameList, &
-            itemNameList=l_itemNameList, &
-            ConnectedList=l_ConnectedList, &
-            NamespaceList=l_NamespaceList, &
-            CplSetList=l_CplSetList, &
-            fieldList=l_fieldList, &
-            stateList=l_stateList, &
-            nestedFlag=l_nestedFlag, rc=localrc)
+          ! recursive query call
+          call NUOPC_GetStateMemberListsIntrnl(nestedState, StandardNameList, &
+            ConnectedList, NamespaceList, CplSetList, itemNameList, fieldList, &
+            stateList, nestedFlag, l_namespaceRoot, itemIndex, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME, &
             rcToReturn=rc)) &
             return  ! bail out
-          if (associated(l_StandardNameList)) then
-            do i=1, size(l_StandardNameList)
-              if (present(StandardNameList)) then
-                StandardNameList(fieldCount) = l_StandardNameList(i)
-              endif
-              if (present(itemNameList)) then
-                itemNameList(fieldCount) = l_itemNameList(i)
-              endif
-              if (present(ConnectedList)) then
-                ConnectedList(fieldCount) = l_ConnectedList(i)
-              endif
-              if (present(NamespaceList)) then
-                if (trim(l_NamespaceList(i)).EQ."__UNSPECIFIED__") then
-                  NamespaceList(fieldCount) = trim(namespace)
-                else
-                  NamespaceList(fieldCount) = trim(namespace)//":"// &
-                    trim(l_NamespaceList(i))
-                endif
-              endif
-              if (present(CplSetList)) then
-                CplSetList(fieldCount) = l_CplSetList(i)
-              endif
-              if (present(fieldList)) then
-                fieldList(fieldCount) = l_fieldList(i)
-              endif
-              if (present(stateList)) then
-                stateList(fieldCount) = l_stateList(i)
-              endif
-              fieldCount = fieldCount + 1
-            enddo
-            deallocate(l_StandardNameList)
-            deallocate(l_itemNameList)
-            deallocate(l_ConnectedList)
-            deallocate(l_NamespaceList)
-            deallocate(l_CplSetList)
-            deallocate(l_fieldList)
-            deallocate(l_stateList)
-          endif
         endif
       enddo
-        
+
       deallocate(ll_itemNameList)
       deallocate(stateitemtypeList)
     endif
-    
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_GetStateMemberCount - Determing number of State members
+! !INTERFACE:
+  subroutine NUOPC_GetStateMemberCount(state, fieldCount, nestedFlag, rc)
+! !ARGUMENTS:
+    type(ESMF_State),       intent(in)            :: state
+    integer,                intent(out), optional :: fieldCount
+    logical,                intent(in),  optional :: nestedFlag
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Determine the number of fields in {\tt state}. By default recursively parse
+!   through nested States.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to be queried.
+!   \item[{[fieldCount]}]
+!     Number of fields.
+!   \item[{[nestedFlag]}]
+!     When set to .true., returns information from nested States (default).
+!     When set to .false., returns information at the current State level only.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer           :: localrc
+    logical           :: l_nestedFlag
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    if (present(nestedFlag)) then
+      l_nestedFlag = nestedFlag
+    else
+      l_nestedFlag = .true.
+    endif
+
+    if (present(fieldCount)) then
+      fieldCount = 0  ! initialize
+      call NUOPC_GetStateMemberCountIntrnl(state, fieldCount, &
+        nestedFlag=l_nestedFlag, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_GetStateMemberCount - Determing number of State members
+! !INTERFACE:
+  recursive subroutine NUOPC_GetStateMemberCountIntrnl(state, fieldCount, &
+    nestedFlag, rc)
+! !ARGUMENTS:
+    type(ESMF_State),       intent(in)              :: state
+    integer,                intent(inout)           :: fieldCount
+    logical,                intent(in)              :: nestedFlag
+    integer,                intent(out),   optional :: rc
+! !DESCRIPTION:
+!   Determine the number of fields in {\tt state}. By default recursively parse
+!   through nested States.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object to be queried.
+!   \item[{[fieldCount]}]
+!     Number of fields. Keep adding to this variable
+!   \item[nestedFlag]
+!     When set to .true., returns information from nested States.
+!     When set to .false., returns information at the current State level only.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer           :: localrc
+    integer           :: itemCount, item
+    character(ESMF_MAXSTR), allocatable     :: ll_itemNameList(:)
+    type(ESMF_StateItem_Flag), allocatable  :: stateitemtypeList(:)
+    type(ESMF_State)                        :: nestedState
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_StateGet(state, itemCount=itemCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    if (itemCount > 0) then
+      allocate(ll_itemNameList(itemCount))
+      allocate(stateitemtypeList(itemCount))
+      call ESMF_StateGet(state, itemNameList=ll_itemNameList, &
+        itemtypeList=stateitemtypeList, rc=localrc)
+      do item=1, itemCount
+        if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
+          fieldCount = fieldCount + 1
+        elseif ((stateitemtypeList(item) == ESMF_STATEITEM_STATE) .and. &
+          nestedFlag) then
+          ! recursively parse the nested state
+          call ESMF_StateGet(state, itemName=ll_itemNameList(item), &
+            nestedState=nestedState, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+          call NUOPC_GetStateMemberCountIntrnl(nestedState, fieldCount, &
+            nestedFlag=nestedFlag, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        endif
+      enddo
+      deallocate(ll_itemNameList)
+      deallocate(stateitemtypeList)
+    endif
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -1721,18 +1941,10 @@ module NUOPC_Base
 #ifdef DEBUG
     character(ESMF_MAXSTR)  :: msgString
 #endif
-    type(ESMF_Info)         :: info
 
     if (present(isValid)) isValid = .false. ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
-    call ESMF_InfoGetFromHost(field, info=info, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
-      return  ! bail out
-    call ESMF_InfoGet(info, key="/NUOPC/Instance/TimeStamp", values=valueList, &
-      rc=localrc)
+    call ESMF_FieldGetTimestamp(field, timestamp=valueList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
@@ -1823,40 +2035,40 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(21)
+    character(ESMF_MAXSTR)            :: attrList(20)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
     integer                           :: localrc
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
     type(ESMF_Info)                   :: info
+    integer                           :: timestamp(10)
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! Set up a customized list of Attributes to be added to the Fields
     attrList(1) = "Connected"  ! values: "true" or "false"
-    attrList(2) = "TimeStamp"  ! values: list of 10 integers: yy,mm,dd,h,m,s,ms,us,ns,calkind
-    attrList(3) = "ProducerConnection"! values: "open", "targeted", "connected"
-    attrList(4) = "ConsumerConnection"! values: "open", "targeted", "connected"
-    attrList(5) = "Updated" ! values: "true" or "false"
-    attrList(6) = "ProducerTransferOffer"   ! values: "cannot provide",
+    attrList(2) = "ProducerConnection"! values: "open", "targeted", "connected"
+    attrList(3) = "ConsumerConnection"! values: "open", "targeted", "connected"
+    attrList(4) = "Updated" ! values: "true" or "false"
+    attrList(5) = "ProducerTransferOffer"   ! values: "cannot provide",
                                     !   "can provide", "will provide"
-    attrList(7) = "ProducerTransferAction"  ! values: "provide", "accept"
-    attrList(8) = "ConsumerTransferOffer"   ! values: "cannot provide",
+    attrList(6) = "ProducerTransferAction"  ! values: "provide", "accept"
+    attrList(7) = "ConsumerTransferOffer"   ! values: "cannot provide",
                                     !   "can provide", "will provide"
-    attrList(9) = "ConsumerTransferAction"  ! values: "provide", "accept"
-    attrList(10)= "SharePolicyField"       ! values: "share", "not share"
-    attrList(11)= "ShareStatusField"       ! values: "shared", "not shared"
-    attrList(12)= "SharePolicyGeomObject"  ! values: "share", "not share"
-    attrList(13)= "ShareStatusGeomObject"  ! values: "shared", "not shared"
-    attrList(14)= "UngriddedLBound"
-    attrList(15)= "UngriddedUBound"
-    attrList(16)= "GridToFieldMap"
-    attrList(17)= "ArbDimCount"
-    attrList(18)= "MinIndex"
-    attrList(19)= "MaxIndex"
-    attrList(20)= "TypeKind"
-    attrList(21)= "GeomLoc"   ! either staggerloc or meshloc
+    attrList(8) = "ConsumerTransferAction"  ! values: "provide", "accept"
+    attrList(9) = "SharePolicyField"       ! values: "share", "not share"
+    attrList(10)= "ShareStatusField"       ! values: "shared", "not shared"
+    attrList(11)= "SharePolicyGeomObject"  ! values: "share", "not share"
+    attrList(12)= "ShareStatusGeomObject"  ! values: "shared", "not shared"
+    attrList(13)= "UngriddedLBound"
+    attrList(14)= "UngriddedUBound"
+    attrList(15)= "GridToFieldMap"
+    attrList(16)= "ArbDimCount"
+    attrList(17)= "MinIndex"
+    attrList(18)= "MaxIndex"
+    attrList(19)= "TypeKind"
+    attrList(20)= "GeomLoc"   ! either staggerloc or meshloc
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=localrc)
@@ -1982,8 +2194,8 @@ module NUOPC_Base
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     ! set TimeStamp
-    call ESMF_InfoSet(info, key="/NUOPC/Instance/TimeStamp", &
-      values=(/0,0,0,0,0,0,0,0,0,0/), rc=localrc)
+    timestamp = (/0,0,0,0,0,0,0,0,0,0/)
+    call ESMF_FieldSetTimestamp(field, timestamp=timestamp, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
@@ -2112,7 +2324,145 @@ module NUOPC_Base
 
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IngestPetList - Ingest a petList from FreeFormat
+! !INTERFACE:
+  subroutine NUOPC_IngestPetList(petList, freeFormat, rc)
+! !ARGUMENTS:
+    integer, allocatable,   intent(out)           :: petList(:)
+    type(NUOPC_FreeFormat), intent(in),  target   :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Construct a petList from a {\tt FreeFormat} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[petList]
+!     The constructed petList. The size and content is set by this method.
+!   \item[freeFormat]
+!     The incoming petList information in free format. The format supports
+!     two types of elements:
+!     \begin{itemize}
+!     \item Single PET elements consist of a single number referring to the PET.
+!     \item Block elements consist of two PET numbers, separated by a "-" 
+!           character. No white spaces are accepted between the dash and the
+!           PET numbers. A block element includes all of the PETs between the
+!           lower bound (left PET number), and the upper bound (right PET
+!           number), bounds inclusive. The upper bound must {\em not} be
+!           less than the lower bound. 
+!     \end{itemize}
+!     Any number of elements may be listed in the free format. The idividual
+!     elements are separated by white spaces.
+!
+!     For an example, the free format petList definition
+!     \begin{verbatim}
+!     "2-5 12 0 15-23"
+!     \end{verbatim}
+!     would translate into a {\tt petList} output of
+!     \begin{verbatim}
+!     (/2, 3, 4, 5, 12, 0, 15, 16, 17, 18, 19, 20, 21, 22, 23/)
+!     \end{verbatim}
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: localrc
+    integer                 :: i, j, k
+    integer                 :: lineCount, tokenCount, blockCount, petCount
+    integer, allocatable    :: lb(:), ub(:)
+    character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
+    character(len=ESMF_MAXSTR), pointer :: chopStringList(:)
+
+    call NUOPC_FreeFormatGet(freeFormat, lineCount=lineCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    blockCount = 0
+    do i=1, lineCount
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=localrc)
+      blockCount = blockCount + tokenCount
+    enddo
+
+    allocate(lb(tokenCount),ub(tokenCount))
+    petCount = 0
+    k = 1
+
+    ! prepare chopStringList
+    nullify(chopStringList)
+
+    do i=1, lineCount
+
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      allocate(tokenList(tokenCount))
+      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenList=tokenList, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+      do j=1, tokenCount
+
+        if (index(trim(tokenList(j)),"-") > 0) then
+          ! this is a PET range
+          call NUOPC_ChopString(tokenList(j), chopChar="-", &
+            chopStringList=chopStringList, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          if (size(chopStringList) /= 2) then
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+              msg="Syntax error detected in petList block element.", &
+              line=__LINE__, file=FILENAME, &
+              rcToReturn=rc)
+            return  ! bail out
+          endif
+          read(chopStringList(1),*) lb(k)
+          read(chopStringList(2),*) ub(k)
+          deallocate(chopStringList)
+          if (ub(k)<lb(k)) then
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+              msg="Upper bound must not be less than lower bound in "//& 
+              "petList block element.", line=__LINE__, file=FILENAME, &
+              rcToReturn=rc)
+            return  ! bail out
+          endif
+        else
+          ! this is a single PET
+          read(tokenList(j),*) lb(k)
+          read(tokenList(j),*) ub(k)
+        endif
+
+        petCount = petCount + ub(k) - lb(k) + 1
+        k = k+1
+
+      enddo
+
+      deallocate(tokenList)
+
+    enddo
+
+    allocate(petList(petCount))
+    i = 1
+
+    do k=1, blockCount
+      do j=lb(k), ub(k)
+        petList(i) = j
+        i = i+1
+      enddo
+    enddo
+
+    deallocate(lb, ub)
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_IsAtTime - Check if a Field is at the given Time
@@ -2126,10 +2476,10 @@ module NUOPC_Base
     type(ESMF_Time),  intent(in)            :: time
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Returns {\tt .true.} if {\tt field} has a timestamp attribute
+!   Returns {\tt .true.} if {\tt field} has a timestamp
 !   that matches {\tt time}. Otherwise returns {\tt .false.}. On PETs 
 !   with only a proxy instance of the field, {\tt .true.} is returned
-!   regardless of the actual timestamp attribute.
+!   regardless of the actual timestamp.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2235,7 +2585,7 @@ module NUOPC_Base
     integer,                       intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the field(s) in {\tt state} have a timestamp 
-!   attribute that matches {\tt time}. Otherwise return {\tt .false.}.
+!   that matches {\tt time}. Otherwise return {\tt .false.}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2719,8 +3069,7 @@ module NUOPC_Base
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     if (btest(verbosity,2)) then
-      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
-        rc=rc)
+      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" intro:", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -2788,8 +3137,7 @@ module NUOPC_Base
     ! local variables
     integer :: indentCount
     if (btest(verbosity,2)) then
-      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
-        rc=rc)
+      call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" extro:", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -2904,7 +3252,7 @@ module NUOPC_Base
 !     \end{itemize}
 !   \item[{[dataFillScheme]}]
 !     Realized fields will be filled according to the selected fill
-!     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
+!     scheme. See {\tt ESMF\_FieldFill()} for fill schemes. Default is to leave
 !     the data in realized fields uninitialized.
 !   \item[{[field]}]
 !     Returns the completed field that was realized by this method. This option
@@ -3086,15 +3434,15 @@ module NUOPC_Base
           call NUOPC_GetAttribute(fieldNew, name=tempString, &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
-            " ***: TransferAction", ESMF_LOGMSG_INFO, rc=localrc)
+            " ***: TransferAction", ESMF_LOGMSG_DEBUG, rc=localrc)
           call NUOPC_GetAttribute(fieldNew, name="ShareStatusField", &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
-            " ***: ShareStatusField", ESMF_LOGMSG_INFO, rc=localrc)
+            " ***: ShareStatusField", ESMF_LOGMSG_DEBUG, rc=localrc)
           call NUOPC_GetAttribute(fieldNew, name="ShareStatusGeomObject", &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
-            " ***: ShareStatusGeomObject:", ESMF_LOGMSG_INFO, rc=localrc)
+            " ***: ShareStatusGeomObject:", ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
           call NUOPC_GetAttribute(fieldNew, name=tempString, &
             value=value, rc=localrc)
@@ -3206,7 +3554,7 @@ module NUOPC_Base
 !     \end{itemize}
 !   \item[{[dataFillScheme]}]
 !     Realized fields will be filled according to the selected fill
-!     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
+!     scheme. See {\tt ESMF\_FieldFill()} for fill schemes. Default is to leave
 !     the data in realized fields uninitialized.
 !   \item[{[field]}]
 !     Returns the completed field that was realized by this method. This option
@@ -3406,7 +3754,7 @@ module NUOPC_Base
 !     \end{itemize}
 !   \item[{[dataFillScheme]}]
 !     Realized fields will be filled according to the selected fill
-!     scheme. See \ref{NUOPC_FillField} for fill schemes. Default is to leave
+!     scheme. See {\tt ESMF\_FieldFill()} for fill schemes. Default is to leave
 !     the data in realized fields uninitialized.
 !   \item[{[field]}]
 !     Returns the completed field that was realized by this method. This option
@@ -3696,13 +4044,19 @@ module NUOPC_Base
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     enddo
-    
+
     ! Finally replace the advertised Field with the realizing Field
-      
+
     call ESMF_StateReplace(state, (/field/), rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    
+
+    ! Destroy the originally advertised Field that has just been released
+
+    call ESMF_FieldDestroy(advertisedField, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -4181,14 +4535,14 @@ module NUOPC_Base
     type(ESMF_Time),  intent(in)            :: time
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Set the "TimeStamp" attribute according to {\tt time} on {\tt field}.
+!   Set the TimeStamp according to {\tt time} on {\tt field}.
 !
 !   This call should rarely be needed in user written code.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[field]
-!     The {\tt ESMF\_Field} object to be updated.
+!     The {\tt ESMF\_Field} object to be time stampped.
 !   \item[time]
 !     The {\tt ESMF\_Time} object defining the TimeStamp.
 !   \item[{[rc]}]
@@ -4201,9 +4555,76 @@ module NUOPC_Base
     type(ESMF_CalKind_Flag) :: calkf
     integer                 :: localrc
     integer                 :: yy, mm, dd, h, m, s, ms, us, ns, ckf
-    type(ESMF_Info)         :: info
+    integer                 :: timestamp(10)
 
     if (present(rc)) rc = ESMF_SUCCESS
+
+    ! access the 10 pieces of a time object
+    call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, us=us, &
+      ns=ns, calkindflag=calkf, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    ! convert calendar kind flag into integer
+    ckf = calkf
+    ! initialize timestamp array
+    timestamp = (/yy,mm,dd,h,m,s,ms,us,ns,ckf/)
+    ! set the 10 integer values representing the time stamp
+    call ESMF_FieldSetTimestamp(field, timestamp=timestamp, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_SetTimestamp - Set the TimeStamp on Fields in a list
+! !INTERFACE:
+  ! Private name; call using NUOPC_SetTimestamp()
+  subroutine NUOPC_SetTimestampFieldList(fieldList, time, selective, rc)
+! !ARGUMENTS:
+    type(ESMF_Field), intent(inout)         :: fieldList(:)
+    type(ESMF_Time),  intent(in)            :: time
+    logical,          intent(in),  optional :: selective
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Set the TimeStamp according to {\tt time} on {\tt field}.
+!
+!   This call should rarely be needed in user written code.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[fieldList]
+!     The list of {\tt ESMF\_Field} objects to be time stampped.
+!   \item[time]
+!     The {\tt ESMF\_Time} object defining the TimeStamp.
+!   \item[{[selective]}]
+!     If {\tt .true.}, then only set the TimeStamp on those fields
+!     for which the "Updated" attribute is equal to "true". Otherwise set the
+!     TimeStamp on all the fields. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_CalKind_Flag) :: calkf
+    integer                 :: localrc, i
+    integer                 :: yy, mm, dd, h, m, s, ms, us, ns, ckf
+    integer                 :: timestamp(10)
+    logical                 :: selectiveArg
+    character(len=40)       :: value
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    selectiveArg = .false.  !default
+    if (present(selective)) selectiveArg = selective
     
     ! access the 10 pieces of a time object
     call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, us=us, &
@@ -4215,20 +4636,97 @@ module NUOPC_Base
       return  ! bail out
     ! convert calendar kind flag into integer
     ckf = calkf
-    ! set the 10 integer values representing the time stamp
-    call ESMF_InfoGetFromHost(field, info=info, rc=localrc)
+    ! initialize timestamp array
+    timestamp = (/yy,mm,dd,h,m,s,ms,us,ns,ckf/)
+    ! set timestamp on each field
+!call ESMF_TraceRegionEnter("loop over fields", rc=rc)
+    if (selectiveArg) then
+      do i=1, size(fieldList)
+        call NUOPC_GetAttribute(fieldList(i), name="Updated", value=value, &
+          rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+        if (trim(value)=="true") then
+          call ESMF_FieldSetTimestamp(fieldList(i), timestamp=timestamp, &
+            rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        endif
+      enddo
+    else
+      do i=1, size(fieldList)
+        call ESMF_FieldSetTimestamp(fieldList(i), timestamp=timestamp, &
+          rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      enddo
+    endif
+!call ESMF_TraceRegionExit("loop over fields", rc=rc)
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_SetTimestamp - Set the TimeStamp on Fields in a list from Clock
+! !INTERFACE:
+  ! Private name; call using NUOPC_SetTimestamp()
+  subroutine NUOPC_SetTimestampFieldListClk(fieldList, clock, selective, rc)
+! !ARGUMENTS:
+    type(ESMF_Field), intent(inout)         :: fieldList(:)
+    type(ESMF_Clock), intent(in)            :: clock
+    logical,          intent(in),  optional :: selective
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Set the TimeStamp according to {\tt time} on {\tt field}.
+!
+!   This call should rarely be needed in user written code.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[fieldList]
+!     The list of {\tt ESMF\_Field} objects to be time stampped.
+!   \item[clock]
+!     The {\tt ESMF\_Clock} object defining the TimeStamp by its current time.
+!   \item[{[selective]}]
+!     If {\tt .true.}, then only set the TimeStamp on those fields
+!     for which the "Updated" attribute is equal to "true". Otherwise set the
+!     TimeStamp on all the fields. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                               :: localrc
+    type(ESMF_Time)                       :: time
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_ClockGet(clock, currTime=time, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    call ESMF_InfoSet(info, key="/NUOPC/Instance/TimeStamp", &
-      values=(/yy,mm,dd,h,m,s,ms,us,ns,ckf/), rc=localrc)
+
+    call NUOPC_SetTimestamp(fieldList, time=time, selective=selective, &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -4244,7 +4742,7 @@ module NUOPC_Base
     logical,          intent(in),  optional :: selective
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Set the "TimeStamp" attribute according to {\tt clock} on all the fields in
+!   Set the TimeStamp according to {\tt clock} on all the fields in
 !   {\tt state}. Depending on {\tt selective}, all or only some fields may be
 !   updated.
 !
@@ -4254,13 +4752,13 @@ module NUOPC_Base
 !   The arguments are:
 !   \begin{description}
 !   \item[state]
-!     The {\tt ESMF\_State} object holding the fields.
+!     The {\tt ESMF\_State} object holding the fields to be time stampped.
 !   \item[time]
 !     The {\tt ESMF\_Time} object defining the TimeStamp.
 !   \item[{[selective]}]
-!     If {\tt .true.}, then only set the "TimeStamp" attributes on those fields
+!     If {\tt .true.}, then only set the TimeStamp on those fields
 !     for which the "Updated" attribute is equal to "true". Otherwise set the
-!     "TimeStamp" attribute on all the fields. Default is {\tt .false.}.
+!     TimeStamp on all the fields. Default is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4268,31 +4766,29 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR), pointer       :: StandardNameList(:)
-    character(ESMF_MAXSTR), pointer       :: itemNameList(:)
     type(ESMF_Field),       pointer       :: fieldList(:)
+    type(ESMF_Field),       allocatable   :: fieldListSet(:)
     character(ESMF_MAXSTR)                :: value
     type(ESMF_Field)                      :: field
     integer                               :: localrc
-    integer                               :: i
+    integer                               :: i, j
     logical                               :: selected
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    nullify(StandardNameList)
-    nullify(itemNameList)
     nullify(fieldList)
 
-    call NUOPC_GetStateMemberLists(state, StandardNameList=StandardNameList, &
-      itemNameList=itemNameList, fieldList=fieldList, rc=localrc)
+    call NUOPC_GetStateMemberLists(state, fieldList=fieldList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    
-    if (associated(itemNameList)) then
-      do i=1, size(itemNameList)
+
+    if (associated(fieldList)) then
+      allocate(fieldListSet(size(fieldList)))
+      j = 0
+      do i=1, size(fieldList)
         field=fieldList(i)
         if (present(selective)) then
           if (selective) then
@@ -4315,18 +4811,21 @@ module NUOPC_Base
           selected=.true.
         endif
         if (selected) then
-          call NUOPC_SetTimestamp(field, time=time, rc=localrc)
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
+          j = j+1
+          fieldListSet(j) = field
         endif
       enddo
+      if (j>0) then
+        call NUOPC_SetTimestamp(fieldListSet(1:j), time=time, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)) &
+          return  ! bail out
+      endif
+      deallocate(fieldListSet)
     endif
     
-    if (associated(StandardNameList)) deallocate(StandardNameList)
-    if (associated(itemNameList)) deallocate(itemNameList)
     if (associated(fieldList)) deallocate(fieldList)
     
   end subroutine
@@ -4344,7 +4843,7 @@ module NUOPC_Base
     logical,          intent(in),  optional :: selective
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Set the "TimeStamp" attribute according to {\tt clock} on all the fields in
+!   Set the TimeStamp according to {\tt clock} on all the fields in
 !   {\tt state}. Depending on {\tt selective}, all or only some fields may be
 !   updated.
 !
@@ -4354,13 +4853,13 @@ module NUOPC_Base
 !   The arguments are:
 !   \begin{description}
 !   \item[state]
-!     The {\tt ESMF\_State} object holding the fields.
+!     The {\tt ESMF\_State} object holding the fields to be time stampped.
 !   \item[clock]
 !     The {\tt ESMF\_Clock} object defining the TimeStamp by its current time.
 !   \item[{[selective]}]
-!     If {\tt .true.}, then only set the "TimeStamp" attributes on those fields
+!     If {\tt .true.}, then only set the TimeStamp on those fields
 !     for which the "Updated" attribute is equal to "true". Otherwise set the
-!     "TimeStamp" attribute on all the fields. Default is {\tt .false.}.
+!     TimeStamp on all the fields. Default is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4401,8 +4900,8 @@ module NUOPC_Base
     integer,          intent(in)            :: rootPet
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Update the "TimeStamp" attribute for all the fields on all the PETs in the
-!   current VM to the "TimeStamp" attribute held by the field instance on the 
+!   Update the TimeStamp for all the fields on all the PETs in the
+!   current VM to the TimeStamp held by the field instance on the 
 !   {\tt rootPet}.
 !
 !   This call should rarely be needed in user written code. It is used 
@@ -4413,7 +4912,7 @@ module NUOPC_Base
 !   \item[fieldList]
 !     List of {\tt ESMF\_Field} objects to be handled.
 !   \item[rootPet]
-!     Root PET from where to propagate the "TimeStamp" across all other PETs.
+!     Root PET from where to propagate the TimeStamp across all other PETs.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4426,17 +4925,16 @@ module NUOPC_Base
     integer, pointer          :: valueList(:,:)
     integer, pointer          :: valueListPtr(:)
     type(ESMF_VM)             :: vm
-    type(ESMF_Info)           :: info
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-      
+
     call ESMF_VMGet(vm, localPet=localPet, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -4449,18 +4947,12 @@ module NUOPC_Base
       count=size(fieldList)
       allocate(valueList(10,count))
       valueListPtr => valueList(:,1)
-      
+
       ! construct the valueList on the rootPet
       if (localPet == rootPet) then
         do i=1, count
-          call ESMF_InfoGetFromHost(fieldList(i), info=info, rc=localrc)
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-          call ESMF_InfoGet(info, key="/NUOPC/Instance/TimeStamp", &
-            values=valueList(:,i), rc=localrc)
+          call ESMF_FieldGetTimestamp(fieldList(i), timestamp=valueList(:,i), &
+            rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME, &
@@ -4477,18 +4969,12 @@ module NUOPC_Base
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-        
+
       ! fill in timestamp info on all other PETs
       if (localPet /= rootPet) then
         do i=1, count
-          call ESMF_InfoGetFromHost(fieldList(i), info=info, rc=localrc)
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-          call ESMF_InfoSet(info, key="/NUOPC/Instance/TimeStamp", &
-            values=valueList(:,i), rc=localrc)
+          call ESMF_FieldSetTimestamp(fieldList(i), timestamp=valueList(:,i), &
+            rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME, &
@@ -4496,10 +4982,10 @@ module NUOPC_Base
             return  ! bail out
         enddo
       endif
-      
+
       deallocate(valueList)
     endif
-    
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -4514,7 +5000,7 @@ module NUOPC_Base
     type(ESMF_Field), pointer               :: dstFieldList(:)
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Update the "TimeStamp" attribute on each field in {\tt dstFieldList} 
+!   Update the TimeStamp on each field in {\tt dstFieldList} 
 !   according to the corresponding (by position) field in the
 !   {\tt srcFieldList}. The number of elements in {\tt dstFieldList} and
 !   {\tt srcFieldList} must be equal. The update is carried out locally on 
@@ -4526,11 +5012,10 @@ module NUOPC_Base
 !   The arguments are:
 !   \begin{description}
 !   \item[srcFieldList]
-!     List of {\tt ESMF\_Field} objects providing the valid "TimeStamp"
-!     attribute.
+!     List of {\tt ESMF\_Field} objects providing the valid TimeStamp.
 !   \item[dstFieldList]
 !     List of {\tt ESMF\_Field} objects that will receive the updated
-!     "TimeStamp" attribute.
+!     TimeStamp.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4541,10 +5026,9 @@ module NUOPC_Base
     type(ESMF_Field)              :: srcField, dstField
     integer                       :: localrc
     integer                       :: i, valueList(10), srcCount, dstCount
-    type(ESMF_Info)               :: info
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     if (.not.associated(srcFieldList)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="must be associated",&
         line=__LINE__, &
@@ -4571,22 +5055,13 @@ module NUOPC_Base
     do i=1, srcCount    
       srcField = srcFieldList(i)
       dstField = dstFieldList(i)
-      call ESMF_InfoGetFromHost(srcField, info=info, rc=localrc)
+      call ESMF_FieldGetTimestamp(srcField, timestamp=valueList, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-      call ESMF_InfoGet(info, key="/NUOPC/Instance/TimeStamp", &
-        values=valueList, rc=localrc)
-      call ESMF_InfoGetFromHost(dstField, info=info, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-      call ESMF_InfoSet(info, key="/NUOPC/Instance/TimeStamp", &
-        values=valueList, rc=localrc)
+      call ESMF_FieldSetTimestamp(dstField, timestamp=valueList, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -4608,7 +5083,7 @@ module NUOPC_Base
     type(ESMF_FieldBundle), intent(inout)         :: dstFields
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Update the "TimeStamp" attribute on all the fields in the {\tt dstFields}
+!   Update the TimeStamp on all the fields in the {\tt dstFields}
 !   FieldBundle to be the same as in the {\tt srcFields} FieldBundle. The number
 !   of elements in both FieldBundles must be equal. The update is carried out 
 !   locally on each PET.
@@ -4619,9 +5094,9 @@ module NUOPC_Base
 !   The arguments are:
 !   \begin{description}
 !   \item[srcFields]
-!     FieldBundle providing the valid "TimeStamp" attributes.
+!     FieldBundle providing the valid TimeStamp.
 !   \item[dstFields]
-!     FieldBundle that will receive the updated "TimeStamp" attributes.
+!     FieldBundle that will receive the updated TimeStamp.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4693,8 +5168,8 @@ module NUOPC_Base
     integer,          intent(in)            :: rootPet
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Update the "TimeStamp" attribute for all the fields on all the PETs in the
-!   current VM to the "TimeStamp" attribute held by the field instance on the 
+!   Update the TimeStamp for all the fields on all the PETs in the
+!   current VM to the TimeStamp held by the field instance on the 
 !   {\tt rootPet}.
 !
 !   This call should rarely be needed in user written code. It is used 
@@ -4705,7 +5180,7 @@ module NUOPC_Base
 !   \item[state]
 !     The {\tt ESMF\_State} object holding the fields.
 !   \item[rootPet]
-!     Root PET from where to propagate the "TimeStamp" across all other PETs.
+!     Root PET from where to propagate the TimeStamp across all other PETs.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4864,6 +5339,213 @@ module NUOPC_Base
     
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine NUOPC_SetVM(gcomp, rc)
+    type(ESMF_GridComp)  :: gcomp
+    integer, intent(out) :: rc
+
+    ! local variables
+    type(ESMF_VM)             :: gvm
+    character(ESMF_MAXSTR)    :: name
+    logical                   :: pthreadsEnabled
+    logical                   :: isPresent, isStructured
+    logical                   :: isPresent2, isStructured2
+    logical                   :: forceChildPthreads
+    integer                   :: value
+    integer                   :: size, idx
+    integer                   :: size2, idx2
+    type(ESMF_Info)           :: info
+    character(80)             :: ikey
+    character(80)             :: ikey2
+    integer                   :: maxCount, pthreadMinStackSize, openMpNumThreads
+    character(40)             :: msgString, openMpHandling
+
+    rc = ESMF_SUCCESS
+
+    ! query the component for info
+    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+#ifdef DEBUG_SETVM_on
+    call ESMF_LogWrite("Generic SetVM() is executing for: "// &
+      trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+
+    ! query global information about this ESMF execution instance
+    call ESMF_VMGetGlobal(gvm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_VMGet(gvm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! iterate through NUOPC Hints
+
+    call ESMF_InfoGetFromHost(gcomp, info=info, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    call ESMF_InfoGet(info, key="/NUOPC/Hint", isPresent=isPresent, &
+      isStructured=isStructured, size=size, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    if (isPresent .and. isStructured) then
+      do idx=1, size
+        call ESMF_InfoGet(info, key="/NUOPC/Hint", idx=idx, ikey=ikey, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (trim(ikey)=="PePerPet") then
+          ! conditionally error out if call into SetVM cannot be supported
+          if (.not.pthreadsEnabled) then
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Generic SetVM() detected lacking Pthreads "// &
+              "support for: "//trim(name), &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+            return  ! bail out
+          endif
+          ! set defaults
+          maxCount = -1
+          openMpHandling = ""
+          openMpNumThreads = -1
+          forceChildPthreads = .false.
+          pthreadMinStackSize = -1
+          ! iterate through the PePerPet hint
+          call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", &
+            isPresent=isPresent2, isStructured=isStructured2, size=size2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (isPresent2 .and. isStructured2) then
+            do idx2=1, size2
+              call ESMF_InfoGet(info, key="/NUOPC/Hint/PePerPet", idx=idx2, &
+                ikey=ikey2, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (trim(ikey2)=="MaxCount") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/MaxCount", &
+                  value=maxCount, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="OpenMpHandling") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/OpenMpHandling", &
+                  value=openMpHandling, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="OpenMpNumThreads") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/OpenMpNumThreads", &
+                  value=openMpNumThreads, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="ForceChildPthreads") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/ForceChildPthreads", &
+                  value=forceChildPthreads, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              elseif (trim(ikey2)=="PthreadMinStackSize") then
+                call ESMF_InfoGet(info, &
+                  key="/NUOPC/Hint/PePerPet/PthreadMinStackSize", &
+                  value=pthreadMinStackSize, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              else
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="Unknown NUOPC Hint: "//trim(ikey)//"/"//trim(ikey2), &
+                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+                return  ! bail out
+              endif
+            enddo
+          endif
+          ! make the actual call into ESMF_GridCompSetVMMaxPEs()
+#ifdef DEBUG_SETVM_on
+          call ESMF_LogWrite("Generic SetVM() is calling "// &
+            "ESMF_GridCompSetVMMaxPEs() for: "// &
+            trim(name)//" with:", ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "MaxCount", maxCount
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',A10)") "OpenMpHandling", &
+            trim(openMpHandling)
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "OpenMpNumThreads", &
+            openMpNumThreads
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',L10)") "ForceChildPthreads", &
+            forceChildPthreads
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          write(msgString,"(' - ',A20,' = ',I10)") "PthreadMinStackSize", &
+            pthreadMinStackSize
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_DEBUG, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+          if (maxCount == -1 .and. pthreadMinStackSize == -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, openMpHandling=openMpHandling,&
+              openMpNumThreads=openMpNumThreads, &
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount > -1 .and. pthreadMinStackSize == -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
+              openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount == -1 .and. pthreadMinStackSize > -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, &
+              pthreadMinStackSize=pthreadMinStackSize, &
+              openMpHandling=openMpHandling, openMpNumThreads=openMpNumThreads,&
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else if (maxCount > -1 .and. pthreadMinStackSize > -1) then
+            call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=maxCount, &
+              pthreadMinStackSize=pthreadMinStackSize, &
+              openMpHandling=openMpHandling, &
+              openMpNumThreads=openMpNumThreads, &
+              forceChildPthreads=forceChildPthreads, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="Unknown NUOPC Hint: "//trim(ikey), &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+          return  ! bail out
+        endif
+      enddo
+    else
+#ifdef DEBUG_SETVM_on
+      call ESMF_LogWrite("Generic SetVM() found no NUOPC Hint for: "// &
+        trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogWrite("Generic SetVM() therefore is NOT calling "// &
+        "ESMF_GridCompSetVMMaxPEs() for: "// &
+        trim(name), ESMF_LOGMSG_DEBUG, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+    endif
 
   end subroutine
   !-----------------------------------------------------------------------------

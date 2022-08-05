@@ -97,11 +97,19 @@ extern void *MPIUNI_TMP;
 #define MPI_STATUS_IGNORE    0
 
 /* External types */
-typedef int    MPI_Comm;  
+typedef int    MPI_Comm;
 typedef void   *MPI_Request;
 typedef void   *MPI_Group;
 typedef struct {int MPI_TAG,MPI_SOURCE,MPI_ERROR;} MPI_Status;
-typedef char*   MPI_Errhandler;
+typedef char*  MPI_Errhandler;
+typedef int    MPI_T_enum;
+/* NOTE: the C type MPI_Offset is NOT the same as MPI datatype MPI_OFFSET */
+typedef long long int MPI_Offset;
+typedef int MPI_Info;         /* handle */
+
+#define MPI_INFO_NULL (0)
+
+
 
 extern int MPIUNI_Memcpy(void*,const void*,int);
 
@@ -122,7 +130,14 @@ extern int MPIUNI_Memcpy(void*,const void*,int);
 #define MPI_SHORT           sizeof(short)
 #define MPI_UB              sizeof(long)
 #define MPI_FLOAT_INT       (sizeof(float)+sizeof(int))
+#define MPI_DOUBLE_INT      (sizeof(double)+sizeof(int))
+#define MPI_LONG_INT        (sizeof(long)+sizeof(int))
 #define MPI_2INT            (2*sizeof(int))
+#define MPI_SHORT_INT       (sizeof(short)+sizeof(int))
+#define MPI_LONG_DOUBLE_INT (sizeof(long double)+sizeof(int))
+#define MPI_2REAL           (2*sizeof(float))
+#define MPI_2DOUBLE_PRECISION (2*sizeof(double))
+#define MPI_2INTEGER        (2*sizeof(int))
 #define MPI_UNSIGNED_CHAR   sizeof(unsigned char)
 #define MPI_UNSIGNED_LONG   sizeof(unsigned long)
 #define MPIU_PETSCLOGDOUBLE sizeof(PetscLogDouble)
@@ -644,7 +659,11 @@ extern double ESMC_MPI_Wtime(void);
      MPI_SUCCESS)
 #define MPI_Errhandler_get(comm,errhandler) MPI_SUCCESS
 #define MPI_Errhandler_free(errhandler) MPI_SUCCESS
-#define MPI_Error_string(errorcode,string,result_len) MPI_SUCCESS
+#define MPI_Error_string(errorcode,string,result_len) \
+  (MPIUNI_TMP = (void*)(long) (errorcode),\
+   string[0]='\0', \
+   *result_len=0, \
+   MPI_SUCCESS)
 #define MPI_Error_class(errorcode,errorclass) MPI_SUCCESS
 #define MPI_Wtick() 1.0
 /*gjt replaced this with real function call #define MPI_Wtime() 0.0 */
@@ -656,6 +675,16 @@ extern double ESMC_MPI_Wtime(void);
 
 #define MPI_Comm_c2f(comm) ((int)comm)
 #define MPI_Comm_f2c(comm) ((MPI_Comm)comm)
+
+#define MPI_Group_c2f(group) ((int)group)
+#define MPI_Group_f2c(group) ((MPI_Group)group)
+
+/* MPI_T API */
+#define MPI_T_finalize() (MPI_SUCCESS)
+#define MPI_T_cvar_get_num(num) \
+  (*num=0, \
+  MPI_SUCCESS)
+
 
 #ifdef __cplusplus
 }

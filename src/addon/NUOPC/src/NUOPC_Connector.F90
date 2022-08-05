@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -11,6 +11,8 @@
 !==============================================================================
 #define FILENAME "src/addon/NUOPC/src/NUOPC_Connector.F90"
 !==============================================================================
+
+#define DEBUGLOG_off
 
 module NUOPC_Connector
 
@@ -74,6 +76,8 @@ module NUOPC_Connector
     integer                             :: srcFieldCount
     integer                             :: dstFieldCount    
     logical                             :: srcDstOverlap
+    logical                             :: srcFlag
+    logical                             :: dstFlag
     type(ESMF_RouteHandle)              :: rh
     type(ESMF_State)                    :: state
     type(ESMF_Region_Flag), pointer     :: zeroRegions(:)
@@ -155,7 +159,11 @@ module NUOPC_Connector
       msg="Allocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompSetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompSetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! initialize internal state members that require sepcial treatment
@@ -285,6 +293,20 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -346,7 +368,11 @@ module NUOPC_Connector
 
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -424,6 +450,20 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1019,6 +1059,20 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1296,6 +1350,20 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1627,6 +1695,20 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1726,7 +1808,7 @@ module NUOPC_Connector
     endif
 
   end subroutine
-  
+
   !-----------------------------------------------------------------------------
 
   subroutine InitializeIPDv05p3(connector, importState, exportState, clock, rc)
@@ -1734,7 +1816,7 @@ module NUOPC_Connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
-    
+
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p3"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
@@ -1777,8 +1859,22 @@ module NUOPC_Connector
       diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1790,7 +1886,7 @@ module NUOPC_Connector
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
     ! handle diagnostic
     if (diagnostic>0) then
       call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
@@ -1833,10 +1929,14 @@ module NUOPC_Connector
     nullify(exportFieldList)
     nullify(exportNamespaceList)
     nullify(exportCplSetList)
-    
+
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1864,7 +1964,7 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(connector, name="CplList", &
       itemCount=cplListSize, rc=rc)
@@ -1929,12 +2029,12 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-    ! clean starting condition for pointer member inside internal state   
+    ! clean starting condition for pointer member inside internal state
     do i=1, is%wrap%cplSetCount
       nullify(is%wrap%cplSet(i)%zeroRegions)
       nullify(is%wrap%cplSet(i)%termOrders)
     enddo
-    
+
     ! prepare chopStringList
     nullify(chopStringList)
 
@@ -1957,7 +2057,7 @@ module NUOPC_Connector
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
-      
+
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
@@ -1980,12 +2080,12 @@ module NUOPC_Connector
                 exportNamespaceList(eMatch), &
                 importCplSetList(iMatch), &
                 exportCplSetList(eMatch))
-              
+
             if (bondLevel == -1) cycle  ! break out and look for next match
-            
-            ! Getting to this place in the double loop means that the 
+
+            ! Getting to this place in the double loop means that the
             ! standard name match has a connection that supports the match.
-            
+
             ! -> look at the current ProducerConnection entry to see what to do
             eField = exportFieldList(eMatch)
             call NUOPC_GetAttribute(eField, name="ProducerConnection", &
@@ -2002,12 +2102,12 @@ module NUOPC_Connector
                 exit
               endif
             endif
-            
+
           endif
         enddo
         if (foundFlag) exit
       enddo
-      
+
       if (.not.foundFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Bad internal error - should never get here!",&
@@ -2015,7 +2115,7 @@ module NUOPC_Connector
           rcToReturn=rc)
         return  ! bail out
       endif
-      
+
       if (btest(verbosity,12)) then
         write (msgString, '(A)') trim(name)//": - connected."
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2023,12 +2123,12 @@ module NUOPC_Connector
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
-      
+
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
         iField=importFieldList(iMatch)
         eField=exportFieldList(eMatch)
-        
+
         ! set the connected Attribute on import Field
         call NUOPC_SetAttribute(iField, name="Connected", value="true", &
           rc=rc)
@@ -2043,7 +2143,7 @@ module NUOPC_Connector
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        
+
         ! coordinate the transfer and sharing between components
         call NUOPC_GetAttribute(iField, name="ProducerTransferOffer", &
           value=iTransferOffer, rc=rc)
@@ -2280,7 +2380,7 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           ! now know globally whether this is a sharable situation or not
           if (helperOut == 0) sharable = .true.
-        
+
           if (btest(verbosity,12)) then
             if (sharable) then
               write (msgString, '(A)') trim(name)//": "//&
@@ -2302,7 +2402,7 @@ module NUOPC_Connector
           endif
 
           if (sharable) then
-            ! One side accepts the other and VMs allow sharing 
+            ! One side accepts the other and VMs allow sharing
             ! Look at GeomObject sharing
             call NUOPC_GetAttribute(iField, name="SharePolicyGeomObject", &
               value=iSharePolicy, rc=rc)
@@ -2334,7 +2434,7 @@ module NUOPC_Connector
             else
               ! at least one side does not want to share -> not shared
               ! but don't modify attribute here because if alread shared through
-              ! another connection, it must stay shared. Rely on "not shared" 
+              ! another connection, it must stay shared. Rely on "not shared"
               ! default.
               if (btest(verbosity,12)) then
                 write (msgString, '(A)') trim(name)//": "//&
@@ -2378,7 +2478,7 @@ module NUOPC_Connector
             else
               ! at least one side does not want to share -> not shared
               ! but don't modify attribute here because if alread shared through
-              ! another connection, it must stay shared. Rely on "not shared" 
+              ! another connection, it must stay shared. Rely on "not shared"
               ! default.
               if (btest(verbosity,12)) then
                 write (msgString, '(A)') trim(name)//": "//&
@@ -2409,12 +2509,12 @@ module NUOPC_Connector
     if (associated(exportFieldList)) deallocate(exportFieldList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
-    
-    ! create the State member    
-    is%wrap%state = ESMF_StateCreate(rc=rc)
+
+    ! create the State member
+    is%wrap%state = ESMF_StateCreate(name=trim(name)//"-State", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
     ! handle diagnostic
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
@@ -2434,7 +2534,7 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2449,7 +2549,7 @@ module NUOPC_Connector
     endif
 
   end subroutine
-  
+
   !-----------------------------------------------------------------------------
 
   subroutine InitializeIPDv05p4(connector, importState, exportState, clock, rc)
@@ -2457,7 +2557,7 @@ module NUOPC_Connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
-    
+
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p4"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
@@ -2527,8 +2627,22 @@ module NUOPC_Connector
       diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2585,10 +2699,14 @@ module NUOPC_Connector
     nullify(exportStateList)
     nullify(exportNamespaceList)
     nullify(exportCplSetList)
-    
+
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2603,16 +2721,28 @@ module NUOPC_Connector
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-import:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-export:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     if (btest(profiling,2)) then
       call ESMF_TraceRegionExit("Reconcile", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(connector, name="CplList", &
       itemCount=cplListSize, rc=rc)
@@ -2665,12 +2795,12 @@ module NUOPC_Connector
 
     ! prepare chopStringList
     nullify(chopStringList)
-    
+
     ! prepare gridList
     nullify(gridList)
     ! prepare meshList
     nullify(meshList)
-    
+
     ! main loop over all entries in the cplList
     do i=1, cplListSize
       call NUOPC_ChopString(cplList(i), chopChar=":", &
@@ -2679,7 +2809,7 @@ module NUOPC_Connector
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
-      
+
       if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
@@ -2690,7 +2820,7 @@ module NUOPC_Connector
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
-      
+
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
@@ -2713,12 +2843,12 @@ module NUOPC_Connector
               exportNamespaceList(eMatch), &
               importCplSetList(iMatch), &
               exportCplSetList(eMatch))
-              
+
             if (bondLevel == -1) cycle  ! break out and look for next match
-            
-            ! Getting to this place in the double loop means that the 
+
+            ! Getting to this place in the double loop means that the
             ! standard name match has a connection that supports the match.
-            
+
             ! -> look at the current ProducerConnection entry to see what to do
             eField = exportFieldList(eMatch)
             call NUOPC_GetAttribute(eField, name="ProducerConnection", &
@@ -2735,12 +2865,12 @@ module NUOPC_Connector
                 exit
               endif
             endif
-            
+
           endif
         enddo
         if (foundFlag) exit
       enddo
-      
+
       if (.not.foundFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Bad internal error - should never get here!",&
@@ -2748,12 +2878,12 @@ module NUOPC_Connector
           rcToReturn=rc)
         return  ! bail out
       endif
-      
+
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
         iField=importFieldList(iMatch)
         eField=exportFieldList(eMatch)
-        
+
         ! check if TransferAction of one side is "accept"
         call NUOPC_GetAttribute(iField, name="ProducerTransferAction", &
           value=iTransferAction, rc=rc)
@@ -2763,7 +2893,7 @@ module NUOPC_Connector
           value=eTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          
+
         if ((trim(iTransferAction)=="provide") &
           .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
@@ -2790,10 +2920,10 @@ module NUOPC_Connector
           endif
           cycle ! continue with the next i
         endif
-        
+
         ! there is transfer: provider -> acceptor
         ! determine if there is any sharing of GeomObject and/or Field
-        
+
         call NUOPC_GetAttribute(iField, name="ShareStatusGeomObject", &
           value=iShareStatusG, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2875,7 +3005,7 @@ module NUOPC_Connector
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        
+
         ! ESMF_GEOMTYPE_GRID
         if (geomtype==ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(providerField, grid=grid, staggerloc=staggerloc, &
@@ -2888,9 +3018,13 @@ module NUOPC_Connector
               staggerloc=staggerloc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
-call ESMF_PointerLog(grid%this, prefix="acceptorField set persistent shared Grid: ", rc=rc)
             ! must make Grid persistent to be safe when sharing with other VM
-            call c_ESMC_SetPersist(grid, ESMF_TRUE, rc=rc)
+#ifdef DEBUGLOG_on
+            call ESMF_PointerLog(grid%this, &
+              prefix="acceptorField set persistent shared provider Grid: ", &
+              logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
+            call c_ESMC_SetPersist(grid, ESMF_TRUE, rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
@@ -2900,19 +3034,24 @@ call ESMF_PointerLog(grid%this, prefix="acceptorField set persistent shared Grid
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if provider grid has been dealt with before
+            ! key in on provider grid as to only transfer each provider grid once
             gridListMatch=.false.
             gridListE=>gridList
             do while (associated(gridListE))
-call ESMF_PointerLog(grid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", rc=rc)
-call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
-call ESMF_PointerLog(gridListE%keyGrid%this, &
-                                prefix="    to keyGrid: "//trim(msgString)//": ", rc=rc)
-!TODO: Actually want to check for alias match.
-!              if (gridListE%providerGrid == grid) then
-!TODO: But for now this does not work due to proxy duplication, and as a 
-!TODO: work-around matching is done by name. This is very fragile and should
-!TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+#ifdef DEBUGLOG_on
+              call ESMF_PointerLog(grid%this, &
+                prefix="Comparing provider Grid: "//trim(geomobjname)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+              call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
+              call ESMF_PointerLog(gridListE%keyGrid%this, &
+                prefix="    to provider keyGrid: "//trim(msgString)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
+              if (gridListE%keyGrid == grid) then ! checking for grid alias
+#ifdef DEBUGLOG_on
+                call ESMF_LogWrite("Matching provider Grid found!", &
+                  ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
                 gridListMatch=.true.
                 exit
               endif
@@ -2920,7 +3059,8 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
             enddo
             if (btest(verbosity,11)) then
               write(msgString, *) "gridListMatch=", gridListMatch
-              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Grid: "&
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//&
+                " for provider Grid: " &
                 //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3099,7 +3239,6 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
                endif
             endif
           endif
-          
           ! clean-up
           deallocate(minIndex, maxIndex, stat=rc)
           if (ESMF_LogFoundDeallocError(rc, &
@@ -3119,7 +3258,7 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
               msg="Deallocating ungriddedUBound", &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
-        
+
         ! ESMF_GEOMTYPE_MESH
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
           call ESMF_FieldGet(providerField, mesh=mesh, meshloc=meshloc, rc=rc)
@@ -3134,9 +3273,13 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-call ESMF_PointerLog(mesh%this, prefix="acceptorField set persistent shared Mesh: ", rc=rc)
+#ifdef DEBUGLOG_on
+            call ESMF_PointerLog(mesh%this, &
+              prefix="acceptorField set persistent shared acceptor Mesh: ", &
+              logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
             ! must make Mesh persistent to be safe when sharing with other VM
-            call c_ESMC_SetPersist(mesh, ESMF_TRUE, rc=rc)
+            call c_ESMC_SetPersist(mesh, ESMF_TRUE, rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return
           else
@@ -3146,19 +3289,24 @@ call ESMF_PointerLog(mesh%this, prefix="acceptorField set persistent shared Mesh
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if provider mesh has been dealt with before
+            ! key in on provider mesh as to only transfer each provider mesh once
             meshListMatch=.false.
             meshListE=>meshList
             do while (associated(meshListE))
-call ESMF_PointerLog(mesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", rc=rc)
-call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
-call ESMF_PointerLog(meshListE%keyMesh%this, &
-                                prefix="    to keyMesh: "//trim(msgString)//": ", rc=rc)
-!TODO: Actually want to check for alias match.
-!              if (meshListE%providerMesh == mesh) then
-!TODO: But for now this does not work due to proxy duplication, and as a 
-!TODO: work-around matching is done by name. This is very fragile and should
-!TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+#ifdef DEBUGLOG_on
+              call ESMF_PointerLog(mesh%this, &
+                prefix="Comparing provider Mesh: "//trim(geomobjname)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+              call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
+              call ESMF_PointerLog(meshListE%keyMesh%this, &
+                prefix="    to provider keyMesh: "//trim(msgString)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
+              if (meshListE%keyMesh == mesh) then ! checking for mesh alias
+#ifdef DEBUGLOG_on
+                call ESMF_LogWrite("Matching provider Mesh found!", &
+                  ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
                 meshListMatch=.true.
                 exit
               endif
@@ -3166,7 +3314,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
             enddo
             if (btest(verbosity,11)) then
               write(msgString, *) "meshListMatch=", meshListMatch
-              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Mesh: "&
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)// &
+                " for provider Mesh: " &
                 //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3204,9 +3353,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
               acceptorDG_nodal = ESMF_DistGridCreate(providerDG_nodal, vm=vm, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              !TODO: When Mesh implements a name, make sure to transfer it here!
               mesh = ESMF_MeshCreate(acceptorDG, nodalDistgrid=acceptorDG_nodal, &
-                rc=rc)
+                name=geomobjname, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               if (btest(verbosity,11)) then
@@ -3317,7 +3465,6 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
                endif
             endif
           endif
-
           ! clean-up
           deallocate(gridToFieldMap, stat=rc)
           if (ESMF_LogFoundDeallocError(rc, &
@@ -3484,7 +3631,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (associated(exportStateList)) deallocate(exportStateList)
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
-    
+
     ! handle diagnostic
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
@@ -3527,7 +3674,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
-    
+
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p5"
     character(ESMF_MAXSTR), pointer :: cplList(:), chopStringList(:)
@@ -3579,7 +3726,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     type(GridL), pointer            :: gridList, gridListE
     logical                         :: gridListMatch
-    
+
     type(MeshL), pointer            :: meshList, meshListE
     logical                         :: meshListMatch
 
@@ -3590,8 +3737,22 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       diagnostic=diagnostic, profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3651,7 +3812,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3666,16 +3831,28 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-import:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-export:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     if (btest(profiling,2)) then
       call ESMF_TraceRegionExit("Reconcile", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! get the cplList Attribute
     call NUOPC_CompAttributeGet(connector, name="CplList", &
       itemCount=cplListSize, rc=rc)
@@ -3725,7 +3902,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       namespaceList=exportNamespaceList, cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
     ! prepare chopStringList
     nullify(chopStringList)
 
@@ -3733,7 +3910,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     nullify(gridList)
     ! prepare meshList
     nullify(meshList)
-    
+
     ! main loop over all entries in the cplList
     do i=1, cplListSize
       call NUOPC_ChopString(cplList(i), chopChar=":", &
@@ -3742,7 +3919,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
-      
+
       if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
@@ -3753,7 +3930,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
-      
+
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
@@ -3776,12 +3953,12 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
               exportNamespaceList(eMatch), &
               importCplSetList(iMatch), &
               exportCplSetList(eMatch))
-              
+
             if (bondLevel == -1) cycle  ! break out and look for next match
-            
-            ! Getting to this place in the double loop means that the 
+
+            ! Getting to this place in the double loop means that the
             ! standard name match has a connection that supports the match.
-            
+
             ! -> look at the current ProducerConnection entry to see what to do
             eField = exportFieldList(eMatch)
             call NUOPC_GetAttribute(eField, name="ProducerConnection", &
@@ -3798,12 +3975,12 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
                 exit
               endif
             endif
-            
+
           endif
         enddo
         if (foundFlag) exit
       enddo
-      
+
       if (.not.foundFlag) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg="Bad internal error - should never get here!",&
@@ -3811,7 +3988,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           rcToReturn=rc)
         return  ! bail out
       endif
-      
+
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
         iField=importFieldList(iMatch)
@@ -3826,7 +4003,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           value=eTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          
+
         if ((trim(iTransferAction)=="provide") &
           .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
@@ -3854,7 +4031,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
         ! there is transfer: provider -> acceptor
         ! determine if there is any sharing of GeomObject and/or Field
-        
+
         call NUOPC_GetAttribute(iField, name="ShareStatusGeomObject", &
           value=iShareStatusG, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3935,6 +4112,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+          ! ESMF_GEOMTYPE_GRID
           if (geomtype==ESMF_GEOMTYPE_GRID) then
             call ESMF_FieldGet(acceptorField, grid=acceptorGrid, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3943,19 +4122,27 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if old acceptor grid has been dealt with before
+            ! key in on old acceptor grid here (and not provider grid!) because
+            ! it must be assumed that the acceptor side has created separate
+            ! acceptor grids for the same transferred provider grid in the
+            ! previous phase
             gridListMatch=.false.
             gridListE=>gridList
             do while (associated(gridListE))
-call ESMF_PointerLog(acceptorGrid%this, prefix="Comparing Grid: "//trim(geomobjname)//": ", rc=rc)
-call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
-call ESMF_PointerLog(gridListE%keyGrid%this, &
-                                        prefix="    to keyGrid: "//trim(msgString)//": ", rc=rc)
-!TODO: Actually want to check for alias match.
-!              if (acceptorGrid == gridListE%keyGrid) then
-!TODO: But for now this does not work due to proxy duplication, and as a 
-!TODO: work-around matching is done by name. This is very fragile and should
-!TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+#ifdef DEBUGLOG_on
+              call ESMF_PointerLog(acceptorGrid%this, &
+                prefix="Comparing acceptor Grid: "//trim(geomobjname)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+              call ESMF_GridGet(gridListE%keyGrid, name=msgString, rc=rc)
+              call ESMF_PointerLog(gridListE%keyGrid%this, &
+                prefix="    to acceptor keyGrid: "//trim(msgString)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
+              if (acceptorGrid == gridListE%keyGrid) then ! checking for grid alias
+#ifdef DEBUGLOG_on
+                call ESMF_LogWrite("Matching acceptor found!", &
+                  ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
                 gridListMatch=.true.
                 exit
               endif
@@ -3963,7 +4150,8 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
             enddo
             if (btest(verbosity,11)) then
               write(msgString, *) "gridListMatch=", gridListMatch
-              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Grid: "&
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)// &
+                " for acceptor Grid: " &
                 //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4039,6 +4227,8 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
                   return  ! bail out
                endif
             endif
+
+          ! ESMF_GEOMTYPE_MESH
           elseif (geomtype==ESMF_GEOMTYPE_MESH) then
             call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4047,19 +4237,27 @@ call ESMF_PointerLog(gridListE%keyGrid%this, &
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             ! see if old acceptor mesh has been dealt with before
+            ! key in on old acceptor mesh here (and not provider mesh!) because
+            ! it must be assumed that the acceptor side has created separate
+            ! acceptor meshes for the same transferred provider mesh in the
+            ! previous phase
             meshListMatch=.false.
             meshListE=>meshList
             do while (associated(meshListE))
-call ESMF_PointerLog(acceptorMesh%this, prefix="Comparing Mesh: "//trim(geomobjname)//": ", rc=rc)
-call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
-call ESMF_PointerLog(meshListE%keyMesh%this, &
-                                        prefix="    to keyMesh: "//trim(msgString)//": ", rc=rc)
-!TODO: Actually want to check for alias match.
-!              if (acceptorMesh == meshListE%keyMesh) then
-!TODO: But for now this does not work due to proxy duplication, and as a 
-!TODO: work-around matching is done by name. This is very fragile and should
-!TODO: be fixed as soon as we can rely on correct proxy behavior!
-              if (trim(geomobjname)==trim(msgString)) then
+#ifdef DEBUGLOG_on
+              call ESMF_PointerLog(acceptorMesh%this, &
+                prefix="Comparing acceptor Mesh: "//trim(geomobjname)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+              call ESMF_MeshGet(meshListE%keyMesh, name=msgString, rc=rc)
+              call ESMF_PointerLog(meshListE%keyMesh%this, &
+                prefix="    to acceptor keyMesh: "//trim(msgString)//": ", &
+                logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
+              if (acceptorMesh == meshListE%keyMesh) then ! checking for mesh alias
+#ifdef DEBUGLOG_on
+                call ESMF_LogWrite("Matching acceptor Mesh found!", &
+                  ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
                 meshListMatch=.true.
                 exit
               endif
@@ -4067,7 +4265,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
             enddo
             if (btest(verbosity,11)) then
               write(msgString, *) "meshListMatch=", meshListMatch
-              call ESMF_LogWrite(trim(name)//": "//trim(msgString)//" for Mesh: "&
+              call ESMF_LogWrite(trim(name)//": "//trim(msgString)// &
+                " for acceptor Mesh: " &
                 //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4100,7 +4299,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
               call ESMF_FieldGet(providerField, mesh=providerMesh, &
                 meshloc=meshloc, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out            
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               call ESMF_MeshGet(providerMesh, isMemFreed=meshNoConnections, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4115,7 +4314,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
                 acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                  nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, vm=vm, rc=rc)
+                  nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, vm=vm, &
+                  name=geomobjname, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               elseif (isPresentNDG.and. .not.isPresentEDG) then
@@ -4124,7 +4324,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
                 acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                  nodalDistgrid=nDistgrid, vm=vm, rc=rc)
+                  nodalDistgrid=nDistgrid, vm=vm, name=geomobjname, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               elseif (isPresentEDG.and. .not.isPresentNDG) then
@@ -4133,7 +4333,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
                 acceptorMesh = ESMF_MeshCreate(providerMesh, &
-                  elementDistgrid=eDistgrid, vm=vm, rc=rc)
+                  elementDistgrid=eDistgrid, vm=vm, name=geomobjname, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
               else
@@ -4179,6 +4379,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
                   return  ! bail out
                endif
             endif
+
+          ! ESMF_GEOMTYPE_LOCSTREAM
           elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
             call ESMF_FieldGet(providerField, locstream=providerLocstream, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4218,6 +4420,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
             if (sharedField) then
               !TODO: sharedField, can now be created because mesh is complete
             endif
+
+          ! unsupported ESMF_GEOMTYPE
           else
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
               msg="Provided GeomType must be Grid, Mesh, or LocStream.", &
@@ -4226,7 +4430,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
             return  ! bail out
           endif
         endif
-        
+
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
       endif
@@ -4237,12 +4441,28 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     do while (associated(gridList))
       gridListE=>gridList
       gridList=>gridList%prev
+#define CLEAN_OUT_OLD_ACCEPTOR_GRID
+#ifdef CLEAN_OUT_OLD_ACCEPTOR_GRID
+call ESMF_PointerLog(gridListE%keyGrid%this, prefix="about to destroy Grid: ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+      call ESMF_GridDestroy(gridListE%keyGrid, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
       deallocate(gridListE)
     enddo
     ! take down meshList
     do while (associated(meshList))
       meshListE=>meshList
       meshList=>meshList%prev
+#define CLEAN_OUT_OLD_ACCEPTOR_MESH
+#ifdef CLEAN_OUT_OLD_ACCEPTOR_MESH
+call ESMF_PointerLog(meshListE%keyMesh%this, prefix="about to destroy Mesh: ", &
+  logMsgFlag=ESMF_LOGMSG_DEBUG, rc=rc)
+      call ESMF_MeshDestroy(meshListE%keyMesh, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
       deallocate(meshListE)
     enddo
 
@@ -4278,7 +4498,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
-    
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4373,7 +4593,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
 
     ! create a helper state needed for reconciliation across Connector VM
-    state = ESMF_StateCreate(rc=rc)
+    state = ESMF_StateCreate(name=trim(name)//"-ShareFieldWithGrid-Temp-State",&
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
 
@@ -4516,7 +4737,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
 
     ! create a helper state needed for reconciliation across Connector VM
-    state = ESMF_StateCreate(rc=rc)
+    state = ESMF_StateCreate(name=trim(name)//"-ShareFieldWithMesh-Temp-State",&
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return
 
@@ -4604,6 +4826,20 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4658,9 +4894,21 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     call NUOPC_Reconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-import:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     call NUOPC_Reconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#if 0
+call ESMF_VMLogGarbageInfo(trim(name)//": "//rName//" Rec-export:", &
+  ESMF_LOGMSG_DEBUG, rc=rc)
+if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     if (btest(profiling,2)) then
       call ESMF_TraceRegionExit("Reconcile", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4762,6 +5010,20 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4819,7 +5081,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -5144,7 +5410,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     
     ! determine whether there is src/dst overlap on any PET
     call DetermineSrcDstOverlap(is%wrap%srcFieldList, is%wrap%dstFieldList, &
-      is%wrap%srcDstOverlap, verbosity, rc=rc)
+      is%wrap%srcDstOverlap, is%wrap%srcFlag, is%wrap%dstFlag, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -5240,15 +5506,16 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
   !-----------------------------------------------------------------------------
 
   subroutine DetermineSrcDstOverlap(srcFieldList, dstFieldList, srcDstOverlap, &
-    verbosity, rc)
+    srcFlag, dstFlag, verbosity, rc)
     type(ESMF_Field), pointer           :: srcFieldList(:)
     type(ESMF_Field), pointer           :: dstFieldList(:)
     logical,                intent(out) :: srcDstOverlap
+    logical,                intent(out) :: srcFlag
+    logical,                intent(out) :: dstFlag
     integer,                intent(in)  :: verbosity
     integer,                intent(out) :: rc
     ! local variables
     integer                           :: i, localPet
-    logical                           :: srcFlag, dstFlag
     type(ESMF_VM)                     :: vm
     character(ESMF_MAXSTR)            :: fieldName
     character(len=240)                :: msgString
@@ -5625,10 +5892,9 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     type(type_UpdatePacket), pointer  :: upE
     integer                           :: i, j, jj
     integer, pointer                  :: bufferPtr(:)
-    type(ESMF_Info)                   :: info
-    
+
     rc = ESMF_SUCCESS
-    
+
     call ESMF_VMGetCurrent(vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
@@ -5647,7 +5913,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       ! step to next element
       upE=>upE%prev
     enddo
-    
+
     ! traverse all packets, fill the sendBuffer and post the sends
     upE=>updatePackets
     do while (associated(upE))
@@ -5655,11 +5921,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         ! there are messages to be sent -> fill the sendBuffer
         do j=1, upE%fieldCount
           jj = upE%fieldIndex(j)
-          call ESMF_InfoGetFromHost(srcFieldList(jj), info=info, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-          call ESMF_InfoGet(info, key="/NUOPC/Instance/TimeStamp", &
-            values=upE%sendBuffer(:,j), rc=rc)
+          call ESMF_FieldGetTimestamp(srcFieldList(jj), &
+            timestamp=upE%sendBuffer(:,j), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         enddo
@@ -5688,11 +5951,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         ! fill in the reiceived timestamps
         do j=1, upE%fieldCount
           jj = upE%fieldIndex(j)
-          call ESMF_InfoGetFromHost(dstFieldList(jj), info=info, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-          call ESMF_InfoSet(info, key="/NUOPC/Instance/TimeStamp", &
-            values=upE%recvBuffer(:,j), rc=rc)
+          call ESMF_FieldSetTimestamp(dstFieldList(jj), &
+            timestamp=upE%recvBuffer(:,j), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         enddo
@@ -5702,7 +5962,7 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     enddo
 
   end subroutine
-    
+
   !-----------------------------------------------------------------------------
 
   subroutine DestroyUpdatePackets(updatePackets, rc)
@@ -5762,6 +6022,20 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5820,6 +6094,20 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle profiling
+    if (btest(profiling,9)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,0)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5865,14 +6153,14 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     type(type_InternalState)  :: is
     type(ESMF_VM)             :: vm
     integer                   :: localrc
-    logical                   :: existflag
+    logical                   :: existflag, isSet
     logical                   :: routeHandleIsCreated
     character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
     integer                   :: phase
     integer                   :: verbosity, diagnostic, profiling
     character(ESMF_MAXSTR)    :: name
-    integer                   :: i
+    integer                   :: i, epochThrottle
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
 
@@ -5885,6 +6173,20 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
     ! handle profiling
+    if (btest(profiling,10)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,3)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5949,10 +6251,29 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+    
+    ! conditional profiling for src/dst PETs
+    if (btest(profiling,3) .and. .not.is%wrap%srcDstOverlap) then
+      if (is%wrap%srcFlag) then
+        call ESMF_TraceRegionEnter(rName//"-srcPETs", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      elseif (is%wrap%dstFlag) then
+        call ESMF_TraceRegionEnter(rName//"-dstPETs", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+    
     ! store the incoming clock as driverClock in internal state
     is%wrap%driverClock = clock
 
@@ -5981,9 +6302,22 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       ! if not specialized -> use default method to execute the exchange
       ! Conditionally enter VMEpoch
       if (.not. is%wrap%srcDstOverlap) then
-        call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
+        call NUOPC_CompAttributeGet(connector, name="EpochThrottle", &
+          value=epochThrottle, isSet=isSet, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (isSet) then
+          ! using custom throttle
+          call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, &
+            throttle=epochThrottle, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        else
+          ! using default throttle
+          call ESMF_VMEpochEnter(epoch=ESMF_VMEPOCH_BUFFER, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
       endif
       ! call the SMM consistent with CplSets present or not
       if (is%wrap%cplSetCount > 1) then
@@ -6086,6 +6420,21 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! conditional profiling for src/dst PETs
+    if (btest(profiling,3) .and. .not.is%wrap%srcDstOverlap) then
+      if (is%wrap%srcFlag) then
+        call ESMF_TraceRegionExit(rName//"-srcPETs", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      elseif (is%wrap%dstFlag) then
+        call ESMF_TraceRegionExit(rName//"-dstPETs", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    endif
+
     ! handle profiling
     if (btest(profiling,3)) then
       call ESMF_TraceRegionExit(rName, rc=rc)
@@ -6126,6 +6475,20 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! handle profiling
+    if (btest(profiling,11)) then
+      call ESMF_TraceRegionEnter("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_VMBarrier(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TraceRegionExit("Leading Barrier", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(profiling,6)) then
       call ESMF_TraceRegionEnter(rName, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -6140,7 +6503,11 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
 
     ! query Component for its internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -6200,7 +6567,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (routeHandleIsCreated) then
-            call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, rc=rc)
+            call ESMF_FieldBundleRegridRelease(is%wrap%cplSet(i)%rh, &
+              noGarbage=.true., rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -6210,7 +6578,8 @@ call ESMF_PointerLog(meshListE%keyMesh%this, &
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         if (routeHandleIsCreated) then
-          call ESMF_FieldBundleRegridRelease(is%wrap%rh, rc=rc)
+          call ESMF_FieldBundleRegridRelease(is%wrap%rh, noGarbage=.true., &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
@@ -7869,7 +8238,11 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -8026,7 +8399,11 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 
     ! query Component for the internal State
     nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
     call ESMF_UserCompGetInternalState(connector, label_InternalState, is, localrc)
+#else
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc=localrc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out

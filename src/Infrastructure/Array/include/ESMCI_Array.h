@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -179,6 +179,7 @@ namespace ESMCI {
     LocalArray **larrayList;          // [ssiLocalDeCount] localDeCount first
     void **larrayBaseAddrList;        // [ssiLocalDeCount] localDeCount first
     VM::memhandle *mh;                // in case memory sharing between PETs
+    bool mhCreator;                   // responsible to delete mh resource
     int vasLocalDeCount;              // number of DEs that are in the same VAS
     int ssiLocalDeCount;              // number of DEs that are on the same SSI
     int *localDeToDeMap;              // [ssiLocalDeCount] mapping to DE
@@ -238,6 +239,8 @@ namespace ESMCI {
                           // TODO: reference counting scheme is implemented
                           // TODO: and DELayout cannot be pulled from under
                           // TODO: DistGrid and Array until they are destroyed.
+    VM *vmAux;            // need this b/c DELayout may not be available
+                          // during destroy (potentially destroyed before Array)
     RouteHandle *ioRH;    // RouteHandle to store redist if needed during IO
 
    public:
@@ -277,6 +280,7 @@ namespace ESMCI {
       rimLinIndex.resize(0);
       rimElementCount.resize(0);
       localDeCountAux = 0;  // auxiliary variable for garbage collection
+      vmAux = vm;
       ioRH = NULL;
     }
     Array(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
@@ -314,6 +318,7 @@ namespace ESMCI {
       rimLinIndex.resize(0);
       rimElementCount.resize(0);
       localDeCountAux = 0;  // auxiliary variable for garbage collection
+      vmAux = NULL;
       ioRH = NULL;
     }
    private:
@@ -336,7 +341,7 @@ namespace ESMCI {
     int constructContiguousFlag(int redDimCount);
     // create() and destroy()
     static Array *create(LocalArray **larrayList, int larrayCount,
-      DistGrid *distgrid, CopyFlag copyflag,
+      DistGrid *distgrid, DataCopyFlag copyflag,
       InterArray<int> *distgridToArrayMap,
       InterArray<int> *computationalEdgeLWidthArg,
       InterArray<int> *computationalEdgeUWidthArg,
@@ -357,7 +362,8 @@ namespace ESMCI {
       InterArray<int> *distLBoundArg,
       InterArray<int> *undistLBoundArg, InterArray<int> *undistUBoundArg,
       int *rc, VM *vm=NULL);
-    static Array *create(Array *array, int rmLeadingTensors=0, int *rc=NULL);
+    static Array *create(Array *array, DataCopyFlag copyflag,
+      DELayout *delayout=NULL, int rmLeadingTensors=0, int *rc=NULL);
     static Array *create(Array *array, bool rmTensorFlag, int *rc=NULL);
     static int destroy(Array **array, bool noGarbage=false);
     // data copy()
@@ -579,7 +585,7 @@ namespace ESMCI {
     }
     int getTensorSequenceIndex()const;
     int getArbSequenceIndexOffset()const;
-    void log()const;
+    void log(ESMC_LogMsgType_Flag msgType=ESMC_LOGMSG_INFO)const;
     void next(){
       bool adjusted = MultiDimIndexLoop::next();
       if (!isWithin()) return;  // reached the end of iteration
@@ -636,160 +642,5 @@ namespace ESMCI {
   //============================================================================
 
 } // namespace ESMCI
-
-
-
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-
-
-//-------------------------------------------------------------------------
-// The following code is for a first newArray prototype which I used
-// to check out some communication ideas: DE-nonblocking paradigm!
-//-------------------------------------------------------------------------
-
-
-#ifdef FIRSTNEWARRAYPROTOTYPE
-
-
-class ESMC_newArray;
-
-typedef struct{
-  int commhandleCount;
-  VMK::commhandle **vmk_commh;
-  int pthidCount;
-  pthread_t pthid[10];
-  void *buffer;
-}ESMC_newArrayCommHandle;
-
-typedef struct{
-  ESMC_newArray *array;     // pointer to calling ESMC_newArray object
-  ESMCI::VM *vm;            // pointer to current VM
-  int de;                   // DE for DE-based non-blocking operation
-  int rootPET;              // root
-  void *result;             // result memory location
-  ESMC_TypeKind_Flag dtk;   // data type kind
-  ESMC_Operation op;        // operation flag
-}ESMC_newArrayThreadArg;
-
-
-// class definition
-class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
-  private:
-    int rank;                 // rank of newArray
-    ESMC_TypeKind_Flag kind;  // kind of newArray (for F90)
-    int **globalDataLBound;   // dataBox for this DE [de][dim]
-    int **globalDataUBound;   // dataBox for this DE [de][dim]
-    int **localFullLBound;    // fullBox (data + halo) for this DE [de][dim]
-    int **localFullUBound;    // fullBox (data + halo) for this DE [de][dim]
-    int **globalFullLBound;   // fullBox (data + halo) for this DE [de][dim]
-    int **globalFullUBound;   // fullBox (data + halo) for this DE [de][dim]
-    int **dataOffset;         // offset dataBox vs. fullBox for DE [de][dim]
-    ESMCI::DELayout *delayout;// DELayout on which newArray is defined
-    LocalArray **localArrays; // array of LocalArray pointers [localDe]
-    ESMC_newArrayCommHandle *commhArray;  // array of commhandles [localDe]
-    ESMC_newArrayThreadArg *thargArray;   // array of thread args [localDe]
-    ESMC_newArrayThreadArg thargRoot;     // root's thread args
-
-    // cached VM information
-    int localVAS;             // VAS in which localPET operates
-                      // don't cache localPET because that might change
-    // cached DELayout information
-    int deCount;              // total number of DEs
-    int localDeCount;         // number of DEs that map onto localVAS
-    int *localDeToDeMap;      // list of local DEs
-    int *deVASList;           // list of VASs for all DEs
-
-  public:
-    // Construct and Destruct
-    int ESMC_newArrayConstruct(
-      LocalArray *larray,  // pointer to LocalArray object
-      int *haloWidth,           // halo width
-      ESMCI::DELayout *delayout,  // DELayout
-      int rootPET,              // root
-      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
-
-    int ESMC_newArrayDestruct(void);
-
-    // Get info
-    int ESMC_newArrayGet(int *rank, ESMCI::DELayout **delayout,
-      LocalArray **localArrays, int len_localArrays,
-      int *globalFullLBound, int *len_globalFullLBound,
-      int *globalFullUBound, int *len_globalFullUBound,
-      int *globalDataLBound, int *len_globalDataLBound,
-      int *globalDataUBound, int *len_globalDataUBound,
-      int *localDataLBound, int *len_localDataLBound,
-      int *localDataUBound, int *len_localDataUBound);
-
-    // IO and validation
-    int ESMC_newArrayPrint(void);
-
-    // Communication
-    int ESMC_newArrayScatter(
-      LocalArray *larray,  // pointer to LocalArray object
-      int rootPET,              // root
-      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
-
-    int ESMC_newArrayScatter(
-      LocalArray *larray,  // pointer to LocalArray object
-      int rootPET,              // root
-      ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
-      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
-
-    int ESMC_newArrayScatter(
-      LocalArray *larray,  // pointer to LocalArray object
-      int rootPET,              // root
-      int de,                   // DE for DE-based non-blocking scatter
-      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
-
-    int ESMC_newArrayScalarReduce(
-      void *result,             // result value (scalar)
-      ESMC_TypeKind_Flag dtk,   // data type kind
-      ESMC_Operation op,        // reduce operation
-      int rootPET,              // root
-      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
-
-    int ESMC_newArrayScalarReduce(
-      void *result,             // result value (scalar)
-      ESMC_TypeKind_Flag dtk,   // data type kind
-      ESMC_Operation op,        // reduce operation
-      int rootPET,              // root
-      ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
-      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
-
-    int ESMC_newArrayScalarReduce(
-      void *result,             // result value (scalar)
-      ESMC_TypeKind_Flag dtk,   // data type kind
-      ESMC_Operation op,        // reduce operation
-      int rootPET,              // root
-      int de,                   // DE for DE-based non-blocking reduce
-      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
-
-    int ESMC_newArrayWait(
-      int rootPET,              // root
-      ESMC_newArrayCommHandle *commh, // commu handle specifying non-block op.
-      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
-
-    int ESMC_newArrayWait(
-      int de,                   // DE for which to wait
-      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
-
-    // friend functions that provide thread support for non-blocking comms
-    friend void *ESMC_newArrayScatterThread(void *);
-    friend void *ESMC_newArrayScalarReduceThread(void *);
-
-};  // end class ESMC_newArray
-
-// external methods:
-
-ESMC_newArray *ESMC_newArrayCreate(LocalArray *larray, int *haloWidth,
-  int deCount, int rootPET, int *rc);
-
-int ESMC_newArrayDestroy(ESMC_newArray **array);
-
-#endif
-
 
 #endif  // ESMCI_Array_H

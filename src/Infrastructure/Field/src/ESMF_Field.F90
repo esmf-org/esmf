@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -108,6 +108,7 @@ module ESMF_FieldMod
     integer                       :: ungriddedUBound(ESMF_MAXDIM)
     integer                       :: totalLWidth(ESMF_MAXDIM)
     integer                       :: totalUWidth(ESMF_MAXDIM)
+    integer                       :: timestamp(10)
     ESMF_INIT_DECLARE
   end type
 
@@ -122,7 +123,7 @@ module ESMF_FieldMod
 #endif
     !private       
     type (ESMF_FieldType), pointer :: ftypep
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------

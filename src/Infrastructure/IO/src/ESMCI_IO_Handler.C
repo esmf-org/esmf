@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -31,7 +31,9 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
+#ifdef ESMF_PIO
 #include "ESMCI_PIO_Handler.h"
+#endif
 
 #define ROOT_PET (0)
 
@@ -63,7 +65,7 @@ namespace ESMCI
 IO_Handler::IO_Handler (
 //
 // !RETURN VALUE:
-//    
+//
 //
 // !ARGUMENTS:
   ESMC_IOFmt_Flag fmtArg               // (in)  - the desired I/O format
@@ -123,23 +125,15 @@ IO_Handler *IO_Handler::create (
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
 
-
   // call class constructor
   try {
     // Determine if we have the support for the requested I/O format
     switch (iofmt) {
-    case ESMF_IOFMT_BIN:
-#ifdef ESMF_PIO
-      iohandler = new PIO_Handler(iofmt, &localrc);
-#else // ESMF_PIO
-      localrc = ESMF_RC_LIB_NOT_PRESENT;
-      ESMC_LogDefault.Write("PIO library required for I/O operation",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-#endif // ESMF_PIO
-      break;
     case ESMF_IOFMT_NETCDF:
       // No break
     case ESMF_IOFMT_NETCDF_64BIT_OFFSET:
+      // No break
+    case ESMF_IOFMT_NETCDF_64BIT_DATA:
       // No break
     case ESMF_IOFMT_NETCDF4:
       // No break

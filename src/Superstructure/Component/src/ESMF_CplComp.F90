@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -886,6 +886,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if (cplcomp%isNamedAlias .and. present(name)) then
+      ! access NamedAlias name
+      name = trim(cplcomp%name)
+    endif
+
     ! call Comp method
     call ESMF_CompStatusGet(compStatus, &
       clockIsPresent = clockIsPresent, &
@@ -1011,8 +1016,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Only the {\em last} data block set via
 ! {\tt ESMF\_CplCompSetInternalState} will be accessible.
 !
-! CAUTION: This method does not have an explicit Fortran interface. Do not
-! specify argument keywords when calling this method!
+! CAUTION: If you are working with a compiler that does not support Fortran 2018
+! assumed-type dummy arguments, then this method does not have an explicit
+! Fortran interface. In this case do not specify argument keywords when calling
+! this method!
 !
 ! The arguments are:
 ! \begin{description}
@@ -1898,12 +1905,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! call Comp method
-    call ESMF_CompSet(cplcomp%compp, name, clock=clock, configFile=configFile, &
-      config=config, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (cplcomp%isNamedAlias .and. present(name)) then
+      ! set NamedAlias name
+      cplcomp%name = trim(name)
+      ! call Comp method (without name)
+      call ESMF_CompSet(cplcomp%compp, clock=clock, &
+        configFile=configFile, config=config, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! call Comp method
+      call ESMF_CompSet(cplcomp%compp, name=name, clock=clock, &
+        configFile=configFile, config=config, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2041,8 +2059,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Only the {\em last} data block set via
 ! {\tt ESMF\_CplCompSetInternalState} will be accessible.
 !
-! CAUTION: This method does not have an explicit Fortran interface. Do not
-! specify argument keywords when calling this method!
+! CAUTION: If you are working with a compiler that does not support Fortran 2018
+! assumed-type dummy arguments, then this method does not have an explicit
+! Fortran interface. In this case do not specify argument keywords when calling
+! this method!
 !
 ! The arguments are:
 ! \begin{description}
@@ -2543,19 +2563,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_CplCompSetVM()
   recursive subroutine ESMF_CplCompSetVMShObj(cplcomp, userRoutine, &
-    keywordEnforcer, sharedObj, userRc, rc)
+    keywordEnforcer, sharedObj, userRoutineFound, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
     character(len=*),    intent(in)            :: userRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
+    logical,             intent(out), optional :: userRoutineFound
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.4.0] Added argument {\tt userRoutineFound}.
+!              The new argument provides a way to test availability without
+!              causing error conditions.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2597,6 +2624,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
 !   searched for {\tt userRoutine}.
+! \item[{[userRoutineFound]}]
+!   Report back whether the specified {\tt userRoutine} was found and executed,
+!   or was not available. If this argument is present, not finding the
+!   {\tt userRoutine} will not result in returning an error in {\tt rc}.
+!   The default is to return an error if the {\tt userRoutine} cannot be found.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -2608,6 +2640,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc                       ! local error status
     integer :: localUserRc
     character(len=0) :: emptyString
+    type(ESMF_Logical)  :: userRoutineFoundHelp
+    logical             :: userRoutineFoundHelpHelp
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2616,15 +2650,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
 
     if (present(sharedObj)) then
-      call c_ESMC_SetVMShObj(cplcomp, userRoutine, sharedObj, localUserRc, &
-        localrc)
+      call c_ESMC_SetVMShObj(cplcomp, userRoutine, sharedObj, &
+        userRoutineFoundHelp, localUserRc, localrc)
     else
-      call c_ESMC_SetVMShObj(cplcomp, userRoutine, emptyString, localUserRc, &
-        localrc)
+      call c_ESMC_SetVMShObj(cplcomp, userRoutine, emptyString, &
+        userRoutineFoundHelp, localUserRc, localrc)
     endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! translate ESMF_Logical -> logical
+    userRoutineFoundHelpHelp = userRoutineFoundHelp
+
+    ! report back
+    if (present(userRoutineFound)) userRoutineFound = userRoutineFoundHelpHelp
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
@@ -2643,7 +2683,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, keywordEnforcer, &
-    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
+    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
+    pthreadMinStackSize, forceChildPthreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
@@ -2652,6 +2693,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
+    integer,             intent(in),  optional :: pthreadMinStackSize
+    logical,             intent(in),  optional :: forceChildPthreads
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2685,6 +2728,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
+! \item[{[pthreadMinStackSize]}]
+!   Minimum stack size in byte of any child PET executing as Pthread. By default
+!   single threaded child PETs do {\em not} execute as Pthread, and their stack
+!   size is unaffected by this argument. However, for multi-threaded child PETs,
+!   or if {\tt forceChildPthreads} is {\tt .true.}, child PETs execute
+!   as Pthreads with their own private stack.
+!
+!   For cases where OpenMP threads
+!   are used by the user code, each thread allocates its own private stack. For
+!   all threads {\em other} than the master, the stack size is set via the 
+!   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
+!   however, becomes the {\em master} of the OpenMP thread team, and is not
+!   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
+!   sized via the {\tt pthreadMinStackSize} argument, and a large enough size
+!   is often critical.
+!
+!   When {\tt pthreadMinStackSize}
+!   is absent, the default is to use the system default
+!   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
+!   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
+!   {\em unlimited}, or any setting below the ESMF implemented minimum,
+!   will result in setting the stack size to 20MiB (the ESMF minimum).
+!   Depending on how much private data is used by the user code under
+!   the master thread, the default might be too small, and
+!   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
+! \item[{[forceChildPthreads]}] 
+!   For {\tt .true.}, force each child PET to execute in its own Pthread.
+!   By default, {\tt .false.}, single PETs spawned from a parent PET
+!   execute in the same thread (or MPI process) as the parent PET. Multiple
+!   child PETs spawned by the same parent PET always execute as their own
+!   Pthreads.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2701,7 +2775,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMaxPEs(cplcomp%compp, maxPeCountPerPet, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, pthreadMinStackSize, &
+      forceChildPthreads=forceChildPthreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2720,7 +2795,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, keywordEnforcer, &
-    maxPetCountPerVas, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
+    maxPetCountPerVas, prefIntraProcess, prefIntraSsi, prefInterSsi, &
+    pthreadMinStackSize, forceChildPthreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
@@ -2729,6 +2805,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
+    integer,             intent(in),  optional :: pthreadMinStackSize
+    logical,             intent(in),  optional :: forceChildPthreads
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2764,6 +2842,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
+! \item[{[pthreadMinStackSize]}]
+!   Minimum stack size in byte of any child PET executing as Pthread. By default
+!   single threaded child PETs do {\em not} execute as Pthread, and their stack
+!   size is unaffected by this argument. However, for multi-threaded child PETs,
+!   or if {\tt forceChildPthreads} is {\tt .true.}, child PETs execute
+!   as Pthreads with their own private stack.
+!
+!   For cases where OpenMP threads
+!   are used by the user code, each thread allocates its own private stack. For
+!   all threads {\em other} than the master, the stack size is set via the 
+!   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
+!   however, becomes the {\em master} of the OpenMP thread team, and is not
+!   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
+!   sized via the {\tt pthreadMinStackSize} argument, and a large enough size
+!   is often critical.
+!
+!   When {\tt pthreadMinStackSize}
+!   is absent, the default is to use the system default
+!   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
+!   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
+!   {\em unlimited}, or any setting below the ESMF implemented minimum,
+!   will result in setting the stack size to 20MiB (the ESMF minimum).
+!   Depending on how much private data is used by the user code under
+!   the master thread, the default might be too small, and
+!   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
+! \item[{[forceChildPthreads]}] 
+!   For {\tt .true.}, force each child PET to execute in its own Pthread.
+!   By default, {\tt .false.}, single PETs spawned from a parent PET
+!   execute in the same thread (or MPI process) as the parent PET. Multiple
+!   child PETs spawned by the same parent PET always execute as their own
+!   Pthreads.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2780,7 +2889,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMaxThreads(cplcomp%compp, maxPetCountPerVas, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, pthreadMinStackSize, &
+      forceChildPthreads=forceChildPthreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2799,7 +2909,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMinThreads(cplcomp, keywordEnforcer, &
-    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
+    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, &
+    pthreadMinStackSize, forceChildPthreads, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
@@ -2808,6 +2919,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: prefIntraProcess
     integer,             intent(in),  optional :: prefIntraSsi
     integer,             intent(in),  optional :: prefInterSsi
+    integer,             intent(in),  optional :: pthreadMinStackSize
+    logical,             intent(in),  optional :: forceChildPthreads
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2840,6 +2953,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
+! \item[{[pthreadMinStackSize]}]
+!   Minimum stack size in byte of any child PET executing as Pthread. By default
+!   single threaded child PETs do {\em not} execute as Pthread, and their stack
+!   size is unaffected by this argument. However, for multi-threaded child PETs,
+!   or if {\tt forceChildPthreads} is {\tt .true.}, child PETs execute
+!   as Pthreads with their own private stack.
+!
+!   For cases where OpenMP threads
+!   are used by the user code, each thread allocates its own private stack. For
+!   all threads {\em other} than the master, the stack size is set via the 
+!   typical {\tt OMP\_STACKSIZE} environment variable mechanism. The PET itself,
+!   however, becomes the {\em master} of the OpenMP thread team, and is not
+!   affected by {\tt OMP\_STACKSIZE}. It is the master's stack that can be
+!   sized via the {\tt pthreadMinStackSize} argument, and a large enough size
+!   is often critical.
+!
+!   When {\tt pthreadMinStackSize}
+!   is absent, the default is to use the system default
+!   set by the {\tt limit} or {\tt ulimit} command. However, the stack of a
+!   Pthread cannot be unlimited, and a shell {\em stacksize} setting of
+!   {\em unlimited}, or any setting below the ESMF implemented minimum,
+!   will result in setting the stack size to 20MiB (the ESMF minimum).
+!   Depending on how much private data is used by the user code under
+!   the master thread, the default might be too small, and
+!   {\tt pthreadMinStackSize} must be used to allocate sufficient stack space.
+! \item[{[forceChildPthreads]}] 
+!   For {\tt .true.}, force each child PET to execute in its own Pthread.
+!   By default, {\tt .false.}, single PETs spawned from a parent PET
+!   execute in the same thread (or MPI process) as the parent PET. Multiple
+!   child PETs spawned by the same parent PET always execute as their own
+!   Pthreads.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2856,7 +3000,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompSetVMMinThreads(cplcomp%compp, maxPeCountPerPet, &
-      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
+      prefIntraProcess, prefIntraSsi, prefInterSsi, pthreadMinStackSize, &
+      forceChildPthreads=forceChildPthreads, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

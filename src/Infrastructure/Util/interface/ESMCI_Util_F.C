@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -93,7 +93,7 @@ extern "C" {
 
   if (!string) {
     //printf("uninitialized String object\n");
-    ESMC_LogDefault.Write("String object uninitialized", ESMC_LOGMSG_INFO,
+    ESMC_LogDefault.Write("String object uninitialized", ESMC_LOGMSG_WARN,
       ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;
@@ -376,14 +376,6 @@ extern "C" {
 
 void FTN_X(c_pointerprint)(void **ptr){
   printf("ESMF_PointerPrint: %p\n", *ptr);
-}
-
-void FTN_X(c_pointerlog)(void **ptr, char *prefix, 
-  ESMCI_FortranStrLenArg prefix_l){
-  std::string prefixStr(prefix, prefix_l);
-  std::stringstream msg;
-  msg << prefixStr << *ptr;
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 }
 
 } // extern "C"

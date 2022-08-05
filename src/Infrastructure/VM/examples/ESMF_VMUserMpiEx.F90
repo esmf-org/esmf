@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -61,12 +61,18 @@ program ESMF_VMUserMpiEx
   write(failMsg, *) "Example failure"
   write(testname, *) "Example ESMF_VMUserMpiEx"
 
-
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
-
 
   finalrc = ESMF_SUCCESS
+
+!BOC
+  ! For cases where ESMF resource management is desired (e.g. for threading),
+  ! ESMF_InitializePreMPI() must be called before MPI_Init().
+  call ESMF_InitializePreMPI(rc=rc)
+!EOC
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 #ifndef ESMF_MPIUNI     
 !BOC
   ! User code initializes MPI.

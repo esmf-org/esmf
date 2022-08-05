@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -69,9 +69,9 @@ module ESMF_ArrayCreateMod
 ^ifndef ESMF_NO_SEQUENCE
   sequence
 ^endif
-  private
+!  private
     type(ESMF_Pointer) :: this
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -140,8 +140,6 @@ module ESMF_ArrayCreateMod
     module procedure ESMF_ArrayCreateAllocateASArb
     module procedure ESMF_ArrayCreateAllocateASArbI8
     module procedure ESMF_ArrayCreateCopy
-
-    module procedure ESMF_ArrayCreateFromLA         !1st prototype
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -3870,19 +3868,28 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateCopy(array, keywordEnforcer, rc)
+  function ESMF_ArrayCreateCopy(array, keywordEnforcer, datacopyflag, delayout, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateCopy
 !
 ! !ARGUMENTS:
-       type(ESMF_Array),  intent(in)             :: array
+       type(ESMF_Array),           intent(in)            :: array
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       integer,           intent(out),  optional :: rc
+       type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag
+       type(ESMF_DELayout),        intent(in),  optional :: delayout
+       integer,                    intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt datacopyflag} to select between different
+!   copy options.\newline
+!   Added argument {\tt delayout} to create Array with different localDe -> DE
+!   mapping. This is identical to a change in DE -> PET mapping.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3894,6 +3901,14 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \begin{description}
 ! \item[array]
 !     {\tt ESMF\_Array} object to be copied.
+! \item[{[datacopyflag]}]
+!      Specifies whether the created Array object references the memory
+!      allocation provided by {\tt array} directly or copies the data from
+!      {\tt array} into a new memory allocation. For valid values see
+!      \ref{const:datacopyflag}. The default is {\tt ESMF\_DATACOPY\_VALUE}.
+! \item[{[delayout]}]
+!      If present, override the DELayout of the incoming {\tt distgrid}.
+!      By default use the DELayout defined in {\tt distgrid}.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3902,6 +3917,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !------------------------------------------------------------------------------
     integer                 :: localrc    ! local return code
     type(ESMF_Array)        :: arrayOut   ! opaque pointer to new C++ Array
+    type(ESMF_DataCopy_Flag):: datacopyflag_opt   ! helper variable
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -3913,8 +3929,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, array, rc)
 
+    ! Set copy/ref behavior
+    datacopyflag_opt = ESMF_DATACOPY_VALUE  ! default
+    if (present(datacopyflag)) datacopyflag_opt = datacopyflag
+
     ! Call into the C++ interface
-    call c_ESMC_ArrayCreateCopy(array, arrayOut, localrc)
+    call c_ESMC_ArrayCreateCopy(array, arrayOut, datacopyflag_opt, delayout, &
+      localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4473,133 +4494,5 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
   end function ESMF_ArrayIsProxy
 !------------------------------------------------------------------------------
 
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-!!!!!!!!!!!!!! old-style newArray calls of 1st prototype calls !!!!!!!!!!!!!!!!!
-
-! -------------------------- ESMF-public method -------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayCreateFromLA()"
-!BOPI
-! !IROUTINE: ESMF_ArrayCreate - Create from LocalArray
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateFromLA(localarray, haloWidth, deCount, rootPET, rc)
-!
-! !RETURN VALUE:
-    type(ESMF_Array) :: ESMF_ArrayCreateFromLA
-!
-! !ARGUMENTS:
-    type(ESMF_LocalArray),  intent(in),   optional  :: localarray
-    integer, target,        intent(in),   optional  :: haloWidth(:)
-    integer,                intent(in),   optional  :: deCount
-    integer,                intent(in)              :: rootPET
-    integer,                intent(out),  optional  :: rc
-!
-! !DESCRIPTION:
-!     Create a new {\tt ESMF\_Array} from an {\tt ESMF\_LocalArray} on
-!     {\tt rootPET}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{[localarray]}]
-!          The {\tt ESMF\_LocalArray} object that will be used to determine
-!          the index space of the {\tt ESMF\_Array}. The data in
-!          {\tt rootPET}|s {\tt localarray} will be scattered across the newly
-!          created {\tt ESMF\_Array} object before returning. Only
-!         {\tt rootPET} must provide a (valid) {\tt localarray} argument.
-!     \item[{[haloWidth]}]
-!          Array holding the halo width for each array dimension. Default is
-!          a halo width of 0 in all dimensions. A negative halo width indicates
-!          that the respective array dimension is not to be decomposed. Only
-!          {\tt rootPET} must provide a (valid) {\tt haloWidth} argument.
-!     \item[{[deCount]}]
-!          Number of DEs into which this Array is to be decomposed. By default
-!          deCount will equal petCount of the current VM context. Only
-!          {\tt rootPET} must provide a (valid) {\tt deCount} argument.
-!     \item[rootPET]
-!          PET that holds the valid data in {\tt localarray}.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-    integer :: laRank
-    integer, pointer :: opt_haloWidth(:)
-    integer :: len_haloWidth
-    integer, target  :: dummy(0)     ! used to satisfy the C interface...
-    type(ESMF_VM):: vm
-    integer:: localPET
-
-    type(ESMF_Array):: array  ! opaque pointer to new C++ Array object
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! invalidate return value
-    array%this = ESMF_NULL_POINTER
-    ESMF_ArrayCreateFromLA = array
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, localarray, rc)
-
-    if (present(haloWidth)) then
-      opt_haloWidth => haloWidth
-      len_haloWidth = size(haloWidth)
-      ! For rootPET check if size(haloWidth) matches the rank of the LocalArray
-      call ESMF_VMGetCurrent(vm, rc=localrc)
-      call ESMF_VMGet(vm, localPET=localPET, rc=localrc)
-      if (localPET==rootPET) then
-        call ESMF_LocalArrayGet(localarray, rank=laRank, rc=localrc)
-        if (len_haloWidth/=laRank) then
-          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-            msg="size of haloWidth array does not match rank of LocalArray", &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-      endif
-    else
-      opt_haloWidth => dummy
-      len_haloWidth = 0
-    endif
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(opt_haloWidth) == size(opt_haloWidth)) continue
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayCreate(array, localarray, opt_haloWidth, len_haloWidth, &
-!      deCount, rootPET, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Set return value
-    ESMF_ArrayCreateFromLA = array
-
-    ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_ArrayCreateFromLA)
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function ESMF_ArrayCreateFromLA
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
 end module ESMF_ArrayCreateMod
 

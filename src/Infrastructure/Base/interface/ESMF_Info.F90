@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -117,6 +117,37 @@ interface ESMF_InfoSet
   module procedure ESMF_InfoSetArrayLG
   module procedure ESMF_InfoSetArrayCH
 end interface ESMF_InfoSet
+
+!BOP
+! !IROUTINE: ESMF_InfoAssignment(=) - Info assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   info1 = info2
+!
+! !ARGUMENTS:
+!   type(ESMF_Info) :: info1
+!   type(ESMF_Info) :: info2
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!   Assign info1 as an alias to the same ESMF Info object in memory
+!   as info2. If info2 is invalid, then info1 will be equally invalid after
+!   the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[info1]
+!     The {\tt ESMF\_Info} object on the left hand side of the assignment.
+!   \item[info2]
+!     The {\tt ESMF\_Info} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
 
 !BOP
 ! !IROUTINE: ESMF_InfoOperator(==) - Info equality operator
@@ -244,6 +275,53 @@ function ESMF_InfoNotEqual(lhs, rhs) result(is_equal)
   logical :: is_equal
   is_equal = .not. ESMF_InfoEqual(lhs, rhs)
 end function ESMF_InfoNotEqual
+
+! -----------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoBroadcast()"
+!BOP
+! !IROUTINE: ESMF_InfoBroadcast - Broadcast Info contents
+! \label{esmf_infobroadcast}
+!
+! !INTERFACE:
+subroutine ESMF_InfoBroadcast(info, rootPet, keywordEnforcer, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(inout) :: info
+  integer, intent(in) :: rootPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Broadcast an \texttt{ESMF\_Info} object collectively across the current VM.
+!
+!     Users wishing to synchronize via broadcast an attribute hierarchy associated
+!     with an ESMF object should consult the \texttt{ESMF\_InfoSync} documentation
+!     \ref{esmf_infosync}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       The \texttt{ESMF\_Info} object that is the source (on \textit{rootPet}) or the
+!       destination object to populate (on all other PETs). On destination PETs,
+!       the structure of \textit{info} is overwritten with data from \textit{rootPet}.
+!     \item [rootPet]
+!       The root PET identifier.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  call c_info_broadcast(info%ptr, rootPet, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoBroadcast
 
 !------------------------------------------------------------------------------
 ! Create ----------------------------------------------------------------------
@@ -459,843 +537,68 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_InfoDestroy
 
 !------------------------------------------------------------------------------
-! Set (Scalar) ----------------------------------------------------------------
-!------------------------------------------------------------------------------
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoDump()"
 !BOP
-! !IROUTINE: ESMF_InfoSet - Set a value
+! !IROUTINE: ESMF_InfoDump - Dump Info contents to string
 !
 ! !INTERFACE:
-!subroutine ESMF_InfoSet(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-!
+function ESMF_InfoDump(info, keywordEnforcer, key, indent, rc) result(output)
 ! !ARGUMENTS:
-!  type(ESMF_Info), intent(inout) :: info
-!  character(len=*), intent(in) :: key
-!  <value>, see below for supported value
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!  logical, intent(in), optional :: force
-!  integer, intent(in), optional :: idx
-!  character(len=*), intent(in), optional :: pkey
-!  integer, intent(out), optional :: rc
+  type(ESMF_Info), intent(in) :: info
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  character(*), intent(in), optional :: key
+  integer, intent(in), optional :: indent
+  integer, intent(out), optional :: rc
+! RESULT:
+  character(:), allocatable :: output
 !
 ! !DESCRIPTION:
-!     Set a \textit{value} in an \texttt{ESMF\_Info} object using a key.
-!
-!     Overloaded \textit{value} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
-!       \item \texttt{logical}
-!       \item \texttt{character(:)}
-!     \end{itemize}
+!     Dump the contents of an \texttt{ESMF\_Info} object as a JSON string.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [info]
 !       Target \texttt{ESMF\_Info} object.
-!     \item [key]
+!     \item [{[key]}]
 !       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
 !       for an overview of the key format.
-!     \item [value]
-!       The input value associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[idx]}]
-!       An integer index to set if the target key's value is a list.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call.
+!     \item [{[indent]}]
+!       Default is 0. Specifying an indentation greater than 0 will result in a
+!       "pretty print" for JSON output string (string includes new line breaks).
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOP
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! NOTE: Documentation stub located above for generic interface compliance.
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  character(:), allocatable :: l_key
+  integer :: dump_length, localrc, local_indent
 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetR4()"
-subroutine ESMF_InfoSetR4(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R4), intent(in) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(in), optional :: idx
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
+  localrc = ESMF_RC_NOT_IMPL
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  integer(C_INT), target :: local_idx
-  type(C_PTR) :: local_idx_ptr
-  character(:), allocatable :: local_pkey
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
+  if (present(key)) then
+    l_key = key
   else
-    local_force = .true.
-  end if
-  if (present(idx)) then
-    local_idx = idx - 1  ! Shift to C (zero-based) indexing
-    local_idx_ptr = C_LOC(local_idx)
+    l_key = ""
+  endif
+  if (present(indent)) then
+    local_indent = indent
   else
-    local_idx_ptr = C_NULL_PTR
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
+    local_indent = 0
+  endif
 
-  call c_info_set_R4(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    value, &
-    local_force, &
-    localrc, &
-    local_idx_ptr, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+  call c_info_dump_len(info%ptr, dump_length, localrc, local_indent)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT)) return
+
+  allocate(character(dump_length)::output)
+
+  call c_info_dump(info%ptr, output, localrc, local_indent)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT)) return
 
   if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetR4
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetR8()"
-subroutine ESMF_InfoSetR8(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R8), intent(in) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(in), optional :: idx
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  integer(C_INT), target :: local_idx
-  type(C_PTR) :: local_idx_ptr
-  character(:), allocatable :: local_pkey
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(idx)) then
-    local_idx = idx - 1  ! Shift to C (zero-based) indexing
-    local_idx_ptr = C_LOC(local_idx)
-  else
-    local_idx_ptr = C_NULL_PTR
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_R8(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    value, &
-    local_force, &
-    localrc, &
-    local_idx_ptr, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetR8
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetI4()"
-subroutine ESMF_InfoSetI4(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  integer(ESMF_KIND_I4), intent(in) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(in), optional :: idx
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  integer(C_INT), target :: local_idx
-  type(C_PTR) :: local_idx_ptr
-  character(:), allocatable :: local_pkey
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(idx)) then
-    local_idx = idx - 1  ! Shift to C (zero-based) indexing
-    local_idx_ptr = C_LOC(local_idx)
-  else
-    local_idx_ptr = C_NULL_PTR
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_I4(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    value, &
-    local_force, &
-    localrc, &
-    local_idx_ptr, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetI4
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetI8()"
-subroutine ESMF_InfoSetI8(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  integer(ESMF_KIND_I8), intent(in) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(in), optional :: idx
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  integer(C_INT), target :: local_idx
-  type(C_PTR) :: local_idx_ptr
-  character(:), allocatable :: local_pkey
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(idx)) then
-    local_idx = idx - 1  ! Shift to C (zero-based) indexing
-    local_idx_ptr = C_LOC(local_idx)
-  else
-    local_idx_ptr = C_NULL_PTR
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_I8(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    value, &
-    local_force, &
-    localrc, &
-    local_idx_ptr, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetI8
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetCH()"
-subroutine ESMF_InfoSetCH(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  character(len=*), intent(in) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(in), optional :: idx
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  integer(C_INT), target :: local_idx
-  type(C_PTR) :: local_idx_ptr
-  character(:), allocatable :: local_pkey
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(idx)) then
-    local_idx = idx - 1  ! Shift to C (zero-based) indexing
-    local_idx_ptr = C_LOC(local_idx)
-  else
-    local_idx_ptr = C_NULL_PTR
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_CH(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    trim(value)//C_NULL_CHAR, &
-    local_force, &
-    localrc, &
-    local_idx_ptr, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetCH
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetLG()"
-subroutine ESMF_InfoSetLG(info, key, value, keywordEnforcer, force, idx, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  logical, intent(in) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(in), optional :: idx
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force, local_value
-  integer(C_INT), target :: local_idx
-  type(C_PTR) :: local_idx_ptr
-  character(:), allocatable :: local_pkey
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(idx)) then
-    local_idx = idx - 1  ! Shift to C (zero-based) indexing
-    local_idx_ptr = C_LOC(local_idx)
-  else
-    local_idx_ptr = C_NULL_PTR
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  local_value = value
-  call c_info_set_LG(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    local_value, &
-    local_force, &
-    localrc, &
-    local_idx_ptr, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetLG
-
-! -----------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetINFO()"
-!BOP
-! !IROUTINE: ESMF_InfoSet - Set a key to the contents of an Info object
-!
-! !INTERFACE:
-  ! Private name; call using ESMF_InfoSet
-subroutine ESMF_InfoSetINFO(info, key, value, keywordEnforcer, force, rc)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  type(ESMF_Info), intent(in) :: value
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value to the contents of an \texttt{ESMF\_Info} object. A copy of
-!     the source contents is made.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [value]
-!       The \texttt{ESMF\_Info} object to use as source data.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-
-  call c_info_set_INFO(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    value%ptr, &
-    local_force, &
-    localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetINFO
-
-!------------------------------------------------------------------------------
-! SetArray --------------------------------------------------------------------
-!------------------------------------------------------------------------------
-
-!BOP
-! !IROUTINE: ESMF_InfoSet - Set a value list
-!
-! !INTERFACE:
-!subroutine ESMF_InfoSet(info, key, values, keywordEnforcer, force, pkey, rc)
-!
-! !ARGUMENTS:
-!  type(ESMF_Info), intent(inout) :: info
-!  character(len=*), intent(in) :: key
-!  <values>, see below for supported values
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!  logical, intent(in), optional :: force
-!  character(len=*), intent(in), optional :: pkey
-!  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value list in an \texttt{ESMF\_Info} object using a key. List values
-!     are initialized to null.
-!
-!     Overloaded \textit{values} for the following types:
-!     \begin{itemize}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
-!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
-!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
-!       \item \texttt{logical, dimension(:)}
-!       \item \texttt{character(:), dimension(:)}
-!     \end{itemize}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [values]
-!       The input value list associated with the key.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[pkey]}]
-!       Use this key's location as the origin for the set call. Used primarily
-!       for recursive requirements related to \texttt{ESMF\_Attribute}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! NOTE: Documentation stub located above for generic interface compliance.
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayR4()"
-subroutine ESMF_InfoSetArrayR4(info, key, values, keywordEnforcer, force, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R4), dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_array_R4(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    SIZE(values), &
-    local_force, &
-    localrc, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayR4
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayR8()"
-subroutine ESMF_InfoSetArrayR8(info, key, values, keywordEnforcer, force, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  real(ESMF_KIND_R8), dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_array_R8(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    SIZE(values), &
-    local_force, &
-    localrc, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayR8
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayI4()"
-subroutine ESMF_InfoSetArrayI4(info, key, values, keywordEnforcer, force, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  integer(ESMF_KIND_I4), dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_array_I4(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    SIZE(values), &
-    local_force, &
-    localrc, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayI4
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayI8()"
-subroutine ESMF_InfoSetArrayI8(info, key, values, keywordEnforcer, force, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  integer(ESMF_KIND_I8), dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  call c_info_set_array_I8(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    values, &
-    SIZE(values), &
-    local_force, &
-    localrc, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayI8
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayCH()"
-subroutine ESMF_InfoSetArrayCH(info, key, values, keywordEnforcer, force, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  character(len=*), dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  integer :: ii
-  integer(C_INT) :: idx
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  ! Allocate storage in C
-  call c_info_set_array_CH(info%ptr, trim(key)//C_NULL_CHAR, &
-    SIZE(values), local_force, localrc, local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Set each character element in the underlying store
-  do ii=1,SIZE(values)
-    call ESMF_InfoSetCH(info, key, values(ii), idx=ii, pkey=local_pkey, rc=localrc)
-  enddo
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayCH
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetArrayLG()"
-subroutine ESMF_InfoSetArrayLG(info, key, values, keywordEnforcer, force, pkey, rc)
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-  logical, dimension(:), intent(in) :: values
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  character(len=*), intent(in), optional :: pkey
-  integer, intent(out), optional :: rc
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-  integer :: ii
-  logical(C_BOOL), dimension(:), allocatable :: local_values
-  character(:), allocatable :: local_pkey
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-  if (present(pkey)) then
-    local_pkey = TRIM(pkey)//C_NULL_CHAR
-  else
-    local_pkey = ""//C_NULL_CHAR
-  end if
-
-  allocate(local_values(SIZE(values)))
-  do ii=1,SIZE(values)
-    local_values(ii) = values(ii)
-  enddo
-
-  call c_info_set_array_LG(&
-    info%ptr, &
-    trim(key)//C_NULL_CHAR, &
-    local_values, &
-    SIZE(values), &
-    local_force, &
-    localrc, &
-    local_pkey)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  deallocate(local_values)
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetArrayLG
-
-
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetNULL()"
-!BOP
-! !IROUTINE: ESMF_InfoSetNULL - Set a value to null
-!
-! !INTERFACE:
-subroutine ESMF_InfoSetNULL(info, key, keywordEnforcer, force, rc)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: key
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  logical, intent(in), optional :: force
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set a value to null \cite{json_for_modern_cpp_null}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [{[force]}]
-!       Default is true. When true, insert the key even if it already exists in
-!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
-!       key already exists.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-  logical(C_BOOL) :: local_force
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (present(force)) then
-    local_force = force
-  else
-    local_force = .true.
-  end if
-
-  call c_info_set_NULL(info%ptr, trim(key)//C_NULL_CHAR, local_force, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetNULL
-
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoSetDirty()"
-!BOPI
-! !IROUTINE: ESMF_InfoSetDirty - Change dirty state for synchronize operations
-!
-! !INTERFACE:
-subroutine ESMF_InfoSetDirty(info, flag, keywordEnforcer, rc)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  logical, intent(in) :: flag
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: rc
-! !DESCRIPTION:
-!     Change the dirty state of an \texttt{ESMF\_Info} object.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [flag]
-!       Logical value to set.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOPI
-
-  integer :: localrc, local_flag
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  if (flag) then
-    local_flag = 1 !true
-  else
-    local_flag = 0 !false
-  end if
-
-  call c_info_set_dirty(info%ptr, local_flag, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoSetDirty
+end function ESMF_InfoDump
 
 !------------------------------------------------------------------------------
 ! Get (Scalar) ----------------------------------------------------------------
@@ -2932,215 +2235,6 @@ end subroutine ESMF_InfoGetFromPointer
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoDump()"
-!BOP
-! !IROUTINE: ESMF_InfoDump - Dump Info contents to string
-!
-! !INTERFACE:
-function ESMF_InfoDump(info, keywordEnforcer, key, indent, rc) result(output)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(in) :: info
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  character(*), intent(in), optional :: key
-  integer, intent(in), optional :: indent
-  integer, intent(out), optional :: rc
-! RESULT:
-  character(:), allocatable :: output
-!
-! !DESCRIPTION:
-!     Dump the contents of an \texttt{ESMF\_Info} object as a JSON string.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [{[key]}]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [{[indent]}]
-!       Default is 0. Specifying an indentation greater than 0 will result in a
-!       "pretty print" for JSON output string (string includes new line breaks).
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  character(:), allocatable :: l_key
-  integer :: dump_length, localrc, local_indent
-
-  localrc = ESMF_RC_NOT_IMPL
-  if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-  if (present(key)) then
-    l_key = key
-  else
-    l_key = ""
-  endif
-  if (present(indent)) then
-    local_indent = indent
-  else
-    local_indent = 0
-  endif
-
-  call c_info_dump_len(info%ptr, dump_length, localrc, local_indent)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT)) return
-
-  allocate(character(dump_length)::output)
-
-  call c_info_dump(info%ptr, output, localrc, local_indent)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end function ESMF_InfoDump
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoRemove()"
-!BOP
-! !IROUTINE: ESMF_InfoRemove - Remove a key-value pair from an Info object
-!
-! !INTERFACE:
-subroutine ESMF_InfoRemove(info, keyParent, keywordEnforcer, keyChild, attnestflag, rc)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  character(len=*), intent(in) :: keyParent
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  character(len=*), intent(in), optional :: keyChild
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Remove a key-value pair from an \texttt{ESMF\_Info} object.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [keyParent]
-!       String key to identify the parent location for the removal. If no \textit{keyChild}
-!       is specified, then the root location is assumed. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [{[keyChild]}]
-!       String key to identify the value for the removal. This \textit{may not}
-!       be a path.
-!     \item [{[attnestflag]}]
-!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search for
-!       \textit{keyParent}. The first instance of the key will be found in the
-!       hierarchy. Default is \texttt{ESMF\_ATTNEST\_OFF}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-  character(:), allocatable :: localkeyChild
-  logical(C_BOOL) :: recursive
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-  recursive = .false.
-
-  if (present(keyChild)) then
-    localkeyChild = keyChild
-  else
-    localkeyChild = ""
-  end if
-  if (present(attnestflag)) then
-    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = .true.
-  end if
-
-  call c_info_erase(info%ptr, trim(keyParent)//C_NULL_CHAR, &
-                     trim(localkeyChild)//C_NULL_CHAR, recursive, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoRemove
-
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoIsPresent()"
-!BOP
-! !IROUTINE: ESMF_InfoIsPresent - Check for key presence
-!
-! !INTERFACE:
-function ESMF_InfoIsPresent(info, key, keywordEnforcer, attnestflag, isPointer, rc) result(is_present)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(in) :: info
-  character(len=*), intent(in) :: key
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
-  logical, intent(in), optional :: isPointer
-  integer, intent(out), optional :: rc
-! !RETURN VALUE:
-  logical :: is_present
-!
-! !DESCRIPTION:
-!     Return true if \textit{key} exists in \texttt{ESMF\_Info}'s storage.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       Target \texttt{ESMF\_Info} object.
-!     \item [key]
-!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
-!       for an overview of the key format.
-!     \item [{[attnestflag]}]
-!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search for
-!       \textit{keyParent}. The first instance of the key will be found in the
-!       hierarchy. Default is \texttt{ESMF\_ATTNEST\_OFF}.
-!     \item [{[isPointer]}]
-!       Default is true. If true, expect the \textit{key} is using JSON Pointer
-!       syntax (see section \ref{info_key_format}). Setting to false will trigger
-!       a slightly faster search.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  logical :: local_isPointer
-  integer :: localrc
-  integer(C_INT) :: isPointer_forC
-  integer(C_INT) :: local_is_present
-  integer(C_INT) :: recursive
-
-  is_present = .false.
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-  recursive = 0 !false
-  local_is_present = 0 !false
-
-  if (present(attnestflag)) then
-    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
-  end if
-  if (present(isPointer)) then
-    local_isPointer = isPointer
-  else
-    local_isPointer = .true.
-  end if
-
-  if (local_isPointer) then
-    isPointer_forC = 1 !true
-  else
-    isPointer_forC = 0 !false
-  end if
-
-  call c_info_is_present(info%ptr, trim(key)//C_NULL_CHAR, local_is_present, &
-    localrc, recursive, isPointer_forC)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (local_is_present == 1) then
-    is_present = .true.
-  else
-    is_present = .false.
-  end if
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end function ESMF_InfoIsPresent
-
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoGetTK()"
 !BOP
 ! !IROUTINE: ESMF_InfoGetTK - Retrieve the ESMF TypeKind for a key
@@ -3266,6 +2360,88 @@ end subroutine ESMF_InfoGetArrayMeta
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoIsPresent()"
+!BOP
+! !IROUTINE: ESMF_InfoIsPresent - Check for key presence
+!
+! !INTERFACE:
+function ESMF_InfoIsPresent(info, key, keywordEnforcer, attnestflag, isPointer, rc) result(is_present)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(in) :: info
+  character(len=*), intent(in) :: key
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  logical, intent(in), optional :: isPointer
+  integer, intent(out), optional :: rc
+! !RETURN VALUE:
+  logical :: is_present
+!
+! !DESCRIPTION:
+!     Return true if \textit{key} exists in \texttt{ESMF\_Info}'s storage.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [{[attnestflag]}]
+!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search for
+!       \textit{keyParent}. The first instance of the key will be found in the
+!       hierarchy. Default is \texttt{ESMF\_ATTNEST\_OFF}.
+!     \item [{[isPointer]}]
+!       Default is true. If true, expect the \textit{key} is using JSON Pointer
+!       syntax (see section \ref{info_key_format}). Setting to false will trigger
+!       a slightly faster search.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  logical :: local_isPointer
+  integer :: localrc
+  integer(C_INT) :: isPointer_forC
+  integer(C_INT) :: local_is_present
+  integer(C_INT) :: recursive
+
+  is_present = .false.
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = 0 !false
+  local_is_present = 0 !false
+
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = 1 !true
+  end if
+  if (present(isPointer)) then
+    local_isPointer = isPointer
+  else
+    local_isPointer = .true.
+  end if
+
+  if (local_isPointer) then
+    isPointer_forC = 1 !true
+  else
+    isPointer_forC = 0 !false
+  end if
+
+  call c_info_is_present(info%ptr, trim(key)//C_NULL_CHAR, local_is_present, &
+    localrc, recursive, isPointer_forC)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (local_is_present == 1) then
+    is_present = .true.
+  else
+    is_present = .false.
+  end if
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function ESMF_InfoIsPresent
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoIsSet()"
 !BOP
 ! !IROUTINE: ESMF_InfoIsSet - Check if a value is null
@@ -3379,6 +2555,1006 @@ end subroutine ESMF_InfoPrint
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoReadJSON()"
+!BOP
+! !IROUTINE: ESMF_InfoReadJSON - Read JSON data from file
+!
+! !INTERFACE:
+function ESMF_InfoReadJSON(filename, keywordEnforcer, rc) result(info_r)
+! !ARGUMENTS:
+  character(len=*), intent(in) :: filename
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: rc
+! !RETURN VALUE:
+  type(ESMF_Info) :: info_r
+!
+! !DESCRIPTION:
+!     Read JSON data from a file and return a new \texttt{ESMF\_Info} object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [filename]
+!       Path to the input file.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  info_r = ESMF_InfoCreate(rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call c_info_read_json(info_r%ptr, trim(filename)//C_NULL_CHAR, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function ESMF_InfoReadJSON
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoRemove()"
+!BOP
+! !IROUTINE: ESMF_InfoRemove - Remove a key-value pair from an Info object
+!
+! !INTERFACE:
+subroutine ESMF_InfoRemove(info, keyParent, keywordEnforcer, keyChild, attnestflag, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: keyParent
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  character(len=*), intent(in), optional :: keyChild
+  type(ESMF_AttNest_Flag), intent(in), optional :: attnestflag
+  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Remove a key-value pair from an \texttt{ESMF\_Info} object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [keyParent]
+!       String key to identify the parent location for the removal. If no \textit{keyChild}
+!       is specified, then the root location is assumed. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [{[keyChild]}]
+!       String key to identify the value for the removal. This \textit{may not}
+!       be a path.
+!     \item [{[attnestflag]}]
+!       Setting to \texttt{ESMF\_ATTNEST\_ON} triggers a recursive search for
+!       \textit{keyParent}. The first instance of the key will be found in the
+!       hierarchy. Default is \texttt{ESMF\_ATTNEST\_OFF}.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+  character(:), allocatable :: localkeyChild
+  logical(C_BOOL) :: recursive
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+  recursive = .false.
+
+  if (present(keyChild)) then
+    localkeyChild = keyChild
+  else
+    localkeyChild = ""
+  end if
+  if (present(attnestflag)) then
+    if (attnestflag%value==ESMF_ATTNEST_ON%value) recursive = .true.
+  end if
+
+  call c_info_erase(info%ptr, trim(keyParent)//C_NULL_CHAR, &
+                     trim(localkeyChild)//C_NULL_CHAR, recursive, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoRemove
+
+!------------------------------------------------------------------------------
+! Set (Scalar) ----------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!BOP
+! !IROUTINE: ESMF_InfoSet - Set a value
+!
+! !INTERFACE:
+!subroutine ESMF_InfoSet(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+!
+! !ARGUMENTS:
+!  type(ESMF_Info), intent(inout) :: info
+!  character(len=*), intent(in) :: key
+!  <value>, see below for supported value
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  logical, intent(in), optional :: force
+!  integer, intent(in), optional :: idx
+!  character(len=*), intent(in), optional :: pkey
+!  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Set a \textit{value} in an \texttt{ESMF\_Info} object using a key.
+!
+!     Overloaded \textit{value} for the following types:
+!     \begin{itemize}
+!       \item \texttt{integer(kind=ESMF\_KIND\_I4)}
+!       \item \texttt{integer(kind=ESMF\_KIND\_I8)}
+!       \item \texttt{real(kind=ESMF\_KIND\_R4)}
+!       \item \texttt{real(kind=ESMF\_KIND\_R8)}
+!       \item \texttt{logical}
+!       \item \texttt{character(:)}
+!     \end{itemize}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [value]
+!       The input value associated with the key.
+!     \item [{[force]}]
+!       Default is true. When true, insert the key even if it already exists in
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
+!       key already exists.
+!     \item [{[idx]}]
+!       An integer index to set if the target key's value is a list.
+!     \item [{[pkey]}]
+!       Use this key's location as the origin for the set call.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE: Documentation stub located above for generic interface compliance.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetR4()"
+subroutine ESMF_InfoSetR4(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R4), intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(in), optional :: idx
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  integer(C_INT), target :: local_idx
+  type(C_PTR) :: local_idx_ptr
+  character(:), allocatable :: local_pkey
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(idx)) then
+    local_idx = idx - 1  ! Shift to C (zero-based) indexing
+    local_idx_ptr = C_LOC(local_idx)
+  else
+    local_idx_ptr = C_NULL_PTR
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_R4(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    value, &
+    local_force, &
+    localrc, &
+    local_idx_ptr, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetR4
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetR8()"
+subroutine ESMF_InfoSetR8(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R8), intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(in), optional :: idx
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  integer(C_INT), target :: local_idx
+  type(C_PTR) :: local_idx_ptr
+  character(:), allocatable :: local_pkey
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(idx)) then
+    local_idx = idx - 1  ! Shift to C (zero-based) indexing
+    local_idx_ptr = C_LOC(local_idx)
+  else
+    local_idx_ptr = C_NULL_PTR
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_R8(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    value, &
+    local_force, &
+    localrc, &
+    local_idx_ptr, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetR8
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetI4()"
+subroutine ESMF_InfoSetI4(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  integer(ESMF_KIND_I4), intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(in), optional :: idx
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  integer(C_INT), target :: local_idx
+  type(C_PTR) :: local_idx_ptr
+  character(:), allocatable :: local_pkey
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(idx)) then
+    local_idx = idx - 1  ! Shift to C (zero-based) indexing
+    local_idx_ptr = C_LOC(local_idx)
+  else
+    local_idx_ptr = C_NULL_PTR
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_I4(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    value, &
+    local_force, &
+    localrc, &
+    local_idx_ptr, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetI4
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetI8()"
+subroutine ESMF_InfoSetI8(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  integer(ESMF_KIND_I8), intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(in), optional :: idx
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  integer(C_INT), target :: local_idx
+  type(C_PTR) :: local_idx_ptr
+  character(:), allocatable :: local_pkey
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(idx)) then
+    local_idx = idx - 1  ! Shift to C (zero-based) indexing
+    local_idx_ptr = C_LOC(local_idx)
+  else
+    local_idx_ptr = C_NULL_PTR
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_I8(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    value, &
+    local_force, &
+    localrc, &
+    local_idx_ptr, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetI8
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetCH()"
+subroutine ESMF_InfoSetCH(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  character(len=*), intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(in), optional :: idx
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  integer(C_INT), target :: local_idx
+  type(C_PTR) :: local_idx_ptr
+  character(:), allocatable :: local_pkey
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(idx)) then
+    local_idx = idx - 1  ! Shift to C (zero-based) indexing
+    local_idx_ptr = C_LOC(local_idx)
+  else
+    local_idx_ptr = C_NULL_PTR
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_CH(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    trim(value)//C_NULL_CHAR, &
+    local_force, &
+    localrc, &
+    local_idx_ptr, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetCH
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetLG()"
+subroutine ESMF_InfoSetLG(info, key, value, keywordEnforcer, force, idx, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  logical, intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(in), optional :: idx
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force, local_value
+  integer(C_INT), target :: local_idx
+  type(C_PTR) :: local_idx_ptr
+  character(:), allocatable :: local_pkey
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(idx)) then
+    local_idx = idx - 1  ! Shift to C (zero-based) indexing
+    local_idx_ptr = C_LOC(local_idx)
+  else
+    local_idx_ptr = C_NULL_PTR
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  local_value = value
+  call c_info_set_LG(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    local_value, &
+    local_force, &
+    localrc, &
+    local_idx_ptr, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetLG
+
+! -----------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetINFO()"
+!BOP
+! !IROUTINE: ESMF_InfoSet - Set a key to the contents of an Info object
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_InfoSet
+subroutine ESMF_InfoSetINFO(info, key, value, keywordEnforcer, force, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  type(ESMF_Info), intent(in) :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Set a value to the contents of an \texttt{ESMF\_Info} object. A copy of
+!     the source contents is made.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [value]
+!       The \texttt{ESMF\_Info} object to use as source data.
+!     \item [{[force]}]
+!       Default is true. When true, insert the key even if it already exists in
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
+!       key already exists.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+
+  call c_info_set_INFO(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    value%ptr, &
+    local_force, &
+    localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetINFO
+
+!------------------------------------------------------------------------------
+! SetArray --------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!BOP
+! !IROUTINE: ESMF_InfoSet - Set a value list
+!
+! !INTERFACE:
+!subroutine ESMF_InfoSet(info, key, values, keywordEnforcer, force, pkey, rc)
+!
+! !ARGUMENTS:
+!  type(ESMF_Info), intent(inout) :: info
+!  character(len=*), intent(in) :: key
+!  <values>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  logical, intent(in), optional :: force
+!  character(len=*), intent(in), optional :: pkey
+!  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Set a value list in an \texttt{ESMF\_Info} object using a key. List values
+!     are initialized to null.
+!
+!     Overloaded \textit{values} for the following types:
+!     \begin{itemize}
+!       \item \texttt{integer(kind=ESMF\_KIND\_I4), dimension(:)}
+!       \item \texttt{integer(kind=ESMF\_KIND\_I8), dimension(:)}
+!       \item \texttt{real(kind=ESMF\_KIND\_R4), dimension(:)}
+!       \item \texttt{real(kind=ESMF\_KIND\_R8), dimension(:)}
+!       \item \texttt{logical, dimension(:)}
+!       \item \texttt{character(:), dimension(:)}
+!     \end{itemize}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [values]
+!       The input value list associated with the key.
+!     \item [{[force]}]
+!       Default is true. When true, insert the key even if it already exists in
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
+!       key already exists.
+!     \item [{[pkey]}]
+!       Use this key's location as the origin for the set call. Used primarily
+!       for recursive requirements related to \texttt{ESMF\_Attribute}.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! NOTE: Documentation stub located above for generic interface compliance.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayR4()"
+subroutine ESMF_InfoSetArrayR4(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R4), dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_array_R4(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    SIZE(values), &
+    local_force, &
+    localrc, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayR4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayR8()"
+subroutine ESMF_InfoSetArrayR8(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  real(ESMF_KIND_R8), dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_array_R8(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    SIZE(values), &
+    local_force, &
+    localrc, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayR8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayI4()"
+subroutine ESMF_InfoSetArrayI4(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  integer(ESMF_KIND_I4), dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_array_I4(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    SIZE(values), &
+    local_force, &
+    localrc, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayI4
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayI8()"
+subroutine ESMF_InfoSetArrayI8(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  integer(ESMF_KIND_I8), dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  call c_info_set_array_I8(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    values, &
+    SIZE(values), &
+    local_force, &
+    localrc, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayI8
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayCH()"
+subroutine ESMF_InfoSetArrayCH(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  character(len=*), dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  integer :: ii
+  integer(C_INT) :: idx
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  ! Allocate storage in C
+  call c_info_set_array_CH(info%ptr, trim(key)//C_NULL_CHAR, &
+    SIZE(values), local_force, localrc, local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Set each character element in the underlying store
+  do ii=1,SIZE(values)
+    call ESMF_InfoSetCH(info, key, values(ii), idx=ii, pkey=local_pkey, rc=localrc)
+  enddo
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayCH
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetArrayLG()"
+subroutine ESMF_InfoSetArrayLG(info, key, values, keywordEnforcer, force, pkey, rc)
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+  logical, dimension(:), intent(in) :: values
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  character(len=*), intent(in), optional :: pkey
+  integer, intent(out), optional :: rc
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+  integer :: ii
+  logical(C_BOOL), dimension(:), allocatable :: local_values
+  character(:), allocatable :: local_pkey
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+  if (present(pkey)) then
+    local_pkey = TRIM(pkey)//C_NULL_CHAR
+  else
+    local_pkey = ""//C_NULL_CHAR
+  end if
+
+  allocate(local_values(SIZE(values)))
+  do ii=1,SIZE(values)
+    local_values(ii) = values(ii)
+  enddo
+
+  call c_info_set_array_LG(&
+    info%ptr, &
+    trim(key)//C_NULL_CHAR, &
+    local_values, &
+    SIZE(values), &
+    local_force, &
+    localrc, &
+    local_pkey)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  deallocate(local_values)
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetArrayLG
+
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetNULL()"
+!BOP
+! !IROUTINE: ESMF_InfoSetNULL - Set a value to null
+!
+! !INTERFACE:
+subroutine ESMF_InfoSetNULL(info, key, keywordEnforcer, force, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(inout) :: info
+  character(len=*), intent(in) :: key
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  logical, intent(in), optional :: force
+  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Set a value to null \cite{json_for_modern_cpp_null}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [key]
+!       String key to access in \texttt{ESMF\_Info} storage. See section \ref{info_key_format}
+!       for an overview of the key format.
+!     \item [{[force]}]
+!       Default is true. When true, insert the key even if it already exists in
+!       storage. If false, \textit{rc} will not return {\tt ESMF\_SUCCESS} if the
+!       key already exists.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+  integer :: localrc
+  logical(C_BOOL) :: local_force
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (present(force)) then
+    local_force = force
+  else
+    local_force = .true.
+  end if
+
+  call c_info_set_NULL(info%ptr, trim(key)//C_NULL_CHAR, local_force, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetNULL
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoSetDirty()"
+!BOPI
+! !IROUTINE: ESMF_InfoSetDirty - Change dirty state for synchronize operations
+!
+! !INTERFACE:
+subroutine ESMF_InfoSetDirty(info, flag, keywordEnforcer, rc)
+! !ARGUMENTS:
+  type(ESMF_Info), intent(inout) :: info
+  logical, intent(in) :: flag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional :: rc
+! !DESCRIPTION:
+!     Change the dirty state of an \texttt{ESMF\_Info} object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [info]
+!       Target \texttt{ESMF\_Info} object.
+!     \item [flag]
+!       Logical value to set.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOPI
+
+  integer :: localrc, local_flag
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_FAILURE
+
+  if (flag) then
+    local_flag = 1 !true
+  else
+    local_flag = 0 !false
+  end if
+
+  call c_info_set_dirty(info%ptr, local_flag, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoSetDirty
+
+!------------------------------------------------------------------------------
+! Sync Documentation ----------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!BOP
+! !IROUTINE: ESMF_InfoSync - Synchronize Info contents across a VM
+! \label{esmf_infosync}
+!
+! !INTERFACE:
+!subroutine ESMF_InfoSync(host, rootPet, vm, keywordEnforcer, markClean, &
+!   rc)
+! !ARGUMENTS:
+!  type(ESMF_*), intent(inout) :: host
+!  integer, intent(in) :: rootPet
+!  type(ESMF_VM), intent(in) :: vm
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!  logical, intent(in), optional :: markClean
+!  integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Synchronize \texttt{ESMF\_Info} contents collectively across the current VM.
+!     Contents on the \textit{rootPet} are set as the contents on matching objects
+!     sharing the VM. An attempt is made to optimize by only communicating updated
+!     contents (i.e. something set or modified). This subroutine will traverse
+!     the ESMF object hierarchy associated with \texttt{host} (i.e. Arrays in
+!     an ArrayBundle, Fields in a FieldBundle, etc.).
+!
+!     Users interested in broadcasting only the \texttt{ESMF\_Info} object should
+!     consult the \texttt{ESMF\_InfoBroadcast} documentation \ref{esmf_infobroadcast}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [host]
+!       Target ESMF object. Overloaded for:
+!       \begin{itemize}
+!         \item \texttt{ESMF\_State}
+!         \item \texttt{ESMF\_CplComp}
+!         \item \texttt{ESMF\_GridComp}
+!         \item \texttt{ESMF\_SciComp}
+!         \item \texttt{ESMF\_Field}
+!         \item \texttt{ESMF\_FieldBundle}
+!       \end{itemize}
+!     \item [rootPet]
+!       The root PET to use for the synchronization.
+!     \item [vm]
+!       The VM to synchronize across.
+!     \item [{[markClean]}]
+!       Default is false. If true, mark changed \texttt{ESMF\_Info} contents as
+!       clean once synchronized. These contents will no longer be broadcast in
+!       consecutive calls to \texttt{ESMF\_InfoSync}.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoUpdate()"
 !BOP
 ! !IROUTINE: ESMF_InfoUpdate - Update the contents of an Info object
@@ -3448,48 +3624,6 @@ end subroutine ESMF_InfoUpdate
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoReadJSON()"
-!BOP
-! !IROUTINE: ESMF_InfoReadJSON - Read JSON data from file
-!
-! !INTERFACE:
-function ESMF_InfoReadJSON(filename, keywordEnforcer, rc) result(info_r)
-! !ARGUMENTS:
-  character(len=*), intent(in) :: filename
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: rc
-! !RETURN VALUE:
-  type(ESMF_Info) :: info_r
-!
-! !DESCRIPTION:
-!     Read JSON data from a file and return a new \texttt{ESMF\_Info} object.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [filename]
-!       Path to the input file.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  info_r = ESMF_InfoCreate(rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  call c_info_read_json(info_r%ptr, trim(filename)//C_NULL_CHAR, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end function ESMF_InfoReadJSON
-
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_InfoWriteJSON()"
 !BOP
 ! !IROUTINE: ESMF_InfoWriteJSON - Write Info contents to file
@@ -3526,107 +3660,5 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoWriteJSON
-
-! -----------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InfoBroadcast()"
-!BOP
-! !IROUTINE: ESMF_InfoBroadcast - Broadcast Info contents
-! \label{esmf_infobroadcast}
-!
-! !INTERFACE:
-subroutine ESMF_InfoBroadcast(info, rootPet, keywordEnforcer, rc)
-! !ARGUMENTS:
-  type(ESMF_Info), intent(inout) :: info
-  integer, intent(in) :: rootPet
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Broadcast an \texttt{ESMF\_Info} object collectively across the current VM.
-!
-!     Users wishing to synchronize via broadcast an attribute hierarchy associated
-!     with an ESMF object should consult the \texttt{ESMF\_InfoSync} documentation
-!     \ref{esmf_infosync}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [info]
-!       The \texttt{ESMF\_Info} object that is the source (on \textit{rootPet}) or the
-!       destination object to populate (on all other PETs). On destination PETs,
-!       the structure of \textit{info} is overwritten with data from \textit{rootPet}.
-!     \item [rootPet]
-!       The root PET identifier.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-
-  integer :: localrc
-
-  localrc = ESMF_FAILURE
-  if (present(rc)) rc = ESMF_FAILURE
-
-  call c_info_broadcast(info%ptr, rootPet, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(rc)) rc = ESMF_SUCCESS
-end subroutine ESMF_InfoBroadcast
-
-!------------------------------------------------------------------------------
-! Sync Documentation ----------------------------------------------------------
-!------------------------------------------------------------------------------
-
-!BOP
-! !IROUTINE: ESMF_InfoSync - Synchronize Info contents across a VM
-! \label{esmf_infosync}
-!
-! !INTERFACE:
-!subroutine ESMF_InfoSync(host, rootPet, vm, keywordEnforcer, markClean, &
-!   rc)
-! !ARGUMENTS:
-!  type(ESMF_*), intent(inout) :: host
-!  integer, intent(in) :: rootPet
-!  type(ESMF_VM), intent(in) :: vm
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!  logical, intent(in), optional :: markClean
-!  integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Synchronize \texttt{ESMF\_Info} contents collectively across the current VM.
-!     Contents on the \textit{rootPet} are set as the contents on matching objects
-!     sharing the VM. An attempt is made to optimize by only communicating updated
-!     contents (i.e. something set or modified). This subroutine will traverse
-!     the ESMF object hierarchy associated with \texttt{host} (i.e. Arrays in
-!     an ArrayBundle, Fields in a FieldBundle, etc.).
-!
-!     Users interested in broadcasting only the \texttt{ESMF\_Info} object should
-!     consult the \texttt{ESMF\_InfoBroadcast} documentation \ref{esmf_infobroadcast}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [host]
-!       Target ESMF object. Overloaded for:
-!       \begin{itemize}
-!         \item \texttt{ESMF\_State}
-!         \item \texttt{ESMF\_CplComp}
-!         \item \texttt{ESMF\_GridComp}
-!         \item \texttt{ESMF\_SciComp}
-!         \item \texttt{ESMF\_Field}
-!         \item \texttt{ESMF\_FieldBundle}
-!       \end{itemize}
-!     \item [rootPet]
-!       The root PET to use for the synchronization.
-!     \item [vm]
-!       The VM to synchronize across.
-!     \item [{[markClean]}]
-!       Default is false. If true, mark changed \texttt{ESMF\_Info} contents as
-!       clean once synchronized. These contents will no longer be broadcast in
-!       consecutive calls to \texttt{ESMF\_InfoSync}.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
 
 end module ESMF_InfoMod  !=====================================================

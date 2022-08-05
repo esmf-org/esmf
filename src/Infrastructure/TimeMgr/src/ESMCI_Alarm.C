@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1189,7 +1189,7 @@ int Alarm::count=0;
         // done processing changed flags, reset if necessary
         if (userChangedRingTime)     userChangedRingTime     = false;
         if (userChangedRingInterval) userChangedRingInterval = false;
-        //if (clock->userChangedDirection) clock->userChangedDirection = false;
+        if (clock->userChangedDirection) clock->userChangedDirection = false;
       }
 
       // ... then check if time to turn on alarm
@@ -1318,7 +1318,7 @@ int Alarm::count=0;
       // ... or non-sticky alarm, if user just changed clock direction to
       //   REVERSE ...
       if (clock->userChangedDirection) {
-        //clock->userChangedDirection = false; // reset changed flag
+        clock->userChangedDirection = false; // reset changed flag
         if (!sticky) {
           if (((positive && ringTime > (clock->currTime + clock->timeStep)) ||
               (!positive && ringTime < (clock->currTime + clock->timeStep))) &&
@@ -1342,6 +1342,10 @@ int Alarm::count=0;
             ringTimeEnd = ringBegin + ringDuration; 
           // ... otherwise use ringTimeStepCount
           } else if (ringTimeStepCount >= 1) {
+            // If ringBegin hasn't been initialized, set ringBegin to clock's startTime
+            if(ringBegin.getCalendar() == NULL){
+              ringBegin = clock->startTime;
+            }
             ringTimeEnd = ringBegin + ringTimeStepCount * clock->timeStep;
           } // TODO: else error, ringTimeStepCount <= 0 (ringing counter is
             // always positive) Validate() ?

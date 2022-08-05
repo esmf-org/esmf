@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -16,6 +16,7 @@
 #include <Mesh/include/Regridding/ESMCI_Mapping.h>
 #include <Mesh/include/Legacy/ESMCI_MeshllField.h>
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
+#include <Mesh/include/ESMCI_MathUtil.h>
 
 #include <limits>
 #include <vector>
@@ -55,6 +56,89 @@ BBox &BBox::operator=(const BBox &rhs) {
 
   return *this;
 }
+
+  // If the 3D object surrounds an axis and extends on that side of the sphere
+  // then it could bulge up to max_radius where the axis is
+  static void _add_axis_bulge(double *min, double *max, double max_radius) {
+    
+    //// +X  ////
+
+    /// If extends in +X direction
+    if (max[0] > 0.0) {
+      // If the hex surrounds the X axis
+      if ((max[1] >= 0.0) && (min[1] <= 0.0)) {
+        if ((max[2] >= 0.0) && (min[2] <= 0.0)) {
+          if (max_radius > max[0]) max[0]=max_radius; 
+        }
+      }
+    }
+
+    //// -X  ////
+
+    /// If extends in -X direction
+    if (min[0] < 0.0) {
+      // If the hex surrounds the X axis
+      if ((max[1] >= 0.0) && (min[1] <= 0.0)) {
+        if ((max[2] >= 0.0) && (min[2] <= 0.0)) {
+          if (-max_radius < min[0]) min[0]=-max_radius; 
+        }
+      }
+    }
+    
+    //// +Y  ////
+
+    /// If extends in +Y direction
+    if (max[1] > 0.0) {
+      // If the hex surrounds the Y axis
+      if ((max[0] >= 0.0) && (min[0] <= 0.0)) {
+        if ((max[2] >= 0.0) && (min[2] <= 0.0)) {
+          if (max_radius > max[1]) max[1]=max_radius; 
+        }
+      }
+    }
+
+    //// -Y  ////
+
+    /// If extends in -Y direction
+    if (min[1] < 0.0) {
+      // If the hex surrounds the Y axis
+      if ((max[0] >= 0.0) && (min[0] <= 0.0)) {
+        if ((max[2] >= 0.0) && (min[2] <= 0.0)) {
+          if (-max_radius < min[1]) min[1]=-max_radius; 
+        }
+      }
+    }
+
+
+    //// +Z  ////
+
+    /// If extends in +Z direction
+    if (max[2] > 0.0) {
+      // If the hex surrounds the Z axis
+      if ((max[0] >= 0.0) && (min[0] <= 0.0)) {
+        if ((max[1] >= 0.0) && (min[1] <= 0.0)) {
+          if (max_radius > max[2]) max[2]=max_radius; 
+        }
+      }
+    }
+
+    //// -Z  ////
+
+    /// If extends in -Z direction
+    if (min[2] < 0.0) {
+      // If the hex surrounds the Z axis
+      if ((max[0] >= 0.0) && (min[0] <= 0.0)) {
+        if ((max[1] >= 0.0) && (min[1] <= 0.0)) {
+          if (-max_radius < min[2]) min[2]=-max_radius; 
+        }
+      }
+    }
+    
+  }
+
+
+  // Unless we are experimenting with the new smaller box for 3D sph, then use the old method (from before 8.2)
+#ifndef BBOX_SMALLER_FOR_SPH3D
 
   // TODO: take normexp out of parameter list because it's reset inside
   BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp, bool is_sph) :
@@ -181,6 +265,145 @@ BBox &BBox::operator=(const BBox &rhs) {
   } // nonshell
 }
 
+#else
+
+  // TODO: take normexp out of parameter list because it's reset inside
+  BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp, bool is_sph) :
+ isempty(false)
+{
+  if (obj.get_type() != MeshObj::ELEMENT) Throw() << "Not able to create BBOx for non element";
+  const MeshObjTopo &topo = *GetMeshObjTopo(obj);
+  const UInt npe = topo.num_nodes;
+
+  dim = topo.spatial_dim;
+
+  // Is a shell? TODO expand shell in normal directions
+  if (topo.spatial_dim != topo.parametric_dim) {
+    // Shell, expand by normexp in normal direction
+    for (UInt i =0; i < dim; i++) {
+      min[i] = std::numeric_limits<double>::max();
+      max[i] = -std::numeric_limits<double>::max();
+    }
+
+    double nr[3];
+    MasterElement<> *me = GetME(coords, obj)(METraits<>());
+    std::vector<double> cd(3*me->num_functions());
+    GatherElemData<>(*me, coords, obj, &cd[0]);
+
+    double pc[] = {0,0};
+    const Mapping<> *mp = GetMapping(obj)(MPTraits<>());
+    mp->normal(1,&cd[0], &pc[0], &nr[0]);
+   
+    double ns = std::sqrt(nr[0]*nr[0]+nr[1]*nr[1]+nr[2]*nr[2]);
+
+    // Only normalize if bigger than 0.0
+    if (ns >1.0E-19) {
+       nr[0] /= ns; nr[1] /= ns; nr[2] /= ns;
+    } else {
+      nr[0] =0.0; nr[1] =0.0; nr[2] =0.0;
+    }
+
+    // Get cell diameter
+    double diam = 0;
+    for (UInt n = 1; n < me->num_functions(); n++) {
+      double dist = std::sqrt( (cd[0]-cd[3*n])*(cd[0]-cd[3*n]) +
+               (cd[1]-cd[3*n+1])*(cd[1]-cd[3*n+1])
+               + (cd[2]-cd[3*n+2])*(cd[2]-cd[3*n+2]));
+      
+      if (dist > diam) diam = dist;
+    }
+    
+    // Orig:   normexp *= diam;    
+    // Drop to 1.0. 1.0 is still overkill, but 2.0 seems like way overkill
+    // normexp=2.0*diam;
+    normexp=1.0*diam;
+
+
+    for (UInt n = 0; n < npe; n++) {
+      for (UInt j = 0; j < dim; j++) {
+        double lm;
+        if ((lm = (cd[n*dim + j] + normexp*nr[j])) < min[j]) min[j] = lm;
+        if ((lm =(cd[n*dim + j] - normexp*nr[j])) < min[j]) min[j] = lm;
+
+        if ((lm=(cd[n*dim + j] + normexp*nr[j])) > max[j]) max[j] = lm;
+         if ((lm=(cd[n*dim + j] - normexp*nr[j])) > max[j]) max[j] = lm;
+      }
+    } // for n
+  } else {
+
+    // Good old fashioned element
+    for (UInt i =0; i < dim; i++) {
+      min[i] = std::numeric_limits<double>::max();
+      max[i] = -std::numeric_limits<double>::max();
+    }
+
+    // Loop the nodes calculating min and max coords
+    for (UInt n = 0; n < topo.num_nodes; n++) {
+      const MeshObj &node = *(obj.Relations[n].obj);
+      const double *coord = coords.data(node);
+      for (UInt j = 0; j < dim; j++) {
+        if (coord[j] < min[j]) min[j] = coord[j];
+        if (coord[j] > max[j]) max[j] = coord[j];
+      }
+    }
+
+    // If this is on a 3D sphere then extend outward to include the bulge
+    // Spatial dimension is assumed to be 3, because we don't allow sdim<pdim
+    if ((topo.parametric_dim==3) && is_sph) {
+
+      // Find the max radius squared
+      double max_radius_sq=0.0;
+      for (UInt n = 0; n < topo.num_nodes; n++) {
+        const MeshObj &node = *(obj.Relations[n].obj);
+        const double *coord = coords.data(node);
+        
+        // Compute radius squared
+        double radius_sq=MU_LENSQ_VEC3D(coord);
+
+        // If bigger than update
+        if (radius_sq > max_radius_sq) max_radius_sq=radius_sq;
+      }
+
+      // Find the max radius
+      double max_radius=std::sqrt(max_radius_sq);
+
+      // If one of the axis are through
+      // the hex then the hex may bulge up to max_radius
+      // Do this here before adding the modifications to min max
+      // by the max_radius through each point
+      _add_axis_bulge(min, max, max_radius);
+
+      // Loop through extending the min max box by the max radius through points
+      // Takes care of upper part of hex that may go out to max radius through 
+      // one of the points
+      for (UInt n = 0; n < topo.num_nodes; n++) {
+        const MeshObj &node = *(obj.Relations[n].obj);
+        const double *coord = coords.data(node);
+        
+        // Compute unit vector in direction of point 
+        double len=MU_LEN_VEC3D(coord);
+
+        // Get 1/len to compute unit vector
+        double div_len=1.0;
+        if (len != 0.0) div_len=1.0/len;
+
+        // Compute unit vector
+        double uvec[3];
+        MU_MULT_BY_SCALAR_VEC3D(uvec,coord,div_len);        
+        
+        // Compute new point at max radius
+        double new_pnt[3];
+        MU_MULT_BY_SCALAR_VEC3D(new_pnt,uvec,max_radius);        
+
+        // Update min and max
+        MU_SET_MIN_VEC3D(min,new_pnt);        
+        MU_SET_MAX_VEC3D(max,new_pnt);        
+      }
+
+    }
+  } // nonshell
+}
+#endif
 
 
   BBox::BBox(const MEField<> &coords, const MeshDB &mesh, bool is_sph) :

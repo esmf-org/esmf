@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -38,7 +38,8 @@
       integer, allocatable:: array1(:), array3(:),array3_soln(:)
       integer, allocatable:: array4(:), array5(:)
       integer, allocatable:: ssiMap(:)
-      character(800)  :: ssiMapString
+      character(:), allocatable:: esmfComm
+      character(800)  :: msgString
       integer, dimension (:, :), allocatable:: array2
       integer::  func_results, myresults
       integer:: nsize, i, j
@@ -77,11 +78,15 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Test_VM Get Test"
       call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, &
-        ssiMap=ssiMap, rc=rc)
+        ssiMap=ssiMap, esmfComm=esmfComm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      
-      write(ssiMapString,*) "ssiMap=", ssiMap
-      call ESMF_LogWrite(ssiMapString, ESMF_LOGMSG_INFO, rc=rc)
+
+      write(msgString,*) "ssiMap=", ssiMap
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+      write(msgString,*) "esmfComm=", esmfComm, "  len(esmfComm)=", len(esmfComm)
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       !------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -550,7 +550,7 @@ int getComputationalUBound(
                    int *_staggerloc,
            int *item,    
                    Array *_array,
-                   CopyFlag *_docopy
+                   DataCopyFlag *_docopy
                    );
 
 
@@ -558,7 +558,7 @@ int getComputationalUBound(
  Array *getItemArray(
                       int *_staggerloc,
                       int *item, 
-                      CopyFlag *_docopy,
+                      DataCopyFlag *_docopy,
                       int *rcArg
                       );
 
@@ -588,7 +588,7 @@ int getComputationalUBound(
                    int *_staggerloc,
                    int *_coord,
                    Array *_array,
-                   CopyFlag *_docopy
+                   DataCopyFlag *_docopy
                    );
 
 
@@ -597,7 +597,7 @@ int getComputationalUBound(
                        int *staggerlocArg,        // (in) optional
                        int arrayCount,             // (in) 
                        Array **arrayList,           // (in)
-                       CopyFlag *docopyArg,   // (in) optional
+                       DataCopyFlag *docopyArg,   // (in) optional
                        InterArray<int> *_staggerEdgeLWidthArg,
                        InterArray<int> *_staggerEdgeUWidthArg,
                        InterArray<int> *_staggerAlign
@@ -622,7 +622,7 @@ int getComputationalUBound(
  Array *getCoordArray(
                       int *_staggerloc,
                       int _coord,
-                      CopyFlag *_docopy,
+                      DataCopyFlag *_docopy,
                       int *rcArg
                       );
 

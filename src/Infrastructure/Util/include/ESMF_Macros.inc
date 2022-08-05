@@ -2,7 +2,7 @@
 $Id$
 
 Earth System Modeling Framework
-Copyright 2002-2020, University Corporation for Atmospheric Research,
+Copyright 2002-2022, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -49,9 +49,9 @@ block/end block statements.
 #endif
 
 #ifdef OMPI_MAJOR_VERSION
-#if (OMPI_MAJOR_VERSION < 3)
+#if (OMPI_MAJOR_VERSION < 2)
 #if 0
-MPI-3 support started in OpenMPI v3
+MPI-3 support was complete in OpenMPI v2
 #endif
 #define ESMF_NO_MPI3
 #endif
@@ -64,4 +64,3 @@ MPI-3 support started in OpenMPI v3
 #endif
 
 #endif 
-

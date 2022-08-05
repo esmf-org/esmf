@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_AlarmTest
+program ESMF_AlarmTest
 
 !------------------------------------------------------------------------------
 !
@@ -3352,6 +3352,30 @@
       call ESMF_ClockDestroy (clock, rc=rc)
 
       ! ----------------------------------------------------------------------------
+#if 0
+      ! The following tests are from Ben@NASA's support ticket 3614994
+      write(failMsg, *) " Alarms did not rewind correct number of times "
+      write(name, *) "Test multiple alarms rewind correct number of times "
+      rc = ESMF_SUCCESS
+      testPass = .true.
+      call Test_ReverseAlarms(testPass, rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+      if (.not. testPass) print *, 'bad return codes discovered'
+      call ESMF_Test (testPass, name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      write(failMsg, *) " Alarms hang... "
+      write(name, *) "Test multiple alarms replay without hanging "
+      rc = ESMF_SUCCESS
+      testPass = .true.
+      call Test_AlarmHang(testPass, rc)
+      if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
+      if (.not. testPass) print *, 'bad return codes discovered'
+      call ESMF_Test (testPass, name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+      ! ----------------------------------------------------------------------------
 #endif
 
       ! destroy calendars
@@ -3363,4 +3387,220 @@
       ! finalize ESMF framework
       call ESMF_TestEnd(ESMF_SRCLINE)
 
-      end program ESMF_AlarmTest
+#if 0
+  contains
+
+    subroutine test_reverseAlarms(testPass, rc)
+      implicit none
+
+      logical, intent(out) :: testPass
+      integer :: status,rc
+
+      type(ESMF_TimeInterval) :: dt
+      type(ESMF_Time) :: start_time, clock_start, clock_end
+      type(ESMF_Clock) :: clock
+      character(len=5) :: add_2nd
+      integer :: nargs
+
+      type(ESMF_TimeInterval) :: tint
+      type(ESMF_Alarm) :: esmfalarm, firstalarm
+
+      integer :: i,nstep
+
+      type(ESMF_Time) :: time
+      character(len=10) :: iam='test_clock'
+      logical :: esmf_ring
+      integer :: nalarms, n_rings=0
+
+      testPass = .false.
+      call ESMF_CalendarSetDefault ( ESMF_CALKIND_GREGORIAN, rc=status )
+      call verify_(status)
+      call ESMF_TimeSet(clock_start,yy=2000,mm=1,dd=1,h=21,m=0,s=0,rc=status)
+      call verify_(status)
+      call ESMF_TimeSet(clock_end,yy=2000,mm=12,dd=1,h=21,m=0,s=0,rc=status)
+      call verify_(status)
+      call ESMF_TimeSet(start_time,yy=2000,mm=10,dd=1,h=21,m=0,s=0,rc=status)
+      call verify_(status)
+      call ESMF_TimeIntervalSet(dt,S=900, sN=0, sD=1,rc=status)
+      call verify_(status)
+      clock= ESMF_ClockCreate(timeStep=dt,startTime=clock_start,stopTime=clock_end,rc=status)
+      call verify_(status)
+      call ESMF_ClockSet(clock,currTime=start_time,rc=status)
+      call verify_(status)
+
+      call ESMF_ClockGet(clock,currtime=start_time,rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+      call ESMF_TimeIntervalSet(tint,h=2,rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+      firstalarm = ESMF_AlarmCreate(clock=clock,ringInterval=tint,ringTime=start_time,sticky=.false.,name="alarm1",rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize()
+
+      nstep=47
+      call ESMF_ClockGet(clock,currtime=start_time,alarmCount=nalarms,rc=status)
+      !write(*,*) "alarms already in clock: ",nalarms
+      call verify_(status)
+      call ESMF_TimeIntervalSet(tint,h=1,rc=status)
+      call verify_(status)
+      esmfalarm = ESMF_AlarmCreate(clock=clock,ringInterval=tint,ringTime=start_time,sticky=.false.,name="alarm2",rc=status)
+      do i=1,nstep
+         call ESMF_ClockGet(clock,currTime=time)
+         esmf_ring = ESMF_AlarmIsRinging(esmfalarm,rc=status)
+         call verify_(status)
+         if ( esmf_ring) then
+             !write(*,*)'ringing'
+            !call ESMF_TimePrint(time,options='string')
+         end if
+         call ESMF_ClockAdvance(clock)
+      enddo
+      call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_REVERSE, rc=status)
+      call verify_(status)
+      !write(*,*)"*************** start rewind *********************"
+      i = 0
+      do
+         i = i + 1
+         !write(*,*) 'Rewind step: ', i
+         call ESMF_ClockAdvance(clock,rc=status)
+         call verify_(status)
+         call ESMF_ClockGet(clock,currTime=time)
+         if (ESMF_AlarmIsRinging(esmfalarm)) then
+            !write(*,*)'rewinding one step ',ESMF_AlarmIsRinging(esmfalarm)
+            n_rings = n_rings + 1
+            !call ESMF_TimePrint(time,options='string')
+         end if
+         
+         if (time == start_time) exit
+      enddo
+      call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_FORWARD, rc=status)
+      call verify_(status)
+      !write(*,*)"*************** end rewind *********************"
+      do i=1,nstep*2
+         call ESMF_ClockGet(clock,currTime=time)
+         esmf_ring = ESMF_AlarmIsRinging(esmfalarm,rc=status)
+         call verify_(status)
+         if ( esmf_ring ) then
+            !write(*,*)'ringing'
+            !call ESMF_TimePrint(time,options='string')
+         end if
+         call ESMF_ClockAdvance(clock)
+      enddo
+      if(n_rings == 12) testPass = .true.
+
+       call ESMF_AlarmDestroy(esmfalarm, rc=status)
+       call verify_(status)
+       call ESMF_AlarmDestroy(firstalarm, rc=status)
+       call verify_(status)
+       call ESMF_ClockDestroy(clock, rc=status)
+       call verify_(status)
+           
+    end subroutine Test_ReverseAlarms
+
+    subroutine Test_AlarmHang(testPass, rc)
+      logical, intent(out) :: testPass
+      integer :: status,rc
+
+      type(ESMF_TimeInterval) :: dt
+      type(ESMF_Time) :: start_time, clock_start, clock_end
+      type(ESMF_Clock) :: clock
+      character(len=5) :: add_2nd
+      integer :: nargs
+           
+      integer :: i,nstep
+
+      type(ESMF_TimeInterval) :: tint
+      type(ESMF_Time) :: time
+      type(ESMF_Alarm) :: esmfalarm
+      type(ESMF_Alarm) :: testalarm
+      character(len=10) :: iam='test_clock'
+      logical :: esmf_ring
+      integer :: nalarms
+
+      testPass = .false.
+
+      call ESMF_CalendarSetDefault ( ESMF_CALKIND_GREGORIAN, rc=status )
+      call verify_(status)
+      call ESMF_TimeSet(clock_start,yy=2000,mm=1,dd=1,h=21,m=0,s=0,rc=status)
+      call verify_(status)
+      call ESMF_TimeSet(clock_end,yy=2000,mm=12,dd=1,h=21,m=0,s=0,rc=status)
+      call verify_(status)
+      call ESMF_TimeSet(start_time,yy=2000,mm=10,dd=1,h=21,m=0,s=0,rc=status)
+      call verify_(status)
+      call ESMF_TimeIntervalSet(dt,S=900, sN=0, sD=1,rc=status)
+      call verify_(status)
+      clock= ESMF_ClockCreate(timeStep=dt,startTime=clock_start,stopTime=clock_end,rc=status)
+      call verify_(status)
+      call ESMF_ClockSet(clock,currTime=start_time,rc=status)
+      call verify_(status)
+
+      nstep = 12
+      call ESMF_ClockGet(clock,currtime=start_time,alarmCount=nalarms,rc=status)
+      !write(*,*) "alarms already in clock: ",nalarms
+      call verify_(status)
+      call ESMF_TimeIntervalSet(tint,h=1,rc=status)
+      call verify_(status)
+      esmfalarm = ESMF_AlarmCreate(clock=clock,ringInterval=tint,ringTime=start_time,sticky=.false.,name="alarm2",rc=status)
+      !call ESMF_TimeIntervalSet(tint,h=3,rc=status)
+      !testalarm = ESMF_AlarmCreate(clock=clock,name="alarm3",ringInterval=tint, ringtime=start_time,sticky=.true.,rc=status)
+      testalarm = ESMF_AlarmCreate(clock=clock,name="alarm3",ringtime=start_time,sticky=.true.,rc=status)
+      call verify_(status)
+      call ESMF_AlarmRingerOff(testalarm,rc=status)
+      call verify_(status)
+      do i=1,nstep
+         call ESMF_AlarmRingerOn(testalarm,rc=status)
+         call verify_(status)
+         call ESMF_ClockGet(clock,currTime=time)
+         esmf_ring = ESMF_AlarmIsRinging(esmfalarm,rc=status)
+         call verify_(status)
+         if ( esmf_ring) then
+            !write(*,*)'ringing: esmfalarm'
+            call ESMF_TimePrint(time,options='string')
+         end if
+         call ESMF_ClockAdvance(clock)
+      enddo
+      call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_REVERSE, rc=status)
+      call verify_(status)
+      call ESMF_AlarmRingerOff(testalarm,rc=status)
+      call verify_(status)
+      !write(*,*)"*************** start rewind *********************"
+      do
+         call ESMF_ClockAdvance(clock,rc=status)
+         call verify_(status)
+         call ESMF_ClockGet(clock,currTime=time)
+         if (ESMF_AlarmIsRinging(esmfalarm)) then
+            !write(*,*)'rewinding one step: esmfalarm ',ESMF_AlarmIsRinging(esmfalarm)
+            call ESMF_TimePrint(time,options='string')
+         end if
+
+         if (ESMF_AlarmIsRinging(esmfalarm)) then
+            write(*,*)'rewinding one step: testalarm ',ESMF_AlarmIsRinging(testalarm)
+            call ESMF_TimePrint(time,options='string')
+         end if
+         
+         if (time == start_time) exit
+      enddo
+      call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_FORWARD, rc=status)
+      call verify_(status)
+      !write(*,*)"*************** end rewind *********************"
+      do i=1,nstep*2
+         call ESMF_ClockGet(clock,currTime=time)
+         esmf_ring = ESMF_AlarmIsRinging(esmfalarm,rc=status)
+         call verify_(status)
+         if ( esmf_ring ) then
+            !write(*,*)'ringing: esmfalarm'
+            call ESMF_TimePrint(time,options='string')
+         end if
+         call ESMF_ClockAdvance(clock)
+      enddo
+
+       call ESMF_AlarmDestroy(esmfalarm, rc=status)
+       call verify_(status)
+       call ESMF_AlarmDestroy(testalarm, rc=status)
+       call verify_(status)
+       call ESMF_ClockDestroy(clock, rc=status)
+       call verify_(status)
+
+       testPass = .true.
+      
+    end subroutine Test_AlarmHang
+#endif
+
+end program ESMF_AlarmTest

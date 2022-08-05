@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -66,6 +66,14 @@ namespace ESMCI {
   void write_3D_poly_to_vtk(const char *filename, int id, int num_p, double *p);
   void write_3D_poly_woid_to_vtk(const char *filename, int num_p, double *p);
 
+  void write_3D_hex_woid_to_vtk(const char *filename, double *hex);
+
+  void write_3D_hex_to_vtk(const char *filename, int id, double *hex);
+
+  void write_3D_minmax_to_vtk(const char *filename, int id, double *min, double *max);
+
+  void write_3D_pnt_woid_to_vtk(const char *filename, double *pnt);
+
 
   void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn);
 
@@ -79,6 +87,9 @@ namespace ESMCI {
   void convert_cart_to_sph_deg(double x, double y, double z,
                                double *lon, double *lat, double *r);
 
+
+  void convert_cart_to_sph_rad(double x, double y, double z,
+                               double *lon, double *lat, double *r);
 
   bool is_smashed_quad2D(int num_p, double *p);
 
@@ -327,6 +338,12 @@ template <class GEOM>
 
 template <class GEOM>
   bool is_pnt_in_polygon(int num_p, double *p, double *pnt, double tol, int *tri_ind_p, double *td, int *ti, bool *success=NULL);
+
+// TODO: combine these into one template like the above
+ void calc_poly_centroid_sph2D3D(int num_p, double *p, int *tri_ind, double *td, int *ti, 
+                                  double *centroid);
+ void calc_poly_centroid_cart2D2D(int num_p, double *p, double *centroid);
+
 
 } // namespace
 

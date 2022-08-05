@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -252,9 +252,11 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
 
 }
 
-#ifdef REGRID_DEBUG_OVERLAP
-  // This assumes that mesh is a rendezvous mesh or is serial
-  void calc_max_overlap(Mesh &mesh, double &max_overlap, int &max_overlap_src_id, int &max_overlap_dst_id) {
+
+// This assumes that mesh is a rendezvous mesh or is serial
+// max_local_overlap_area returns the local  maximum overlap area which will be -1 if no overlap was detected
+// max_local_overlap_id1 and max_local_overlap_id2 give the element ids of the local max overlap
+void calc_max_overlap(Mesh &mesh, double &max_local_overlap_area, int &max_local_overlap_id1, int &max_local_overlap_id2) {
   Trace __trace("calc_max_overlap(Mesh &mesh, double &max_overlap, int &max_overlap_id)");
 
   // Calc search results
@@ -311,12 +313,9 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
   std::vector<sintd_cell *> tmp_cells;  
 
   // Init variables
-  int loc_max_sid=-1;
-  int loc_max_did=-1;
-  double loc_max_overlap=0.0; 
-  double loc_tot_overlap_area=0.0;
-
-  int num_big_overlap=0;
+  int loc_max_id1=-1;
+  int loc_max_id2=-1;
+  double loc_max_overlap_area=-1.0; 
 
   // Loop through search results
   for (sb = sres.begin(); sb != se; sb++) {
@@ -409,21 +408,14 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
 	// Skip if src area is 0.0 
 	if (src_elem_area == 0.0) continue;
 
-	// Compute overlap fraction
-	// double overlap= areas[i]/src_elem_area;
-	double overlap= areas[i];
-
-	loc_tot_overlap_area += areas[i];
-
-	if (overlap > 1.0E-6) {
-	 num_big_overlap++;
-	}
+	// Get overlap area
+	double overlap_area= areas[i];
 
 	// Update max
-	if (overlap > loc_max_overlap) {
-	  loc_max_sid=sr.elem->get_id();
-	  loc_max_did=sr.elems[i]->get_id();
-	  loc_max_overlap=overlap;
+	if (overlap_area > loc_max_overlap_area) {
+	  loc_max_id1=sr.elem->get_id();
+	  loc_max_id2=sr.elems[i]->get_id();
+	  loc_max_overlap_area=overlap_area;
 	}
       }
     }
@@ -444,15 +436,11 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
   }
 #endif
 
-  // TODO: Eventually get the max over all processors
-
   // Output local max for now
-  max_overlap=loc_max_overlap;
-  max_overlap_src_id=loc_max_sid;
-  max_overlap_dst_id=loc_max_did;
+  max_local_overlap_area=loc_max_overlap_area;
+  max_local_overlap_id1=loc_max_id1;
+  max_local_overlap_id2=loc_max_id2;
 }
-
-#endif
 
 /*----------------------------------------------------------------*/
 // Interp:
@@ -1488,9 +1476,6 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
                                          bool set_dst_status, WMat &dst_status) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
-
-
-
   // Get src coord field
   MEField<> *src_cfield = srcmesh.GetCoordField();
 
@@ -1504,6 +1489,20 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
   // Get src and dst area field
   MEField<> *dst_area_field = dstmesh.GetField("elem_area");
   MEField<> *src_area_field = srcmesh.GetField("elem_area");
+
+  // If an XGrid is being created, then set things up appropriately
+  // (These fields shouldn't be needed unless an XGrid is being created)
+  MEField<> *src_side1_mesh_ind_field=NULL;
+  MEField<> *src_side1_orig_elem_id_field=NULL;
+  MEField<> *dst_side2_mesh_ind_field=NULL;
+  MEField<> *dst_side2_orig_elem_id_field=NULL;
+  if (midmesh != NULL) {
+   src_side1_mesh_ind_field=srcmesh.GetField("side1_mesh_ind");
+   src_side1_orig_elem_id_field=srcmesh.GetField("side1_orig_elem_id");
+
+   dst_side2_mesh_ind_field=dstmesh.GetField("side2_mesh_ind");
+   dst_side2_orig_elem_id_field=dstmesh.GetField("side2_orig_elem_id");
+  }
 
 
   // determine if we should use the dst_frac variable
@@ -1586,10 +1585,12 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
     std::vector<sintd_node *> tmp_nodes;
     std::vector<sintd_cell *> tmp_cells;
      calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,
-                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
-                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
-                                      &tmp_valid, &tmp_areas, &tmp_dst_areas,
-                                      midmesh, &tmp_nodes, &tmp_cells, 0, zz);
+                                       sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+                                       &src_elem_area, &valid, &wgts, &areas, &dst_areas,
+                                       &tmp_valid, &tmp_areas, &tmp_dst_areas,
+                                       midmesh, &tmp_nodes, &tmp_cells, 0, zz,
+                                       src_side1_mesh_ind_field, src_side1_orig_elem_id_field, 
+                                       dst_side2_mesh_ind_field, dst_side2_orig_elem_id_field);
 
 
     // Invalidate masked destination elements
@@ -1748,8 +1749,7 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
   } // for searchresult
 
   if(midmesh != 0)
-    compute_midmesh(sintd_nodes, sintd_cells, 2, 2, midmesh);
-
+    compute_midmesh(sintd_nodes, sintd_cells, 2, 2, midmesh,3);
 }
 
 
@@ -1775,8 +1775,6 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
 #endif
 
 
-
-
   // Get src coord field
   MEField<> *src_cfield = srcmesh.GetCoordField();
 
@@ -1791,13 +1789,19 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   MEField<> *dst_area_field = dstmesh.GetField("elem_area");
   MEField<> *src_area_field = srcmesh.GetField("elem_area");
 
+  // If an XGrid is being created, then set things up appropriately
+  // (These fields shouldn't be needed unless an XGrid is being created)
+  MEField<> *src_side1_mesh_ind_field=NULL;
+  MEField<> *src_side1_orig_elem_id_field=NULL;
+  MEField<> *dst_side2_mesh_ind_field=NULL;
+  MEField<> *dst_side2_orig_elem_id_field=NULL;
+  if (midmesh != NULL) {
+   src_side1_mesh_ind_field=srcmesh.GetField("side1_mesh_ind");
+   src_side1_orig_elem_id_field=srcmesh.GetField("side1_orig_elem_id");
 
-  // Get src and dst side fields
-  MEField<> *dst_side_field=dstmesh.GetField("side1_mesh_ind");
-  if (!dst_side_field) dst_side_field=dstmesh.GetField("side2_mesh_ind");
-
-  MEField<> *src_side_field=srcmesh.GetField("side1_mesh_ind");
-  if (!src_side_field) src_side_field=srcmesh.GetField("side2_mesh_ind");
+   dst_side2_mesh_ind_field=dstmesh.GetField("side2_mesh_ind");
+   dst_side2_orig_elem_id_field=dstmesh.GetField("side2_orig_elem_id");
+  }
 
   // Figure out interpolation to XGrid information
   MEField<> *src_xgrid_ind_field=NULL;
@@ -1916,7 +1920,9 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
                                      &tmp_valid, &tmp_areas, &tmp_dst_areas,
-				     midmesh, &tmp_nodes, &tmp_cells, 0, zz, src_side_field, dst_side_field);
+				     midmesh, &tmp_nodes, &tmp_cells, 0, zz, 
+                                     src_side1_mesh_ind_field, src_side1_orig_elem_id_field, 
+                                     dst_side2_mesh_ind_field, dst_side2_orig_elem_id_field);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
@@ -2410,7 +2416,7 @@ void calc_conserve_mat_serial_3D_3D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
 
 #if 0
   if(midmesh != 0)
-    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh);
+    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh,3);
 #endif
 
 }
@@ -2834,10 +2840,60 @@ static void _fill_pl_with_outside_status(PointList &pl, WMat &status) {
     }
 }
 
+// Check a Mesh for some more expensive error conditions
+// If one is detected, then fail with an error message
+static void _check_mesh(Mesh &mesh, const char *name) {
+#define OVERLAP_TOL 1.0E-15
+
+  // Do overlap detection
+  double max_local_overlap_area;
+  int max_local_overlap_id1, max_local_overlap_id2;
+  calc_max_overlap(mesh, max_local_overlap_area, max_local_overlap_id1, max_local_overlap_id2);
+
+  // Reduce to get the max overlap and proc it's located on
+  // Struct to use for MPI_MAXLOC
+  struct {
+    double area;
+    int rank;
+  } local_max, global_max;
+  local_max.area=max_local_overlap_area;
+  local_max.rank=Par::Rank();
+  MPI_Allreduce(&local_max,&global_max,1,MPI_DOUBLE_INT,MPI_MAXLOC,Par::Comm());
+
+  // If the global_max overlap is bigger than tol, then report an error
+  if (global_max.area > OVERLAP_TOL) {
+
+    // Broadcast ids from max proc, so everyone has them
+    int global_max_ids[2];
+    global_max_ids[0]=max_local_overlap_id1;
+    global_max_ids[1]=max_local_overlap_id2;
+    MPI_Bcast(global_max_ids,2,MPI_INT,global_max.rank,Par::Comm());
+
+    // Output error info on processor 0
+      ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Self Overlapping Grid or Mesh Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+      ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+      char msg[1024];
+      sprintf(msg,"  Significant self overlap (overlap area > %g) detected in %s Mesh or Grid.",OVERLAP_TOL,name);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+      sprintf(msg,"  Maximum overlap area=%g occurs between elem id=%d and elem id=%d",global_max.area, global_max_ids[0], global_max_ids[1]);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+      ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+      ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+      Throw() << " Self overlapping Grid or Mesh detected.";
+  }
+#undef OVERLAP_TOL
+
+  // TODO: add more checks
+
+
+
+}
+
 Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh,
                bool freeze_src_, int imethod,
                bool set_dst_status, WMat &dst_status,
-               MAP_TYPE mtype, int unmappedaction, int _num_src_pnts, ESMC_R8 _dist_exponent):
+               MAP_TYPE mtype, int unmappedaction, bool checkFlag, 
+               int _num_src_pnts, ESMC_R8 _dist_exponent):
 
 sres(),
 grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE)),
@@ -2913,6 +2969,7 @@ interp_method(imethod)
     }
 
 
+    
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
 
@@ -2932,6 +2989,8 @@ interp_method(imethod)
       }
     } else {
       if (search_obj_type == MeshObj::NODE) {
+
+        // Search
         OctSearch(grend.GetSrcRend(), grend.GetDstPlistRend(), mtype, search_obj_type,
                   unmappedaction, sres, set_dst_status, dst_status, 1e-8);
         // Redistribute regrid status
@@ -2939,6 +2998,14 @@ interp_method(imethod)
           dst_status.Migrate(*dstplist);
         }
       } else if (search_obj_type == MeshObj::ELEMENT) {
+
+        // Check meshes
+        if (checkFlag) {
+          _check_mesh(grend.GetSrcRend(), "source");
+          _check_mesh(grend.GetDstRend(), "destination");
+        }
+
+        // Search
         //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
         if(freeze_src_) {
           OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
@@ -2972,6 +3039,12 @@ interp_method(imethod)
                   unmappedaction, sres, set_dst_status, dst_status, 1e-8);
         //OctSearch(src, dest, mtype, search_obj_type, unmappedaction, sres, 1e-8);
       } else if (search_obj_type == MeshObj::ELEMENT) {
+        // Check grids
+        if (checkFlag) {
+          _check_mesh(*src, "source");
+          _check_mesh(*dest, "destination");
+        }
+
         OctSearchElems(*src, ESMCI_UNMAPPEDACTION_IGNORE, *dest, unmappedaction, 1e-8, sres);
       }
     }

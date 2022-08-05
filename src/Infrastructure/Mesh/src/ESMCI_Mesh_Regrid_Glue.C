@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -65,10 +65,6 @@ static bool all_mesh_elem_ids_in_wmat(Mesh *mesh, WMat &wts, int *missing_id);
 static bool any_cells_in_mesh_degenerate(Mesh *mesh);
 static void get_mesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std::vector<int> *missing_ids);
 static void get_mesh_elem_ids_not_in_wmat(Mesh *mesh, WMat &wts, std::vector<int> *missing_ids);
-static void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
-                                      int *iientries);
-static void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
-                                      int *iientries, double *factors);
 static void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
                                int *iientries, double *factors);
 
@@ -95,7 +91,6 @@ void ESMCI_regrid_create(
                       int *map_type,
                      int *norm_type,
                      int *regridPoleType, int *regridPoleNPnts,
-                     int *regridScheme,
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
                      ESMC_R8 *extrapDistExponent,
@@ -107,9 +102,10 @@ void ESMCI_regrid_create(
                      int *nentries, ESMCI::TempWeights **tweights,
                      int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                      int *_has_statusArray, ESMCI::Array **_statusArray,
+                     int *_checkFlag, 
                      int*rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_regrid_create()"
+#define ESMC_METHOD "ESMCI_regrid_create()"
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
 
 
@@ -138,10 +134,67 @@ void ESMCI_regrid_create(
 
   try {
 
+    // Declare local return code
+    int localrc;
+
+    // Initialize the parallel environment for mesh
+    ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;  // bail out with exception
+    
+
     // transalate ignoreDegenerate to C++ bool
     bool ignoreDegenerate=false;
     if (*_ignoreDegenerate == 1) ignoreDegenerate=true;
 
+    // transalate checkFlag to C++ bool
+    bool checkFlag=false;
+    if (*_checkFlag == 1) checkFlag=true;
+
+    // Output Warning message about checkFlag
+    if (checkFlag){
+      ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! Calling regrid weight generation                  !!!", 
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! (e.g. ESMF_FieldRegridStore()) with checkFlag on. !!!", 
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! Extra checking comes at the cost of performance.  !!!",
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!! Only use for debugging, NOT for production!       !!!",
+                            ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+                            ESMC_LOGMSG_WARN);
+    }
+
+    ////// Sanity checks /////
+
+    // extrapolation not supported with conservative methods
+    if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+      if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+          (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "Extrapolation is not currently supported with conservative regrid methods.",
+             ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+
+
+    // Conservative not supported on 3D spherical meshes
+    if ((*regridMethod==ESMC_REGRID_METHOD_CONSERVE) ||
+        (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
+      if ((srcmesh->parametric_dim() == 3) && 
+          (dstmesh->parametric_dim() == 3)) {
+        if ((srcmesh->coordsys != ESMC_COORDSYS_CART) || 
+            (dstmesh->coordsys != ESMC_COORDSYS_CART)) {
+          
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                           "Conservative regridding isn't supported on 3D spherical Grids or Meshes.",
+                                           ESMC_CONTEXT, &localrc)) throw localrc;
+        }
+      }
+    }
+
+    
      //// Precheck Meshes for errors
     bool degenerate=false;
 
@@ -157,7 +210,6 @@ void ESMCI_regrid_create(
 
       // Degenerate
       if (degenerate) {
-        int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Src contains a cell that has corners close enough that the cell "
         "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -172,13 +224,13 @@ void ESMCI_regrid_create(
 
         // Degenerate
         if (degenerate) {
-          int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- Dst contains a cell which has corners close enough that the cell "
         "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
         }
       }
     }
+
 
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
@@ -209,7 +261,7 @@ void ESMCI_regrid_create(
 
       if(!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, 
                  NULL, *wts, 
-                 regridMethod, regridScheme, 
+                 regridMethod, 
                  regridPoleType, regridPoleNPnts,
                  map_type,
                  extrapMethod,
@@ -218,7 +270,8 @@ void ESMCI_regrid_create(
                  extrapNumLevels,
                  extrapNumInputLevels, 
                  &temp_unmappedaction,
-                 set_dst_status, dst_status)) {
+                 set_dst_status, dst_status,
+                 checkFlag)) {
         Throw() << "Online regridding error" << std::endl;
       }
     } else {
@@ -226,7 +279,7 @@ void ESMCI_regrid_create(
 
       if(!regrid(dstmesh, dstpointlist, srcmesh, srcpointlist, 
                  NULL, *wts,
-                 &tempRegridMethod, regridScheme, 
+                 &tempRegridMethod, 
                  regridPoleType, regridPoleNPnts,
                   map_type,
                  extrapMethod,
@@ -235,7 +288,8 @@ void ESMCI_regrid_create(
                  extrapNumLevels,
                  extrapNumInputLevels, 
                  &temp_unmappedaction,
-                 set_dst_status, dst_status)) {
+                 set_dst_status, dst_status,
+                 checkFlag)) {
         Throw() << "Online regridding error" << std::endl;
       }
     }
@@ -278,7 +332,6 @@ void ESMCI_regrid_create(
           (*regridMethod==ESMC_REGRID_METHOD_CONSERVE_2ND)) {
         int missing_id;
         if (!all_mesh_elem_ids_in_wmat(dstmesh, *wts, &missing_id)) {
-          int localrc;
           char msg[1024];
           sprintf(msg,"- There exist destination cells (e.g. id=%d) which don't overlap with any "
             "source cell",missing_id);
@@ -289,7 +342,6 @@ void ESMCI_regrid_create(
         // CURRENTLY DOESN'T WORK!!!
 #if 0
         if (!all_mesh_node_ids_in_wmat(srcmesh, *wts)) {
-          int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
             "- There exist source points which can't be mapped to any "
             "destination point", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -300,7 +352,6 @@ void ESMCI_regrid_create(
         int missing_id;
 
         if (!all_mesh_node_ids_in_wmat(dstpointlist, *wts, &missing_id)) {
-          int localrc;
           char msg[1024];
           sprintf(msg,"- There exist destination points (e.g. id=%d) which can't be mapped to any "
             "source cell",missing_id);
@@ -450,7 +501,6 @@ void ESMCI_regrid_create(
 
     // Build the ArraySMM
     if (*has_rh != 0) {
-      int localrc;
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       ESMC_Logical ignoreUnmatched = ESMF_FALSE;
       FTN_X(c_esmc_arraysmmstoreind4)(arraysrcpp, arraydstpp, rh, &tk, factors,
@@ -496,23 +546,23 @@ void ESMCI_regrid_create(
     *_num_udl=0;
     *_tudl=NULL;
     if (*has_udl) {
-      ESMCI::TempUDL *tudl = new ESMCI::TempUDL;
-
       // Get number of unmapped points
       int num_udl=unmappedDstList.size();
 
-      // Allocate and fill udl list in struct
-      tudl->udl = NULL;
-       if (num_udl > 0) {
-         tudl->udl = new int[num_udl];
-         for (int i=0; i<num_udl; i++) {
-           tudl->udl[i]=unmappedDstList[i];
-         }
-       }
+      // If list entries exist, allocate and fill udl struct
+      ESMCI::TempUDL *tudl = NULL;
+      if (num_udl > 0) {
+        tudl = new ESMCI::TempUDL;
+        tudl->udl = NULL;
+        tudl->udl = new int[num_udl];
+        for (int i=0; i<num_udl; i++) {
+          tudl->udl[i]=unmappedDstList[i];
+        }
+      }
 
-       // Output information
-       *_num_udl=num_udl;
-       *_tudl=tudl;
+      // Output information
+      *_num_udl=num_udl;
+      *_tudl=tudl;
     }
 
   } catch(std::exception &x) {
@@ -548,7 +598,7 @@ void ESMCI_regrid_create(
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()"
   Trace __trace(" FTN_X(regrid_getiwts)()");
@@ -564,7 +614,7 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
     if (!iwts) Throw() << "Could not find integration weights field on this mesh"
                              <<std::endl;
 
-    if(!get_iwts(mesh, iwts, regridScheme))
+    if(!get_iwts(mesh, iwts))
       Throw() << "Online regridding error" << std::endl;
 
     CpMeshDataToArray(grid, *staggerLoc, mesh, array, iwts);
@@ -598,7 +648,7 @@ void ESMCI_regrid_getiwts(Grid **gridpp,
 
 void ESMCI_regrid_getarea(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
-                   int *regridScheme, int*rc) {
+                   int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getarea()"
   Trace __trace(" FTN_X(regrid_getarea)()");
@@ -1524,122 +1574,6 @@ static void noncnsrv_check_for_mesh_errors(Mesh *mesh, bool ignore_degenerate, b
 }
 
 #endif
-
-static void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
-                                      int *iientries) {
-
-
-  // Get a list of split ids that we own
-  UInt num_gids=0;
-  UInt *gids_split=NULL;
-  UInt *gids_orig=NULL;
-
-  // Get number of split points
-  num_gids=srcmesh->split_to_orig_id.size();
-
-  // Allocate space
-  if (num_gids>0) {
-    gids_split= new UInt[num_gids];
-    gids_orig= new UInt[num_gids];
-
-    // Loop and get split-orig id pairs
-    std::map<UInt,UInt>::iterator mi=srcmesh->split_to_orig_id.begin();
-    std::map<UInt,UInt>::iterator me=srcmesh->split_to_orig_id.end();
-
-    int pos=0;
-    for ( ; mi != me; mi++) {
-      gids_split[pos]=mi->first;
-      gids_orig[pos]=mi->second;
-      pos++;
-    }
-
-    //    for (int i=0; i<num_gids; i++) {
-    //  printf("%d# s=%d o=%d\n",Par::Rank(),gids_split[i],gids_orig[i]);
-    //}
-  }
-
-  // Put into DDir
-  DDir<> id_map_dir;
-  id_map_dir.Create(num_gids,gids_split,gids_orig);
-
-  // Clean up
-  if (num_gids>0) {
-    if (gids_split!= NULL) delete [] gids_split;
-    if (gids_orig != NULL) delete [] gids_orig;
-  }
-
-
-  // Gather list of spit src ids
-  //// TODO: Maybe use a std::set instead to reduce the amount of communication??
-  std::vector<UInt> src_split_gids;
-  std::vector<int> src_split_gids_idx;
-
-  // Loop through weights modifying split dst elements
-  for (int i=0; i<num_entries; i++) {
-
-      // Get src id
-     UInt src_id=iientries[2*i];
-
-     // If a split id then add to list
-     if (src_id > srcmesh->max_non_split_id) {
-       src_split_gids.push_back(src_id);
-       src_split_gids_idx.push_back(2*i);
-     }
-
-  }
-
-  // Do remote lookup to translate
-  UInt num_src_split_gids=src_split_gids.size();
-  UInt *src_split_gids_proc=NULL;
-  UInt *src_split_gids_orig=NULL;
-
-  if (num_src_split_gids > 0) {
-    src_split_gids_proc = new UInt[num_src_split_gids];
-    src_split_gids_orig = new UInt[num_src_split_gids];
-  }
-
-  // Get mapping of split ids to original ids
-  id_map_dir.RemoteGID(num_src_split_gids, &src_split_gids[0], src_split_gids_proc, src_split_gids_orig);
-
-  // Loop setting new ids
-  for (int i=0; i<num_src_split_gids; i++) {
-    iientries[src_split_gids_idx[i]]=src_split_gids_orig[i];
-  }
-
-  // Clean up
-  if (num_src_split_gids > 0) {
-    if (src_split_gids_proc != NULL) delete [] src_split_gids_proc;
-    if (src_split_gids_orig != NULL) delete [] src_split_gids_orig;
-  }
-}
-
-
-
-static void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
-                                      int *iientries, double *factors) {
-
-  // Loop through weights modifying split dst elements
-  for (int i=0; i<num_entries; i++) {
-    int dst_id=iientries[2*i+1];
-
-    // See if the element is part of a larger polygon
-    std::map<UInt,double>::iterator mi =  dstmesh->split_id_to_frac.find(dst_id);
-
-    // It is part of a larger polygon, so process
-    if (mi != dstmesh->split_id_to_frac.end()) {
-
-      // Modify weight by fraction of orig polygon
-      factors[i] *= mi->second;
-
-      // See if the id needs to be translated, if so then translate
-      std::map<UInt,UInt>::iterator soi =  dstmesh->split_to_orig_id.find(dst_id);
-      if (soi != dstmesh->split_to_orig_id.end()) {
-        iientries[2*i+1]=soi->second;
-      }
-    }
-  }
-
-}
 
 static void change_wts_to_be_fracarea(Mesh *mesh, int num_entries,
                                int *iientries, double *factors) {

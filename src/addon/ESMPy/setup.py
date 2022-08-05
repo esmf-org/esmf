@@ -62,7 +62,12 @@ class AbstractESMFNoseCommand(AbstractESMFCommand):
             sys.path.append('src')
 
             from ESMF.api import constants
-            mpirun_prefix = [constants._ESMF_MPIRUN, '-n', str(constants._ESMF_MPIRUN_NP)]
+
+            # -np is used in place of -n for esmf mpirun.srun wrapper
+            mpisyntax = "-n";
+            if "mpirun.srun" in constants._ESMF_MPIRUN:
+                mpisyntax = "-np";
+            mpirun_prefix = [constants._ESMF_MPIRUN, mpisyntax, str(constants._ESMF_MPIRUN_NP)]
             ret = mpirun_prefix + ret
 
         if not isinstance(cls._nose_flags, type(None)):
@@ -242,7 +247,7 @@ for dirpath, dirnames, filenames in os.walk(src_path):
 # TODO: build doc command
 # TODO: remove duplicated metadata: here and src/ESMF/__init__.py
 setup(name="ESMPy",
-      version="8.1.0",
+      version="8.4.0",
       description="ESMF Python interface",
       author="University Corporation for Atmospheric Research, \
               Massachusetts Institute of Technology, \
@@ -253,8 +258,8 @@ setup(name="ESMPy",
               Argonne National Laboratory, \
               NASA Goddard Space Flight Center",
       license="University of Illinois-NCSA",
-      author_email="esmf_support@list.woc.noaa.gov",
-      url="http://earthsystemcog.org/projects/esmpy/",
+      author_email="esmf_support@ucar.edu",
+      url="http://earthsystemmodeling.org/esmpy/",
       packages=packages,
       package_dir={'': 'src'},
       cmdclass={'build': BuildCommand,

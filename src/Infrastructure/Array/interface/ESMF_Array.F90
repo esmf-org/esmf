@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -100,10 +100,6 @@ module ESMF_ArrayMod
   public ESMF_ArrayValidate
   public ESMF_ArrayWrite
 
-#ifdef FIRSTNEWARRAYPROTOTYPE
-  public ESMF_ArrayWait
-#endif
-  
 ! - ESMF-internal methods:
   public ESMF_ArrayGetInit          ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArraySetInitCreated   ! implemented in ESMF_ArrayCreateMod
@@ -180,7 +176,7 @@ module ESMF_ArrayMod
 
   end interface
 
-      
+
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_ArrayReduce -- Generic interface
@@ -193,12 +189,6 @@ module ESMF_ArrayMod
     module procedure ESMF_ArrayReduce
     module procedure ESMF_ArrayReduceFarray
 
-#ifdef FIRSTNEWARRAYPROTOTYPE
-
-    module procedure ESMF_ArrayReduceScalarBR8       !1st prototype
-    module procedure ESMF_ArrayReduceScalarNBRootR8  !1st prototype
-    module procedure ESMF_ArrayReduceScalarNBR8      !1st prototype
-#endif
 ! todo: need to write vector version where the user can specify which
 !       dimensions of narray are supposed to be reduced. output is vector
 !       good news is that the vector version does not have to be type/kind
@@ -210,27 +200,6 @@ module ESMF_ArrayMod
 !EOPI 
   end interface
 
-
-
-#ifdef FIRSTNEWARRAYPROTOTYPE
-! -------------------------- ESMF-public method -------------------------------
-!BOPI
-! !IROUTINE: ESMF_ArrayWait -- Generic interface
-
-! !INTERFACE:
-  interface ESMF_ArrayWait
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-    module procedure ESMF_ArrayWaitRoot
-    module procedure ESMF_ArrayWaitDE
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_ArrayWait} functions.   
-!EOPI 
-  end interface
-#endif
 
 !------------------------------------------------------------------------------
 ! ! Interoperability interfaces
@@ -455,8 +424,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [array]
 !       {\tt ESMF\_Array} object for which to set properties.
-!     \item [{[name]}]
-!       The Array name.
 !     \item[{[computationalLWidth]}] 
 !       \begin{sloppypar}
 !       This argument must have of size {\tt (dimCount, localDeCount)}.
@@ -471,6 +438,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       computational region with respect to the upper corner of the exclusive
 !       region for all local DEs.
 !       \end{sloppypar}
+!     \item [{[name]}]
+!       The Array name.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -490,9 +459,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Set the name in Base object
     if (present(name)) then
-      call c_ESMC_SetName(array, "Array", name, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (array%isNamedAlias) then
+        array%name = trim(name)
+      else
+        call c_ESMC_SetName(array, "Array", name, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     ! Deal with (optional) array arguments
@@ -740,6 +713,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DynamicMaskStateWrpR4R4R4V):: dynMaskStateR4R4R4V
 #endif
     type(ESMF_Logical)          :: handleAllElements
+    type(ESMF_Pointer)          :: this
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -748,18 +722,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments, deal with optional Array args
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     if (present(srcArray)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      call ESMF_ArrayGetThis(srcArray, this, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (this /= ESMF_NULL_POINTER) then
+        ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, srcArray, rc)
+      endif
       opt_srcArray = srcArray
     else
-      call ESMF_ArraySetThisNull(opt_srcArray, localrc)
+      call ESMF_ArraySetThisNull(opt_srcArray, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if (present(dstArray)) then
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      call ESMF_ArrayGetThis(dstArray, this, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (this /= ESMF_NULL_POINTER) then
+        ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, dstArray, rc)
+      endif
       opt_dstArray = dstArray
     else
-      call ESMF_ArraySetThisNull(opt_dstArray, localrc)
+      call ESMF_ArraySetThisNull(opt_dstArray, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1893,15 +1877,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                   intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-! \label{ArraySMMStoreTK}
+! \label{ArraySMMStoreTKTP}
 ! {\tt ESMF\_ArraySMMStore()} is a collective method across all PETs of the
 ! current Component. The interface of the method is overloaded, allowing 
 ! -- in principle -- each PET to call into {\tt ESMF\_ArraySMMStore()}
 ! through a different entry point. Restrictions apply as to which combinations
 ! are sensible. All other combinations result in ESMF run time errors. The
 ! complete semantics of the {\tt ESMF\_ArraySMMStore()} method, as provided
-! through the separate entry points shown in \ref{ArraySMMStoreTK} and
-! \ref{ArraySMMStoreNF}, is described in the following paragraphs as a whole.
+! through the separate entry points shown in \ref{ArraySMMStoreTKTP} and
+! \ref{ArraySMMStoreNFTP}, is described in the following paragraphs as a whole.
 !
 !   \begin{sloppypar}
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
@@ -3228,15 +3212,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-! \label{ArraySMMStoreNF}
+! \label{ArraySMMStoreNFTP}
 ! {\tt ESMF\_ArraySMMStore()} is a collective method across all PETs of the
 ! current Component. The interface of the method is overloaded, allowing 
 ! -- in principle -- each PET to call into {\tt ESMF\_ArraySMMStore()}
 ! through a different entry point. Restrictions apply as to which combinations
 ! are sensible. All other combinations result in ESMF run time errors. The
 ! complete semantics of the {\tt ESMF\_ArraySMMStore()} method, as provided
-! through the separate entry points shown in \ref{ArraySMMStoreTK} and
-! \ref{ArraySMMStoreNF}, is described in the following paragraphs as a whole.
+! through the separate entry points shown in \ref{ArraySMMStoreTKTP} and
+! \ref{ArraySMMStoreNFTP}, is described in the following paragraphs as a whole.
 !
 !   \begin{sloppypar}
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
@@ -3902,18 +3886,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing Array data may
-!      {\em not} be overwritten. If .true., the overwrite behavior depends
-!      on the value of {\tt iofmt} as shown below:
-!    \begin{description}
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
-!      be overwritten with each Array's data.
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF, ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET}:]\ Only the
-!      data corresponding to each Array's name will be
+!      {\em not} be overwritten. If .true., only the
+!      data corresponding to the Array's name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
 !      the given timeslice may be overwritten.
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
-!    \end{description}
 !    \end{sloppypar}
 !   \item[{[status]}]
 !    \begin{sloppypar}
@@ -3942,10 +3920,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[iofmt]}]
 !    \begin{sloppypar}
 !    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
-!    of options. If not present, file names with a {\tt .bin} extension will
-!    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
-!    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
-!    {\tt ESMF\_IOFMT\_NETCDF}.
+!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !    \end{sloppypar}
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3982,19 +3957,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (fileName, '.') > 0) then
-        file_ext_p = index (fileName, '.', back=.true.)
-        select case (fileName(file_ext_p:))
-        case ('.nc')
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        case ('.bin')
-          opt_iofmt = ESMF_IOFMT_BIN
-        case default
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        end select
-      else
-        opt_iofmt = ESMF_IOFMT_NETCDF
-      end if
+      opt_iofmt = ESMF_IOFMT_NETCDF
     end if
 
     ! Attributes
@@ -4025,350 +3988,5 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_ArrayWrite
 !------------------------------------------------------------------------------
-
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-!!!!!!!!!!!!!! old-style newArray calls of 1st prototype calls !!!!!!!!!!!!!!!!!
-
-
-#ifdef FIRSTNEWARRAYPROTOTYPE
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayReduceScalarBR8()"
-!BOPI
-! !IROUTINE: ESMF_ArrayReduce - Reduce a Array to a single R8 scalar
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayReduce()
-  subroutine ESMF_ArrayReduceScalarBR8(array, result, reduceflag, &
-    reduceflagDummy, rootPET, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),    intent(in)              :: array
-    real(ESMF_KIND_R8),     intent(out)             :: result
-    type(ESMF_Reduce_Flag),  intent(in)              :: reduceflag
-    type(ESMF_Reduce_Flag),  intent(in)              :: reduceflagDummy !prevent conflict
-    integer,                intent(in)              :: rootPET
-    type(ESMF_VM),          intent(in),   optional  :: vm
-    integer,                intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Reduce {\tt array} to a singe R8 scalar {\tt result}. The reduction
-!     operation is specified in {\tt reduceFlag}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object that will be reduced.
-!     \item[result]
-!        Upon return this will hold the result of the reduction operation. Only
-!        {\tt rootPET} must provide a valid {\tt result} argument.
-!        {\tt result} arguments on other PETs will be used to check the
-!        data type and kind but are otherwise ignored.
-!   \item[reduceflag] 
-!        Reduction operation. See section \ref{const:reduce} for a list of 
-!        valid reduce operations.
-!     \item[rootPET]
-!        PET on which result will be returned.
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method's overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Initialize return code
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayReduceScalarB(array, result, ESMF_TYPEKIND_R8, reduceflag, &
-!      rootPET, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_ArrayReduceScalarBR8
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayReduceScalarNBRootR8()"
-!BOPI
-! !IROUTINE: ESMF_ArrayReduce - Reduce a Array to a single R8 scalar
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayReduce()
-  subroutine ESMF_ArrayReduceScalarNBRootR8(array, result, reduceflag, &
-    rootPET, commhandle, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),    intent(in)              :: array
-    real(ESMF_KIND_R8),     intent(out)             :: result
-    type(ESMF_Reduce_Flag),  intent(in)              :: reduceflag
-    integer,                intent(in)              :: rootPET
-    type(ESMF_CommHandle),  intent(inout)           :: commhandle
-    type(ESMF_VM),          intent(in),   optional  :: vm
-    integer,                intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Reduce {\tt array} to a singe R8 scalar {\tt result}. The reduction
-!     operation is specified in {\tt reduceFlag}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object that will be reduced.
-!     \item[result]
-!        Upon return (after wait returned!!!) this will hold the result of the reduction operation. Only
-!        {\tt rootPET} must provide a valid {\tt result} argument.
-!        {\tt result} arguments on other PETs will be used to check the
-!        data type and kind but are otherwise ignored.
-!     \item[reduceflag] 
-!        Reduction operation. See section \ref{const:reduce} for a list of 
-!        valid reduce operations.
-!     \item[rootPET]
-!        PET on which result will be returned.
-!     \item[commhandle]
-!          Upon return {\tt commhandle} on {\tt rootPET} holds the 
-!          {\tt ESMF\_CommHandle} associated with the non-blocking scatter 
-!          operation.
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method's overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Initialize return code
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayReduceScalarNBRoot(array, result, ESMF_TYPEKIND_R8, reduceflag, &
-!      rootPET, commhandle, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_ArrayReduceScalarNBRootR8
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayReduceScalarNBR8()"
-!BOPI
-! !IROUTINE: ESMF_ArrayReduce - Reduce a Array to a single R8 scalar
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayReduce()
-  subroutine ESMF_ArrayReduceScalarNBR8(array, result, reduceflag, rootPET, &
-    de, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),    intent(in)              :: array
-    real(ESMF_KIND_R8),     intent(out)             :: result
-    type(ESMF_Reduce_Flag),  intent(in)              :: reduceflag
-    integer,                intent(in)              :: rootPET
-    integer,                intent(in)              :: de
-    type(ESMF_VM),          intent(in),   optional  :: vm
-    integer,                intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Reduce {\tt array} to a singe R8 scalar {\tt result}. The reduction
-!     operation is specified in {\tt reduceFlag}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object that will be reduced.
-!     \item[result]
-!        Upon return this will hold the result of the reduction operation. Only
-!        {\tt rootPET} must provide a valid {\tt result} argument.
-!        {\tt result} arguments on other PETs will be used to check the
-!        data type and kind but are otherwise ignored.
-!     \item[reduceflag] 
-!        Reduction operation. See section \ref{const:reduce} for a list of 
-!        valid reduce operations.
-!     \item[rootPET]
-!        PET on which result will be returned.
-!     \item[de]
-!          DE for which this call is issued.
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method's overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Initialize return code
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayReduceScalarNB(array, result, ESMF_TYPEKIND_R8, reduceflag, &
-!      rootPET, de, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_ArrayReduceScalarNBR8
-!------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-! ---- Wait methods ---------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayWaitRoot()"
-!BOPI
-! !IROUTINE: ESMF_ArrayWait - Wait for non-blocking Array communication
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayWait()
-  subroutine ESMF_ArrayWaitRoot(array, rootPET, commhandle, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),       intent(inout)           :: array
-    integer,                intent(in)              :: rootPET
-    type(ESMF_CommHandle),  intent(inout)           :: commhandle
-    type(ESMF_VM),          intent(in),   optional  :: vm
-    integer,                intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Wait for non-blocking communication associated with {\tt commhandle}
-!     to finish making all data objects valid and accessible. This call is
-!     only to be issued from the PET which was {\tt rootPET} for the respecitve
-!     communication call.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object across which data will be scattered.
-!     \item[rootPET]
-!          PET that was the root during the respective communication call.
-!     \item[commhandle]
-!          Wait for the data object on rootPET associated with commhandle to
-!          become available.
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method's overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Initialize return code
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayWaitRoot(array, rootPET, commhandle, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_ArrayWaitRoot
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayWaitDE()"
-!BOPI
-! !IROUTINE: ESMF_ArrayWait - Wait for non-blocking Array communication
-
-! !INTERFACE:
-  ! Private name; call using ESMF_ArrayWait()
-  subroutine ESMF_ArrayWaitDE(array, de, vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Array),       intent(inout)           :: array
-    integer,                intent(in)              :: de
-    type(ESMF_VM),          intent(in),   optional  :: vm
-    integer,                intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!     Wait for non-blocking communication to finish for the specific DE,
-!     making available the associated data in {\tt array}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array] 
-!        The {\tt ESMF\_Array} object across which data will be scattered.
-!     \item[de]
-!          DE for which this call is issued. 
-!     \item[{[vm]}]
-!        Optional {\tt ESMF\_VM} object of the current context. Providing the
-!        VM of the current context will lower the method's overhead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Initialize return code
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayWaitDE(array, de, vm, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_ArrayWaitDE
-!------------------------------------------------------------------------------
-
-
-#endif
 
 end module ESMF_ArrayMod

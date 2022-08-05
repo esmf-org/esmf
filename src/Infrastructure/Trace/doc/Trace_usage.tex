@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2020, University Corporation for Atmospheric Research,
+% Copyright 2002-2022, University Corporation for Atmospheric Research,
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 % Laboratory, University of Michigan, National Centers for Environmental
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -116,44 +116,45 @@ The {\em ESMF\_Profile.summary} file will contain a tree of
 timed regions, but aggregated across all PETs. For example:
 
 \begin{verbatim}
-Region                           PETs   Count    Mean (s)    Min (s)     Min PET Max (s)     Max PET
-  [esm] Init 1                   4      1        4.0880      4.0878      2       4.0883      1
-    [OCN-TO-ATM] IPDv05p6b       4      1        2.6007      2.6007      2       2.6007      3
-    [ATM-TO-OCN] IPDv05p6b       4      1        1.4335      1.4333      0       1.4337      3
-    [ATM-TO-OCN] IPDv05p4        4      1        0.0037      0.0007      0       0.0060      1
-    [ATM] IPDv00p2               4      1        0.0034      0.0020      1       0.0055      0
-    [ATM-TO-OCN] IPDv05p1        4      1        0.0020      0.0007      2       0.0033      3
-    [OCN] IPDv00p2               4      1        0.0019      0.0015      3       0.0024      2
-    [ATM-TO-OCN] IPDv05p3        4      1        0.0010      0.0008      0       0.0013      1
-    [ATM-TO-OCN] IPDv05p2a       4      1        0.0009      0.0007      0       0.0012      3
-    [ATM] IPDv00p1               4      1        0.0009      0.0007      3       0.0011      0
-    [ATM-TO-OCN] IPDv05p2b       4      1        0.0008      0.0007      0       0.0010      3
-    [ATM-TO-OCN] IPDv05p5        4      1        0.0008      0.0007      0       0.0010      3
-    [ATM-TO-OCN] IPDv05p6a       4      1        0.0008      0.0005      2       0.0012      3
-    [OCN-TO-ATM] IPDv05p3        4      1        0.0008      0.0006      2       0.0010      3
-    [OCN-TO-ATM] IPDv05p4        4      1        0.0008      0.0006      0       0.0009      3
-    [OCN-TO-ATM] IPDv05p2b       4      1        0.0007      0.0006      2       0.0009      3
-    [OCN] IPDv00p1               4      1        0.0007      0.0005      1       0.0009      2
-    [OCN-TO-ATM] IPDv05p2a       4      1        0.0007      0.0006      2       0.0009      1
-    [OCN-TO-ATM] IPDv05p5        4      1        0.0007      0.0006      0       0.0009      3
-    [OCN-TO-ATM] IPDv05p1        4      1        0.0006      0.0005      0       0.0008      1
-    [OCN-TO-ATM] IPDv05p6a       4      1        0.0006      0.0004      2       0.0007      1
-  [esm] RunPhase1                4      1        2.7444      2.7423      0       2.7454      1
-    [OCN-TO-ATM] RunPhase1       4      864      0.6123      0.6004      2       0.6244      1
-    [ATM] RunPhase1              4      864      0.5386      0.5296      0       0.5530      1
-      ATM:ModelAdvance           4      864      0.3038      0.3022      0       0.3065      1
-    [OCN] RunPhase1              4      864      0.3471      0.3256      0       0.3824      1
-    [ATM-TO-OCN] RunPhase1       4      864      0.2843      0.1956      1       0.3345      0
-  [esm] FinalizePhase1           4      1        0.0029      0.0029      1       0.0030      2
-    [OCN-TO-ATM] FinalizePhase1  4      1        0.0007      0.0006      0       0.0008      3
-    [ATM-TO-OCN] FinalizePhase1  4      1        0.0002      0.0001      3       0.0002      1
-    [OCN] FinalizePhase1         4      1        0.0001      0.0001      3       0.0001      0
-    [ATM] FinalizePhase1         4      1        0.0001      0.0000      0       0.0001      2
+Region                           PETs   PEs    Count    Mean (s)    Min (s)     Min PET Max (s)     Max PET
+  [esm] Init 1                   4      4      1        4.0880      4.0878      2       4.0883      1
+    [OCN-TO-ATM] IPDv05p6b       4      4      1        2.6007      2.6007      2       2.6007      3
+    [ATM-TO-OCN] IPDv05p6b       4      4      1        1.4335      1.4333      0       1.4337      3
+    [ATM-TO-OCN] IPDv05p4        4      4      1        0.0037      0.0007      0       0.0060      1
+    [ATM] IPDv00p2               4      4      1        0.0034      0.0020      1       0.0055      0
+    [ATM-TO-OCN] IPDv05p1        4      4      1        0.0020      0.0007      2       0.0033      3
+    [OCN] IPDv00p2               4      4      1        0.0019      0.0015      3       0.0024      2
+    [ATM-TO-OCN] IPDv05p3        4      4      1        0.0010      0.0008      0       0.0013      1
+    [ATM-TO-OCN] IPDv05p2a       4      4      1        0.0009      0.0007      0       0.0012      3
+    [ATM] IPDv00p1               4      4      1        0.0009      0.0007      3       0.0011      0
+    [ATM-TO-OCN] IPDv05p2b       4      4      1        0.0008      0.0007      0       0.0010      3
+    [ATM-TO-OCN] IPDv05p5        4      4      1        0.0008      0.0007      0       0.0010      3
+    [ATM-TO-OCN] IPDv05p6a       4      4      1        0.0008      0.0005      2       0.0012      3
+    [OCN-TO-ATM] IPDv05p3        4      4      1        0.0008      0.0006      2       0.0010      3
+    [OCN-TO-ATM] IPDv05p4        4      4      1        0.0008      0.0006      0       0.0009      3
+    [OCN-TO-ATM] IPDv05p2b       4      4      1        0.0007      0.0006      2       0.0009      3
+    [OCN] IPDv00p1               4      4      1        0.0007      0.0005      1       0.0009      2
+    [OCN-TO-ATM] IPDv05p2a       4      4      1        0.0007      0.0006      2       0.0009      1
+    [OCN-TO-ATM] IPDv05p5        4      4      1        0.0007      0.0006      0       0.0009      3
+    [OCN-TO-ATM] IPDv05p1        4      4      1        0.0006      0.0005      0       0.0008      1
+    [OCN-TO-ATM] IPDv05p6a       4      4      1        0.0006      0.0004      2       0.0007      1
+  [esm] RunPhase1                4      4      1        2.7444      2.7423      0       2.7454      1
+    [OCN-TO-ATM] RunPhase1       4      4      864      0.6123      0.6004      2       0.6244      1
+    [ATM] RunPhase1              4      4      864      0.5386      0.5296      0       0.5530      1
+      ATM:ModelAdvance           4      4      864      0.3038      0.3022      0       0.3065      1
+    [OCN] RunPhase1              4      4      864      0.3471      0.3256      0       0.3824      1
+    [ATM-TO-OCN] RunPhase1       4      4      864      0.2843      0.1956      1       0.3345      0
+  [esm] FinalizePhase1           4      4      1        0.0029      0.0029      1       0.0030      2
+    [OCN-TO-ATM] FinalizePhase1  4      4      1        0.0007      0.0006      0       0.0008      3
+    [ATM-TO-OCN] FinalizePhase1  4      4      1        0.0002      0.0001      3       0.0002      1
+    [OCN] FinalizePhase1         4      4      1        0.0001      0.0001      3       0.0001      0
+    [ATM] FinalizePhase1         4      4      1        0.0001      0.0000      0       0.0001      2
 \end{verbatim}
 
 The meaning of the statistics in each column in as follows:
 \begin{itemize}
 \item [{\tt PETs}] the number of reporting PETs that executed the region
+\item [{\tt PEs}] the number of PEs associated with the reporting PETs that executed the region
 \item [{\tt Count}] the number of times each reporting PET executed the region
       or ``MULTIPLE'' if not all PETs executed the region the same number of times
 \item [{\tt Mean}] the mean across all reporting PETs of the total time spent in the region

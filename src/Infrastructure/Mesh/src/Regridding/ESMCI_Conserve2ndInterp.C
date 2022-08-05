@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -298,7 +298,7 @@ namespace ESMCI {
 
       // Make a unit vector
       double len=MU_LEN_VEC2D(outward_norm);
-      if (len == 0.0) Throw() << "Length of outward vector unexpectedly 0.0.";
+      if (len == 0.0) continue; // Vector is 0.0 length and so won't contribute anything below, so skip
       double div_len=1.0/len;
       MU_MULT_BY_SCALAR_VEC2D(outward_norm,outward_norm,div_len);
 
@@ -906,7 +906,15 @@ namespace ESMCI {
 
       // Make a unit vector
       double len=MU_LEN_VEC3D(outward_norm);
-      if (len == 0.0) Throw() << "Length of outward vector unexpectedly 0.0.";
+      if (len == 0.0) {
+        // If 0.0 is because vectors are going the same way (dot>0.0)
+        // and therefore almost parallel, then
+        // continue to next because the length of this edge would be 0.0
+        // and not contribute, if they're opposite dir. complain because
+        // we don't handle that case yet. (Maybe could by using atan2() instead of acos()??
+        if (MU_DOT_VEC3D(nbr->cntr,prev_nbr->cntr) > 0.0) continue;
+        else Throw() << "Neighbors of source cell on opposite sides of sphere, so outward norm has len=0.0";
+      }
       double div_len=1.0/len;
       MU_MULT_BY_SCALAR_VEC3D(outward_norm,outward_norm,div_len);
 

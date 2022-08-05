@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -115,6 +115,7 @@ module ESMF_XGridMod
     logical                                :: is_proxy         ! .true. for a proxy xgrid
     logical                                :: storeOverlay     ! .false. do not save mesh in the middle
     integer                                :: online           ! 1 if Xgrid is computed based on user input, 0 offline
+    type(ESMF_CoordSys_Flag)               :: coordSys         ! Coordinate system of the XGrid
     type (ESMF_Status)                     :: status
     ESMF_INIT_DECLARE
   end type
@@ -484,8 +485,8 @@ contains
       endif
 
       ! Compare Grids contained
-      fp1 = xgrid1%xgtypep
-      fp2 = xgrid2%xgtypep
+      fp1 => xgrid1%xgtypep
+      fp2 => xgrid2%xgtypep
       ! Side A Grids
       if(associated(fp1%sideA)) ngridA1 = size(fp1%sideA, 1)
       if(associated(fp2%sideA)) ngridA2 = size(fp2%sideA, 1)
@@ -1313,6 +1314,11 @@ contains
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+          msg="The XGrid mesh was not stored during XGrid creation, re-create XGrid with storeOverlay set to .true.", &
+          ESMF_CONTEXT, rcToReturn=rc)
+         return
       endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
@@ -1380,6 +1386,7 @@ contains
 !
 !EOPI
         xgtypep%status  = ESMF_STATUS_UNINIT
+        xgtypep%coordSys  = ESMF_COORDSYS_SPH_DEG
         xgtypep%online         = 0
         xgtypep%is_proxy       = .false. 
         xgtypep%storeOverlay   = .false. 

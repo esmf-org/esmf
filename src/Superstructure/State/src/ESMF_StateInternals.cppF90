@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -236,7 +236,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
           if (itemCount < localitemcount) then
             write (errmsg,*)  &
                'itemCount', itemCount, ' too small.  Setting to', localitemcount
-            call ESMF_LogWrite (trim (errmsg), ESMF_LOGMSG_INFO,  &
+            call ESMF_LogWrite (trim (errmsg), ESMF_LOGMSG_WARNING,  &
                 method=ESMF_METHOD, rc=rc)
           end if
           localitemcount = max (localitemcount, itemCount)
@@ -628,13 +628,20 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
           return @\
         endif @\
  @\
-        call ESMF_GetName (mname(i)%statep%base, name=itemname, rc=localrc) @\
-^else @\
-        call mtype##Get(mname(i), name=itemname, rc=localrc) @\
-^endif @\
-        if (ESMF_LogFoundError(localrc, & @\
+        if (mname(i)%isNamedAlias) then @\
+          itemname = trim(mname(i)%name) @\
+        else @\
+          call ESMF_GetName (mname(i)%statep%base, name=itemname, rc=localrc) @\
+          if (ESMF_LogFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
+        endif @\
+^else @\
+        call mtype##Get(mname(i), name=itemname, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, & @\
+          ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+^endif @\
  @\
         ! See if this name is already in the state @\
         exists = ESMF_StateClassFindData (stypep, itemname, expected=.false., & @\
@@ -700,16 +707,22 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         if (localaddflag .and. localrepflag) then @\
           call ESMF_ContainerAddReplace (stypep%stateContainer,  & @\
               itemList=siwrap, rc=localrc) @\
+          if (ESMF_LogFoundError (localrc,  & @\
+            ESMF_ERR_PASSTHRU,  & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         else if (localaddflag) then @\
           call ESMF_ContainerAdd (stypep%stateContainer,  & @\
               itemList=siwrap, rc=localrc) @\
+          if (ESMF_LogFoundError (localrc,  & @\
+            ESMF_ERR_PASSTHRU,  & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
         else  @\
           call ESMF_ContainerReplace (stypep%stateContainer,  & @\
               itemList=siwrap, rc=localrc) @\
-        end if @\
-        if (ESMF_LogFoundError (localrc,  & @\
+          if (ESMF_LogFoundError (localrc,  & @\
             ESMF_ERR_PASSTHRU,  & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
+        end if @\
  @\
       end do @\
  @\

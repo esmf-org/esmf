@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -50,8 +50,11 @@ module ESMF_RegridWeightGenMod
   use ESMF_IOFileTypeCheckMod
   use ESMF_RHandleMod
   use ESMF_LocStreamMod
+  use ESMF_UtilRWGMod
 
   implicit none
+
+  private
 
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -107,7 +110,7 @@ contains
     useUserAreaFlag, largefileFlag, &
     netcdf4fileFlag, weightOnlyFlag, &
     tileFilePath, &
-    verboseFlag, rc)
+    verboseFlag, checkFlag, rc)
 
 ! !ARGUMENTS:
 
@@ -147,8 +150,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical,                      intent(in),  optional :: largefileFlag
   logical,                      intent(in),  optional :: netcdf4fileFlag
   logical,                      intent(in),  optional :: weightOnlyFlag
-  logical,                      intent(in),  optional :: verboseFlag
   character(len=*),             intent(in),  optional :: tileFilePath
+  logical,                      intent(in),  optional :: verboseFlag
+  logical,                      intent(in),  optional :: checkFlag
   integer,                      intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -312,13 +316,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[weightOnlyFlag]}]
 !     If .TRUE., the output weight file only contains factorList and factorIndexList.
 !     The default is .FALSE..
-!   \item [{[verboseFlag]}]
-!     If .TRUE., it will print summary information about the regrid parameters,
-!     default to .FALSE..
 !   \item[{[tileFilePath]}]
 !     Optional argument to define the path where the tile files reside. If it
 !     is given, it overwrites the path defined in {\tt gridlocation} variable
 !     in the mosaic file.
+!   \item [{[verboseFlag]}]
+!     If .TRUE., it will print summary information about the regrid parameters,
+!     default to .FALSE..
+!   \item [{[checkFlag]}]
+!     checkFlag value to pass into ESMF\_FieldRegridStore(), if not provided
+!     has same default as ESMF\_FieldRegridStore() which is false.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1076,6 +1083,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       if (present(tileFilePath)) then
           print *, "  Alternative tile file path: ", trim(tileFilePath)
+       endif
+      if (present(checkFlag)) then
+         if (checkFlag) then
+             print *, "  The checkFlag is set, and so extra error checking will be done."
+          endif
       endif
       write(*,*)
     endif
@@ -1500,6 +1512,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1520,6 +1533,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1540,6 +1554,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1559,6 +1574,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1580,6 +1596,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1599,6 +1616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1618,6 +1636,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1636,6 +1655,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1677,10 +1697,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (dstIsReg .or. dstIsMosaic) then
@@ -1690,10 +1706,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1953,6 +1965,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
               extrapNumLevels=extrapNumLevels, &
+              checkFlag = checkFlag, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1971,6 +1984,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
               extrapNumLevels=extrapNumLevels, &
+              checkFlag = checkFlag, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1989,6 +2003,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
               extrapNumLevels=extrapNumLevels, &
+              checkFlag = checkFlag, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2006,6 +2021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
               extrapNumLevels=extrapNumLevels, &
+              checkFlag = checkFlag, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2642,15 +2658,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
         call computeRedistAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
-        if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2797,100 +2805,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
   end subroutine ESMF_RegridWeightGenDG
 
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "computeAreaGrid"
-
-! For now just put into a 1D array on PET 0. When PIO array write is done, then
-! do it in parallel
-! AREA ONLY VALID ON PET 0
-subroutine computeAreaGrid(grid, petNo, area, regridScheme, rc)
-  type(ESMF_Grid) :: grid
-  integer :: petNo
-  real (ESMF_KIND_R8), pointer :: area(:)
-  integer :: regridScheme
-  integer :: rc
-
-  type(ESMF_Field) :: areaField
-  integer :: minIndex(2), maxIndex(2), gridDims(2)
-  real (ESMF_KIND_R8), pointer :: area2D(:,:)
-  integer :: i, start, ntiles
-  integer :: localrc
-
-  ! Create a field on the grid to hold the areas
-  areaField=ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R8, &
-                 staggerloc=ESMF_STAGGERLOC_CENTER, name="area", rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  if (localrc /=ESMF_SUCCESS) then
-     rc=localrc
-     return
-  endif
-
-  ! compute areas
-  call ESMF_FieldRegridGetArea(areaField, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
- if (localrc /=ESMF_SUCCESS) then
-     rc=localrc
-     return
-  endif
-
-  ! Get number of tiles
-  call ESMF_GridGet(grid, tileCount = ntiles, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-       ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Get size of Grid
-  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  if (localrc /=ESMF_SUCCESS) then
-      rc=localrc
-      return
-  endif
-
-  ! Grid size
-  gridDims(1)=maxIndex(1)-minIndex(1)+1
-  gridDims(2)=maxIndex(2)-minIndex(2)+1
-
-  ! Allocate memory for area
-  allocate(area2D(gridDims(1),gridDims(2)))
-
-  ! Only do this part on PET 0
-  if (petNo .eq. 0) then
-     ! Allocate memory for area
-     allocate(area(gridDims(1)*gridDims(2)*ntiles))
-  endif
-
-  ! Get area onto PET 0
-  start=1
-  do i=1,ntiles
-    call ESMF_FieldGather(areaField, farray=area2D, rootPet=0, tile=i, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-     ! copy to 1D array
-     if (PetNo == 0) then
-       ! flatten area
-       area(start:start+gridDims(1)*gridDims(2)-1)=RESHAPE(area2D,(/gridDims(1)*gridDims(2)/))
-       start= start+gridDims(1)*gridDims(2)
-     endif
-  enddo
-
-  ! deallocate memory for 2D area
-  deallocate(area2D)
-
-end subroutine computeAreaGrid
-
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "computeRedistAreaMesh"
@@ -2909,51 +2823,24 @@ subroutine computeRedistAreaMesh(mesh, vm, petNo, petCnt, area, rc)
   integer :: localElemCount,i
   integer (ESMF_KIND_I4) :: localCount(1), globalCount(1)
   integer :: totalCount
-  logical :: hasSplitElem
   type(ESMF_DistGrid) :: distgrid, justPet0Distgrid
   type(ESMF_Array) :: areaArray, justPet0Array
   type(ESMF_RouteHandle) :: rh
 
-  ! Find out if elements are split
-  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)
+  ! Get local size of mesh areas
+  call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
+                     ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
 
-  ! Get area depending on split elements
-  if (hasSplitElem) then
-     ! Get local size of mesh areas before split
-     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
-            rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
+  ! allocate space for areas
+  allocate(localArea(localElemCount))
 
-    ! allocate space for areas
-    allocate(localArea(localElemCount))
-
-    ! Get local Areas
-    call ESMF_MeshGetOrigElemArea(mesh, areaList=localArea, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  else
-     ! Get local size of mesh areas
-     call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
-            rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! allocate space for areas
-    allocate(localArea(localElemCount))
-
-    ! Get local Areas
-    call ESMF_MeshGetElemArea(mesh, areaList=localArea, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  endif
+  ! Get local Areas
+  call ESMF_MeshGetElemArea(mesh, areaList=localArea, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! The element disgrid is for the split elements, thus the following code
   ! doesn't work with split element
@@ -3027,120 +2914,6 @@ subroutine computeRedistAreaMesh(mesh, vm, petNo, petCnt, area, rc)
   ! call ESMF_DistGridDestroy(justPet0Distgrid)
 
 end subroutine computeRedistAreaMesh
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "computeAreaMesh"
-
-! For now just put into a 1D array on PET 0. When PIO array write is done, then
-! do it in parallel
-! AREA ONLY VALID ON PET 0
-subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
-  type(ESMF_Mesh) :: mesh
-  type(ESMF_VM) :: VM
-  integer :: petNo,petCnt
-  real (ESMF_KIND_R8), pointer :: area(:)
-  integer :: rc
-  real (ESMF_KIND_R8), pointer :: localArea(:)
-  integer :: localrc
-  integer :: localElemCount,i
-  integer (ESMF_KIND_I4) :: localCount(1)
-  integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
-  integer :: totalCount
-  logical :: hasSplitElem
-
-  ! Find out if elements are split
-  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Get area depending on split elements
-  if (hasSplitElem) then
-     ! Get local size of mesh areas before split
-     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
-            rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! allocate space for areas
-    allocate(localArea(localElemCount))
-
-    ! Get local Areas
-    call ESMF_MeshGetOrigElemArea(mesh, areaList=localArea, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  else
-     ! Get local size of mesh areas
-     call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
-            rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! allocate space for areas
-    allocate(localArea(localElemCount))
-
-    ! Get local Areas
-    call ESMF_MeshGetElemArea(mesh, areaList=localArea, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-  endif
-
-  ! Allocate List of counts
-  allocate(globalCount(petCnt))
-
-  ! Get List of counts
-  localCount(1)=localElemCount
-  call ESMF_VMGather(vm,localCount,globalCount,count=1,rootPet=0,rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Calculate Displacements
-  allocate(globalDispl(petCnt))
-  if (petNo==0) then
-     globalDispl(1)=0
-     do i=2,petCnt
-        globalDispl(i)=globalDispl(i-1)+globalCount(i-1)
-     enddo
-  else
-    globalDispl=0
-  endif
-
-
-  ! Sum size
-  if (petNo==0) then
-    totalCount=0
-    do i=1,petCnt
-       totalCount=totalCount+globalCount(i)
-    enddo
-  else
-    totalCount=1 ! Because I'm not sure what happens
-                 ! if array is not allocated in VM
-  endif
-
-  ! Allocate final area list
-  allocate(area(totalCount))
-
-  ! Gather all areas
-  call ESMF_VMGatherV(vm,sendData=localArea, sendCount=localElemCount,&
-         recvData=area,recvCounts=globalCount,recvOffsets=globalDispl,&
-         rootPet=0, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-                         ESMF_ERR_PASSTHRU, &
-                         ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! Get rid of helper variables
-  deallocate(localArea)
-  deallocate(globalCount)
-  deallocate(globalDispl)
-  if (petNo .ne. 0) deallocate(area)
-
-end subroutine computeAreaMesh
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3550,7 +3323,6 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
   integer (ESMF_KIND_I4) :: localCount(1)
   integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
   integer :: totalCount
-  logical :: hasSplitElem
 
   ! Get localFrac from field
   call ESMF_FieldGet(fracField, localDE=0, farrayPtr=localFrac,  rc=localrc)
@@ -3559,41 +3331,8 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
      return
   endif
 
-  ! Find out if elements are split
-  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-     rc=localrc
-     return
-  endif
-
-  ! Get merge frac field depending on if split elements
-  if (hasSplitElem) then
-     ! Get local size of mesh areas before split
-     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
-          rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=localrc
-        return
-     endif
-
-     ! allocate space for frac
-     allocate(mergedFrac(localElemCount))
-
-     ! Get local Areas
-     call ESMF_MeshGetOrigElemFrac(mesh, splitFracList=localFrac, &
-          origfracList=mergedFrac, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=localrc
-        return
-     endif
-
-     ! switch to point to merged areas
-     localFrac=>mergedFrac
-  else
-     localElemCount=size(localFrac)
-     ! localFrac is gotten from the fracField above
-  endif
-
+  localElemCount=size(localFrac)
+  ! localFrac is gotten from the fracField above
 
   ! Allocate List of counts
   allocate(globalCount(petCnt))
@@ -3641,10 +3380,6 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
      return
   endif
 
-  ! Get rid of helper variables
-  if (hasSplitElem) then
-     deallocate(mergedFrac)
-  endif
   deallocate(globalCount)
   deallocate(globalDispl)
   if (petNo .ne. 0) deallocate(frac)
@@ -3674,7 +3409,6 @@ subroutine gatherRedistFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, r
   integer :: localElemCount,i
   integer (ESMF_KIND_I4) :: localCount(1), globalCount(1)
   integer :: totalCount
-  logical :: hasSplitElem
   integer, pointer :: seqIndexList(:)
 
 
@@ -3685,41 +3419,8 @@ subroutine gatherRedistFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, r
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
-
-  ! Find out if elements are split
-  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-       ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-  ! Get merge frac field depending on if split elements
-  if (hasSplitElem) then
-     ! Get local size of mesh areas before split
-     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
-          rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-       ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-     ! allocate space for frac
-     allocate(mergedFrac(localElemCount))
-
-     ! Get local Areas
-     call ESMF_MeshGetOrigElemFrac(mesh, splitFracList=localFrac, &
-          origfracList=mergedFrac, rc=localrc)
-     if (ESMF_LogFoundError(localrc, &
-       ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-     ! switch to point to merged areas
-     localFrac=>mergedFrac
-  else
-     localElemCount=size(localFrac)
-     ! localFrac is gotten from the fracField above
-  endif
+  localElemCount=size(localFrac)
+  ! localFrac is gotten from the fracField above
 
 
   ! Get total size
@@ -3795,12 +3496,6 @@ subroutine gatherRedistFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, r
 
 
   ! Properly redisted fractions should now be in frac(:)
-
-
-  ! Get rid of helper variables
-  if (hasSplitElem) then
-     deallocate(mergedFrac)
-  endif
 
   call ESMF_ArrayDestroy(justPet0Array)
   call ESMF_DistGridDestroy(justPet0Distgrid)
@@ -3998,9 +3693,10 @@ real(ESMF_KIND_R8), intent(inout) :: B(:)
 ! LOCAL VARIABLES
 integer :: left, right
 real(ESMF_KIND_R8) :: random, tempR
-real(ESMF_KIND_I4) :: tempI(2), pivot
+integer(ESMF_KIND_I4) :: tempI(2), pivot
 integer :: marker
 
+    ! If there's more than one entry in the array, then sort
     if (nA > 1) then
 
         call random_number(random)

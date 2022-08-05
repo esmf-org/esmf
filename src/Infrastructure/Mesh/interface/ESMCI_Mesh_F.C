@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -59,20 +59,224 @@ using namespace ESMCI;
  *  Low level helper functions: translate from F90 to C++.
  *----------------------------------------------------------------------------*/
 
-// Moab variable
-bool Moab_on=false;
+// This method turns on MOAB
+extern "C" void FTN_X(c_esmc_meshgetmoab)(int *_moabOn, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetmoab()"
+
+  MeshCap::meshGetMOAB(_moabOn, rc);
+}
 
 // This method turns on MOAB
 extern "C" void FTN_X(c_esmc_meshsetmoab)(int *_moabOn, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshsetmoab()"
 
-    if (*_moabOn==1) Moab_on=true;
-    else Moab_on=false;
-
-  if (rc!=NULL) *rc=ESMF_SUCCESS;
+  MeshCap::meshSetMOAB(_moabOn, rc);
 }
 
+extern "C" void FTN_X(c_esmc_meshgetisfree)(MeshCap **meshpp, ESMC_Logical *isfree) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetisfree()"
+
+  *isfree = ((*meshpp)->isfree) ? ESMF_TRUE : ESMF_FALSE;
+}
+
+extern "C" void FTN_X(c_esmc_meshsetisfree)(MeshCap **meshpp) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetisfree()"
+
+  (*meshpp)->isfree = true;
+}
+
+extern "C" void FTN_X(c_esmc_meshgetstatus)(MeshCap **meshpp, ESMC_MeshStatus_Flag *status) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetstatus()"
+
+  *status = (*meshpp)->status;
+}
+
+extern "C" void FTN_X(c_esmc_meshsetstatus)(MeshCap **meshpp, ESMC_MeshStatus_Flag *status) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetstatus()"
+
+  (*meshpp)->status = *status;
+}
+
+// Accessors to MeshCap member variables
+extern "C" void FTN_X(c_esmc_meshgetnodedistgridpresent)(MeshCap **meshpp, 
+  ESMC_Logical *ispresent, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetnodedistgridpresent()"
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    *ispresent = ((*meshpp)->node_distgrid_set) ? ESMF_TRUE : ESMF_FALSE;
+
+    if (rc!=NULL) *rc = ESMF_SUCCESS; 
+}
+
+// Accessors to MeshCap member variables
+extern "C" void FTN_X(c_esmc_meshgetelemdistgridpresent)(MeshCap **meshpp, 
+  ESMC_Logical *ispresent, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetelemdistgridpresent()"
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    *ispresent = ((*meshpp)->elem_distgrid_set) ? ESMF_TRUE : ESMF_FALSE;
+
+    if (rc!=NULL) *rc = ESMF_SUCCESS; 
+}
+
+// Accessors to MeshCap member variables
+extern "C" void FTN_X(c_esmc_meshgetnodedistgrid)(MeshCap **meshpp, DistGrid **dg, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetnodedistgrid()"
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // ensure 'meshpp' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'meshpp' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    
+    *dg = (*meshpp)->meshgetnodedistgrid();
+  
+    if (rc!=NULL) *rc = ESMF_SUCCESS; 
+}
+
+extern "C" void FTN_X(c_esmc_meshgetelemdistgrid)(MeshCap **meshpp, DistGrid **dg, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshgetelemdistgrid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // ensure 'meshpp' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'meshpp' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    
+    *dg = (*meshpp)->meshgetelemdistgrid();
+
+    if (rc!=NULL) *rc = ESMF_SUCCESS; 
+}
+
+extern "C" void FTN_X(c_esmc_meshsetnodedistgrid)(MeshCap **meshpp, DistGrid **dg, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetnodedistgrid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // ensure 'meshpp' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'meshpp' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    // ensure 'dg' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(dg) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'dg' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+
+    ESMCI_NULL_CHECK_PRC(dg, rc)
+    (*meshpp)->meshsetnodedistgrid(*dg);
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+extern "C" void FTN_X(c_esmc_meshsetelemdistgrid)(MeshCap **meshpp, DistGrid **dg, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetelemdistgrid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // ensure 'meshpp' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'meshpp' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    // ensure 'dg' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(dg) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'dg' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    
+    ESMCI_NULL_CHECK_PRC(dg, rc)
+    (*meshpp)->meshsetelemdistgrid(*dg);
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
+
+extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(MeshCap **meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreatenodedistgrid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // ensure 'meshpp' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'dg' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    
+    (*meshpp)->meshcreatenodedistgrid(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc)))
+      return;
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+
+
+extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(MeshCap **meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreateelemdistgrid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // ensure 'meshpp' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(meshpp) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'dg' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
+    
+    (*meshpp)->meshcreateelemdistgrid(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc)))
+      return;
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
 
 
 #if 0
@@ -120,11 +324,7 @@ extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
   int localrc = ESMC_RC_NOT_IMPL;
 
   // Create Mesh depending on whether MOAB or not
-  if (Moab_on) {
-    *meshpp=MeshCap::meshcreate(pdim,sdim,coordSys,false,rc);
-  } else {
-    *meshpp=MeshCap::meshcreate(pdim,sdim,coordSys,true,rc);
-  }
+  *meshpp=MeshCap::meshcreate(pdim,sdim,coordSys,rc);
 
   // copy and convert F90 string to null terminated one
   std::string cname(name, name_l);
@@ -139,15 +339,21 @@ extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
 
 } // meshcreate
 
+extern "C" void FTN_X(c_esmc_meshcreateempty)(MeshCap **mesh, int *rc) {
+
+  *mesh=MeshCap::meshcreateempty(rc);
+  
+}
+
 
 extern "C" void FTN_X(c_esmc_meshaddnodes)(MeshCap **meshpp, int *num_nodes, int *nodeId,
-                                           double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                                           double *nodeCoord, InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                            int *rc)
 {
   // Call into implementation
   (*meshpp)->meshaddnodes(num_nodes, nodeId,
-                          nodeCoord, nodeOwner, nodeMaskII,
+                          nodeCoord, nodeOwnerII, nodeMaskII,
                           _coordSys, _orig_sdim,
                           rc);
 
@@ -224,7 +430,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp,
                                               int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                                               int *_areaPresent, double *elemArea,
                                               int *_coordsPresent, double *elemCoords,
-                                              int *_num_elemConn, int *elemConn, int *regridConserve,
+                                              int *_num_elemConn, int *elemConn, 
                                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                               int *rc)
 {
@@ -232,7 +438,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp,
   (*meshpp)->meshaddelements(_num_elems, elemId, elemType, _elemMaskII ,
                          _areaPresent, elemArea,
                          _coordsPresent, elemCoords,
-                         _num_elemConn, elemConn, regridConserve,
+                         _num_elemConn, elemConn,
                          _coordSys, _orig_sdim,
                          rc);
 }
@@ -280,12 +486,6 @@ extern "C" void FTN_X(c_esmc_meshfreememory)(MeshCap **meshpp, int *rc) {
 }
 
 
-extern "C" void FTN_X(c_esmc_meshget)(MeshCap **meshpp, int *num_nodes, int *num_elements, int *rc){
-
-  (*meshpp)->meshget(num_nodes, num_elements, rc);
-}
-
-
 extern "C" void FTN_X(c_esmc_meshgetnodecount)(MeshCap **meshpp, int *nodeCount, int *rc){
 
   (*meshpp)->getNodeCount(nodeCount, rc);
@@ -300,6 +500,17 @@ extern "C" void FTN_X(c_esmc_meshgetelemcount)(MeshCap **meshpp, int *elemCount,
 extern "C" void FTN_X(c_esmc_meshgetelemconncount)(MeshCap **meshpp, int *elemConnCount, int *rc){
 
   (*meshpp)->getElemConnCount(elemConnCount, rc);
+}
+
+extern "C" void FTN_X(c_esmc_meshgetownednodecount)(MeshCap **meshpp, int *nodeCount, int *rc){
+
+  (*meshpp)->getOwnedNodeCount(nodeCount, rc);
+}
+
+
+extern "C" void FTN_X(c_esmc_meshgetownedelemcount)(MeshCap **meshpp, int *elemCount, int *rc){
+
+  (*meshpp)->getOwnedElemCount(elemCount, rc);
 }
 
 extern "C" void FTN_X(c_esmc_meshgeteleminfopresence)(MeshCap **meshpp, 
@@ -352,56 +563,6 @@ extern "C" void FTN_X(c_esmc_meshgetnodecreateinfo)(MeshCap **meshpp,
 }
 
 
-
-extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(MeshCap **meshpp, int *ngrid, int *num_lnodes, int *rc) {
-
-  (*meshpp)->meshcreatenodedistgrid(ngrid, num_lnodes, rc);
-
-}
-
-
-extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(MeshCap **meshpp, int *egrid, int *num_lelems, int *rc) {
-
-  (*meshpp)->meshcreateelemdistgrid(egrid, num_lelems, rc);
-}
-
-
-extern "C" void FTN_X(c_esmc_meshinfoserialize)(int *intMeshFreed,
-                                                int *spatialDim, int *parametricDim,
-                                                int *intIsPresentNDG, int *intIsPresentEDG,
-                                                int *coordSys, 
-                                                char *buffer, int *length, int *offset,
-                                                ESMC_InquireFlag *inquireflag, int *rc,
-                                                ESMCI_FortranStrLenArg buffer_l){
-
-  MeshCap::meshinfoserialize(intMeshFreed,
-                             spatialDim, parametricDim,
-                             intIsPresentNDG, intIsPresentEDG,
-                             coordSys, 
-                             buffer, length, offset,
-                             inquireflag, rc,
-                             buffer_l);
-
-}
-
-
-extern "C" void FTN_X(c_esmc_meshinfodeserialize)(int *intMeshFreed,
-                                                  int *spatialDim, int *parametricDim,
-                                                  int *intIsPresentNDG, int *intIsPresentEDG,
-                                                  int *coordSys, 
-                                                  char *buffer, int *offset,
-                                                  int *rc,
-                                                  ESMCI_FortranStrLenArg buffer_l){
-
-  MeshCap::meshinfodeserialize(intMeshFreed,
-                               spatialDim, parametricDim,
-                               intIsPresentNDG, intIsPresentEDG,
-                               coordSys, 
-                               buffer, offset, rc,
-                               buffer_l);
-}
-
-
 extern "C" void FTN_X(c_esmc_meshserialize)(MeshCap **meshpp,
                 char *buffer, int *length, int *offset,
                 ESMC_AttReconcileFlag *attreconflag,
@@ -418,7 +579,6 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(MeshCap **meshpp,
                              char *buffer, int *offset,
                              ESMC_AttReconcileFlag *attreconflag, int *rc,
                              ESMCI_FortranStrLenArg buffer_l){
-
   // Create MeshCap
   *meshpp=new MeshCap(-1);   // prevent baseID counter increment
 
@@ -474,9 +634,13 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(MeshCap **meshpp, int *num_elem, doubl
   (*meshpp)->meshgetarea(num_elem, elem_areas, rc);
 }
 
-extern "C" void FTN_X(c_esmc_meshgetdimensions)(MeshCap **meshpp, int *sdim, int *pdim, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetdimensions)(MeshCap **meshpp, int *sdim, int *pdim,
+  ESMC_CoordSys_Flag *coordsys, int *rc) {
 
-  (*meshpp)->meshgetdimensions(sdim, pdim, rc);
+  (*meshpp)->meshgetdimensions(sdim, pdim, coordsys, rc);
+
+  // return success
+  if (rc) *rc=ESMF_SUCCESS;
 }
 
 extern "C" void FTN_X(c_esmc_meshgetcentroid)(MeshCap **meshpp, int *num_elem, double *elem_centroid, int *rc) {
@@ -575,12 +739,6 @@ extern "C" void FTN_X(c_esmc_meshcreateredist)(MeshCap **src_meshpp, int *num_no
 }
 
 
-extern "C" void FTN_X(c_esmc_meshcreatebase)(MeshCap **mesh, int *rc) {
-
-  *mesh=new MeshCap();
-  if (rc) *rc=ESMF_SUCCESS;
-}
-
 // This method verifies that nodes in node_gids array are the same as the local nodes in meshpp, otherwise
 // it returns an error (used to test MeshRedist()).
 // To do this check make sure the number of nodes in both cases are the same and that every
@@ -636,7 +794,7 @@ extern "C" void FTN_X(c_esmc_meshgetinternalptr)(MeshCap **meshpp,
 #define ESMC_METHOD "c_esmc_meshgetinternalptr"
 
   *internal_ptr=(*meshpp)->get_internal_mesh_ptr();
-
+  
   // return success
   if (rc) *rc=ESMF_SUCCESS;
 
@@ -644,14 +802,12 @@ extern "C" void FTN_X(c_esmc_meshgetinternalptr)(MeshCap **meshpp,
 
 
 extern "C" void FTN_X(c_esmc_meshcreatefromintptr)(MeshCap **meshpp,
-                                                void **ptr, int *rc)
+                                                void *ptr, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreatefromintptr()"
 
-  // Create MeshCap for now assuming pointer is Mesh, need other way
-  // to indicate it's MOAB, or wait until passing whole MeshCap struct
-    *meshpp=MeshCap::create_from_ptr(ptr, true, rc);
+    *meshpp=MeshCap::create_from_ptr(ptr, rc);
 }
 
 extern "C" void FTN_X(c_esmc_meshfitonvm)(MeshCap **meshpp, VM **vm, int *rc) {
@@ -679,21 +835,12 @@ extern "C" void FTN_X(c_esmc_meshcreateeasyelems)(MeshCap **meshpp,
 #define ESMC_METHOD "c_esmc_meshcreateeasyelems()"
 
   // Create Mesh depending on whether MOAB or not
-  if (Moab_on) {
     *meshpp=MeshCap::meshcreate_easy_elems(pdim, sdim,
                                 num_elems, elemIdsII, elemTypes, elemMaskII,
                                 num_elemCorners, elemCornerCoords,
                                 has_elemArea, elemArea,
                                 has_elemCoords, elemCoords,
-                                coordSys,false,rc);
-  } else {
-    *meshpp=MeshCap::meshcreate_easy_elems(pdim, sdim,
-                                num_elems, elemIdsII, elemTypes, elemMaskII,
-                                num_elemCorners, elemCornerCoords,
-                                has_elemArea, elemArea,
-                                has_elemCoords, elemCoords,
-                                coordSys,true,rc);
-  }
+                                coordSys,rc);
 
 } // meshcreate
 
@@ -710,12 +857,7 @@ extern "C" void FTN_X(c_esmc_meshcreatefromgrid)(MeshCap **meshpp,
 
   int localrc = ESMC_RC_NOT_IMPL;
 
-  // Create Mesh depending on whether MOAB or not
-  if (Moab_on) {
-    *meshpp=MeshCap::meshcreate_from_grid(gridpp,false,rc);
-  } else {
-    *meshpp=MeshCap::meshcreate_from_grid(gridpp,true,rc);
-  }
+  *meshpp=MeshCap::meshcreate_from_grid(gridpp,rc);
 
   // copy and convert F90 string to null terminated one
   std::string cname(name, name_l);
@@ -746,6 +888,74 @@ extern "C" void FTN_X(c_esmc_geteleminfointoarray)(MeshCap **meshpp,
                                   rc);
 
 }
+
+
+extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
+                                                 char *filename,
+                                                 ESMC_FileFormat_Flag *fileformat, 
+                                                 ESMC_Logical *convertToDual,
+                                                 ESMC_Logical *addUserArea,
+                                                 ESMC_CoordSys_Flag *coordSys, 
+                                                 ESMC_MeshLoc_Flag *maskFlag, 
+                                                 char *maskVarName, 
+                                                 ESMCI::DistGrid **nodeDistgridpp,
+                                                 ESMCI::DistGrid **elemDistgridpp,
+                                                 int *rc, 
+                                                 ESMCI_FortranStrLenArg filename_len,
+                                                 ESMCI_FortranStrLenArg maskVarName_len)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreatefromfile()"
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // Get C style filename
+  char *C_filename = ESMC_F90toCstring(filename, filename_len);
+
+  // Get C style maskVarName
+  char *C_maskVarName = NULL;
+  if (ESMC_NOT_PRESENT_FILTER(maskVarName) != ESMC_NULL_POINTER) {
+    C_maskVarName=ESMC_F90toCstring(maskVarName, maskVarName_len);
+  }
+
+  // Convert Flags
+  bool C_convertToDual=false;
+  if (*convertToDual == ESMF_TRUE) C_convertToDual=true;
+
+  bool C_addUserArea=false;
+  if (*addUserArea == ESMF_TRUE) C_addUserArea=true;
+
+  // Convert  Distgrids
+  // (Optional, so also handle that by checking for not present)
+  ESMCI::DistGrid *nodeDistgrid=NULL;
+  if (ESMC_NOT_PRESENT_FILTER(nodeDistgridpp) != ESMC_NULL_POINTER) {
+    nodeDistgrid=*nodeDistgridpp;
+  }
+
+  ESMCI::DistGrid *elemDistgrid=NULL;
+  if (ESMC_NOT_PRESENT_FILTER(elemDistgridpp) != ESMC_NULL_POINTER) {
+    elemDistgrid=*elemDistgridpp;
+  }
+
+
+  // Create Mesh from file
+  *meshpp=MeshCap::meshcreatefromfilenew(C_filename,
+                                         *fileformat,
+                                         C_convertToDual,
+                                         C_addUserArea,
+                                         *coordSys,
+                                         *maskFlag, 
+                                         C_maskVarName, 
+                                         nodeDistgrid,
+                                         elemDistgrid,
+                                         ESMC_NOT_PRESENT_FILTER(rc));
+
+  // Get rid C style filename
+  delete [] C_filename;
+
+  // If present, get rid C style maskVarName
+  if (C_maskVarName != NULL)   delete [] C_maskVarName;
+
+} // meshcreate
 
 
 

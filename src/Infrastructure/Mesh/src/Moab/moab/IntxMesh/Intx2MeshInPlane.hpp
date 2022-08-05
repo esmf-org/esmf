@@ -9,21 +9,24 @@
 #define INTX2MESHINPLANE_HPP_
 
 #include "Intx2Mesh.hpp"
-namespace moab {
+namespace moab
+{
 
-class Intx2MeshInPlane: public moab::Intx2Mesh {
-public:
-  Intx2MeshInPlane(Interface * mbimpl);
-  virtual ~Intx2MeshInPlane();
+class Intx2MeshInPlane : public moab::Intx2Mesh
+{
+  public:
+    Intx2MeshInPlane( Interface* mbimpl );
 
-  double setup_red_cell(EntityHandle red, int & nsRed);
+    virtual ~Intx2MeshInPlane();
 
-  ErrorCode computeIntersectionBetweenRedAndBlue(EntityHandle red, EntityHandle blue,
-      double * P, int & nP, double & area, int markb[MAXEDGES], int markr[MAXEDGES],
-      int & nsBlue, int & nsRed, bool check_boxes_first=false);
+    double setup_tgt_cell( EntityHandle tgt, int& nsTgt );
 
-  ErrorCode findNodes(EntityHandle red, int nsRed, EntityHandle blue, int nsBlue, double * iP, int nP);
+    ErrorCode computeIntersectionBetweenTgtAndSrc( EntityHandle tgt, EntityHandle src, double* P, int& nP, double& area,
+                                                   int markb[MAXEDGES], int markr[MAXEDGES], int& nsSrc, int& nsTgt,
+                                                   bool check_boxes_first = false );
 
+    ErrorCode findNodes( EntityHandle tgt, int nsTgt, EntityHandle src, int nsSrc, double* iP, int nP );
 };
-} // end namespace moab
+
+}  // end namespace moab
 #endif /* INTX2MESHINPLANE_HPP_ */

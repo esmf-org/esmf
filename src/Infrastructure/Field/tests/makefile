@@ -1,4 +1,4 @@
-# $Id$ 
+# $Id$
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -39,6 +39,9 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
+
+# TESTS_BUILD   = \
+#		$(ESMF_TESTDIR)/ESMC_FieldRegridCsrvUTest
 
 TESTS_RUN     = \
 		RUN_ESMC_FieldUTest \
@@ -97,7 +100,7 @@ TESTS_RUN_UNI = \
 
 
 #
-# check ESMF_TESTHARNESS_FIELD for default, 
+# check ESMF_TESTHARNESS_FIELD for default,
 # otherwise append test harness suite target
 #
 ifeq ($(ESMF_TESTHARNESS_FIELD), default)
@@ -110,11 +113,11 @@ endif
 
 include ${ESMF_DIR}/makefile
 
-CLEANDIRS   = 
+CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD) $(CPFILES) *.nc
 CLOBBERDIRS =
 
-DIRS        = 
+DIRS        =
 
 #
 # Field
@@ -228,7 +231,7 @@ RUN_ESMF_FieldArbGridUTest:
 	$(MAKE) TNAME=FieldArbGrid NP=4 ftest
 
 RUN_ESMF_FieldIOUTest:
-	rm -f $(ESMF_TESTDIR)/field2.nc
+	rm -f $(ESMF_TESTDIR)/*.nc
 	$(MAKE) TNAME=FieldIO NP=4 ftest
 
 RUN_ESMF_FieldArbGridUTestUNI:

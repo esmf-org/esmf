@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -294,42 +294,46 @@ void FTN_X(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
 #if 1
 // non-method functions
 void FTN_X(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
-                int *keyCount,
-                char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag,
-                int *rc,
-                ESMCI_FortranStrLenArg buffer_l){
-
-    ESMC_IndexFlag *ifp;
-    int *ip;
+                                      int *keyCount, ESMC_CoordSys_Flag *coordSys,
+                                      char *buffer, int *length, int *offset,
+                                      ESMC_InquireFlag *inquireflag,
+                                      int *rc,
+                                      ESMCI_FortranStrLenArg buffer_l){
 
 
     // Initialize return code; assume routine not implemented
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-    // TODO: verify length > vars.
-    int size = sizeof(ESMC_IndexFlag) + sizeof(int);
+    // Calc size to store locstream info
+    int size = sizeof(ESMC_IndexFlag)+sizeof(int)+sizeof(ESMC_CoordSys_Flag);
+
+    // If not just inquiring save info to buffer
+    //  Verify length > vars.
     if (*inquireflag != ESMF_INQUIREONLY) {
+
+      // Make sure info will fit
       if ((*length - *offset) < size) {
-         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to add a LocStream object", ESMC_CONTEXT, rc);
-         return;
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                "Buffer too short to add a LocStream object", ESMC_CONTEXT, rc);
+        return;
       }
-    }
 
 
-    // Save indexflag
-    ifp = (ESMC_IndexFlag *)(buffer + *offset);
-    if (*inquireflag != ESMF_INQUIREONLY)
+      // Save indexflag
+      ESMC_IndexFlag *ifp = (ESMC_IndexFlag *)(buffer + *offset);
       *ifp++ = *indexflag;
 
-    // Save keyCount
-    ip= (int *)ifp;
-    if (*inquireflag != ESMF_INQUIREONLY)
+      // Save keyCount
+      int *ip= (int *)ifp;
       *ip++ = *keyCount;
 
-    // Adjust offset
-    *offset += sizeof(ESMC_IndexFlag) + sizeof(int);
+      // Save coordSys
+      ESMC_CoordSys_Flag *csp= (ESMC_CoordSys_Flag *)ip;
+      *csp++ = *coordSys;
+    }
+
+    // Increase offset by size
+    *offset += size;
 
     // return success
     if (rc) *rc = ESMF_SUCCESS;
@@ -339,27 +343,29 @@ void FTN_X(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
 
 
 void FTN_X(c_esmc_locstreamdeserialize)(ESMC_IndexFlag *indexflag,
-                int *keyCount, char *buffer,
-                int *offset,
-                int *rc,
-                ESMCI_FortranStrLenArg buffer_l){
+                                        int *keyCount, ESMC_CoordSys_Flag *coordSys,
+                                        char *buffer, int *offset,
+                                        int *rc,
+                                        ESMCI_FortranStrLenArg buffer_l){
 
-    ESMC_IndexFlag *ifp;
-    int *ip;
-
+    
     // Initialize return code; assume routine not implemented
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // Get indexflag
-    ifp = (ESMC_IndexFlag *)(buffer + *offset);
+    ESMC_IndexFlag *ifp = (ESMC_IndexFlag *)(buffer + *offset);
     *indexflag=*ifp++;
 
     // Get keyCount
-    ip= (int *)ifp;
+    int *ip= (int *)ifp;
     *keyCount=*ip++;
 
+    // Get CoordSys
+    ESMC_CoordSys_Flag *csp= (ESMC_CoordSys_Flag *)ip;
+    *coordSys=*csp++;
+
     // Adjust offset
-    *offset += sizeof(ESMC_IndexFlag) + sizeof(int);
+    *offset += sizeof(ESMC_IndexFlag)+sizeof(int)+sizeof(ESMC_CoordSys_Flag);
 
     // return success
     if (rc) *rc = ESMF_SUCCESS;

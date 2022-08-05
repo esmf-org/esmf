@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2020, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -20,11 +20,36 @@ module ESMF_VMComponentUTest_gcomp_mod
   
   private
   
-  public mygcomp_setvm, mygcomp_register_nexh, mygcomp_register_exh
+  public mygcomp_setvm, mygcomp_setvmForcePthreads
+  public mygcomp_register_nexh, mygcomp_register_exh
     
   contains !--------------------------------------------------------------------
 
   subroutine mygcomp_setvm(gcomp, rc)
+    ! arguments
+    type(ESMF_GridComp):: gcomp
+    integer, intent(out):: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    logical :: pthreadsEnabled
+#endif
+    
+    ! Initialize
+    rc = ESMF_SUCCESS
+
+#ifdef ESMF_TESTWITHTHREADS
+    ! The following call might use threads for resource control.
+
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (pthreadsEnabled) then
+      call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+    endif
+#endif
+  end subroutine !--------------------------------------------------------------
+
+  subroutine mygcomp_setvmForcePthreads(gcomp, rc)
     ! arguments
     type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
@@ -47,10 +72,9 @@ module ESMF_VMComponentUTest_gcomp_mod
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
     if (pthreadsEnabled) then
-      call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+      call ESMF_GridCompSetVMMinThreads(gcomp, forceChildPthreads=.true., rc=rc)
     endif
 #endif
-
   end subroutine !--------------------------------------------------------------
 
   subroutine mygcomp_register_nexh(gcomp, rc)
@@ -196,16 +220,17 @@ program ESMF_VMComponentUTest
   call ESMF_VMGetGlobal(vm, rc=rc)
   call ESMF_VMPrint(vm)
   
-  ! Prepare for non-exhaustive test section
+  ! Prepare for loop testing
   loop_rc=ESMF_SUCCESS 
 
-  do j=1, 2
-    do i=1, 100
+  do j=1, 1
+    do i=1, 2
 
       gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
   
-      call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvm, rc=loop_rc)
+      call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvm, &
+        rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompSetServices(gcomp(i), userRoutine=mygcomp_register_nexh, &
@@ -213,7 +238,7 @@ program ESMF_VMComponentUTest
       if (loop_rc /= ESMF_SUCCESS) goto 10
 
     enddo
-    do i=1, 100
+    do i=1, 2
 
       call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
@@ -229,11 +254,45 @@ program ESMF_VMComponentUTest
   write(failMsg, *) "Failure codes returned!"
   call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  ! Prepare for loop testing
+  loop_rc=ESMF_SUCCESS 
+
+  do j=1, 1
+    do i=1, 2
+
+      gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 15
+  
+      call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvmForcePthreads,&
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 15
+
+      call ESMF_GridCompSetServices(gcomp(i), userRoutine=mygcomp_register_nexh, &
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 15
+
+    enddo
+    do i=1, 2
+
+      call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 15
+      
+    enddo
+  enddo
+  
+15 continue
+  !----------------------------------------------------------------
+  !Verify loop test results
+  !NEX_UTest
+  write(name, *) "Component Create/SetServices/Destroy ForcePthreads Test"
+  write(failMsg, *) "Failure codes returned!"
+  call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Testing VM IsCreated for uncreated object"
   write(failMsg, *) "Did not return .false."
-  isCreated = ESMF_VMIsCreated(vm2)
+  isCreated = ESMF_VMIsCreated(vm2, rc=rc)
   call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -241,7 +300,6 @@ program ESMF_VMComponentUTest
   !NEX_UTest
   write(name, *) "Testing VM IsCreated for uncreated object"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  isCreated = ESMF_VMIsCreated(vm2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -274,7 +332,7 @@ program ESMF_VMComponentUTest
   !NEX_UTest
   write(name, *) "Testing VM IsCreated for created object"
   write(failMsg, *) "Did not return .true."
-  isCreated = ESMF_VMIsCreated(vm2)
+  isCreated = ESMF_VMIsCreated(vm2, rc=rc)
   call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -282,7 +340,6 @@ program ESMF_VMComponentUTest
   !NEX_UTest
   write(name, *) "Testing VM IsCreated for created object"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  isCreated = ESMF_VMIsCreated(vm2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -294,30 +351,9 @@ program ESMF_VMComponentUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-!the following tests will not work with current implementation of IsCreate
-#if 0
-
-  !------------------------------------------------------------------------
-  !NEX__UTest
-  write(name, *) "Testing VM IsCreated for destroyed object"
-  write(failMsg, *) "Did not return .false."
-  isCreated = ESMF_VMIsCreated(vm2)
-  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX__UTest
-  write(name, *) "Testing VM IsCreated for destroyed object"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  isCreated = ESMF_VMIsCreated(vm2, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-#endif
-
 #ifdef ESMF_TESTEXHAUSTIVE
 
-  ! Prepare for exhaustive test section
+  ! Prepare for loop testing
   loop_rc=ESMF_SUCCESS 
 
   do j=1, 20
@@ -327,7 +363,7 @@ program ESMF_VMComponentUTest
       if (loop_rc /= ESMF_SUCCESS) goto 20
   
       call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvm, rc=loop_rc)
-      if (loop_rc /= ESMF_SUCCESS) goto 10
+      if (loop_rc /= ESMF_SUCCESS) goto 20
 
       call ESMF_GridCompSetServices(gcomp(i), userRoutine=mygcomp_register_exh, &
         rc=loop_rc)
@@ -347,6 +383,39 @@ program ESMF_VMComponentUTest
   !Verify loop test results
   !EX_UTest
   write(name, *) "Exhaustive Component Create/SetServices/Destroy Test"
+  write(failMsg, *) "Failure codes returned!"
+  call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  ! Prepare for loop testing
+  loop_rc=ESMF_SUCCESS 
+
+  do j=1, 20
+    do i=1, 200
+
+      gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 25
+  
+      call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvmForcePthreads, rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 25
+
+      call ESMF_GridCompSetServices(gcomp(i), userRoutine=mygcomp_register_exh, &
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 25
+
+    enddo
+    do i=1, 200
+
+      call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 25
+      
+    enddo
+  enddo
+  
+25 continue
+  !----------------------------------------------------------------
+  !Verify loop test results
+  !EX_UTest
+  write(name, *) "Exhaustive Component Create/SetServices/Destroy ForcePthreads Test"
   write(failMsg, *) "Failure codes returned!"
   call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 

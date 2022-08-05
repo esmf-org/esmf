@@ -1,7 +1,7 @@
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2020, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -343,6 +343,7 @@ namespace ESMCI {
     output_mesh->set_spatial_dimension(src_mesh->spatial_dim());
     output_mesh->set_parametric_dimension(src_mesh->parametric_dim());
     output_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
+    output_mesh->coordsys=src_mesh->coordsys;
 
     // Send elements from src_mesh to output_mesh
     CommReg elemComm;
@@ -471,6 +472,7 @@ namespace ESMCI {
   output_mesh->set_spatial_dimension(src_mesh->spatial_dim());
   output_mesh->set_parametric_dimension(src_mesh->parametric_dim());
   output_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
+  output_mesh->coordsys=src_mesh->coordsys;
 
   // Create a distributed directory to figure out where the elems should go.
   DDir<> edir;
@@ -604,6 +606,7 @@ namespace ESMCI {
   output_mesh->set_spatial_dimension(src_mesh->spatial_dim());
   output_mesh->set_parametric_dimension(src_mesh->parametric_dim());
   output_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
+  output_mesh->coordsys=src_mesh->coordsys;
 
   // Create a distributed directory to figure out where the elems should go.
   DDir<> edir;
