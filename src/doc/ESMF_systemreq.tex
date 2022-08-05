@@ -2,8 +2,10 @@
 
 
 The following compilers and utilities are required for compiling, linking and
-testing the ESMF software. Some combinations of Fortran and C++ compilers,
-e.g. Intel ifort with GNU g++, are supported.
+testing the ESMF software. It is good common practice to use a consistent set
+of Fortran/C++/C compilers from the same vendor, e.g. GNU, Intel, etc.
+However, some vendor {\em combinations} of Fortran, C++, and C compilers,
+e.g. Intel ifort with GNU g++, are also supported.
 \begin{itemize}
 \item Fortran compiler:
   \begin{itemize}
@@ -23,6 +25,7 @@ e.g. Intel ifort with GNU g++, are supported.
   \item NVHPC's nvc++, or
   \item IBM's xlC, or
   \item CCE's CC.
+  \item LLVM's clang
   \end{itemize}
 \item C compiler:
   \begin{itemize}
@@ -32,6 +35,7 @@ e.g. Intel ifort with GNU g++, are supported.
   \item NVHPC's nvcc, or
   \item IBM's xlc, or
   \item CCE's cc.
+  \item LLVM's clang
   \end{itemize}
 \item MPI implementation compatible with the above compilers (but also see below
 for the MPI-bypass build option):
