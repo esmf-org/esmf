@@ -74,16 +74,16 @@ namespace ESMCI {
     bool            overwrite;                // OK to overwrite fields if true
     int             ntiles;                   // Number of tiles in arrays handled by this object
   protected:
-    IO_Handler(ESMC_IOFmt_Flag fmtArg);        // native constructor
+    IO_Handler(ESMC_IOFmt_Flag fmtArg, int ntilesArg); // native constructor
   private:
 //    IO(ESMC_IOFmt_Flag fmtArg, int rank, int *rc);
   protected:
     ~IO_Handler() { destruct(); }
     // create() and destroy()
   public:
-    static IO_Handler *create(ESMC_IOFmt_Flag iofmt, int *rc = NULL);
+    static IO_Handler *create(ESMC_IOFmt_Flag iofmt, int ntiles, int *rc = NULL);
     static IO_Handler *create(const std::string& file,
-                              ESMC_IOFmt_Flag iofmt, int *rc = NULL);
+                              ESMC_IOFmt_Flag iofmt, int ntiles, int *rc = NULL);
     static int destroy(IO_Handler **io);
     static void finalize(int *rc = NULL);
   private:
@@ -139,9 +139,12 @@ namespace ESMCI {
       return (ioh1 == ioh2);
     }
 
-    // open() and close()
+    // open(), close() and helper functions
   protected:
     virtual void open(bool readonly_arg, int *rc = NULL) = 0;
+
+    // Check compatibility of an array with this IO Handler object; return error if incompatible
+    int checkArray(const Array *arr_p) const;
   public:
     void open(const std::string &file,
               ESMC_FileStatus_Flag filestatusflag_arg,

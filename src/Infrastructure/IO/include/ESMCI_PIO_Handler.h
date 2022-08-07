@@ -83,7 +83,7 @@ namespace ESMCI {
 
   public:
     // native constructor and destructor
-    PIO_Handler(ESMC_IOFmt_Flag fmtArg, int *rc);
+    PIO_Handler(ESMC_IOFmt_Flag fmtArg, int ntilesArg, int *rc);
     // Static initialize and finalize routines for PIO
     static void initialize(int comp_rank, MPI_Comm comp_comm,
                            int num_iotasks, 

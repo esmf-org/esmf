@@ -466,8 +466,9 @@ PIO_Handler::PIO_Handler(
 // !ARGUMENTS:
 //
   ESMC_IOFmt_Flag fmtArg,                 // (in)  - File format for PIO to use
+  int ntilesArg,                          // (in)  - Number of tiles in arrays handled by this object
   int *rc                                 // (out) - Error return code
-  ) : IO_Handler(fmtArg) {
+  ) : IO_Handler(fmtArg, ntilesArg) {
 //
 // !DESCRIPTION:
 //    Construct the internal information structure of an ESMCI::PIO_Handler
@@ -602,6 +603,11 @@ void PIO_Handler::arrayRead(
   if (isOpen() != ESMF_TRUE)
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_READ, "file not open",
         ESMC_CONTEXT, rc)) return;
+
+  // Array compatible with this object?
+  localrc = checkArray(arr_p);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+    return;
 
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
@@ -792,6 +798,11 @@ void PIO_Handler::arrayWrite(
   if (isOpen() != ESMF_TRUE)
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_READ, "file not open",
         ESMC_CONTEXT, rc)) return;
+
+  // Array compatible with this object?
+  localrc = checkArray(arr_p);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+    return;
 
   iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
       &arrDims, &narrDims, &basepiotype, &localrc);

@@ -70,7 +70,8 @@ IO_Handler::IO_Handler (
 //
 //
 // !ARGUMENTS:
-  ESMC_IOFmt_Flag fmtArg               // (in)  - the desired I/O format
+  ESMC_IOFmt_Flag fmtArg,              // (in)  - the desired I/O format
+  int ntilesArg                        // (in)  - the number of tiles in arrays handled by this object
 //
   ) {
 //
@@ -85,11 +86,7 @@ IO_Handler::IO_Handler (
   fileStatusFlag = ESMC_FILESTATUS_UNKNOWN;
   overwrite = false;
   filename[0] = '\0';
-  // FIXME(wjs, 2022-07-25) Determine ntiles dynamically, here or later; for now we'll fix
-  // at 6 for testing. If we end up setting it dynamically elsewhere, then it should be
-  // initialized to 1 here.
-  ntiles = 6;
-
+  ntiles = ntilesArg;
 }
 //-----------------------------------------------------------------------------
 
@@ -114,13 +111,14 @@ IO_Handler *IO_Handler::create (
 //
 // !ARGUMENTS:
       ESMC_IOFmt_Flag iofmt,              // (in)  the desired I/O format
+      int ntiles,                         // (in)  the number of tiles in arrays handled by this object
 //
   int *rc                                 // (out) return code
   ) {
 //
 // !DESCRIPTION:
 //    Create an initialized {\tt IO_Handler} object of the correct type for
-//    the specified I/O format (iofmt).
+//    the specified I/O format (iofmt) and number of tiles (ntiles).
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -147,7 +145,7 @@ IO_Handler *IO_Handler::create (
       // No break
     case ESMF_IOFMT_NETCDF4C:
 #if  defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
-      iohandler = new PIO_Handler(iofmt, &localrc);
+      iohandler = new PIO_Handler(iofmt, ntiles, &localrc);
 #else // defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
       errmsg = "PIO & (P)NetCDF libraries required for I/O operation";
       localrc = ESMF_RC_LIB_NOT_PRESENT;
@@ -202,13 +200,14 @@ IO_Handler *IO_Handler::create (
 // !ARGUMENTS:
       const std::string& file,             // (in) A file for Handler
       ESMC_IOFmt_Flag iofmt,               // (in) the desired I/O format
+      int ntiles,                          // (in) the number of tiles in arrays handled by this object
 //
   int *rc                                  // (out) return code
   ) {
 //
 // !DESCRIPTION:
 //    Create an initialized {\tt IO_Handler} object of the correct type for
-//    the specified I/O format (iofmt).
+//    the specified I/O format (iofmt) and number of tiles (ntiles).
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -217,7 +216,7 @@ IO_Handler *IO_Handler::create (
     *rc = ESMF_RC_NOT_IMPL;   // final return code
   }
 
-  IO_Handler *iohandler = IO_Handler::create(iofmt, &localrc);
+  IO_Handler *iohandler = IO_Handler::create(iofmt, ntiles, &localrc);
 
   if (ESMC_NULL_POINTER != iohandler)
     iohandler->filename = file;
@@ -549,6 +548,46 @@ bool IO_Handler::fileExists(
 } // end IO_Handler::fileExists
 //-------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::checkArray()"
+//BOPI
+// !IROUTINE:  IO_Handler::checkArray - Check compatibility of an array with this object
+//
+// !INTERFACE:
+int IO_Handler::checkArray(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+  const Array *arr_p        // (in) - array to check
+  )const{
+//
+// !DESCRIPTION:
+//      Checks compatibility of an array with this IO Handler object (correct number of tiles).
+//      Returns an error code if incompatible.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  int thisNtiles = arr_p->getDistGrid()->getTileCount();
+  if (thisNtiles == ntiles) {
+    rc = ESMF_SUCCESS;
+    return rc;
+  } else {
+    std::stringstream errmsg;
+    errmsg << "Number of tiles in array for IO (" << thisNtiles
+           << ") does not match this IO Handler's ntiles value (" << ntiles
+           << "). All arrays handled by a given IO handler must have the same "
+           << "number of tiles.";
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_VAL_WRONG, errmsg, ESMC_CONTEXT, &rc);
+    return rc;
+  }
+} // end IO_Handler::checkArray
+//-------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------
 #undef  ESMC_METHOD

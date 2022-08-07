@@ -779,9 +779,13 @@ int IO::open(
   bool readonly                        // (in)  - If false then read/write
   ) {
 // !DESCRIPTION:
-//      Open a file or stream for I/O. Create a new IO_Handler if necessary
-//      It is an error if a handler exists with a different I/O format (iofmt)
-//      It is an error if the IO_Handler is already connected to an open stream
+//      Open a file or stream for I/O. Create a new IO_Handler if necessary.
+//      It is an error if a handler exists with a different I/O format (iofmt).
+//      It is an error if the IO_Handler is already connected to an open stream.
+//      If this IO object may be used to read / write multi-tile arrays, then
+//      those arrays must be added via a call to addArray before calling this
+//      open function (so that we can open the appropriate files for multi-tile
+//      I/O).
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -800,7 +804,7 @@ int IO::open(
 
   // Ensure that we have an IO_Handler (create if necessary)
   if ((IO_Handler *)NULL == ioHandler) {
-    ioHandler = IO_Handler::create(file, iofmt, &localrc);
+    ioHandler = IO_Handler::create(file, iofmt, getNtiles(), &localrc);
     if (ESMF_SUCCESS != localrc) {
       PRINTMSG("IO_Handler::create returned " << localrc);
       ioHandler = (IO_Handler *)NULL;
@@ -1017,6 +1021,15 @@ int IO::addArray(
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return localrc;
   }
+
+  // Confirm that this array has the same number of tiles as other arrays that
+  // have been added to this IO object, or set the number of tiles if it hasn't
+  // yet been set. (See some comments about ntiles in ESMCI_IO.h for more
+  // details.)
+  int thisNtiles = arr_p->getDistGrid()->getTileCount();
+  localrc = setOrCheckNtiles(thisNtiles);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+    return rc;
 
 // Push Array onto the list
   try {
@@ -1434,6 +1447,105 @@ void IO::clear(void) {
     delete obj;
   }
 }  // end IO::close
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::setOrCheckNtiles()"
+//BOPI
+// !IROUTINE:  IO::setOrCheckNtiles - Set or check the ntiles value
+//
+// !INTERFACE:
+int IO::setOrCheckNtiles(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  int ntiles_arg         // (in)  - number of tiles to set or check
+  ) {
+//
+// !DESCRIPTION:
+//      If ntiles has not yet been set (i.e., this function has not yet been
+//      called), then set ntiles to the given value. If ntiles has already been
+//      set, then verify that ntiles matches the already-set value; if it
+//      doesn't, return an error via the return value. Note that all arrays
+//      handled by this IO object must have the same number of tiles; to confirm
+//      that this is the case, this function should be called for each array,
+//      specifying the number of tiles for that array.
+//
+//      If this IO object will be handling multi-tile arrays, then this function
+//      must be called before calling open or any other function that depends on
+//      the number of tiles.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  if (!ntilesIsLocked) {
+    // ntiles hasn't been set on this object yet; set it and mark it as locked
+    ntiles = ntiles_arg;
+    ntilesIsLocked = true;
+    rc = ESMF_SUCCESS;
+    return rc;
+  } else {
+    // ntiles has already been set; verify that the new ntiles value matches the
+    // already-set value (because all arrays handled by a given IO object must
+    // have the same number of tiles)
+    int localrc = checkNtiles(ntiles_arg);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+      return rc;
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+} // end IO::setOrCheckNtiles
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::checkNtiles()"
+//BOPI
+// !IROUTINE:  IO::checkNtiles - Check the ntiles value
+//
+// !INTERFACE:
+int IO::checkNtiles(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+  int ntiles_arg         // (in)  - number of tiles to check
+  )const{
+//
+// !DESCRIPTION:
+//      Verify that the given value of ntiles matches the already-set ntiles (set
+//      via a prior call to setOrCheckNtiles); if it doesn't, return an error via
+//      the return value. (Note that all arrays handled by this IO object must
+//      have the same number tiles.)
+//
+//      It is often better to use setOrCheckNtiles, since that version will set
+//      ntiles if it hasn't already been set; this version is meant only for the
+//      situation where ntiles should already have been set previously.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  if (ntiles_arg == ntiles) {
+    rc = ESMF_SUCCESS;
+    return rc;
+  } else {
+    std::stringstream errmsg;
+    errmsg << "New number of tiles (" << ntiles_arg
+           << ") does not match previously-set number of tiles (" << ntiles
+           << ") for this IO object. All arrays handled by a given IO object "
+           << "must have the same number of tiles.";
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_VAL_WRONG, errmsg, ESMC_CONTEXT, &rc);
+    return rc;
+  }
+} // end IO::checkNtiles
 //-------------------------------------------------------------------------
 
 }  // end namespace ESMCI
