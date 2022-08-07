@@ -71,7 +71,6 @@ namespace ESMCI {
     static std::vector<int> activePioInstances;
     int pioSystemDesc; // Descriptor for initialized PIO inst.
     int pioFileDesc;       // Descriptor for open PIO file
-    int pioIODesc;           // Descriptor created by initdecomp
     MPI_Comm communicator;
     int my_rank;
     int num_iotasks;
