@@ -971,6 +971,8 @@ int IO::addArray(
 // !DESCRIPTION:
 //      Add an array to the list of objects to read or write.
 //      {\tt arr_p} is required
+//      If any arrays have multiple tiles, all arrays handled by a given IO
+//      object must have the same number of tiles.
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -1006,6 +1008,8 @@ int IO::addArray(
 //      {\tt dimAttPack} optional Attribute package for dimension names
 //      {\tt varAttPack} optional Attribute package for variable attributes
 //      {\tt gblAttPack} optional Attribute package for global attributes
+//      If any arrays have multiple tiles, all arrays handled by a given IO
+//      object must have the same number of tiles.
 //
 //EOP
 //-----------------------------------------------------------------------------
