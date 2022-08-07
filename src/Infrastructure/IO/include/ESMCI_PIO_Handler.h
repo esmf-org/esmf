@@ -140,7 +140,7 @@ namespace ESMCI {
     void close(int *rc = NULL);
 
   private:
-    int getIODesc(int iosys, Array *arr_p,
+    int getIODesc(int iosys, Array *arr_p, int tile,
                             int ** iodims = (int **)NULL,
                             int *nioDims = (int *)NULL,
                             int ** arrdims = (int **)NULL,

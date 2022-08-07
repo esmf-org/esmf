@@ -81,6 +81,7 @@ namespace ESMCI
     int *dims;                // The shape of the Array IO
     int basepiotype;          // PIO version of Array data type
     Array *array_p;           // The array matched to this descriptor
+    int tile;                 // The tile number in the array for this descriptor
     int arrayRank;            // The rank of array_p
     int *arrayShape;          // The shape of array_p
   public:
@@ -90,6 +91,7 @@ namespace ESMCI
       array_p = arrayArg;
       nDims = 0;
       dims = (int *)NULL;
+      tile = 0;
       arrayRank = 0;
       arrayShape = (int *)NULL;
     }
@@ -97,7 +99,7 @@ namespace ESMCI
   public:
     ~PIO_IODescHandler();
     static void finalize(void);
-    static int constructPioDecomp(int iosys, Array *arr_p,
+    static int constructPioDecomp(int iosys, Array *arr_p, int tile,
                                   int *newDecomp_p);
     static int freePioDecomp(int *decomp_p);
     static int getDims(const int &iodesc,
@@ -107,7 +109,7 @@ namespace ESMCI
                        int ** arrDims = (int **)NULL);
     static int getIOType(const int &iodesc, int *rc = (int *)NULL);
     static int getIODesc(int iosys,
-                                   Array *arrayArg, int *rc = (int *)NULL);
+                         Array *arrayArg, int tileArg, int *rc = (int *)NULL);
   };
 
 //
@@ -609,6 +611,9 @@ void PIO_Handler::arrayRead(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
     return;
 
+  // FIXME(wjs, 2022-07-22) Add loop over tiles
+  int tile = 1;
+
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
   localDE = 0;
@@ -622,7 +627,7 @@ void PIO_Handler::arrayRead(
     int nDims;
 
     // If frame >= 0 then we need to not use the unlimited dim in the iodesc.
-    iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
+    iodesc = getIODesc(pioSystemDesc, arr_p, tile, &ioDims, &nioDims,
 		       &arrDims, &narrDims, &basepiotype, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 				      ESMC_CONTEXT, rc)) return;
@@ -690,9 +695,6 @@ void PIO_Handler::arrayRead(
         return;
       }
       if (*timeslice > time_len) {
-        // FIXME(wjs, 2022-07-26) Hard-coding tile here for now because it's needed for
-        // the interface. Eventually we'll get it as an argument or in a loop.
-        int tile = 1;
         PRINTMSG(" (" << my_rank << "): " <<
                  "Timeframe is greater than that in file" <<
                  getFilename(tile) << ", file time = " << time_len <<
@@ -804,7 +806,9 @@ void PIO_Handler::arrayWrite(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
     return;
 
-  iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
+  // FIXME(wjs, 2022-07-22) Add loop over tiles
+  int tile = 1;
+  iodesc = getIODesc(pioSystemDesc, arr_p, tile, &ioDims, &nioDims,
       &arrDims, &narrDims, &basepiotype, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return;
@@ -826,8 +830,6 @@ void PIO_Handler::arrayWrite(
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
   localDE = 0;
-  // FIXME(wjs, 2022-07-22) Add loop over tiles
-  int tile = 1;
   int tileOfThisDe = arr_p->getDistGrid()->getTilePLocalDe(localDE, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, rc)) return;
@@ -1655,6 +1657,7 @@ void PIO_Handler::close(
 //
   int iosys,          // (in)  - PIO system handle to use
   Array *arr_p,                       // (in)  - Array for IO decompomposition
+  int tile,                           // (in)  - Tile number in array
   int ** ioDims,                      // (out) - Array shape for IO
   int *nioDims,                       // (out) - Rank of Array IO
   int ** arrDims,                     // (out) - Array shape for IO
@@ -1677,11 +1680,11 @@ void PIO_Handler::close(
   }
 
   PRINTPOS;
-  new_io_desc = PIO_IODescHandler::getIODesc(iosys, arr_p, &localrc);
+  new_io_desc = PIO_IODescHandler::getIODesc(iosys, arr_p, tile, &localrc);
   if ((int)NULL == new_io_desc) {
     PRINTMSG("calling constructPioDecomp");
     localrc = PIO_IODescHandler::constructPioDecomp(iosys,
-                                                    arr_p, &new_io_desc);
+                                                    arr_p, tile, &new_io_desc);
     PRINTMSG("constructPioDecomp call complete" << ", localrc = " << localrc);
   }
   if ((ioDims != (int **)NULL) || (nioDims != (int *)NULL) ||
@@ -1908,8 +1911,9 @@ int PIO_IODescHandler::constructPioDecomp(
 //
 // !ARGUMENTS:
 //
-  int iosys,          // (in)  - PIO system handle to use
-  Array *arr_p,                       // (in)  - Array for IO decompomposition
+  int iosys,                // (in)  - PIO system handle to use
+  Array *arr_p,             // (in)  - Array for IO decompomposition
+  int tile,                 // (in)  - Tile number in array
   int *newDecomp_p          // (out) - New decomposition descriptor
   ) {
 //
@@ -1938,6 +1942,11 @@ int PIO_IODescHandler::constructPioDecomp(
       ESMC_CONTEXT, &localrc);
     return ESMF_RC_ARG_BAD;
   }
+  if (tile < 1) {
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, "- tile must be >= 1",
+      ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
   if ((int *)NULL == newDecomp_p) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL,
       "- newDecomp_p cannot be NULL", ESMC_CONTEXT, &localrc);
@@ -1956,9 +1965,6 @@ int PIO_IODescHandler::constructPioDecomp(
     return ESMF_RC_NOT_IMPL;
   }
 
-  // FIXME(wjs, 2022-07-20) Do we need a tile argument to this function (replacing the
-  // local tile variable)? Otherwise, need to have a loop over tiles.
-  int tile = 1;
   // TODO: To support multiple DEs per PE, we would need to extend this to be an array
   bool thisDeIsThisTile = false;
 
@@ -2051,6 +2057,7 @@ int PIO_IODescHandler::constructPioDecomp(
   const int *minIndexPDimPTile = distGrid->getMinIndexPDimPTile();
   const int *maxIndexPDimPTile = distGrid->getMaxIndexPDimPTile();
 
+  handle->tile = tile;
 // NB: Is this part of the restrictions on Array I/O?
 //    nDims = arr_p->getRank();
   handle->nDims = distGrid->getDimCount();
@@ -2333,8 +2340,9 @@ int PIO_IODescHandler::getIODesc(
 // !ARGUMENTS:
 //
   int iosys,              // (in)  - The PIO IO system
-  Array *arrayArg,                        // (in)  - The IO descriptor
-  int *rc                                 // (out) - Error return code
+  Array *arrayArg,        // (in)  - The IO descriptor
+  int tileArg,            // (in)  - Tile number in array
+  int *rc                 // (out) - Error return code
   ) {
 //
 // !DESCRIPTION:
@@ -2352,7 +2360,7 @@ int PIO_IODescHandler::getIODesc(
   for (it = PIO_IODescHandler::activePioIoDescriptors.begin();
        it < PIO_IODescHandler::activePioIoDescriptors.end();
        ++it) {
-    if ((iosys == (*it)->ios) && (arrayArg == (*it)->array_p)) {
+    if ((iosys == (*it)->ios) && (arrayArg == (*it)->array_p) && (tileArg == (*it)->tile)) {
       iodesc = (*it)->io_descriptor;
       localrc = ESMF_SUCCESS;
     }
