@@ -78,7 +78,6 @@ namespace ESMCI {
     int stride;
     int rearr;
     int base;
-    int user_count;
     bool new_file;
 
   public:

@@ -494,7 +494,6 @@ PIO_Handler::PIO_Handler(
       pioSystemDesc =  0;
     pioFileDesc = 0;
     pioIODesc = 0;
-    user_count = 0;
     localrc = ESMF_SUCCESS;
     new_file = false;
     // Get the rest from initialize
