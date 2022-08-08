@@ -820,15 +820,6 @@ int IO::open(
   }
   // No else (state looks OK)
 
-  // Check to make sure that a file is not already open
-  if (ioHandler->isOpen() != ESMF_FALSE) {
-    PRINTMSG("IO_Handler is already open ");
-    localrc = ESMC_RC_FILE_OPEN;
-    ESMC_LogDefault.Write("Internal error, ioHandler is already open",
-                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-    return localrc;
-  }
-
   // Open the file
   ioHandler->open(file, filestatusflag, overwrite, readonly, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -876,13 +867,11 @@ int IO::flush(void
     }
   }
 
-  // Check to make sure that a file is already open
-  if (ioHandler->isOpen() != ESMF_FALSE) {
-    ioHandler->flush(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &rc)) {
-      return rc;
-    }
+  // Note that it is safe to call this even if the file isn't open
+  ioHandler->flush(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
+    return rc;
   }
 
   // return successfully
@@ -906,8 +895,8 @@ int IO::close(void
   ) {
 // !DESCRIPTION:
 //      Close an open file or stream
-//      It is an error if the file is not open
 //      It is an error if no IOHandler exists
+//      It is NOT an error if the file is not open
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -925,24 +914,17 @@ int IO::close(void
     }
   }
 
-  // Check to make sure that a file is already open
-  if (ioHandler->isOpen() != ESMF_FALSE) {
-      ioHandler->flush(&localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                        &rc)) {
-          return rc;
-      }
-      ioHandler->close();
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_CONTEXT, &rc)) {
-        return rc;
-      }
-  } else {
-    localrc = ESMC_RC_FILE_CLOSE;
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, &rc)) {
-      return rc;
-    }
+  // No need to check if file is open: flush and close just won't do anything if
+  // the file isn't already open
+  ioHandler->flush(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) {
+    return rc;
+  }
+  ioHandler->close();
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                    ESMC_CONTEXT, &rc)) {
+    return rc;
   }
 
   // return successfully
