@@ -7998,7 +7998,8 @@ subroutine test_mesh_create_from_raster(correct, rc)
    endif
    
    ! Create Mesh structure from raster info
-   mesh=ESMF_MeshCreate(grid, array, rc=localrc)
+   mesh=ESMF_MeshCreate(grid, array, & 
+        rasterMaskValues=(/1/), rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return

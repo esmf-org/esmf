@@ -531,6 +531,22 @@ void get_grid_coords_at_seqinds(Grid *grid, int staggerloc, int num_seqinds, int
       //cnr_offset[0][1],cnr_offset[1][0],cnr_offset[1][1],cnr_offset[2][0],cnr_offset[2][1],
       //cnr_offset[3][0], cnr_offset[3][1]);
 
+      // Get raster mask information
+      int num_mask_vals=0;
+      int *mask_vals;
+      if (present(raster_mask_values)) {
+        
+        // Error check mask values
+        if (raster_mask_values->dimCount != 1) {
+          Throw() << " Mask values must be of rank 1.";
+        }
+        
+        // Get mask values
+        num_mask_vals=raster_mask_values->extent[0];
+        mask_vals=&(raster_mask_values->array[0]);
+      }
+
+      
       // Create structure to accumulate polygons and use them to create mesh connection info
       Globber globber;
       
@@ -583,6 +599,17 @@ void get_grid_coords_at_seqinds(Grid *grid, int staggerloc, int num_seqinds, int
             // DEBUG OUTPUT       
             // printf("elem [%d %d] value=%d corners = %d %d %d %d \n",i0,i1,value,quad_cnr_ids[0],quad_cnr_ids[1],quad_cnr_ids[2],quad_cnr_ids[3]);
 
+            // Skip if masked
+            bool masked=false;     
+            for (int m=0; m<num_mask_vals; m++) {
+              if (mask_vals[m] == value) {
+                masked=true;
+                break;
+              }
+            }
+            if (masked) continue;
+            
+                 
             // Add to globber
             globber.add(value, NUM_QUAD_CORNERS, quad_cnr_ids);
             
