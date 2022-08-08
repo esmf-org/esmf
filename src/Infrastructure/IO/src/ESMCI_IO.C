@@ -932,13 +932,11 @@ int IO::close(void
                                         &rc)) {
           return rc;
       }
-    if (ESMF_SUCCESS == localrc) {
       ioHandler->close();
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) {
         return rc;
       }
-    }
   } else {
     localrc = ESMC_RC_FILE_CLOSE;
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
