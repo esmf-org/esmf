@@ -11,7 +11,7 @@ ESMF_CXXDEFAULT         = clang
 ESMF_CDEFAULT           = clang
 ESMF_CPPDEFAULT         = clang -E -P -x c
 
-ESMF_CXXCOMPILECPPFLAGS += -x c++
+ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.7 -stdlib=libc++
 
 ############################################################
 # Default MPI setting.
@@ -215,22 +215,6 @@ ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 ESMF_CRPATHPREFIX           = -Wl,-rpath,
 
 ############################################################
-# Determine where clang's libraries are located
-#
-# TODO: The -print-file-name option doesn't seem to work properly yet.
-#ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
-#ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
-#ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
-#endif
-#ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
-
-#ESMF_LIBCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
-#ifeq ($(ESMF_LIBCXX),libc++.dylib)
-#ESMF_LIBCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
-#endif
-#ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBCXX))
-
-############################################################
 # Determine where gfortran's libraries are located
 #
 ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
@@ -241,14 +225,24 @@ ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))
 
 ############################################################
+# Link against the c++ library
+#
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKLIBS  += -lc++
+
+############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstdc++ -lc++
+ESMF_F90LINKLIBS += -lm
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lgfortran -lstdc++ -lc++
+ESMF_CXXLINKLIBS += -lgfortran -lc++
 
 ############################################################
 # Shared library options
