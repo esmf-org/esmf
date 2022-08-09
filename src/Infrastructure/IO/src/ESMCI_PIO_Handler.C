@@ -580,8 +580,9 @@ void PIO_Handler::arrayReadOneTileFile(
   ) {
 //
 // !DESCRIPTION:
-//    Read data from field <name> from the open file for the given tile. If
-//    timeslice is not NULL, it should point to an integer representing the
+//    Read data from field <name> from the open file for the given tile.
+//    For typical single-tile arrays, this will just be called once per arrayRead, with tile=1.
+//    If timeslice is not NULL, it should point to an integer representing the
 //    timeslice to read from the Array.
 //
 //EOPI
@@ -772,6 +773,7 @@ void PIO_Handler::arrayWriteOneTileFile(
 //
 // !DESCRIPTION:
 //    Write data to field <name> to the open file, for the given tile.
+//    For typical single-tile arrays, this will just be called once per arrayWrite, with tile=1.
 //    Calls the appropriate PIO write_darray_<rank>_<typekind> function.
 //    It is an error if this handler object does not have an open
 //    PIO file descriptor and a valid PIO IO descriptor (these items should
@@ -1220,6 +1222,7 @@ void PIO_Handler::openOneTileFile(
 //
 // !DESCRIPTION:
 //    Open a file for reading and/or writing for the given tile.
+//    For typical single-tile arrays, this will just be called once per open, with tile=1.
 //    PIO must be initialized for this routine to succeed (ESMF_RC_INTNRL_BAD)
 //    It is an error if a file is already open (ESMF_RC_FILE_OPEN)
 //
@@ -1578,6 +1581,7 @@ void PIO_Handler::flushOneTileFile(
 //
 // !DESCRIPTION:
 //    Flush any pending I/O operations for this tile's file.
+//    For typical single-tile arrays, this will just be called once per flush, with tile=1.
 //    It is safe to call this on a non-open file; in this case, nothing is done.
 //
 //EOPI
@@ -1625,6 +1629,7 @@ void PIO_Handler::closeOneTileFile(
 //
 // !DESCRIPTION:
 //    Close the open file associated with this tile (if any).
+//    For typical single-tile arrays, this will just be called once per close, with tile=1.
 //    It is NOT an error if no file is open
 //
 //EOPI
