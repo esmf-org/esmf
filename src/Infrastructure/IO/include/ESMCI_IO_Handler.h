@@ -88,21 +88,36 @@ namespace ESMCI {
     static void finalize(int *rc = NULL);
   private:
     virtual void destruct(void) { }
+
+  protected:
+    // read()
+    // Non-atomic reads which are only successful on an open IO stream
+    virtual void arrayReadOneTileFile(Array *arr_p, int tile, const char *name,
+                                      int *timeslice = NULL, int *rc = NULL) = 0;
+
+    // write()
+    // Non-atomic writes which are only successful on an open IO stream
+    virtual void arrayWriteOneTileFile(Array *arr_p, int tile, const char *name,
+                                       const std::vector<std::string> &dimLabels,
+                                       int *timeslice = NULL,
+                                       const ESMCI::Info *varAttPack = NULL,
+                                       const ESMCI::Info *gblAttPack = NULL,
+                                       int *rc = NULL) = 0;
   public:
 
     // read()
     // Non-atomic reads which are only successful on an open IO stream
-    virtual void arrayRead(Array *arr_p, const char *name,
-                           int *timeslice = NULL, int *rc = NULL) = 0;
+    void arrayRead(Array *arr_p, const char *name,
+                   int *timeslice = NULL, int *rc = NULL);
 
     // write()
     // Non-atomic writes which are only successful on an open IO stream
-    virtual void arrayWrite(Array *arr_p, const char *name,
-                            const std::vector<std::string> &dimLabels,
-                            int *timeslice = NULL,
-                            const ESMCI::Info *varAttPack = NULL,
-                            const ESMCI::Info *gblAttPack = NULL,
-                            int *rc = NULL) = 0;
+    void arrayWrite(Array *arr_p, const char *name,
+                    const std::vector<std::string> &dimLabels,
+                    int *timeslice = NULL,
+                    const ESMCI::Info *varAttPack = NULL,
+                    const ESMCI::Info *gblAttPack = NULL,
+                    int *rc = NULL);
 
     // get() and set()
   public:
@@ -141,7 +156,9 @@ namespace ESMCI {
 
     // open(), close() and helper functions
   protected:
-    virtual void open(bool readonly_arg, int *rc = NULL) = 0;
+    virtual void openOneTileFile(int tile, bool readonly_arg, int *rc = NULL) = 0;
+    virtual void flushOneTileFile(int tile, int *rc = NULL) = 0;
+    virtual void closeOneTileFile(int tile, int *rc = NULL) = 0;
 
     // Check compatibility of an array with this IO Handler object; return error if incompatible
     int checkArray(const Array *arr_p) const;
@@ -151,9 +168,10 @@ namespace ESMCI {
               bool overwrite_arg,
               bool readonly_arg,
               int *rc = NULL);
-    virtual ESMC_Logical isOpen(void) { return ESMF_FALSE; }
-    virtual void flush(int *rc = NULL) = 0;
-    virtual void close(int *rc = NULL) = 0;
+    ESMC_Logical isOpenAnyTile(void);
+    virtual ESMC_Logical isOpen(int tile) { return ESMF_FALSE; }
+    void flush(int *rc = NULL);
+    void close(int *rc = NULL);
 
 // Don't know yet if we will need these
 #if 0
