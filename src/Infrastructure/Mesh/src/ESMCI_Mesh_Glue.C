@@ -2157,35 +2157,6 @@ void ESMCI_MeshGetElemCreateInfo(Mesh *mesh,
     std::vector<int> num_merged_nids;
     std::vector<int> merged_nids;
 
-    // If split, override some info
-    if (mesh->is_split) {
-      try {
-        if (present(elemConn))
-          native_get_mesh_merged_connlist(**(&mesh), num_merged_nids,
-                                          merged_nids, false);
-        else
-          native_get_mesh_merged_connlist(**(&mesh), num_merged_nids,
-                                          merged_nids);
-        num_elems = num_merged_nids.size();
-        num_elem_conn = merged_nids.size();
-
-          // std::cout << "num_merged_nids = [";
-          // for (const auto nid: num_merged_nids)
-          //   std::cout << nid << " ";
-          // std::cout<< "]" <<std::endl;
-          // std::cout << "merged_nids = [";
-          // for (const auto mid: merged_nids)
-          //   std::cout << mid << " ";
-          // std::cout << "]" << std::endl;
-
-      } catch(...){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              " SplitMerge fail", ESMC_CONTEXT, rc);
-        return;
-      }
-    }
-
-
     ////// Error check input arrays //////
 
     // If elemIds array exists, error check
