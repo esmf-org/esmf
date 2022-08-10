@@ -14655,11 +14655,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          By default every tile is decomposed in the same way.  If the total
 !          PET count is less than 6, one tile will be assigned to one DE and the DEs
 !          will be assigned to PETs sequentially, therefore, some PETs may have
-!          more than one DEs.  If the total PET count is greater than 6, the total
+!          more than one DE.  If the total PET count is greater than 6, the total
 !          number of DEs will be a multiple of 6 and less than or equal to the total
 !          PET count.  For instance, if the total PET count is 16, the total DE count
 !          will be 12 with each tile decomposed into 1x2 blocks.  The 12 DEs are mapped
-!          to the first 12 PETs and the remainding 4 PETs have no DEs locally, unless
+!          to the first 12 PETs and the remaining 4 PETs have no DEs locally, unless
 !          an optional {\tt delayout} is provided.
 !     \item[{[decompflagPTile]}]
 !          List of decomposition flags indicating how each dimension of each
@@ -15790,16 +15790,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The name of the GRIDSPEC Mosaic file.
 !     \item[{[regDecompPTile]}]
 !          List of DE counts for each dimension. The second index steps through
-!          the tiles. The total {\tt deCount} is determined as th sum over
+!          the tiles. The total {\tt deCount} is determined as the sum over
 !          the products of {\tt regDecompPTile} elements for each tile.
 !          By default every tile is decomposed in the same way.  If the total
-!          PET count is less than 6, one tile will be assigned to one DE and the DEs
+!          PET count is less than the tile count, one tile will be assigned to one DE and the DEs
 !          will be assigned to PETs sequentially, therefore, some PETs may have
-!          more than one DEs.  If the total PET count is greater than 6, the total
-!          number of DEs will be multiple of 6 and less than or equal to the total
-!          PET count.  For instance, if the total PET count is 16, the total DE count
+!          more than one DE.  If the total PET count is greater than the tile count, the total
+!          number of DEs will be a multiple of the tile count and less than or equal to the total
+!          PET count.  For instance, if the total PET count is 16 and the tile count is 6, the total DE count
 !          will be 12 with each tile decomposed into 1x2 blocks.  The 12 DEs are mapped
-!          to the first 12 PETs and the remainding 4 PETs have no DEs locally, unless
+!          to the first 12 PETs and the remaining 4 PETs have no DEs locally, unless
 !          an optional {\tt delayout} is provided.
 !     \item[{[decompflagPTile]}]
 !          List of decomposition flags indicating how each dimension of each
@@ -15956,8 +15956,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     enddo
 
   !------------------------------------------------------------------------
-  ! default decomposition. The number of DEs has to be multiple of 6.
-  ! If the total PET count is less than 6, some PETs will get more than one DE.
+  ! default decomposition. The number of DEs has to be multiple of the tile count.
+  ! If the total PET count is less than the tile count, some PETs will get more than one DE.
   ! Otherwise, total DEs is always less than or equal to total PETs.
 
     if (PetCnt < tileCount) then

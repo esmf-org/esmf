@@ -672,7 +672,7 @@ void PIO_Handler::arrayReadOneTileFile(
       if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
 	return;
       }
-       
+
       if(unlim == dimids[narrDims-1]){
 	narrDims = narrDims - 1;
       }
@@ -1119,7 +1119,7 @@ void PIO_Handler::arrayWriteOneTileFile(
   if (!varExists) {
     PRINTMSG("niodims = " << nioDims);
     PRINTMSG("basepiotype = " << basepiotype);
-     
+
     piorc = PIOc_def_var(filedesc, varname.c_str(), basepiotype,
                          nioDims, ncDims, &vardesc);
     if (!CHECKPIOERROR(piorc, "Attempting to define PIO vardesc for: " + varname,
@@ -1160,7 +1160,7 @@ void PIO_Handler::arrayWriteOneTileFile(
       }
     }
     if (gblAttPack) {
-      attPackPut (NULL, gblAttPack, tile, &localrc);
+      attPackPut (NC_GLOBAL, gblAttPack, tile, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) {
         return;
@@ -1350,17 +1350,17 @@ void PIO_Handler::openOneTileFile(
     // Looks like we are ready to try and create the file
     mode |= clobberMode;
     switch (getFormat()){
-    case ESMF_IOFMT_NETCDF_64BIT_OFFSET: 
+    case ESMF_IOFMT_NETCDF_64BIT_OFFSET:
     {
         mode |= PIO_64BIT_OFFSET;
         break;
     }
-    case ESMF_IOFMT_NETCDF_64BIT_DATA: 
+    case ESMF_IOFMT_NETCDF_64BIT_DATA:
     {
         mode |= PIO_64BIT_DATA;
         break;
     }
-    }    
+    }
     ESMCI_IOREGION_ENTER("PIOc_createfile");
 
     piorc = PIOc_createfile(pioSystemDesc, &(pioFileDesc[tile-1]),

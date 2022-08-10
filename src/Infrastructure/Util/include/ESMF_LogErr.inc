@@ -20,7 +20,7 @@
 
 #include "ESMF_ErrReturnCodes.inc"
 #include "ESMF_LogConstants.inc"
-#ifndef PARCH_IRIX64
+#ifndef ESMF_OS_IRIX64
 
 #define ESMF_LogWrite() ESMF_LogWrite()
 

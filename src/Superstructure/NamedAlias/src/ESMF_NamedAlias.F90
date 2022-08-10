@@ -68,6 +68,8 @@ contains !=====================================================================
 ! !INTERFACE:
 !   function ESMF_NamedAlias(object, name, rc)
 !
+! !RETURN VALUE:
+!   type(ESMF_*)        :: ESMF_NamedAlias
 ! !ARGUMENTS:
 !   type(ESMF_*),       intent(in)            :: object
 !   character(len = *), intent(in),  optional :: name

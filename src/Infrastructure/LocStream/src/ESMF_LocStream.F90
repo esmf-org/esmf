@@ -2467,30 +2467,62 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     !print *, PetNo, starti, localcount, coordX(1), coordY(1)
-    ! Add coordinate keys
-    call ESMF_LocStreamAddKey(locStream, 'ESMF:Lon',coordX, keyUnits=units, &
-                              keyLongName='Longitude', &
-                              datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Add coordinate keys based on coordSys
+    if ((coordSys == ESMF_COORDSYS_SPH_DEG) .or. (coordSys == ESMF_COORDSYS_SPH_RAD)) then 
 
-    call ESMF_LocStreamAddKey(locStream, 'ESMF:Lat',coordY, keyUnits=units, &
-                              keyLongName='Latitude', &
-                              datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-    !If 3D grid, add the height coordinates
-    if (totaldims == 3) then
-       if (localcount == 0) allocate(coordZ(localcount))
-       call ESMF_LocStreamAddKey(locStream, 'ESMF:Radius',coordZ, &
-                                 keyUnits='radius', &
-                                 keyLongName='Height', &
-                                 datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:Lon',coordX, keyUnits=units, &
+            keyLongName='Longitude', &
+            datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        deallocate(coordZ)
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:Lat',coordY, keyUnits=units, &
+            keyLongName='Latitude', &
+            datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       
+       !If 3D grid, add the height coordinates
+       if (totaldims == 3) then
+          if (localcount == 0) allocate(coordZ(localcount))
+          call ESMF_LocStreamAddKey(locStream, 'ESMF:Radius',coordZ, &
+               keyUnits='radius', &
+               keyLongName='Height', &
+               datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          deallocate(coordZ)
+       endif
+       
+    else if (coordSys == ESMF_COORDSYS_CART) then
+       
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:X',coordX, keyUnits=units, &
+             datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:Y',coordY, keyUnits=units, &
+             datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       
+       !If 3D grid, add the height coordinates
+       if (totaldims == 3) then
+          if (localcount == 0) allocate(coordZ(localcount))
+          call ESMF_LocStreamAddKey(locStream, 'ESMF:Z',coordZ, &
+                datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          deallocate(coordZ)
+       endif       
+    else
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+            msg="Unrecognized coordinate system.", &
+            ESMF_CONTEXT, rcToReturn=rc)
+       return
     endif
+       
     !Add mask key
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Mask',imask,  &
                               keyLongName='Mask', &
