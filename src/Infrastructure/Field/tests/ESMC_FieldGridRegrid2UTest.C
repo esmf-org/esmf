@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -320,10 +320,10 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //EX_UTest
-  strcpy(name, "MeshGetLocalNodeCount");
+  strcpy(name, "MeshGetNodeCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_node_out;
-  rc = ESMC_MeshGetLocalNodeCount(mesh, &num_node_out);
+  rc = ESMC_MeshGetNodeCount(mesh, &num_node_out);
   ESMC_Test((rc==ESMF_SUCCESS) && num_node==num_node_out,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -331,10 +331,10 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //EX_UTest
-  strcpy(name, "MeshGetLocalElementCount");
+  strcpy(name, "MeshGetElementCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_elem_out;
-  rc = ESMC_MeshGetLocalElementCount(mesh, &num_elem_out);
+  rc = ESMC_MeshGetElementCount(mesh, &num_elem_out);
   ESMC_Test((rc==ESMF_SUCCESS) && num_elem==num_elem_out,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

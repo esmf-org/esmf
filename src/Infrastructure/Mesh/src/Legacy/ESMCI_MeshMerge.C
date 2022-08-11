@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -449,6 +449,17 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
   std::vector<sintd_node *> sintd_nodes;
   std::vector<sintd_cell *> sintd_cells;
 
+  // figure out side
+  int side=srcmesh.side;
+  if (dstmesh.side != side) {
+    std::cout << "src side="<<side<<"dst side="<<dstmesh.side<<std::endl;
+    Throw() << "Meshes being merged should be on the same side of the XGrid.";
+  }
+  int side1_mesh_ind=-1;
+  int side1_orig_elem_id=-1;
+  int side2_mesh_ind=-1;
+  int side2_orig_elem_id=-1;
+
   // go through all src mesh elements
   unsigned int ncells = 0;
   {
@@ -458,6 +469,10 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
     // Get mask and coord field
     MEField<> *mask_field = mesh.GetField("elem_mask");
     MEField<> &coord = *mesh.GetCoordField();
+    MEField<> *side1_mesh_ind_field = mesh.GetField("side1_mesh_ind");
+    MEField<> *side1_orig_elem_id_field = mesh.GetField("side1_orig_elem_id");
+    MEField<> *side2_mesh_ind_field = mesh.GetField("side2_mesh_ind");
+    MEField<> *side2_orig_elem_id_field = mesh.GetField("side2_orig_elem_id");
 
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
@@ -488,12 +503,48 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
       polygon res_poly;
       coords_to_polygon(topo->num_nodes, cd, sdim, res_poly);
 
+      // Set mesh ind origin info
+      if (side == 1) {
+        if (side1_mesh_ind_field) {
+          double *side1_mesh_ind_ptr = side1_mesh_ind_field->data(elem);
+          side1_mesh_ind=(int)(*side1_mesh_ind_ptr+0.5);
+        } else {
+          side1_mesh_ind=mesh.ind;
+        }
+      } else if (side == 2) {
+        if (side2_mesh_ind_field) {
+          double *side2_mesh_ind_ptr = side2_mesh_ind_field->data(elem);
+          side2_mesh_ind=(int)(*side2_mesh_ind_ptr+0.5);
+        } else {
+          side2_mesh_ind=mesh.ind;
+        }
+      }
+
+      // Set elem origin info
+      if (side == 1) {
+        if (side1_orig_elem_id_field) {
+          double *side1_orig_elem_id_ptr = side1_orig_elem_id_field->data(elem);
+          side1_orig_elem_id=(int)(*side1_orig_elem_id_ptr+0.5);
+        } else {
+          side1_orig_elem_id=elem.get_id();
+        }
+      } else if (side == 2) {
+        if (side2_orig_elem_id_field) {
+          double *side2_orig_elem_id_ptr = side2_orig_elem_id_field->data(elem);
+          side2_orig_elem_id=(int)(*side2_orig_elem_id_ptr+0.5);
+        } else {
+          side2_orig_elem_id=elem.get_id();
+        }
+      }
+
+
       construct_sintd(res_poly.area(sdim), topo->num_nodes, cd, pdim, sdim, 
-		      &sintd_nodes, &sintd_cells
+		      &sintd_nodes, &sintd_cells,
 #ifdef BOB_XGRID_DEBUG
-                      ,elem.get_id(),-2
+                      elem.get_id(),-2,
 #endif
-                      );
+                      side1_mesh_ind, side1_orig_elem_id,
+                      side2_mesh_ind, side2_orig_elem_id);
 
       ncells ++;
       delete[] cd;
@@ -516,6 +567,10 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
     // Get mask and coord field
     MEField<> *mask_field = mesh.GetField("elem_mask");
     MEField<> &coord = *mesh.GetCoordField();
+    MEField<> *side1_mesh_ind_field = mesh.GetField("side1_mesh_ind");
+    MEField<> *side1_orig_elem_id_field = mesh.GetField("side1_orig_elem_id");
+    MEField<> *side2_mesh_ind_field = mesh.GetField("side2_mesh_ind");
+    MEField<> *side2_orig_elem_id_field = mesh.GetField("side2_orig_elem_id");
 
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
@@ -542,12 +597,48 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
       polygon res_poly;
       coords_to_polygon(topo->num_nodes, cd, sdim, res_poly);
 
+      // Set mesh ind origin info
+      if (side == 1) {
+        if (side1_mesh_ind_field) {
+          double *side1_mesh_ind_ptr = side1_mesh_ind_field->data(elem);
+          side1_mesh_ind=(int)(*side1_mesh_ind_ptr+0.5);
+        } else {
+          side1_mesh_ind=mesh.ind;
+        }
+      } else if (side == 2) {
+        if (side2_mesh_ind_field) {
+          double *side2_mesh_ind_ptr = side2_mesh_ind_field->data(elem);
+          side2_mesh_ind=(int)(*side2_mesh_ind_ptr+0.5);
+        } else {
+          side2_mesh_ind=mesh.ind;
+        }
+      }
+
+      // Set elem origin info
+      if (side == 1) {
+        if (side1_orig_elem_id_field) {
+          double *side1_orig_elem_id_ptr = side1_orig_elem_id_field->data(elem);
+          side1_orig_elem_id=(int)(*side1_orig_elem_id_ptr+0.5);
+        } else {
+          side1_orig_elem_id=elem.get_id();
+        }
+      } else if (side == 2) {
+        if (side2_orig_elem_id_field) {
+          double *side2_orig_elem_id_ptr = side2_orig_elem_id_field->data(elem);
+          side2_orig_elem_id=(int)(*side2_orig_elem_id_ptr+0.5);
+        } else {
+          side2_orig_elem_id=elem.get_id();
+        }
+      }
+
+
       construct_sintd(res_poly.area(sdim), topo->num_nodes, cd, pdim, sdim, 
-		      &sintd_nodes, &sintd_cells
+		      &sintd_nodes, &sintd_cells,
 #ifdef BOB_XGRID_DEBUG
-                      ,-3,elem.get_id()
+                      -3,elem.get_id(),
 #endif
-                      );
+                      side1_mesh_ind, side1_orig_elem_id,
+                      side2_mesh_ind, side2_orig_elem_id);
 
       ncells ++;
       delete[] cd;
@@ -563,7 +654,7 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
   //}
 
   // We now have all the genesis cells, compute the merged mesh
-  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh);
+  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh, side);
   //char str[64]; memset(str, 0, 64);
   //sprintf(str, "sewmesh.vtk.%d", me);
   //WriteVTKMesh(mergemesh, str);
@@ -591,9 +682,10 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   // figure out side
   int side=srcmesh.side;
   if (dstmesh.side != side) Throw() << "Meshes being merged should be on the same side of the XGrid.";
-  int side1_mesh_ind=0;
-  int side2_mesh_ind=0;
-
+  int side1_mesh_ind=-1;
+  int side1_orig_elem_id=-1;
+  int side2_mesh_ind=-1;
+  int side2_orig_elem_id=-1;
 
   int rc;
   unsigned int me = VM::getCurrent(&rc)->getLocalPet();
@@ -613,20 +705,16 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   {
     const Mesh & mesh = srcmesh;
 
-   // Set mesh ind
-    if (side == 1) {
-      side1_mesh_ind=mesh.ind;
-      side2_mesh_ind=0;
-    } else if (side == 2) {
-      side1_mesh_ind=0;
-      side2_mesh_ind=mesh.ind;
-    }
-
     // Get mask, coord, and frac2 field
+
     MEField<> *mask_field = mesh.GetField("elem_mask");
     MEField<> &coord = *mesh.GetCoordField();
     MEField<> *elem_frac2=mesh.GetField("elem_frac2");
     if (!elem_frac2) Throw() << "Meshes involved in XGrid construction should have frac2 field";
+    MEField<> *side1_mesh_ind_field = mesh.GetField("side1_mesh_ind");
+    MEField<> *side1_orig_elem_id_field = mesh.GetField("side1_orig_elem_id");
+    MEField<> *side2_mesh_ind_field = mesh.GetField("side2_mesh_ind");
+    MEField<> *side2_orig_elem_id_field = mesh.GetField("side2_orig_elem_id");
 
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
@@ -669,11 +757,47 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
       polygon res_poly;
       coords_to_polygon(topo->num_nodes, cd, sdim, res_poly);
 
+      // Set mesh ind origin info
+      if (side == 1) {
+        if (side1_mesh_ind_field) {
+          double *side1_mesh_ind_ptr = side1_mesh_ind_field->data(elem);
+          side1_mesh_ind=(int)(*side1_mesh_ind_ptr+0.5);
+        } else {
+          side1_mesh_ind=mesh.ind;
+        }
+      } else if (side == 2) {
+        if (side2_mesh_ind_field) {
+          double *side2_mesh_ind_ptr = side2_mesh_ind_field->data(elem);
+          side2_mesh_ind=(int)(*side2_mesh_ind_ptr+0.5);
+        } else {
+          side2_mesh_ind=mesh.ind;
+        }
+      }
+
+      // Set elem origin info
+      if (side == 1) {
+        if (side1_orig_elem_id_field) {
+          double *side1_orig_elem_id_ptr = side1_orig_elem_id_field->data(elem);
+          side1_orig_elem_id=(int)(*side1_orig_elem_id_ptr+0.5);
+        } else {
+          side1_orig_elem_id=elem.get_id();
+        }
+      } else if (side == 2) {
+        if (side2_orig_elem_id_field) {
+          double *side2_orig_elem_id_ptr = side2_orig_elem_id_field->data(elem);
+          side2_orig_elem_id=(int)(*side2_orig_elem_id_ptr+0.5);
+        } else {
+          side2_orig_elem_id=elem.get_id();
+        }
+      }
+
+
       construct_sintd(res_poly.area(sdim), num_nodes, cd, pdim, sdim, &sintd_nodes, &sintd_cells, 
 #ifdef BOB_XGRID_DEBUG
                       elem.get_id(),-4, 
 #endif
-                      side1_mesh_ind, side2_mesh_ind);
+                      side1_mesh_ind, side1_orig_elem_id,
+                      side2_mesh_ind, side2_orig_elem_id);
 
       ncells ++;
       delete[] cd;
@@ -688,15 +812,10 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
     MEField<> &clip_coord = *srcmesh.GetCoordField();
     MEField<> *elem_frac=mesh.GetField("elem_frac2");
     if (!elem_frac) Throw() << "Meshes involved in XGrid construction should have frac2 field";
-
-    // Set mesh ind
-    if (side == 1) {
-      side1_mesh_ind=mesh.ind;
-      side2_mesh_ind=0;
-    } else if (side == 2) {
-      side1_mesh_ind=0;
-      side2_mesh_ind=mesh.ind;
-    } 
+    MEField<> *side1_mesh_ind_field = mesh.GetField("side1_mesh_ind");
+    MEField<> *side1_orig_elem_id_field = mesh.GetField("side1_orig_elem_id");
+    MEField<> *side2_mesh_ind_field = mesh.GetField("side2_mesh_ind");
+    MEField<> *side2_orig_elem_id_field = mesh.GetField("side2_orig_elem_id");
 
     // Get mask field
     MEField<> *mask_field = mesh.GetField("elem_mask");
@@ -758,15 +877,51 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
       // dump_elem(elem, sdim, coord);
       interp_map_iter it = sres_map->find(&elem);
       if(it == sres_map->end()){ // Not intersected, just add it to the list
+
         polygon res_poly;
         coords_to_polygon(subject_num_nodes, cd, sdim, res_poly);
+
+        // Set mesh ind origin info
+        if (side == 1) {
+          if (side1_mesh_ind_field) {
+            double *side1_mesh_ind_ptr = side1_mesh_ind_field->data(elem);
+            side1_mesh_ind=(int)(*side1_mesh_ind_ptr+0.5);
+          } else {
+            side1_mesh_ind=mesh.ind;
+          }
+        } else if (side == 2) {
+          if (side2_mesh_ind_field) {
+            double *side2_mesh_ind_ptr = side2_mesh_ind_field->data(elem);
+            side2_mesh_ind=(int)(*side2_mesh_ind_ptr+0.5);
+          } else {
+            side2_mesh_ind=mesh.ind;
+          }
+        }
+        
+        // Set elem origin info
+        if (side == 1) {
+          if (side1_orig_elem_id_field) {
+            double *side1_orig_elem_id_ptr = side1_orig_elem_id_field->data(elem);
+            side1_orig_elem_id=(int)(*side1_orig_elem_id_ptr+0.5);
+          } else {
+            side1_orig_elem_id=elem.get_id();
+          }
+        } else if (side == 2) {
+          if (side2_orig_elem_id_field) {
+            double *side2_orig_elem_id_ptr = side2_orig_elem_id_field->data(elem);
+            side2_orig_elem_id=(int)(*side2_orig_elem_id_ptr+0.5);
+          } else {
+            side2_orig_elem_id=elem.get_id();
+          }
+        }
 
         construct_sintd(res_poly.area(sdim), subject_num_nodes, cd, pdim, sdim, 
 			&sintd_nodes, &sintd_cells,
 #ifdef BOB_XGRID_DEBUG
                         -5,elem.get_id(),
 #endif
-                         side1_mesh_ind, side2_mesh_ind);
+                      side1_mesh_ind, side1_orig_elem_id,
+                      side2_mesh_ind, side2_orig_elem_id);
 
         delete[] cd;
         ncells ++;
@@ -1091,19 +1246,55 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
           int n_pts = res_it->points.size();
           double * poly_cd = new double[sdim*n_pts];
           polygon_to_coords(*res_it, sdim, poly_cd);
-	  // Having the id isn't very useful since it seems like it would always be the last source in the list
-	  //          construct_sintd(res_it->area(sdim), n_pts, poly_cd, pdim, sdim, &sintd_nodes, &sintd_cells,res_it->id,elem.get_id());
+
+
+          // Set mesh ind origin info
+          if (side == 1) {
+            if (side1_mesh_ind_field) {
+              double *side1_mesh_ind_ptr = side1_mesh_ind_field->data(elem);
+              side1_mesh_ind=(int)(*side1_mesh_ind_ptr+0.5);
+            } else {
+              side1_mesh_ind=mesh.ind;
+            }
+          } else if (side == 2) {
+            if (side2_mesh_ind_field) {
+              double *side2_mesh_ind_ptr = side2_mesh_ind_field->data(elem);
+              side2_mesh_ind=(int)(*side2_mesh_ind_ptr+0.5);
+            } else {
+              side2_mesh_ind=mesh.ind;
+            }
+          }
+          
+          // Set elem origin info
+          if (side == 1) {
+            if (side1_orig_elem_id_field) {
+              double *side1_orig_elem_id_ptr = side1_orig_elem_id_field->data(elem);
+              side1_orig_elem_id=(int)(*side1_orig_elem_id_ptr+0.5);
+            } else {
+              side1_orig_elem_id=elem.get_id();
+            }
+          } else if (side == 2) {
+            if (side2_orig_elem_id_field) {
+              double *side2_orig_elem_id_ptr = side2_orig_elem_id_field->data(elem);
+              side2_orig_elem_id=(int)(*side2_orig_elem_id_ptr+0.5);
+            } else {
+              side2_orig_elem_id=elem.get_id();
+            }
+          }
+          
           construct_sintd(res_it->area(sdim), n_pts, poly_cd, pdim, sdim, &sintd_nodes, &sintd_cells,
 #ifdef BOB_XGRID_DEBUG
                           -6,elem.get_id(),
 #endif
-                          side1_mesh_ind, side2_mesh_ind);
+                          side1_mesh_ind, side1_orig_elem_id,
+                          side2_mesh_ind, side2_orig_elem_id);
+
 	  p++;
           delete [] poly_cd;
         }
-      } // intersected dst element
-    } // for ei, mesh element iterator
-  } 
+        } // intersected dst element
+      } // for ei, mesh element iterator
+    }
 
   // We now have all the genesis cells, compute the merged mesh
   compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh, side);
@@ -1115,7 +1306,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   WriteMesh(mergemesh, "MergedMesh");
 #endif
 
-}
+  }
 
   void MeshSetFraction(Mesh & mesh, double fraction){
 

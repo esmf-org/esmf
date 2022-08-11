@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -347,13 +347,13 @@ extern "C" void FTN_X(c_esmc_meshcreateempty)(MeshCap **mesh, int *rc) {
 
 
 extern "C" void FTN_X(c_esmc_meshaddnodes)(MeshCap **meshpp, int *num_nodes, int *nodeId,
-                                           double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                                           double *nodeCoord, InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                            int *rc)
 {
   // Call into implementation
   (*meshpp)->meshaddnodes(num_nodes, nodeId,
-                          nodeCoord, nodeOwner, nodeMaskII,
+                          nodeCoord, nodeOwnerII, nodeMaskII,
                           _coordSys, _orig_sdim,
                           rc);
 
@@ -888,6 +888,74 @@ extern "C" void FTN_X(c_esmc_geteleminfointoarray)(MeshCap **meshpp,
                                   rc);
 
 }
+
+
+extern "C" void FTN_X(c_esmc_meshcreatefromfile)(MeshCap **meshpp,
+                                                 char *filename,
+                                                 ESMC_FileFormat_Flag *fileformat, 
+                                                 ESMC_Logical *convertToDual,
+                                                 ESMC_Logical *addUserArea,
+                                                 ESMC_CoordSys_Flag *coordSys, 
+                                                 ESMC_MeshLoc_Flag *maskFlag, 
+                                                 char *maskVarName, 
+                                                 ESMCI::DistGrid **nodeDistgridpp,
+                                                 ESMCI::DistGrid **elemDistgridpp,
+                                                 int *rc, 
+                                                 ESMCI_FortranStrLenArg filename_len,
+                                                 ESMCI_FortranStrLenArg maskVarName_len)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreatefromfile()"
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // Get C style filename
+  char *C_filename = ESMC_F90toCstring(filename, filename_len);
+
+  // Get C style maskVarName
+  char *C_maskVarName = NULL;
+  if (ESMC_NOT_PRESENT_FILTER(maskVarName) != ESMC_NULL_POINTER) {
+    C_maskVarName=ESMC_F90toCstring(maskVarName, maskVarName_len);
+  }
+
+  // Convert Flags
+  bool C_convertToDual=false;
+  if (*convertToDual == ESMF_TRUE) C_convertToDual=true;
+
+  bool C_addUserArea=false;
+  if (*addUserArea == ESMF_TRUE) C_addUserArea=true;
+
+  // Convert  Distgrids
+  // (Optional, so also handle that by checking for not present)
+  ESMCI::DistGrid *nodeDistgrid=NULL;
+  if (ESMC_NOT_PRESENT_FILTER(nodeDistgridpp) != ESMC_NULL_POINTER) {
+    nodeDistgrid=*nodeDistgridpp;
+  }
+
+  ESMCI::DistGrid *elemDistgrid=NULL;
+  if (ESMC_NOT_PRESENT_FILTER(elemDistgridpp) != ESMC_NULL_POINTER) {
+    elemDistgrid=*elemDistgridpp;
+  }
+
+
+  // Create Mesh from file
+  *meshpp=MeshCap::meshcreatefromfilenew(C_filename,
+                                         *fileformat,
+                                         C_convertToDual,
+                                         C_addUserArea,
+                                         *coordSys,
+                                         *maskFlag, 
+                                         C_maskVarName, 
+                                         nodeDistgrid,
+                                         elemDistgrid,
+                                         ESMC_NOT_PRESENT_FILTER(rc));
+
+  // Get rid C style filename
+  delete [] C_filename;
+
+  // If present, get rid C style maskVarName
+  if (C_maskVarName != NULL)   delete [] C_maskVarName;
+
+} // meshcreate
 
 
 

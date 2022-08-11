@@ -20,6 +20,7 @@ TESTS_BUILD	  = \
                 $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
                 $(ESMF_TESTDIR)/ESMF_MeshUTest \
                 $(ESMF_TESTDIR)/ESMC_NearestUTest \
+                $(ESMF_TESTDIR)/ESMF_MeshFileIOUTest \
                 $(ESMF_TESTDIR)/ESMC_Proj4UTest
 
 # TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshCapUTest
@@ -37,6 +38,7 @@ TESTS_RUN    =  \
                 RUN_ESMC_MeshVTKUTest \
                 RUN_ESMF_MeshOpUTest \
                 RUN_ESMF_MeshUTest \
+                RUN_ESMF_MeshFileIOUTest \
                 RUN_ESMC_NearestUTest \
                 RUN_ESMC_Proj4UTest
 
@@ -49,6 +51,7 @@ TESTS_RUN_UNI = \
                 RUN_ESMC_MeshUTestUNI \
                 RUN_ESMF_MeshOpUTestUNI \
                 RUN_ESMF_MeshUTestUNI \
+                RUN_ESMF_MeshFileIOUTestUNI \
                 RUN_ESMC_Proj4UTestUNI
 
 include ${ESMF_DIR}/makefile
@@ -95,6 +98,14 @@ RUN_ESMF_MeshUTest:
 
 RUN_ESMF_MeshUTestUNI:
 	$(MAKE) TNAME=Mesh NP=1 ftest
+
+RUN_ESMF_MeshFileIOUTest:
+	cp -r data $(ESMF_TESTDIR)
+	$(MAKE) TNAME=MeshFileIO NP=4 ftest
+
+RUN_ESMF_MeshFileIOUTestUNI:
+	cp -r data $(ESMF_TESTDIR)
+	$(MAKE) TNAME=MeshFileIO NP=1 ftest
 
 RUN_ESMC_MeshVTKUTest:
 	cp -r data $(ESMF_TESTDIR)

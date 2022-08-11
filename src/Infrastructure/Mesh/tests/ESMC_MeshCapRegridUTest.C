@@ -1,7 +1,7 @@
 //==============================================================================
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -107,8 +107,8 @@ void combine(const std::string &api, const std::string &mesh,
 
 #if defined ESMF_MOAB
       try {
-        MCT *test = generate->mesh_map[mesh](localrc);
-        
+        std::shared_ptr<MCT> test = generate->mesh_map[mesh](localrc);
+
         test->name = name;
         test->nativeormb = nvmb;
         // test->verbosity = 3;
@@ -127,7 +127,8 @@ void combine(const std::string &api, const std::string &mesh,
         if (localrc == ESMF_SUCCESS) rc = test->regrid_map[api](mt, nt, pt,
                                                                 em, ua, id);
 
-        delete test;
+        // test is a shared_ptr so no need to delete
+        // delete test;
       }
       CATCH_MCT_FAIL(&rc)
 #else
@@ -480,6 +481,3 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-
-
-

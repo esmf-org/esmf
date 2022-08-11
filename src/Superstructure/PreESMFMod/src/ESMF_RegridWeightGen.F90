@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -110,7 +110,7 @@ contains
     useUserAreaFlag, largefileFlag, &
     netcdf4fileFlag, weightOnlyFlag, &
     tileFilePath, &
-    verboseFlag, rc)
+    verboseFlag, checkFlag, rc)
 
 ! !ARGUMENTS:
 
@@ -150,8 +150,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical,                      intent(in),  optional :: largefileFlag
   logical,                      intent(in),  optional :: netcdf4fileFlag
   logical,                      intent(in),  optional :: weightOnlyFlag
-  logical,                      intent(in),  optional :: verboseFlag
   character(len=*),             intent(in),  optional :: tileFilePath
+  logical,                      intent(in),  optional :: verboseFlag
+  logical,                      intent(in),  optional :: checkFlag
   integer,                      intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -315,13 +316,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[weightOnlyFlag]}]
 !     If .TRUE., the output weight file only contains factorList and factorIndexList.
 !     The default is .FALSE..
-!   \item [{[verboseFlag]}]
-!     If .TRUE., it will print summary information about the regrid parameters,
-!     default to .FALSE..
 !   \item[{[tileFilePath]}]
 !     Optional argument to define the path where the tile files reside. If it
 !     is given, it overwrites the path defined in {\tt gridlocation} variable
 !     in the mosaic file.
+!   \item [{[verboseFlag]}]
+!     If .TRUE., it will print summary information about the regrid parameters,
+!     default to .FALSE..
+!   \item [{[checkFlag]}]
+!     checkFlag value to pass into ESMF\_FieldRegridStore(), if not provided
+!     has same default as ESMF\_FieldRegridStore() which is false.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1079,6 +1083,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       if (present(tileFilePath)) then
           print *, "  Alternative tile file path: ", trim(tileFilePath)
+       endif
+      if (present(checkFlag)) then
+         if (checkFlag) then
+             print *, "  The checkFlag is set, and so extra error checking will be done."
+          endif
       endif
       write(*,*)
     endif
@@ -1503,6 +1512,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1523,6 +1533,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1543,6 +1554,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1562,6 +1574,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1583,6 +1596,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1602,6 +1616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1621,6 +1636,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1639,6 +1655,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 extrapNumSrcPnts=extrapNumSrcPnts, &
                 extrapDistExponent=extrapDistExponent, &
                 extrapNumLevels=extrapNumLevels, &
+                checkFlag = checkFlag, &
                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
@@ -1948,6 +1965,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
               extrapNumLevels=extrapNumLevels, &
+              checkFlag = checkFlag, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1966,6 +1984,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
               extrapNumLevels=extrapNumLevels, &
+              checkFlag = checkFlag, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1984,6 +2003,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
               extrapNumLevels=extrapNumLevels, &
+              checkFlag = checkFlag, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2001,6 +2021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               extrapNumSrcPnts=extrapNumSrcPnts, &
               extrapDistExponent=extrapDistExponent, &
               extrapNumLevels=extrapNumLevels, &
+              checkFlag = checkFlag, &
               rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

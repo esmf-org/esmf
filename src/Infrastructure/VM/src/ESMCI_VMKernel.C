@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -356,7 +356,7 @@ void VMK::InitPreMPI(){
 void VMK::set(bool globalResourceControl){
 #ifndef ESMF_NO_GETHOSTID
 #ifndef ESMF_NO_PTHREADS
-#ifndef PARCH_darwin
+#if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
   if (globalResourceControl){
     // setting affinity on this level might interfer with user level pinning
     // therefore only do it by user request
@@ -381,7 +381,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
   argc = 0; // reset
   for (int k=0; k<100; k++)
     argv[k] = new char[1600];
-#ifdef ESMF_MPICH
+#ifdef ESMF_MPICH1
   // currently only obtain arguments for MPICH because it needs it!!!
   obtain_args();
 #endif
@@ -393,7 +393,7 @@ void VMK::init(MPI_Comm mpiCommunicator, bool globalResourceControl){
 #ifndef ESMF_MPIUNI
   if (!mpi_init_outside_esmf){
     InitPreMPI(); // must call before MPI is initialized
-#ifdef ESMF_MPICH
+#ifdef ESMF_MPICH1
     // MPICH1.2 is not standard compliant and needs valid args
     // make copy of argc and argv for MPICH because it modifies them and
     // the original values are needed to delete the memory during finalize()
@@ -753,7 +753,7 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
   Affinities affs;
   affs.mypthid = mypthid;
 #ifndef ESMF_NO_PTHREADS
-#ifndef PARCH_darwin
+#if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
   // get the current thread affinity
   pthread_getaffinity_np(mypthid, sizeof(cpu_set_t), &(affs.cpuset));
   // set thread affinity
@@ -2648,7 +2648,7 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
 #ifndef ESMF_NO_PTHREADS
-#ifndef PARCH_darwin
+#if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
   // output thread affinity
   cpu_set_t cpuset;
   pthread_getaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);

@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -47,7 +47,8 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
 #ifdef BOB_XGRID_DEBUG
                                int s_id=-1, int d_id=-1, 
 #endif
-                               int side1_mesh_ind=-1, int side2_mesh_ind=-1);
+                               int side1_mesh_ind=-1, int side1_orig_cell_id=-1, 
+                               int side2_mesh_ind=-1, int side2_orig_cell_id=-1);
 
 /**
  *\brief compute intersecting cell and nodes from a polygon
@@ -61,11 +62,11 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
  */
 void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
 		     std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, 
-#ifdef BOB_XGRID_DEBUG
+#if BOB_XGRID_DEBUG
                      int s_id=-1, int d_id=-1,
 #endif
-                     int side1_mesh_ind=-1, int side2_mesh_ind=-1);
-
+		     int side1_mesh_ind=-1, int side1_orig_elem_id=-1,
+                     int side2_mesh_ind=-1, int side2_orig_elem_id=-1);
 
 /**
  *\brief compute mesh in the middle from meshes on side A and B
@@ -287,6 +288,11 @@ bool intersect_line_with_line(const double *p1, const double *p2, const double *
 double gcdistance(double l1, double g1, double l2, double g2);
 double gcdistance(double * v1, double * v2);
 
+ void calc_wgts_from_side_mesh_to_xgrid(Mesh *src_side_mesh, Mesh *dst_xgrid_mesh, IWeights &wts);
+ void calc_wgts_from_xgrid_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_side_mesh, IWeights &wts);
+
+
+
 // Debugging apis
 void cart2sph(int num_p, const double *p, double *lonlat);
 void cart2sph(const polygon & cart, polygon & sph);
@@ -298,7 +304,9 @@ void test_clip2D(int pdim, int sdim, int num_s, double * s_coord, int num_c, dou
 void test_clip3D(int pdim, int sdim, int num_s, double * s_coord, int num_c, double * c_coord);
 void dump_sph_coords(int num, const double * coord);
 void dump_cart_coords(int num, const double * coord, bool only_sph=false);
-void dump_polygon(const polygon & poly, bool only_sph=false);
+ void dump_polygon(const polygon & poly, bool only_sph=false);
+ 
+
 
 } // namespace
 

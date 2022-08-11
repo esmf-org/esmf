@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -51,7 +51,7 @@ program ESMF_RegridWeightGenApp
   type(ESMF_ExtrapMethod_Flag) :: extrapMethodFlag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(5)
   character(len=MAXNAMELEN)  :: commandbuf3(9)
-  integer            :: commandbuf2(25)
+  integer            :: commandbuf2(26)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
@@ -67,7 +67,8 @@ program ESMF_RegridWeightGenApp
   logical            :: terminateProg
   !real(ESMF_KIND_R8) :: starttime, endtime
   logical            :: checkFlag, moabFlag
-   type(ESMF_LogKind_Flag) :: msgbuf(1)
+  logical            :: checkFlagFlag
+  type(ESMF_LogKind_Flag) :: msgbuf(1)
   type(ESMF_LogKind_Flag) :: logflag
   character(len=ESMF_MAXPATHLEN)  :: argvalue
   integer            :: count, i, length
@@ -746,6 +747,11 @@ program ESMF_RegridWeightGenApp
        endif
     endif
 
+    ! Pass checkFlag into ESMF_FieldRegridStore()
+    checkFlagFlag = .false.
+    call ESMF_UtilGetArgIndex('--checkFlag', argindex=ind, rc=rc)
+    if (ind /= -1) checkFlagFlag = .true.
+
     checkFlag = .false.
     call ESMF_UtilGetArgIndex('--check', argindex=ind, rc=rc)
     if (ind /= -1) checkFlag = .true.
@@ -794,7 +800,8 @@ program ESMF_RegridWeightGenApp
       commandbuf2(23)=extrap_num_src_pnts
       commandbuf2(24)=extrapNumLevels
       if (moabFlag) commandbuf2(25)=1
-    endif 
+      if (checkFlagFlag) commandbuf2(26) = 1 
+   endif
 
 
     call ESMF_VMBroadcast(vm, commandbuf2, size (commandbuf2), 0, rc=rc)
@@ -964,7 +971,11 @@ program ESMF_RegridWeightGenApp
     ! Set moab flag
     moabFlag=.false.
     if (commandbuf2(25)==1) moabFlag=.true.
- 
+
+    ! Set checkFlag flag
+    checkFlagFlag = .false.
+    if (commandbuf2(26)==1) checkFlagFlag = .true.
+    
     call ESMF_VMBroadcast(vm, commandbuf1, len(commandbuf1)*size(commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     call ESMF_VMBroadcast(vm, commandbuf3, len(commandbuf3)*size(commandbuf3), 0, rc=rc)
@@ -1088,7 +1099,9 @@ if (writewgtfile) then
                               useSrcCornerFlag = useSrcCorner, &
                               useDstCornerFlag = useDstCorner, &
                               tileFilePath = trim(tilePath), &
-                              verboseFlag = .true., rc = rc)
+                              verboseFlag = .true., &
+                              checkFlag = checkFlagFlag, &
+                              rc = rc)
     else
         call ESMF_RegridWeightGen(srcfile, dstfile, &
                               weightFile=wgtfile, rhFile=rhfile, &
@@ -1113,7 +1126,9 @@ if (writewgtfile) then
                               weightOnlyFlag  = weightOnlyFlag, &
                               useSrcCornerFlag = useSrcCorner, &
                               useDstCornerFlag = useDstCorner, &
-                              verboseFlag = .true., rc = rc)
+                              verboseFlag = .true., &
+                              checkFlag = checkFlagFlag, &
+                              rc = rc)
     endif
   else
     if (useTilePathFlag) then
@@ -1140,7 +1155,9 @@ if (writewgtfile) then
                               useSrcCornerFlag = useSrcCorner, &
                               useDstCornerFlag = useDstCorner, &
                               tileFilePath = trim(tilePath), &
-                              verboseFlag = .true., rc = rc)
+                              verboseFlag = .true., &
+                              checkFlag = checkFlagFlag, &
+                              rc = rc)
     else
         call ESMF_RegridWeightGen(srcfile, dstfile, weightFile=wgtfile, &
                               regridmethod=methodflag, &
@@ -1164,7 +1181,9 @@ if (writewgtfile) then
                               weightOnlyFlag  = weightOnlyFlag, &
                               useSrcCornerFlag = useSrcCorner, &
                               useDstCornerFlag = useDstCorner, &
-                              verboseFlag = .true., rc = rc)
+                              verboseFlag = .true., &
+                              checkFlag = checkFlagFlag, &
+                              rc = rc)
     endif
   endif
 else
@@ -1194,7 +1213,9 @@ else
                               useSrcCornerFlag = useSrcCorner, &
                               useDstCornerFlag = useDstCorner, &
                               tileFilePath = trim(tilePath), &
-                              verboseFlag = .true., rc = rc)
+                              verboseFlag = .true., &
+                              checkFlag = checkFlagFlag, &
+                              rc = rc)
     else
         call ESMF_RegridWeightGen(srcfile, dstfile, &
                               rhFile=rhfile, &
@@ -1219,7 +1240,9 @@ else
                               weightOnlyFlag  = weightOnlyFlag, &
                               useSrcCornerFlag = useSrcCorner, &
                               useDstCornerFlag = useDstCorner, &
-                              verboseFlag = .true., rc = rc)
+                              verboseFlag = .true., &
+                              checkFlag = checkFlagFlag, &
+                              rc = rc)
     endif
   else
     write(*,*)
@@ -1298,6 +1321,7 @@ contains
     print *, "                      [--tilefile_path tile_file_path]"
     print *, "                      [--no_log]"
     print *, "                      [--check]"
+    print *, "                      [--checkFlag]"
     print *, "                      [--help]"
     print *, "                      [--version]"
     print *, "                      [-V]"
@@ -1382,11 +1406,12 @@ contains
     print *, "--tilefile_path - the alternative file path for the tile files when the grid file type is"
     print *, "            MOSAIC."
     print *, "--no_log    - Turn off the ESMF logs."
-    print *, "--check    - Check that the generated weights produce reasonable regridded fields.  This"
+    print *, "--check     - Check that the generated weights produce reasonable regridded fields.  This"
     print *, "             is done by calling ESMF_FieldRegrid() on an analytic source field using the weights"
     print *, "             generated by this application.  The mean relative error between the destination"
     print *, "             and analytic field is computed, as well as the relative error between the mass" 
     print *, "             of the source and destination fields in the conservative case."
+    print *, "--checkFlag - Turn on more expensive extra error checking during weight generation."
     print *, "--help or -h - Print this help message and exit."
     print *, "--version  - Print ESMF version and license information and exit."
     print *, "-V        - Print ESMF version number and exit."
