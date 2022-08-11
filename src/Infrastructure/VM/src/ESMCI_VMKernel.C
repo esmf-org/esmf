@@ -356,7 +356,7 @@ void VMK::InitPreMPI(){
 void VMK::set(bool globalResourceControl){
 #ifndef ESMF_NO_GETHOSTID
 #ifndef ESMF_NO_PTHREADS
-#ifndef PARCH_darwin
+#if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
   if (globalResourceControl){
     // setting affinity on this level might interfer with user level pinning
     // therefore only do it by user request
@@ -753,7 +753,7 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
   Affinities affs;
   affs.mypthid = mypthid;
 #ifndef ESMF_NO_PTHREADS
-#ifndef PARCH_darwin
+#if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
   // get the current thread affinity
   pthread_getaffinity_np(mypthid, sizeof(cpu_set_t), &(affs.cpuset));
   // set thread affinity
@@ -2648,7 +2648,7 @@ void VMK::log(std::string prefix, ESMC_LogMsgType_Flag msgType)const{
   ESMC_LogDefault.Write(msg.str(), msgType);
   msg.str("");  // clear
 #ifndef ESMF_NO_PTHREADS
-#ifndef PARCH_darwin
+#if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
   // output thread affinity
   cpu_set_t cpuset;
   pthread_getaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
