@@ -63,20 +63,49 @@ class Globber {
     // Number of ids and ids in glob
     vector<int> num_ids;
     vector<int> ids;
-    
+
+    // Reserve sizes
+    // Ints to accumulate reserve sizes so we're not doing it all at once
+    int reserve_num_polys;
+    int reserve_num_poly_ids;
+   
   public:
-    
+
+    // Init some things
+    Glob():
+      reserve_num_polys(0),
+      reserve_num_poly_ids(0)
+    {
+    }
+
+    // Add another polygon to reserve
+    void add_to_reserve(int num_poly_ids) {
+      reserve_num_polys++;
+      reserve_num_poly_ids+=num_poly_ids; 
+    }
+
+    // Actually reserve, based on accumulated numbers
+    void reserve() {
+      
+      // Reserve space for num_ids
+      num_ids.reserve(reserve_num_polys);
+            
+      // Reserve space for ids
+      ids.reserve(reserve_num_poly_ids);
+    }
+
+   
     // Add another polygon to glob
     void add(int num_poly_ids, int *poly_ids) {
       
       // Add extra space for num_ids
-      num_ids.reserve(num_ids.size()+1);
+      // num_ids.reserve(num_ids.size()+1);
       
       // Add another count
       num_ids.push_back(num_poly_ids);
       
       // Add extra space for ids
-      ids.reserve(ids.size()+num_poly_ids);
+      //ids.reserve(ids.size()+num_poly_ids);
       
       // Add ids
       for (int i=0; i<num_poly_ids; i++) {
@@ -90,11 +119,13 @@ class Globber {
   // Map to hold globs that map to the same value
   map<int, Glob*> glob_map;
 
-public:
-  
-  // Add a new polygon representing a region filled with value
-  void add(int value, int num_ids, int *ids) {
 
+private:
+
+  // Get the glob corresponding to the input value
+  // (If the appropriate glob doesn't exist, then add a new one)
+  Glob *get_glob_for_value(int value) {
+    
     // Get glob that matches value
     map<int,Glob *>::iterator vtgi = glob_map.find(value);
     
@@ -111,6 +142,42 @@ public:
     } else {
       glob = vtgi-> second;
     }
+
+    return glob;
+  }
+  
+public:
+
+
+  // Add a polygon to reserve
+  void add_to_reserve(int value, int num_ids) {
+
+    // Get glob for value
+    Glob *glob=get_glob_for_value(value);
+
+    // Add ids to glob
+    glob->add_to_reserve(num_ids);    
+  }
+
+  // Actually reserve based on numbers that have been accumulated
+  void reserve() {
+
+    // Itereate through map
+    auto mi=glob_map.begin();
+    auto me=glob_map.end();
+    for (; mi != me; mi++) {
+
+      // Reserve current glob
+      mi->second->reserve();
+    }
+  }
+  
+  
+  // Add a new polygon representing a region filled with value
+  void add(int value, int num_ids, int *ids) {
+
+    // Get glob for value
+    Glob *glob=get_glob_for_value(value);
 
     // Add ids to glob
     glob->add(num_ids, ids);    
@@ -545,10 +612,57 @@ void get_grid_coords_at_seqinds(Grid *grid, int staggerloc, int num_seqinds, int
         num_mask_vals=raster_mask_values->extent[0];
         mask_vals=&(raster_mask_values->array[0]);
       }
-
       
       // Create structure to accumulate polygons and use them to create mesh connection info
       Globber globber;
+      
+      // Loop over center DEs accumulating sizes to reserve
+      for (int lDE=0; lDE < centerLocalDECount; lDE++) {
+
+        // Get Center DE bounds
+        int ubnd[ESMF_MAXDIM];
+        int lbnd[ESMF_MAXDIM];
+        raster_grid->getDistExclusiveUBound(centerDistgrid, lDE, ubnd);
+        raster_grid->getDistExclusiveLBound(centerDistgrid, lDE, lbnd);
+        
+        // Get localArray for lDE
+        LocalArray *localArray = raster_array->getLocalarrayList()[lDE];
+        
+        // Loop over bounds
+        for (int i0=lbnd[0]; i0<=ubnd[0]; i0++){
+          for (int i1=lbnd[1]; i1<=ubnd[1]; i1++){
+            
+            // Set index
+            int index[2];
+            index[0]=i0;
+            index[1]=i1;
+            
+            // Get value in array
+            ESMC_I4 value;
+            localArray->getDataInternal(index, &value);
+            
+
+            // Skip if masked
+            bool masked=false;     
+            for (int m=0; m<num_mask_vals; m++) {
+              if (mask_vals[m] == value) {
+                masked=true;
+                break;
+              }
+            }
+            if (masked) continue;
+            
+                 
+            // Add to globber reserve
+            globber.add_to_reserve(value, NUM_QUAD_CORNERS);
+          }
+        }
+      }
+
+
+      // Reserve space for actual ids
+      globber.reserve();
+      
       
       // Loop over center DEs adding cells
       for (int lDE=0; lDE < centerLocalDECount; lDE++) {
@@ -616,7 +730,7 @@ void get_grid_coords_at_seqinds(Grid *grid, int staggerloc, int num_seqinds, int
           }
         }
       }
-
+      
 
       // Get mesh info
       globber.get_mesh_conn_info(mesh_num_nodes, mesh_node_ids, mesh_node_owners,
