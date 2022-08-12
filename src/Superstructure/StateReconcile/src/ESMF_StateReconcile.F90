@@ -2066,7 +2066,7 @@ contains
     character(ESMF_MAXSTR) :: msgstring
 
     logical, parameter :: debug = .false.
-    logical, parameter :: profile = .true.
+    logical, parameter :: profile = .false.
 
     localrc = ESMF_RC_NOT_IMPL
 

@@ -192,7 +192,7 @@ class Py3Char(object):
 #### INIT/FINAL ###################################################
 
 _ESMF.ESMC_Initialize.restype = ct.c_int
-#_ESMF.ESMC_Initialize.argtypes = []
+_ESMF.ESMC_Initialize.argtypes = [ct.POINTER(ct.int)]
 
 def ESMP_Initialize(logkind = constants.LogKind.MULTI):
     """
