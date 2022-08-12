@@ -117,33 +117,22 @@ class Globber {
 
   
   // Map to hold globs that map to the same value
-  map<int, Glob*> glob_map;
-
+  map<int, Glob> glob_map;
 
 private:
 
+  
   // Get the glob corresponding to the input value
   // (If the appropriate glob doesn't exist, then add a new one)
-  Glob *get_glob_for_value(int value) {
-    
-    // Get glob that matches value
-    map<int,Glob *>::iterator vtgi = glob_map.find(value);
-    
-    // Either get the glob or add a new one
-    Glob *glob;
-    if (vtgi == glob_map.end()) {
+  Glob &get_glob_for_value(int value) {
 
-      // Make a new glob
-      glob = new Glob;
+    // Try to insert, but nothing happens if already there...
+    Glob empty_glob;
+    std::pair<map<int,Glob>::iterator,bool> ret;
+    ret=glob_map.insert(std::pair<int,Glob>(value,empty_glob));
 
-      // Add it to the list
-      glob_map[value]=glob;
-
-    } else {
-      glob = vtgi-> second;
-    }
-
-    return glob;
+    // Return glob in map
+    return ret.first->second;
   }
   
 public:
@@ -153,10 +142,10 @@ public:
   void add_to_reserve(int value, int num_ids) {
 
     // Get glob for value
-    Glob *glob=get_glob_for_value(value);
+    Glob &glob=get_glob_for_value(value);
 
     // Add ids to glob
-    glob->add_to_reserve(num_ids);    
+    glob.add_to_reserve(num_ids);    
   }
 
   // Actually reserve based on numbers that have been accumulated
@@ -168,7 +157,7 @@ public:
     for (; mi != me; mi++) {
 
       // Reserve current glob
-      mi->second->reserve();
+      mi->second.reserve();
     }
   }
   
@@ -177,10 +166,10 @@ public:
   void add(int value, int num_ids, int *ids) {
 
     // Get glob for value
-    Glob *glob=get_glob_for_value(value);
+    Glob &glob=get_glob_for_value(value);
 
     // Add ids to glob
-    glob->add(num_ids, ids);    
+    glob.add(num_ids, ids);    
   }
 
   void get_mesh_conn_info(int &num_nodes, int *&node_ids, int *&node_owners, int &num_elems, int *&elem_ids, int *&elem_num_conns, int *&elem_conns) {
@@ -197,8 +186,8 @@ public:
 
 
     // Iterators to loop through globs
-    map<int,Glob *>::iterator gmi;
-    map<int,Glob *>::iterator gme  = glob_map.end();
+    map<int,Glob>::iterator gmi;
+    map<int,Glob>::iterator gme  = glob_map.end();
     
     
     // Init Output
@@ -234,10 +223,10 @@ public:
     for (gmi  = glob_map.begin(); gmi != gme; gmi++) {
 
       // Number of connetions is the total number of ids for this elem
-      int num_conns_for_this_elem=gmi->second->ids.size();
+      int num_conns_for_this_elem=gmi->second.ids.size();
 
       // Plus 1 polybreak indicator after each polygon except the last one (-1) 
-      num_conns_for_this_elem+=gmi->second->num_ids.size()-1;
+      num_conns_for_this_elem+=gmi->second.num_ids.size()-1;
 
       // Add to total
       tot_elem_num_conns += num_conns_for_this_elem;
@@ -253,7 +242,7 @@ public:
     // Count total number of connections
     int num_conn=0;
     for (gmi=glob_map.begin(); gmi != gme; gmi++) {
-      num_conn += gmi->second->ids.size();
+      num_conn += gmi->second.ids.size();
     }
 
     // If empty, leave
@@ -266,15 +255,15 @@ public:
     int conn_pos=0;
     int cl_pos=0;
     for (gmi=glob_map.begin(); gmi != gme; gmi++) {
-      Glob *glob=gmi->second;
+      Glob &glob=gmi->second;
       
       // Loop through polygons
       int glob_pos=0;
-      for (int p=0; p<glob->num_ids.size(); p++) {
+      for (int p=0; p<glob.num_ids.size(); p++) {
 
         // Load polygon ids into list
-        for (int i=0; i<glob->num_ids[p]; i++) {                
-          convert_list[cl_pos].node_id=gmi->second->ids[glob_pos];
+        for (int i=0; i<glob.num_ids[p]; i++) {                
+          convert_list[cl_pos].node_id=gmi->second.ids[glob_pos];
           convert_list[cl_pos].elem_conns_pos=conn_pos;
           cl_pos++;
           glob_pos++;
@@ -282,7 +271,7 @@ public:
         }
 
         // If not at end of glob, add an extra slot for polybreak indicator
-        if (p < glob->num_ids.size()-1) conn_pos++;
+        if (p < glob.num_ids.size()-1) conn_pos++;
       }
     }
   
