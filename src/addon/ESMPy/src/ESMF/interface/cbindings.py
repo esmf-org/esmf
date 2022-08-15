@@ -1960,6 +1960,36 @@ def ESMP_FieldRead(field, filename, variablename, timeslice, iofmt=1):
         raise ValueError('ESMC_FieldRead() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
+_ESMF.ESMC_FieldWrite.restype = ct.c_int
+_ESMF.ESMC_FieldWrite.argtypes = [ct.c_void_p,
+                                 Py3Char,
+                                 Py3Char,
+                                 ct.c_uint,
+                                 ct.c_uint,
+                                 ct.c_uint,
+                                 ct.c_uint]
+def ESMP_FieldWrite(field, filename, variablename, timeslice, overwrite=1, 
+                    status=0, iofmt=1):
+    #TODO: C doc says it defaults to NETCDF(1), but actually defaults to BIN(0)
+    """
+    Preconditions: An ESMP_Field has been created.\n
+    Postconditions: The contents of 'field' have been written to a file.\n
+    Arguments:\n
+        ESMP_Field :: field\n
+        string     :: filename\n
+        string     :: variablename\n
+        integer    :: timeslice\n
+        int        :: overwrite(1)\n
+        FileStatus :: status(0)\n
+        IOFmt      :: iofmt(nc)\n
+    """
+    # parameters are a different order going to ESMC, b/c  it makes more 
+    #   sense to have the required parameters for ESMPy grouped together.
+    rc = _ESMF.ESMC_FieldWrite(field.struct.ptr, filename, variablename, 
+                               overwrite, status, timeslice, iofmt)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldWrite() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
 
 
 _ESMF.ESMC_FieldRegridGetArea.restype = ct.c_int

@@ -47,5 +47,9 @@ regrid = ESMF.Regrid(srcfield, dstfield,
 # Do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
 
+# Read the field data into the data structure
+dstfield.write(filename="dstfield.nc", variable="so", timeslice=0)
+
+
 # Output the results from one processor only
 if ESMF.local_pet() == 0: print ("ESMPy Field Data Regridding Example Finished Successfully")

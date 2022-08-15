@@ -408,3 +408,52 @@ class Field(object):
                        variablename=variable,
                        timeslice=local_timeslice,
                        iofmt=format)
+    def write(self, filename, variable, timeslice=None):
+        """
+        Write data into CF-compliant NetCDF file from 
+        an existing :class:`~ESMF.api.field.Field`.
+
+        :note: This interface is not supported when ESMF is built with
+            ``ESMF_COMM=mpiuni``.
+
+        *REQUIRED:*
+
+        :param str filename: The name of the NetCDF file.
+        :param str variable: The name of the data variable to write to file.
+
+        *OPTIONAL:*
+
+        :param list timeslice: The number of timeslices to read.
+        """
+
+        import ESMF.api.constants as constants
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+            raise ImportError("Field.Write() requires PIO and does not work if ESMF has not been built with MPI support")
+
+        assert (type(filename) is str)
+        assert (type(variable) is str)
+
+        # format defaults to NetCDF for now
+        format = 1
+
+        # overwrite defaults to True for now
+        overwrite = 1
+
+        # status defaults to UNKNOWN for now
+        status = 0
+
+        if not isinstance(timeslice, int):
+            raise TypeError("timeslice must be a single integer value")
+
+        local_timeslice = None
+        if timeslice == None:
+          local_timeslice = 1
+        else:
+          local_timeslice = timeslice
+
+        ESMP_FieldWrite(self, filename=filename,
+                       variablename=variable,
+                       timeslice=local_timeslice,
+                       overwrite=overwrite,
+                       status=status,
+                       iofmt=format)
