@@ -48,6 +48,7 @@ module ESMF_InitMod
       use ESMF_CalendarMod
       use ESMF_TraceMod
       use ESMF_UtilMod
+      use ESMF_TraceMod
 
       implicit none
       private
@@ -337,7 +338,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return 
       endif 
       ! on success LogErr is assumed to be functioning
-      
+
+      ! provide complete ESMF profile region
+      call ESMF_TraceRegionEnter("[ESMF]", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
       ! obtain global VM
       call ESMF_VMGetGlobal(localvm, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1164,6 +1170,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
 
+      ! provide complete ESMF profile region
+      call ESMF_TraceRegionExit("[ESMF]", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) then
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": TraceRegionExit() error." 
+      endif
+
       ! Write final message to the log
       call ESMF_LogWrite("Finalizing ESMF", &
         ESMF_LOGMSG_INFO, rc=localrc)
@@ -1220,7 +1233,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (endflag==ESMF_END_ABORT) abortFlag = .true.
         if (endflag==ESMF_END_KEEPMPI) keepMpiFlag = ESMF_TRUE
       endif
-      
+
       if (abortFlag) then
         ! Abort the VM
         call ESMF_VMAbort(rc=localrc)

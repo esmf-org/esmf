@@ -99,7 +99,7 @@ The :class:`~ESMF.api.esmpymanager.Manager` is also used to enable logging:
 .. code::
 
     mg = ESMF.Manager(debug=True)
-    local_pet = mg.local_pet()
+    local_pet = mg.local_pet
 
 The output will be logged in files named PET<local_pet>.ESMF_LogFile.
 

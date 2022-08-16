@@ -114,8 +114,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[field]
 !     The {\tt ESMF\_Field} object to fill with data.
 !   \item[{[dataFillScheme]}]
-!     The fill scheme. The available options are "sincos", "one", and "const".
-!     Defaults to "sincos".
+!     The fill scheme. The available options are "sincos", "one", "const", and
+!     "random". Defaults to "sincos".
 !   \item[{[const1]}]
 !     Constant of real type. Defaults to 0.
 !   \item[{[member]}]
@@ -208,7 +208,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     l_step = 1
     if(present(step)) l_step = step
     if(present(param3I4)) l_member = param3I4
-    l_dataFillScheme = "sincos"
+    l_dataFillScheme = "sincos" ! default
     if(present(dataFillScheme)) l_dataFillScheme = dataFillScheme
       
     allocate(coordDimCount(rank))
@@ -911,7 +911,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           rcToReturn=rc)
         return ! bail out
       endif
-    else if (trim(dataFillScheme)=="one") then
+    else if (trim(l_dataFillScheme)=="one") then
       do lde=0, ldeCount-1
         if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
           ! 1D all 1.
@@ -963,7 +963,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dataPtrR4D3 = 1._ESMF_KIND_R4
         endif
       enddo
-    else if (trim(dataFillScheme)=="const") then
+    else if (trim(l_dataFillScheme)=="const") then
       do lde=0, ldeCount-1
         if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
           ! 1D all 1.
@@ -1013,6 +1013,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
           ! initialize the entire array
           dataPtrR4D3 = real(l_const1,ESMF_KIND_R4);
+        endif
+      enddo
+    else if (trim(l_dataFillScheme)=="random") then
+      do lde=0, ldeCount-1
+        if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
+          ! 1D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          call random_number(dataPtrR8D1)
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
+          ! 1D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          call random_number(dataPtrR4D1)
+        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+          ! 2D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          call random_number(dataPtrR8D2)
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
+          ! 2D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          call random_number(dataPtrR4D2)
+        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
+          ! 3D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D3, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          call random_number(dataPtrR8D3)
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
+          ! 3D all 1.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D3, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return  ! bail out
+          ! initialize the entire array
+          call random_number(dataPtrR4D3)
         endif
       enddo
     else
