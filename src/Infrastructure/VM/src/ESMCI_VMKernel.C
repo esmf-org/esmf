@@ -19,10 +19,10 @@
 #define VM_PETMANAGEMENTLOG_off
 #define VM_MEMLOG_off
 #define VM_COMMQUEUELOG_off
-#define VM_EPOCHLOG_on
+#define VM_EPOCHLOG_off
 #define VM_EPOCHMEMLOG_off
 #define VM_SSISHMLOG_off
-#define VM_SIZELOG_on
+#define VM_SIZELOG_off
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
