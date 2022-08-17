@@ -238,19 +238,19 @@ module ESMF_VMMod
     end subroutine
 
     subroutine c_ESMC_VMRecv(vm, recvData, recvSize, src, rc)
-      import                :: ESMF_VM
+      import                :: ESMF_VM, ESMF_KIND_I8
       type(ESMF_VM)         :: vm
       type(*)               :: recvData(*)
-      integer               :: recvSize
+      integer(ESMF_KIND_I8) :: recvSize
       integer               :: src
       integer               :: rc
     end subroutine
 
     subroutine c_ESMC_VMRecvNB(vm, recvData, recvSize, src, comm, rc)
-      import                :: ESMF_VM, ESMF_CommHandle
+      import                :: ESMF_VM, ESMF_CommHandle, ESMF_KIND_I8
       type(ESMF_VM)         :: vm
       type(*)               :: recvData(*)
-      integer               :: recvSize
+      integer(ESMF_KIND_I8) :: recvSize
       integer               :: src
       type(ESMF_CommHandle) :: comm
       integer               :: rc
@@ -303,19 +303,19 @@ module ESMF_VMMod
     end subroutine
 
     subroutine c_ESMC_VMSend(vm, sendData, sendSize, dst, rc)
-      import                :: ESMF_VM
+      import                :: ESMF_VM, ESMF_KIND_I8
       type(ESMF_VM)         :: vm
       type(*)               :: sendData(*)
-      integer               :: sendSize
+      integer(ESMF_KIND_I8) :: sendSize
       integer               :: dst
       integer               :: rc
     end subroutine
 
     subroutine c_ESMC_VMSendNB(vm, sendData, sendSize, dst, comm, rc)
-      import                :: ESMF_VM, ESMF_CommHandle
+      import                :: ESMF_VM, ESMF_CommHandle, ESMF_KIND_I8
       type(ESMF_VM)         :: vm
       type(*)               :: sendData(*)
-      integer               :: sendSize
+      integer(ESMF_KIND_I8) :: sendSize
       integer               :: dst
       type(ESMF_CommHandle) :: comm
       integer               :: rc
@@ -6226,7 +6226,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                     intent(in)            :: vm
-!    <type>(ESMF_KIND_<kind>), target,  intent(out)           :: recvData(:)  
+!    <type>(ESMF_KIND_<kind>), target,  intent(out)           :: recvData(:)
 !    integer,                           intent(in)            :: count
 !    integer,                           intent(in)            :: srcPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -6292,7 +6292,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
-    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)  
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -6303,7 +6303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -6325,7 +6325,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 4 ! 4 bytes
+      size = count
+      size = size * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
@@ -6365,7 +6366,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
-    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)  
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -6376,7 +6377,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -6398,7 +6399,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 8 ! 8 bytes
+      size = count
+      size = size * 8 ! 8 bytes
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
@@ -6438,7 +6440,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
-    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)  
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -6449,7 +6451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -6471,7 +6473,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 4 ! 4 bytes
+      size = count
+      size = size * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
@@ -6511,7 +6514,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
-    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)  
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -6522,7 +6525,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -6544,7 +6547,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 8 ! 8 bytes
+      size = count
+      size = size * 8 ! 8 bytes
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
@@ -6584,7 +6588,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
-    type(ESMF_Logical), target, intent(out)           :: recvData(:)  
+    type(ESMF_Logical), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -6595,7 +6599,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -6617,7 +6621,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 4 ! 4 bytes
+      size = count
+      size = size * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
@@ -6668,7 +6673,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -6690,7 +6695,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 1 ! 1 byte
+      size = count ! 1 byte
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
@@ -6741,7 +6746,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -6763,7 +6768,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (count > 0) then
       ! There is data to be received
-      size = count * 1 ! 1 byte
+      size = count ! 1 byte
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
@@ -7806,7 +7811,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
-!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)  
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
 !    integer,                          intent(in)            :: count
 !    integer,                          intent(in)            :: dstPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -7871,7 +7876,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
-    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)  
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -7881,7 +7886,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -7903,7 +7908,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 4 ! 4 bytes
+      size = count
+      size = size * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
@@ -7943,7 +7949,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
-    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)  
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -7953,7 +7959,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -7975,7 +7981,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 8 ! 8 bytes
+      size = count
+      size = size * 8 ! 8 bytes
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
@@ -8015,7 +8022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
-    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)  
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -8026,7 +8033,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -8048,7 +8055,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 4 ! 4 bytes
+      size = count
+      size = size * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
@@ -8088,7 +8096,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
-    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)  
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -8099,7 +8107,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -8121,7 +8129,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 8 ! 8 bytes
+      size = count
+      size = size * 8 ! 8 bytes
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
@@ -8161,7 +8170,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
-    type(ESMF_Logical), target, intent(in)            :: sendData(:)  
+    type(ESMF_Logical), target, intent(in)            :: sendData(:)
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -8172,7 +8181,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -8194,7 +8203,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       ! There is data to be received
-      size = count * 4 ! 4 bytes
+      size = count
+      size = size * 4 ! 4 bytes
       ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
@@ -8245,7 +8255,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -8318,7 +8328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: size
+    integer(ESMF_KIND_I8)   :: size
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
@@ -8377,10 +8387,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
-!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)  
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
 !    integer,                          intent(in)            :: sendCount
 !    integer,                          intent(in)            :: dstPet
-!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)  
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
 !    integer,                          intent(in)            :: recvCount
 !    integer,                          intent(in)            :: srcPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -8454,10 +8464,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
-    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)  
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
     integer,                       intent(in)            :: sendCount
     integer,                       intent(in)            :: dstPet
-    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)  
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
     integer,                       intent(in)            :: recvCount
     integer,                       intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -8530,10 +8540,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
-    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)  
+    integer(ESMF_KIND_I8), target, intent(in)            :: sendData(:)
     integer,                       intent(in)            :: sendCount
     integer,                       intent(in)            :: dstPet
-    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)  
+    integer(ESMF_KIND_I8), target, intent(out)           :: recvData(:)
     integer,                       intent(in)            :: recvCount
     integer,                       intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -8606,10 +8616,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
-    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)  
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
     integer,                    intent(in)            :: sendCount
     integer,                    intent(in)            :: dstPet
-    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)  
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: recvCount
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -8682,10 +8692,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
-    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)  
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
     integer,                    intent(in)            :: sendCount
     integer,                    intent(in)            :: dstPet
-    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)  
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: recvCount
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -8758,10 +8768,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
-    type(ESMF_Logical), target, intent(in)            :: sendData(:)  
+    type(ESMF_Logical), target, intent(in)            :: sendData(:)
     integer,                    intent(in)            :: sendCount
     integer,                    intent(in)            :: dstPet
-    type(ESMF_Logical), target, intent(out)           :: recvData(:)  
+    type(ESMF_Logical), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: recvCount
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below

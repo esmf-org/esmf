@@ -524,12 +524,15 @@ class XXE{
       int vectorLengthShift);
     int appendWtimer(int predicateBitField, char *string, int id, int actualId,
       int relativeId=0, XXE *relativeXXE=NULL);
-    int appendRecv(int predicateBitField, void *buffer, int size, int srcPet,
+    int appendRecv(int predicateBitField, void *buffer,
+      unsigned long long int size, int srcPet,
       int tag=-1, bool vectorFlag=false, bool indirectionFlag=false);
-    int appendSend(int predicateBitField, void *buffer, int size, int dstPet,
+    int appendSend(int predicateBitField, void *buffer,
+      unsigned long long int size, int dstPet,
       int tag=-1, bool vectorFlag=false, bool indirectionFlag=false);
-    int appendSendRRA(int predicateBitField, int rraOffset, int size,
-      int dstPet, int rraIndex, int tag=-1, bool vectorFlag=false);
+    int appendSendRRA(int predicateBitField, int rraOffset,
+      unsigned long long int size, int dstPet, int rraIndex,
+      int tag=-1, bool vectorFlag=false);
     int appendSendRecv(int predicateBitField, void *srcBuffer, void *dstBuffer,
       int srcSize, int dstSize, int srcPet, int dstPet, int srcTag, int dstTag, 
       bool vectorFlag=false, bool srcIndirectionFlag=false,
@@ -538,14 +541,17 @@ class XXE{
       int srcSize, int dstSize, int srcPet, int dstPet, int rraIndex,
       int srcTag, int dstTag, bool vectorFlag=false,
       bool dstIndirectionFlag=false);
-    int appendRecvnb(int predicateBitField, void *buffer, int size, int srcPet,
+    int appendRecvnb(int predicateBitField, void *buffer,
+      unsigned long long int size, int srcPet,
       int tag=-1, bool vectorFlag=false, bool indirectionFlag=false);
-    int appendSendnb(int predicateBitField, void *buffer, int size, int dstPet,
+    int appendSendnb(int predicateBitField, void *buffer,
+      unsigned long long int size, int dstPet,
       int tag=-1, bool vectorFlag=false, bool indirectionFlag=false);
-    int appendSendnbRRA(int predicateBitField, int rraOffset, int size,
-      int dstPet, int rraIndex, int tag=-1, bool vectorFlag=false);
-    int appendMemCpySrcRRA(int predicateBitField, int rraOffset, int size,
-      void *dstMem, int rraIndex);
+    int appendSendnbRRA(int predicateBitField, int rraOffset,
+      unsigned long long int size, int dstPet, int rraIndex,
+      int tag=-1, bool vectorFlag=false);
+    int appendMemCpySrcRRA(int predicateBitField, int rraOffset,
+      unsigned long long int size, void *dstMem, int rraIndex);
     int appendMemGatherSrcRRA(int predicateBitField, void *dstBase,
       TKId dstBaseTK, int rraIndex, int chunkCount, bool vectorFlag=false,
       bool indirectionFlag=false);
@@ -553,9 +559,11 @@ class XXE{
       int rraOffset, int rraIndex);
     int appendZeroSuperScalarRRA(int predicateBitField, TKId elementTK,
       int rraIndex, int termCount, bool vectorFlag=false);
-    int appendZeroMemset(int predicateBitField, void *buffer, int byteCount,
-      bool vectorFlag=false, bool indirectionFlag=false);
-    int appendZeroMemsetRRA(int predicateBitField, int byteCount, int rraIndex,
+    int appendZeroMemset(int predicateBitField, void *buffer,
+      unsigned long long int byteCount, bool vectorFlag=false,
+      bool indirectionFlag=false);
+    int appendZeroMemsetRRA(int predicateBitField,
+      unsigned long long int byteCount, int rraIndex,
       bool vectorFlag=false);
     int appendProductSumScalarRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraOffset, void *factor, void *value,
@@ -617,7 +625,7 @@ class XXE{
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
-      int size;
+      unsigned long long int size;
       int tag;
     }SendInfo;
 
@@ -630,7 +638,7 @@ class XXE{
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
-      int size;
+      unsigned long long int size;
       int tag;
     }RecvInfo;
 
@@ -642,7 +650,7 @@ class XXE{
       int dstPet;
       bool vectorFlag;
       int rraOffset;
-      int size;
+      unsigned long long int size;
       int rraIndex;
       int tag;
     }SendRRAInfo;
@@ -655,7 +663,7 @@ class XXE{
       int srcPet;
       bool vectorFlag;
       int rraOffset;
-      int size;
+      unsigned long long int size;
       int rraIndex;
       int tag;
     }RecvRRAInfo;
@@ -706,7 +714,7 @@ class XXE{
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
-      int size;
+      unsigned long long int size;
       int tag;
     }SendnbInfo;
 
@@ -720,7 +728,7 @@ class XXE{
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
-      int size;
+      unsigned long long int size;
       int tag;
     }RecvnbInfo;
 
@@ -733,7 +741,7 @@ class XXE{
       int dstPet;
       bool vectorFlag;
       int rraOffset;
-      int size;
+      unsigned long long int size;
       int rraIndex;
       int tag;
     }SendnbRRAInfo;
@@ -747,7 +755,7 @@ class XXE{
       int srcPet;
       bool vectorFlag;
       int rraOffset;
-      int size;
+      unsigned long long int size;
       int rraIndex;
       int tag;
     }RecvnbRRAInfo;
@@ -960,13 +968,13 @@ class XXE{
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
-      int byteCount;
+      unsigned long long int byteCount;
     }ZeroMemsetInfo;
 
     typedef struct{
       OpId opId;
       int predicateBitField;
-      int byteCount;
+      unsigned long long int byteCount;
       int rraIndex;
       bool vectorFlag;
     }ZeroMemsetRRAInfo;
@@ -976,7 +984,7 @@ class XXE{
       int predicateBitField;
       void *dstMem;
       void *srcMem;
-      int size;
+      unsigned long long int size;
     }MemCpyInfo;
 
     typedef struct{
@@ -984,7 +992,7 @@ class XXE{
       int predicateBitField;
       void *dstMem;
       int rraOffset;
-      int size;
+      unsigned long long int size;
       int rraIndex;
     }MemCpySrcRRAInfo;
     
@@ -1070,8 +1078,8 @@ class XXE{
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
-      int size;
-    }BuffInfo;
+      unsigned long long int size;
+    }BuffInfo;  // meta for: SendInfo and RecvInfo
     
     typedef struct{
       OpId opId;
@@ -1083,8 +1091,8 @@ class XXE{
       bool vectorFlag;
       bool indirectionFlag;
       void *buffer;
-      int size;
-    }BuffnbInfo;
+      unsigned long long int size;
+    }BuffnbInfo;  // meta for: SendnbInfo and RecvnbInfo
 
     typedef struct{
       OpId opId;

@@ -126,7 +126,7 @@ program ESMF_VMNonBlockingEx
 ! started, let along completed. For this reason it is unsafe to overwrite
 ! the data in the {\tt localData} array on {\tt src} PET, or to access
 ! the {\tt localData} array on {\tt dst} PET. However both PETs are free
-! to engage in other work while the data transfer my proceed concurrently.
+! to engage in other work while the data transfer may proceed concurrently.
 !EOE
 
 !BOC
@@ -277,20 +277,19 @@ program ESMF_VMNonBlockingEx
 
 !BOE
 ! For cases where multiple messages are being sent between the same
-! {\tt src}-{\tt dst}
-! pairs using non-blocking communications, performance can often
-! be improved by aggregating individual messages. An extra buffer
-! is needed to hold the collected messages, resulting in only a single data
+! {\tt src}-{\tt dst} pairs using non-blocking communications, performance
+! can often be improved by aggregating individual messages. An extra buffer
+! is needed to hold the collected messages. The result is a single data
 ! transfer for each PET pair. In many cases this can significantly reduce the
 ! time spent in communications. The ESMF VM class provides access to such a
-! buffer technique through the {\tt ESMF\_VMEpoch} API.
+! buffering technique through the {\tt ESMF\_VMEpoch} API.
 !
 ! The {\tt ESMF\_VMEpoch} API consists of two interfaces:
 ! {\tt ESMF\_VMEpochEnter()} and {\tt ESMF\_VMEpochExit()}. When entering an
 ! epoch, the user specifies the type of epoch that is to be entered. Currently
 ! only {\tt ESMF\_VMEPOCH\_BUFFER} is available. Inside this epoch,
 ! non-blocking communication calls are aggregated and data transfers on the 
-! {\tt src} side are not issued until the epoch is exited. On the {\tt dst side}
+! {\tt src} side are not issued until the epoch is exited. On the {\tt dst} side
 ! a single data transfer is received, and then divided over the actual
 ! non-blocking receive calls.
 !
