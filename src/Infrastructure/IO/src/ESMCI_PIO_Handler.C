@@ -1190,7 +1190,7 @@ void PIO_Handler::open(
   int piorc;                              // PIO error value
   VM *vm = VM::getCurrent(&localrc);
   int numtasks =  vm->getPetCount();
-  int petspernode = vm->getSsiLocalPetCount();
+  int petspernode = vm->getSsiMaxPetCount();
 
 
   struct iofmt_map_t {
