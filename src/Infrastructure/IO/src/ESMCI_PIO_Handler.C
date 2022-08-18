@@ -278,7 +278,7 @@ int PIO_Handler::initializeVM (void
 
       // Figure out the inputs for the initialize call
       int numtasks =  vm->getPetCount();
-      stride = vm->getSsiLocalPetCount();
+      stride = vm->getSsiMaxPetCount();
       base = 0; // IO tasks start with base and are every stride tasks until num_iotasks.
       if (numtasks > stride){
           num_iotasks = int(numtasks/stride);
@@ -1190,7 +1190,7 @@ void PIO_Handler::open(
   int piorc;                              // PIO error value
   VM *vm = VM::getCurrent(&localrc);
   int numtasks =  vm->getPetCount();
-  int petspernode = vm->getSsiLocalPetCount();
+  int petspernode = vm->getSsiMaxPetCount();
 
 
   struct iofmt_map_t {
