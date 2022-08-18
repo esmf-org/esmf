@@ -500,28 +500,28 @@ function ESMF_XGridCreate(keywordEnforcer, &
 !           these Meshes can be either Cartesian 2D or Spherical.
 !     \item [{[sideAGridPriority]}]
 !           Priority array of Grids on sideA during overlay generation.
-!           The {\tt sideAGridPriority} array should be the same length as {\tt sideAGrid}. The values
+!           The {\tt sideAGridPriority} array should be the same size as the {\tt sideAGrid} array. The values
 !           in the array should range from 1 to size(sideAGrid)+size(sideAMesh). A Grid whose corresponding
 !           value in this array is lower than another side A Grid or Mesh, will take precedence over that Grid or Mesh
 !           during side A merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
 !           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideAMeshPriority]}]
 !           Priority array of Meshes on sideA during overlay generation.
-!           The {\tt sideAMeshPriority} array should be the same length as {\tt sideAMesh}. The values
+!           The {\tt sideAMeshPriority} array should be the same size as the {\tt sideAMesh} array. The values
 !           in the array should range from 1 to size(sideAGrid)+size(sideAMesh). A Mesh whose corresponding
 !           value in this array is lower than another side A Grid or Mesh, will take precedence over that Grid or Mesh
 !           during side A merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
 !           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideBGridPriority]}]
 !           Priority array of Grids on sideB during overlay generation.
-!           The {\tt sideBGridPriority} array should be the same length as {\tt sideBGrid}. The values
+!           The {\tt sideBGridPriority} array should be the same size as the {\tt sideBGrid} array. The values
 !           in the array should range from 1 to size(sideBGrid)+size(sideBMesh). A Grid whose corresponding
 !           value in this array is lower than another side B Grid or Mesh, will take precedence over that Grid or Mesh
 !           during side B merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
 !           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideBMeshPriority]}]
 !           Priority array of Meshes on sideB during overlay generation.
-!           The {\tt sideBMeshPriority} array should be the same length as {\tt sideBMesh}. The values
+!           The {\tt sideBMeshPriority} array should be the same size as the {\tt sideBMesh} array. The values
 !           in the array should range from 1 to size(sideBGrid)+size(sideBMesh). A Mesh whose corresponding
 !           value in this array is lower than another side B Grid or Mesh, will take precedence over that Grid or Mesh
 !           during side B merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
@@ -1644,28 +1644,28 @@ integer,              intent(out),optional :: rc
 !           these Meshes can be either Cartesian 2D or Spherical.
 !     \item [{[sideAGridPriority]}]
 !           Priority array of Grids on sideA during overlay generation.
-!           The {\tt sideAGridPriority} array should be the same length as {\tt sideAGrid}. The values
+!           The {\tt sideAGridPriority} array should be the same size as the {\tt sideAGrid} array. The values
 !           in the array should range from 1 to size(sideAGrid)+size(sideAMesh). A Grid whose corresponding
 !           value in this array is lower than another side A Grid or Mesh, will take precedence over that Grid or Mesh
 !           during side A merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
 !           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideAMeshPriority]}]
 !           Priority array of Meshes on sideA during overlay generation.
-!           The {\tt sideAMeshPriority} array should be the same length as {\tt sideAMesh}. The values
+!           The {\tt sideAMeshPriority} array should be the same size as the {\tt sideAMesh} array. The values
 !           in the array should range from 1 to size(sideAGrid)+size(sideAMesh). A Mesh whose corresponding
 !           value in this array is lower than another side A Grid or Mesh, will take precedence over that Grid or Mesh
 !           during side A merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
 !           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideBGridPriority]}]
 !           Priority array of Grids on sideB during overlay generation.
-!           The {\tt sideBGridPriority} array should be the same length as {\tt sideBGrid}. The values
+!           The {\tt sideBGridPriority} array should be the same size as the {\tt sideBGrid} array. The values
 !           in the array should range from 1 to size(sideBGrid)+size(sideBMesh). A Grid whose corresponding
 !           value in this array is lower than another side B Grid or Mesh, will take precedence over that Grid or Mesh
 !           during side B merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
 !           the other Grid or Mesh part will be clipped away.
 !     \item [{[sideBMeshPriority]}]
 !           Priority array of Meshes on sideB during overlay generation.
-!           The {\tt sideBMeshPriority} array should be the same length as {\tt sideBMesh}. The values
+!           The {\tt sideBMeshPriority} array should be the same size as the {\tt sideBMesh} array. The values
 !           in the array should range from 1 to size(sideBGrid)+size(sideBMesh). A Mesh whose corresponding
 !           value in this array is lower than another side B Grid or Mesh, will take precedence over that Grid or Mesh
 !           during side B merging. In other words, if both have parts in the same region, then the object with the lower value will win, and
