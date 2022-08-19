@@ -62,3 +62,9 @@ jobs:
         cp -rf NUOPC_howtodoc.pdf ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
         cd ${{ github.workspace }}/artifacts/artifacts/doc-dev_guide
         cp -rf ./dev_guide/dev_guide/* ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/dev_guide/
+        
+    - name: Commit and publish docs
+      uses: actions-js/push@master
+      with:
+        directory: ${{ github.workspace }}/esmf-org.github.io
+        github_token: ${{ secrets.GITHUB_TOKEN }}
