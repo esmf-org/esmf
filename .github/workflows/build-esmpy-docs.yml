@@ -56,3 +56,9 @@ jobs:
         cd ${{ github.workspace }}/artifacts/doc-esmpy/esmpy_doc
         cp -rf html ${{ github.workspace }}/esmpy_doc/docs/nightly/${{ github.ref_name }}/
         cp -rf latex/ESMPy.pdf ${{ github.workspace }}/esmpy_doc/docs/nightly/${{ github.ref_name }}/
+
+    - name: Commit and publish docs
+      uses: actions-js/push@master
+      with:
+        directory: ${{ github.workspace }}/esmpy_doc
+        github_token: ${{ secrets.GITHUB_TOKEN }}
