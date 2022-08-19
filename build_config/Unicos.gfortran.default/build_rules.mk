@@ -104,7 +104,7 @@ ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 ############################################################
 # OpenACC compiler and linker flags
 #
-ESMF_OPENACCDEFAULT = ON
+ESMF_OPENACCDEFAULT = OFF
 ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
 ESMF_OPENACC_CXXCOMPILEOPTS += -fopenacc
 ESMF_OPENACC_F90LINKOPTS    += -fopenacc
