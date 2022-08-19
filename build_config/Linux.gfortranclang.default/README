@@ -1,6 +1,4 @@
-Settings for Linux, using the clang C++ compiler and gfortran compiler.
-Due to bugs in early versions of gfortran, ESMF requires gfortran version 4.3
-or newer.
+Settings for Linux, using the clang C++ compiler and GNU gfortran compiler.
 
 Requires the following environment settings:
 

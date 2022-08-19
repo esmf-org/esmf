@@ -54,6 +54,13 @@ void dg0_shape_func<PDIM>::shape_grads(unsigned int npts, const ScalarT pcoord[]
 
 template<int PDIM>
 bool dg0_shape_func<PDIM>::is_in(const double pcoord[], double *dist) {
+  // WARNING:
+  // This method isn't used right now, but
+  // init dist to 0.0, just so something consistent is
+  // returned. However, this will be WRONG if is_in=false.
+  // TODO: If this is used, fix dist value to be correct when is_in=false
+  if (dist) *dist=0.0;
+
   return false;
 }
 
@@ -94,8 +101,17 @@ void bar_shape_func::shape_grads(unsigned int npts, const ScalarT pcoord[], Scal
   }  // for j
 }
 
+
 bool bar_shape_func::is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
+
+  // WARNING:
+  // This method isn't used right now, but
+  // init dist to 0.0, just so something consistent is
+  // returned. However, this will be WRONG if is_in=false.
+  // TODO: If this is used, fix dist value to be correct when is_in=false
+  if (dist) *dist=0.0;   // Init to 0.0
+
   if (pcoord[0] < -1.0-in_tol || pcoord[0] > 1.0+in_tol) return false;
   return true;
 }
@@ -144,6 +160,14 @@ void bar3_shape_func::shape_grads(unsigned int npts, const ScalarT pcoord[], Sca
 
 bool bar3_shape_func::is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
+
+  // WARNING:
+  // This method isn't used right now, but
+  // init dist to 0.0, just so something consistent is
+  // returned. However, this will be WRONG if is_in=false.
+  // TODO: If this is used, fix dist value to be correct when is_in=false
+  if (dist) *dist=0.0;   // Init to 0.0
+  
   if (pcoord[0] < -1.0-in_tol || pcoord[0] > 1.0+in_tol) return false;
   return true;
 }
@@ -191,27 +215,15 @@ void tri_shape_func::shape_grads(unsigned int npts, const ScalarT pcoord[], Scal
 }
 
 
-#if 0
-bool tri_shape_func::is_in(const double pcoord[], double *dist) {
-  const double in_tol = 1e-10;
-  if (pcoord[0] < -in_tol) {
-    if (dist) *dist = -pcoord[0];
-    return false;
-  } else if (pcoord[1] < -in_tol) {
-    if (dist) *dist = -pcoord[1];
-    return false;
-  } else if ((pcoord[0] + pcoord[1]) > 1.0+in_tol) {
-    if (dist) *dist = std::abs((pcoord[0] + pcoord[1]) - 1.0);
-    return false;
-  }
-  return true;
-}
-#endif
 
 bool tri_shape_func::is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
+
+  // Init to is_in = true case
   bool in=true;
+  if (dist) *dist=0.0; 
 
+  // Figure out if it's actually not in
   if ((pcoord[0] <-in_tol) || (pcoord[1] <-in_tol)) {
     double out_dist[2]={0.0,0.0};
 
@@ -320,29 +332,16 @@ void quad_shape_func::shape_grads(unsigned int npts, const ScalarT pcoord[], Sca
   }  // for j
 }
 
-#if 0
+  
 bool quad_shape_func::is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
-  if (pcoord[0] < -1.0-in_tol) {
-    if(dist) *dist = -1.0 - pcoord[0];
-    return false;
-  } else if (pcoord[0] > 1.0+in_tol) {
-    return false;
-  } else if  (pcoord[1] < -1.0-in_tol) {
-    return false;
-  } else if(pcoord[1] > 1.0+in_tol) {
-    return false;
-  }
-  return true;
-}
-#endif
 
-
-bool quad_shape_func::is_in(const double pcoord[], double *dist) {
-  const double in_tol = 1e-10;
+  // Init to is_in = true case
   bool in=true;
   double max_out[2]={0.0,0.0};
+  if (dist) *dist=0.0; 
 
+  // Figure out if it's actually not in
   if (pcoord[0] < -1.0-in_tol) {
     max_out[0]=-1.0 - pcoord[0];
     in= false;
@@ -461,6 +460,14 @@ void quad9_shape_func::shape_grads(unsigned int npts, const ScalarT pcoord[], Sc
 
 bool quad9_shape_func::is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
+
+  // WARNING:
+  // This method isn't used right now, but
+  // init dist to 0.0, just so something consistent is
+  // returned. However, this will be WRONG if is_in=false.
+  // TODO: If this is used, fix dist value to be correct when is_in=false
+  if (dist) *dist=0.0;   // Init to 0.0
+  
   if (pcoord[0] < -1.0-in_tol || pcoord[0] > 1.0+in_tol || pcoord[1] < -1.0-in_tol || pcoord[1] > 1.0+in_tol) return false;
   return true;
 }
@@ -556,12 +563,16 @@ void hex_shape_func::shape_grads(unsigned int npts, const ScalarT pcoord[], Scal
   }  // for j
 }
 
-#if 1
+
 bool hex_shape_func::is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
+
+  // Init to is_in = true case
   bool in=true;
   double max_out[3]={0.0,0.0,0.0};
+  if (dist) *dist=0.0; 
 
+  // Figure out if it's actually not in  
   if (pcoord[0] < -1.0-in_tol) {
     max_out[0]=-1.0 - pcoord[0];
     in= false;
@@ -591,17 +602,6 @@ bool hex_shape_func::is_in(const double pcoord[], double *dist) {
 
   return in;
 }
-
-#else
-
-bool hex_shape_func::is_in(const double pcoord[], double *dist) {
-  const double in_tol = 1e-10;
-  if (pcoord[0] < -1.0-in_tol || pcoord[0] > 1.0+in_tol || pcoord[1] < -1.0-in_tol || pcoord[1] > 1.0+in_tol
-   || pcoord[2] < -1.0-in_tol || pcoord[2] > 1.0+in_tol) return false;
-  return true;
-}
-
-#endif
 
 
 
@@ -666,9 +666,17 @@ void tet_shape_func::shape_grads(unsigned int npts, const ScalarT pcoord[], Scal
 
 bool tet_shape_func::is_in(const double pcoord[],double *dist) {
   const double in_tol = 1e-10;
-  if (pcoord[0] < 0-in_tol || pcoord[1] < -in_tol || pcoord[2] < -in_tol) return false;
 
+  // WARNING:
+  // This method isn't used right now, but
+  // init dist to 0.0, just so something consistent is
+  // returned. However, this will be WRONG if is_in=false.
+  // TODO: If this is used, fix dist value to be correct when is_in=false  
+  if (dist) *dist=0.0;   // Init to 0.0
+  
+  if (pcoord[0] < 0-in_tol || pcoord[1] < -in_tol || pcoord[2] < -in_tol) return false;
   if ((pcoord[0] + pcoord[1] + pcoord[2]) > 1+in_tol) return false;
+
   return true;
 }
 
@@ -706,6 +714,14 @@ void quad_zeroderiv_shape_func::shape_grads(unsigned int npts, const ScalarT pco
 
 bool quad_zeroderiv_shape_func::is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
+
+  // WARNING:
+  // This method isn't used right now, but
+  // init dist to 0.0, just so something consistent is
+  // returned. However, this will be WRONG if is_in=false.
+  // TODO: If this is used, fix dist value to be correct when is_in=false
+  if (dist) *dist=0.0;   // Init to 0.0
+  
   if (pcoord[0] < -1.0-in_tol || pcoord[0] > 1.0+in_tol || pcoord[1] < -1.0-in_tol || pcoord[1] > 1.0+in_tol) return false;
   return true;
 }

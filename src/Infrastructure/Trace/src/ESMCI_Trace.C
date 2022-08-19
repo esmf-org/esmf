@@ -655,6 +655,13 @@ namespace ESMCI {
       InitializeWrappers();
     }
 
+    // enter global ESMF region
+    TraceEventRegionEnter("[ESMF]", &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+      return;
+    }
+
     if (rc!=NULL) *rc = ESMF_SUCCESS;
 
   }
@@ -1063,6 +1070,14 @@ namespace ESMCI {
     // allow calling multiple times, only closes
     // on the first call, needed in testing
     if (traceInitialized) {
+
+      // exit global ESMF region
+      TraceEventRegionExit("[ESMF]", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc,
+           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+        return;
+      }
+
       traceInitialized = false;
       FinalizeWrappers();
 

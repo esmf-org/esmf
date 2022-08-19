@@ -34,6 +34,12 @@ module NUOPC_Driver
     routine_Run
 
   public &
+    label_PreChildrenAdvertise, &
+    label_PostChildrenAdvertise, &
+    label_PreChildrenRealize, &
+    label_PostChildrenRealize, &
+    label_PreChildrenDataInitialize, &
+    label_PostChildrenDataInitialize, &
     label_ModifyInitializePhaseMap, &
     label_ModifyCplLists, &
     label_SetModelServices, &
@@ -46,6 +52,18 @@ module NUOPC_Driver
     label_InternalState = "Driver_InternalState"
   character(*), parameter :: &
     label_SetModelServices = "Driver_SetModelServices"
+  character(*), parameter :: &
+    label_PreChildrenAdvertise = "Driver_PreChildrenAdvertise"
+  character(*), parameter :: &
+    label_PostChildrenAdvertise = "Driver_PostChildrenAdvertise"
+  character(*), parameter :: &
+    label_PreChildrenRealize = "Driver_PreChildrenRealize"
+  character(*), parameter :: &
+    label_PostChildrenRealize = "Driver_PostChildrenRealize"
+  character(*), parameter :: &
+    label_PreChildrenDataInitialize = "Driver_PreChildrenDataInitialize"
+  character(*), parameter :: &
+    label_PostChildrenDataInitialize = "Driver_PostChildrenDataInitialize"
   character(*), parameter :: &
     label_SetRunSequence = "Driver_SetRunSequence"
   character(*), parameter :: &
@@ -1229,7 +1247,7 @@ module NUOPC_Driver
     if (btest(profiling,1)) then
       call ESMF_TraceRegionExit("label_ModifyInitializePhaseMap")
     endif
-    
+
     ! Ingest the InitializePhaseMap
     do i=0, is%wrap%modelCount
       areServicesSet = &
@@ -1259,6 +1277,23 @@ module NUOPC_Driver
         endif
       enddo
     enddo
+
+    ! SPECIALIZE by calling into optional attached method
+    ! before children advertise
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_PreChildrenAdvertise")
+    endif
+    call ESMF_MethodExecute(driver, label=label_PreChildrenAdvertise, &
+      existflag=existflag, userRc=userrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_PreChildrenAdvertise")
+    endif
 
     ! -> Encode the NUOPC IPDv00, IPDv01, IPDv02, IPDv03, IPDv04, IPDv05, IPDvX
 
@@ -1413,7 +1448,7 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-      
+
     ! Before returning the driver must clean up its own importState, which 
     ! may have Fields advertised that do not have a ConsumerConnection set.
     ! These are Fields that during the negotiation between driver children
@@ -1431,6 +1466,23 @@ module NUOPC_Driver
       call rmFieldsWoConsumerConnection(importState, name=name, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
+    ! SPECIALIZE by calling into optional attached method
+    ! after children advertise
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_PostChildrenAdvertise")
+    endif
+    call ESMF_MethodExecute(driver, label=label_PostChildrenAdvertise, &
+      existflag=existflag, userRc=userrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_PostChildrenAdvertise")
     endif
 
     ! handle verbosity
@@ -1725,12 +1777,14 @@ module NUOPC_Driver
     
     ! local variables
     character(*), parameter   :: rName="InitializeIPDv02p3"
+    integer                   :: userrc
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity, profiling
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
     character(ESMF_MAXSTR)    :: msgString, pLabel
     integer                   :: phase
+    logical                   :: existflag
 
     rc = ESMF_SUCCESS
 
@@ -1802,6 +1856,23 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+    endif
+
+    ! SPECIALIZE by calling into optional attached method
+    ! before children realize
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_PreChildrenRealize")
+    endif
+    call ESMF_MethodExecute(driver, label=label_PreChildrenRealize, &
+      existflag=existflag, userRc=userrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_PreChildrenRealize")
     endif
 
     ! connectorComps
@@ -1991,6 +2062,23 @@ module NUOPC_Driver
     ! connectorComps
     ! nothing to do
 
+    ! SPECIALIZE by calling into optional attached method
+    ! after children realize
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_PostChildrenRealize")
+    endif
+    call ESMF_MethodExecute(driver, label=label_PostChildrenRealize, &
+      existflag=existflag, userRc=userrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_PostChildrenRealize")
+    endif
+
     ! handle verbosity
     if (btest(verbosity,8)) then
       call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
@@ -2058,6 +2146,7 @@ module NUOPC_Driver
     integer                   :: verbosity, profiling
     character(ESMF_MAXSTR)    :: msgString, pLabel
     integer                   :: phase
+    logical                   :: existflag
 
     rc = ESMF_SUCCESS
 
@@ -2129,6 +2218,23 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+    endif
+
+    ! SPECIALIZE by calling into optional attached method
+    ! before children data initialize
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_PreChildrenDataInitialize")
+    endif
+    call ESMF_MethodExecute(driver, label=label_PreChildrenDataInitialize, &
+      existflag=existflag, userRc=userrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_PreChildrenDataInitialize")
     endif
 
     ! if the incoming clock is valid, then use to set currTime on internalClock
@@ -2272,6 +2378,23 @@ module NUOPC_Driver
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
       endif
+    endif
+
+    ! SPECIALIZE by calling into optional attached method
+    ! after children data initialize
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionEnter("label_PostChildrenDataInitialize")
+    endif
+    call ESMF_MethodExecute(driver, label=label_PostChildrenDataInitialize, &
+      existflag=existflag, userRc=userrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (btest(profiling,1)) then
+      call ESMF_TraceRegionExit("label_PostChildrenDataInitialize")
     endif
 
     ! handle verbosity
@@ -4511,6 +4634,16 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
+
+    ! Call the SetVM on the added component
+    call NUOPC_CompSetVM(cmEntry%wrap%component, &
+      sharedObj=sharedObj, userRc=userrc, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
 
     ! Call the SetServices on the added component
     call NUOPC_CompSetServices(cmEntry%wrap%component, &
@@ -8057,6 +8190,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (stateIsCreated) then
       ! - complete all the fields in the importState
+      if (btest(verbosity,4)) then
+        call ESMF_LogWrite("Calling into completeAllFields() for importState", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       call completeAllFields(importState, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -8068,6 +8208,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (stateIsCreated) then
       ! - complete all the fields in the exportState
+      if (btest(verbosity,4)) then
+        call ESMF_LogWrite("Calling into completeAllFields() for exportState", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       call completeAllFields(exportState, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -8119,18 +8266,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (associated(fieldList)) then
         do i=1, size(fieldList)
-          
+
           ! See if the Field is shared. If so, don't need to do anything
           ! here, because the Connector will have realized the Fields 
           ! automatically, using reference sharing. Otherwise realize here.
-          
+
           call NUOPC_GetAttribute(fieldList(i), name="ShareStatusField", &
             value=value, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          
-          if (trim(value)=="not shared") then
+
+          if (trim(value)=="shared") then
+            ! shared -> must complete the field here
+            if (btest(verbosity,4)) then
+              call ESMF_LogWrite("- "//trim(itemNameList(i))// &
+                ": shared --> don't know what to do!!!!!.", ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
+          else
             ! not shared -> must complete the field here
+            if (btest(verbosity,4)) then
+              call ESMF_LogWrite("- "//trim(itemNameList(i))// &
+                ": not shared --> complete here.", ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
             call NUOPC_Realize(stateList(i), fieldName=itemNameList(i), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

@@ -356,6 +356,10 @@ ifeq ($(ESMF_MACHINE),x86_64)
 # except x86_64
 export ESMF_ABI = 64
 endif
+ifeq ($(ESMF_MACHINE),arm64)
+# and arm64
+export ESMF_ABI = 64
+endif
 endif
 
 ifeq ($(ESMF_OS),Cygwin)

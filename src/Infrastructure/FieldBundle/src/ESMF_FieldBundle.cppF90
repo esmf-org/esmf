@@ -109,7 +109,7 @@ module ESMF_FieldBundleMod
   sequence
 ^endif
     type(ESMF_FieldBundleType), pointer :: this
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -1600,7 +1600,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Destroy all the internal Fields if this is a proxy fieldBundle
 #if 0
-!gjt: don't do this, Fields do their own garbage collection under their VM
+!gjt: dont do this, Fields do their own garbage collection under their VM
       if(this%is_proxy) then
         nullify(flist)
         call ESMF_ContainerGet(this%container, itemCount=fcount, &
@@ -1895,10 +1895,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(name)) then
+      if (fieldbundle%isNamedAlias) then
+        name = trim(fieldbundle%name)
+      else
         call ESMF_GetName(fieldbundle%this%base, name, localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
     
     ! Return successfully
@@ -6277,7 +6280,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing field data may
 !      {\em not} be overwritten.  If .true., only the
-!      data corresponding to the field's name will be
+!      data corresponding to the fields name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
 !      the given timeslice will be overwritten.
 !      Note that it is always an error to attempt to overwrite a NetCDF

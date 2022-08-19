@@ -273,7 +273,7 @@ namespace ESMCI {
       totalElementCountPLocalDe = NULL;
       sizeSuperUndist = NULL;
       sizeDist = NULL;
-#if !defined (PARCH_IRIX64)
+#if !defined (ESMF_OS_IRIX64)
       rimSeqIndexI4.resize(0);
       rimSeqIndexI8.resize(0);
 #endif
@@ -311,7 +311,7 @@ namespace ESMCI {
       totalElementCountPLocalDe = NULL;
       sizeSuperUndist = NULL;
       sizeDist = NULL;
-#if !defined (PARCH_IRIX64)
+#if !defined (ESMF_OS_IRIX64)
       rimSeqIndexI4.resize(0);
       rimSeqIndexI8.resize(0);
 #endif

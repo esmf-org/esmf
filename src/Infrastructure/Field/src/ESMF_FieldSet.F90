@@ -128,9 +128,13 @@ contains
     
     ! Set the name in Base object
     if (present(name)) then
-      call ESMF_SetName(field%ftypep%base, name=name, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (field%isNamedAlias) then
+        field%name = trim(name)
+      else
+        call ESMF_SetName(field%ftypep%base, name=name, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     ! return successfully
