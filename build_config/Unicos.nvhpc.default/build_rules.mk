@@ -1,20 +1,20 @@
 # $Id$
 #
-# Linux.nvhpc.default
+# Unicos.nvhpc.default
 #
 
 ############################################################
 # Default compiler setting.
 #
-ESMF_F90DEFAULT         = nvfortran
-ESMF_CXXDEFAULT         = nvc++
-ESMF_CDEFAULT           = nvc
+ESMF_F90DEFAULT         = ftn
+ESMF_CXXDEFAULT         = CC
+ESMF_CDEFAULT           = cc
 
 ############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)
-export ESMF_COMM := mpiuni
+export ESMF_COMM := mpi
 endif
 
 ############################################################
@@ -29,100 +29,15 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
-ESMF_F90LINKLIBS       += -lmpi -lmpi++
-ESMF_CXXLINKLIBS       += -lmpi -lmpi++
-ESMF_MPIRUNDEFAULT      = mpiexec_mpt $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec_mpt $(ESMF_MPILAUNCHOPTIONS)
-else
-ifeq ($(ESMF_COMM),mpt)
-# MPT with compiler wrappers -------------------------------
-ESMF_F90DEFAULT         = mpif90
-ESMF_F90LINKLIBS       += -lmpi++
-ESMF_CXXDEFAULT         = mpicxx
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-else
-ifeq ($(ESMF_COMM),mpich1)
-# Mpich1 ---------------------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH1
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH1
-ESMF_F90DEFAULT         = mpif90
-ESMF_F90LINKLIBS       += -lpmpich++ -lmpich
-ESMF_CXXDEFAULT         = mpiCC
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
-else
-ifeq ($(ESMF_COMM),mpich2)
-# Mpich2 ---------------------------------------------------
-ESMF_F90DEFAULT         = mpif90
-ESMF_CXXDEFAULT         = mpicxx
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
-else
-ifeq ($(ESMF_COMM),mpich)
-# Mpich3 and up --------------------------------------------
-ESMF_F90DEFAULT         = mpif90
-ESMF_CXXDEFAULT         = mpicxx
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-else
-ifeq ($(ESMF_COMM),mvapich)
-# Mvapich ---------------------------------------------------
-ESMF_F90DEFAULT         = mpif90
-ESMF_CXXDEFAULT         = mpicxx
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-else
-ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
-ESMF_F90DEFAULT         = mpif90
-ESMF_CXXDEFAULT         = mpicxx
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-else
-ifeq ($(ESMF_COMM),intelmpi)
-# IntelMPI -------------------------------------------------
-ESMF_F90DEFAULT         = mpipgf90
-ESMF_CXXDEFAULT         = mpipgc++
-ESMF_CDEFAULT           = mpipgcc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-else
-ifeq ($(ESMF_COMM),openmpi)
-# OpenMPI --------------------------------------------------
-ifeq ($(shell $(ESMF_DIR)/scripts/available mpifort),mpifort)
-ESMF_F90DEFAULT         = mpifort
-else
-ESMF_F90DEFAULT         = mpif90
-endif
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
-ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90 $(ESMF_F90DEFAULT))
-ESMF_CXXDEFAULT         = mpicxx
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+ESMF_F90LINKLIBS       += 
+ESMF_CXXLINKLIBS       += 
+ESMF_MPIRUNDEFAULT      = mpirun.srun
+ESMF_MPIMPMDRUNDEFAULT  =
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
-endif
-endif
-endif
-endif
-endif
-endif
-endif
-endif
 endif
 endif
 endif
