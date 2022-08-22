@@ -14,34 +14,33 @@ clean:
     # rm -rf src/ESMF/test/regrid_from_file/data')
     # rm -rf examples/data')
 
-
 install:
-		pip install .
+		python3 -m pip install --user .
 
 test_unit:
-		pytest -m="not parallel"
+		python3 -m pytest -m="not parallel"
 
 test_unit_parallel:
-		mpirun -n 4 python -m pytest -m="not serial"
+		mpirun -n 4 python3 -m pytest -m="not serial"
 
 test_examples_dryrun:
-		pytest -vs examples/exampletestdryrun.py
+		python3 -m pytest -vs examples/exampletestdryrun.py
 	
 test_examples:
-		pytest -m="not parallel" examples/exampletest.py
+		python3 -m pytest -vs -m="not parallel" examples/exampletest.py
 
 test_examples_parallel:
-		mpirun -n 4 python -m pytest -m="not serial" examples/exampletest.py
+		mpirun -n 4 python3 -vs -m pytest -m="not serial" examples/exampletest.py
 
 test_regrid_from_file_dryrun:
-		pytest -vs src/ESMF/test/regrid_from_file/rfftestdryrun.py
+		python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftestdryrun.py
 
 test_regrid_from_file:
-		pytest -vs src/ESMF/test/regrid_from_file/rfftest.py
+		python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftest.py
 
 test_regrid_from_file_parallel:
-		pytest -vs src/ESMF/test/regrid_from_file/rfftestdryrun.py
-		mpirun -n 4 python -m pytest -vs src/ESMF/test/regrid_from_file/rfftest.py
+		python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftestdryrun.py
+		mpirun -n 4 python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftest.py
 
 test_all: test_unit test_parallel test_examples_dryrun test_examples test_examples_parallel
 
@@ -50,4 +49,5 @@ test: test_unit test_unit_parallel test_examples test_examples_parallel
 test_uni: test_unit test_examples
 
 uninstall:
-		pip uninstall ESMPy
+		python3 -m pip uninstall ESMPy
+
