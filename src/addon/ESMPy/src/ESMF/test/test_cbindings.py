@@ -4,6 +4,8 @@
 unit test file
 """
 
+import pytest
+
 from ESMF import *
 from ESMF.interface.cbindings import *
 from ESMF.test.base import TestBase, attr
