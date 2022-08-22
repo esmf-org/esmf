@@ -75,9 +75,14 @@ class Manager(object):
     will always be called prior to exiting Python.  Calling __init__
     explicitly results in a no-op.
 
-    The Manager can be used to enable the 
+    The :class:`~ESMF.api.esmpymanager.Manager` can be used to enable the 
     `MOAB <https://sigma.mcs.anl.gov/moab-library/>`_
-    mesh backend to the Mesh. This is done by calling ``set_moab()`` with ``moab_on=True``.
+    mesh backend to the :class:`~ESMF.api.esmpymanager.Mesh`. This is done by calling ``set_moab()`` with ``moab_on=True``.
+    
+    The :class:`~ESMF.api.esmpymanager.Manager` has a `test_exhaustive` member 
+    variable that can be enabled to run 
+    combinatorial expansions of :class:`~ESMF.api.esmpymanager.Grid` and 
+    :class:`~ESMF.api.esmpymanager.Field` creation parameters.
 
     :param bool debug: outputs logging information to ESMF logfiles. If
         ``None``, defaults to False.
@@ -126,6 +131,9 @@ class Manager(object):
             
             # set up to use the ESMF native mesh backend by default
             self._moab = False
+            
+            # exhaustive testing set to False by default
+            self._test_exhaustive = False
 
         return
 

@@ -4,6 +4,9 @@ import numpy as np
 
 from ESMF.util.enum import IntEnum
 
+# Test exhaustive parameter
+esmpy_test_exhaustive=False
+
 # error message
 _errmsg = 'Please check the log files (named "*ESMF_LogFile").'
 _ESMP_SUCCESS = 0

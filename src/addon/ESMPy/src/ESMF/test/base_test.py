@@ -8,6 +8,7 @@ class Test(TestBase):
 
     def setup(self):
         mg = Manager()
+        mg.test_exhaustive = False
         # mg.barrier()
 
     def test_assertNumpyAll_bad_mask(self):

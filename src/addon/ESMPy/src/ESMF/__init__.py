@@ -76,9 +76,6 @@ from ESMF.api.constants import *
 from ESMF.util.helpers import *
 from ESMF.api.constants import _ESMF_VERSION
 
-# for testing
-from ESMF.util.decorators import expected_failure
-
 #### SET UP SOME INFO #########################################################
 
 __name__ = "ESMF"
@@ -94,5 +91,3 @@ __author__ = "University Corporation for Atmospheric Research, " + \
 __license__ = "University of Illinois-NCSA"
 __release__ = _ESMF_VERSION
 __version__ = _ESMF_VERSION
-
-

@@ -6,8 +6,10 @@ from ESMF import *
 from ESMF.interface.cbindings import *
 from ESMF.test.base import TestBase, attr
 
+import pytest
+
 class TestVM(TestBase):
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_vm_broadcast(self):
         mg = Manager()
 
@@ -27,7 +29,7 @@ class TestVM(TestBase):
 
         mg.barrier()
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_vm_reduce(self):
         send = np.ones(4, dtype=np.float64)
         recv = np.zeros(4, dtype=np.float64)

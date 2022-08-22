@@ -26,6 +26,10 @@ class SerialMethod(ESMPyException):
     """This method is not safe to run in parallel!"""
     pass
 
+class SkipTest(ESMPyException):
+    """This test is skipped for some reason."""
+    pass
+
 
 
 class GridException(ESMPyException):
@@ -78,13 +82,4 @@ class FieldException(ESMPyException):
 class FieldDOError(FieldException):
     """Raised when an attempt is made to build a Field on an undefined 
        discretization object (e.g. not a Grid or a Mesh)"""
-    pass
-
-class TestException(ESMPyException):
-    """Base class for errors in the ESMPy testing."""
-    pass
-
-class TestGridWriteBeforeCoords(TestException):
-    """Raised when an attempt is made to write a Grid before c
-       coordinates have been specified"""
     pass

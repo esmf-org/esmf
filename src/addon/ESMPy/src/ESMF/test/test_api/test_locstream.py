@@ -8,6 +8,7 @@ from ESMF.interface.cbindings import *
 from ESMF.test.base import TestBase, attr
 
 import unittest
+import pytest
 
 class TestLocStream(TestBase):
 
@@ -52,7 +53,7 @@ class TestLocStream(TestBase):
         assert np.all(l2["ESMF:X"] == [0, 1, 2, 3, 4])
 
 
-    @attr('serial')
+    @pytest.mark.serial
     def test_slice(self):
         locstream = LocStream(5, name="Test LocStream")
 

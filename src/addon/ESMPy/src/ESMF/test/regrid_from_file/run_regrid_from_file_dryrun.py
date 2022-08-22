@@ -36,18 +36,12 @@ def cache_data_files_for_test_cases(test_cases):
             break
     return status_ok
 
-# Main program:  Retrieve data files from a remote server if they do not exist 
-# locally for each test read from a control file.
-def main():
-    # Read the test case parameters from the control file.
-    test_cases = read_control_file()
+# Read the test case parameters from the control file.
+test_cases = read_control_file()
 
-    # Retrieve the data files needed for the test cases from the remote server.
-    status_ok = cache_data_files_for_test_cases(test_cases)
-    if status_ok:
-        print ('RESULT: PASS - regrid_from_file_dryrun ok\n\n')
-    else:
-        print ('RESULT: FAIL - regrid_from_file_dryrun error\n\n')
-
-if __name__ == '__main__':
-    sys.exit(main())
+# Retrieve the data files needed for the test cases from the remote server.
+status_ok = cache_data_files_for_test_cases(test_cases)
+if status_ok:
+    print ('RESULT: PASS - regrid_from_file_dryrun ok\n\n')
+else:
+    print ('RESULT: FAIL - regrid_from_file_dryrun error\n\n')

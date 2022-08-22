@@ -12,28 +12,6 @@ import functools
 from ESMF.api.constants import LogKind, _ESMF_NETCDF
 from ESMF.util.exceptions import NetCDFMissing
 
-try:
-    import nose
-
-    def expected_failure(test):
-        @functools.wraps(test)
-        def inner(*args, **kwargs):
-            try:
-                test(*args, **kwargs)
-            except Exception:
-                raise nose.SkipTest
-        return inner
-except:
-    def expected_failure(test):
-        @functools.wraps(test)
-        def inner(*args, **kwargs):
-            try:
-                test(*args, **kwargs)
-            except:
-                raise AssertionError('SkipTest: Failure expected')
-        return inner
-
-
 def beta(func):
     '''This is a decorator that can be used to mark functions
     as beta.  Other decorators must be upper.'''

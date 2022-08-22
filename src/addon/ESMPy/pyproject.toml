@@ -22,3 +22,17 @@ build-backend = "setuptools.build_meta"
 # 
 # [tool.setuptools.dynamic]
 # version = {attr = "ESMPy.VERSION"}
+#
+
+[tool.pytest.ini_options]
+markers = [
+    "dryrun: marks a function that will only download test data files (deselect with '-m \"not parallel\"')",
+    "parallel: marks a test which requires mpi (deselect with '-m \"not parallel\"')",
+    "serial: marks a test which should be run on one core (deselect with '-m \"not serial\"')"
+]
+filterwarnings = [
+    # "ignore:DeprecationWarning",
+    # note the use of single quote below to denote "raw" strings in TOML
+    # 'ignore:DeprecationWarning: Call to deprecated function ESMP_FieldRegridStoreFile',
+    # 'ignore:DeprecationWarning: Call to deprecated function ESMP_FieldSMMStore',
+]

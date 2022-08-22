@@ -3,12 +3,7 @@
 mesh unit test file
 """
 
-try:
-    from unittest import SkipTest
-except ImportError:
-    from nose import SkipTest
-
-import unittest
+import pytest
 
 import os
 import inspect
@@ -181,7 +176,6 @@ class TestMesh(TestBase):
 
         self.assertNumpyAll(mesh.area, elemArea)
 
-    @attr('data')
     def test_mesh_create_from_file_scrip(self):
         try:
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
@@ -190,7 +184,6 @@ class TestMesh(TestBase):
         except:
             raise NameError('mesh_create_from_file_scrip failed!')
 
-    @attr('data')
     def test_mesh_create_from_file_esmfmesh(self):
         try:
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
@@ -221,7 +214,7 @@ class TestMesh(TestBase):
         self.check_mesh(mesh2, nodeCoord, nodeOwner)
 
     # slicing is disabled in parallel
-    @attr('serial')
+    @pytest.mark.serial
     def test_mesh_slicing(self):
         parallel = False
         if pet_count() > 1:
@@ -257,8 +250,7 @@ class TestMesh(TestBase):
         assert mesh3.size == [2, None]
         assert mesh3.size_owned == [2, None]
 
-    @attr('data')
-    @attr('serial')
+    @pytest.mark.serial
     def test_slice_mesh_created_from_file_scrip(self):
         try:
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
@@ -281,8 +273,7 @@ class TestMesh(TestBase):
         assert mesh2.size == [5, None]
         assert mesh2.size_owned == [5, None]
 
-    @attr('data')
-    @attr('serial')
+    @pytest.mark.serial
     def test_slice_mesh_created_from_file_esmfmesh(self):
         try:
             esmfdir = os.path.dirname(inspect.getfile(ESMF))
@@ -304,9 +295,8 @@ class TestMesh(TestBase):
         assert mesh2.size_owned == [5, None]
 
 
-    @attr('data')
-    @attr('serial')
-    @unittest.expectedFailure
+    @pytest.mark.serial
+    @pytest.mark.xfail
     #TODO: remove expected failure once we have a smaller data file with mesh element coordinates to use
     # TODO: have to define slicing for mesh element coordinates as well..
     def test_slice_mesh_created_from_file_elem_coords(self):

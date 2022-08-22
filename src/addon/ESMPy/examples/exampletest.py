@@ -3,25 +3,29 @@
 """
 examples test file
 """
-try:
-    from unittest import SkipTest
-except ImportError:
-    from nose import SkipTest
+
+import pytest
 
 from ESMF.test.base import TestBase, attr
 import ESMF.api.constants as constants
 
 class TestExamples(TestBase):
+    
+    # '0' in the name is so it is run first
+    def test_0_examples_dryrun(self):
+        from ESMF.util.cache_data import cache_data_files
+        cache_data_files()
 
     def test_helloworld(self):
         from . import hello_world
 
-    # # ESMF IO does not work in mpiuni mode
-    # def test_cubed_sphere_to_mesh_regrid(self):
-    #     if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
-    #         raise SkipTest('ESMF must be built with MPI for test')
-    #     else:
-    #         from . import cubed_sphere_to_mesh_regrid
+    # ESMF IO does not work in mpiuni mode
+    @pytest.mark.parallel
+    def test_cubed_sphere_to_mesh_regrid(self):
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+            raise SkipTest('ESMF must be built with MPI for test')
+        else:
+            from . import cubed_sphere_to_mesh_regrid
 
     # ESMF IO does not work in mpiuni mode
     # only example, not in documentation
@@ -58,10 +62,10 @@ class TestExamples(TestBase):
         else:
             from . import regrid_from_file
 
-    # only example, not in documentation
-    @attr('slow')
-    def _tripole_regrid(self):
-        from . import tripole_regrid
+    # # only example, not in documentation, datafile missing from repo
+    # @pytest.mark.slow
+    # def test_tripole_regrid(self):
+    #     from . import tripole_regrid
 
     # only example, not in documentation
     def test_ugrid_latlon_regrid(self):

@@ -2,10 +2,7 @@
 field unit test file
 """
 
-try:
-    from unittest import SkipTest
-except ImportError:
-    from nose import SkipTest
+import pytest
 
 from ESMF import *
 from ESMF.interface.cbindings import *
@@ -14,6 +11,10 @@ from ESMF.util.mesh_utilities import mesh_create_50, mesh_create_50_parallel
 
 
 class TestField(TestBase):
+    
+    mg = Manager(debug=True)
+    mg.test_exhaustive = False
+
     # this is for the documentation, do not modify
     def create_field(grid_or_mesh, name):
         '''
@@ -71,7 +72,7 @@ class TestField(TestBase):
         del (self.field)
         assert (not hasattr(self, 'field'))
 
-    @attr('serial')
+    @pytest.mark.serial
     def test_numpy_funcs(self):
         field = self.make_field(np.array([10, 10], dtype=np.int32))
 
@@ -97,8 +98,8 @@ class TestField(TestBase):
 
 
 
-    @attr('serial')
-    @attr('slow')
+    @pytest.mark.serial
+    @pytest.mark.skipif(mg.test_exhaustive==False, reason="only run in exhaustive mode")
     #nosetests src/ESMF/test/test_api/test_field.py:TestField.test_field_create_2d_grid
     def _field_create_2d_grid(self):
         keywords = dict(
@@ -148,8 +149,8 @@ class TestField(TestBase):
             raise ValueError(
                 "The following combinations of parameters failed to create a proper Field: " + str(fail))
 
-    @attr('serial')
-    @attr('slow')
+    @pytest.mark.serial
+    @pytest.mark.skipif(mg.test_exhaustive==False, reason="only run in exhaustive mode")
     def _field_create_3d_grid(self):
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
@@ -200,7 +201,7 @@ class TestField(TestBase):
             raise ValueError(
                 "The following combinations of parameters failed to create a proper Field: " + str(len(fail)))
 
-    @attr('slow')
+    @pytest.mark.skipif(mg.test_exhaustive==False, reason="only run in exhaustive mode")
     def _field_create_2d_mesh(self):
         parallel = False
         if pet_count() > 1:
@@ -315,7 +316,7 @@ class TestField(TestBase):
 
         assert (field.struct.ptr != field2.struct.ptr)
 
-    @attr('serial')
+    @pytest.mark.serial
     def test_field_area(self):
         grid = Grid(np.array([3, 4]), staggerloc=[StaggerLoc.CENTER, StaggerLoc.CORNER],
                     coord_sys=CoordSys.SPH_DEG, num_peri_dims=1,
@@ -431,7 +432,7 @@ class TestField(TestBase):
         field2.data[...] = 10
         self.examine_field_attributes(field2)
 
-    @attr('serial')
+    @pytest.mark.serial
     def test_field_slice_grid(self):
         typekind = TypeKind.R8
         grid = Grid(np.array([100, 100]), coord_sys=CoordSys.CART,
@@ -471,7 +472,7 @@ class TestField(TestBase):
         assert (field3.grid.upper_bounds[0].tolist() == [2, 2])
 
     # slicing is disabled in parallel
-    @attr('serial')
+    @pytest.mark.serial
     def test_field_slice_mesh(self):
         parallel = False
         if pet_count() > 1:
@@ -510,7 +511,7 @@ class TestField(TestBase):
         assert (field2.grid.size[0] == 5)
         assert (field3.grid.size[0] == 2)
 
-    @attr('serial')
+    @pytest.mark.serial
     def test_field_slice_grid_extraindices(self):
         n = 10
         grid = Grid(np.array([n,n]), coord_sys=CoordSys.CART, staggerloc=StaggerLoc.CENTER)
@@ -548,7 +549,7 @@ class TestField(TestBase):
         assert (field2.grid.upper_bounds[0].tolist() == [5, 5])
         assert (field3.grid.upper_bounds[0].tolist() == [2, 2])
 
-    @attr('serial')
+    @pytest.mark.serial
     def disable_est_field_slice_mesh_extraindices(self):
         parallel = False
         if pet_count() > 1:
@@ -584,7 +585,7 @@ class TestField(TestBase):
         assert field2.data.shape == (5, 2, 1)
         assert field3.data.shape == (2, 1, 1)
 
-    @attr('serial')
+    @pytest.mark.serial
     def test_field_reshape(self):
         field = self.make_field(np.array([10, 10], dtype=np.int32),
                                 ndbounds=False)

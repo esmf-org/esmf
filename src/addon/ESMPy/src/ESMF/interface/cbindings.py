@@ -1943,6 +1943,7 @@ _ESMF.ESMC_FieldRead.argtypes = [ct.c_void_p,
                                  Py3Char,
                                  ct.c_uint,
                                  ct.c_uint]
+@netcdf
 def ESMP_FieldRead(field, filename, variablename, timeslice, iofmt=1):
     #TODO: C doc says it defaults to NETCDF(1), but actually defaults to BIN(0)
     """
@@ -2160,7 +2161,6 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             OptionalBool,
                                             OptionalField,
                                             OptionalField]
-@deprecated
 def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                           srcMaskValues=None, dstMaskValues=None,
                           regridmethod=None,

@@ -2,10 +2,7 @@
 regrid unit test file
 """
 
-try:
-    from unittest import SkipTest
-except ImportError:
-    from nose import SkipTest
+import pytest
 
 import os
 
@@ -84,7 +81,7 @@ class TestRegrid(TestBase):
                     line_type=LineType.CART, factors=False)
         _ = rh(srcfield, dstfield)
 
-    @attr('serial')
+    @pytest.mark.serial
     def test_field_regrid_factor_retrieval(self):
         # Test retrieving factors from a route handle.
 
@@ -187,7 +184,7 @@ class TestRegrid(TestBase):
 
                 rh.destroy()
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_field_regrid_file1(self):
         mgr = Manager()
 
@@ -241,7 +238,7 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_field_regrid_file2(self):
         mgr = Manager()
         filename = 'esmpy_test_field_regrid_file2.nc'
@@ -312,7 +309,7 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     # remove this test for 8.2.0 due to unexplained segv
     def tet_field_regrid_file_withaux(self):
         import os
@@ -377,7 +374,7 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_field_regrid_file3(self):
         mgr = Manager()
         filename = 'esmpy_test_field_from_file.nc'
@@ -472,7 +469,7 @@ class TestRegrid(TestBase):
                 os.remove(path)
 
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_field_regrid_file4(self):
         mgr = Manager()
         filename = 'routehandlefile.nc'
@@ -611,7 +608,7 @@ class TestRegrid(TestBase):
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.CONSERVE)
         dstfield = rh(srcfield, dstfield)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_field_regrid_zeroregion(self):
         parallel = False
         if pet_count() > 1:
@@ -658,7 +655,7 @@ class TestRegrid(TestBase):
                 if dstfield.grid.mask[StaggerLoc.CENTER][i, j] == 0:
                     assert(dstfield[i, j] == 0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_field_regrid_zeroregion_select_ndbounds(self):
         # Test zero region select during a sparse matrix multiplication
         # having undistributed dimensions.
@@ -710,7 +707,7 @@ class TestRegrid(TestBase):
             if os.path.exists(filename):
                 os.remove(filename)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_field_regrid_area(self):
         parallel = False
         if pet_count() > 1:
@@ -752,7 +749,7 @@ class TestRegrid(TestBase):
             if (dstarea.data[i] != 0.25):
                 assert (dstarea.data[i] == 0.125)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_field_regrid_periodic(self):
         parallel = False
         if pet_count() > 1:
@@ -802,7 +799,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0016447124122954575)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_grid_3d_bilinear_cartesian(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -832,7 +829,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.00215601743167)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_grid_3d_bilinear_spherical(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -862,7 +859,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.00061587737764545617)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_grid_regrid_csrv_mask_3D(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -903,7 +900,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0021560174316746865)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_grid_regrid_csrv_mask(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -945,7 +942,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_grid_regrid_csrv_2nd_mask(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -987,7 +984,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0020296891000258252)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_grid_regrid_srcmask_types(self):
         # NOTE: this tests an old issue where the items of a grid were not properly set when
         # the grid coord_typekind differed from the field typekind.
@@ -1033,7 +1030,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_mesh_regrid_csrv_mask(self):
         parallel = False
         if pet_count() > 1:
@@ -1091,7 +1088,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.038806630051265847)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_mesh_regrid_csrv(self):
         parallel = False
         if pet_count() > 1:
@@ -1147,7 +1144,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037733241800767432)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_mesh_regrid_mask(self):
         parallel = False
         if pet_count() > 1:
@@ -1192,7 +1189,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_mesh_regrid(self):
         parallel = False
         if pet_count() > 1:
@@ -1236,7 +1233,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_field_regrid_extrapolation(self):
         parallel = False
         if pet_count() > 1:
@@ -1283,7 +1280,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_field_regrid_extrapolation_creepfill(self):
         parallel = False
         if pet_count() > 1:
@@ -1328,7 +1325,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_mesh_mesh_regrid(self):
         parallel = False
         if pet_count() > 1:
@@ -1388,7 +1385,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037109375)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def est_grid_mesh_pentatri_regrid_csrv(self):
         parallel = False
         if pet_count() > 1:
@@ -1497,7 +1494,7 @@ class TestRegrid(TestBase):
         assert (meanrel < 10E-2)
         assert (csrvrel < 10E-14)
 
-    @attr('parallel')
+    @pytest.mark.parallel
     def test_grid_mesh_pentatri_regrid_bilinear(self):
         parallel = False
         if pet_count() > 1:
