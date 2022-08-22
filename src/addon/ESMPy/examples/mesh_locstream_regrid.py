@@ -1,10 +1,5 @@
 # This example demonstrates how to regrid between a mesh and a locstream.
 
-try:
-    from unittest import SkipTest
-except ImportError:
-    from nose import SkipTest
-
 import ESMF
 import numpy
 

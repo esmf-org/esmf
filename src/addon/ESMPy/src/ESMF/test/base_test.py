@@ -1,8 +1,6 @@
-import unittest
 from ESMF.test.base import TestBase
 import numpy as np
 from ESMF import Manager
-
 
 class Test(TestBase):
 
@@ -24,6 +22,3 @@ class Test(TestBase):
     def tearDown(self):
         mg = Manager()
         # mg.barrier()
-
-if __name__ == "__main__":
-    unittest.main()

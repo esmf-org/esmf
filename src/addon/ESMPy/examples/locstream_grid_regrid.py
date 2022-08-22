@@ -9,11 +9,6 @@
 # from ESMF.util.cache_data import cache_data_file
 # cache_data_file(os.path.join(DD, "ll1deg_grid.nc"))
 
-try:
-    from unittest import SkipTest
-except ImportError:
-    from nose import SkipTest
-
 import ESMF
 import numpy
 
