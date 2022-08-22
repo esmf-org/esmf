@@ -19,7 +19,7 @@ except:
 
 
 def mesh_create_5_pentahexa(coord_sys=None):
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created.
     RETURN VALUES: \n Mesh :: mesh \n
@@ -43,7 +43,7 @@ def mesh_create_5_pentahexa(coord_sys=None):
           Element Ids in centers
 
     Note: This mesh is not parallel, it can only be used in serial
-    '''
+    """
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2, coord_sys=coord_sys)
 
@@ -91,7 +91,7 @@ def mesh_create_5_pentahexa(coord_sys=None):
     return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_4_ngons():
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 4 element Mesh has been created.
     RETURN VALUES: \n Mesh :: mesh \n
@@ -113,7 +113,7 @@ def mesh_create_4_ngons():
           Element Ids in centers
 
     Note: This mesh is not parallel, it can only be used in serial
-    '''
+    """
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
 
@@ -149,7 +149,7 @@ def mesh_create_4_ngons():
     return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_5():
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created.    
     RETURN VALUES: \n Mesh :: mesh \n
@@ -170,7 +170,7 @@ def mesh_create_5():
           Element Ids in centers
     
     Note: This mesh is not parallel, it can only be used in serial
-    '''
+    """
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
     
@@ -212,7 +212,7 @@ def mesh_create_5():
     return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord
 
 def mesh_create_10():
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 10 element Mesh has been created.    
     RETURN VALUES: \n Mesh :: mesh \n
@@ -237,7 +237,7 @@ def mesh_create_10():
           Element Ids in centers
     
     Note: This mesh is not parallel, it can only be used in serial
-    '''
+    """
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
     
@@ -281,7 +281,7 @@ def mesh_create_10():
     return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord
 
 def mesh_create_50(domask=False, doarea=False):
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 50 element Mesh has been created.    
     RETURN VALUES: \n Mesh :: mesh \n
@@ -322,7 +322,7 @@ def mesh_create_50(domask=False, doarea=False):
           Element Ids in centers
     
     Note: This mesh is not parallel, it can only be used in serial
-    '''
+    """
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
     
@@ -397,7 +397,7 @@ def mesh_create_50(domask=False, doarea=False):
         return mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord
 
 def mesh_create_50_ngons(domask=False, doarea=False):
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 50 element Mesh has been created.
     RETURN VALUES: \n Mesh :: mesh \n
@@ -443,7 +443,7 @@ def mesh_create_50_ngons(domask=False, doarea=False):
           Element Ids in centers
 
     Note: This mesh is not parallel, it can only be used in serial
-    '''
+    """
 
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
@@ -524,7 +524,7 @@ def mesh_create_50_ngons(domask=False, doarea=False):
         return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_4_ngons(domask=False, doarea=False):
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 4 element Mesh has been created.
     RETURN VALUES: \n Mesh :: mesh \n
@@ -546,7 +546,7 @@ def mesh_create_4_ngons(domask=False, doarea=False):
           Element Ids in centers
 
     Note: This mesh is not parallel, it can only be used in serial
-    '''
+    """
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
 
@@ -592,7 +592,7 @@ def mesh_create_4_ngons(domask=False, doarea=False):
         return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_5_parallel ():
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created in parallel.
     RETURN VALUES: \n Mesh :: mesh \n
@@ -620,7 +620,7 @@ def mesh_create_5_parallel ():
     #
     #               Node Id labels at corners
     #              Element Id labels in centers
-    '''
+    """
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
     
@@ -702,7 +702,7 @@ def mesh_create_5_parallel ():
     return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_5_pentahexa_parallel ():
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 5 element Mesh has been created in parallel.
     RETURN VALUES: \n Mesh :: mesh \n
@@ -733,7 +733,7 @@ def mesh_create_5_pentahexa_parallel ():
     #
     #               Node Id labels at corners
     #              Element Id labels in centers
-    '''
+    """
 
     # Two parametric dimensions, and two spatial dimensions
     mesh = ESMF.Mesh(parametric_dim=2, spatial_dim=2)
@@ -821,7 +821,7 @@ def mesh_create_5_pentahexa_parallel ():
     return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_10_parallel ():
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 10 element Mesh has been created in parallel.
     RETURN VALUES: \n Mesh :: mesh \n
@@ -855,7 +855,7 @@ def mesh_create_10_parallel ():
     #
     #               Node Id labels at corners
     #              Element Id labels in centers
-    '''
+    """
     if ESMF.pet_count() > 1:
         if ESMF.pet_count() != 4:
                 raise NameError('MPI rank must be 4 to build this mesh!')
@@ -947,7 +947,7 @@ def mesh_create_10_parallel ():
     return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_50_parallel(domask=False, doarea=False):
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 50 element Mesh has been created in parallel.    
     RETURN VALUES: \n Mesh :: mesh \n
@@ -993,7 +993,7 @@ def mesh_create_50_parallel(domask=False, doarea=False):
 
           Node Ids at corners
           Element Ids in centers
-    '''
+    """
     if ESMF.pet_count() > 1:
         if ESMF.pet_count() != 4:
                 raise NameError('MPI rank must be 4 to build this mesh!')
@@ -1137,7 +1137,7 @@ def mesh_create_50_parallel(domask=False, doarea=False):
         return mesh, nodeCoord, nodeOwner, elemType, elemConn
 
 def mesh_create_50_ngons_parallel(domask=False, doarea=False):
-    '''
+    """
     PRECONDITIONS: None
     POSTCONDITIONS: A 50 element Mesh has been created in parallel.
     RETURN VALUES: \n Mesh :: mesh \n
@@ -1188,7 +1188,7 @@ def mesh_create_50_ngons_parallel(domask=False, doarea=False):
 
           Node Ids at corners
           Element Ids in centers
-    '''
+    """
     if ESMF.pet_count() > 1:
         if ESMF.pet_count() != 4:
                 raise NameError('MPI rank must be 4 to build this mesh!')
@@ -1337,12 +1337,12 @@ def mesh_create_50_ngons_parallel(domask=False, doarea=False):
 
 def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
                           domask=False, elemMask=None):
-    '''
+    """
     PRECONDITIONS: A Field has been created on the elements of a Mesh.
     POSTCONDITIONS: The Field has been initialized to an analytic 
                     field.
     RETURN VALUES: \n Field :: field \n
-    '''
+    """
 
     [node, element] = [0,1]
 
@@ -1404,14 +1404,14 @@ def initialize_field_mesh(field, nodeCoord, nodeOwner, elemType, elemConn,
 
 def compute_mass_mesh(valuefield, dofrac=False, fracfield=None,
                       uninitval=422397696.):
-    '''
+    """
     PRECONDITIONS: 'fracfield' contains the fractions of each cell
                    which contributed to a regridding operation involving
                    'valuefield.  'dofrac' is a boolean value that gives 
                    the option to not use the 'fracfield'.\n
     POSTCONDITIONS: The mass of the data field is computed.\n
     RETURN VALUES: float :: mass \n
-    '''
+    """
     mass = 0.0
     # mesh area field must be built on elements
     areafield = ESMF.Field(valuefield.grid, name='areafield',

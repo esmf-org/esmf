@@ -3,6 +3,7 @@ import numpy as np
 import ESMF
 from ESMF.util.itester import iter_product_keywords
 
+from unittest import SkipTest
 
 class TestBase(unittest.TestCase):
 

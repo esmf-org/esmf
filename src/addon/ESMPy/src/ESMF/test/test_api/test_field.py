@@ -6,7 +6,7 @@ import pytest
 
 from ESMF import *
 from ESMF.interface.cbindings import *
-from ESMF.test.base import TestBase, attr
+from ESMF.test.base import TestBase, attr, SkipTest
 from ESMF.util.mesh_utilities import mesh_create_50, mesh_create_50_parallel
 
 

@@ -6,7 +6,7 @@ examples test file
 
 import pytest
 
-from ESMF.test.base import TestBase, attr
+from ESMF.test.base import TestBase, attr, SkipTest
 import ESMF.api.constants as constants
 
 class TestExamples(TestBase):

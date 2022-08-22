@@ -7,7 +7,7 @@ import pytest
 import os
 
 from ESMF import *
-from ESMF.test.base import TestBase, attr
+from ESMF.test.base import TestBase, attr, SkipTest
 from ESMF.util.field_utilities import compare_fields
 from ESMF.util.grid_utilities import *
 from ESMF.util.mesh_utilities import *

@@ -14,6 +14,7 @@ import numpy
 
 import ESMF.util.helpers as helpers
 import ESMF.api.constants as constants
+from ESMF.test.base import SkipTest
 
 # This call enables debug logging
 ESMF.Manager(debug=True)

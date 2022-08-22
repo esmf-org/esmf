@@ -26,11 +26,6 @@ class SerialMethod(ESMPyException):
     """This method is not safe to run in parallel!"""
     pass
 
-class SkipTest(ESMPyException):
-    """This test is skipped for some reason."""
-    pass
-
-
 
 class GridException(ESMPyException):
     """Base class for errors in the Grid class."""

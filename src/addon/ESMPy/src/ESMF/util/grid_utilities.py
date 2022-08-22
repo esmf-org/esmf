@@ -401,12 +401,12 @@ def grid_create_from_coordinates_periodic_3d(longitudes, latitudes, heights,
     return grid
 
 def initialize_field_grid(field, domask=False, doarea=False):
-    '''
+    """
     PRECONDITIONS: A Field has been created.
     POSTCONDITIONS: The 'field' has been initialized to an analytic 
                     field.
     RETURN VALUES: \n Field :: field \n
-    '''
+    """
     if domask:
         mask = field.grid.get_item(ESMF.GridItem.MASK)
 
@@ -423,14 +423,14 @@ def initialize_field_grid(field, domask=False, doarea=False):
     return field
 
 def initialize_field_grid_periodic(field):
-    '''
+    """
     PRECONDITIONS: A Field has been created as 'field' with a 'grid'
                    where coordinates have been set on both 
                    the center and corner stagger locations. \n
     POSTCONDITIONS: The 'field' has been initialized to an analytic 
                     field.\n
     RETURN VALUES: \n Field :: field \n
-    '''
+    """
     DEG2RAD = 3.141592653589793/180.0
 
     # get the coordinate pointers and set the coordinates
@@ -444,14 +444,14 @@ def initialize_field_grid_periodic(field):
     return field
 
 def initialize_field_grid_periodic_3d(field):
-    '''
+    """
     PRECONDITIONS: A Field has been created as 'field' with a 'grid'
                    where coordinates have been set on both
                    the center and corner stagger locations. \n
     POSTCONDITIONS: The 'field' has been initialized to an analytic
                     field.\n
     RETURN VALUES: \n Field :: field \n
-    '''
+    """
     DEG2RAD = 3.141592653589793/180.0
 
     # get the coordinate pointers and set the coordinates
@@ -467,12 +467,12 @@ def initialize_field_grid_periodic_3d(field):
     return field
 
 def initialize_field_grid_3d(field, domask=False):
-    '''
+    """
     PRECONDITIONS: A Field has been created.
     POSTCONDITIONS: The 'field' has been initialized to an analytic 
                     field.
     RETURN VALUES: \n Field :: field \n
-    '''
+    """
     if domask:
         mask = field.grid.get_item(ESMF.GridItem.MASK)
 
@@ -491,14 +491,14 @@ def initialize_field_grid_3d(field, domask=False):
 
 def compute_mass_grid(valuefield, dofrac=False, fracfield=None,
                       uninitval=422397696.):
-    '''
+    """
     PRECONDITIONS: 'fracfield' contains the fractions of each cell
                    which contributed to a regridding operation involving
                    'valuefield.  'dofrac' is a boolean value that gives 
                    the option to not use the 'fracfield'.\n
     POSTCONDITIONS: The mass of the data field is computed.\n
     RETURN VALUES: float :: mass \n
-    '''
+    """
     mass = 0.0
     areafield = ESMF.Field(valuefield.grid, name='areafield')
     areafield.get_area()

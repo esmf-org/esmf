@@ -3,16 +3,16 @@
 clean:
 		rm -rf build
 		rm -rf dist
-		rm -rf *.egg-info
-    # find . -name "*.pyc" -exec rm -f {} \;')
-    # find . -name "*ESMF_LogFile*" -exec rm -f {} \;')
-    # find . -name "*.log" -exec rm -f {} \;')
-    # find . -name "*.vtk" -exec rm -f {} \;')
-    # rm src/ESMF/interface/esmfmkfile.py')
-    # rm -rf build')
-    # rm -rf dist')
-    # rm -rf src/ESMF/test/regrid_from_file/data')
-    # rm -rf examples/data')
+		find . -name "*.egg-info" -exec rm -rf {} \;
+		find . -name "*.pyc" -exec rm -f {} \;
+		find . -name "*ESMF_LogFile*" -exec rm -f {} \;
+		find . -name "*.log" -exec rm -f {} \;
+		find . -name "*.vtk" -exec rm -f {} \;
+		find . -name "*.pytest_cache" -exec rm -rf {} \;
+		find . -name "*.python-version" -exec rm -f {} \;
+		rm -rf src/ESMF/test/regrid_from_file/data
+		rm -rf examples/data
+		rm src/ESMF/interface/esmfmkfile.py
 
 install:
 		python3 -m pip install --user .
@@ -30,7 +30,7 @@ test_examples:
 		python3 -m pytest -vs -m="not parallel" examples/exampletest.py
 
 test_examples_parallel:
-		mpirun -n 4 python3 -vs -m pytest -m="not serial" examples/exampletest.py
+		mpirun -n 4 python3 -m pytest -vs -m="not serial" examples/exampletest.py
 
 test_regrid_from_file_dryrun:
 		python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftestdryrun.py
@@ -42,12 +42,11 @@ test_regrid_from_file_parallel:
 		python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftestdryrun.py
 		mpirun -n 4 python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftest.py
 
-test_all: test_unit test_parallel test_examples_dryrun test_examples test_examples_parallel
+test_all: test_unit test_parallel test_examples test_examples_parallel
 
-test: test_unit test_unit_parallel test_examples test_examples_parallel
+test_parallel: test_unit_parallel test_examples_dryrun test_examples_parallel
 
 test_uni: test_unit test_examples
 
 uninstall:
 		python3 -m pip uninstall ESMPy
-
