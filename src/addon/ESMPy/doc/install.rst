@@ -17,7 +17,7 @@ The following packages are *optional*:
 * ESMF installation with NetCDF - required to create :class:`Grids <ESMF.api.grid.Grid>` and :class:`Meshes <ESMF.api.mesh.Mesh>` from file
     - NetCDF must be built as a shared library for ESMPy installation to succeed
 * `mpi4py <http://mpi4py.scipy.org/>`_- python bindings to MPI, needed to run some of the parallel regridding examples
-* `nose2 <https://docs.nose2.io/en/latest/>`_ - for nose testing
+* `pytest <https://docs.pytest.org/en/7.1.x/>`_ - for testing
 
 ----------------
 Getting the code
@@ -76,7 +76,7 @@ with the following command issued from the top level ESMPy directory:
 
 .. code::
 
-    pip install .
+    python3 -m pip install .
 
 Please contact esmf_support@ucar.edu with any questions.
 
@@ -94,22 +94,29 @@ To use ESMPy in an external program, import it with:
 Validation
 ----------
 
-The ESMPy testing is done with the nose package, both in serial and
-parallel.  The nose commands are wrapped in the following ESMPy targets:
+The ESMPy testing is done with the pytest package, both in serial and
+parallel. Basic unit tests can be run with the following command:
 
 .. code::
 
-    python setup.py test
+    python3 -m pytest
+    
+There are a few other pytest targets available for a wider range of testing if 
+greater test coverage is desired:
 
-    python setup.py test_examples
+.. code::
 
-    python setup.py test_regrid_from_file
+    make test_unit
 
-    python setup.py test_parallel
+    make test_examples
 
-    python setup.py test_examples_parallel
+    make test_regrid_from_file
 
-    python setup.py test_regrid_from_file_parallel
+    make test_unit_parallel
+
+    make test_examples_parallel
+
+    make test_regrid_from_file_parallel
 
 .. Note:: 
 
@@ -117,18 +124,6 @@ parallel.  The nose commands are wrapped in the following ESMPy targets:
     The ``test_regrid_from_file_dryrun`` command will simply download the test
     files without actually running them (allowing the stress on the machine to
     be applied to bandwidth first, and then memory).
-
-Alternatively, individual tests can be run with nose using the following format:
-
-.. code::
-
-    nosetests <file>:<test>
-
-e.g.
-
-.. code::
-
-    nosetests src/ESMF/test/test_api/test_regrid.py:TestRegrid.test_field_regrid
 
 -----------
 Limitations
