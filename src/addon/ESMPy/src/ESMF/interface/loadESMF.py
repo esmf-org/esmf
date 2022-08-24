@@ -20,25 +20,10 @@ except:
     raise ImportError('The CTypes library cannot be found.')
 
 esmfmk = None
-mked = False
-esmfmkfile_local = os.path.join(os.getcwd(),"src/ESMF/interface/esmfmkfile.py")
 try:
-    
-    if os.path.isfile(esmfmkfile_local):
-        from ESMF.interface.esmfmkfile import ESMFMKFILE as esmfmk
-        mked = True
+    esmfmk = os.environ["ESMFMKFILE"]
 except:
-    raise ImportError('The esmf.mk file could not be loaded.')
-else:
-    if not mked:
-        esmfmk = os.getenv("ESMFMKFILE")
-        if not esmfmk:
-            raise ImportError('The ESMFMKFILE was not set in the build, nor is it available as an environment variable.')
-        else:
-            with open(esmfmkfile_local, 'w') as emfl:
-                emfl.write('ESMFMKFILE = "'+esmfmk+'"')
-                emfl.close()
-
+    raise ImportError('The ESMFMKFILE environment variable is not available.')
 
 #### INVESTIGATE esmf.mk ######################################################
 

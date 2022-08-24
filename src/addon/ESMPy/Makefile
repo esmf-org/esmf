@@ -12,7 +12,6 @@ clean:
 		find . -name "*.python-version" -exec rm -f {} \;
 		rm -rf src/ESMF/test/regrid_from_file/data
 		rm -rf examples/data
-		rm src/ESMF/interface/esmfmkfile.py
 
 install:
 		python3 -m pip install --user .
