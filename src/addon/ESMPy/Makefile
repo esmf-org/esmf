@@ -14,7 +14,7 @@ clean:
 		rm -rf examples/data
 
 install:
-		python3 -m pip install --user .
+		python3 -m pip install .
 
 test_unit:
 		python3 -m pytest -m="not parallel"
