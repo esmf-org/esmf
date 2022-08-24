@@ -120,7 +120,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Fields are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -130,6 +129,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The {\tt ESMF\_Field} object that contains data to be written.
 !   \item[fileName]
 !     The name of the output file to which Field data is written.
+!     If the Field is a multi-tile Array, then fileName must contain
+!     exactly one instance of "#"; this is a placeholder that will be replaced
+!     by the tile number, with each tile being written to a separate file. (For
+!     example, for a fileName of "myfile#.nc", tile 1 will be written to
+!     "myfile1.nc", tile 2 to "myfile2.nc", etc.)
+!     (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[variableName]}]
 !    Variable name in the output file; default is the "name" of field.
 !    Use this argument only in the I/O format (such as NetCDF) that
