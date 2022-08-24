@@ -1,17 +1,17 @@
 .PHONY: clean install test test_int test_all uninstall
 
 clean:
-		rm -rf build
-		rm -rf dist
-		find . -name "*.egg-info" -exec rm -rf {} \;
-		find . -name "*.pyc" -exec rm -f {} \;
-		find . -name "*ESMF_LogFile*" -exec rm -f {} \;
-		find . -name "*.log" -exec rm -f {} \;
-		find . -name "*.vtk" -exec rm -f {} \;
-		find . -name "*.pytest_cache" -exec rm -rf {} \;
-		find . -name "*.python-version" -exec rm -f {} \;
-		rm -rf src/ESMF/test/regrid_from_file/data
-		rm -rf examples/data
+		rm -rf build || :
+		rm -rf dist || :
+		find . -name "*.egg-info" -exec rm -rf {} \; || :
+		find . -name "*.pyc" -exec rm -f {} \; || :
+		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
+		find . -name "*.log" -exec rm -f {} \; || :
+		find . -name "*.vtk" -exec rm -f {} \; || :
+		find . -name "*.pytest_cache" -exec rm -rf {} \; || :
+		find . -name "*.python-version" -exec rm -f {} \; || :
+		rm -rf src/ESMF/test/regrid_from_file/data || :
+		rm -rf examples/data || :
 
 install:
 		python3 -m pip install .
