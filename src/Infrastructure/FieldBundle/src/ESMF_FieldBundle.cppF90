@@ -2764,7 +2764,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 ! !DESCRIPTION:
 !   Read field data to a FieldBundle object from file(s).
 !   For this API to be functional, the environment variable {\tt ESMF\_PIO} 
-!   should be set to "internal" when the ESMF library is built.
+!   should be set to either "internal" or "external" when the ESMF library is built.
 !   Please see the section on Data I/O,~\ref{io:dataio}.
 !
 !   Limitations:
@@ -6240,7 +6240,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !
 ! !DESCRIPTION:
 !   Write the Fields into a file. For this API to be functional,
-!   the environment variable {\tt ESMF\_PIO} should be set to "internal"
+!   the environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external"
 !   when the ESMF library is built. Please see the section on 
 !   Data I/O,~\ref{io:dataio}.
 !

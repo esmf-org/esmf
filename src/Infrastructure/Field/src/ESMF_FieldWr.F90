@@ -97,7 +97,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Write Field data into a file.  For this API to be functional, the 
-!   environment variable {\tt ESMF\_PIO} should be set to "internal" when 
+!   environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external" when
 !   the ESMF library is built.  Please see the section on 
 !   Data I/O,~\ref{io:dataio}.
 !
