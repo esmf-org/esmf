@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -67,12 +67,14 @@ namespace ESMCI {
                     std::multimap<const MeshObj *, const interp_res *>::iterator > interp_map_range;
 
   void calc_1st_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield,
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> *dst_mask_field, MEField<> * dst_frac2_field,
-                                           double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, std::vector<double> *dst_areas,
-                                           std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
-                                           Mesh * midmesh, std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells,
-                                           interp_mapp res_map, struct Zoltan_Struct * zz);
+                                         std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> *dst_mask_field, MEField<> * dst_frac2_field,
+                                         double *src_elem_area,
+                                         std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, std::vector<double> *dst_areas,
+                                         std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
+                                         Mesh * midmesh, std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells,
+                                         interp_mapp res_map, struct Zoltan_Struct * zz, 
+                                         MEField<> *src_side1_mesh_ind_field=NULL, MEField<> *src_side1_orig_elem_id_field=NULL, 
+                                         MEField<> *dst_side2_mesh_ind_field=NULL, MEField<> *dst_side2_orig_elem_id_field=NULL);
 
 
   void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
@@ -81,8 +83,10 @@ namespace ESMCI {
                                         std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, std::vector<double> *dst_areas,
                                         std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
                                         Mesh * midmesh, std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, 
-					interp_mapp res_map, struct Zoltan_Struct * zz, MEField<> *src_side_field=NULL, MEField<> *dst_side_field=NULL);
-
+					interp_mapp res_map, struct Zoltan_Struct * zz, 
+                                        MEField<> *src_side1_mesh_ind_field=NULL, MEField<> *src_side1_orig_elem_id_field=NULL, 
+                                        MEField<> *dst_side2_mesh_ind_field=NULL, MEField<> *dst_side2_orig_elem_id_field=NULL);
+ 
   void calc_1st_order_weights_3D_3D_cart(const MeshObj *src_elem, MEField<> *src_cfield,
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> *dst_mask_field, MEField<> * dst_frac2_field,
                                            double *src_elem_area,

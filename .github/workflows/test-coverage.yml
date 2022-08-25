@@ -1,0 +1,43 @@
+name: Test Coverage
+
+on:
+  workflow_dispatch:
+    inputs:
+      esmf_branch:
+        description: 'ESMF Branch'
+        required: true
+        default: 'develop'      
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Checkout Dockerfiles
+      uses: actions/checkout@v3
+      with:
+          repository: esmf-org/esmf-containers
+          path: esmf-containers
+          ref: main
+    
+    - name: Build Docker image  
+      run: | 
+        cd ${{ github.workspace }}/esmf-containers/test-coverage
+        docker build . --tag esmf/test-coverage --build-arg ESMF_BRANCH="${{ inputs.esmf_branch }}"
+        
+    - name: Copy artifacts
+      run: |
+        mkdir -p ${{ github.workspace }}/artifacts
+        CID=$(docker run -dit --name runner esmf/test-coverage)
+        docker cp ${CID}:/artifacts/test_coverage-artifacts.zip ${{ github.workspace }}/artifacts
+        docker stop ${CID}
+        docker rm ${CID}
+            
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-coverage
+        path: ${{ github.workspace }}/artifacts

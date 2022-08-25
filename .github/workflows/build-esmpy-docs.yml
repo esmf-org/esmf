@@ -1,0 +1,64 @@
+name: Build ESMPy Docs
+
+on:
+  workflow_dispatch:
+#  push:
+#    branches: [ "develop" ]
+#  pull_request:
+#    branches: [ "develop" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Checkout Dockerfiles
+      uses: actions/checkout@v3
+      with:
+          repository: esmf-org/esmf-containers
+          path: esmf-containers
+          ref: main
+    
+    - name: Build Docker image  
+      run: | 
+        cd ${{ github.workspace }}/esmf-containers/build-esmf-docs/esmpy
+        docker build . --tag esmf/build-esmpy-docs
+        
+    - name: Copy artifacts
+      run: |
+        mkdir -p ${{ github.workspace }}/artifacts
+        CID=$(docker run -dit --name runner esmf/build-esmpy-docs)
+        docker cp ${CID}:/artifacts/doc-esmpy.zip ${{ github.workspace }}/artifacts
+        docker stop ${CID}
+        docker rm ${CID}
+            
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: esmpy-docs
+        path: ${{ github.workspace }}/artifacts
+        
+    - name: Checkout esmpy_doc
+      uses: actions/checkout@v3
+      with:
+          repository: esmf-org/esmpy_doc
+          path: esmpy_doc          
+    
+    - name: Copy docs
+      run: | 
+        cd ${{ github.workspace }}/esmpy_doc
+        mkdir -p docs/nightly/${{ github.ref_name }}
+        cd ${{ github.workspace }}/artifacts
+        unzip doc-esmpy.zip
+        cd ${{ github.workspace }}/artifacts/doc-esmpy/esmpy_doc
+        cp -rf html ${{ github.workspace }}/esmpy_doc/docs/nightly/${{ github.ref_name }}/
+        cp -rf latex/ESMPy.pdf ${{ github.workspace }}/esmpy_doc/docs/nightly/${{ github.ref_name }}/
+
+    - name: Commit and publish docs
+      uses: actions-js/push@master
+      with:
+        directory: ${{ github.workspace }}/esmpy_doc
+        github_token: ${{ secrets.GITHUB_TOKEN }}

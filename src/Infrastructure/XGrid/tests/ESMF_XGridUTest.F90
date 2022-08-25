@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -56,6 +56,16 @@
  
     !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Don't know if I should keep this turned on as an actual unit test, but it's useful for debugging
+  write(name, *) "Testing XGrid side and elem info."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call test_side_and_elem_info(rc)  
+  call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+#if 1
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Testing XGrid IsCreated for uncreated object"
@@ -160,6 +170,14 @@
 
     !------------------------------------------------------------------------
     !NEX_UTest
+    ! Create an XGrid in 2D from Meshes
+    call test_xgrid_w_ngon_mesh(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating an XGrid in 2D from Meshes contain elements with >4 sides"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
     ! Create an XGrid in 2D from Meshes with user supplied area
     print *, 'Starting test7'
     call test7(rc)
@@ -191,9 +209,9 @@
     write(failMsg, *) ""
     write(name, *) "Test 2nd order on an XGrid with a cubed sphere Grid"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
-
-    call ESMF_TestEnd(ESMF_SRCLINE)
+ call ESMF_TestEnd(ESMF_SRCLINE)
   
 contains 
 #define ESMF_METHOD "ESMF_TESTS"
@@ -1342,7 +1360,355 @@ contains
   end subroutine test7
 
 
- 
+  ! Create a spherical mesh containing >4 sided elements
+  ! on 1 or 2 PETS
+  
+  !
+  !  2.5        8        10 --------11
+  !          /     \   /            |
+  !  2.1   7         9              12
+  !        |         |      5       /
+  !        |    4    |            /
+  !        |         |          /
+  !  1.0   4 ------- 5 ------- 6
+  !        |         |  \   3  |
+  !        |    1    |    \    |
+  !        |         |  2   \  |
+  ! -0.1   1 ------- 2 ------- 3
+  !
+  !      -0.1       1.0       2.1   2.5
+  !
+  !        Node Id labels at corners
+  !       Element Id labels in centers
+  subroutine createTestMeshPH(mesh, rc)
+  type(ESMF_Mesh), intent(out) :: mesh
+  integer :: rc
+
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+   integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+  integer :: numElems,numOwnedElemsTst
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  real(ESMF_KIND_R8), pointer :: elemCoords(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  integer :: numQuadElems,numTriElems
+  integer :: numPentElems,numHexElems,numTotElems
+  integer :: numElemConn
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! return with an error if not 1 or 2 PETs
+  if ((petCount /= 1) .and. (petCount /=2)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+  if (petCount .eq. 1) then
+      ! Set number of nodes
+     numNodes=12
+
+     ! Allocate and fill the node id array.
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9,10,11,12/)
+
+     ! Allocate and fill node coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(nodeCoords(2*numNodes))
+     nodeCoords=(/0.0,0.0, & ! node id 1
+                   1.0,0.0, & ! node id 2
+                   2.1,0.0, & ! node id 3
+                  0.0, 1.0, & ! node id 4
+                   1.0, 1.0, & ! node id 5
+                   2.1, 1.0, & ! node id 6
+                  0.0, 2.1, & ! node id 7
+                   0.5, 2.5, & ! node id 8
+                   1.0, 2.1, & ! node id 9
+                   1.5, 2.5, & ! node id 10
+                   2.5, 2.5, & ! node id 11
+                   2.5, 2.1/)  ! node id 12
+
+      ! Allocate and fill the node owner array.
+      ! Since this Mesh is all on PET 0, it's just set to all 0.
+     allocate(nodeOwners(numNodes))
+     nodeOwners=0 ! everything on PET 0
+
+     ! Set the number of each type of element, plus tot and num conn.
+     numQuadElems=1
+     numTriElems=2
+     numPentElems=1
+     numHexElems=1
+     numTotElems=numTriElems+numQuadElems+numPentElems+numHexElems
+     numElemConn=3*numTriElems+4*numQuadElems+ &
+                 5*numPentElems+6*numHexElems
+
+     ! Allocate and fill the element id array.
+     allocate(elemIds(numTotElems))
+     elemIds=(/1,2,3,4,5/)
+
+
+     ! Allocate and fill the element topology type array.
+     allocate(elemTypes(numTotElems))
+     elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                 ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+                  5, &                      ! elem id 4
+                 6/)                       ! elem id 5
+
+
+     ! Allocate and fill elem coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(elemCoords(2*numTotElems))
+     elemCoords=(/ 0.45, 0.45, & ! elem id 1
+                   1.37, 0.27, & ! elem id 2
+                   1.73, 0.63, & ! elem id 3
+                   0.46, 1.74, & ! elem id 4
+                   1.76, 1.87/)  ! elem id 5
+
+
+
+     ! Allocate and fill the element connection type array.
+     ! Note that entries in this array refer to the
+      ! positions in the nodeIds, etc. arrays and that
+      ! the order and number of entries for each element
+     ! reflects that given in the Mesh options
+     ! section for the corresponding entry
+     ! in the elemTypes array.
+     allocate(elemConn(numElemConn))
+     elemConn=(/1,2,5,4, &       ! elem id 1
+                2,3,5,   &       ! elem id 2
+                3,6,5,   &       ! elem id 3
+                4,5,9,8,7, &     ! elem id 4
+                5,6,12,11,10,9/) ! elem id 5
+
+     
+ else if (petCount .eq. 2) then
+     ! Setup mesh data depending on PET
+    if (localPET .eq. 0) then !!! This part only for PET 0
+       ! Set number of nodes
+       numNodes=6
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,3,4,5,6/)
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/0.0, 0.0, & ! node id 1
+                     1.0, 0.0, & ! node id 2
+                     2.1, 0.0, & ! node id 3
+                    0.0,  1.0, & ! node id 4
+                     1.0,  1.0,  & ! node id 5
+                     2.1,  1.0/)  ! node id 6
+            
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 1
+                    0, & ! node id 2
+                    0, & ! node id 3
+                    0, & ! node id 4
+                    0, & ! node id 5
+                    0/)  ! node id 6
+
+       ! Set the number of each type of element, plus tot and num conn.
+       numQuadElems=1
+       numTriElems=2
+       numPentElems=0
+       numHexElems=0
+       numTotElems=numTriElems+numQuadElems+numPentElems+numHexElems
+       numElemConn=3*numTriElems+4*numQuadElems+ &
+            5*numPentElems+6*numHexElems
+
+       ! Allocate and fill the element id array.
+        allocate(elemIds(numTotElems))
+        elemIds=(/1,2,3/)
+
+       ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+                   ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+                   ESMF_MESHELEMTYPE_TRI/)   ! elem id 3
+
+     ! Allocate and fill elem coordinate array.
+     ! Since this is a 2D Mesh the size is 2x the
+     ! number of nodes.
+     allocate(elemCoords(2*numTotElems))
+     elemCoords=(/0.45, 0.45, & ! elem id 1
+                  1.37, 0.27, & ! elem id 2
+                  1.73, 0.63/)  ! elem id 3
+
+       ! Allocate and fill the element connection type array.
+       ! Note that entry are local indices
+       allocate(elemConn(numElemConn))
+       elemConn=(/1,2,5,4, & ! elem id 1
+                  2,3,5,   & ! elem id 2
+                  3,6,5/)    ! elem id 3 
+                  
+     else if (localPET .eq. 1) then !!! This part only for PET 1
+       ! Set number of nodes
+       numNodes=9
+
+       ! Allocate and fill the node id array.
+       allocate(nodeIds(numNodes))
+       nodeIds=(/4,5,6,7,8,9,10,11,12/)
+
+       ! Allocate and fill node coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(nodeCoords(2*numNodes))
+       nodeCoords=(/0.0, 1.0, & ! node id 4
+                     1.0, 1.0, & ! node id 5
+                     2.1, 1.0, & ! node id 6
+                    0.0, 2.1, & ! node id 7
+                     0.5, 2.5, & ! node id 8
+                     1.0, 2.1, & ! node id 9
+                     1.5, 2.5, & ! node id 10
+                     2.5, 2.5, & ! node id 11
+                     2.5, 2.1/)  ! node id 12
+
+       
+       ! Allocate and fill the node owner array.
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0, & ! node id 4
+                    0, & ! node id 5
+                    0, & ! node id 6
+                    1, & ! node id 7
+                    1, & ! node id 8
+                    1, & ! node id 9
+                    1, & ! node id 10
+                    1, & ! node id 11                    
+                    1/)  ! node id 12
+
+       ! Set the number of each type of element, plus tot and num conn.
+       numQuadElems=0
+       numTriElems=0
+       numPentElems=1
+       numHexElems=1
+       numTotElems=numTriElems+numQuadElems+numPentElems+numHexElems
+       numElemConn=3*numTriElems+4*numQuadElems+ &
+            5*numPentElems+6*numHexElems
+
+       ! Allocate and fill the element id array.
+       allocate(elemIds(numTotElems))
+       elemIds=(/4,5/)
+
+        ! Allocate and fill the element topology type array.
+       allocate(elemTypes(numTotElems))
+       elemTypes=(/5, & ! elem id 4
+                   6/)  ! elem id 5
+
+       ! Allocate and fill elem coordinate array.
+       ! Since this is a 2D Mesh the size is 2x the
+       ! number of nodes.
+       allocate(elemCoords(2*numTotElems))
+       elemCoords=(/0.46, 1.74, & ! elem id 4
+                    1.76, 1.87/)  ! elem id 5
+
+       ! Allocate and fill the element connection type array.
+       allocate(elemConn(numElemConn))
+       elemConn=(/1,2,6,5,4, & ! elem id 4
+                  2,3,9,8,7,6/)  ! elem id 5
+
+      endif
+    endif
+
+   ! Create Mesh structure in 1 step
+   mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, &
+        nodeIds=nodeIds, nodeCoords=nodeCoords, &
+        nodeOwners=nodeOwners, elementIds=elemIds,&
+        elementTypes=elemTypes, elementConn=elemConn, &
+        elementCoords=elemCoords, &
+        rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+end subroutine createTestMeshPH
+
+
+! Test XGrid when created from a mesh containing
+! an elem with >4 sides
+  subroutine test_xgrid_w_ngon_mesh(rc)
+    integer, intent(out) :: rc
+    integer              :: localrc, i, npet
+    type(ESMF_XGrid)     :: xgrid
+    type(ESMF_Mesh)      :: mesh_ngon, mesh_qt 
+    type(ESMF_VM)        :: vm
+    real(ESMF_KIND_R8)   :: xgrid_area(12), B_area(2,2)
+
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    call ESMF_VMGetCurrent(vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, petcount=npet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create ngon mesh
+    call createTestMeshPH(mesh_ngon, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create mesh containing quads and triangles
+    call CreateTestMesh2x2_1(mesh_qt, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Create XGrid from meshes
+    xgrid = ESMF_XGridCreate(sideAMesh=(/mesh_ngon/), &
+                             sideBMesh=(/mesh_qt/), &
+                             storeOverlay = .true., &
+                             rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Test flux exchange through xgrid
+    call flux_exchange_sph_mesh(xgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get rid of meshes
+    call ESMF_MeshDestroy(mesh_ngon, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_MeshDestroy(mesh_qt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+  end subroutine test_xgrid_w_ngon_mesh
+
+
+  
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! 
   ! Creates the following mesh on 
@@ -2790,7 +3156,7 @@ end subroutine CreateTestMesh2x2_2
 
 #else
 
-write(*,*) "NOT Using XGrid"
+!write(*,*) "NOT Using XGrid"
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -3458,7 +3824,7 @@ write(*,*) "NOT Using XGrid"
 #define USE_XGRID_CSGRID
 #ifdef USE_XGRID_CSGRID
 
-write(*,*) "Using XGrid"
+!write(*,*) "Using XGrid"
 
    ! Create XGrid
    xgrid = ESMF_XGridCreate(sideAGrid=(/srcGrid/), &
@@ -3525,7 +3891,7 @@ write(*,*) "Using XGrid"
        ESMF_CONTEXT, rcToReturn=rc)) return
 
 #else
-  write(*,*) "NOT Using XGrid"
+!  write(*,*) "NOT Using XGrid"
 
   ! Do regrid store to create routehandle
   call ESMF_FieldRegridStore(srcField, &
@@ -4565,7 +4931,8 @@ end subroutine test_CSGridToGrid_2nd
     integer                                   :: sideAGC, sideBGC, sideAMC, sideBMC
     real(ESMF_KIND_R8)                        :: global_sum, l_area_adj
     character(len=1)                          :: cids(10) = (/'0','1','2','3','4','5','6','7','8','9'/)
-
+    real(ESMF_KIND_R8)                        :: global_af, global_a
+    
     l_scheme = ESMF_REGRID_SCHEME_REGION3D
     if(present(scheme)) l_scheme = scheme
     l_area_adj = 1.0
@@ -4765,7 +5132,8 @@ end subroutine test_CSGridToGrid_2nd
         ESMF_CONTEXT, rcToReturn=rc)) return
     if(lpet == 0) print *, ' xgrid flux and area: ', allsrcsum
     if(abs(allsrcsum(1) - allsrcsum(2)*scale*l_area_adj) .gt. 1.e-10) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+    !   write(*,*) allsrcsum(1),allsrcsum(2)*scale*l_area_adj,allsrcsum(2)*scale,allsrcsum(2),scale,l_area_adj
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
          msg="- inconsistent flux and area found", &
          ESMF_CONTEXT, rcToReturn=rc) 
       return
@@ -4776,6 +5144,8 @@ end subroutine test_CSGridToGrid_2nd
 
     !make sure flux is conserved on dst Fields
     global_sum = 0.
+    global_af = 0.
+    global_a = 0.
     do i = 1, size(dstField)
       call ESMF_FieldRegrid(srcField=f_xgrid, dstField=dstField(i), &
         routehandle=x2d_rh(i), rc=localrc)
@@ -4809,7 +5179,10 @@ end subroutine test_CSGridToGrid_2nd
           ESMF_CONTEXT, rcToReturn=rc)) return
       if(lpet == 0) print *, 'dst flux and area: ', allsrcsum
       if(ndst == 1) then
-        if((abs(exf_tarea*l_area_adj - allsrcsum(2)) .gt. 1.e-10) .or. &
+      !   write(*,*) "exf_tarea*l_area_adj=",exf_tarea*l_area_adj," allsrcsum(2)=",allsrcsum(2)
+      !   write(*,*) "exf_tflux=",exf_tflux," allsrcsum(1)=",allsrcsum(1)
+         
+         if((abs(exf_tarea*l_area_adj - allsrcsum(2)) .gt. 1.e-10) .or. &
            (abs(exf_tflux - allsrcsum(1)) .gt. 1.e-10)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
              msg="- inconsistent flux and area found", &
@@ -4823,14 +5196,19 @@ end subroutine test_CSGridToGrid_2nd
             ESMF_CONTEXT, rcToReturn=rc)) return
         if(lpet == 0) print *, 'dst flux and area using frac2: ', allsrcsum
         global_sum = global_sum + allsrcsum(1)
-      endif
+        global_af = global_af + allsrcsum(2)
+        global_a = global_a + allsrcsum(3)
+     endif
 
     enddo
 
     ! make sure going to multiple Grids also conserve global flux
     if(ndst .gt. 1) then
+     !  write(*,*) exf_tflux,global_sum,exf_tflux-global_sum
+     !  write(*,*) global_af, global_a
+
         if ((abs(exf_tflux - global_sum) .gt. 1.e-10)) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- inconsistent flux and area found", &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -5254,10 +5632,161 @@ end subroutine test_CSGridToGrid_2nd
     deallocate(s2x_rh, x2s_rh)
     deallocate(d2x_rh, x2d_rh)
 
+    ! Destroy xgrid
     call ESMF_XGridDestroy(xgrid,rc=localrc)
-
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! If rc present, return success
     if(present(rc)) rc = ESMF_SUCCESS
 
   end subroutine flux_exchange_sph_mesh
+
+
+  ! This is a test that creates a small xgrid from a couple of small grids.
+  ! It's useful for debugging simple issues because everything is easy to look through.
+ subroutine test_side_and_elem_info(rc)
+#undef ESMF_METHOD 
+#define ESMF_METHOD "test_side_and_elem_info"
+  integer, intent(out)  :: rc
+  integer :: localrc
+  type(ESMF_VM) :: vm
+  type(ESMF_Grid) :: a1Grid, a2Grid
+  type(ESMF_Grid) :: bGrid
+  type(ESMF_XGrid) :: xgrid
+  type(ESMF_Mesh) :: xgridMesh
+  integer :: localPet, petCount
+
+  
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Create small 4 x 4 Grid for side A
+  a1Grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/4,4/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/8.0_ESMF_KIND_R8,5.0_ESMF_KIND_R8/), &
+       coordSys=ESMF_COORDSYS_CART, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Debug output
+#if 0
+  call ESMF_GridWriteVTK(a1Grid,staggerloc=ESMF_STAGGERLOC_CORNER, &
+        filename="a1GridCnr", &
+        rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+  
+  ! Create small 4 x 4 Grid for side A
+  a2Grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/4,4/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,4.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/8.0_ESMF_KIND_R8,8.0_ESMF_KIND_R8/), &
+       coordSys=ESMF_COORDSYS_CART, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  
+  ! Debug output
+#if 0
+  call ESMF_GridWriteVTK(a2Grid,staggerloc=ESMF_STAGGERLOC_CORNER, &
+        filename="a2GridCnr", &
+        rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
+
+  ! Create small 8 x 8 Grid for side B
+  bGrid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/8,8/), &
+       minCornerCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/8.0_ESMF_KIND_R8,8.0_ESMF_KIND_R8/), &
+       coordSys=ESMF_COORDSYS_CART, &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Debug output
+#if 0
+  call ESMF_GridWriteVTK(bGrid,staggerloc=ESMF_STAGGERLOC_CORNER, &
+        filename="bGridCnr", &
+        rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
+  ! Create XGrid
+  xgrid = ESMF_XGridCreate(sideAGrid=(/a1Grid, a2Grid/), &
+       sideBGrid=(/bGrid/), &
+       storeOverlay = .true., &
+       rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+  
+   ! Debug output
+#if 0
+  call ESMF_XGridGet(xgrid, mesh=xgridMesh, rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+   call ESMF_MeshWriteVTK(xgridMesh, "xgridMesh", rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
+  ! Free the XGrid
+  call ESMF_XGridDestroy(xgrid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Free the grids
+  call ESMF_GridDestroy(a1Grid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_GridDestroy(a2Grid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_GridDestroy(bGrid, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Return success
+  rc=ESMF_SUCCESS
+
+end subroutine test_side_and_elem_info
+
 
 end program ESMF_XGridUTest

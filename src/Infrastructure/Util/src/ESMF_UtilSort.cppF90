@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -97,8 +97,8 @@ contains
 !       Array of data to be sorted.  The original data is overwritten by the @\
 !       sorted data.  @\
 !     \item [direction] @\
-!       Direction of sorting.  Legal values are {\tt ESMF\_SORT\_ASCENDING} @\
-!       and {\tt ESMF\_SORT\_DESCENDING}. @\
+!       Direction of sorting.  Legal values are {\tt ESMF\_SORTFLAG\_ASCENDING} @\
+!       and {\tt ESMF\_SORTFLAG\_DESCENDING}. @\
 !     \item [{[rc]}] @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if the sorting is successful. @\
 !     \end{description} @\
@@ -132,8 +132,8 @@ contains
 !       Array of data to be sorted.  The sorted data is returned @\
 !       in the list. @\
 !     \item [direction] @\
-!       Direction of sorting.  Legal values are {\tt ESMF_SORT_ASCENDING} @\
-!       and {\tt ESMF_SORT_DESCENDING}. @\
+!       Direction of sorting.  Legal values are {\tt ESMF_SORTFLAG_ASCENDING} @\
+!       and {\tt ESMF_SORTFLAG_DESCENDING}. @\
 !     \item [{[rc]}] @\
 !       Return code; equals {\tt ESMF_SUCCESS} if the sorting is successful. @\
 !     \end{description} @\

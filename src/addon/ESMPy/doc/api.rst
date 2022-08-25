@@ -99,19 +99,23 @@ The :class:`~ESMF.api.esmpymanager.Manager` is also used to enable logging:
 .. code::
 
     mg = ESMF.Manager(debug=True)
-    local_pet = mg.local_pet()
+    local_pet = mg.local_pet
 
 The output will be logged in files named PET<local_pet>.ESMF_LogFile.
 
-~~~~~~~~~~~~~~~~~~
-Garbage Collection
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+Memory management
+~~~~~~~~~~~~~~~~~
 
 The underlying ESMF framework needs to be initialized and finalized once and 
 only once per execution. This is handled internally by the 
 :class:`~ESMF.api.esmpymanager.Manager` and **does not** require any explicit
 user intervention. However, the ESMF garbage collection feature is not triggered
-until the finalization routine is invoked. So if memory deallocation of ESMPy
+until the finalization routine is invoked, which may not happen until the 
+:class:`~ESMF.api.esmpymanager.Manager` goes out of scope at the end of the 
+program execution. 
+
+If memory deallocation of ESMPy
 objects is required *prior* to the end of the program, the class level 
 ``destroy`` routines should be invoked:
 
@@ -122,15 +126,19 @@ objects is required *prior* to the end of the program, the class level
     mg.destroy()
 
 This is commonly required when reusing a :class:`~ESMF.api.regrid.Regrid` object 
-to interpolate data between many :class:`~ESMF.api.field.Field` pairs to 
-conserve memory to complete all interpolations in a single execution.
+to interpolate data between many :class:`~ESMF.api.field.Field` pairs.
 
 ~~~~~~~~~~~~~~~~~
 MOAB Mesh backend
 ~~~~~~~~~~~~~~~~~
 
 The Manager can be used to enable the `MOAB <https://sigma.mcs.anl.gov/moab-library/>`_
-mesh backend to the Mesh. This is done by calling ``set_moab()`` with ``moab_on=True``.
+mesh backend to the Mesh.
+
+.. code::
+
+    mg.set_moab(moab_on=True)
+    
 The MOAB mesh is an alternative to the native ESMF mesh, and does not yet have
 full support.
 

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -42,6 +42,7 @@
 #include "Mesh/include/ESMCI_MBMesh_GToM_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Util.h"
+#include "Mesh/include/ESMCI_Mesh_FileIO.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_Mesh_From_Raster.h"
 //-----------------------------------------------------------------------------
@@ -528,7 +529,7 @@ MeshCap *MeshCap::meshcreatefromfile(const char *filename,
  }
 
 void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
-                           double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                           double *nodeCoord, InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                            int *rc)
 {
@@ -539,7 +540,7 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
   if (is_esmf_mesh) {
     ESMCI_MESHCREATE_TRACE_ENTER("NativeMesh addnodes");
     ESMCI_meshaddnodes(&mesh, num_nodes, nodeId,
-                       nodeCoord, nodeOwner, nodeMaskII,
+                       nodeCoord, nodeOwnerII, nodeMaskII,
                        _coordSys, _orig_sdim,
                        rc);
     ESMCI_MESHCREATE_TRACE_EXIT("NativeMesh addnodes");
@@ -547,7 +548,7 @@ void MeshCap::meshaddnodes(int *num_nodes, int *nodeId,
 #if defined ESMF_MOAB
     ESMCI_MESHCREATE_TRACE_ENTER("MBMesh addnodes");
     MBMesh_addnodes(&mbmesh, num_nodes, nodeId,
-                     nodeCoord, nodeOwner, nodeMaskII,
+                     nodeCoord, nodeOwnerII, nodeMaskII,
                      _coordSys, _orig_sdim,
                      rc);
     ESMCI_MESHCREATE_TRACE_EXIT("MBMesh addnodes");
@@ -1248,6 +1249,82 @@ void MeshCap::xgridregrid_create(MeshCap **meshsrcpp, MeshCap **meshdstpp,
 
   return;
  }
+
+
+void MeshCap::xgrid_calc_wgts_from_side_mesh(MeshCap *src_side_mesh, MeshCap *dst_xgrid_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::xgrid_calc_wgts_from_side_mesh()"
+
+  int localrc;
+  
+  // Can only do if the same kind
+  if (src_side_mesh->is_esmf_mesh != dst_xgrid_mesh->is_esmf_mesh) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "Can't do this operation with different mesh types",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Get mesh type
+  bool is_esmf_mesh=src_side_mesh->is_esmf_mesh;
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_Mesh_XGrid_calc_wgts_from_side_mesh(src_side_mesh->mesh,
+                                              dst_xgrid_mesh->mesh, 
+                                              nentries, tweights,
+                                              &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "This functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+
+}
+
+
+void MeshCap::xgrid_calc_wgts_to_side_mesh(MeshCap *src_xgrid_mesh, MeshCap *dst_side_mesh,
+                                             int *nentries, ESMCI::TempWeights **tweights,
+                                             int*rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::xgrid_calc_wgts_to_side_mesh()"
+
+  int localrc;
+  
+  // Can only do if the same kind
+  if (src_xgrid_mesh->is_esmf_mesh != dst_side_mesh->is_esmf_mesh) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "Can't do this operation with different mesh types",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Get mesh type
+  bool is_esmf_mesh=src_xgrid_mesh->is_esmf_mesh;
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_Mesh_XGrid_calc_wgts_to_side_mesh(src_xgrid_mesh->mesh,
+                                            dst_side_mesh->mesh, 
+                                            nentries, tweights,
+                                            &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc)) return;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "This functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+  
+}
+
+
 
 
 MeshCap *MeshCap::GridToMesh(const Grid &grid_, int staggerLoc,
@@ -2481,6 +2558,66 @@ void MeshCap::meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
   }
 }
 
+
+MeshCap *MeshCap::meshcreatefromfilenew(char *filename,
+                                        ESMC_FileFormat_Flag fileformat,
+                                        bool convert_to_dual, 
+                                        bool add_user_area, 
+                                        ESMC_CoordSys_Flag coordSys, 
+                                        ESMC_MeshLoc_Flag maskFlag, 
+                                        char *maskVarName, 
+                                        ESMCI::DistGrid *node_distgrid,
+                                        ESMCI::DistGrid *elem_distgrid,
+                                        int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshcreatefromfilenew()"
+
+  int localrc;
+
+  bool is_esmf_mesh = !moab_on;
+
+  // Create mesh depending on the type
+  Mesh *mesh = nullptr;
+  MBMesh *mbmesh = nullptr;
+  int orig_sdim,pdim;
+  ESMC_CoordSys_Flag coord_sys; 
+  if (is_esmf_mesh) {
+    ESMCI_mesh_create_from_file(filename, 
+                                fileformat, 
+                                convert_to_dual,
+                                add_user_area, 
+                                coordSys,
+                                maskFlag, 
+                                maskVarName, 
+                                node_distgrid, 
+                                elem_distgrid, 
+                                &mesh, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, rc)) return NULL;
+      // Get mesh info
+      orig_sdim=mesh->orig_spatial_dim;
+      coord_sys=mesh->coordsys;
+      pdim=mesh->parametric_dim();
+
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                  "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return NULL;
+  }
+
+  // Create MeshCap
+  MeshCap *mc=new MeshCap();
+
+  // Set member variables
+  mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
+  mc->finalize_dims(orig_sdim, pdim, coord_sys);
+  mc->finalize_counts(&localrc);
+
+  // Output new MeshCap
+  return mc;
+}
+
 // returns NULL if unsuccessful
 MeshCap *MeshCap::meshcreate_from_raster(Grid *raster_grid,
                                          Array *raster_array,
@@ -2497,7 +2634,7 @@ MeshCap *MeshCap::meshcreate_from_raster(Grid *raster_grid,
   Mesh *mesh = nullptr;
   MBMesh *mbmesh = nullptr;
   int orig_sdim,pdim;
-  ESMC_CoordSys_Flag coord_sys;
+  ESMC_CoordSys_Flag coord_sys; 
   if (is_esmf_mesh) {
 
     // Create Mesh from raster information
@@ -2523,7 +2660,7 @@ MeshCap *MeshCap::meshcreate_from_raster(Grid *raster_grid,
   // Create MeshCap
   MeshCap *mc=new MeshCap();
 
-  // Set MeshCap member variables
+  // Set member variables
   mc->finalize_ptr(mesh, mbmesh, is_esmf_mesh);
   mc->finalize_dims(orig_sdim, pdim, coord_sys);
   mc->finalize_counts(&localrc);
@@ -2531,4 +2668,5 @@ MeshCap *MeshCap::meshcreate_from_raster(Grid *raster_grid,
   // Output new MeshCap
   return mc;
 }
-
+                                  
+      

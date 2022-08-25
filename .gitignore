@@ -20,6 +20,8 @@ PET*.ESMF_LogFile
 /src/include/
 /test/
 /examples/
+/src/Infrastructure/IO/PIO/Build/
+/src/Infrastructure/IO/PIO/Install/
 
 # protex generated files #
 ##########################
@@ -43,6 +45,8 @@ src/Infrastructure/FieldBundle/src/ESMF_FieldBundle.F90
 src/Infrastructure/LocalArray/interface/ESMF_LocalArrayCreate.F90
 src/Infrastructure/LocalArray/interface/ESMF_LocalArrayGet.F90
 src/Infrastructure/LocalArray/interface/ESMF_LocalArrayWrapperType.F90
+src/Infrastructure/Mesh/tests/ESMC_MeshCapGenUTest.C
+src/Infrastructure/Mesh/tests/ESMC_MeshCapRegridGenUTest.C
 src/Infrastructure/IO/interface/ESMF_IO_NCPutGet.F90
 src/Infrastructure/Util/doc/ESMC_ReturnCodes.tex
 src/Infrastructure/Util/src/ESMF_FortranWordsize.F90
@@ -101,7 +105,6 @@ src/doc/ESMF_usrdoc.tex.ORIG
 src/doc/ESMF_usrdoc.toc
 src/doc/.latex2html-init
 
-
 # special test files that cannot be cleaned after build #
 ############################################################
 src/system_tests/ESMF_ArrayRedistMPMD/ESMF_ArrayRedistSTestA.o
@@ -112,6 +115,8 @@ src/system_tests/ESMF_ArrayRedistMPMD/user_model1.mod
 src/system_tests/ESMF_ArrayRedistMPMD/user_model1.o
 src/system_tests/ESMF_ArrayRedistMPMD/user_model2.mod
 src/system_tests/ESMF_ArrayRedistMPMD/user_model2.o
+src/system_tests/ESMF_ArrayRedistSharedObj/user_coupler.so
+src/system_tests/ESMF_ArrayRedistSharedObj/user_model1.so
 
 src/Infrastructure/Trace/preload/preload.o
 src/Infrastructure/Trace/preload/preload_io.o

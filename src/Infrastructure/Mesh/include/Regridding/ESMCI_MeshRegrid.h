@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -40,6 +40,11 @@ namespace ESMCI {
             int *unmappedaction,
             bool set_dst_status, WMat &dst_status, bool checkFlag);
 
+ void translate_split_src_elems_in_wts(Mesh *srcmesh, int num_entries,
+                                      int *iientries);
+ void translate_split_dst_elems_in_wts(Mesh *dstmesh, int num_entries,
+                                      int *iientries, double *factors);
+  
  int get_iwts(Mesh &mesh, MEField<> *iwts);
 
 } // namespace

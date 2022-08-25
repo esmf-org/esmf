@@ -1,6 +1,5 @@
 Settings for Darwin (Mac OS X), using the GNU gfortran compiler
-(part of the GCC 4.0 release) and the clang C++ compiler (g++).  Due to bugs
-in early versions of gfortran, ESMF requires gfortran version 4.3 or newer.
+ and the clang C++ compiler (g++).
 
 Requires the following environment settings:
 

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -538,10 +538,10 @@ int ESMC_MeshFreeMemory(
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshGetLocalElementCount - Get the number of elements in a Mesh on the current PET
+// !IROUTINE: ESMC_MeshGetElementCount - Get the number of elements in a Mesh on the current PET
 //
 // !INTERFACE:
-int ESMC_MeshGetLocalElementCount(
+int ESMC_MeshGetElementCount(
   ESMC_Mesh mesh,           // in
   int *elementCount         // out
 );
@@ -565,10 +565,10 @@ int ESMC_MeshGetLocalElementCount(
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshGetLocalNodeCount - Get the number of nodes in a Mesh on the current PET
+// !IROUTINE: ESMC_MeshGetNodeCount - Get the number of nodes in a Mesh on the current PET
 //
 // !INTERFACE:
-int ESMC_MeshGetLocalNodeCount(
+int ESMC_MeshGetNodeCount(
   ESMC_Mesh mesh,          // in
   int *nodeCount           // out
 );

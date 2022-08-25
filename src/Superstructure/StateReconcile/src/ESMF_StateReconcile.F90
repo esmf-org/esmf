@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -64,6 +64,8 @@ module ESMF_StateReconcileMod
   use ESMF_FieldCreateMod
   use ESMF_FieldBundleMod
   use ESMF_RHandleMod
+
+  use ESMF_TraceMod
 
   use ESMF_InfoMod, only : ESMF_Info, ESMF_InfoGetFromBase, ESMF_InfoUpdate
   use ESMF_InfoCacheMod
@@ -2064,6 +2066,7 @@ contains
     character(ESMF_MAXSTR) :: msgstring
 
     logical, parameter :: debug = .false.
+    logical, parameter :: profile = .false.
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2142,6 +2145,14 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': calling VMAllToAll')
     end if
+
+    if (profile) then 
+      call ESMF_TraceRegionEnter("ESMF_VMAllToAllV", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
+
     call ESMF_VMAllToAllV (vm,  &
         sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send, &
         recvData=buffer_recv, recvCounts=counts_recv, recvOffsets=offsets_recv, &
@@ -2149,6 +2160,13 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    if (profile) then 
+      call ESMF_TraceRegionExit("ESMF_VMAllToAllV", rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    endif
 
     ! Copy recv buffers into recv_needs
 

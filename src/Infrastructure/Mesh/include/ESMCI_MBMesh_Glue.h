@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -51,7 +51,7 @@ void MBMesh_create(MBMesh **mbmpp,
 
 
 void MBMesh_addnodes(MBMesh **mbmpp, int *num_nodes, int *nodeId,
-                     double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                     double *nodeCoord, InterArray<int> *nodeOwner, InterArray<int> *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                      int *rc);
 

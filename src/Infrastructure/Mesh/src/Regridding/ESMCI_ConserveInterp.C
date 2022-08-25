@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -64,7 +64,9 @@ namespace ESMCI {
                                               std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
                                               Mesh * midmesh,
                                               std::vector<sintd_node *> * sintd_nodes,
-                                              std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
+                                              std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz,
+                                              MEField<> *src_side1_mesh_ind_field, MEField<> *src_side1_orig_elem_id_field, 
+                                              MEField<> *dst_side2_mesh_ind_field, MEField<> *dst_side2_orig_elem_id_field) {
 
 
 // Maximum size for a supported polygon
@@ -257,9 +259,51 @@ namespace ESMCI {
       }
 
       if(midmesh || res_map) {
+
+	// Set side1 ind information
+	int side1_ind=1; // If there is no src_side1_mesh_ind field, then this mesh hasn't 
+                         // been merged, so it's the only one on it's side and it's ind 1
+	if (src_side1_mesh_ind_field) {
+	  double *side1_dbl=src_side1_mesh_ind_field->data(*src_elem);
+	  side1_ind=(int)(*side1_dbl+0.5);
+	} 
+
+        // Set side1 orig elem id
+        int side1_orig_elem_id=src_elem->get_id();
+        if (src_side1_orig_elem_id_field) {
+          double *side1_orig_elem_id_ptr = src_side1_orig_elem_id_field->data(*src_elem);
+          side1_orig_elem_id=(int)(*side1_orig_elem_id_ptr+0.5);
+        }
+
+	// Set side2 ind information
+	int side2_ind=1; // If there is no dst_side2_mesh_ind field, then this mesh hasn't 
+                         // been merged, so it's the only one on it's side and it's ind 1
+	if (dst_side2_mesh_ind_field) {
+	  double *side2_dbl=dst_side2_mesh_ind_field->data(*dst_elem);
+	  side2_ind=(int)(*side2_dbl+0.5);
+	} 
+
+        // Set side2 orig elem id
+        int side2_orig_elem_id=dst_elem->get_id();
+        if (dst_side2_orig_elem_id_field) {
+          double *side2_orig_elem_id_ptr = dst_side2_orig_elem_id_field->data(*dst_elem);
+          side2_orig_elem_id=(int)(*side2_orig_elem_id_ptr+0.5);
+        }	 
+
+        // make sintd  nodes and cells
         compute_sintd_nodes_cells(sintd_areas[i],
-				  num_sintd_nodes, sintd_coords, 2, 2,
-				  sintd_nodes, sintd_cells, zz);
+				  num_sintd_nodes, sintd_coords, 2, 2, 
+				  sintd_nodes, sintd_cells, zz,
+#ifdef BOB_XGRID_DEBUG
+                                  src_elem->get_id(),dst_elem->get_id(),
+#endif
+                                  side1_ind, side1_orig_elem_id,
+                                  side2_ind, side2_orig_elem_id);
+
+        // OLD WAY, GET RID OF WHEN WORKING
+        // compute_sintd_nodes_cells(sintd_areas[i],
+	//			  num_sintd_nodes, sintd_coords, 2, 2,
+	//			  sintd_nodes, sintd_cells, zz);
       }
 
       // append result to a multi-map index-ed by passive mesh element for merging optimization
@@ -642,15 +686,17 @@ namespace ESMCI {
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into
   // this call.
   void calc_1st_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield,
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
-                                           double *src_elem_area,
-                                           std::vector<int> *valid,
-                                           std::vector<double> *wgts,
-                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
-                                           std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
-                                           Mesh * midmesh,
-                                           std::vector<sintd_node *> * sintd_nodes,
-                                         std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
+                                         std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                         double *src_elem_area,
+                                         std::vector<int> *valid,
+                                         std::vector<double> *wgts,
+                                         std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                         std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
+                                         Mesh * midmesh,
+                                         std::vector<sintd_node *> * sintd_nodes,
+                                         std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz,
+                                         MEField<> *src_side1_mesh_ind_field, MEField<> *src_side1_orig_elem_id_field, 
+                                         MEField<> *dst_side2_mesh_ind_field, MEField<> *dst_side2_orig_elem_id_field) {
 
     // Use original version if midmesh exists
     // TODO: Fei fix this
@@ -662,7 +708,9 @@ namespace ESMCI {
                                              sintd_areas_out, dst_areas_out,
                                              midmesh,
                                              sintd_nodes,
-                                             sintd_cells, res_map, zz);
+                                             sintd_cells, res_map, zz,
+                                             src_side1_mesh_ind_field, src_side1_orig_elem_id_field, 
+                                             dst_side2_mesh_ind_field, dst_side2_orig_elem_id_field);
 
       return;
     }
@@ -908,7 +956,8 @@ void norm_poly3D(int num_p, double *p) {
 					     std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out, 
 					     Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
 					     std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz, 
-					     MEField<> *src_side_field, MEField<> *dst_side_field) {
+                                             MEField<> *src_side1_mesh_ind_field, MEField<> *src_side1_orig_elem_id_field, 
+                                             MEField<> *dst_side2_mesh_ind_field, MEField<> *dst_side2_orig_elem_id_field) {
 
 
 // Maximum size for a supported polygon
@@ -1143,26 +1192,45 @@ void norm_poly3D(int num_p, double *p) {
 
 #undef XGRID_CLIP_TOL
 
-	// Set side information
-	int side1_ind=1; // default to 1
-	if (src_side_field) {
-	  double *side1_dbl=src_side_field->data(*src_elem);
+	// Set side1 ind information
+	int side1_ind=1; // If there is no src_side1_mesh_ind field, then this mesh hasn't 
+                         // been merged, so it's the only one on it's side and it's ind 1
+	if (src_side1_mesh_ind_field) {
+	  double *side1_dbl=src_side1_mesh_ind_field->data(*src_elem);
 	  side1_ind=(int)(*side1_dbl+0.5);
 	} 
-	int side2_ind=1; // default to 1
-	if (dst_side_field) {
-	  double *side2_dbl=dst_side_field->data(*dst_elem);
+
+        // Set side1 orig elem id
+        int side1_orig_elem_id=src_elem->get_id();
+        if (src_side1_orig_elem_id_field) {
+          double *side1_orig_elem_id_ptr = src_side1_orig_elem_id_field->data(*src_elem);
+          side1_orig_elem_id=(int)(*side1_orig_elem_id_ptr+0.5);
+        }
+
+	// Set side2 ind information
+	int side2_ind=1; // If there is no dst_side2_mesh_ind field, then this mesh hasn't 
+                         // been merged, so it's the only one on it's side and it's ind 1
+	if (dst_side2_mesh_ind_field) {
+	  double *side2_dbl=dst_side2_mesh_ind_field->data(*dst_elem);
 	  side2_ind=(int)(*side2_dbl+0.5);
 	} 
-        //printf("%d# BOB: END CC\n",Par::Rank());
-	  
+
+        // Set side2 orig elem id
+        int side2_orig_elem_id=dst_elem->get_id();
+        if (dst_side2_orig_elem_id_field) {
+          double *side2_orig_elem_id_ptr = dst_side2_orig_elem_id_field->data(*dst_elem);
+          side2_orig_elem_id=(int)(*side2_orig_elem_id_ptr+0.5);
+        }	 
+
+        // make sintd  nodes and cells	  
         compute_sintd_nodes_cells(sintd_areas[i],
 				  num_sintd_nodes, sintd_coords, 2, 3, 
 				  sintd_nodes, sintd_cells, zz,
 #ifdef BOB_XGRID_DEBUG
                                   src_elem->get_id(),dst_elem->get_id(),
 #endif
-                                  side1_ind, side2_ind);
+                                  side1_ind, side1_orig_elem_id,
+                                  side2_ind, side2_orig_elem_id);
 
 
 #if 0
@@ -1585,27 +1653,32 @@ void norm_poly3D(int num_p, double *p) {
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into
   // this call.
   void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
-                                           double *src_elem_area,
-                                           std::vector<int> *valid, 
-                                           std::vector<double> *wgts, 
-                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
-                                           std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
-                                           Mesh * midmesh, 
-                                           std::vector<sintd_node *> * sintd_nodes, 
-					std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz, MEField<> *src_side_field, MEField<> *dst_side_field) {
+                                        std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
+                                        double *src_elem_area,
+                                        std::vector<int> *valid, 
+                                        std::vector<double> *wgts, 
+                                        std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
+                                        std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
+                                        Mesh * midmesh, 
+                                        std::vector<sintd_node *> * sintd_nodes, 
+					std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz, 
+                                        MEField<> *src_side1_mesh_ind_field, MEField<> *src_side1_orig_elem_id_field, 
+                                        MEField<> *dst_side2_mesh_ind_field, MEField<> *dst_side2_orig_elem_id_field) {
+
 
     // Use original version if midmesh exists
     // TODO: Fei fix this
     if(midmesh || res_map) {
       calc_1st_order_weights_2D_3D_sph_orig(src_elem, src_cfield, 
-                                             dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
-                                             src_elem_area,
-                                             valid, wgts, 
-                                             sintd_areas_out, dst_areas_out,
-                                             midmesh, 
-                                             sintd_nodes, 
-					    sintd_cells, res_map, zz, src_side_field, dst_side_field);
+                                            dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
+                                            src_elem_area,
+                                            valid, wgts, 
+                                            sintd_areas_out, dst_areas_out,
+                                            midmesh, 
+                                            sintd_nodes, 
+					    sintd_cells, res_map, zz, 
+                                            src_side1_mesh_ind_field, src_side1_orig_elem_id_field, 
+                                            dst_side2_mesh_ind_field, dst_side2_orig_elem_id_field);
 
       return;
     }
@@ -1824,281 +1897,6 @@ void norm_poly3D(int num_p, double *p) {
 
 
   //////////////// END CALC 2D 3D WEIGHTS //////////////////
-
-
-#if 0
-
-  // Here valid and wghts need to be resized to the same size as dst_elems before being passed into
-  // this call.
-  void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield,
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
-                                           double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts,
-                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
-                                           Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes,
-                                           std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
-
-
-// Maximum size for a supported polygon
-// Since the elements are of a small
-// limited size. Fixed sized buffers seem
-// the best way to handle them
-
-#define  MAX_NUM_POLY_NODES 40
-#define  MAX_NUM_POLY_COORDS_3D (3*MAX_NUM_POLY_NODES)
-
-    // Declaration for src polygon
-    int num_src_nodes;
-    double src_coords[MAX_NUM_POLY_COORDS_3D];
-    double tmp_coords[MAX_NUM_POLY_COORDS_3D];
-
-    // Get src coords
-    get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
-    //  get_elem_coords(src_elem, src_cfield, 3, MAX_NUM_POLY_NODES, &num_src_nodes, src_coords);
-
-
-    // if no nodes then exit
-    if (num_src_nodes<1) return;
-
-    // Get rid of degenerate edges
-    remove_0len_edges3D(&num_src_nodes, src_coords);
-
-
-    // If less than a triangle invalidate everything and leave because it won't results in weights
-    // Decision about returning error for degeneracy is made above this subroutine
-    if (num_src_nodes<3) {
-      *src_elem_area=0.0;
-      for (int i=0; i<dst_elems.size(); i++) {
-        (*valid)[i]=0;
-        (*wgts)[i]=0.0;
-        (*sintd_areas_out)[i]=0.0;
-        (*dst_areas_out)[i]=0.0;
-      }
-      return;
-    }
-
-
-    // If a smashed quad invalidate everything and leave because it won't results in weights
-    // Decision about returning error for degeneracy is made above this subroutine
-    if (is_smashed_quad3D(num_src_nodes, src_coords)) {
-      *src_elem_area=0.0;
-      for (int i=0; i<dst_elems.size(); i++) {
-        (*valid)[i]=0;
-        (*wgts)[i]=0.0;
-        (*sintd_areas_out)[i]=0.0;
-        (*dst_areas_out)[i]=0.0;
-      }
-      return;
-    }
-
-
-    // calculate dst area
-    double src_area=great_circle_area(num_src_nodes, src_coords);
-
-
-    // If src area is 0.0 invalidate everything and leave because it won't results in weights
-    // Decision about returning error for degeneracy is made above this subroutine
-    if (src_area == 0.0) {
-      *src_elem_area=0.0;
-      for (int i=0; i<dst_elems.size(); i++) {
-        (*valid)[i]=0;
-        (*wgts)[i]=0.0;
-        (*sintd_areas_out)[i]=0.0;
-        (*dst_areas_out)[i]=0.0;
-      }
-      return;
-    }
-
-
-    // Output src_elem_area
-    *src_elem_area=src_area;
-
-    // Declaration for dst polygon
-    int num_dst_nodes;
-    double dst_coords[MAX_NUM_POLY_COORDS_3D];
-
-    // Declaration for intersection polygon
-    int num_sintd_nodes;
-    double sintd_coords[MAX_NUM_POLY_COORDS_3D];
-
-    // Allocate something to hold areas
-    std::vector<double> sintd_areas;
-    sintd_areas.resize(dst_elems.size(),0.0);
-
-    std::vector<double> dst_areas;
-    dst_areas.resize(dst_elems.size(),0.0);
-
-    // Loop intersecting and computing areas of intersection
-    for (int i=0; i<dst_elems.size(); i++) {
-      const MeshObj *dst_elem = dst_elems[i];
-
-      // Get dst coords
-      get_elem_coords_3D_ccw(dst_elem, dst_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
-
-
-      // if no nodes then go to next
-      if (num_dst_nodes<1) {
-        (*valid)[i]=0;
-        (*wgts)[i]=0.0;
-        sintd_areas[i]=0.0;
-        continue;
-      }
-
-      // Get rid of degenerate edges
-      remove_0len_edges3D(&num_dst_nodes, dst_coords);
-
-      // if less than a triangle complain
-      if (num_dst_nodes<3) {
-        (*valid)[i]=0;
-        (*wgts)[i]=0.0;
-        sintd_areas[i]=0.0;
-        continue;
-      }
-
-      // if a smashed quad skip
-      if (is_smashed_quad3D(num_dst_nodes, dst_coords)) {
-        (*valid)[i]=0;
-        (*wgts)[i]=0.0;
-        sintd_areas[i]=0.0;
-        continue;
-      }
-
-      // calculate dst area
-     dst_areas[i]=great_circle_area(num_dst_nodes, dst_coords);
-
-     // if destination area is 0.0, invalidate and go to next
-     if (dst_areas[i]==0.0) {
-       (*valid)[i]=0;
-       (*wgts)[i]=0.0;
-       sintd_areas[i]=0.0;
-       continue;
-     }
-
-     // Make sure that we aren't going to go over size of tmp buffers
-     if ((num_src_nodes + num_dst_nodes) > MAX_NUM_POLY_NODES) {
-       Throw() << " src and dst poly size too big for temp buffer";
-     }
-
-
-     // Intersect src with dst element
-     intersect_convex_2D_3D_sph_gc_poly(num_dst_nodes, dst_coords,
-                                        num_src_nodes, src_coords,
-                                        tmp_coords,
-                                        &num_sintd_nodes, sintd_coords);
-
-#if 0
-      if (((dst_elem->get_id()==173) && (src_elem->get_id()==409)) ||
-          ((dst_elem->get_id()==171) && (src_elem->get_id()==406))) {
-        printf("%d %d dst: ",dst_elem->get_id(),src_elem->get_id());
-        for (int j=0; j<num_dst_nodes; j++) {
-          printf(" [%f,%f,%f] ",dst_coords[3*j],dst_coords[3*j+1],dst_coords[3*j+2]);
-        }
-        printf("\n");
-      }
-#endif
-
-      // Get rid of degenerate edges
-      remove_0len_edges3D(&num_sintd_nodes, sintd_coords);
-
-      // if intersected element isn't a complete polygon then go to next
-      if (num_sintd_nodes < 3) {
-        (*valid)[i]=0;
-        (*wgts)[i]=0.0;
-        sintd_areas[i]=0.0;
-        continue;
-      }
-
-      // calculate intersection area
-      sintd_areas[i]=great_circle_area(num_sintd_nodes, sintd_coords);
-
-#if 0
-      // Get elem rotation
-      bool left_turn;
-      bool right_turn;
-      rot_2D_3D_sph(num_sintd_nodes, sintd_coords, &left_turn, &right_turn);
-
-      if (right_turn) {
-            printf("SINTD RIGHT TURN! src:%d dst:%d left=%d right=%d area=%20.17f \n",src_elem->get_id(),dst_elem->get_id(),left_turn,right_turn,sintd_areas[i]);
-
-            if ((src_elem->get_id()==421) && (dst_elem->get_id()==25)) {
-              write_3D_poly_woid_to_vtk("concave_elem_421_25", num_sintd_nodes, sintd_coords);
-            }
-      }
-#endif
-
-      (*valid)[i]=1;
-
-      // Invalidate masked destination elements
-      if (dst_mask_field) {
-        double *msk=dst_mask_field->data(*dst_elem);
-        if (*msk>0.5) {
-          (*valid)[i]=0;
-          continue;
-        }
-      }
-      // Invalidate creeped out dst element
-      if(dst_frac2_field){
-        double *dst_frac2=dst_frac2_field->data(*dst_elem);
-        if (*dst_frac2 == 0.0){
-          (*valid)[i] = 0;
-          continue;
-        }
-      }
-
-      if(midmesh || res_map)
-        compute_sintd_nodes_cells(sintd_areas[i],
-          num_sintd_nodes, sintd_coords, 2, 3,
-          sintd_nodes, sintd_cells, zz);
-
-      // append result to a multi-map index-ed by passive mesh element for merging optimization
-      if(res_map){
-        interp_map_iter it = res_map->find(src_elem);
-        if(it != res_map->end()) {
-          // check if this is a unique intersection
-          interp_map_range range = res_map->equal_range(src_elem);
-          for(interp_map_iter it = range.first; it != range.second; ++it){
-            if(it->second->clip_elem == dst_elem)
-              Throw() << "Duplicate src/dst elem pair found in res_map" << std::endl;
-          }
-        }
-        int sdim = 3;
-        res_map->insert(std::make_pair(src_elem, new interp_res(dst_elem, num_sintd_nodes, num_src_nodes, num_dst_nodes, sdim, src_coords, dst_coords,
-          src_area, dst_areas[i], ((src_area == 0.)? 1.:sintd_areas[i]/src_area) ) ) );
-      }
-    }
-
-    if(res_map) return;     // not intended for weight calculation
-
-    // Loop calculating weights
-    for (int i=0; i<dst_elems.size(); i++) {
-      if ((*valid)[i]==1) {
-        // calc weight
-        double weight=sintd_areas[i]/dst_areas[i];
-
-        // If weight is slightly bigger than one because of round off then push it back
-        // if it's way over let it go, so we see it.
-        if ((weight > 1.0) && (weight < 1.0+1.0E-10)) weight = 1.0;
-
-        // return weight
-        (*wgts)[i]=weight;
-      }
-    }
-
-
-    // Loop setting areas
-    for (int i=0; i<dst_elems.size(); i++) {
-      if ((*valid)[i]==1) {
-        // return weight
-        (*sintd_areas_out)[i]=sintd_areas[i];
-        (*dst_areas_out)[i]=dst_areas[i];
-      }
-    }
-
-#undef  MAX_NUM_POLY_NODES
-#undef  MAX_NUM_POLY_COORDS_3D
-  }
-
-#endif
 
 #if 0
 

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -84,9 +84,7 @@ void WMat::InsertRow(const Entry &row, const std::vector<Entry> &cols) {
 
 
 
-
-// Insert row and associated columns into matrix complain if column doesn't
-// exist then add it, if it exists with a different value then complain
+// Insert row and associated columns into matrix 
 // ASSUMES cols is in sorted order
 void WMat::InsertRowMergeSingle(const Entry &row, const Entry &col) {
 
@@ -130,8 +128,8 @@ void WMat::InsertRowMergeSingle(const Entry &row, const Entry &col) {
 
 
 
-// Insert row and associated columns into matrix complain if column doesn't
-// exist then add it, if it exists with a different value then sum values
+// Insert row and associated columns into matrix complain if it exists 
+// with a different value then sum values
 // ASSUMES cols is in sorted order
 void WMat::InsertRowSumSingle(const Entry &row, const Entry &col) {
 
@@ -767,6 +765,67 @@ void WMat::AssimilateConstraintsNPnts(const WMat &constraints) {
 
 }
 
+// This is a pretty specific method that takes an adj_matrix. The adj matrix row ids should match with the col ids of the this matrix. Each row of the
+// adj matrix should contain just one col with the adj in the value (If it contains more than one col, then the first is used and the others are ignored.
+// This method goes through and matches the row ids of the adj_mat with col
+// ids in the this matrix. It then multiplies the value of the col in the this matrix with the col value in the adj_mat. 
+// NOTE: wts.GatherToCol(adj_wts) (where wts is the this matrix) might need to be called to make sure the distribution of the adj_mat lines
+//  up with the cols of the this matrix. 
+void WMat::MultColsByAdjMat(const WMat &adj_mat) {
+
+  // Loop the current matrix and adjust cols by the adj_mat
+  WeightMap::iterator wi = weights.begin(), we = weights.end();
+  for (; wi != we; ++wi) {
+
+    // Get current row and col
+    const Entry &row = wi->first;
+    std::vector<Entry> &cols = wi->second;
+    
+    // Loop columns and adjust by adj matrix
+    for (UInt i = 0; i < cols.size(); i++) {
+
+      // Get column id
+      UInt col_id=cols[i].id;
+
+      // Check to see if any rows in the adj matrix match this col id
+      // Since these two matrices may be coming from different weight
+      // calculation routines they might have different secondary data (e.g. src_id), so
+      // bracket with upper and lower bound and check explicitly if ids match
+      
+      // Lower bound
+      Entry lower(col_id);
+      WeightMap::const_iterator ai = adj_mat.weights.lower_bound(lower);
+      
+      //// Upper Bound
+      Entry upper(col_id+1);
+      WeightMap::const_iterator ae = adj_mat.weights.lower_bound(upper);
+    
+      // If there are adj matrix rows that match, then look for an exact match
+      if (ai != adj_mat.weights.end()) {
+
+        // Loop over any adj_mat entries which match
+        // see if any have the same id
+        for (; ai != ae; ++ai) {
+          const Entry &adj_mat_row = ai->first;
+          
+          // If a row matches, then multiply by the first col entry
+          if (adj_mat_row.id == col_id) {
+            
+            // Get cols
+            const std::vector<Entry> &adj_mat_cols = ai->second;
+            
+            // If there's a col, then multiply by value of first one
+            // and just ignore others. 
+            if (adj_mat_cols.size() > 0) {
+              cols[i].value *= adj_mat_cols[0].value;              
+            }   
+          }
+        }
+      }
+    } 
+  }
+}
+
 
 void WMat::GatherToCol(WMat &rhs) {
   Trace __trace("WMat::GatherToCol(WMat &rhs)");
@@ -785,7 +844,6 @@ void WMat::GatherToCol(WMat &rhs) {
 
   }
 }
-
 
 
 void WMat::GatherToRowSrc(WMat &rhs) {

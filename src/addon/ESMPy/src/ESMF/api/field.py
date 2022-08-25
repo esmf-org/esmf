@@ -382,7 +382,7 @@ class Field(object):
 
         *OPTIONAL:*
 
-        :param list timeslice: The number of timeslices to read.
+        :param int timeslice: The number of timeslices to read.
         """
 
         import ESMF.api.constants as constants

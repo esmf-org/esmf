@@ -1,0 +1,70 @@
+name: Build ESMF Docs
+
+on:
+  workflow_dispatch:
+#  push:
+#    branches: [ "develop" ]
+#  pull_request:
+#    branches: [ "develop" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Checkout Dockerfiles
+      uses: actions/checkout@v3
+      with:
+          repository: esmf-org/esmf-containers
+          path: esmf-containers
+          ref: main
+    
+    - name: Build Docker image  
+      run: | 
+        cd ${{ github.workspace }}/esmf-containers/build-esmf-docs/esmf
+        docker build . --tag esmf/build-esmf-docs --build-arg ESMF_BRANCH="${{ github.ref_name }}" --no-cache
+        
+    - name: Extract artifacts
+      run: |
+        mkdir -p ${{ github.workspace }}/artifacts
+        CID=$(docker run -dit --name runner esmf/build-esmf-docs)
+        docker cp ${CID}:/artifacts/doc-artifacts.zip ${{ github.workspace }}/artifacts
+        docker stop ${CID}
+        docker rm ${CID}        
+            
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: esmf-docs
+        path: ${{ github.workspace }}/artifacts
+        
+    - name: Checkout esmf-org.github.io
+      uses: actions/checkout@v3
+      with:
+          repository: esmf-org/esmf-org.github.io
+          path: esmf-org.github.io          
+    
+    - name: Copy docs
+      run: | 
+        cd ${{ github.workspace }}/esmf-org.github.io
+        mkdir -p docs/nightly/${{ github.ref_name }}
+        cd ${{ github.workspace }}/artifacts
+        unzip doc-artifacts.zip
+        cd ${{ github.workspace }}/artifacts/artifacts/doc-esmf
+        cp -rf ./* ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
+        cd ${{ github.workspace }}/artifacts/artifacts/doc-nuopc
+        cp -rf NUOPC_refdoc ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
+        cp -rf NUOPC_refdoc.pdf ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
+        cp -rf NUOPC_howtodoc ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
+        cp -rf NUOPC_howtodoc.pdf ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
+        cd ${{ github.workspace }}/artifacts/artifacts/doc-dev_guide
+        cp -rf ./dev_guide/dev_guide/* ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/dev_guide/
+        
+    - name: Commit and publish docs
+      uses: actions-js/push@master
+      with:
+        directory: ${{ github.workspace }}/esmf-org.github.io
+        github_token: ${{ secrets.GITHUB_TOKEN }}

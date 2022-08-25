@@ -30,12 +30,12 @@
 #include <mpe.h>
 #endif /* USE_MPE */
 
-#ifndef MPI_OFFSET
+//#ifndef MPI_OFFSET
 /** MPI_OFFSET is an integer type of size sufficient to represent the
  * size (in bytes) of the largest file supported by MPI. In some MPI
  * implementations MPI_OFFSET is not properly defined.  */
-#define MPI_OFFSET  MPI_LONG_LONG
-#endif
+//#define MPI_OFFSET  MPI_LONG_LONG
+//#endif
 
 /* These are the sizes of types in netCDF files. Do not replace these
  * constants with sizeof() calls for C types. They are not the
@@ -57,10 +57,10 @@
 #define MPI_OFFSET OMPI_OFFSET_DATATYPE
 #endif
 #endif
-#ifndef MPI_Offset
+//#ifndef MPI_Offset
 /** This is the type used for PIO_Offset. */
-#define MPI_Offset long long
-#endif
+//#define MPI_Offset long long
+//#endif
 
 /** Some MPI implementations do not allow passing MPI_DATATYPE_NULL to
  * comm functions even though the send or recv length is 0, in these
@@ -640,14 +640,5 @@ enum PIO_MSG
     PIO_MSG_INQ_TYPE,
     PIO_MSG_INQ_UNLIMDIMS
 };
-
-#ifdef ESMF_PROFILE
-#define ESMF_LOGMEMINFO(name) {\
-    int _loginfo=1;\
-    c_esmc_vmlogmeminfo_(name, &_loginfo, NULL, NULL, strlen(name));
-#else
-#define ESMF_LOGMEMINFO(name) ;
-#endif
-
 
 #endif /* __PIO_INTERNAL__ */

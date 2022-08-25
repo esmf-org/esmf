@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -3902,17 +3902,18 @@ int XXE::exec(
         char *buffer = (char *)xxeSendInfo->buffer;
         if (xxeSendInfo->indirectionFlag)
           buffer = *(char **)xxeSendInfo->buffer;
-        int size = xxeSendInfo->size;
+        unsigned long long int size = xxeSendInfo->size;
         if (xxeSendInfo->vectorFlag)
           size *= *vectorLength;
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::send: buffer=%p, size=%d, dst=%d, "
+        sprintf(msg, "XXE::send: buffer=%p, size=%Ld, dst=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d",
           xxeSendInfo->buffer, xxeSendInfo->size, xxeSendInfo->dstPet,
           xxeSendInfo->tag, xxeSendInfo->vectorFlag,
           xxeSendInfo->indirectionFlag);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
+//TODO: 32-bit limit
         vm->send(buffer, size, xxeSendInfo->dstPet, xxeSendInfo->tag);
         xxeSendInfo->activeFlag = true;     // set
         xxeSendInfo->cancelledFlag = false; // set
@@ -3924,17 +3925,18 @@ int XXE::exec(
         char *buffer = (char *)xxeRecvInfo->buffer;
         if (xxeRecvInfo->indirectionFlag)
           buffer = *(char **)xxeRecvInfo->buffer;
-        int size = xxeRecvInfo->size;
+        unsigned long long int size = xxeRecvInfo->size;
         if (xxeRecvInfo->vectorFlag)
           size *= *vectorLength;
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::recv: buffer=%p, size=%d, src=%d, "
+        sprintf(msg, "XXE::recv: buffer=%p, size=%Ld, src=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d",
           xxeRecvInfo->buffer, xxeRecvInfo->size, xxeRecvInfo->srcPet,
           xxeRecvInfo->tag, xxeRecvInfo->vectorFlag,
           xxeRecvInfo->indirectionFlag);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
+//TODO: 32-bit limit
         vm->recv(buffer, size, xxeRecvInfo->srcPet, xxeRecvInfo->tag);
         xxeRecvInfo->activeFlag = true;     // set
         xxeRecvInfo->cancelledFlag = false; // set
@@ -3943,16 +3945,17 @@ int XXE::exec(
     case sendRRA:
       {
         xxeSendRRAInfo = (SendRRAInfo *)xxeElement;
-        int size = xxeSendRRAInfo->size;
+        unsigned long long int size = xxeSendRRAInfo->size;
         int rraOffset = xxeSendRRAInfo->rraOffset;
         if (xxeSendRRAInfo->vectorFlag){
           size *= *vectorLength;
           rraOffset *= *vectorLength;
         }
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::sendRRA: size=%d", xxeSendRRAInfo->size);
+        sprintf(msg, "XXE::sendRRA: size=%Ld", xxeSendRRAInfo->size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
+//TODO: 32-bit limit
         vm->send(rraList[xxeSendRRAInfo->rraIndex]
           + rraOffset, size, xxeSendRRAInfo->dstPet, xxeSendRRAInfo->tag);
         xxeSendRRAInfo->activeFlag = true;      // set
@@ -3962,16 +3965,17 @@ int XXE::exec(
     case recvRRA:
       {
         xxeRecvRRAInfo = (RecvRRAInfo *)xxeElement;
-        int size = xxeRecvRRAInfo->size;
+        unsigned long long int size = xxeRecvRRAInfo->size;
         int rraOffset = xxeRecvRRAInfo->rraOffset;
         if (xxeRecvRRAInfo->vectorFlag){
           size *= *vectorLength;
           rraOffset *= *vectorLength;
         }
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::recvRRA: size=%d", xxeRecvRRAInfo->size);
+        sprintf(msg, "XXE::recvRRA: size=%Ld", xxeRecvRRAInfo->size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
+//TODO: 32-bit limit
         vm->recv(rraList[xxeRecvRRAInfo->rraIndex]
           + rraOffset, size, xxeRecvRRAInfo->srcPet, xxeRecvRRAInfo->tag);
         xxeRecvRRAInfo->activeFlag = true;      // set
@@ -4041,16 +4045,16 @@ int XXE::exec(
         char *buffer = (char *)xxeSendnbInfo->buffer;
         if (xxeSendnbInfo->indirectionFlag)
           buffer = *(char **)xxeSendnbInfo->buffer;
-        int size = xxeSendnbInfo->size;
+        unsigned long long int size = xxeSendnbInfo->size;
         if (xxeSendnbInfo->vectorFlag)
           size *= *vectorLength;
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::sendnb: dst=%d, size=%d, buffer=%p",
+        sprintf(msg, "XXE::sendnb: dst=%d, size=%Ld, buffer=%p",
           xxeSendnbInfo->dstPet, size, buffer);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
 #ifdef XXE_EXEC_OPSLOG_on
-        for (int k=0; k<size; k++){
+        for (unsigned long long int k=0; k<size; k++){
           std::stringstream logmsg;
           logmsg << "buffer[" << k << "] = " << buffer[k];
           ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_DEBUG);
@@ -4059,6 +4063,7 @@ int XXE::exec(
 #ifdef XXE_EXEC_MEMLOG_on
   VM::logMemInfo(std::string("XXE::exec():sendnb2.0"));
 #endif
+//TODO: 32-bit limit
         vm->send(buffer, size, xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle,
           xxeSendnbInfo->tag);
 #ifdef XXE_EXEC_MEMLOG_on
@@ -4074,14 +4079,15 @@ int XXE::exec(
         char *buffer = (char *)xxeRecvnbInfo->buffer;
         if (xxeRecvnbInfo->indirectionFlag)
           buffer = *(char **)xxeRecvnbInfo->buffer;
-        int size = xxeRecvnbInfo->size;
+        unsigned long long int size = xxeRecvnbInfo->size;
         if (xxeRecvnbInfo->vectorFlag)
           size *= *vectorLength;
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::recvnb: src=%d, size=%d, buffer=%p",
+        sprintf(msg, "XXE::recvnb: src=%d, size=%Ld, buffer=%p",
           xxeRecvnbInfo->srcPet, size, buffer);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
+//TODO: 32-bit limit
         vm->recv(buffer, size, xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle,
           xxeRecvnbInfo->tag);
         xxeRecvnbInfo->activeFlag = true;     // set
@@ -4091,17 +4097,18 @@ int XXE::exec(
     case sendnbRRA:
       {
         xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
-        int size = xxeSendnbRRAInfo->size;
+        unsigned long long int size = xxeSendnbRRAInfo->size;
         int rraOffset = xxeSendnbRRAInfo->rraOffset;
         if (xxeSendnbRRAInfo->vectorFlag){
           size *= *vectorLength;
           rraOffset *= *vectorLength;
         }
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::sendnbRRA: dst=%d, size=%d",
+        sprintf(msg, "XXE::sendnbRRA: dst=%d, size=%Ld",
           xxeSendnbRRAInfo->dstPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
+//TODO: 32-bit limit
         vm->send(rraList[xxeSendnbRRAInfo->rraIndex]
           + rraOffset, size, xxeSendnbRRAInfo->dstPet,
           xxeSendnbRRAInfo->commhandle, xxeSendnbRRAInfo->tag);
@@ -4112,17 +4119,18 @@ int XXE::exec(
     case recvnbRRA:
       {
         xxeRecvnbRRAInfo = (RecvnbRRAInfo *)xxeElement;
-        int size = xxeRecvnbRRAInfo->size;
+        unsigned long long int size = xxeRecvnbRRAInfo->size;
         int rraOffset = xxeRecvnbRRAInfo->rraOffset;
         if (xxeRecvnbRRAInfo->vectorFlag){
           size *= *vectorLength;
           rraOffset *= *vectorLength;
         }
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::recvnbRRA: src=%d, size=%d",
+        sprintf(msg, "XXE::recvnbRRA: src=%d, size=%Ld",
           xxeRecvnbRRAInfo->srcPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
+//TODO: 32-bit limit
         vm->recv(rraList[xxeRecvnbRRAInfo->rraIndex]
           + rraOffset, size, xxeRecvnbRRAInfo->srcPet,
           xxeRecvnbRRAInfo->commhandle, xxeRecvnbRRAInfo->tag);
@@ -5229,15 +5237,16 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         char *buffer = (char *)xxeZeroMemsetInfo->buffer;
         if (xxeZeroMemsetInfo->indirectionFlag)
           buffer = *(char **)xxeZeroMemsetInfo->buffer;
-        int byteCount = xxeZeroMemsetInfo->byteCount;
+        unsigned long long int byteCount = xxeZeroMemsetInfo->byteCount;
         if(xxeZeroMemsetInfo->vectorFlag)
           byteCount *= *vectorLength;
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::zeroMemset: indirectionFlag=%d, buffer=%p, "
-          "vectorFlag=%d, byteCount=%d", xxeZeroMemsetInfo->indirectionFlag,
+          "vectorFlag=%d, byteCount=%Ld", xxeZeroMemsetInfo->indirectionFlag,
           buffer, xxeZeroMemsetInfo->vectorFlag, byteCount);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
+//TODO: 32-bit limit
         memset(buffer, 0, byteCount);
       }
       break;
@@ -5246,21 +5255,23 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         xxeZeroMemsetRRAInfo =
           (ZeroMemsetRRAInfo *)xxeElement;
         char *rraBase = rraList[xxeZeroMemsetRRAInfo->rraIndex];
-        int byteCount = xxeZeroMemsetRRAInfo->byteCount;
+        unsigned long long int byteCount = xxeZeroMemsetRRAInfo->byteCount;
         if(xxeZeroMemsetRRAInfo->vectorFlag)
           byteCount *= *vectorLength;
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::zeroMemsetRRA: rraBase=%p, "
-          "vectorFlag=%d, byteCount=%d", rraBase,
+          "vectorFlag=%d, byteCount=%Ld", rraBase,
           xxeZeroMemsetRRAInfo->vectorFlag, byteCount);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
+//TODO: 32-bit limit
         memset(rraBase, 0, byteCount);
       }
       break;
     case memCpy:
       {
         xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
+//TODO: 32-bit limit
         memcpy(xxeMemCpyInfo->dstMem, xxeMemCpyInfo->srcMem,
           xxeMemCpyInfo->size);
       }
@@ -5268,6 +5279,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     case memCpySrcRRA:
       {
         xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)xxeElement;
+//TODO: 32-bit limit
         memcpy(xxeMemCpySrcRRAInfo->dstMem,
           rraList[xxeMemCpySrcRRAInfo->rraIndex]
           + xxeMemCpySrcRRAInfo->rraOffset,
@@ -5283,7 +5295,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         char *rraBase = rraList[xxeMemGatherSrcRRAInfo->rraIndex];
         int *rraOffsetList = xxeMemGatherSrcRRAInfo->rraOffsetList;
         int *countList = xxeMemGatherSrcRRAInfo->countList;
-        int vectorL = 1; // initialize
+        unsigned long long int vectorL = 1; // initialize
         if (xxeMemGatherSrcRRAInfo->vectorFlag)
           vectorL = *vectorLength;
         bool superVector = (xxeMemGatherSrcRRAInfo->vectorFlag
@@ -5304,7 +5316,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         }
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::memGatherSrcRRA: dstBaseTK=%d, vectorFlag=%d, "
-          "vectorL=%d, srcSuperVecSize_r=%d, superVectorOkay=%d",
+          "vectorL=%Ld, srcSuperVecSize_r=%d, superVectorOkay=%d",
           xxeMemGatherSrcRRAInfo->dstBaseTK,
           xxeMemGatherSrcRRAInfo->vectorFlag, vectorL,
           srcSuperVecSize_r,
@@ -5366,9 +5378,11 @@ printf("gjt - DID NOT CANCEL commhandle\n");
             {
               char *dstPointer = dstBase;
               for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-                memcpy(dstPointer, rraBase + rraOffsetList[k] * vectorL,
-                  countList[k] * vectorL);
-                dstPointer += countList[k] * vectorL;
+//TODO: 32-bit limit
+                unsigned long long int size = vectorL;
+                size *= countList[k];
+                memcpy(dstPointer, rraBase + rraOffsetList[k] * vectorL, size);
+                dstPointer += size;
               }
             }
             break;
@@ -7738,7 +7752,7 @@ int XXE::print(
     case send:
       {
         xxeSendInfo = (SendInfo *)xxeElement;
-        fprintf(fp, "  XXE::send: buffer=%p, size=%d, dst=%d, "
+        fprintf(fp, "  XXE::send: buffer=%p, size=%Ld, dst=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d\n",
           xxeSendInfo->buffer, xxeSendInfo->size, xxeSendInfo->dstPet,
           xxeSendInfo->tag, xxeSendInfo->vectorFlag,
@@ -7748,7 +7762,7 @@ int XXE::print(
     case recv:
       {
         xxeRecvInfo = (RecvInfo *)xxeElement;
-        fprintf(fp, "  XXE::recv: buffer=%p, size=%d, src=%d, "
+        fprintf(fp, "  XXE::recv: buffer=%p, size=%Ld, src=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d\n",
           xxeRecvInfo->buffer, xxeRecvInfo->size, xxeRecvInfo->srcPet,
           xxeRecvInfo->tag, xxeRecvInfo->vectorFlag,
@@ -7758,7 +7772,7 @@ int XXE::print(
     case sendRRA:
       {
         xxeSendRRAInfo = (SendRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::sendRRA: rraOffset=%d, size=%d, "
+        fprintf(fp, "  XXE::sendRRA: rraOffset=%d, size=%Ld, "
           "dst=%d, rraIndex=%d, tag=%d, vectorFlag=%d\n",
           xxeSendRRAInfo->rraOffset, xxeSendRRAInfo->size,
           xxeSendRRAInfo->dstPet, xxeSendRRAInfo->rraIndex,
@@ -7768,7 +7782,7 @@ int XXE::print(
     case recvRRA:
       {
         xxeRecvRRAInfo = (RecvRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::recvRRA: rraOffset=%d, size=%d, "
+        fprintf(fp, "  XXE::recvRRA: rraOffset=%d, size=%Ld, "
           "src=%d, rraIndex=%d, tag=%d, vectorFlag=%d\n",
           xxeRecvRRAInfo->rraOffset, xxeRecvRRAInfo->size,
           xxeRecvRRAInfo->srcPet, xxeRecvRRAInfo->rraIndex,
@@ -7778,7 +7792,7 @@ int XXE::print(
     case sendnb:
       {
         xxeSendnbInfo = (SendnbInfo *)xxeElement;
-        fprintf(fp, "  XXE::sendnb: buffer=%p, size=%d, dst=%d, "
+        fprintf(fp, "  XXE::sendnb: buffer=%p, size=%Ld, dst=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d, commhandle=%p\n",
           xxeSendnbInfo->buffer, xxeSendnbInfo->size, xxeSendnbInfo->dstPet,
           xxeSendnbInfo->tag, xxeSendnbInfo->vectorFlag,
@@ -7788,7 +7802,7 @@ int XXE::print(
     case recvnb:
       {
         xxeRecvnbInfo = (RecvnbInfo *)xxeElement;
-        fprintf(fp, "  XXE::recvnb: buffer=%p, size=%d, src=%d, "
+        fprintf(fp, "  XXE::recvnb: buffer=%p, size=%Ld, src=%d, "
           "tag=%d, vectorFlag=%d, indirectionFlag=%d, commhandle=%p\n",
           xxeRecvnbInfo->buffer, xxeRecvnbInfo->size, xxeRecvnbInfo->srcPet,
           xxeRecvnbInfo->tag, xxeRecvnbInfo->vectorFlag,
@@ -7798,7 +7812,7 @@ int XXE::print(
     case sendnbRRA:
       {
         xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::sendnbRRA: rraOffset=%d, size=%d, "
+        fprintf(fp, "  XXE::sendnbRRA: rraOffset=%d, size=%Ld, "
           "dst=%d, rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
           xxeSendnbRRAInfo->rraOffset, xxeSendnbRRAInfo->size,
           xxeSendnbRRAInfo->dstPet, xxeSendnbRRAInfo->rraIndex,
@@ -7809,7 +7823,7 @@ int XXE::print(
     case recvnbRRA:
       {
         xxeRecvnbRRAInfo = (RecvnbRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::recvnbRRA: rraOffset=%d, size=%d, "
+        fprintf(fp, "  XXE::recvnbRRA: rraOffset=%d, size=%Ld, "
           "src=%d, rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
           xxeRecvnbRRAInfo->rraOffset, xxeRecvnbRRAInfo->size,
           xxeRecvnbRRAInfo->srcPet, xxeRecvnbRRAInfo->rraIndex,
@@ -7980,7 +7994,7 @@ int XXE::print(
     case zeroMemset:
       {
         xxeZeroMemsetInfo = (ZeroMemsetInfo *)xxeElement;
-        fprintf(fp, "  XXE::zeroMemset buffer=%p, byteCount=%d, "
+        fprintf(fp, "  XXE::zeroMemset buffer=%p, byteCount=%Ld, "
           "vectorFlag=%d, indirectionFlag=%d\n",
             xxeZeroMemsetInfo->buffer,
             xxeZeroMemsetInfo->byteCount, xxeZeroMemsetInfo->vectorFlag,
@@ -7990,7 +8004,7 @@ int XXE::print(
     case zeroMemsetRRA:
       {
         xxeZeroMemsetRRAInfo = (ZeroMemsetRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::zeroMemsetRRA byteCount=%d, "
+        fprintf(fp, "  XXE::zeroMemsetRRA byteCount=%Ld, "
           "rraIndex=%d, vectorFlag=%d\n",
           xxeZeroMemsetRRAInfo->byteCount,
           xxeZeroMemsetRRAInfo->rraIndex, xxeZeroMemsetRRAInfo->vectorFlag);
@@ -8188,7 +8202,7 @@ int XXE::printProfile(
 }
 //-----------------------------------------------------------------------------
 
-      //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::optimizeElement()"
 //BOPI
@@ -8299,7 +8313,7 @@ int XXE::optimizeElement(
 }
 //-----------------------------------------------------------------------------
 
-      //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::execReady()"
 //BOPI
@@ -8328,15 +8342,11 @@ int XXE::execReady(
     count, sizeof(StreamElement));
 #endif
 
-  const int sendnbMax = 20000;
-  int *sendnbIndexList = new int[sendnbMax];
-  int sendnbCount = 0;
-  int sendnbLowerIndex = -1;  // prime lower index indicator blow 0
+  vector<int> sendnbIndexList;
+  int sendnbLowerIndex = -1;  // prime lower index indicator below 0
 
-  const int recvnbMax = 20000;
-  int *recvnbIndexList = new int[recvnbMax];
-  int recvnbCount = 0;
-  int recvnbLowerIndex = -1;  // prime lower index indicator blow 0
+  vector<int> recvnbIndexList;
+  int recvnbLowerIndex = -1;  // prime lower index indicator below 0
 
   StreamElement *xxeElement, *xxeIndexElement, *xxeElement2;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
@@ -8355,8 +8365,8 @@ int XXE::execReady(
     // repeat going through the entire opstream until no more StreamElements
     // need to be replaced, i.e. the i-loop will finally make it all the way
     // through.
-    sendnbCount = 0;
-    recvnbCount = 0;
+    sendnbIndexList.resize(0);
+    recvnbIndexList.resize(0);
 
     for (i=0; i<count; i++){
       xxeElement = &(opstream[i]);
@@ -8408,53 +8418,26 @@ int XXE::execReady(
       case recv:
         break;
       case sendnb:
-        if (i>sendnbLowerIndex){
-          sendnbIndexList[sendnbCount] = i;
-          ++sendnbCount;
-          if (sendnbCount >= sendnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "sendnbCount out of range", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-        }
+        if (i>sendnbLowerIndex)
+          sendnbIndexList.push_back(i);
         break;
       case recvnb:
-        if (i>recvnbLowerIndex){
-          recvnbIndexList[recvnbCount] = i;
-          ++recvnbCount;
-          if (recvnbCount >= recvnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "recvnbCount out of range", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-        }
+        if (i>recvnbLowerIndex)
+          recvnbIndexList.push_back(i);
         break;
       case sendnbRRA:
-        if (i>sendnbLowerIndex){
-          sendnbIndexList[sendnbCount] = i;
-          ++sendnbCount;
-          if (sendnbCount >= sendnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "sendnbCount out of range", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-        }
+        if (i>sendnbLowerIndex)
+          sendnbIndexList.push_back(i);
         break;
       case recvnbRRA:
-        if (i>recvnbLowerIndex){
-          recvnbIndexList[recvnbCount] = i;
-          ++recvnbCount;
-          if (recvnbCount >= recvnbMax){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "recvnbCount out of range", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-        }
+        if (i>recvnbLowerIndex)
+          recvnbIndexList.push_back(i);
         break;
         // --- cases below this line cannot be used in execution -> must replace
       case waitOnAllSendnb:
         sendnbLowerIndex = i; // all sendnb prior this index are considered
         {
+          int sendnbCount = sendnbIndexList.size();
 #if 0
           printf("case: waitOnAllSendnb: %d outstanding sendnb\n",
             sendnbCount);
@@ -8499,6 +8482,7 @@ int XXE::execReady(
       case waitOnAllRecvnb:
         recvnbLowerIndex = i; // all recvnb prior this index are considered
         {
+          int recvnbCount = recvnbIndexList.size();
 #if 0
           printf("case: waitOnAllRecvnb: %d outstanding recvnb\n",
             recvnbCount);
@@ -8546,10 +8530,6 @@ int XXE::execReady(
       if (breakFlag) break;
     } // for i
   } // while
-
-  // garbage collection
-  delete [] sendnbIndexList;
-  delete [] recvnbIndexList;
 
   // translate profiling Wtimer Ids into XXE opstream indices
   int *idList = new int[count];
@@ -9745,7 +9725,7 @@ int XXE::appendRecv(
 //
   int predicateBitField,
   void *buffer,
-  int size,
+  unsigned long long int size,
   int srcPet,
   int tag,
   bool vectorFlag,
@@ -9800,7 +9780,7 @@ int XXE::appendSend(
 //
   int predicateBitField,
   void *buffer,
-  int size,
+  unsigned long long int size,
   int dstPet,
   int tag,
   bool vectorFlag,
@@ -9855,7 +9835,7 @@ int XXE::appendSendRRA(
 //
   int predicateBitField,
   int rraOffset,
-  int size,
+  unsigned long long int size,
   int dstPet,
   int rraIndex,
   int tag,
@@ -10040,7 +10020,7 @@ int XXE::appendRecvnb(
 //
   int predicateBitField,
   void *buffer,
-  int size,
+  unsigned long long int size,
   int srcPet,
   int tag,
   bool vectorFlag,
@@ -10102,7 +10082,7 @@ int XXE::appendSendnb(
 //
   int predicateBitField,
   void *buffer,
-  int size,
+  unsigned long long int size,
   int dstPet,
   int tag,
   bool vectorFlag,
@@ -10164,7 +10144,7 @@ int XXE::appendSendnbRRA(
 //
   int predicateBitField,
   int rraOffset,
-  int size,
+  unsigned long long int size,
   int dstPet,
   int rraIndex,
   int tag,
@@ -10226,7 +10206,7 @@ int XXE::appendMemCpySrcRRA(
 //
   int predicateBitField,
   int rraOffset,
-  int size,
+  unsigned long long int size,
   void *dstMem,
   int rraIndex
   ){
@@ -10446,7 +10426,7 @@ int XXE::appendZeroMemset(
 //
   int predicateBitField,
   void *buffer,
-  int byteCount,
+  unsigned long long int byteCount,
   bool vectorFlag,
   bool indirectionFlag
   ){
@@ -10495,7 +10475,7 @@ int XXE::appendZeroMemsetRRA(
 // !ARGUMENTS:
 //
   int predicateBitField,
-  int byteCount,
+  unsigned long long int byteCount,
   int rraIndex,
   bool vectorFlag
   ){

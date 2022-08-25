@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -469,14 +469,6 @@ module NUOPC_ModelBase
         isPresent=isPresentDataInitialize, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      ! Detect inconsistent specialization combinations
-      if (isPresentAdvertise.neqv.isPresentRealizeProvided) then
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="NUOPC INCOMPATIBILITY DETECTED: "// &
-          "Advertise and RealizeProvided must both be present or absent.", &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
-        return  ! bail out
-      endif
       ! Advertise: conditionally activate the generic code
       if (isPresentAdvertise) then
         call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &

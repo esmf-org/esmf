@@ -398,11 +398,11 @@ PIOc_sync(int ncid)
     int ierr = PIO_NOERR;  /* Return code from function calls. */
 
     PLOG((1, "PIOc_sync ncid = %d", ncid));
+
     /* Get the file info from the ncid. */
     if ((ierr = pio_get_file(ncid, &file)))
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
     ios = file->iosystem;
-    ESMF_LOGMEMINFO("Enter PIOc_sync");
 
     /* Flush data buffers on computational tasks. */
     if (!ios->async || !ios->ioproc)
@@ -416,10 +416,8 @@ PIOc_sync(int ncid)
             {
                 /* If there are any data arrays waiting in the
                  * multibuffer, flush it. */
-                ESMF_LOGMEMINFO("Enter: flush_buffer");
                 if (wmb->num_arrays > 0)
                     flush_buffer(ncid, wmb, true);
-                ESMF_LOGMEMINFO("Exit: flush_buffer");
                 HASH_DEL(file->buffer, wmb);
                 free(wmb);
 
@@ -458,9 +456,7 @@ PIOc_sync(int ncid)
             {
 #ifdef _NETCDF4
             case PIO_IOTYPE_NETCDF4P:
-                ESMF_LOGMEMINFO("Enter: nc_sync4");
                 ierr = nc_sync(file->fh);
-                ESMF_LOGMEMINFO("Exit: nc_sync4");
                 break;
             case PIO_IOTYPE_NETCDF4C:
 #endif
@@ -485,8 +481,6 @@ PIOc_sync(int ncid)
         return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
     if (ierr)
         return check_netcdf2(ios, NULL, ierr, __FILE__, __LINE__);
-    ESMF_LOGMEMINFO("Exit: PIOc_sync");
-
 
     return ierr;
 }

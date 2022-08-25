@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -114,7 +114,7 @@ void MBMesh_create(MBMesh **mbmpp, int *pdim, int *sdim,
 
 
 void MBMesh_addnodes(MBMesh **mbmpp, int *_num_nodes, int *nodeId,
-                     double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
+                     double *nodeCoord,  InterArray<int> *nodeOwnerII, InterArray<int> *nodeMaskII,
                      ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                      int *rc)
 {
@@ -140,6 +140,35 @@ void MBMesh_addnodes(MBMesh **mbmpp, int *_num_nodes, int *nodeId,
     // Get petCount 
     int petCount = VM::getCurrent(&localrc)->getPetCount();
     ESMC_CHECK_PASSTHRU_THROW(localrc);
+
+     // Get nodeOwner array and error check
+    int *nodeOwner=NULL;
+    if (present(nodeOwnerII)) { // if masks exist
+      // Error checking
+      if (nodeOwnerII->dimCount !=1) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                         " nodeOwner array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+      }
+      
+      if (nodeOwnerII->extent[0] != num_nodes) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                         " nodeOwner array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+      
+      // Get array
+      nodeOwner=nodeOwnerII->array;
+    } else {
+
+       // Only complain, if other things exist on this PET
+       if (num_nodes >0) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                          " nodeOwner array must be provided.", ESMC_CONTEXT, &localrc)) throw localrc;
+       }
+
+    }
+
 
     //// Error check input ////
 

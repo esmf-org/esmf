@@ -142,6 +142,11 @@ endif
 
 ifndef ESMF_COMM
 export ESMF_COMM = default
+else
+ifeq ($(ESMF_COMM),mpich3)
+export ESMF_COMM = mpich
+$(warning !!! For MPICH3 and up, please use ESMF_COMM=mpich !!!)
+endif
 endif
 
 ifndef ESMF_COMPILER
@@ -349,6 +354,10 @@ ifeq ($(ESMF_OS),Darwin)
 export ESMF_ABI = 32
 ifeq ($(ESMF_MACHINE),x86_64)
 # except x86_64
+export ESMF_ABI = 64
+endif
+ifeq ($(ESMF_MACHINE),arm64)
+# and arm64
 export ESMF_ABI = 64
 endif
 endif

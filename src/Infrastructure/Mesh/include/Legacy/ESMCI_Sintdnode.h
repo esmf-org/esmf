@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -134,12 +134,35 @@ class sintd_cell {
     int side1_mesh_ind;
     int side2_mesh_ind;
 
+    // Original elem id for each side
+    int side1_orig_elem_id;
+    int side2_orig_elem_id;
+
+
 #ifdef BOB_XGRID_DEBUG
     int s_id, d_id; // DEBUG
 #endif
 
-    sintd_cell(double _area, const std::vector<sintd_node *> & _nodes) : 
-      area(_area), nodes(_nodes) {}
+ sintd_cell(double _area, const std::vector<sintd_node *> & _nodes): 
+    area(_area),
+      nodes(_nodes), 
+      side1_mesh_ind(-1),
+      side1_orig_elem_id(-1),
+      side2_mesh_ind(-1),
+      side2_orig_elem_id(-1) {}
+    
+    void set_side1_mesh_ind(int _side1_mesh_ind) {side1_mesh_ind=_side1_mesh_ind;}
+    void set_side1_orig_elem_id(int _side1_orig_elem_id) {side1_orig_elem_id=_side1_orig_elem_id;}
+
+    int get_side1_mesh_ind() {return side1_mesh_ind;}
+    int get_side1_orig_elem_id() {return side1_orig_elem_id;}
+
+
+    void set_side2_mesh_ind(int _side2_mesh_ind) {side2_mesh_ind=_side2_mesh_ind;}
+    void set_side2_orig_elem_id(int _side2_orig_elem_id) {side2_orig_elem_id=_side2_orig_elem_id;}
+
+    int get_side2_mesh_ind() {return side2_mesh_ind;}
+    int get_side2_orig_elem_id() {return side2_orig_elem_id;}
 
     int num_edges() const { return nodes.size(); }
 
