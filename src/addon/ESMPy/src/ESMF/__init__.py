@@ -77,33 +77,37 @@ from ESMF.util.helpers import *
 
 #### SET UP SOME INFO #########################################################
 
-# pre Python 3.8, not sure how far yet
-from pkg_resources import get_distribution
-pkgInfo = get_distribution('ESMPy').get_metadata('METADATA')
+import sys
 
-# parse it using email.Parser
-from email import message_from_string
-msg = message_from_string(pkgInfo)
+if (sys.version_info >= (3,8)):
+    # this requires Python 3.8 or higher
+    import importlib.metadata as ilm
+    
+    md = ilm.metadata("ESMPy")
+    
+    __name__ = md["Name"]
+    __version__ = md["Version"]
+    __author__ = md["Author"]
+    __description__ = md["Description"]
+    __summary__ = md["Summary"]
+    __homepage__ = md["Home-page"]
 
-__name__ = msg["Name"]
-__version__ = msg["Version"]
-__author__ = msg["Author"]
-__description__ = msg["Summary"]
-__homepage__ = msg["Home-page"]
-__email__ = msg["Maintainer-email"]
-__license__ = msg["License"]
-
-# # this requires Python 3.8 or higher
-# import importlib.metadata as ilm
-# 
-# md = ilm.metadata("ESMPy")
-# 
-# __name__ = md["Name"]
-# __version__ = md["Version"]
-# __author__ = md["Author"]
-# __description__ = md["Description"]
-# __summary__ = md["Summary"]
-# __homepage__ = md["Home-page"]
+else:
+    # pre Python 3.8, not sure how far yet
+    from pkg_resources import get_distribution
+    pkgInfo = get_distribution('ESMPy').get_metadata('METADATA')
+    
+    # parse it using email.Parser
+    from email import message_from_string
+    msg = message_from_string(pkgInfo)
+    
+    __name__ = msg["Name"]
+    __version__ = msg["Version"]
+    __author__ = msg["Author"]
+    __description__ = msg["Summary"]
+    __homepage__ = msg["Home-page"]
+    __email__ = msg["Maintainer-email"]
+    __license__ = msg["License"]
 
 # # this is the old hardcoded version
 
