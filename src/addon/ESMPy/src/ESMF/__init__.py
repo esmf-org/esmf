@@ -74,20 +74,48 @@ from ESMF.api.field import *
 from ESMF.api.regrid import *
 from ESMF.api.constants import *
 from ESMF.util.helpers import *
-from ESMF.api.constants import _ESMF_VERSION
 
 #### SET UP SOME INFO #########################################################
 
-__name__ = "ESMF"
-__description__ = "ESMF Python interface"
-__author__ = "University Corporation for Atmospheric Research, " + \
-             "Massachusetts Institute of Technology, " + \
-             "Geophysical Fluid Dynamics Laboratory, " + \
-             "University of Michigan, " + \
-             "National Centers for Environmental Prediction, " + \
-             "Los Alamos National Laboratory, " + \
-             "Argonne National Laboratory, " + \
-             "NASA Goddard Space Flight Center"
-__license__ = "University of Illinois-NCSA"
-__release__ = _ESMF_VERSION
-__version__ = _ESMF_VERSION
+# pre Python 3.8, not sure how far yet
+from pkg_resources import get_distribution
+pkgInfo = get_distribution('ESMPy').get_metadata('METADATA')
+
+# parse it using email.Parser
+from email import message_from_string
+msg = message_from_string(pkgInfo)
+
+__name__ = msg["Name"]
+__version__ = msg["Version"]
+__author__ = msg["Author"]
+__description__ = msg["Summary"]
+__homepage__ = msg["Home-page"]
+__email__ = msg["Maintainer-email"]
+__license__ = msg["License"]
+
+# # this requires Python 3.8 or higher
+# import importlib.metadata as ilm
+# 
+# md = ilm.metadata("ESMPy")
+# 
+# __name__ = md["Name"]
+# __version__ = md["Version"]
+# __author__ = md["Author"]
+# __description__ = md["Description"]
+# __summary__ = md["Summary"]
+# __homepage__ = md["Home-page"]
+
+# # this is the old hardcoded version
+
+# __name__ = "ESMF"
+# __version__ = ""
+# __description__ = "ESMF Python interface"
+# __author__ = "University Corporation for Atmospheric Research, " + \
+#              "Massachusetts Institute of Technology, " + \
+#              "Geophysical Fluid Dynamics Laboratory, " + \
+#              "University of Michigan, " + \
+#              "National Centers for Environmental Prediction, " + \
+#              "Los Alamos National Laboratory, " + \
+#              "Argonne National Laboratory, " + \
+#              "NASA Goddard Space Flight Center"
+# __license__ = "University of Illinois-NCSA"

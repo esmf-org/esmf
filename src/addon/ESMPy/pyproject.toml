@@ -1,38 +1,16 @@
 [build-system]
-requires = ["setuptools"]
+requires = [ "setuptools>=41", "wheel", "setuptools-git-versioning", ]
 build-backend = "setuptools.build_meta"
 
-# [project]
-# name = "ESMPy"
-# description = "ESMF Python interface"
-# license = {text = "University of Illinois-NCSA"}
-# readme = "README.md"
-# # dynamic = ["version"]
-# dependencies = [
-#     "numpy",
-# ]
-# 
-# [tool.setuptools.packages.find]
-# where = ["src"]
-# exclude = [
-#     "ESMPy.doc*",
-#     "ESMPy.example*",
-#     "ESMPy.test*",
-# ]
-# 
-# [tool.setuptools.dynamic]
-# version = {attr = "ESMPy.VERSION"}
-#
+[tool.setuptools-git-versioning]
+enabled = true
+template = "{tag}"
+dev_template = "{tag}"
+dirty_template = "{tag}"
 
 [tool.pytest.ini_options]
 markers = [
     "dryrun: marks a function that will only download test data files (deselect with '-m \"not parallel\"')",
     "parallel: marks a test which requires mpi (deselect with '-m \"not parallel\"')",
     "serial: marks a test which should be run on one core (deselect with '-m \"not serial\"')"
-]
-filterwarnings = [
-    # "ignore:DeprecationWarning",
-    # note the use of single quote below to denote "raw" strings in TOML
-    # 'ignore:DeprecationWarning: Call to deprecated function ESMP_FieldRegridStoreFile',
-    # 'ignore:DeprecationWarning: Call to deprecated function ESMP_FieldSMMStore',
 ]
