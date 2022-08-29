@@ -79,35 +79,41 @@ from ESMF.util.helpers import *
 
 import sys
 
+msg = ""
+
 if (sys.version_info >= (3,8)):
     # this requires Python 3.8 or higher
     import importlib.metadata as ilm
     
-    md = ilm.metadata("ESMPy")
-    
-    __name__ = md["Name"]
-    __version__ = md["Version"]
-    __author__ = md["Author"]
-    __description__ = md["Description"]
-    __summary__ = md["Summary"]
-    __homepage__ = md["Home-page"]
+    msg = ilm.metadata("ESMPy")
 
 else:
     # pre Python 3.8, not sure how far yet
     from pkg_resources import get_distribution
-    pkgInfo = get_distribution('ESMPy').get_metadata('METADATA')
+    try: 
+        pkgInfo = get_distribution('ESMPy').get_metadata('METADATA')
+    except:
+        try:
+            pkgInfo = get_distribution('ESMPy').get_metadata('PKG-INFO')
+        except:
+            raise ImportError("Could not find METADATA or PKG-INFO for ESMPy")
     
     # parse it using email.Parser
     from email import message_from_string
     msg = message_from_string(pkgInfo)
-    
-    __name__ = msg["Name"]
-    __version__ = msg["Version"]
-    __author__ = msg["Author"]
-    __description__ = msg["Summary"]
-    __homepage__ = msg["Home-page"]
-    __email__ = msg["Maintainer-email"]
-    __license__ = msg["License"]
+
+# set the private metadata
+__name__ = msg["Name"]
+__version__ = msg["Version"]
+__license__ = msg["License"]
+__email__ = msg["Maintainer-email"]
+__description__ = msg["Summary"]
+__requires__ = msg["Requires-Dist"]
+__requires_python__ = msg["Requires-Python"]
+# these don't seem to work with setuptools pyproject.toml
+__author__ = msg["Author"]
+__homepage__ = msg["Home-page"]
+__obsoletes__ = msg["obsoletes"]
 
 # # this is the old hardcoded version
 
