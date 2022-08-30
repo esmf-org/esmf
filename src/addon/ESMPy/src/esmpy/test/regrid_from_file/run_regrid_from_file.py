@@ -1,58 +1,51 @@
 # $Id$
 
-import os
+"""
+Reads each line of a control file where each line corresponds to one test
+case.    Parses each line and calls a test subroutine that creates meshes from
+source and destination NetCDF files, creates an analytic field across the
+source mesh, regrids the source mesh to the grid of the destination mesh,
+and compares the analytic field of the resulting regridded mesh to that of the
+source mesh.
+"""
+
 import sys
+import os
+import traceback
+import pytest
 
-import esmpy.api.constants as constants
-from esmpy.test.regrid_from_file.regrid_from_file_consts import TEST_REGRID_DIR
+try:
+    import esmpy
+except:
+    raise ImportError('The ESMF library cannot be found!')
+from esmpy.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR
+from esmpy.test.regrid_from_file.regrid_check import regrid_check
+from esmpy.test.regrid_from_file.read_test_cases_from_control_file import read_control_file
 
+# Start up esmpy.
+mg = esmpy.Manager(debug=True)
 
-parallel = False
-if len(sys.argv) > 1:
-    if "--parallel" in sys.argv[1]:
-        parallel = True
+# Read the test case parameters from the control file.
+print('Reading control file...')
+test_cases = read_control_file()
 
-# run utests, pipe to file
-rtestfile=os.path.join(TEST_REGRID_DIR, 'regrid_check_driver.py')
-rtestoutfile='run_regrid_from_file.log'
-num_proc = 1
-if parallel:
-    # make sure we are not in uni mode
-    if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
-        raise ValueError("Cannot run parallel tests when ESMF is built with ESMF_COMM=mpiuni")
+# For each test case line from the control file parse the line and call
+# the test subroutine.
 
-    # setup the constants
-    rtestoutfile='run_regrid_from_file_parallel.log'
-
-constants._ESMF_MPIRUN + " -n "
-os.system(constants._ESMF_MPIRUN + " -n " + str(constants._ESMF_MPIRUN_NP) + " python3 " + rtestfile + " > " + rtestoutfile + " 2>&1")
-
-# traverse output, find number of pass and fail and print report
-RTEST = open(rtestoutfile)
-
-rtpass = 0
-rtfail = 0
-rtskip = 0
-
-for line in RTEST:
-    if 'RESULT: PASS' in line:
-        rtpass=rtpass+1
-    if 'RESULT: FAIL' in line:
-        rtfail=rtfail+1
-    if 'RESULT: SKIP' in line:
-        rtskip=rtskip+1
-
-RTEST.close()
-
-rtpass = rtpass/num_proc
-rtfail = rtfail/num_proc
-rtskip = rtskip/num_proc
-
-print("Regrid from file test results: "+rtestoutfile)
-print("PASS  = "+str(int(rtpass)))
-print("FAIL  = "+str(int(rtfail)))
-print("SKIP  = "+str(int(rtskip)))
-
-if rtpass == 0 and rtfail == 0 and rtskip == 0: 
-    print(rtestoutfile+":")
-    os.system("tail "+rtestoutfile)
+@pytest.mark.parametrize('test_case', test_cases)
+def test_run_regrid_from_file(test_case):
+    (src_fname, dst_fname, regrid_method, options, 
+     itrp_mean_err, itrp_max_err, csrv_err) = test_case
+    test_str = 'Regrid %s to %s as %s with %s itrp_mean_err=%f, itrp_max_err=%f, and csrv_err=%f' % (src_fname, dst_fname, regrid_method, options, itrp_mean_err, itrp_max_err, csrv_err)
+    if esmpy.local_pet() == 0:
+        print ('\n' + test_str)
+    src_fname_full = os.path.join(DATA_SUBDIR, src_fname)
+    dst_fname_full = os.path.join(DATA_SUBDIR, dst_fname)
+    
+    # run the data file retrieval and regridding through try/except
+    try:
+        correct = regrid_check(src_fname_full, dst_fname_full, regrid_method, 
+                               options, itrp_mean_err, itrp_max_err, csrv_err)
+    except:
+        print ("PET {}: Regridding ERROR:{}".format(esmpy.local_pet(), correct))
+        traceback.print_exc(file=sys.stdout)

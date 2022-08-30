@@ -17,33 +17,36 @@ install:
 		python3 -m pip install .
 
 test_unit:
-		python3 -m pytest -m="not parallel"
+		python3 -m pytest -m="not parallel" --json-report --json-report-summary
 
 test_unit_parallel:
-		mpirun -n 4 python3 -m pytest -m="not serial"
+		mpirun -n 4 python3 -m pytest -m="not serial" --json-report --json-report-summary
 
-test_examples_dryrun:
-		python3 -m pytest -vs examples/exampletestdryrun.py
-	
 test_examples:
 		python3 -m pytest -vs -m="not parallel" examples/exampletest.py
 
 test_examples_parallel:
 		mpirun -n 4 python3 -m pytest -vs -m="not serial" examples/exampletest.py
 
-test_regrid_from_file_dryrun:
-		python3 -m pytest -vs src/esmpy/test/regrid_from_file/rfftestdryrun.py
-
+test_examples_dryrun:
+		python3 -m pytest -vs examples/exampletestdryrun.py
+	
 test_regrid_from_file:
-		python3 -m pytest -vs src/esmpy/test/regrid_from_file/rfftest.py
+		python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file.py
 
-test_serial: test_unit test_examples
+test_regrid_from_file_parallel:
+		mpirun -n 4 python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file.py
+
+test_regrid_from_file_dryrun:
+		python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file_dryrun.py
+
+test_serial: test_unit test_examples test_regrid_from_file
+
+test_parallel: test_unit_parallel test_examples_parallel test_regrid_from_file_parallel
 
 test_dryrun: test_examples_dryrun test_regrid_from_file_dryrun
 
-test_parallel: test_unit_parallel test_examples_parallel test_regrid_from_file
-
-test_all: test_unit test_unit_parallel test_examples test_examples_parallel test_regrid_from_file
+test_all: test_unit test_unit_parallel test_examples test_examples_parallel test_regrid_from_file test_regrid_from_file_parallel
 
 uninstall:
 		python3 -m pip uninstall ESMPy

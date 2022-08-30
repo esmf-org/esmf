@@ -40,8 +40,8 @@ def cache_data_files_for_test_cases(test_cases):
 test_cases = read_control_file()
 
 # Retrieve the data files needed for the test cases from the remote server.
-status_ok = cache_data_files_for_test_cases(test_cases)
-if status_ok:
-    print ('RESULT: PASS - regrid_from_file_dryrun ok\n\n')
-else:
-    print ('RESULT: FAIL - regrid_from_file_dryrun error\n\n')
+try:
+    status_ok = cache_data_files_for_test_cases(test_cases)
+except:
+    print ("Cache data file error: {}\n".format(status_ok))
+    traceback.print_exc(file=sys.stdout)
