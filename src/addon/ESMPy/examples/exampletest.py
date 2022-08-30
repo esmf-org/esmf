@@ -6,14 +6,14 @@ examples test file
 
 import pytest
 
-from ESMF.test.base import TestBase, attr, SkipTest
-import ESMF.api.constants as constants
+from esmpy.test.base import TestBase, attr, SkipTest
+import esmpy.api.constants as constants
 
 class TestExamples(TestBase):
     
     # '0' in the name is so it is run first
     def test_0_examples_dryrun(self):
-        from ESMF.util.cache_data import cache_data_files
+        from esmpy.util.cache_data import cache_data_files
         cache_data_files()
 
     def test_helloworld(self):

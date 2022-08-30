@@ -9,12 +9,12 @@ Requirements
 The following packages are *required* to work with ESMPy:
 
 * `ESMF installation <http://earthsystemmodeling.org/docs/release/latest/ESMF_usrdoc/>`_
-* `python <http://python.org/>`_
+* `python <http://python.org/>`_, minimum version 3.7
 * `numpy <http://www.numpy.org/>`_
 
 The following packages are *optional*:
 
-* ESMF installation with NetCDF - required to create :class:`Grids <ESMF.api.grid.Grid>` and :class:`Meshes <ESMF.api.mesh.Mesh>` from file
+* ESMF installation with NetCDF - required to create :class:`Grids <esmpy.api.grid.Grid>` and :class:`Meshes <esmpy.api.mesh.Mesh>` from file
     - NetCDF must be built as a shared library for ESMPy installation to succeed
 * `mpi4py <http://mpi4py.scipy.org/>`_- python bindings to MPI, needed to run some of the parallel regridding examples
 * `pytest <https://docs.pytest.org/en/7.1.x/>`_ - for testing
@@ -27,7 +27,7 @@ The ESMPy source code can be downloaded from the
 `ESMF git repository <https://github.com/esmf-org/esmf>`_.
 
 The `ESMF User's Guide <http://earthsystemmodeling.org/docs/release/latest/ESMF_usrdoc/>`_
-contains information on building and installing ESMF.
+contains information on building and installing esmpy.
 
 The `ESMF Reference Manual <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_
 contains information on the architecture of ESMF, example code, and details of the API (Application Programming
@@ -88,7 +88,7 @@ To use ESMPy in an external program, import it with:
 
 .. code::
 
-    import ESMF
+    import esmpy
 
 ----------
 Validation
@@ -110,13 +110,11 @@ greater test coverage is desired:
 
     make test_examples
 
-    make test_regrid_from_file
-
     make test_unit_parallel
 
     make test_examples_parallel
-
-    make test_regrid_from_file_parallel
+    
+    make test_regrid_from_file
 
 .. Note:: 
 
@@ -136,16 +134,16 @@ to ESMF offline and integrated regridding capabilities.
 - ESMPy cannot use an ESMF installation that is built with external LAPACK
   support.
 - Coordinates cannot be retrieved from the elements of a 
-  :class:`~ESMF.api.mesh.Mesh`. This can affect the ability to set 
-  :class:`~ESMF.api.field.Field` values on a source :class:`~ESMF.api.mesh.Mesh`
+  :class:`~esmpy.api.mesh.Mesh`. This can affect the ability to set 
+  :class:`~esmpy.api.field.Field` values on a source :class:`~esmpy.api.mesh.Mesh`
   created from file when using conservative regridding.
-- Multi-tile :class:`~ESMF.api.grid.Grid` support is limited to cubed-sphere 
+- Multi-tile :class:`~esmpy.api.grid.Grid` support is limited to cubed-sphere 
   grids created on 6 processors. A cubed-sphere grid can be created on any
   number of processors, but only when it is created on 6 processors will the
   coordinates be retrievable for the entire object. A 
-  :class:`~ESMF.api.field.Field` created from a cubed-sphere 
-  :class:`~ESMF.api.grid.Grid` cannot be written to file in parallel.
-- There is no ``FieldBundle`` class, only single :class:`Fields <ESMF.api.field.Field>`.
+  :class:`~esmpy.api.field.Field` created from a cubed-sphere 
+  :class:`~esmpy.api.grid.Grid` cannot be written to file in parallel.
+- There is no ``FieldBundle`` class, only single :class:`Fields <esmpy.api.field.Field>`.
 
 Testing related:
 

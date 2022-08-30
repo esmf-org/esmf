@@ -1,6 +1,6 @@
-import ESMF
+import esmpy
 
 # This call enables debug logging
-# esmpy = ESMF.Manager(debug=True)
+# esmpy = esmpy.Manager(debug=True)
 
-print ("Hello ESMPy World from PET (processor) {0}!".format(ESMF.local_pet()))
+print ("Hello ESMPy World from PET (processor) {0}!".format(esmpy.local_pet()))

@@ -10,7 +10,7 @@ clean:
 		find . -name "*.vtk" -exec rm -f {} \; || :
 		find . -name "*.pytest_cache" -exec rm -rf {} \; || :
 		find . -name "*.python-version" -exec rm -f {} \; || :
-		rm -rf src/ESMF/test/regrid_from_file/data || :
+		rm -rf src/esmpy/test/regrid_from_file/data || :
 		rm -rf examples/data || :
 
 install:
@@ -32,14 +32,10 @@ test_examples_parallel:
 		mpirun -n 4 python3 -m pytest -vs -m="not serial" examples/exampletest.py
 
 test_regrid_from_file_dryrun:
-		python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftestdryrun.py
+		python3 -m pytest -vs src/esmpy/test/regrid_from_file/rfftestdryrun.py
 
 test_regrid_from_file:
-		python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftest.py
-
-test_regrid_from_file_parallel:
-		python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftestdryrun.py
-		mpirun -n 4 python3 -m pytest -vs src/ESMF/test/regrid_from_file/rfftest.py
+		python3 -m pytest -vs src/esmpy/test/regrid_from_file/rfftest.py
 
 test_all: test_unit test_parallel test_examples test_examples_parallel
 

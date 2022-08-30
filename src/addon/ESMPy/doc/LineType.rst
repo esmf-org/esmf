@@ -2,6 +2,6 @@
 LineType
 ~~~~~~~~
 
-.. autoclass:: ESMF.api.constants.LineType
+.. autoclass:: esmpy.api.constants.LineType
     :members:
     :exclude-members: __new__

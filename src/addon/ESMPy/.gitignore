@@ -2,11 +2,6 @@
 ###################
 *.pyc
 
-# Nose #
-########
-*.noseids
-nosetests.xml
-
 # Misc #
 ########
 *~
@@ -19,12 +14,6 @@ PET*
 *.vtk
 *.csv
 
-# Eclipse #
-###########
-*.project
-*.pydevproject
-*.settings
-
 # ESMPy build and docs #
 ########################
 build
@@ -32,9 +21,9 @@ dist
 doc/esmpy_doc
 src/ESMPy.egg-info
 examples/data
-src/ESMF/test/data
+src/esmpy/test/data
 examples/notebooks/ESMPy-data
-src/ESMF/test/regrid_from_file/data
+src/esmpy/test/regrid_from_file/data
 
 # notebooks #
 #############

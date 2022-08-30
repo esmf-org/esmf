@@ -11,7 +11,7 @@
 # DD = os.path.join(os.getcwd(), "examples/data")
 # if not os.path.isdir(DD):
 #     os.makedirs(DD)
-# from ESMF.util.cache_data import cache_data_file
+# from esmpy.util.cache_data import cache_data_file
 # cache_data_file(os.path.join(DD, "ll1deg_grid.nc"))
 # cache_data_file(os.path.join(DD, "mpas_uniform_10242_dual_counterclockwise.nc"))
 
@@ -21,7 +21,7 @@ import sys
 
 def regrid():
     try:
-        import ESMF
+        import esmpy
     except:
         raise ImportError("ESMF is not available on this machine")
 
@@ -29,45 +29,45 @@ def regrid():
     grid2 = "examples/data/mpas_uniform_10242_dual_counterclockwise.nc"
 
     # Create a uniform global latlon grid from a SCRIP formatted file
-    grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
+    grid = esmpy.Grid(filename=grid1, filetype=esmpy.FileFormat.SCRIP)
     # NOTE: corners are needed for conservative regridding
-    # grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP,
+    # grid = esmpy.Grid(filename=grid1, filetype=esmpy.FileFormat.SCRIP,
     #                  add_corner_stagger=True)
 
     # create a field on the center stagger locations of the source grid
-    srcfield = ESMF.Field(grid, name='srcfield',
-                          staggerloc=ESMF.StaggerLoc.CENTER)
+    srcfield = esmpy.Field(grid, name='srcfield',
+                          staggerloc=esmpy.StaggerLoc.CENTER)
 
     # create an ESMF formatted unstructured mesh with clockwise cells removed
-    mesh = ESMF.Mesh(filename=grid2, filetype=ESMF.FileFormat.ESMFMESH)
+    mesh = esmpy.Mesh(filename=grid2, filetype=esmpy.FileFormat.ESMFMESH)
 
     # create a field on the nodes of the destination mesh
-    dstfield = ESMF.Field(mesh, name='dstfield', meshloc=ESMF.MeshLoc.NODE)
-    xctfield = ESMF.Field(mesh, name='xctfield', meshloc=ESMF.MeshLoc.NODE)
+    dstfield = esmpy.Field(mesh, name='dstfield', meshloc=esmpy.MeshLoc.NODE)
+    xctfield = esmpy.Field(mesh, name='xctfield', meshloc=esmpy.MeshLoc.NODE)
     # NOTE: Field must be built on elements of Mesh for conservative regridding
-    # dstfield = ESMF.Field(mesh, name='dstfield', meshloc=ESMF.MeshLoc.ELEMENT)
-    # xctfield = ESMF.Field(mesh, name='xctfield', meshloc=ESMF.MeshLoc.ELEMENT)
+    # dstfield = esmpy.Field(mesh, name='dstfield', meshloc=esmpy.MeshLoc.ELEMENT)
+    # xctfield = esmpy.Field(mesh, name='xctfield', meshloc=esmpy.MeshLoc.ELEMENT)
 
     # initialize the fields
     [lon, lat] = [0, 1]
     deg2rad = 3.14159 / 180
 
-    gridXCoord = srcfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
-    gridYCoord = srcfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
+    gridXCoord = srcfield.grid.get_coords(lon, esmpy.StaggerLoc.CENTER)
+    gridYCoord = srcfield.grid.get_coords(lat, esmpy.StaggerLoc.CENTER)
     srcfield.data[...] = 10.0 + (gridXCoord * deg2rad) ** 2 + (
                                                               gridYCoord * deg2rad) ** 2
 
-    gridXCoord = xctfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
-    gridYCoord = xctfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
+    gridXCoord = xctfield.grid.get_coords(lon, esmpy.StaggerLoc.CENTER)
+    gridYCoord = xctfield.grid.get_coords(lat, esmpy.StaggerLoc.CENTER)
     xctfield.data[...] = 10.0 + (gridXCoord * deg2rad) ** 2 + (
                                                               gridYCoord * deg2rad) ** 2
 
     dstfield.data[...] = 1e20
 
     # create an object to regrid data from the source to the destination field
-    regrid = ESMF.Regrid(srcfield, dstfield,
-                         regrid_method=ESMF.RegridMethod.BILINEAR,
-                         unmapped_action=ESMF.UnmappedAction.ERROR)
+    regrid = esmpy.Regrid(srcfield, dstfield,
+                         regrid_method=esmpy.RegridMethod.BILINEAR,
+                         unmapped_action=esmpy.UnmappedAction.ERROR)
 
     # do the regridding from source to destination field
     dstfield = regrid(srcfield, dstfield)
