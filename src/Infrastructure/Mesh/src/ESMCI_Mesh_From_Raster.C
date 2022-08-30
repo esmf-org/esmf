@@ -126,11 +126,13 @@ void ESMCI_mesh_create_from_raster(Grid *raster_grid,
                      &pdim, &orig_sdim, &coordSys, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;
-      
+
+    // Wrap node owners in an InterArray
+    InterArray<int> node_owners_IA(node_owners,num_nodes);
 
     // Add nodes
     ESMCI_meshaddnodes(&mesh,
-                       &num_nodes, node_ids, node_coords, node_owners, NULL,
+                       &num_nodes, node_ids, node_coords, &node_owners_IA, NULL,
                        &coordSys, &orig_sdim, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;

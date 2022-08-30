@@ -125,6 +125,7 @@ subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
     area, centroid, &
     distgridA, distgridB, distgridM, &
     sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
+    sideAGeomIndArray, sideBGeomIndArray, &
     name, &
     rc) 
 
@@ -149,6 +150,8 @@ type(ESMF_XGridSpec), intent(out), optional :: sparseMatA2X(:)
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatB2X(:)
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatX2B(:)
+type(ESMF_Array),     intent(inout), optional :: sideAGeomIndArray
+type(ESMF_Array),     intent(out), optional :: sideBGeomIndArray
 character (len=*),    intent(out), optional :: name
 integer,              intent(out), optional :: rc 
 !
@@ -207,6 +210,10 @@ integer,              intent(out), optional :: rc
 !     \item [{[sparseMatX2B]}]
 !           Indexlist from xgrid index space to a Grid index space on side B; 
 !           indexFactorlist from xgrid index space to a Grid index space on side B. Must enter with shape(sparsematX2B)=(/sideBGridCount+sideBMeshCount/).
+!     \item [{[sideAGeomIndArray]}]
+!           After this call the ESMF Array will be filled with an index that indicates which Grid or Mesh
+!           from side A each XGrid cell corresponds to. The passed in ESMF Array must be built on the Distgrid
+!           of the passed in XGrid (e.g. built on {\tt distgridM)).
 !     \item [{[name]}]
 !           Name of the xgrid object.
 !     \item [{[rc]}]
@@ -222,7 +229,12 @@ integer,              intent(out), optional :: rc
     type(ESMF_DELayout)           :: delayout
     type(ESMF_XGridGeomType_Flag) :: xggt
     type(ESMF_CoordSys_Flag) :: coord_sys
-
+    type(ESMF_DistGrid) :: meshElemDistgrid
+    
+    integer            :: numElemArrays=0
+    type(ESMF_Pointer) :: elemArrays(ESMF_MESH_ELEMINFOINTOARRAY_MAX)
+    integer :: infoTypeElemArrays(ESMF_MESH_ELEMINFOINTOARRAY_MAX)
+    
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
@@ -396,7 +408,7 @@ integer,              intent(out), optional :: rc
     if(present(mesh)) then
       if(.not. xgtypep%storeOverlay) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-             msg="- Cannot retrieve super mesh when storeOverylay is false.", &
+             msg="- Cannot retrieve super mesh when storeOverlay is false.", &
              ESMF_CONTEXT, rcToReturn=rc)
           return
       endif    
@@ -543,6 +555,94 @@ integer,              intent(out), optional :: rc
             sparseMatX2B(i) = xgtypep%sparseMatX2B(i)
         enddo 
     endif
+
+    ! Init number of elem arrays
+    numElemArrays=0
+    
+    ! Get sideAGeomIndArray 
+    if(present(sideAGeomIndArray)) then
+       
+       ! Make sure that the mesh is present
+       if(.not. xgtypep%storeOverlay) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg=" Cannot retrieve sideAGeomIndArray when storeOverlay is false.", &
+             ESMF_CONTEXT, rcToReturn=rc)
+          return
+      endif
+
+      ! Make sure Array is initialized
+       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, sideAGeomIndArray, rc)
+
+       ! Set number of elem info request
+       numElemArrays=numElemArrays+1
+
+       ! Load info type
+       infoTypeElemArrays(numElemArrays)=ESMF_MESH_ELEMINFOINTOARRAY_SAIN
+
+       ! Load Array
+       call ESMF_ArrayGetThis(sideAGeomIndArray,elemArrays(numElemArrays),rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       
+    endif
+
+    ! Get sideBGeomIndArray 
+    if(present(sideBGeomIndArray)) then
+       
+       ! Make sure that the mesh is present
+       if(.not. xgtypep%storeOverlay) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg=" Cannot retrieve sideBGeomIndArray when storeOverlay is false.", &
+             ESMF_CONTEXT, rcToReturn=rc)
+          return
+      endif
+
+      ! Make sure Array is initialized
+       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, sideBGeomIndArray, rc)
+
+       ! Set number of elem info request
+       numElemArrays=numElemArrays+1
+
+       ! Load info type
+       infoTypeElemArrays(numElemArrays)=ESMF_MESH_ELEMINFOINTOARRAY_SBIN
+
+       ! Load Array
+       call ESMF_ArrayGetThis(sideBGeomIndArray,elemArrays(numElemArrays),rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       
+    endif
+
+
+    ! Get mesh info into Arrays
+    if (numElemArrays .gt. 0) then
+
+      ! Double check that mesh is present
+      if(.not. xgtypep%storeOverlay) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="Cannot retrieve XGrid info from internal mesh when storeOverlay is false..", &
+             ESMF_CONTEXT, rcToReturn=rc)
+          return
+      endif    
+
+      ! Get mesh distgrid
+      call c_ESMC_MeshGetElemDistGrid(xgtypep%mesh, meshElemDistgrid, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      
+       ! Make call to get info
+       call C_ESMC_GetElemInfoIntoArray(xgtypep%mesh, &
+            meshElemDistgrid, &
+            numElemArrays, &
+            infoTypeElemArrays, &
+            elemArrays, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
+    
     
     if (present(name)) then
         call ESMF_GetName(xgtypep%base, name, localrc)
@@ -559,7 +659,7 @@ integer,              intent(out), optional :: rc
     if(present(dimCount)) then
       if(.not. xgtypep%storeOverlay) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-             msg="- Cannot retrieve dimCount of the super mesh when storeOverylay is false.", &
+             msg="- Cannot retrieve dimCount of the super mesh when storeOverlay is false.", &
              ESMF_CONTEXT, rcToReturn=rc)
           return
       endif

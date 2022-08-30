@@ -3699,7 +3699,9 @@ void ESMCI_geteleminfointoarray(Mesh *mesh,
   // Must match with ESMF_MeshGet()
 #define INFO_TYPE_ELEM_ARRAYS_MASK 1
 #define INFO_TYPE_ELEM_ARRAYS_AREA 2
-#define INFO_TYPE_ELEM_ARRAYS_MAX  2
+#define INFO_TYPE_ELEM_ARRAYS_SIDEAIND  3
+#define INFO_TYPE_ELEM_ARRAYS_SIDEBIND  4
+#define INFO_TYPE_ELEM_ARRAYS_MAX  4
 
     int localrc;
     try {
@@ -3730,6 +3732,10 @@ void ESMCI_geteleminfointoarray(Mesh *mesh,
         ESMCI::Array *elem_mask_Array=NULL;
         MEField<> *elem_area_field=NULL; 
         ESMCI::Array *elem_area_Array=NULL;
+        MEField<> *elem_sideAInd_field=NULL; 
+        ESMCI::Array *elem_sideAInd_Array=NULL;
+        MEField<> *elem_sideBInd_field=NULL; 
+        ESMCI::Array *elem_sideBInd_Array=NULL;
 
         for (int i=0; i<numElemArrays; i++) {
           if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_MASK) { 
@@ -3767,6 +3773,44 @@ void ESMCI_geteleminfointoarray(Mesh *mesh,
             if (mesh->is_split) Throw() << "this call currently can't handle a mesh containing elems with > 4 corners";
           }
 
+          if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_SIDEAIND) { 
+            elem_sideAInd_field = mesh->GetField("side1_mesh_ind");
+            if (!elem_sideAInd_field) {
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                            " mesh doesn't contain side B geom. index information.",
+                                            ESMC_CONTEXT, &localrc);
+              throw localrc;
+            }
+
+            // Get array pointer
+            elem_sideAInd_Array=elemArrays[i];
+
+            // Complain if the array has more than rank 1                                 
+            if (elem_sideAInd_Array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
+
+            // Complain if the Mesh is split 
+            if (mesh->is_split) Throw() << "this call currently can't handle a mesh containing elems with > 4 corners";
+          }
+
+          if (infoTypeElemArrays[i] == INFO_TYPE_ELEM_ARRAYS_SIDEBIND) { 
+            elem_sideBInd_field = mesh->GetField("side2_mesh_ind");
+            if (!elem_sideBInd_field) {
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                            " mesh doesn't contain side B geom. index information.",
+                                            ESMC_CONTEXT, &localrc);
+              throw localrc;
+            }
+
+            // Get array pointer
+            elem_sideBInd_Array=elemArrays[i];
+
+            // Complain if the array has more than rank 1                                 
+            if (elem_sideBInd_Array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
+
+            // Complain if the Mesh is split 
+            if (mesh->is_split) Throw() << "this call currently can't handle a mesh containing elems with > 4 corners";
+          }
+          
         }
 
 
@@ -3815,7 +3859,7 @@ void ESMCI_geteleminfointoarray(Mesh *mesh,
             }
           }
 
-          // Get mask if needed
+          // Get area if needed
           if (elem_area_Array) {
             // Get the array info
             LocalArray *localArray=(elem_area_Array->getLocalarrayList())[lDE];
@@ -3848,6 +3892,75 @@ void ESMCI_geteleminfointoarray(Mesh *mesh,
               set_Array_data(localArray, index, typekind, *area_val);
             }
           }
+
+          // Get side A index if needed
+          if (elem_sideAInd_Array) {
+            // Get the array info
+            LocalArray *localArray=(elem_sideAInd_Array->getLocalarrayList())[lDE];
+
+            // Get localDE lower bound                                                    
+            int lbound=(elem_sideAInd_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)                                                                          
+            // Typekind
+            ESMC_TypeKind_Flag typekind=elem_sideAInd_Array->getTypekind();
+
+            // Loop seqIndices
+            for (int i=0; i<seqIndexList.size(); i++) {
+              int si=seqIndexList[i];
+
+              //  Find the corresponding Mesh element
+              Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, si);
+              if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+                Throw() << "element with that id not found in mesh";
+              }
+              
+              // Get the element
+              const MeshObj &elem = *mi;
+
+              // Get the data from mesh
+              double *val=elem_sideAInd_field->data(elem);
+         
+              // Location in array
+              int index=i+lbound;
+              
+              // Set data
+              set_Array_data(localArray, index, typekind, *val);
+            }
+          }
+
+          // Get side B index if needed
+          if (elem_sideBInd_Array) {
+            // Get the array info
+            LocalArray *localArray=(elem_sideBInd_Array->getLocalarrayList())[lDE];
+
+            // Get localDE lower bound                                                    
+            int lbound=(elem_sideBInd_Array->getComputationalLBound())[lDE]; // (assumes array rank is 1)                                                                          
+            // Typekind
+            ESMC_TypeKind_Flag typekind=elem_sideBInd_Array->getTypekind();
+
+            // Loop seqIndices
+            for (int i=0; i<seqIndexList.size(); i++) {
+              int si=seqIndexList[i];
+
+              //  Find the corresponding Mesh element
+              Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::ELEMENT, si);
+              if (mi == mesh->map_end(MeshObj::ELEMENT)) {
+                Throw() << "element with that id not found in mesh";
+              }
+              
+              // Get the element
+              const MeshObj &elem = *mi;
+
+              // Get the data from mesh
+              double *val=elem_sideBInd_field->data(elem);
+         
+              // Location in array
+              int index=i+lbound;
+              
+              // Set data
+              set_Array_data(localArray, index, typekind, *val);
+            }
+          }
+
         }
 
     } catch(std::exception &x) {

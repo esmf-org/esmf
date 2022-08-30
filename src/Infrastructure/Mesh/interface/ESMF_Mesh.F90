@@ -137,6 +137,16 @@ module ESMF_MeshMod
 
 
 
+  ! For ESMF internal use when querying Mesh info into Arrays using the
+  ! C_ESMC_GetElemInfoIntoArray() interface. These need to correspond with
+  ! the C side versions in ESMCI_Mesh_Glue.C
+  integer, parameter :: ESMF_MESH_ELEMINFOINTOARRAY_MASK=1
+  integer, parameter :: ESMF_MESH_ELEMINFOINTOARRAY_AREA=2
+  integer, parameter :: ESMF_MESH_ELEMINFOINTOARRAY_SAIN=3
+  integer, parameter :: ESMF_MESH_ELEMINFOINTOARRAY_SBIN=4
+  integer, parameter :: ESMF_MESH_ELEMINFOINTOARRAY_MAX=4
+
+  
 !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
 !
@@ -156,6 +166,15 @@ module ESMF_MeshMod
        ESMF_MESHSTATUS_EMPTY, &
        ESMF_MESHSTATUS_COMPLETE
 
+  ! FOR ESMF Internal use only, but public so they can be used
+  ! elsewhere in ESMF
+  public ESMF_MESH_ELEMINFOINTOARRAY_MAX, &
+         ESMF_MESH_ELEMINFOINTOARRAY_MASK,&
+         ESMF_MESH_ELEMINFOINTOARRAY_AREA, &
+         ESMF_MESH_ELEMINFOINTOARRAY_SAIN, &
+         ESMF_MESH_ELEMINFOINTOARRAY_SBIN
+
+  
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -5038,12 +5057,9 @@ end function ESMF_MeshEmptyCreate
     type(ESMF_CoordSys_Flag) :: coordSysIn
     logical  :: isPresent
     type(ESMF_Logical) :: isPresentAux
-    integer, parameter :: maxElemArrays=2
     integer            :: numElemArrays
-    type(ESMF_Pointer) :: elemArrays(maxElemArrays)
-    integer :: infoTypeElemArrays(maxElemArrays)
-    integer,parameter :: infoTypeElem_Mask=1
-    integer,parameter :: infoTypeElem_Area=2
+    type(ESMF_Pointer) :: elemArrays(ESMF_MESH_ELEMINFOINTOARRAY_MAX)
+    integer :: infoTypeElemArrays(ESMF_MESH_ELEMINFOINTOARRAY_MAX)
     type(ESMF_InterArray) :: elementIdsIA
     type(ESMF_InterArray) :: elementTypesIA
     type(ESMF_InterArray) :: elementConnIA
@@ -5504,7 +5520,7 @@ end function ESMF_MeshEmptyCreate
        numElemArrays=numElemArrays+1
 
        ! Load info type
-       infoTypeElemArrays(numElemArrays)=infoTypeElem_Mask
+       infoTypeElemArrays(numElemArrays)=ESMF_MESH_ELEMINFOINTOARRAY_MASK
 
        ! Load Array
        call ESMF_ArrayGetThis(elemMaskArray,elemArrays(numElemArrays),rc=localrc)
@@ -5523,7 +5539,7 @@ end function ESMF_MeshEmptyCreate
        numElemArrays=numElemArrays+1
 
        ! Load info type
-       infoTypeElemArrays(numElemArrays)=infoTypeElem_Area
+       infoTypeElemArrays(numElemArrays)=ESMF_MESH_ELEMINFOINTOARRAY_AREA
 
        ! Load Array
        call ESMF_ArrayGetThis(elemAreaArray,elemArrays(numElemArrays),rc=localrc)

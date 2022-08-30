@@ -5658,6 +5658,9 @@ end subroutine test_CSGridToGrid_2nd
   type(ESMF_Mesh) :: xgridMesh
   integer :: localPet, petCount
 
+  type(ESMF_Field) :: side1Field
+  type(ESMF_Array) :: side1Array
+  
   
   ! init success flag
   rc=ESMF_SUCCESS
@@ -5750,12 +5753,28 @@ end subroutine test_CSGridToGrid_2nd
   
    ! Debug output
 #if 0
-  call ESMF_XGridGet(xgrid, mesh=xgridMesh, rc=localrc)
+
+  ! Create Field
+  side1Field=ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
-   call ESMF_MeshWriteVTK(xgridMesh, "xgridMesh", rc=localrc)
+   ! Get Array
+   call ESMF_FieldGet(side1Field, array=side1Array, rc=localrc) 
+   if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+   
+  
+   call ESMF_XGridGet(xgrid, mesh=xgridMesh, &
+        sideAGeomIndArray=side1Array, rc=localrc)
+   if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+   call ESMF_MeshWriteVTK(xgridMesh, "xgridMesh", &
+        elemArray1=side1Array, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
