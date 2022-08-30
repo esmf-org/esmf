@@ -17,16 +17,16 @@ install:
 		python3 -m pip install .
 
 test_unit:
-		python3 -m pytest -m="not parallel" --json-report --json-report-summary
+		python3 -m pytest -m="not parallel"
 
 test_unit_parallel:
-		mpirun -n 4 python3 -m pytest -m="not serial" --json-report --json-report-summary
+		mpirun -n 4 python3 -m pytest -m="not serial"
 
 test_examples:
-		python3 -m pytest -vs -m="not parallel" examples/exampletest.py
+		python3 -m pytest -vs examples/exampletest.py
 
 test_examples_parallel:
-		mpirun -n 4 python3 -m pytest -vs -m="not serial" examples/exampletest.py
+		mpirun -n 4 python3 -m pytest -vs examples/exampletest.py
 
 test_examples_dryrun:
 		python3 -m pytest -vs examples/exampletestdryrun.py

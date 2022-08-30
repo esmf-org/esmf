@@ -20,15 +20,6 @@ class TestExamples(TestBase):
         from . import hello_world
 
     # ESMF IO does not work in mpiuni mode
-    @pytest.mark.parallel
-    def test_cubed_sphere_to_mesh_regrid(self):
-        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
-            raise SkipTest('ESMF must be built with MPI for test')
-        else:
-            from . import cubed_sphere_to_mesh_regrid
-
-    # ESMF IO does not work in mpiuni mode
-    # only example, not in documentation
     def test_field_read(self):
         if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
             raise SkipTest('ESMF must be built with MPI for test')
@@ -37,13 +28,22 @@ class TestExamples(TestBase):
 
     # only example, not in documentation
     def test_grid_create_peridim_mask(self):
-        from . import grid_create_peridim_mask
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+            raise SkipTest('ESMF must be built with MPI for test')
+        else:
+            from . import grid_create_peridim_mask
 
     def test_grid_locstream_regrid(self):
-        from . import grid_locstream_regrid
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+            raise SkipTest('ESMF must be built with MPI for test')
+        else:
+            from . import grid_locstream_regrid
 
     def test_locstream_grid_regrid(self):
-        from . import locstream_grid_regrid
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+            raise SkipTest('ESMF must be built with MPI for test')
+        else:
+            from . import locstream_grid_regrid
 
     def test_mesh_locstream_regrid(self):
         from . import mesh_locstream_regrid
@@ -62,15 +62,25 @@ class TestExamples(TestBase):
         else:
             from . import regrid_from_file
 
-    # # only example, not in documentation, datafile missing from repo
-    # @pytest.mark.slow
+    def test_ugrid_latlon_regrid(self):
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+            raise SkipTest('ESMF must be built with MPI for test')
+        else:
+            from . import ugrid_latlon_regrid
+
+    def test_ungridded_dimension_regrid(self):
+        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+            raise SkipTest('ESMF must be built with MPI for test')
+        else:
+            from . import ungridded_dimension_regrid
+
+    # # ESMF IO does not work in mpiuni mode
+    # def test_cubed_sphere_to_mesh_regrid(self):
+    #     if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
+    #         raise SkipTest('ESMF must be built with MPI for test')
+    #     else:
+    #         from . import cubed_sphere_to_mesh_regrid
+
+    # # datafile missing from repo
     # def test_tripole_regrid(self):
     #     from . import tripole_regrid
-
-    # only example, not in documentation
-    def test_ugrid_latlon_regrid(self):
-        from . import ugrid_latlon_regrid
-
-    # only example, not in documentation
-    def test_ungridded_dimension_regrid(self):
-        from . import ungridded_dimension_regrid

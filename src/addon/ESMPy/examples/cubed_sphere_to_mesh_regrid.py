@@ -26,7 +26,8 @@ mg = esmpy.Manager(debug=False)
 grid1 = "examples/data/ll1deg_grid.nc"
 
 # Create a cubed sphere grid with 20 elements per tile
-srcgrid = esmpy.Grid(tilesize=20, name="cubed_sphere")
+regDecompPTile = numpy.array([[2,2,1,1,1,1],[2,2,2,2,2,2]], dtype=numpy.int32)
+srcgrid = esmpy.Grid(tilesize=20, regDecompPTile = regDecompPTile, name="cubed_sphere")
 
 # create an regular lat lon grid from file
 dstgrid = esmpy.Grid(filename=grid1, filetype=esmpy.FileFormat.SCRIP)
