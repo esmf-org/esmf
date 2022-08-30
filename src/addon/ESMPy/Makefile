@@ -37,11 +37,13 @@ test_regrid_from_file_dryrun:
 test_regrid_from_file:
 		python3 -m pytest -vs src/esmpy/test/regrid_from_file/rfftest.py
 
-test_all: test_unit test_parallel test_examples test_examples_parallel
+test_serial: test_unit test_examples
 
-test_parallel: test_unit_parallel test_examples_dryrun test_examples_parallel
+test_dryrun: test_examples_dryrun test_regrid_from_file_dryrun
 
-test_uni: test_unit test_examples
+test_parallel: test_unit_parallel test_examples_parallel test_regrid_from_file
+
+test_all: test_unit test_unit_parallel test_examples test_examples_parallel test_regrid_from_file
 
 uninstall:
 		python3 -m pip uninstall ESMPy
