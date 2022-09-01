@@ -203,6 +203,19 @@ ESMF_OPENMP=OFF
 endif
 
 ############################################################
+# OpenACC compiler and linker flags
+#
+ifneq ($(ESMF_CLANGSTR), clang)
+ESMF_OPENACCDEFAULT = OFF
+ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
+ESMF_OPENACC_CXXCOMPILEOPTS += -fopenacc
+ESMF_OPENACC_F90LINKOPTS    += -fopenacc
+ESMF_OPENACC_CXXLINKOPTS    += -fopenacc
+else
+ESMF_OPENACC=OFF
+endif
+
+############################################################
 # Need this until the file convention is fixed (then remove these two lines)
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form

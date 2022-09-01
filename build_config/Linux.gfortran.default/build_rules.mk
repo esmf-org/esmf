@@ -231,6 +231,15 @@ ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
+# OpenACC compiler and linker flags
+#
+ESMF_OPENACCDEFAULT = OFF
+ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
+ESMF_OPENACC_CXXCOMPILEOPTS += -fopenacc
+ESMF_OPENACC_F90LINKOPTS    += -fopenacc
+ESMF_OPENACC_CXXLINKOPTS    += -fopenacc
+
+############################################################
 # Need this until the file convention is fixed (then remove these two lines)
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
