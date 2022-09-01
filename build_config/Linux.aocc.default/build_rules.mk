@@ -1,14 +1,17 @@
 # $Id$
 #
-# Linux.nvhpc.default
+# Linux.aocc.default
 #
 
 ############################################################
 # Default compiler setting.
 #
-ESMF_F90DEFAULT         = nvfortran
-ESMF_CXXDEFAULT         = nvc++
-ESMF_CDEFAULT           = nvc
+ESMF_F90DEFAULT         = flang
+ESMF_CXXDEFAULT         = clang++
+ESMF_CDEFAULT           = clang
+ESMF_CPPDEFAULT		= clang -E -P -x c
+
+ESMF_CXXCOMPILECPPFLAGS += -x c++
 
 ############################################################
 # Default MPI setting.
@@ -73,14 +76,6 @@ ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),mvapich)
-# Mvapich ---------------------------------------------------
-ESMF_F90DEFAULT         = mpif90
-ESMF_CXXDEFAULT         = mpicxx
-ESMF_CDEFAULT           = mpicc
-ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-else
 ifeq ($(ESMF_COMM),mvapich2)
 # Mvapich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
@@ -89,13 +84,16 @@ ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),intelmpi)
-# IntelMPI -------------------------------------------------
-ESMF_F90DEFAULT         = mpipgf90
-ESMF_CXXDEFAULT         = mpipgc++
-ESMF_CDEFAULT           = mpipgcc
+ifeq ($(ESMF_COMM),lam)
+# LAM (assumed to be built with gfortran) -----------------------
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
+ESMF_F90DEFAULT         = mpif77
+ESMF_CXXDEFAULT         = mpic++
+ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
@@ -125,14 +123,13 @@ endif
 endif
 endif
 endif
-endif
 
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} --version -c
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version -c
-ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version -c
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 
 ############################################################
 # Currently no support the Fortran2018 assumed type feature
@@ -141,8 +138,43 @@ ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
 
 ############################################################
+# Special debug flags
+#
+ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused
+
+############################################################
+# Fortran symbol convention
+#
+ifeq ($(ESMF_FORTRANSYMBOLS),default)
+ESMF_F90COMPILEOPTS       +=
+ESMF_F90LINKOPTS          +=
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+else
+ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
+ESMF_F90COMPILEOPTS       += -fno-second-underscore
+ESMF_F90LINKOPTS          += -fno-second-underscore
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+else
+ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
+ESMF_F90COMPILEOPTS       += -fsecond-underscore
+ESMF_F90LINKOPTS          += -fsecond-underscore
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
+else
+$(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
+endif
+endif
+endif
+
+############################################################
 # Construct the ABISTRING
 #
+ifeq ($(ESMF_MACHINE),ia64)
+ifeq ($(ESMF_ABI),64)
+ESMF_ABISTRING := $(ESMF_MACHINE)_64
+else
+$(error Invalid ESMF_MACHINE / ESMF_ABI combination: $(ESMF_MACHINE) / $(ESMF_ABI))
+endif
+endif
 ifeq ($(ESMF_MACHINE),x86_64)
 ifeq ($(ESMF_ABI),32)
 ESMF_ABISTRING := $(ESMF_MACHINE)_32
@@ -156,28 +188,23 @@ endif
 # Set memory model compiler flags according to ABISTRING
 #
 ifeq ($(ESMF_ABISTRING),x86_64_32)
-ESMF_CXXCOMPILEOPTS       += 
-ESMF_CXXLINKOPTS          += 
-ESMF_F90COMPILEOPTS       += 
-ESMF_F90LINKOPTS          += 
+ESMF_CXXCOMPILEOPTS       += -m32
+ESMF_CXXLINKOPTS          += -m32
+ESMF_F90COMPILEOPTS       += -m32
+ESMF_F90LINKOPTS          += -m32
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
-ESMF_CXXCOMPILEOPTS       += -mcmodel=small
-ESMF_CXXLINKOPTS          += -mcmodel=small
-ESMF_F90COMPILEOPTS       += -mcmodel=small
-ESMF_F90LINKOPTS          += -mcmodel=small
+ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
+ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
+ESMF_F90LINKOPTS          += -m64 -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
-ESMF_CXXCOMPILEOPTS       += -mcmodel=medium
-ESMF_CXXLINKOPTS          += -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -mcmodel=medium
-ESMF_F90LINKOPTS          += -mcmodel=medium
+ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
+ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
 endif
-
-############################################################
-# Enable TR15581/F2003 Allocatable array resizing
-#
-ESMF_F90COMPILEOPTS += -Mallocatable=03
 
 ############################################################
 # Conditionally add pthread compiler and linker flags
@@ -192,25 +219,17 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_OPENMP_F90COMPILEOPTS += -mp
-ESMF_OPENMP_CXXCOMPILEOPTS += -mp
-ESMF_OPENMP_F90LINKOPTS    += -mp
-ESMF_OPENMP_CXXLINKOPTS    += -mp
-
-############################################################
-# OpenACC compiler and linker flags (the -Minfo just there for debugging)
-#
-ESMF_OPENACCDEFAULT = OFF
-ESMF_OPENACC_F90COMPILEOPTS += -acc -Minfo
-ESMF_OPENACC_CXXCOMPILEOPTS += -acc -Minfo
-ESMF_OPENACC_F90LINKOPTS    += -acc -Minfo
-ESMF_OPENACC_CXXLINKOPTS    += -acc -Minfo
+ESMF_OPENMP=ON
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
 #
-ESMF_F90COMPILEFREENOCPP = -Mfreeform
-ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
+ESMF_F90COMPILEFREENOCPP = -ffree-form
+ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 
 ############################################################
 # Set rpath syntax
@@ -222,12 +241,12 @@ ESMF_CRPATHPREFIX           = -Wl,-rpath,
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -c++libs
+ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -fortranlibs
+ESMF_CXXLINKLIBS += -lrt -lflang -lflangrti -lpgmath -ldl
 
 ############################################################
 # Linker option that ensures that the specified libraries are 
@@ -244,9 +263,9 @@ ESMF_SL_LIBOPTS  += -shared
 ############################################################
 # Shared object options
 #
-ESMF_SO_F90COMPILEOPTS  = -fpic
+ESMF_SO_F90COMPILEOPTS  = -fPIC
 ESMF_SO_F90LINKOPTS     = -shared
 ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
-ESMF_SO_CXXCOMPILEOPTS  = -fpic
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
 ESMF_SO_CXXLINKOPTS     = -shared
 ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic

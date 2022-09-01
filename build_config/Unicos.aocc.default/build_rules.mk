@@ -1,6 +1,6 @@
 # $Id$
 #
-# Unicos.gfortran.default
+# Unicos.aocc.default
 #
 
 ############################################################
@@ -45,15 +45,20 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} --version
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
-ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v --version
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
+
+############################################################
+# Currently no support the Fortran2018 assumed type feature
+#
+ESMF_F90COMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_F2018ASSUMEDTYPE
 
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fimplicit-none -fcheck=all,no-pointer
-ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
+ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused
 
 ############################################################
 # Fortran symbol convention
@@ -96,6 +101,7 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
+ESMF_OPENMP=ON
 ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
 ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 ESMF_OPENMP_F90LINKOPTS    += -fopenmp
@@ -117,36 +123,11 @@ ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 
 ############################################################
-# Set unlimited line length limit for free format files
-#
-ESMF_F90COMPILEOPTS += -ffree-line-length-none
-
-############################################################
 # Set rpath syntax
 #
 ESMF_F90RPATHPREFIX         = -Wl,-rpath,
 ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 ESMF_CRPATHPREFIX           = -Wl,-rpath,
-
-############################################################
-# Determine where gcc's libraries are located
-#
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.so)
-ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
-ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)
-endif
-ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
-ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
-
-############################################################
-# Determine where gfortran's libraries are located
-#
-ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS) -print-file-name=libgfortran.so)
-ifeq ($(ESMF_LIBSTDCXX),libgfortran.so)
-ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS) -print-file-name=libgfortran.a)
-endif
-ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
-ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
@@ -156,7 +137,7 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt -lgfortran -ldl
+ESMF_CXXLINKLIBS += -lrt -lflang -lflangrti -lpgmath -ldl
 
 ############################################################
 # Shared library options
