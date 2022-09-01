@@ -613,7 +613,6 @@ _ESMF.ESMC_GridCreateCubedSphere.argtypes = [ct.POINTER(ct.c_int),
                                              ct.POINTER(ESMP_InterfaceInt),
                                              ct.c_void_p,
                                              ct.POINTER(ct.c_int)]
-@beta
 def ESMP_GridCreateCubedSphere(tilesize, regDecompPTile=None,
                                #decompFlagPTile=None, deLabelList=None,
                                staggerLocList=None, name=None):
