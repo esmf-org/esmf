@@ -495,7 +495,6 @@ workflows:
       - build-esmf-docs:
           requires:
             - should-build-docs
-      - build-esmf-docs
       - publish-esmf-docs:
           requires:
             - build-esmf-docs
@@ -504,9 +503,9 @@ workflows:
 #              only:
 #                - develop
 #                - /^release/.*$/
-      - build-esmpy-docs
-#          requires:
-#            - should-build-docs
+      - build-esmpy-docs:
+          requires:
+            - should-build-docs
       - publish-esmpy-docs:
           requires:
             - build-esmpy-docs
