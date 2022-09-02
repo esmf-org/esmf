@@ -1,4 +1,5 @@
-[![ESMF](https://circleci.com/gh/esmf-org/esmf.svg?style=svg)](http://www.earthsystemmodeling.org/docs/nightly/develop/ESMF_refdoc/)  
+[![ESMF Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml)
+[![ESMPy Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml)
 
 # Earth System Modeling Framework (ESMF)
 
