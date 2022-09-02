@@ -4,7 +4,9 @@ on:
   workflow_dispatch:
   push:
 
-concurrency: build-esmf-docs
+concurrency: 
+  group: build-esmf-docs
+  cancel-in-progress: true
 
 jobs:
 
