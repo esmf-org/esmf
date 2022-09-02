@@ -490,11 +490,11 @@ workflows:
 
   docs-commit:
     jobs:
-#      - should-build-docs:
-#          type: approval
-#      - build-esmf-docs:
-#          requires:
-#            - should-build-docs
+      - should-build-docs:
+          type: approval
+      - build-esmf-docs:
+          requires:
+            - should-build-docs
       - build-esmf-docs
       - publish-esmf-docs:
           requires:
