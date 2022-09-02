@@ -51,6 +51,8 @@ jobs:
       run: |
          cd ${{ github.workspace }}/esmf-org.github.io
          echo 'test' > test.txt
+         git commit test.txt -m 'please ignore'
+         git push
          
 #    - name: Copy docs
 #      run: | 
