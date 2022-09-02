@@ -16,7 +16,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf NUOPC Layer Reference}}
-\newcommand{\myauthors}{\large {\it Content Standards Committee (CSC) Members}}
+\newcommand{\myauthors}{\large {\it Content_Standards Committee (CSC) Members}}
 \newcommand{\myversion}{ESMF 8.4.0 beta snapshot}
 % set a standard paragraph style
 \setlength{\parskip}{0pt}
