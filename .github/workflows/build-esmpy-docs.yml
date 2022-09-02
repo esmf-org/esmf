@@ -4,7 +4,9 @@ on:
   workflow_dispatch:
   push:
 
-concurrency: build-esmpy-docs
+concurrency: 
+  group: build-esmpy-docs
+  cancel-in-progress: true
 
 jobs:
 
