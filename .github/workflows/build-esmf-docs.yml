@@ -69,5 +69,6 @@ jobs:
       with:
         repository: esmf-org/esmf-org.github.io
         directory: ${{ github.workspace }}/esmf-org.github.io
+        branch: master
         github_token: ${{ secrets.ESMF_WEB_TOKEN }}
         message: 'Publish ESMF Docs'
