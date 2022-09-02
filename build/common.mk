@@ -637,6 +637,9 @@ ESMF_EXDIR      = $(ESMF_BUILD)/examples/examples$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_
 # apps executable directory
 ESMF_APPSDIR     = $(ESMF_BUILD)/apps/apps$(ESMF_BOPT)/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_ABI).$(ESMF_COMM).$(ESMF_SITE)
 
+# unified nuopc executable directory
+ESMF_ESMXDIR     = $(ESMF_BUILD)/src/addon/ESMX
+
 # include file directory
 ESMF_INCDIR     = $(ESMF_BUILD)/src/include
 
