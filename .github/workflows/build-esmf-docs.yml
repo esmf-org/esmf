@@ -66,5 +66,7 @@ jobs:
     - name: Commit and publish docs
       uses: actions-js/push@master
       with:
+        repository: esmf-org/esmf-org.github.io
         directory: ${{ github.workspace }}/esmf-org.github.io
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        message: 'Publish ESMF Docs'
