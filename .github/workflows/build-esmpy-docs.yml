@@ -2,10 +2,9 @@ name: Build ESMPy Docs
 
 on:
   workflow_dispatch:
-#  push:
-#    branches: [ "develop" ]
-#  pull_request:
-#    branches: [ "develop" ]
+  push:
+
+concurrency: build-esmpy-docs
 
 jobs:
 
