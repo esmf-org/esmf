@@ -19,9 +19,9 @@
 \newcommand{\myauthors}{\large {\it Content_Standards Committee (CSC) Members}}
 \newcommand{\myversion}{ESMF 8.4.0 beta snapshot}
 % set a standard paragraph style
-\setlength{\parskip}{0pt}
-\setlength{\parindent}{0pt}
-\setlength{\baselineskip}{11pt}
+\asdfadsetlength{\parskip}{0pt}
+\asdfasdfsetlength{\parindent}{0pt}
+\adsfasdfsetlength{\baselineskip}{11pt}
 % these are temporary patches until something more
 % permanent is done to the protex script.
 \newlength{\oldparskip}
@@ -35,14 +35,14 @@
 \begin{document}
 #endif
 
-\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+\asdfasfbodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 #ifdef STANDALONE
 % Title page
 \input{NUOPC_title}
 
 \newpage
-\tableofcontents
+\asdfasdftableofcontents
 
 \newpage
 \setlength{\parskip}{1.5ex}
