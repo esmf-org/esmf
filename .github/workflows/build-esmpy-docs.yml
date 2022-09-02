@@ -45,7 +45,8 @@ jobs:
       uses: actions/checkout@v3
       with:
           repository: esmf-org/esmpy_doc
-          path: esmpy_doc          
+          path: esmpy_doc
+          token: ${{ secrets.ESMF_WEB_TOKEN }}
     
     - name: Copy docs
       run: | 
@@ -60,5 +61,8 @@ jobs:
     - name: Commit and publish docs
       uses: actions-js/push@master
       with:
+        repository: esmf-org/esmpy_doc
         directory: ${{ github.workspace }}/esmpy_doc
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: master
+        github_token: ${{ secrets.ESMF_WEB_TOKEN }}
+        message: 'Publish ESMPy Docs'
