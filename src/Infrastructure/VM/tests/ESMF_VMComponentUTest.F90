@@ -200,10 +200,11 @@ program ESMF_VMComponentUTest
   character(ESMF_MAXSTR) :: name
 
   ! local variables
-  integer:: i, j, rc, loop_rc
+  integer:: i, j, rc, loop_rc, localPet, petCount, loc_petCount
   type(ESMF_VM):: vm, vm2
   type(ESMF_GridComp):: gcomp(1000), gcomp2
   logical :: isCreated
+  integer, allocatable  :: petList(:)
   
 !------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -218,17 +219,23 @@ program ESMF_VMComponentUTest
 
   ! Get global VM and print info
   call ESMF_VMGetGlobal(vm, rc=rc)
-  call ESMF_VMPrint(vm)
-  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_VMLog(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !----------------------------------------------------------------
+  !----------------------------------------------------------------
   ! Prepare for loop testing
-  loop_rc=ESMF_SUCCESS 
+  loop_rc=ESMF_SUCCESS
 
   do j=1, 1
     do i=1, 2
 
       gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
-  
+
       call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvm, &
         rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
@@ -240,9 +247,11 @@ program ESMF_VMComponentUTest
     enddo
     do i=1, 2
 
+      call ESMF_GridCompGet(gcomp(i), petCount=loc_petCount, rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 10
       call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 10
-      
+
     enddo
   enddo
   
@@ -253,16 +262,24 @@ program ESMF_VMComponentUTest
   write(name, *) "Component Create/SetServices/Destroy Test"
   write(failMsg, *) "Failure codes returned!"
   call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !----------------------------------------------------------------
+  !Check petCount
+  !NEX_UTest
+  write(name, *) "Check petCount for Component Create/SetServices/Destroy Test"
+  write(failMsg, *) "Incorrect petCount!"
+  call ESMF_Test((loc_petCount==petCount), name, failMsg, result, ESMF_SRCLINE)
 
+  !----------------------------------------------------------------
+  !----------------------------------------------------------------
   ! Prepare for loop testing
-  loop_rc=ESMF_SUCCESS 
+  loop_rc=ESMF_SUCCESS
 
   do j=1, 1
     do i=1, 2
 
       gcomp(i) = ESMF_GridCompCreate(name='My gridded component', rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 15
-  
+
       call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvmForcePthreads,&
         rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 15
@@ -274,9 +291,11 @@ program ESMF_VMComponentUTest
     enddo
     do i=1, 2
 
+      call ESMF_GridCompGet(gcomp(i), petCount=loc_petCount, rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 15
       call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
       if (loop_rc /= ESMF_SUCCESS) goto 15
-      
+
     enddo
   enddo
   
@@ -287,6 +306,222 @@ program ESMF_VMComponentUTest
   write(name, *) "Component Create/SetServices/Destroy ForcePthreads Test"
   write(failMsg, *) "Failure codes returned!"
   call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !----------------------------------------------------------------
+  !Check petCount
+  !NEX_UTest
+  write(name, *) "Check petCount for Component Create/SetServices/Destroy ForcePthreads Test"
+  write(failMsg, *) "Incorrect petCount!"
+  call ESMF_Test((loc_petCount==petCount), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !----------------------------------------------------------------
+  ! Prepare for loop testing
+  loop_rc=ESMF_SUCCESS
+  loc_petCount = -1
+
+  do j=1, 1
+    do i=1, 2
+
+      gcomp(i) = ESMF_GridCompCreate(name='My gridded component', &
+        petList=(/0/), rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 110
+
+      call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvm, &
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 110
+
+      call ESMF_GridCompSetServices(gcomp(i), userRoutine=mygcomp_register_nexh, &
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 110
+
+    enddo
+    do i=1, 2
+
+      call ESMF_GridCompGet(gcomp(i), petCount=loc_petCount, rc=rc)
+      if (localPet==0) then
+        loop_rc=rc
+      elseif (rc/=ESMF_SUCCESS) then
+        loop_rc=ESMF_SUCCESS
+      endif
+      if (loop_rc /= ESMF_SUCCESS) goto 110
+      call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 110
+
+    enddo
+  enddo
+  
+110 continue
+  !----------------------------------------------------------------
+  !Verify loop test results
+  !NEX_UTest
+  write(name, *) "Component Create/SetServices/Destroy with petList Test"
+  write(failMsg, *) "Failure codes returned!"
+  call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !----------------------------------------------------------------
+  !Check petCount
+  !NEX_UTest
+  write(name, *) "Check petCount for Component Create/SetServices/Destroy with petList Test"
+  write(failMsg, *) "Incorrect petCount!"
+  if (localPet==0) then
+    call ESMF_Test((loc_petCount==1), name, failMsg, result, ESMF_SRCLINE)
+  else
+    call ESMF_Test((loc_petCount==-1), name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+  !----------------------------------------------------------------
+  !----------------------------------------------------------------
+  ! Prepare for loop testing
+  loop_rc=ESMF_SUCCESS
+  loc_petCount = -1
+
+  do j=1, 1
+    do i=1, 2
+
+      gcomp(i) = ESMF_GridCompCreate(name='My gridded component', &
+        petList=(/0/), rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 115
+
+      call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvmForcePthreads,&
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 115
+
+      call ESMF_GridCompSetServices(gcomp(i), userRoutine=mygcomp_register_nexh, &
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 115
+
+    enddo
+    do i=1, 2
+
+      call ESMF_GridCompGet(gcomp(i), petCount=loc_petCount, rc=rc)
+      if (localPet==0) then
+        loop_rc=rc
+      elseif (rc/=ESMF_SUCCESS) then
+        loop_rc=ESMF_SUCCESS
+      endif
+      if (loop_rc /= ESMF_SUCCESS) goto 115
+      call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 115
+
+    enddo
+  enddo
+  
+115 continue
+  !----------------------------------------------------------------
+  !Verify loop test results
+  !NEX_UTest
+  write(name, *) "Component Create/SetServices/Destroy ForcePthreads with petList Test"
+  write(failMsg, *) "Failure codes returned!"
+  call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !----------------------------------------------------------------
+  !Check petCount
+  !NEX_UTest
+  write(name, *) "Check petCount for Component Create/SetServices/Destroy ForcePthreads with petList Test"
+  write(failMsg, *) "Incorrect petCount!"
+  if (localPet==0) then
+    call ESMF_Test((loc_petCount==1), name, failMsg, result, ESMF_SRCLINE)
+  else
+    call ESMF_Test((loc_petCount==-1), name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+  !----------------------------------------------------------------
+  !----------------------------------------------------------------
+
+  !----------------------------------------------------------------
+  !----------------------------------------------------------------
+  ! Prepare for loop testing
+  loop_rc=ESMF_SUCCESS
+  allocate(petList(0))
+
+  do j=1, 1
+    do i=1, 2
+
+      gcomp(i) = ESMF_GridCompCreate(name='My gridded component', &
+        petList=petList, rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 210
+
+      call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvm, &
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 210
+
+      call ESMF_GridCompSetServices(gcomp(i), userRoutine=mygcomp_register_nexh, &
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 210
+
+    enddo
+    do i=1, 2
+
+      call ESMF_GridCompGet(gcomp(i), petCount=loc_petCount, rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 210
+      call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 210
+
+    enddo
+  enddo
+  deallocate(petList)
+
+210 continue
+  !----------------------------------------------------------------
+  !Verify loop test results
+  !NEX_UTest
+  write(name, *) "Component Create/SetServices/Destroy with empty petList Test"
+  write(failMsg, *) "Failure codes returned!"
+  call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !----------------------------------------------------------------
+  !Check petCount
+  !NEX_UTest
+  write(name, *) "Check petCount for Component Create/SetServices/Destroy with empty petList Test"
+  write(failMsg, *) "Incorrect petCount!"
+  call ESMF_Test((loc_petCount==petCount), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !----------------------------------------------------------------
+  ! Prepare for loop testing
+  loop_rc=ESMF_SUCCESS
+  allocate(petList(0))
+
+  do j=1, 1
+    do i=1, 2
+
+      gcomp(i) = ESMF_GridCompCreate(name='My gridded component', &
+        petList=petList, rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 215
+
+      call ESMF_GridCompSetVM(gcomp(i), userRoutine=mygcomp_setvmForcePthreads,&
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 215
+
+      call ESMF_GridCompSetServices(gcomp(i), userRoutine=mygcomp_register_nexh, &
+        rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 215
+
+    enddo
+    do i=1, 2
+
+      call ESMF_GridCompGet(gcomp(i), petCount=loc_petCount, rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 215
+      call ESMF_GridCompDestroy(gcomp(i), rc=loop_rc)
+      if (loop_rc /= ESMF_SUCCESS) goto 215
+
+    enddo
+  enddo
+  deallocate(petList)
+
+215 continue
+  !----------------------------------------------------------------
+  !Verify loop test results
+  !NEX_UTest
+  write(name, *) "Component Create/SetServices/Destroy ForcePthreads with empty petList Test"
+  write(failMsg, *) "Failure codes returned!"
+  call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !----------------------------------------------------------------
+  !Check petCount
+  !NEX_UTest
+  write(name, *) "Check petCount for Component Create/SetServices/Destroy ForcePthreads with empty petList Test"
+  write(failMsg, *) "Incorrect petCount!"
+  call ESMF_Test((loc_petCount==petCount), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !----------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -353,8 +588,10 @@ program ESMF_VMComponentUTest
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
+  !----------------------------------------------------------------
+  !----------------------------------------------------------------
   ! Prepare for loop testing
-  loop_rc=ESMF_SUCCESS 
+  loop_rc=ESMF_SUCCESS
 
   do j=1, 20
     do i=1, 200
@@ -386,8 +623,10 @@ program ESMF_VMComponentUTest
   write(failMsg, *) "Failure codes returned!"
   call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !----------------------------------------------------------------
+  !----------------------------------------------------------------
   ! Prepare for loop testing
-  loop_rc=ESMF_SUCCESS 
+  loop_rc=ESMF_SUCCESS
 
   do j=1, 20
     do i=1, 200
