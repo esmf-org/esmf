@@ -1,6 +1,6 @@
 [![ESMF](https://circleci.com/gh/esmf-org/esmf.svg?style=svg)](http://www.earthsystemmodeling.org/docs/nightly/develop/ESMF_refdoc/)  
 
-# Earth System Modeling Framework (ESMF)  
+# Earth System Modeling Framework (ESMF)
 
 >Copyright (c) 2002-2022 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
 
@@ -32,8 +32,10 @@ conda create -c conda-forge -n <env> esmf esmpy
 ## Add-On Packages
 
 Several add-on packages are included with ESMF under [`./src/addon`](https://github.com/esmf-org/esmf/tree/master/src/addon):  
- * [ESMPy](src/addon/ESMPy/README.md) - Python interface to ESMF.
- * [NUOPC](src/addon/NUOPC/README) - Interoperability layer developed under the National Unified Operational Prediction Capability (NUOPC) program.
+ * [ESMPy](src/addon/ESMPy) - Python interface to ESMF.
+ * [ESMX](src/addon/ESMX) - A layer providing the Earth System Model eXecutable.
+   The ESMX layer is built on top of ESMF and NUOPC.
+ * [NUOPC](src/addon/NUOPC) - Interoperability layer developed under the National Unified Operational Prediction Capability (NUOPC) program.
 
 See each addon package for a specific README file.
 

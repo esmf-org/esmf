@@ -1,5 +1,6 @@
-NUOPC Layer
-===========
+# NUOPC Layer
+
+NUOPC is the **N**ational **U**nified **O**perational **P**rediction **C**apability.
 
 The National Unified Operational Prediction Capability (NUOPC) is a consortium
 of Navy, NOAA, and Air Force modelers and their research partners. It aims to
@@ -15,4 +16,3 @@ reference manual, please visit:
 
 http://earthsystemmodeling.org/nuopc/
 
---
