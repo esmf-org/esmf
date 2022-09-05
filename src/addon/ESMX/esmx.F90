@@ -2,6 +2,8 @@
 ! ESMX (Earth System Model eXecutable)
 !   This file contains the main application program and the top level driver.
 !==============================================================================
+#define FILENAME "src/addon/ESMX/esmx.F90"
+!==============================================================================
 
 module esmxDriver
 
@@ -37,7 +39,7 @@ module esmxDriver
     call NUOPC_CompDerive(driver, driverSS, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! Specialize Driver
@@ -45,14 +47,14 @@ module esmxDriver
       specRoutine=SetModelServices, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     call NUOPC_CompSpecialize(driver, specLabel=label_SetRunSequence, &
       specRoutine=SetRunSequence, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
   end subroutine SetServices
@@ -84,7 +86,7 @@ module esmxDriver
     call ESMF_GridCompGet(driver, config=config, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! determine the generic component labels
@@ -92,14 +94,14 @@ module esmxDriver
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     allocate(compLabels(componentCount))
     call ESMF_ConfigGetAttribute(config, valueList=compLabels, &
       label="ESMX_component_list:", count=componentCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! setup CompDef structure
@@ -116,14 +118,14 @@ module esmxDriver
         relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call NUOPC_IngestPetList(petList, ff, rc=rc)
       call ESMF_ConfigGetAttribute(config, model, &
         label=trim(prefix)//"_model:", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
       ! set up NUOPC hint for OpenMP
@@ -131,19 +133,19 @@ module esmxDriver
         label=trim(prefix)//"_omp_num_threads:", default=-1, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       info = ESMF_InfoCreate(rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       if (ompNumThreads /= -1) then
         call ESMF_InfoSet(info, key="/NUOPC/Hint/PePerPet/MaxCount", &
           value=ompNumThreads, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       endif
 
@@ -166,7 +168,7 @@ module esmxDriver
           msg="Unable to add component '"//trim(prefix)// &
             "' to driver via Fortran module.", &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       else
         ! add child component with SetVM and SetServices in shared object
@@ -177,7 +179,7 @@ module esmxDriver
           msg="Unable to add component '"//trim(prefix)// &
             "' to driver via shared object: "//trim(model), &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       endif
 
@@ -186,33 +188,33 @@ module esmxDriver
         label=trim(prefix)//"_attributes::", relaxedflag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out        
       call NUOPC_CompAttributeIngest(comp, ff, addFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call NUOPC_FreeFormatDestroy(ff, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       ff = NUOPC_FreeFormatCreate(config, &
         label="ALLCOMP_attributes::", relaxedflag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out        
       call NUOPC_CompAttributeIngest(comp, ff, addFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call NUOPC_FreeFormatDestroy(ff, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
       ! clean-up
@@ -220,7 +222,7 @@ module esmxDriver
       call ESMF_InfoDestroy(info, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     enddo
 
@@ -231,25 +233,25 @@ module esmxDriver
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_ConfigGetAttribute(config, stopTimeString, label="stopTime:", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! set the driver clock startTime/stopTime
     call ESMF_TimeSet(startTime, timeString=startTimeString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_TimeSet(stopTime,  timeString=stopTimeString,  rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! set the driver clock default timeStep = stopTime - startTime
@@ -261,13 +263,13 @@ module esmxDriver
       timeStep=timeStep, startTime=startTime, stopTime=stopTime, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     call ESMF_GridCompSet(driver, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     rc = ESMF_SUCCESS
@@ -291,14 +293,14 @@ module esmxDriver
     call ESMF_GridCompGet(driver, name=name, config=config, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! read free format run sequence from config
     runSeqFF = NUOPC_FreeFormatCreate(config, label="runSeq::", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! ingest FreeFormat run sequence
@@ -306,14 +308,14 @@ module esmxDriver
       autoAddConnectors=.true., rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! clean-up
     call NUOPC_FreeFormatDestroy(runSeqFF, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
   end subroutine SetRunSequence
@@ -346,45 +348,45 @@ program ESMX
     defaultCalkind=ESMF_CALKIND_GREGORIAN, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ConfigGetAttribute(config, logFlush, &
     label="ESMX_log_flush:", default=.false., rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_LogSet(flush=logFlush, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_LogWrite("=============================================", &
     ESMF_LOGMSG_INFO, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_LogWrite("ESMX (Earth System Model eXecutable) STARTING", &
     ESMF_LOGMSG_INFO, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_LogWrite("=============================================", &
     ESMF_LOGMSG_INFO, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ConfigGetAttribute(config, fieldDictionary, &
     label="ESMX_field_dictionary:", default="<no-set>", rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (trim(fieldDictionary)/="<no-set>") then
     ! Read custom dictionary from YAML file
@@ -392,7 +394,7 @@ program ESMX
     if (ESMF_LogFoundError(rcToCheck=rc, &
       msg="Unable to read Field Dictionary file: "//trim(fieldDictionary), &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 
@@ -400,18 +402,18 @@ program ESMX
   driver = ESMF_GridCompCreate(name="esmxDriver", config=config, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! SetServices for the esmx driver
   call ESMF_GridCompSetServices(driver, driverSS, userRc=urc, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! read and ingest free format driver attributes
@@ -419,92 +421,92 @@ program ESMX
     relaxedflag=.true., rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call NUOPC_CompAttributeIngest(driver, ff, addFlag=.true., rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call NUOPC_FreeFormatDestroy(ff, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   ff = NUOPC_FreeFormatCreate(config, label="ALLCOMP_attributes::", &
     relaxedflag=.true., rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call NUOPC_CompAttributeIngest(driver, ff, addFlag=.true., rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call NUOPC_FreeFormatDestroy(ff, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Call Initialize for the esmx driver
   call ESMF_GridCompInitialize(driver, userRc=urc, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Call Run for the esmx driver
   call ESMF_GridCompRun(driver, userRc=urc, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Call Finalize for the esmx driver
   call ESMF_GridCompFinalize(driver, userRc=urc, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Destroy the esmx driver
   call ESMF_GridCompDestroy(driver, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_LogWrite("=============================================", &
     ESMF_LOGMSG_INFO, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_LogWrite("ESMX (Earth System Model eXecutable) FINISHED", &
     ESMF_LOGMSG_INFO, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_LogWrite("=============================================", &
     ESMF_LOGMSG_INFO, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Finalize ESMF

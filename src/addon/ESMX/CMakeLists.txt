@@ -12,7 +12,7 @@ set(CMAKE_CXX_COMPILER ${ESMF_CXXCOMPILER})
 set(CMAKE_Fortran_COMPILER ${ESMF_F90COMPILER})
 
 # Specific project settings
-project(ESMX VERSION 0.1.0 DESCRIPTION "Unified Nuopc EXecutable")
+project(ESMX VERSION 0.1.0)
 add_executable(esmx esmx.F90)
 target_link_libraries(esmx PRIVATE ESMF)
 install(TARGETS esmx)
