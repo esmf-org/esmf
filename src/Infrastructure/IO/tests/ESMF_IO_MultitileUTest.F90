@@ -45,15 +45,33 @@ program ESMF_IO_MultitileUTest
   character(ESMF_MAXSTR) :: name
 
   type(ESMF_Grid) :: grid6tile
+
+  ! Fields used for writing:
+  !
   ! The following fields make up the field bundle:
   type(ESMF_Field) :: field1, field2, field1Copy
+  real(ESMF_KIND_R8), pointer :: data1(:,:), data2(:,:), data1Copy(:,:)
   type(ESMF_FieldBundle) :: fieldBundle
   ! This field is not in the field bundle:
   type(ESMF_Field) :: field3
+  real(ESMF_KIND_R8), pointer :: data3(:,:)
+
+  ! Fields used for reading:
+  !
+  ! The following fields make up the field bundle:
+  type(ESMF_Field) :: field1Read, field2Read, field1CopyRead
+  real(ESMF_KIND_R8), pointer :: data1Read(:,:), data2Read(:,:), data1CopyRead(:,:)
+  type(ESMF_FieldBundle) :: fieldBundleRead
+  ! This field is not in the field bundle:
+  type(ESMF_Field) :: field3Read
+  real(ESMF_KIND_R8), pointer :: data3Read(:,:)
+
   ! This is used for error testing:
   type(ESMF_Grid) :: gridSingleTile
   type(ESMF_Field) :: fieldSingleTile
   type(ESMF_FieldBundle) :: fieldBundleMixedTileCounts
+
+  logical :: allEqual
 
   character(len=*), parameter :: fileName = "ESMF_IO_MultitileUTest#.nc"
   character(len=*), parameter :: fileNameFail = "ESMF_IO_MultitileUTestFail#.nc"
@@ -84,8 +102,34 @@ program ESMF_IO_MultitileUTest
 #endif
   !------------------------------------------------------------------------
 
-  ! FIXME(wjs, 2022-08-26) Add tests of FieldBundleRead and FieldRead; in
-  ! addition to checking rc, also check equality to the original fields
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Read a FieldBundle with multi-tile fields"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_FieldBundleRead(fieldBundleRead, fileName=fileName, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Confirm that FieldBundle-read fields match originals"
+  write(failMsg, *) "Some read-in fields differ from originals"
+  allEqual = ( &
+       all(data1Read == data1) .and. &
+       all(data2Read == data2) .and. &
+       all(data1CopyRead == data1Copy))
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not fail as expected"
+  call ESMF_Test(.not. allEqual, name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
 
 #ifdef ESMF_TESTEXHAUSTIVE
   ! The following tests don't add much code coverage, so are only done when
@@ -101,6 +145,32 @@ program ESMF_IO_MultitileUTest
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Read a multi-tile Field"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_FieldRead(field3Read, fileName=fileName, rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Confirm that Field-read field matches original"
+  write(failMsg, *) "Read-in field differs from original"
+  allEqual = all(data3Read == data3)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not fail as expected"
+  call ESMF_Test(.not. allEqual, name, failMsg, result, ESMF_SRCLINE)
 #endif
   !------------------------------------------------------------------------
 
@@ -172,15 +242,36 @@ contains
     if (rc /= ESMF_SUCCESS) return
     call ESMF_FieldFill(field1, dataFillScheme='sincos', member=1, rc=rc)
     if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(field1, farrayPtr=data1)
+    if (rc /= ESMF_SUCCESS) return
+
+    field1Read = ESMF_FieldCreate(grid6tile, arraySpec, name="field1", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(field1Read, farrayPtr=data1Read)
+    if (rc /= ESMF_SUCCESS) return
 
     field2 = ESMF_FieldCreate(grid6tile, arraySpec, name="field2", rc=rc)
     if (rc /= ESMF_SUCCESS) return
     call ESMF_FieldFill(field2, dataFillScheme='sincos', member=2, rc=rc)
     if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(field2, farrayPtr=data2)
+    if (rc /= ESMF_SUCCESS) return
+
+    field2Read = ESMF_FieldCreate(grid6tile, arraySpec, name="field2", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(field2Read, farrayPtr=data2Read)
+    if (rc /= ESMF_SUCCESS) return
 
     field3 = ESMF_FieldCreate(grid6tile, arraySpec, name="field3", rc=rc)
     if (rc /= ESMF_SUCCESS) return
     call ESMF_FieldFill(field3, dataFillScheme='sincos', member=3, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(field3, farrayPtr=data3)
+    if (rc /= ESMF_SUCCESS) return
+
+    field3Read = ESMF_FieldCreate(grid6tile, arraySpec, name="field3", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(field3Read, farrayPtr=data3Read)
     if (rc /= ESMF_SUCCESS) return
 
     ! Create a copy of field1 that uses the same array, so we can test writing
@@ -189,10 +280,22 @@ contains
     if (rc /= ESMF_SUCCESS) return
     field1Copy = ESMF_FieldCreate(grid6tile, array1, name="field1Copy", rc=rc)
     if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(field1Copy, farrayPtr=data1Copy)
+    if (rc /= ESMF_SUCCESS) return
+
+    field1CopyRead = ESMF_FieldCreate(grid6tile, arraySpec, name="field1Copy", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(field1CopyRead, farrayPtr=data1CopyRead)
+    if (rc /= ESMF_SUCCESS) return
 
     fieldBundle = ESMF_FieldBundleCreate(name="fb", rc=rc)
     if (rc /= ESMF_SUCCESS) return
     call ESMF_FieldBundleAdd(fieldBundle, [field1, field2, field1Copy], rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    fieldBundleRead = ESMF_FieldBundleCreate(name="fbRead", rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldBundleAdd(fieldBundleRead, [field1Read, field2Read, field1CopyRead], rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
   end subroutine createFields
