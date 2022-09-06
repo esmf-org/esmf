@@ -18,7 +18,7 @@ target_link_libraries(esmx PRIVATE ESMF)
 install(TARGETS esmx)
 target_include_directories(esmx PUBLIC ${PROJECT_BINARY_DIR})
 
-# Generate 
+# Generate comp*.* files from esmxBuild.yaml
 find_package(Python 3 COMPONENTS Interpreter REQUIRED)
 execute_process(COMMAND ${Python_EXECUTABLE}
   ${CMAKE_CURRENT_LIST_DIR}/esmxGen.py --ifile ./esmxBuild.yaml --odir ${CMAKE_CURRENT_BINARY_DIR}
@@ -27,4 +27,11 @@ if(ret EQUAL "1")
   message( FATAL_ERROR "esmxGen.py failed processing esmxBuild.yaml")
 endif()
 
+# Specify driver dependency
+add_library(esmx_driver ESMX_Driver.F90)
+target_include_directories(esmx_driver PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(esmx_driver PRIVATE ESMF)
+target_link_libraries(esmx PUBLIC esmx_driver)
+
+# Include compList.txt which in turn includes component libraries
 include(${CMAKE_CURRENT_BINARY_DIR}/compList.txt)
