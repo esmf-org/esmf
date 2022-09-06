@@ -630,6 +630,8 @@ void PIO_Handler::arrayReadOneTileFile(
   // anyway?
   // - (2022-07-22) I think I should set it to NULL
   baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
+  // arrlen will be the size owned locally (0 if this DE doesn't own the current tile)
+  // (though note that this value isn't actually used by PIO)
   int arrlen = 1;
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
     int nDims;
@@ -677,6 +679,7 @@ void PIO_Handler::arrayReadOneTileFile(
 	narrDims = narrDims - 1;
       }
       for (int i=0; i<narrDims; i++){
+        // Note that arrDims[i] will be 0 if this DE doesn't own the current tile
 	arrlen *= arrDims[i];
       }
 
@@ -717,6 +720,7 @@ void PIO_Handler::arrayReadOneTileFile(
     } else {
       frame = -1;
       for (int i=0; i<narrDims; i++){
+        // Note that arrDims[i] will be 0 if this DE doesn't own the current tile
 	arrlen *= arrDims[i];
       }
 
