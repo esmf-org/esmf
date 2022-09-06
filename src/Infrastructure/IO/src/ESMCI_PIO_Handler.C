@@ -625,14 +625,19 @@ void PIO_Handler::arrayReadOneTileFile(
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
   localDE = 0;
-  // FIXME(wjs, 2022-07-21) Should this be something special (like NULL) if this DE
-  // doesn't belong to the tile of interest? Or is it okay for it to be set like this
-  // anyway?
-  // - (2022-07-22) I think I should set it to NULL
-  baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
+  int tileOfThisDe = arr_p->getDistGrid()->getTilePLocalDe(localDE, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+    return;
   // arrlen will be the size owned locally (0 if this DE doesn't own the current tile)
   // (though note that this value isn't actually used by PIO)
-  int arrlen = 1;
+  int arrlen;
+  if (tileOfThisDe == tile) {
+    baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
+    arrlen = 1;
+  } else {
+    baseAddress = NULL;
+    arrlen = 0;
+  }
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
     int nDims;
 
