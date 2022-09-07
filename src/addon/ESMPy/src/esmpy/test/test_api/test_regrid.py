@@ -632,7 +632,7 @@ class TestRegrid(TestBase):
 
         # regridding
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.CONSERVE,
-                    dst_mask_values=np.array([0]))
+                    dst_mask_values=np.atleast_1d(np.array([0])))
         dstfield = rh(srcfield, dstfield, zero_region=Region.SELECT)
 
         # validate that the masked values were not zeroed out
@@ -663,8 +663,8 @@ class TestRegrid(TestBase):
 
         # Regrid in-memory
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR,
-                    src_mask_values=np.array([0]),
-                    dst_mask_values=np.array([0]),
+                    src_mask_values=np.atleast_1d(np.array([0])),
+                    dst_mask_values=np.atleast_1d(np.array([0])),
                     unmapped_action=UnmappedAction.IGNORE)
         _ = rh(srcfield, dstfield, zero_region=Region.SELECT)
 
@@ -676,7 +676,7 @@ class TestRegrid(TestBase):
         dstfield.data[:] = -999
         filename = '_esmf_test_weights_.nc'
         _ = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR,
-                   src_mask_values=np.array([0]),
+                   src_mask_values=np.atleast_1d(np.array([0])),
                    unmapped_action=UnmappedAction.IGNORE,
                    filename=filename)
         self.assertTrue(np.all(dstfield.data == -999))
@@ -748,7 +748,7 @@ class TestRegrid(TestBase):
 
         # run the ESMF regridding
         regridSrc2Dst = esmpy.Regrid(srcfield, dstfield,
-                                    src_mask_values=np.array([0]),
+                                    src_mask_values=np.atleast_1d(np.array([0])),
                                     regrid_method=esmpy.RegridMethod.CONSERVE,
                                     unmapped_action=esmpy.UnmappedAction.ERROR,
                                     src_frac_field=srcfracfield,
@@ -887,7 +887,7 @@ class TestRegrid(TestBase):
 
         # run the ESMF regridding
         regridSrc2Dst = esmpy.Regrid(srcfield, dstfield,
-                                    src_mask_values=np.array([0]),
+                                    src_mask_values=np.atleast_1d(np.array([0])),
                                     regrid_method=esmpy.RegridMethod.CONSERVE,
                                     unmapped_action=esmpy.UnmappedAction.ERROR,
                                     src_frac_field=srcfracfield,
@@ -928,7 +928,7 @@ class TestRegrid(TestBase):
 
         # run the ESMF regridding
         regridSrc2Dst = esmpy.Regrid(srcfield, dstfield,
-                                    src_mask_values=np.array([0]),
+                                    src_mask_values=np.atleast_1d(np.array([0])),
                                     regrid_method=esmpy.RegridMethod.CONSERVE_2ND,
                                     unmapped_action=esmpy.UnmappedAction.ERROR,
                                     src_frac_field=srcfracfield,
@@ -1023,7 +1023,7 @@ class TestRegrid(TestBase):
 
         # run the ESMF regridding
         regridSrc2Dst = esmpy.Regrid(srcfield, dstfield,
-                                    src_mask_values=np.array([0]),
+                                    src_mask_values=np.atleast_1d(np.array([0])),
                                     regrid_method=esmpy.RegridMethod.CONSERVE,
                                     unmapped_action=esmpy.UnmappedAction.ERROR,
                                     src_frac_field=srcfracfield,
@@ -1116,7 +1116,7 @@ class TestRegrid(TestBase):
 
         # run the ESMF regridding
         regridSrc2Dst = esmpy.Regrid(srcfield, dstfield,
-                                    dst_mask_values=np.array([0]),
+                                    dst_mask_values=np.atleast_1d(np.array([0])),
                                     regrid_method=esmpy.RegridMethod.BILINEAR,
                                     unmapped_action=esmpy.UnmappedAction.IGNORE)
         dstfield = regridSrc2Dst(srcfield, dstfield)

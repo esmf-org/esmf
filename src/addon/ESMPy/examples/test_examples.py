@@ -11,15 +11,15 @@ from esmpy.api.constants import _ESMF_NETCDF, _ESMF_PIO
 import esmpy.api.constants as constants
 from esmpy.api.esmpymanager import Manager
 
-class TestExamples(TestBase):
-    
-    mg = Manager(debug=True)
-        
-    # '0' in the name is so it is run first
-    def test_0_examples_dryrun(self):
-        from esmpy.util.cache_data import cache_data_files
-        cache_data_files()
+# Start up esmpy
+mg = Manager(debug=True)
 
+if mg.pet_count == 1:
+    from esmpy.util.cache_data import cache_data_files
+    cache_data_files()
+
+class TestExamples(TestBase):
+        
     def test_helloworld(self):
         from . import hello_world
 

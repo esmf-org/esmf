@@ -5,25 +5,30 @@ clean:
 		rm -rf dist || :
 		find . -name "*.egg-info" -exec rm -rf {} \; || :
 		find . -name "*.pyc" -exec rm -f {} \; || :
-		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
 		find . -name "*.log" -exec rm -f {} \; || :
 		find . -name "*.vtk" -exec rm -f {} \; || :
 		find . -name "*.pytest_cache" -exec rm -rf {} \; || :
 		find . -name "*.python-version" -exec rm -f {} \; || :
 		find . -name "*__pycache__" -exec rm -rf {} \; || :
+		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
 		find . -name ".report.json" -exec rm -rf {} \; || :
 		find . -name ".test" -exec rm -rf {} \; || :
 		rm -rf src/esmpy/test/regrid_from_file/data || :
 		rm -rf examples/data || :
 
+dust:
+		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
+		find . -name ".report.json" -exec rm -rf {} \; || :
+		find . -name ".test" -exec rm -rf {} \; || :
+
 install:
 		python3 -m pip install .
 
 dryrun_examples:
-		python3 -m pytest -vs examples/exampletestdryrun.py
+		python3 examples/test_examples_dryrun.py
 	
 dryrun_regrid_from_file:
-		python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file_dryrun.py
+		python3 src/esmpy/test/regrid_from_file/test_regrid_from_file_dryrun.py
 
 dryrun: dryrun_examples dryrun_regrid_from_file
 
@@ -37,16 +42,16 @@ test_unit_parallel:
 		mpiexec -n 4 python3 -vs
 
 test_examples:
-		python3 -m pytest -vs examples/exampletest.py
+		python3 -m pytest -vs examples/test_examples.py
 
 test_examples_parallel:
-		mpiexec -n 4 python3 -m pytest -vs examples/exampletest.py
+		mpiexec -n 4 python3 -m pytest -vs examples/test_examples.py
 
 test_regrid_from_file:
-		python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file.py
+		python3 -m pytest -vs src/esmpy/test/regrid_from_file/test_regrid_from_file.py
 
 test_regrid_from_file_parallel:
-		mpiexec -n 4 python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file.py
+		mpiexec -n 4 python3 -m pytest -vs src/esmpy/test/regrid_from_file/test_regrid_from_file.py
 
 test_serial: test_unit test_examples test_regrid_from_file
 

@@ -4,7 +4,7 @@ case for regridding from a source file coordinate grid to a destination file
 coordinate grid.    Parses each line and retrieves the source and destination
 files from a remote server if they do not already exist locally.  On parallel
 computers where the compute nodes do not have internet access, this script must
-be run on the front-end machine before running run_regrid_from_file.py to do 
+be run on the front-end machine before running test_regrid_from_file.py to do 
 the regridding.
 """
 

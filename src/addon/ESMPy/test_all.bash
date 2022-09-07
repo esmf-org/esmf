@@ -7,7 +7,7 @@ echo "Testing ESMPy ${VERSION}"
 for NP in 1 4 6
 do
     REPORT="esmpy${VERSION}-cheyenne-intelmpt-petx${NP}.test"
-    COMMAND="mpiexec -n ${NP} python3 -m pytest -vs --json-report --json-report-summary > $REPORT 2>&1"00
+    COMMAND="mpiexec -n ${NP} python3 -m pytest -vs --json-report --json-report-summary > $REPORT 2>&1"
     echo ${COMMAND}
     eval "${COMMAND}"
     find . -name "*.ESMF_LogFile" -exec cat {} >> ${REPORT} \;

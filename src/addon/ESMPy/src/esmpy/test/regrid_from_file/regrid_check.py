@@ -117,9 +117,9 @@ def run_regridding(srcfield, dstfield, src_mask, dst_mask,
     src_mask_vals = None
     dst_mask_vals = None
     if src_mask:
-        src_mask_vals = np.array([0])
+        src_mask_vals = np.atleast_1d(np.array([0]))
     if dst_mask:
-        dst_mask_vals = np.array([0])
+        dst_mask_vals = np.atleast_1d(np.array([0]))
 
     regridSrc2Dst = esmpy.Regrid(srcfield, dstfield,
                                 src_mask_values=src_mask_vals,

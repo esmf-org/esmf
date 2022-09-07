@@ -26,7 +26,7 @@ from esmpy.test.regrid_from_file.read_test_cases_from_control_file import read_c
 mg = Manager(debug=True)
 
 if mg.pet_count == 1:
-    import esmpy.test.regrid_from_file.run_regrid_from_file_dryrun
+    import esmpy.test.regrid_from_file.test_regrid_from_file_dryrun
 
 # Read the test case parameters from the control file.
 print('Reading control file...')
