@@ -1,5 +1,5 @@
 [build-system]
-requires = [ "setuptools>=41", "wheel", "setuptools-git-versioning", ]
+requires = [ "setuptools>=41", "wheel", "setuptools-git-versioning"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -12,6 +12,7 @@ license = {text = "University of Illinois-NCSA"}
 dependencies = [
     "numpy",
     'importlib-metadata; python_version<"3.8"',
+    "pytest-json-report"
 ]
 dynamic = ["version"]
 
@@ -33,4 +34,5 @@ exclude = ["doc*"]
 testpaths = [
     "src/esmpy/test/test_api",
     "examples/exampletest.py", 
+    "src/esmpy/test/regrid_from_file/run_regrid_from_file.py", 
 ]

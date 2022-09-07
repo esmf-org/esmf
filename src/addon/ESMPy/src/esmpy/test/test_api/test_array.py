@@ -3,11 +3,12 @@
 unit test file
 """
 
+import pytest
+import numpy as np
+
 from esmpy import *
 from esmpy.interface.cbindings import *
 from esmpy.test.base import TestBase
-
-import numpy as np
 
 # TODO: test view casting
 # TODO: demonstrate Fortran reordering in reshape call

@@ -3,16 +3,16 @@
 grid unit test file
 """
 
-import esmpy
+import pytest
+import numpy as np
+
+import os
+import inspect
+
 from esmpy import *
 from esmpy.interface.cbindings import *
 from esmpy.test.base import TestBase
 from esmpy.api.constants import _ESMF_NETCDF
-
-import numpy as np
-import os
-import inspect
-import pytest
 
 class TestGrid(TestBase):
     
@@ -141,28 +141,28 @@ class TestGrid(TestBase):
         assert lon.size == 100
         assert lat.size == 100
 
-        grid = esmpy.Grid(np.array([lon.size, lat.size], 'int32'),
+        grid = Grid(np.array([lon.size, lat.size], 'int32'),
                          num_peri_dims=1, staggerloc=[StaggerLoc.CENTER, StaggerLoc.CORNER])
 
-        gridXCorner = grid.get_coords(0, staggerloc=esmpy.StaggerLoc.CORNER)
-        lon_par = lon[grid.lower_bounds[esmpy.StaggerLoc.CORNER][0]:grid.upper_bounds[esmpy.StaggerLoc.CORNER][0]]
+        gridXCorner = grid.get_coords(0, staggerloc=StaggerLoc.CORNER)
+        lon_par = lon[grid.lower_bounds[StaggerLoc.CORNER][0]:grid.upper_bounds[StaggerLoc.CORNER][0]]
         gridXCorner[...] = lon_par.reshape((lon_par.size, 1))
 
-        gridYCorner = grid.get_coords(1, staggerloc=esmpy.StaggerLoc.CORNER)
+        gridYCorner = grid.get_coords(1, staggerloc=StaggerLoc.CORNER)
         lat_corner = np.linspace(90, -90, lat.size + 1)
-        lat_par = lat_corner[grid.lower_bounds[esmpy.StaggerLoc.CORNER][1]:grid.upper_bounds[esmpy.StaggerLoc.CORNER][1]]
+        lat_par = lat_corner[grid.lower_bounds[StaggerLoc.CORNER][1]:grid.upper_bounds[StaggerLoc.CORNER][1]]
         gridYCorner[...] = lat_par.reshape((1, lat_par.size))
 
         offset_lon = 360. / lon.size / 2.
         lon -= offset_lon
         gridXCenter = grid.get_coords(0)
-        lon_par = lon[grid.lower_bounds[esmpy.StaggerLoc.CENTER][0]:grid.upper_bounds[esmpy.StaggerLoc.CENTER][0]]
+        lon_par = lon[grid.lower_bounds[StaggerLoc.CENTER][0]:grid.upper_bounds[StaggerLoc.CENTER][0]]
         gridXCenter[...] = lon_par.reshape((lon_par.size, 1))
 
         offset_lat = 180. / (lat.size) / 2.
         lat = np.linspace(90 - offset_lat, -90 + offset_lat, lat.size)
         gridYCenter = grid.get_coords(1)
-        lat_par = lat[grid.lower_bounds[esmpy.StaggerLoc.CENTER][1]:grid.upper_bounds[esmpy.StaggerLoc.CENTER][1]]
+        lat_par = lat[grid.lower_bounds[StaggerLoc.CENTER][1]:grid.upper_bounds[StaggerLoc.CENTER][1]]
         gridYCenter[...] = lat_par.reshape((1, lat_par.size))
 
 
@@ -283,8 +283,6 @@ class TestGrid(TestBase):
             #                           [DecompFlag.DEFAULT, 6]], dtype=np.int32)
             # deLabelList = np.array([11,12,13,14,15,16], dtype=np.int32)
 
-            esmpy.Manager(debug=True)
-
             grid = Grid(tilesize = 45, regDecompPTile = regDecompPTile,
                                      #decompFlagPTile = decompFlagPTile,
                                      #deLabelList = deLabelList,
@@ -322,7 +320,7 @@ class TestGrid(TestBase):
     def test_grid_slice_2d_corners(self):
         grid = self.make_grid_2d()
 
-        grid.add_coords(staggerloc=esmpy.StaggerLoc.CORNER)
+        grid.add_coords(staggerloc=StaggerLoc.CORNER)
         grid_row = grid.get_coords(0, staggerloc=StaggerLoc.CORNER)
         grid_col = grid.get_coords(1, staggerloc=StaggerLoc.CORNER)
 
@@ -433,6 +431,7 @@ class TestGrid(TestBase):
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_slice_grid_created_from_file_scrip(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         try:
             esmfdir = os.path.dirname(inspect.getfile(esmpy))
@@ -632,6 +631,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_gridspec1D(self):
+        import esmpy
         esmfdir = os.path.dirname(inspect.getfile(esmpy))
         grid = Grid(filename=os.path.join(esmfdir, "test/data/gridspec1Dcoords.nc"),
                     filetype=FileFormat.GRIDSPEC, add_corner_stagger=True,
@@ -641,6 +641,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         try:
             esmfdir = os.path.dirname(inspect.getfile(esmpy))
@@ -652,6 +653,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_balanced_balanced(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.BALANCED, DecompFlag.BALANCED],
                               dtype=np.int32)
@@ -665,6 +667,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_balanced_restfirst(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.BALANCED, DecompFlag.RESTFIRST],
                               dtype=np.int32)
@@ -678,6 +681,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_balanced_restlast(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.BALANCED, DecompFlag.RESTLAST],
                               dtype=np.int32)
@@ -692,6 +696,7 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_balanced_cyclic(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.BALANCED, DecompFlag.CYCLIC],
                               dtype=np.int32)
@@ -705,6 +710,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restfirst_balanced(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.BALANCED],
                               dtype=np.int32)
@@ -718,6 +724,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restfirst_restfirst(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.RESTFIRST],
                               dtype=np.int32)
@@ -731,6 +738,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restfirst_restlast(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.RESTLAST],
                               dtype=np.int32)
@@ -745,6 +753,7 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restfirst_cyclic(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.CYCLIC],
                               dtype=np.int32)
@@ -758,6 +767,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restlast_balanced(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.BALANCED],
                               dtype=np.int32)
@@ -771,6 +781,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restlast_restfirst(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.RESTFIRST],
                               dtype=np.int32)
@@ -784,6 +795,7 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restlast_restlast(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.RESTLAST],
                               dtype=np.int32)
@@ -798,6 +810,7 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restlast_cyclic(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.CYCLIC],
                               dtype=np.int32)
@@ -812,6 +825,7 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_cyclic_balanced(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.BALANCED],
                               dtype=np.int32)
@@ -826,6 +840,7 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_cyclic_restfirst(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.RESTFIRST],
                               dtype=np.int32)
@@ -840,6 +855,7 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_cyclic_restlast(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.RESTLAST],
                               dtype=np.int32)
@@ -854,6 +870,7 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_cyclic_cyclic(self):
+        import esmpy
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.CYCLIC],
                               dtype=np.int32)

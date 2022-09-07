@@ -8,7 +8,6 @@ import pytest
 import os
 import inspect
 
-import esmpy
 from esmpy import *
 from esmpy.test.base import TestBase
 from esmpy.api.constants import _ESMF_NETCDF, _ESMF_PIO

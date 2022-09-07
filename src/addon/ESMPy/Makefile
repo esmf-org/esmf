@@ -10,6 +10,8 @@ clean:
 		find . -name "*.vtk" -exec rm -f {} \; || :
 		find . -name "*.pytest_cache" -exec rm -rf {} \; || :
 		find . -name "*.python-version" -exec rm -f {} \; || :
+		find . -name "*__pycache__" -exec rm -rf {} \; || :
+		find . -name ".report.json" -exec rm -rf {} \; || :
 		rm -rf src/esmpy/test/regrid_from_file/data || :
 		rm -rf examples/data || :
 

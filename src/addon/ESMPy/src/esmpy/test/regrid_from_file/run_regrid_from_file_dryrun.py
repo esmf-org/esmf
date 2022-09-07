@@ -40,8 +40,4 @@ def cache_data_files_for_test_cases(test_cases):
 test_cases = read_control_file()
 
 # Retrieve the data files needed for the test cases from the remote server.
-try:
-    status_ok = cache_data_files_for_test_cases(test_cases)
-except:
-    print ("Cache data file error: {}\n".format(status_ok))
-    traceback.print_exc(file=sys.stdout)
+cache_data_files_for_test_cases(test_cases)

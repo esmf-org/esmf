@@ -3,11 +3,10 @@
 locstream unit test file
 """
 
-from esmpy import *
-from esmpy.interface.cbindings import *
-from esmpy.test.base import TestBase
-
 import pytest
+
+from esmpy import *
+from esmpy.test.base import TestBase
 
 class TestLocStream(TestBase):
 

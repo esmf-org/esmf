@@ -5,7 +5,6 @@ field unit test file
 import pytest
 
 from esmpy import *
-from esmpy.interface.cbindings import *
 from esmpy.test.base import TestBase
 from esmpy.util.mesh_utilities import mesh_create_50, mesh_create_50_parallel
 
@@ -72,7 +71,7 @@ class TestField(TestBase):
         del (self.field)
         assert (not hasattr(self, 'field'))
 
-    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_numpy_funcs(self):
         field = self.make_field(np.array([10, 10], dtype=np.int32))
 
@@ -99,7 +98,7 @@ class TestField(TestBase):
 
 
     @pytest.mark.skipif(mg.test_exhaustive==False, reason="only run in exhaustive mode")
-    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def _field_create_2d_grid(self):
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
@@ -149,7 +148,7 @@ class TestField(TestBase):
                 "The following combinations of parameters failed to create a proper Field: " + str(fail))
 
     @pytest.mark.skipif(mg.test_exhaustive==False, reason="only run in exhaustive mode")
-    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def _field_create_3d_grid(self):
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
@@ -201,7 +200,7 @@ class TestField(TestBase):
                 "The following combinations of parameters failed to create a proper Field: " + str(len(fail)))
 
     @pytest.mark.skipif(mg.test_exhaustive==False, reason="only run in exhaustive mode")
-    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def _field_create_2d_mesh(self):
         keywords = dict(
             meshloc=[MeshLoc.NODE, MeshLoc.ELEMENT],
@@ -277,7 +276,7 @@ class TestField(TestBase):
 
         return field
 
-    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_uniqueness(self):
         mesh = None
         if (pet_count() == 4):
@@ -301,7 +300,7 @@ class TestField(TestBase):
 
         assert (field.struct.ptr != field2.struct.ptr)
 
-    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_field_area(self):
         grid = Grid(np.array([3, 4]), staggerloc=[StaggerLoc.CENTER, StaggerLoc.CORNER],
                     coord_sys=CoordSys.SPH_DEG, num_peri_dims=1,
@@ -337,7 +336,7 @@ class TestField(TestBase):
 
         assert(np.all(field.data == field2.data))
 
-    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_field_locstream_mask(self):
         # LocStream creation and simple validation
         locstream = LocStream(5, name="Test LocStream")
@@ -390,11 +389,8 @@ class TestField(TestBase):
         field2.data[...] = 10
         self.examine_field_attributes(field2)
 
-    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_extradims_mesh(self):
-        
-        print("Pet count {}".format(pet_count()))
-        
         mesh = None
         if (pet_count() == 4):
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -412,7 +408,7 @@ class TestField(TestBase):
         field2.data[...] = 10
         self.examine_field_attributes(field2)
 
-    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_field_slice_grid(self):
         typekind = TypeKind.R8
         grid = Grid(np.array([100, 100]), coord_sys=CoordSys.CART,
@@ -452,7 +448,7 @@ class TestField(TestBase):
         assert (field3.grid.upper_bounds[0].tolist() == [2, 2])
 
     # slicing is disabled in parallel
-    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_field_slice_mesh(self):
         mesh = None
         if pet_count() > 1:
@@ -483,7 +479,7 @@ class TestField(TestBase):
         assert (field2.grid.size[0] == 5)
         assert (field3.grid.size[0] == 2)
 
-    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_field_slice_grid_extraindices(self):
         n = 10
         grid = Grid(np.array([n,n]), coord_sys=CoordSys.CART, staggerloc=StaggerLoc.CENTER)
@@ -521,7 +517,7 @@ class TestField(TestBase):
         assert (field2.grid.upper_bounds[0].tolist() == [5, 5])
         assert (field3.grid.upper_bounds[0].tolist() == [2, 2])
 
-    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def disable_est_field_slice_mesh_extraindices(self):
         mesh, nodeCoord, nodeOwner, elemType, elemConn, elemCoord = mesh_create_50()
 
@@ -543,7 +539,7 @@ class TestField(TestBase):
         assert field2.data.shape == (5, 2, 1)
         assert field3.data.shape == (2, 1, 1)
 
-    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_field_reshape(self):
         field = self.make_field(np.array([10, 10], dtype=np.int32),
                                 ndbounds=False)

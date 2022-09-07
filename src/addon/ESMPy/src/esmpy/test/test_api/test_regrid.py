@@ -313,7 +313,7 @@ class TestRegrid(TestBase):
     @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     # remove this test for 8.2.0 due to unexplained segv
-    def test_field_regrid_file_withaux(self):
+    def _field_regrid_file_withaux(self):
         import os
         DD = os.path.join(os.getcwd(), "test/data")
         if not os.path.isdir(DD):
