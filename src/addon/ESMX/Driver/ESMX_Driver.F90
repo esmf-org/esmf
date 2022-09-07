@@ -80,14 +80,74 @@ module ESMX_Driver
     character(len=240)              :: model
     type(ESMF_Info)                 :: info
     type(type_CompDef), allocatable :: CompDef(:)
-    logical                         :: inCompDef
+    logical                         :: inCompDef, isPresent
 
-    ! get the config
-    call ESMF_GridCompGet(driver, config=config, rc=rc)
+    ! see if config is present
+    call ESMF_GridCompGet(driver, configIsPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+
+    if (isPresent) then
+      ! get the config from component
+      call ESMF_GridCompGet(driver, config=config, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      ! attempt to open config from default file "esmxRun.config"
+      config = ESMF_ConfigCreate(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call ESMF_ConfigLoadFile(config, filename="esmxRun.config", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      ! set it on the component
+      call ESMF_GridCompSet(driver, config=config, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      ! also ingest ESMX_attributes
+      ff = NUOPC_FreeFormatCreate(config, label="ESMX_attributes::", &
+        relaxedflag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call NUOPC_CompAttributeIngest(driver, ff, addFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call NUOPC_FreeFormatDestroy(ff, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      ff = NUOPC_FreeFormatCreate(config, label="ALLCOMP_attributes::", &
+        relaxedflag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call NUOPC_CompAttributeIngest(driver, ff, addFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call NUOPC_FreeFormatDestroy(ff, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
 
     ! determine the generic component labels
     componentCount = ESMF_ConfigGetLen(config, label="ESMX_component_list:", &
@@ -228,49 +288,60 @@ module ESMX_Driver
 
     deallocate(compLabels)
 
-    ! read startTimeString and stopTimeString from config
-    call ESMF_ConfigGetAttribute(config, startTimeString, label="startTime:", &
-      rc=rc)
+    ! check if driver clock is set (by parent)
+    call ESMF_GridCompGet(driver, clockIsPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call ESMF_ConfigGetAttribute(config, stopTimeString, label="stopTime:", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
+      file=__FILE__)) &
       return  ! bail out
 
-    ! set the driver clock startTime/stopTime
-    call ESMF_TimeSet(startTime, timeString=startTimeString, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call ESMF_TimeSet(stopTime,  timeString=stopTimeString,  rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    if (.not.isPresent) then
+      ! set clock according to config
 
-    ! set the driver clock default timeStep = stopTime - startTime
-    ! use with runSequence @*,
-    ! or overwritten with explicit timeStep in runSequence
-    timeStep = stopTime - startTime
+      ! read startTimeString and stopTimeString from config
+      call ESMF_ConfigGetAttribute(config, startTimeString, label="startTime:", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call ESMF_ConfigGetAttribute(config, stopTimeString, label="stopTime:", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
 
-    internalClock = ESMF_ClockCreate(name="Application Clock", &
-      timeStep=timeStep, startTime=startTime, stopTime=stopTime, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      ! set the driver clock startTime/stopTime
+      call ESMF_TimeSet(startTime, timeString=startTimeString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call ESMF_TimeSet(stopTime,  timeString=stopTimeString,  rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
 
-    call ESMF_GridCompSet(driver, clock=internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      ! set the driver clock default timeStep = stopTime - startTime
+      ! use with runSequence @*,
+      ! or overwritten with explicit timeStep in runSequence
+      timeStep = stopTime - startTime
+
+      internalClock = ESMF_ClockCreate(name="Application Clock", &
+        timeStep=timeStep, startTime=startTime, stopTime=stopTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+
+      call ESMF_GridCompSet(driver, clock=internalClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
 
     rc = ESMF_SUCCESS
 
