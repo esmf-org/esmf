@@ -12,41 +12,45 @@ clean:
 		find . -name "*.python-version" -exec rm -f {} \; || :
 		find . -name "*__pycache__" -exec rm -rf {} \; || :
 		find . -name ".report.json" -exec rm -rf {} \; || :
+		find . -name ".test" -exec rm -rf {} \; || :
 		rm -rf src/esmpy/test/regrid_from_file/data || :
 		rm -rf examples/data || :
 
 install:
 		python3 -m pip install .
 
+dryrun_examples:
+		python3 -m pytest -vs examples/exampletestdryrun.py
+	
+dryrun_regrid_from_file:
+		python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file_dryrun.py
+
+dryrun: dryrun_examples dryrun_regrid_from_file
+
+test:
+		bash test_all.bash
+
 test_unit:
-		python3 -m pytest -m="not parallel"
+		python3 -m pytest -vs
 
 test_unit_parallel:
-		mpirun -n 4 python3 -m pytest -m="not serial"
+		mpiexec -n 4 python3 -vs
 
 test_examples:
 		python3 -m pytest -vs examples/exampletest.py
 
 test_examples_parallel:
-		mpirun -n 4 python3 -m pytest -vs examples/exampletest.py
+		mpiexec -n 4 python3 -m pytest -vs examples/exampletest.py
 
-test_examples_dryrun:
-		python3 -m pytest -vs examples/exampletestdryrun.py
-	
 test_regrid_from_file:
 		python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file.py
 
 test_regrid_from_file_parallel:
-		mpirun -n 4 python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file.py
-
-test_regrid_from_file_dryrun:
-		python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file_dryrun.py
+		mpiexec -n 4 python3 -m pytest -vs src/esmpy/test/regrid_from_file/run_regrid_from_file.py
 
 test_serial: test_unit test_examples test_regrid_from_file
 
 test_parallel: test_unit_parallel test_examples_parallel test_regrid_from_file_parallel
-
-test_dryrun: test_examples_dryrun test_regrid_from_file_dryrun
 
 test_all: test_unit test_unit_parallel test_examples test_examples_parallel test_regrid_from_file test_regrid_from_file_parallel
 
