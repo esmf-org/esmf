@@ -4,9 +4,9 @@ ESMX is the **E**arth **S**ystem **M**odel e**X**ecutable layer.
 
 The ESMX layer is built on top of ESMF and NUOPC. ESMX user interfaces are typically implemented through configuration files.
 
-The idea is to make it as simple as possible for a user to build, run, and test NUOPC based systems. The approach is supposed to be the same whether applied to a single component, or a fully coupled system of NUOPC-compliant components.
+The idea is to make it as simple as possible for a user to build, run, and test NUOPC based systems. The approach implemented by ESMX is the same whether applied to a single component, or a fully coupled system of NUOPC-compliant components.
 
-ESMX tries to unify, provide, and maintain those parts of NUOPC-based modeling systems that are common across most such implementations. This includes the top level application and driver code, parts of the build infrastructure, and tools to manage run configurations.
+ESMX unifies, provides, and maintains those parts of NUOPC-based modeling systems that are common across most such implementations. This includes the top level application and driver code, parts of the build infrastructure, and tools to manage run configurations.
 
 The objectives of ESMX are:
  - **Simplification** of standing up new NUOPC-based systems.
@@ -40,20 +40,20 @@ As shown above, building `esmx` has a dependency on file `esmxBuild.yaml`. This 
     components:
 
       tawas:
-        config:       TaWaS/tawas.cmake
+        cmake_config: TaWaS/tawas.cmake
         fort_module:  tawas
 
       lumo:
-        config:       Lumo/lumo.cmake
+        cmake_config: Lumo/lumo.cmake
 
 In this example two components are built into `esmx` explicitly. (Read about dynamically loading components from shared objects at run-time later.)
 
 Each component is given a name, here `tawas` and `lumo`. Components will be referred to by this *component-name* in the run-time configuration (esmxRun.config) discussed below.
 
-Each component must define the `config` key, specifying a file that can be included by the CMake based `esmx` build. This file must specify three CMake elements:
+Each component must define the `cmake_config` key, specifying a file that can be included by the CMake based `esmx` build. This file must specify three CMake elements:
 - `add_library(component-name ... )`
 - `set_target_properties(component-name ... )`
-- `target_link_libraries(esmx PRIVATE component-name)`
+- `target_link_libraries(esmx_driver PUBLIC component-name)`
 
 Here *component-name* is the name under which the component was defined in the `esmxBuild.yaml` file, here `tawas` or `lumo`. 
 
