@@ -18,7 +18,7 @@ The objectives of ESMX are:
 
 One of the main features provided by ESMX is the *unified driver executable*. A good starting point to explore this feature is the [ESMX_AtmOcnProto](https://github.com/esmf-org/nuopc-app-prototypes/tree/develop/ESMX_AtmOcnProto) under the NUOPC prototype repository.
 
-The default name of the unified driver executable built by ESMX is lower case `esmx`. This will be used for the remainder of this section to refer to the unfied driver executable.
+The name of the unified driver executable built by ESMX is lower case `esmx`. This will be used for the remainder of this section to refer to the unfied driver executable.
 
 ### Project integration
 
@@ -111,4 +111,42 @@ Finally the `startTime` and `stopTime` fields set the start and stop time of the
 There are two options recognized when specifying the value of the `XXX_model` field:
 - First, if the value specified is recognized as a *component-name* provided by any of the components built into `esmx` during build-time, as specified by `esmxBuild.yaml`, the respective component is accessed via its Fortran module.
 - Second, if the value does not match a build-time dependency, it is assumed to correspond to a shared object. In that case the attempt is made to load the specified shared object at run-time, and to associate with the generic component label.
+
+## The Unfied ESMX_Driver
+
+The ESMX layer provides access to the `ESMX_Driver` via the public NUOPC Driver API. This means that `ESMX_Driver` can be plugged into a larger NUOPC application as a standard NUOPC component, or alternatively be accessed through the [External NUOPC Interface](https://earthsystemmodeling.org/docs/nightly/develop/NUOPC_refdoc/node3.html#SECTION00038000000000000000).
+A good starting point to explore this feature is the [ESMX_ExternalDriverAPIProto](https://github.com/esmf-org/nuopc-app-prototypes/tree/develop/ESMX_ExternalDriverAPIProto) under the NUOPC prototype repository.
+
+### Project integration
+
+The typical situation where `ESMX_Driver` comes into play is where a user application needs to access a NUOPC based system that uses the unified ESMX driver. Assuming the user application uses CMake, integration of ESMX is straight forward. All that is required is `add_subdirectory()` in the application's `CMakeLists.txt` file to add the `${ESMF_ESMXDIR}/Driver` directory, and make the application dependent on target `esmx_driver`. An example for a very simple application is shown:
+
+    cmake_minimum_required(VERSION 3.5.2)
+    enable_language(Fortran)
+
+    add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)
+
+    # Specific project settings
+    project(ExternalDriverAPIProto VERSION 0.1.0)
+    add_executable(externalApp externalApp.F90)
+    install(TARGETS externalApp)
+    target_include_directories(externalApp PUBLIC ${PROJECT_BINARY_DIR})
+    target_link_libraries(externalApp PUBLIC esmx_driver)
+
+The applcation can then be built as typically via cmake commands, only requiring that the `ESMF_ESMXDIR` variable is passed in. It can be convenient to wrap the cmake commands into a GNU Makefile, accessing the `ESMF_ESMXDIR` variable through the `ESMFMKFILE` mechanism.
+
+    include $(ESMFMKFILE)
+
+    build/externalApp: externalApp.F90 esmxBuild.yaml
+	    cmake -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
+	    cmake --build ./build
+
+### esmxBuild.yaml and esmxRun.config
+
+The `esmx_driver` target defined by the `add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)` has a build-time dependency on the `esmxBuild.yaml` file already discussed under the [unfied driver executable section](#esmxbuildyaml). The identical file can be used when working on the `ESMX_Driver` level.
+
+The run-time configuration needed by `ESMX_Driver` can either be supplied by the user application, or alternatively default to `esmxRun.config`. The following rules apply:
+
+
+
 
