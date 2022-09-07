@@ -10,7 +10,8 @@ import inspect
 
 import esmpy
 from esmpy import *
-from esmpy.test.base import TestBase, attr, SkipTest
+from esmpy.test.base import TestBase
+from esmpy.api.constants import _ESMF_NETCDF, _ESMF_PIO
 from esmpy.util.mesh_utilities import *
 
 class TestMesh(TestBase):
@@ -47,17 +48,11 @@ class TestMesh(TestBase):
         # this call fails if nodes and elements have not been added first
         # mesh.free_memory()
 
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_5(self):
         elemCoord = None
         parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        if parallel:
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_5_parallel()
         else:
@@ -66,17 +61,11 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
 
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_10(self):
         elemCoord = None
         parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        if parallel:
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_10_parallel()
         else:
@@ -85,17 +74,11 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
 
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_50(self):
         elemCoord = None
         parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        if parallel:
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
@@ -104,22 +87,16 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner, elemCoord=elemCoord)
 
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_50_moab(self):
-        
         # set this mesh to be created with the MOAB backend
         mg = Manager()
         mg.set_moab()
         
         elemCoord = None
         parallel = False
-        if pet_count() > 1:
-            parallel = True
 
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        if parallel:
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
@@ -135,16 +112,10 @@ class TestMesh(TestBase):
         
         assert (mg.moab == False)
 
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_50_ngons(self):
         parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        if parallel:
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_ngons_parallel()
         else:
@@ -153,17 +124,11 @@ class TestMesh(TestBase):
 
         self.check_mesh(mesh, nodeCoord, nodeOwner)
 
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_50_mask_area(self):
         elemCoord = None
         parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        if parallel:
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask, elemArea = \
                 mesh_create_50_parallel(domask=True, doarea=True)
         else:
@@ -176,32 +141,23 @@ class TestMesh(TestBase):
 
         self.assertNumpyAll(mesh.area, elemArea)
 
+    @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
+    @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_mesh_create_from_file_scrip(self):
-        try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            mesh_from_file = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-pentagons.nc"),
+        esmfdir = os.path.dirname(inspect.getfile(esmpy))
+        mesh_from_file = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-pentagons.nc"),
                                   filetype=FileFormat.SCRIP)
-        except:
-            raise NameError('mesh_create_from_file_scrip failed!')
 
+    @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
+    @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_mesh_create_from_file_esmfmesh(self):
-        try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            mesh_from_file = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-esmf.nc"),
+        esmfdir = os.path.dirname(inspect.getfile(esmpy))
+        mesh_from_file = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-esmf.nc"),
                                   filetype=FileFormat.ESMFMESH)
-        except:
-            raise NameError('mesh_create_from_file_scrip failed!')
 
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_copy(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        if parallel:
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_ngons_parallel()
         else:
@@ -214,21 +170,9 @@ class TestMesh(TestBase):
         self.check_mesh(mesh2, nodeCoord, nodeOwner)
 
     # slicing is disabled in parallel
-    @pytest.mark.serial
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_mesh_slicing(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        if parallel:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
-                mesh_create_5_pentahexa_parallel()
-        else:
-            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+        mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_5_pentahexa()
 
         mesh2 = mesh[0:5]
@@ -250,15 +194,14 @@ class TestMesh(TestBase):
         assert mesh3.size == [2, None]
         assert mesh3.size_owned == [2, None]
 
-    @pytest.mark.serial
+    @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
+    @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_slice_mesh_created_from_file_scrip(self):
-        try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-pentagons.nc"),
-                        filetype=FileFormat.SCRIP,
-                        convert_to_dual=True)
-        except:
-            raise NameError('mesh_create_from_file_scrip failed!')
+        esmfdir = os.path.dirname(inspect.getfile(esmpy))
+        mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-pentagons.nc"),
+                    filetype=FileFormat.SCRIP,
+                    convert_to_dual=True)
 
         mesh2 = mesh[0:5]
 
@@ -273,14 +216,13 @@ class TestMesh(TestBase):
         assert mesh2.size == [5, None]
         assert mesh2.size_owned == [5, None]
 
-    @pytest.mark.serial
+    @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
+    @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_slice_mesh_created_from_file_esmfmesh(self):
-        try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-esmf.nc"),
-                                  filetype=FileFormat.ESMFMESH)
-        except:
-            raise NameError('mesh_create_from_file_esmfmesh failed!')
+        esmfdir = os.path.dirname(inspect.getfile(esmpy))
+        mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-esmf.nc"),
+                              filetype=FileFormat.ESMFMESH)
 
         mesh2 = mesh[0:5]
 
@@ -295,17 +237,16 @@ class TestMesh(TestBase):
         assert mesh2.size_owned == [5, None]
 
 
-    @pytest.mark.serial
     @pytest.mark.xfail
+    @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
+    @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     #TODO: remove expected failure once we have a smaller data file with mesh element coordinates to use
     # TODO: have to define slicing for mesh element coordinates as well..
     def test_slice_mesh_created_from_file_elem_coords(self):
-        try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne30np4-t2.nc"),
-                        filetype=FileFormat.SCRIP)
-        except:
-            raise NameError('mesh_create_from_file_elem_coords failed!')
+        esmfdir = os.path.dirname(inspect.getfile(esmpy))
+        mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne30np4-t2.nc"),
+                    filetype=FileFormat.SCRIP)
 
         mesh2 = mesh[0:5]
 

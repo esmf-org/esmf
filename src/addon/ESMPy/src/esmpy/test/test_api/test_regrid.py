@@ -7,13 +7,17 @@ import pytest
 import os
 
 from esmpy import *
-from esmpy.test.base import TestBase, attr, SkipTest
+from esmpy.test.base import TestBase
+from esmpy.api.constants import _ESMF_NETCDF, _ESMF_PIO
 from esmpy.util.field_utilities import compare_fields
 from esmpy.util.grid_utilities import *
 from esmpy.util.mesh_utilities import *
 
 
 class TestRegrid(TestBase):
+
+    mg = Manager(debug=True)
+    mg.test_exhaustive = False
 
     def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
         # This is for documentation. Do not modify.
@@ -81,7 +85,8 @@ class TestRegrid(TestBase):
                     line_type=LineType.CART, factors=False)
         _ = rh(srcfield, dstfield)
 
-    @pytest.mark.serial
+    @pytest.mark.skipif(constants._ESMF_USE_INMEM_FACTORS, reason="compiler does not support in-memory weights")
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_field_regrid_factor_retrieval(self):
         # Test retrieving factors from a route handle.
 
@@ -132,17 +137,11 @@ class TestRegrid(TestBase):
 
             keywords = dict(deep_copy=[False, True], as_dict=[False, True])
             for k in self.iter_product_keywords(keywords):
-                try:
-                    rh = Regrid(srcfield, dstfield,
-                                regrid_method=RegridMethod.BILINEAR,
-                                line_type=LineType.CART, factors=True,
-                                create_rh=False,
-                                unmapped_action=UnmappedAction.IGNORE)
-                except RuntimeError:
-                    if constants._ESMF_USE_INMEM_FACTORS:
-                        raise
-                    else:
-                        raise SkipTest("compiler does not support in-memory weights")
+                rh = Regrid(srcfield, dstfield,
+                            regrid_method=RegridMethod.BILINEAR,
+                            line_type=LineType.CART, factors=True,
+                            create_rh=False,
+                            unmapped_action=UnmappedAction.IGNORE)
                 _ = rh(srcfield, dstfield)
 
                 fl, fil, fdict = [None] * 3  # Reset at each loop
@@ -184,7 +183,8 @@ class TestRegrid(TestBase):
 
                 rh.destroy()
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
+    @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_field_regrid_file1(self):
         mgr = Manager()
 
@@ -238,7 +238,8 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
+    @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_field_regrid_file2(self):
         mgr = Manager()
         filename = 'esmpy_test_field_regrid_file2.nc'
@@ -309,9 +310,10 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
+    @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     # remove this test for 8.2.0 due to unexplained segv
-    def tet_field_regrid_file_withaux(self):
+    def test_field_regrid_file_withaux(self):
         import os
         DD = os.path.join(os.getcwd(), "test/data")
         if not os.path.isdir(DD):
@@ -374,7 +376,8 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
+    @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_field_regrid_file3(self):
         mgr = Manager()
         filename = 'esmpy_test_field_from_file.nc'
@@ -468,8 +471,6 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
-
-    @pytest.mark.parallel
     def test_field_regrid_file4(self):
         mgr = Manager()
         filename = 'routehandlefile.nc'
@@ -564,17 +565,10 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_regrid_gridmesh(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
         mesh = None
-        if parallel:
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
@@ -608,18 +602,10 @@ class TestRegrid(TestBase):
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.CONSERVE)
         dstfield = rh(srcfield, dstfield)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_regrid_zeroregion(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
         mesh = None
-        if parallel:
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
@@ -655,7 +641,8 @@ class TestRegrid(TestBase):
                 if dstfield.grid.mask[StaggerLoc.CENTER][i, j] == 0:
                     assert(dstfield[i, j] == 0)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
+    @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_field_regrid_zeroregion_select_ndbounds(self):
         # Test zero region select during a sparse matrix multiplication
         # having undistributed dimensions.
@@ -707,18 +694,10 @@ class TestRegrid(TestBase):
             if os.path.exists(filename):
                 os.remove(filename)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_regrid_area(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
         mesh = None
-        if parallel:
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
@@ -749,16 +728,7 @@ class TestRegrid(TestBase):
             if (dstarea.data[i] != 0.25):
                 assert (dstarea.data[i] == 0.125)
 
-    @pytest.mark.parallel
     def test_field_regrid_periodic(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
         # create a grid
         srcgrid = grid_create_from_bounds_periodic(60, 30, corners=True, domask=True)
         dstgrid = grid_create_from_bounds_periodic(55, 28, corners=True)
@@ -799,7 +769,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0016447124122954575)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
     def test_grid_grid_3d_bilinear_cartesian(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -829,7 +798,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.00215601743167)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
     def test_grid_grid_3d_bilinear_spherical(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -859,7 +827,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.00061587737764545617)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
     def test_grid_grid_regrid_csrv_mask_3D(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -900,7 +867,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0021560174316746865)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
     def test_grid_grid_regrid_csrv_mask(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -942,7 +908,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
     def test_grid_grid_regrid_csrv_2nd_mask(self):
         # RO: This test creates the same Grid on every processor, it could be improved
 
@@ -984,7 +949,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0020296891000258252)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
     def test_grid_grid_regrid_srcmask_types(self):
         # NOTE: this tests an old issue where the items of a grid were not properly set when
         # the grid coord_typekind differed from the field typekind.
@@ -1030,18 +994,10 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_grid_mesh_regrid_csrv_mask(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        # create a Mesh
-        if parallel:
+        mesh = None
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn, elemMask, elemArea = \
                 mesh_create_50_parallel(domask=True, doarea=True)
         else:
@@ -1088,18 +1044,10 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.038806630051265847)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_grid_mesh_regrid_csrv(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        # create a Mesh
-        if parallel:
+        mesh = None
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
@@ -1144,21 +1092,13 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037733241800767432)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_grid_mesh_regrid_mask(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        # create a grid
+       # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True, domask=True)
 
-        # create a Mesh
-        if parallel:
+        mesh = None
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
@@ -1189,21 +1129,13 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_grid_mesh_regrid(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        # create a grid
+       # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
 
-        # create a Mesh
-        if parallel:
+        mesh = None
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
@@ -1233,21 +1165,13 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_regrid_extrapolation(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
         # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
 
-        # create a Mesh
-        if parallel:
+        mesh = None
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
@@ -1280,21 +1204,13 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_regrid_extrapolation_creepfill(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
         # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
 
-        # create a Mesh
-        if parallel:
+        mesh = None
+        if pet_count == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_parallel()
         else:
@@ -1325,18 +1241,11 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_mesh_regrid(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        # create two unique Mesh objects
-        if parallel:
+        srcmesh = None
+        dstmesh = None
+        if pet_count() == 4:
             srcmesh, nodeCoordSrc, nodeOwnerSrc, elemTypeSrc, elemConnSrc = \
                 mesh_create_50_parallel()
             dstmesh, nodeCoordDst, nodeOwnerDst, elemTypeDst, elemConnDst = \
@@ -1385,18 +1294,10 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037109375)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def est_grid_mesh_pentatri_regrid_csrv(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        # create a Mesh
-        if parallel:
+        mesh = None
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_ngons_parallel()
         else:
@@ -1444,11 +1345,8 @@ class TestRegrid(TestBase):
         assert (meanrel < 10E-2)
         assert (csrvrel < 10E-14)
 
-    # TODO: this test is disable, I don't remember why
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def est_grid_mesh_pentatri_regrid_csrv_simple(self):
-        if esmpy.pet_count() > 1:
-            raise NameError('This test can only be run in serial!')
-
         # create a Mesh
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
             mesh_create_4_ngons()
@@ -1494,18 +1392,10 @@ class TestRegrid(TestBase):
         assert (meanrel < 10E-2)
         assert (csrvrel < 10E-14)
 
-    @pytest.mark.parallel
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_grid_mesh_pentatri_regrid_bilinear(self):
-        parallel = False
-        if pet_count() > 1:
-            parallel = True
-
-        if parallel:
-            if constants._ESMF_MPIRUN_NP != 4:
-                raise SkipTest('This test must be run with 4 processors.')
-
-        # create a Mesh
-        if parallel:
+        mesh = None
+        if pet_count() == 4:
             mesh, nodeCoord, nodeOwner, elemType, elemConn = \
                 mesh_create_50_ngons_parallel()
         else:

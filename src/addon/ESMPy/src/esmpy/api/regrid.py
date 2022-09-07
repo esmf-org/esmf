@@ -143,11 +143,6 @@ class Regrid(object):
 
         # Write weights to file if requested.
         if not isinstance(filename, type(None)):
-            if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
-                msg = "Regrid(filename) requires PIO and does not work if ESMF has " \
-                      "not been built with MPI support"
-                raise ImportError(msg)
-
             self._routehandle = ESMP_FieldRegridStoreFile(
                 srcfield,
                 dstfield,

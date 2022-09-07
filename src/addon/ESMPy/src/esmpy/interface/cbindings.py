@@ -9,7 +9,7 @@ import numpy as np
 import sys
 
 import esmpy.api.constants as constants
-from esmpy.util.decorators import deprecated, netcdf, beta
+from esmpy.util.decorators import *
 from esmpy.interface.loadESMF import _ESMF
 
 
@@ -1209,6 +1209,7 @@ _ESMF.ESMC_MeshCreateFromFile.argtypes = [Py3Char, ct.c_int,
                                           OptionalNamedConstant,
                                           Py3Char]
 
+@pio
 @netcdf
 def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
                             convertToDual=None, addUserArea=None,
@@ -1942,6 +1943,7 @@ _ESMF.ESMC_FieldRead.argtypes = [ct.c_void_p,
                                  Py3Char,
                                  ct.c_uint,
                                  ct.c_uint]
+@pio
 @netcdf
 def ESMP_FieldRead(field, filename, variablename, timeslice, iofmt=1):
     #TODO: C doc says it defaults to NETCDF(1), but actually defaults to BIN(0)
@@ -2160,6 +2162,8 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             OptionalBool,
                                             OptionalField,
                                             OptionalField]
+@pio
+@netcdf
 def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                           srcMaskValues=None, dstMaskValues=None,
                           regridmethod=None,

@@ -8,7 +8,7 @@ import pytest
 
 from esmpy import *
 from esmpy.interface.cbindings import *
-from esmpy.test.base import TestBase, attr
+from esmpy.test.base import TestBase
 
 import numpy as np
 

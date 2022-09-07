@@ -5,11 +5,13 @@ locstream unit test file
 
 from esmpy import *
 from esmpy.interface.cbindings import *
-from esmpy.test.base import TestBase, attr
+from esmpy.test.base import TestBase
 
 import pytest
 
 class TestLocStream(TestBase):
+
+    mg = Manager(debug=True)
 
     def test_create(self):
         # LocStream creation and simple validation
@@ -52,7 +54,7 @@ class TestLocStream(TestBase):
         assert np.all(l2["ESMF:X"] == [0, 1, 2, 3, 4])
 
 
-    @pytest.mark.serial
+    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_slice(self):
         locstream = LocStream(5, name="Test LocStream")
 

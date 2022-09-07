@@ -4,12 +4,11 @@ vm unit test file
 
 from esmpy import *
 from esmpy.interface.cbindings import *
-from esmpy.test.base import TestBase, attr
+from esmpy.test.base import TestBase
 
 import pytest
 
 class TestVM(TestBase):
-    @pytest.mark.parallel
     def test_vm_broadcast(self):
         mg = Manager()
 
@@ -29,7 +28,6 @@ class TestVM(TestBase):
 
         mg.barrier()
 
-    @pytest.mark.parallel
     def test_vm_reduce(self):
         send = np.ones(4, dtype=np.float64)
         recv = np.zeros(4, dtype=np.float64)

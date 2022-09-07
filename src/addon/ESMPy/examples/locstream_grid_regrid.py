@@ -14,7 +14,6 @@ import numpy
 
 import esmpy.util.helpers as helpers
 import esmpy.api.constants as constants
-from esmpy.test.base import TestBase, attr, SkipTest
 
 # This call enables debug logging
 esmpy.Manager(debug=True)
@@ -28,10 +27,7 @@ domask=True
 if esmpy.pet_count() == 1:
     locstream = create_locstream_spherical_16(coord_sys=coord_sys, domask=domask)
 else:
-    if constants._ESMF_MPIRUN_NP != 4:
-        raise SkipTest('processor count must be 4 or 1 for this example')
-    else:
-        locstream = create_locstream_spherical_16_parallel(coord_sys=coord_sys, domask=domask)
+    locstream = create_locstream_spherical_16_parallel(coord_sys=coord_sys, domask=domask)
 
 # create a field
 srcfield = esmpy.Field(locstream, name='srcfield')

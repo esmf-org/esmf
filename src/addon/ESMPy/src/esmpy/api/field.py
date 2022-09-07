@@ -385,10 +385,6 @@ class Field(object):
         :param int timeslice: The number of timeslices to read.
         """
 
-        import esmpy.api.constants as constants
-        if constants._ESMF_COMM == constants._ESMF_COMM_MPIUNI:
-            raise ImportError("Field.Read() requires PIO and does not work if ESMF has not been built with MPI support")
-
         assert (type(filename) is str)
         assert (type(variable) is str)
 

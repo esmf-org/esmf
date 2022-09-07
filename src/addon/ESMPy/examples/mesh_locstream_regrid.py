@@ -5,7 +5,6 @@ import numpy
 
 import esmpy.util.helpers as helpers
 import esmpy.api.constants as constants
-from esmpy.test.base import TestBase, attr, SkipTest
 
 # This call enables debug logging
 # esmpy.Manager(debug=True)
@@ -16,11 +15,8 @@ if esmpy.pet_count() == 1:
     mesh, _, _, _, _, _ = mesh_create_5()
     locstream = create_locstream_16()
 else:
-    if constants._ESMF_MPIRUN_NP != 4:
-        raise SkipTest('processor count must be 4 or 1 for this example')
-    else:
-        mesh, _, _, _, _ = mesh_create_5_parallel()
-        locstream = create_locstream_16_parallel()
+    mesh, _, _, _, _ = mesh_create_5_parallel()
+    locstream = create_locstream_16_parallel()
 
 # create a field
 srcfield = esmpy.Field(mesh, name='srcfield')#, meshloc=esmpy.MeshLoc.ELEMENT)

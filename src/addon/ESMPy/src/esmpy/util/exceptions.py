@@ -18,6 +18,10 @@ class NetCDFMissing(ESMPyException):
     """ESMF was not built with the NetCDF package."""
     pass
 
+class PIOMissing(ESMPyException):
+    """ESMF was not built with PIO support."""
+    pass
+
 class MethodNotImplemented(ESMPyException):
     """Raised when an unimplemented method is called."""
     pass

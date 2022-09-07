@@ -6,7 +6,7 @@ examples dryrun test file
 
 import pytest
 
-from esmpy.test.base import TestBase, attr
+from esmpy.test.base import TestBase
 
 class TestExamplesDryrun(TestBase):
 

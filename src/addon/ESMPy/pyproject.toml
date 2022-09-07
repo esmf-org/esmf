@@ -25,14 +25,12 @@ starting_version = "8.4.0" # this is a backup for pip <= 22.0 where git-versioni
 [tool.dynamic]
 version = "placeholder" # this is a placeholder for the version pulled with git-versioning
 
-
 [tool.setuptools.packages.find]
 where = ["src"]
-exclude = ["doc*", "examples*", "test*"]
+exclude = ["doc*"]
 
 [tool.pytest.ini_options]
-markers = [
-    "dryrun: marks a function that will only download test data files (deselect with '-m \"not parallel\"')",
-    "parallel: marks a test which requires mpi (deselect with '-m \"not parallel\"')",
-    "serial: marks a test which should be run on one core (deselect with '-m \"not serial\"')"
+testpaths = [
+    "src/esmpy/test/test_api",
+    "examples/exampletest.py", 
 ]

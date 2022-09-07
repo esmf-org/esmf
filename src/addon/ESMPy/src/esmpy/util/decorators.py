@@ -9,8 +9,8 @@ decorators
 import warnings
 import functools
 
-from esmpy.api.constants import LogKind, _ESMF_NETCDF
-from esmpy.util.exceptions import NetCDFMissing
+from esmpy.api.constants import LogKind, _ESMF_NETCDF, _ESMF_PIO
+from esmpy.util.exceptions import NetCDFMissing, PIOMissing
 
 def beta(func):
     '''This is a decorator that can be used to mark functions
@@ -71,5 +71,33 @@ def netcdf(func):
             return func(*args, **kwargs)
         else:
             raise NetCDFMissing("This function requires ESMF to have been built with NetCDF.")
+        
+    return new_func
+
+def pio(func):
+    '''This is a decorator that can be used to error out of functions
+    if PIO is not available. (e.g. if ESMF was built using ESMF_COMM=mpiuni).'''
+
+    @functools.wraps(func)
+    def new_func(*args, **kwargs):
+        from esmpy.api.constants import _ESMF_PIO
+        
+        if _ESMF_PIO:
+            return func(*args, **kwargs)
+        else:
+            raise PIOMissing("This function requires ESMF to have been built with PIO.")
+        
+    return new_func
+
+def PETx4(func):
+    '''This is a decorator that can be used to error out of functions
+    if execution does not have 4 cores available.'''
+
+    @functools.wraps(func)
+    def new_func(*args, **kwargs):
+        if esmpy.pet_count() == 4:
+            return func(*args, **kwargs)
+        else:
+            raise PETx4NotSatisfied("This function requires 4 core execution.")
         
     return new_func

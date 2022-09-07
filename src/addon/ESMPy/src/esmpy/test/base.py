@@ -1,14 +1,23 @@
 import unittest
 import numpy as np
-import esmpy
 from esmpy.util.itester import iter_product_keywords
-
-from unittest import SkipTest
 
 class TestBase(unittest.TestCase):
 
+    # mg = None
+
     def __init__(self, *args, **kwds):
         super(TestBase, self).__init__(*args, **kwds)
+
+    # @classmethod
+    # def setUpClass(cls):
+    #     import esmpy
+    #     cls.mg = esmpy.Manager(debug = True)
+    #     cls.mg.test_exhaustive = False
+    # 
+    # @classmethod
+    # def tearDownClass(cls):
+    #     del cls.mg
 
     def assertNumpyAll(self, arr1, arr2, check_fill_value_dtype=True, check_arr_dtype=True):
         """
@@ -97,20 +106,3 @@ class TestBase(unittest.TestCase):
     @staticmethod
     def iter_product_keywords(keywords, as_namedtuple=True):
         return iter_product_keywords(keywords, as_namedtuple=as_namedtuple)
-
-
-def attr(*args, **kwargs):
-    """
-    Decorator that adds attributes to classes or functions for use with the Attribute (-a) plugin.
-
-    http://nose.readthedocs.org/en/latest/plugins/attrib.html
-    """
-
-    def wrap_ob(ob):
-        for name in args:
-            setattr(ob, name, True)
-        for name, value in kwargs.items():
-            setattr(ob, name, value)
-        return ob
-
-    return wrap_ob
