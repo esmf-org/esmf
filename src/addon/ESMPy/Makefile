@@ -11,15 +11,15 @@ clean:
 		find . -name "*.python-version" -exec rm -f {} \; || :
 		find . -name "*__pycache__" -exec rm -rf {} \; || :
 		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
-		find . -name ".report.json" -exec rm -rf {} \; || :
-		find . -name ".test" -exec rm -rf {} \; || :
+		find . -name "*.report.json" -exec rm -rf {} \; || :
+		find . -name "*.test" -exec rm -rf {} \; || :
 		rm -rf src/esmpy/test/regrid_from_file/data || :
 		rm -rf examples/data || :
 
 dust:
 		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
-		find . -name ".report.json" -exec rm -rf {} \; || :
-		find . -name ".test" -exec rm -rf {} \; || :
+		find . -name "*.report.json" -exec rm -rf {} \; || :
+		find . -name "*.test" -exec rm -rf {} \; || :
 
 install:
 		python3 -m pip install .
