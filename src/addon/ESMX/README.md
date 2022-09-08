@@ -104,7 +104,7 @@ Fields starting with `ESMX_` are defined by the ESMX unified driver executable. 
 
 Each generic component label must be associated with an actual component model through the `XXX_model` field, where `XXX` is replaced by the actual generic component label, e.g. `ATM`, `OCN`, etc. The association is made by specifying the *component-name* used in the `esmxBuild.yaml` file discussed earlier. The options in the example are `tawas` and `lumo`.
 
-Finally the `startTime` and `stopTime` fields set the start and stop time of the run, respectively. The `runSeq` field defines the run sequence.
+Finally the `startTime` and `stopTime` fields set the start and stop time of the run, respectively. The `runSeq` field defines the run sequence. The *default* time step of the outer run sequence loop, i.e. if using the `@*` syntax, is set to `stopTime - startTime`.
 
 ### Dynamically loading components from shared objects at run-time
 
@@ -146,7 +146,9 @@ The applcation can then be built as typically via cmake commands, only requiring
 The `esmx_driver` target defined by the `add_subdirectory(${ESMF_ESMXDIR}/Driver ./ESMX_Driver)` has a build-time dependency on the `esmxBuild.yaml` file already discussed under the [unfied driver executable section](#esmxbuildyaml). The identical file can be used when working on the `ESMX_Driver` level.
 
 The run-time configuration needed by `ESMX_Driver` can either be supplied by the user application, or alternatively default to `esmxRun.config`. The following rules apply:
-
-
-
-
+- `ESMX_Driver`, at the beginning of its `SetModelServices()` method checks whether the parent level has provided an `ESMF_Config` object by setting the `config` member on the `ESMX_Driver` component. If so, the provided `config` object is used. Otherwise `ESMX_Driver` itself creates `config` from file `esmxRun.config`.
+- For the case where the `config` object was provided by the parent layer, `ESMX_Driver` does not ingest attributes from `config`. Instead the assumption is made that the parent layer sets the desired attributes on `ESMX_Driver`.
+- For the case where the `config` object was loaded from `esmxRun.config` by `ESMX_Driver`, the driver ingests attributes from `config`, potentially overriding parent level settings.
+- The `ESMX_component_list`, child component, and run sequence information is ingested from `config` as described under the [unfied driver executable section](#esmxrunconfig).
+- If the parent level passes an `ESMF_Clock` object to `ESMX_Driver` during initialize, the driver uses it instead of looking for `startTime` and `stopTime` in `config`.
+- For the case where a clock is provided by the parent layer, its `timeStep` is used as the *default* time step of the outer run sequence loop when using the `@*` syntax. If a specific time step is set in the run sequence with `@DT`, then `DT` must be a divisor of the `timeStep` provided by the parent clock.
