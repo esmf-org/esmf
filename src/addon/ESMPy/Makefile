@@ -33,7 +33,7 @@ dryrun_regrid_from_file:
 dryrun: dryrun_examples dryrun_regrid_from_file
 
 test:
-		bash test_all.bash
+		bash src/esmpy/test/test_all.bash
 
 test_unit:
 		python3 -m pytest -vs
