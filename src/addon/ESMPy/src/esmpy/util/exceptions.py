@@ -10,8 +10,16 @@ class ESMPyException(Exception):
     """Base class for errors in the ESMPy package."""
     pass
 
-class RequiredArgs(ESMPyException):
-    """Required arguments were not specified."""
+class ESMPyWarning(Warning):
+    """Base class for warnings in the ESMPy package."""
+    pass
+
+class VersionMismatch(ESMPyException):
+    """The ESMF installation is not compatible with this version of ESMPy."""
+    pass
+
+class VersionWarning(ESMPyWarning):
+    """The ESMF and/or ESMPy installations are beta version which may not be fully compatible."""
     pass
 
 class NetCDFMissing(ESMPyException):
@@ -22,12 +30,17 @@ class PIOMissing(ESMPyException):
     """ESMF was not built with PIO support."""
     pass
 
+
 class MethodNotImplemented(ESMPyException):
     """Raised when an unimplemented method is called."""
     pass
 
 class SerialMethod(ESMPyException):
     """This method is not safe to run in parallel!"""
+    pass
+
+class RequiredArgs(ESMPyException):
+    """Required arguments were not specified."""
     pass
 
 

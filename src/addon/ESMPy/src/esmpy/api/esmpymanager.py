@@ -6,9 +6,10 @@ The ESMPyManager API
 
 #### IMPORT LIBRARIES #########################################################
 
+from esmpy.interface.cbindings import *
+
 from esmpy.api.constants import *
 from esmpy.util.exceptions import *
-from esmpy.interface.cbindings import *
 from esmpy.util.decorators import initialize
 
 import re

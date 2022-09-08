@@ -51,6 +51,10 @@ _ESMF_COMM_MPIUNI = -1
 # ESMF_VERSION
 _ESMF_VERSION = None
 
+# ESMPY_VERSION, this is required to avoid a circular import in loadESMF when
+#  checking that the ESMF_VERSION matches esmpy.__version__
+_ESMPY_VERSION = None
+
 # ESMF_MPIRUN
 _ESMF_MPIRUN = None
 _ESMF_MPIRUN_NP = None

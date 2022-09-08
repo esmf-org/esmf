@@ -5,8 +5,10 @@
 import os
 import sys
 import traceback
+import re
 
 import esmpy.api.constants as constants
+from esmpy.util.exceptions import VersionWarning, VersionMismatch
 
 try:
     import numpy as np
@@ -65,6 +67,24 @@ with open(esmfmk, 'r') as MKFILE:
             if "gfortran" in line:
                 use_inmem_factors = True
 
+# check and set _ESMF_VERSION_STRING
+esmfvs = re.split(r'\D+',esmfversion)
+esmpyvs = re.split(r'\D+',constants._ESMPY_VERSION)
+
+if esmfversion != constants._ESMPY_VERSION:
+    # check if major, minor and patch version numbers are equivalent
+    if esmfvs[0:2] != esmpyvs[0:2]:
+        raise VersionMismatch("ESMF installation version {}, ESMPy version {}".format(
+            esmfversion, constants._ESMPY_VERSION))
+    # otherwise warn that beta versions may be in use
+    else:
+        import warnings
+        warnings.warn("ESMF installation version {}, ESMPy version {}".format(
+            esmfversion, constants._ESMPY_VERSION), VersionWarning)
+
+constants._ESMF_VERSION = esmfversion
+
+
 if not libsdir:
     raise ValueError("ESMF_LIBSDIR not found!")
 if not esmfos:
@@ -103,9 +123,6 @@ if "mpiuni" not in esmfcomm:
 # set _ESMF_COMM
 if "mpiuni" in esmfcomm:
     constants._ESMF_COMM = constants._ESMF_COMM_MPIUNI
-
-# set _ESMF_VERSION_STRING 
-constants._ESMF_VERSION = esmfversion
 
 # look for ESMPY_MPIRUN, set accordingly
 try:

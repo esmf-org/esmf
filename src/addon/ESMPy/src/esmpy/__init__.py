@@ -64,18 +64,9 @@ simple sparse matrix multiplication operation between interpolation weights and
 data values.
 """
 
-#### IMPORT LIBRARIES #########################################################
-
-from esmpy.api.esmpymanager import *
-from esmpy.api.grid import *
-from esmpy.api.mesh import *
-from esmpy.api.locstream import *
-from esmpy.api.field import *
-from esmpy.api.regrid import *
-from esmpy.api.constants import *
-from esmpy.util.helpers import *
-
 #### SET UP SOME INFO #########################################################
+
+import esmpy.api.constants as constants
 
 import sys
 
@@ -105,6 +96,7 @@ else:
 # set the private metadata
 __name__ = msg["Name"]
 __version__ = msg["Version"]
+constants._ESMPY_VERSION = __version__ # required to check against ESMF_VERSION in loadESMF
 __license__ = msg["License"]
 __email__ = msg["Maintainer-email"]
 __description__ = msg["Summary"]
@@ -114,3 +106,14 @@ __requires_python__ = msg["Requires-Python"]
 __author__ = msg["Author"]
 __homepage__ = msg["Home-page"]
 __obsoletes__ = msg["obsoletes"]
+
+#### IMPORT LIBRARIES #########################################################
+
+from esmpy.api.esmpymanager import *
+from esmpy.api.grid import *
+from esmpy.api.mesh import *
+from esmpy.api.locstream import *
+from esmpy.api.field import *
+from esmpy.api.regrid import *
+from esmpy.api.constants import *
+from esmpy.util.helpers import *
