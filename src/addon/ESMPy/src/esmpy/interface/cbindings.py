@@ -2329,7 +2329,6 @@ _ESMF.ESMC_FieldSMMStore.restype = ct.c_int
 _ESMF.ESMC_FieldSMMStore.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_char_p,
                                      ct.POINTER(ESMP_RouteHandle), ct.c_bool,
                                      ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
-@deprecated
 def ESMP_FieldSMMStore(srcField, dstField, filename,
                        ignoreUnmatchedIndices=None):
     """
