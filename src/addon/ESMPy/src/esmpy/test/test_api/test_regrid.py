@@ -85,7 +85,7 @@ class TestRegrid(TestBase):
                     line_type=LineType.CART, factors=False)
         _ = rh(srcfield, dstfield)
 
-    @pytest.mark.skipif(constants._ESMF_USE_INMEM_FACTORS, reason="compiler does not support in-memory weights")
+    @pytest.mark.skipif(not constants._ESMF_USE_INMEM_FACTORS, reason="compiler does not support in-memory weights")
     @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
     def test_field_regrid_factor_retrieval(self):
         # Test retrieving factors from a route handle.
