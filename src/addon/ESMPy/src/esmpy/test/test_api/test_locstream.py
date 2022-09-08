@@ -10,8 +10,6 @@ from esmpy.test.base import TestBase
 
 class TestLocStream(TestBase):
 
-    mg = Manager(debug=True)
-
     def test_create(self):
         # LocStream creation and simple validation
         locstream = LocStream(5, name="Test LocStream")
@@ -53,7 +51,7 @@ class TestLocStream(TestBase):
         assert np.all(l2["ESMF:X"] == [0, 1, 2, 3, 4])
 
 
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_slice(self):
         locstream = LocStream(5, name="Test LocStream")
 

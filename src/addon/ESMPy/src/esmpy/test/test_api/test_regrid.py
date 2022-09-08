@@ -16,9 +16,6 @@ from esmpy.util.mesh_utilities import *
 
 class TestRegrid(TestBase):
 
-    mg = Manager(debug=True)
-    mg.test_exhaustive = False
-
     def run_regridding(srcfield, dstfield, srcfracfield, dstfracfield):
         # This is for documentation. Do not modify.
         '''
@@ -86,7 +83,7 @@ class TestRegrid(TestBase):
         _ = rh(srcfield, dstfield)
 
     @pytest.mark.skipif(not constants._ESMF_USE_INMEM_FACTORS, reason="compiler does not support in-memory weights")
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_field_regrid_factor_retrieval(self):
         # Test retrieving factors from a route handle.
 
@@ -565,7 +562,7 @@ class TestRegrid(TestBase):
             if os.path.isfile(path):
                 os.remove(path)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_regrid_gridmesh(self):
         mesh = None
         if pet_count() == 4:
@@ -602,7 +599,7 @@ class TestRegrid(TestBase):
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.CONSERVE)
         dstfield = rh(srcfield, dstfield)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_regrid_zeroregion(self):
         mesh = None
         if pet_count() == 4:
@@ -694,7 +691,7 @@ class TestRegrid(TestBase):
             if os.path.exists(filename):
                 os.remove(filename)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_regrid_area(self):
         mesh = None
         if pet_count() == 4:
@@ -994,7 +991,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_grid_mesh_regrid_csrv_mask(self):
         mesh = None
         if pet_count() == 4:
@@ -1044,7 +1041,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.038806630051265847)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_grid_mesh_regrid_csrv(self):
         mesh = None
         if pet_count() == 4:
@@ -1092,7 +1089,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037733241800767432)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_grid_mesh_regrid_mask(self):
        # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True, domask=True)
@@ -1129,7 +1126,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_grid_mesh_regrid(self):
        # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
@@ -1165,7 +1162,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_regrid_extrapolation(self):
         # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
@@ -1204,7 +1201,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_field_regrid_extrapolation_creepfill(self):
         # create a grid
         grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
@@ -1241,7 +1238,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_mesh_regrid(self):
         srcmesh = None
         dstmesh = None
@@ -1294,7 +1291,7 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037109375)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def est_grid_mesh_pentatri_regrid_csrv(self):
         mesh = None
         if pet_count() == 4:
@@ -1345,7 +1342,7 @@ class TestRegrid(TestBase):
         assert (meanrel < 10E-2)
         assert (csrvrel < 10E-14)
 
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def est_grid_mesh_pentatri_regrid_csrv_simple(self):
         # create a Mesh
         mesh, nodeCoord, nodeOwner, elemType, elemConn = \
@@ -1392,7 +1389,7 @@ class TestRegrid(TestBase):
         assert (meanrel < 10E-2)
         assert (csrvrel < 10E-14)
 
-    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_grid_mesh_pentatri_regrid_bilinear(self):
         mesh = None
         if pet_count() == 4:

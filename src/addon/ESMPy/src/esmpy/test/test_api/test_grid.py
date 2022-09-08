@@ -16,9 +16,10 @@ from esmpy.api.constants import _ESMF_NETCDF
 
 class TestGrid(TestBase):
     
+    # prefer TestBase.mg, but in this case required for test_exhaustive in pytest markers
     mg = Manager(debug=True)
     mg.test_exhaustive = False
-
+    
     def examine_grid_attributes(self, grid):
         # ~~~~~~~~~~~~~~~~~~~~~~  STAGGER LOCATIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # grid.staggerloc returns a boolean list of the activated stagger locations
@@ -181,7 +182,7 @@ class TestGrid(TestBase):
         self.examine_grid_attributes(grid)
 
     @pytest.mark.skipif(mg.test_exhaustive==False, reason="only run in exhaustive mode")
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_create_2d(self):
         keywords = dict(
             # periodic specifies all valid combos of [pole_kind, num_peri_dims, periodic_dim, pole_dim]
@@ -227,7 +228,7 @@ class TestGrid(TestBase):
                 "The following combinations of Grid parameters failed to create a proper Grid: " + str(fail))
 
     @pytest.mark.skipif(mg.test_exhaustive==False, reason="only run in exhaustive mode")
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_create_3d(self):
         keywords = dict(
             # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
@@ -296,7 +297,7 @@ class TestGrid(TestBase):
             grid.destroy()
             # grid2.destroy()
 
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_2d(self):
         grid = self.make_grid_2d()
 
@@ -316,7 +317,7 @@ class TestGrid(TestBase):
         assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1)
         assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1]
 
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_2d_corners(self):
         grid = self.make_grid_2d()
 
@@ -347,7 +348,7 @@ class TestGrid(TestBase):
         assert grid3.upper_bounds[StaggerLoc.CORNER].tolist() == [3, 2]
 
 
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_3d(self):
         grid = self.make_grid_3d()
 
@@ -367,7 +368,7 @@ class TestGrid(TestBase):
         assert grid3.coords[StaggerLoc.CENTER][0].shape == (2, 1, 2)
         assert grid3.upper_bounds[StaggerLoc.CENTER].tolist() == [2, 1, 2]
 
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_3d_corners(self):
         grid = self.make_grid_3d()
 
@@ -402,7 +403,7 @@ class TestGrid(TestBase):
         assert grid3.coords[cvf][0].shape == (3, 2, 3)
         assert grid3.upper_bounds[cvf].tolist() == [3, 2, 3]
 
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_grid_slice_periodic(self):
         grid, x, y = self.make_grid_periodic()
 
@@ -429,7 +430,7 @@ class TestGrid(TestBase):
         assert grid3.upper_bounds[StaggerLoc.CORNER].tolist() == [3, 2]
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
-    @pytest.mark.skipif(mg.pet_count!=1, reason="test must be run in serial")
+    @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_slice_grid_created_from_file_scrip(self):
         import esmpy
         reg_decomp = [pet_count(), 1]

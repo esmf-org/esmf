@@ -1,23 +1,22 @@
 import unittest
 import numpy as np
 from esmpy.util.itester import iter_product_keywords
+from esmpy.api.esmpymanager import Manager
 
 class TestBase(unittest.TestCase):
 
-    # mg = None
+    @property
+    def mg(self):
+        """
+        :rtype: :class:`~esmpy.api.esmpymanager.Manager`
+        :return: :class:`~esmpy.api.esmpymanager.Manager`
+        """
+        return self._mg
 
     def __init__(self, *args, **kwds):
         super(TestBase, self).__init__(*args, **kwds)
-
-    # @classmethod
-    # def setUpClass(cls):
-    #     import esmpy
-    #     cls.mg = esmpy.Manager(debug = True)
-    #     cls.mg.test_exhaustive = False
-    # 
-    # @classmethod
-    # def tearDownClass(cls):
-    #     del cls.mg
+        self._mg = Manager(debug = True)
+        self._mg.test_exhaustive = False
 
     def assertNumpyAll(self, arr1, arr2, check_fill_value_dtype=True, check_arr_dtype=True):
         """
