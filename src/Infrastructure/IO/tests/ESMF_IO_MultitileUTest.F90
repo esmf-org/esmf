@@ -44,6 +44,8 @@ program ESMF_IO_MultitileUTest
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
 
+  type(ESMF_VM) :: vm
+  integer :: localPet
   type(ESMF_Grid) :: grid6tile
   type(ESMF_DistGrid) :: distgrid3tile
 
@@ -100,6 +102,10 @@ program ESMF_IO_MultitileUTest
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_VMGet(vm, localPet=localPet, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
 
@@ -533,7 +539,7 @@ contains
 
     do j = 1, size(array, 2)
        do i = 1, size(array, 1)
-          array(i,j) = multiplier * ((i-1)*size(array,2) + (j-1))
+          array(i,j) = (localPet+1) * multiplier * ((i-1)*size(array,2) + (j-1))
        end do
     end do
   end subroutine fillArray
