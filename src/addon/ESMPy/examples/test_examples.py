@@ -14,7 +14,7 @@ from esmpy.api.esmpymanager import Manager
 # Start up esmpy
 mg = Manager(debug=True)
 
-if pet_count() == 1:
+if mg.pet_count == 1:
     from esmpy.util.cache_data import cache_data_files
     cache_data_files()
 
@@ -33,17 +33,17 @@ class TestExamples(TestBase):
     def test_grid_create_peridim_mask(self):
         from . import grid_create_peridim_mask
 
-    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_locstream_regrid(self):
         from . import grid_locstream_regrid
 
-    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_locstream_grid_regrid(self):
         from . import locstream_grid_regrid
 
-    @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
+    @pytest.mark.skipif(mg.pet_count not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_locstream_regrid(self):
         from . import mesh_locstream_regrid
 
@@ -68,7 +68,7 @@ class TestExamples(TestBase):
 
     # this will currently never run because it isn't yet possible to run pytest with mpiexec
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
-    @pytest.mark.skipif(pet_count()!=6, reason="test must be run with 6 cores")
+    @pytest.mark.skipif(mg.pet_count!=6, reason="test must be run with 6 cores")
     def test_cubed_sphere_to_mesh_regrid(self):
         from . import cubed_sphere_to_mesh_regrid
 
