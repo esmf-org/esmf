@@ -18,11 +18,12 @@ class TestPyTest(TestBase):
         if self.mg.local_pet == 2:
             raise ValueError("Test failure on a single PET")
 
-    @pytest.mark.mpi(min_size=2)
-    def test_pytest_mpi4py(self):
-        from mpi4py import MPI
-
-        comm = MPI.COMM_WORLD
-        rank = comm.Get_rank()
-
-        print ("Test1: I AM PET {} and rank {}".format(local_pet(), rank))
+    # # this requires pytest-mpi package
+    # @pytest.mark.mpi(min_size=2)
+    # def test_pytest_mpi4py(self):
+    #     from mpi4py import MPI
+    # 
+    #     comm = MPI.COMM_WORLD
+    #     rank = comm.Get_rank()
+    # 
+    #     print ("Test1: I AM PET {} and rank {}".format(local_pet(), rank))
