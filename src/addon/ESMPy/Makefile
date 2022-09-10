@@ -24,13 +24,13 @@ dust:
 install:
 		python3 -m pip install .
 
-dryrun_examples:
+download_examples:
 		python3 examples/test_examples_dryrun.py
 	
-dryrun_regrid_from_file:
+download_regrid_from_file:
 		python3 src/esmpy/test/regrid_from_file/test_regrid_from_file_dryrun.py
 
-dryrun: dryrun_examples dryrun_regrid_from_file
+download: download_examples download_regrid_from_file
 
 test:
 		bash src/esmpy/test/test_all.bash
