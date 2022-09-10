@@ -1,9 +1,7 @@
 import os
 
-DATA_URL_ROOT = 'http://data.earthsystemmodeling.org/download/data/'
-
 # If fname doesn't exist, retrieve it from the remote server via http.
-def cache_data_file(fname, DATA_URL_ROOT=DATA_URL_ROOT):
+def cache_data_file(fname, DATA_URL_ROOT=None):
     import sys
     if sys.version_info[0] >= 3:
         from urllib.request import urlopen, URLError
@@ -11,6 +9,9 @@ def cache_data_file(fname, DATA_URL_ROOT=DATA_URL_ROOT):
         from urllib2 import urlopen, URLError
 
     from shutil import copyfileobj
+
+    if DATA_URL_ROOT == None:
+        DATA_URL_ROOT = 'http://data.earthsystemmodeling.org/download/data/'
 
     status_ok = True
     if not os.path.exists(fname):
@@ -30,7 +31,7 @@ def cache_data_file(fname, DATA_URL_ROOT=DATA_URL_ROOT):
     return status_ok
 
 
-def cache_data_files():
+def cache_data_files(dataurl=None):
     # Filenames to download.
     datafilelist = ["aggregAtlanticESTOFS.nc",
                     "GRIDSPEC_ACCESS1.nc",
@@ -49,6 +50,6 @@ def cache_data_files():
     # Download each test file.
     for fname in datafilelist:
         # Retrieve the data files needed for the test cases from the remote server.
-        status_ok = cache_data_file(os.path.join(datadir, fname))
+        status_ok = cache_data_file(os.path.join(datadir, fname), dataurl)
         if not status_ok:
             raise IOError("Error downloading '{}'".format(fname))

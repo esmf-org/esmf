@@ -11,14 +11,17 @@ the regridding.
 import sys
 import os
 
-from esmpy.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR, DATA_URL_ROOT
+from esmpy.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR
 from esmpy.util.cache_data import cache_data_file
 from esmpy.test.regrid_from_file.read_test_cases_from_control_file import read_control_file
 
-def cache_data_files_for_test_cases(test_cases):
+def cache_data_files_for_test_cases(test_cases, DATA_URL_ROOT=None):
     # Create data subdirectory if it doesn't exist.
     if not os.path.exists(DATA_SUBDIR):
         os.mkdir(DATA_SUBDIR)
+
+    if DATA_URL_ROOT == None:
+        DATA_URL_ROOT = 'http://data.earthsystemmodeling.org/download/data/'
 
     # For each test case line from the control file parse the line and call
     # the test subroutine.
@@ -36,8 +39,12 @@ def cache_data_files_for_test_cases(test_cases):
             break
     return status_ok
 
+DATAURL = None
+if len(sys.argv) > 1:
+    DATAURL = sys.argv[1]
+
 # Read the test case parameters from the control file.
 test_cases = read_control_file()
 
 # Retrieve the data files needed for the test cases from the remote server.
-cache_data_files_for_test_cases(test_cases)
+cache_data_files_for_test_cases(test_cases, DATAURL)
