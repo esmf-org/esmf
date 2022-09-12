@@ -25,10 +25,10 @@ install:
 		python3 -m pip install .
 
 download_examples:
-		python3 examples/test_examples_dryrun.py
+		python3 examples/test_examples_download.py
 	
 download_regrid_from_file:
-		python3 src/esmpy/test/regrid_from_file/test_regrid_from_file_dryrun.py
+		python3 src/esmpy/test/regrid_from_file/test_regrid_from_file_download.py
 
 download: download_examples download_regrid_from_file
 

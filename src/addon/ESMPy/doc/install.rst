@@ -118,10 +118,11 @@ greater test coverage is desired:
 
 .. Note:: 
 
-    The ``regrid_from_file`` tests can take up a lot of memory and bandwidth.
-    The ``test_regrid_from_file_dryrun`` command will simply download the test
-    files without actually running them (allowing the stress on the machine to
-    be applied to bandwidth first, and then memory).
+    The ``regrid_from_file`` and ``example`` tests can take up a lot of memory 
+    and bandwidth. The ``download_regrid_from_file`` and ``download_examples`` 
+    commands will simply download the test files without actually running them 
+    (allowing the stress on the machine to be applied to bandwidth first, and 
+    then memory).
 
 -----------
 Limitations

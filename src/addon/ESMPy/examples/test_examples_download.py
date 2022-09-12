@@ -1,7 +1,7 @@
 # $Id$
 
 """
-examples data dryrun
+examples data download
 """
 
 import sys
