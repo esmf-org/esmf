@@ -178,6 +178,22 @@ program ESMF_IO_MultitileUTest
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
+  ! The purpose of this test is to make sure that the code for checking consistency with
+  ! an existing field works for multi-tile fields (at least in the case where they *are*
+  ! consistent).
+  write(name, *) "Rewrite an existing multi-tile Field to existing files"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_FieldWrite(field3, fileName=fileNameFields, overwrite=.true., rc=rc)
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc == ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
   write(name, *) "Read a multi-tile Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldRead(field3Read, fileName=fileNameFields, rc=rc)
