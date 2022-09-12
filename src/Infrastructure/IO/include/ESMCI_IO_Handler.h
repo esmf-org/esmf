@@ -68,49 +68,66 @@ namespace ESMCI {
     int             localPet;
     ESMC_IndexFlag  indexflag;
     ESMC_IOFmt_Flag iofmtFlag;
-    std::string     filename;                 // The filename for this object
+    std::string     filename;                 // The filename for this object (for multi-tile IO,
+                                              // this will contain a placeholder to be replaced by tile number)
     ESMC_FileStatus_Flag fileStatusFlag;      // Store file status
     bool            overwrite;                // OK to overwrite fields if true
+    int             ntiles;                   // Number of tiles in arrays handled by this object
   protected:
-    IO_Handler(ESMC_IOFmt_Flag fmtArg);        // native constructor
+    IO_Handler(ESMC_IOFmt_Flag fmtArg, int ntilesArg); // native constructor
   private:
 //    IO(ESMC_IOFmt_Flag fmtArg, int rank, int *rc);
   protected:
     ~IO_Handler() { destruct(); }
     // create() and destroy()
   public:
-    static IO_Handler *create(ESMC_IOFmt_Flag iofmt, int *rc = NULL);
+    static IO_Handler *create(ESMC_IOFmt_Flag iofmt, int ntiles, int *rc = NULL);
     static IO_Handler *create(const std::string& file,
-                              ESMC_IOFmt_Flag iofmt, int *rc = NULL);
+                              ESMC_IOFmt_Flag iofmt, int ntiles, int *rc = NULL);
     static int destroy(IO_Handler **io);
     static void finalize(int *rc = NULL);
   private:
     virtual void destruct(void) { }
+
+  protected:
+    // read()
+    // Non-atomic reads which are only successful on an open IO stream
+    virtual void arrayReadOneTileFile(Array *arr_p, int tile, const char *name,
+                                      int *timeslice = NULL, int *rc = NULL) = 0;
+
+    // write()
+    // Non-atomic writes which are only successful on an open IO stream
+    virtual void arrayWriteOneTileFile(Array *arr_p, int tile, const char *name,
+                                       const std::vector<std::string> &dimLabels,
+                                       int *timeslice = NULL,
+                                       const ESMCI::Info *varAttPack = NULL,
+                                       const ESMCI::Info *gblAttPack = NULL,
+                                       int *rc = NULL) = 0;
   public:
 
     // read()
     // Non-atomic reads which are only successful on an open IO stream
-    virtual void arrayRead(Array *arr_p, const char *name,
-                           int *timeslice = NULL, int *rc = NULL) = 0;
+    void arrayRead(Array *arr_p, const char *name,
+                   int *timeslice = NULL, int *rc = NULL);
 
     // write()
     // Non-atomic writes which are only successful on an open IO stream
-    virtual void arrayWrite(Array *arr_p, const char *name,
-                            const std::vector<std::string> &dimLabels,
-                            int *timeslice = NULL,
-                            const ESMCI::Info *varAttPack = NULL,
-                            const ESMCI::Info *gblAttPack = NULL,
-                            int *rc = NULL) = 0;
+    void arrayWrite(Array *arr_p, const char *name,
+                    const std::vector<std::string> &dimLabels,
+                    int *timeslice = NULL,
+                    const ESMCI::Info *varAttPack = NULL,
+                    const ESMCI::Info *gblAttPack = NULL,
+                    int *rc = NULL);
 
     // get() and set()
   public:
     const char *getName(void) const { return "ESMCI::IO_Handler"; }
     ESMC_IOFmt_Flag getFormat(void) { return iofmtFlag; }
+    const int getNtiles(void) const { return ntiles; }
     virtual bool formatOk(ESMC_IOFmt_Flag *newIofmt) {
       return (((ESMC_IOFmt_Flag *)NULL != newIofmt) &&
               (*newIofmt == iofmtFlag));
     }
-    const char *getFilename(void) const { return filename.c_str(); }
     bool overwriteFields(void) { return overwrite; }
     ESMC_FileStatus_Flag getFileStatusFlag(void) { return fileStatusFlag; }
   protected:
@@ -121,6 +138,9 @@ namespace ESMCI {
     }
     int setFilename(const std::string& name);
   public:
+
+    // get filename; if multi-tile IO, tile placeholder will be replaced by the given tile number
+    const std::string getFilename(int tile, int *rc = NULL) const;
 
     // file exists is needed to implement status codes
     static bool fileExists(const std::string& filename, bool needWrite);
@@ -134,18 +154,24 @@ namespace ESMCI {
       return (ioh1 == ioh2);
     }
 
-    // open() and close()
+    // open(), close() and helper functions
   protected:
-    virtual void open(bool readonly_arg, int *rc = NULL) = 0;
+    virtual void openOneTileFile(int tile, bool readonly_arg, int *rc = NULL) = 0;
+    virtual void flushOneTileFile(int tile, int *rc = NULL) = 0;
+    virtual void closeOneTileFile(int tile, int *rc = NULL) = 0;
+
+    // Check compatibility of an array with this IO Handler object; return error if incompatible
+    int checkArray(const Array *arr_p) const;
   public:
     void open(const std::string &file,
               ESMC_FileStatus_Flag filestatusflag_arg,
               bool overwrite_arg,
               bool readonly_arg,
               int *rc = NULL);
-    virtual ESMC_Logical isOpen(void) { return ESMF_FALSE; }
-    virtual void flush(int *rc = NULL) = 0;
-    virtual void close(int *rc = NULL) = 0;
+    ESMC_Logical isOpenAnyTile(void);
+    virtual ESMC_Logical isOpen(int tile) { return ESMF_FALSE; }
+    void flush(int *rc = NULL);
+    void close(int *rc = NULL);
 
 // Don't know yet if we will need these
 #if 0

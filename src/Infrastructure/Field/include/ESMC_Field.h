@@ -673,7 +673,7 @@ int ESMC_FieldPrint(
 //
 //  Read Field data from a file and put it into an {ESMF\_Field} object.
 //  For this API to be functional, the environment variable {\tt ESMF\_PIO}
-//  should be set to "internal" when the ESMF library is built.
+//  should be set to either "internal" or "external" when the ESMF library is built.
 //  Please see the section on Data I/O,~\ref{io:dataio}.
 //
 //  Limitations:
@@ -1192,7 +1192,7 @@ int ESMC_FieldSMMStore(
 //
 // !DESCRIPTION:
 //  Write Field data into a file.  For this API to be functional, the 
-//  environment variable {\tt ESMF\_PIO} should be set to "internal" when 
+//  environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external" when
 //  the ESMF library is built.  Please see the section on 
 //  Data I/O,~\ref{io:dataio}.
 //

@@ -318,7 +318,7 @@ int ArrayBundle::read(
 // !DESCRIPTION:
 //   Read Array data to an ArrayBundle object from file(s).
 //   For this API to be functional, the environment variable {\tt ESMF\_PIO} 
-//   should be set to "internal" when the ESMF library is built.
+//   should be set to either "internal" or "external" when the ESMF library is built.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -426,7 +426,7 @@ int ArrayBundle::write(
 //
 // !DESCRIPTION:
 //   Write the Arrays into a file. For this API to be functional,
-//   the environment variable {\tt ESMF\_PIO} should be set to "internal"
+//   the environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external"
 //   when the ESMF library is built.
 //
 //EOPI
