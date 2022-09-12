@@ -50,7 +50,7 @@ In this example two components are built into `esmx` explicitly. (Read about dyn
 
 Each component is given a name, here `tawas` and `lumo`. Components will be referred to by this *component-name* in the run-time configuration (esmxRun.config) discussed below.
 
-Each component must define the `cmake_config` key, specifying a file that can be included by the CMake based `esmx` build. This file must specify three CMake elements:
+Each component must define the `cmake_config` key, specifying a file that can be included by the CMake based `esmx` build. This file must provide three CMake elements:
 - `add_library(component-name ... )`
 - `set_target_properties(component-name ... )`
 - `target_link_libraries(esmx_driver PUBLIC component-name)`
