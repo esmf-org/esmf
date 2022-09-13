@@ -292,7 +292,7 @@ module ESMX_Driver
     call ESMF_GridCompGet(driver, clockIsPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     if (.not.isPresent) then
