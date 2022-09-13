@@ -1687,9 +1687,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[fileName]
 !     The name of the file from which ArrayBundle data is read.
 !     If the ArrayBundle contains multi-tile Arrays, then fileName must contain
-!     exactly one instance of "#"; this is a placeholder that will be replaced
+!     exactly one instance of "\#"; this is a placeholder that will be replaced
 !     by the tile number, with each tile being read from a separate file. (For
-!     example, for a fileName of "myfile#.nc", tile 1 will be read from
+!     example, for a fileName of "myfile\#.nc", tile 1 will be read from
 !     "myfile1.nc", tile 2 from "myfile2.nc", etc.)
 !     (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[singleFile]}]
@@ -3842,9 +3842,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[fileName]
 !     The name of the output file to which array bundle data is written.
 !     If the ArrayBundle contains multi-tile Arrays, then fileName must contain
-!     exactly one instance of "#"; this is a placeholder that will be replaced
+!     exactly one instance of "\#"; this is a placeholder that will be replaced
 !     by the tile number, with each tile being written to a separate file. (For
-!     example, for a fileName of "myfile#.nc", tile 1 will be written to
+!     example, for a fileName of "myfile\#.nc", tile 1 will be written to
 !     "myfile1.nc", tile 2 to "myfile2.nc", etc.)
 !     (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[convention]}]

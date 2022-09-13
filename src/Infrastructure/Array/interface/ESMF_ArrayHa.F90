@@ -654,9 +654,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[fileName]
 !    The name of the file from which Array data is read.
 !    If this is a multi-tile Array, then fileName must contain
-!    exactly one instance of "#"; this is a placeholder that will be replaced
+!    exactly one instance of "\#"; this is a placeholder that will be replaced
 !    by the tile number, with each tile being read from a separate file. (For
-!    example, for a fileName of "myfile#.nc", tile 1 will be read from
+!    example, for a fileName of "myfile\#.nc", tile 1 will be read from
 !    "myfile1.nc", tile 2 from "myfile2.nc", etc.)
 !    (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[variableName]}]
