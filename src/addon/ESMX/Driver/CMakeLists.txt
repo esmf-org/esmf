@@ -16,7 +16,7 @@ target_include_directories(esmx_driver PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(esmx_driver PUBLIC ESMF)
 
 # Generate comp*.* files from esmxBuild.yaml
-find_package(Python 3 COMPONENTS Interpreter REQUIRED)
+find_package(Python 3.5 COMPONENTS Interpreter REQUIRED)
 execute_process(COMMAND ${Python_EXECUTABLE}
   ${CMAKE_CURRENT_LIST_DIR}/esmxGen.py --ifile ./esmxBuild.yaml --odir ${CMAKE_CURRENT_BINARY_DIR}
   RESULT_VARIABLE ret)
