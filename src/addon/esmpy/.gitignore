@@ -19,9 +19,9 @@ PET*
 build
 dist
 doc/esmpy_doc
-src/ESMPy.egg-info
+src/esmpy.egg-info
 src/esmpy/data
-examples/notebooks/ESMPy-data
+examples/notebooks/esmpy-data
 
 # notebooks #
 #############

@@ -3,7 +3,7 @@ requires = [ "setuptools>=41", "wheel", "setuptools-git-versioning"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ESMPy"
+name = "esmpy"
 description = "ESMF Python interface"
 # readme = "README.md"
 maintainers = [{author = "ESMF Core Team", email = "esmf_support@ucar.edu"}]

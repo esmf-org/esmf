@@ -57,4 +57,4 @@ test_parallel: test_unit_parallel test_examples_parallel test_regrid_from_file_p
 test_all: test_unit test_unit_parallel test_examples test_examples_parallel test_regrid_from_file test_regrid_from_file_parallel
 
 uninstall:
-		python3 -m pip uninstall ESMPy
+		python3 -m pip uninstall esmpy

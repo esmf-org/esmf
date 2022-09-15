@@ -76,18 +76,18 @@ if (sys.version_info >= (3,8)):
     # this requires Python 3.8 or higher
     import importlib.metadata as ilm
     
-    msg = ilm.metadata("ESMPy")
+    msg = ilm.metadata("esmpy")
 
 else:
     # pre Python 3.8, not sure how far yet
     from pkg_resources import get_distribution
     try: 
-        pkgInfo = get_distribution('ESMPy').get_metadata('METADATA')
+        pkgInfo = get_distribution('esmpy').get_metadata('METADATA')
     except:
         try:
-            pkgInfo = get_distribution('ESMPy').get_metadata('PKG-INFO')
+            pkgInfo = get_distribution('esmpy').get_metadata('PKG-INFO')
         except:
-            raise ImportError("Could not find METADATA or PKG-INFO for ESMPy")
+            raise ImportError("Could not find METADATA or PKG-INFO for esmpy")
     
     # parse it using email.Parser
     from email import message_from_string
