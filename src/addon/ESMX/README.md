@@ -158,8 +158,8 @@ The ESMX layer has the following dependencies:
 - **ESMF Library**: The ESMX layer is part of the ESMF repository. In order to use ESMX as described above, the ESMF library first needs to be built following the instructions for [Building ESMF](https://github.com/esmf-org/esmf#building-esmf).
 - **CMake**: v3.5.2 or greater.
 - **Python**: v3.5 or greater.
-  - Available as `python3` in `$PATH`.
-  - `PyYaml` module installed in the Python environment.
+  - `python3` must be in `$PATH`.
+  - `PyYaml` must be installed in the Python environment.
   
 There are many ways to provide a suitable Python environment. One portable way based on [venv](https://docs.python.org/3/library/venv.html) is shown below.
 
