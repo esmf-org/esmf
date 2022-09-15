@@ -17,7 +17,10 @@
 
 import numpy
 from mpi4py import MPI
-import sys
+import sys, os
+
+from esmpy.util.cache_data import DATA_DIR
+from esmpy.util.exceptions import DataMissing
 
 def regrid():
     try:
@@ -25,8 +28,13 @@ def regrid():
     except:
         raise ImportError("ESMF is not available on this machine")
 
-    grid1 = "examples/data/ll1deg_grid.nc"
-    grid2 = "examples/data/mpas_uniform_10242_dual_counterclockwise.nc"
+    grid1 = os.path.join(DATA_DIR, "ll1deg_grid.nc")
+    if not os.path.exists(grid1):
+        raise DataMissing("Data not available, try 'make download'.")
+
+    grid2 = os.path.join(DATA_DIR, "mpas_uniform_10242_dual_counterclockwise.nc")
+    if not os.path.exists(grid2):
+        raise DataMissing("Data not available, try 'make download'.")
 
     # Create a uniform global latlon grid from a SCRIP formatted file
     grid = esmpy.Grid(filename=grid1, filetype=esmpy.FileFormat.SCRIP)

@@ -13,17 +13,23 @@
 import esmpy
 import numpy
 
+import os
+
 import esmpy.util.helpers as helpers
 import esmpy.api.constants as constants
+from esmpy.util.cache_data import DATA_DIR
+from esmpy.util.exceptions import DataMissing
 
 # This call enables debug logging when debug=True
-mg = esmpy.Manager(debug=False)
+# mg = esmpy.Manager(debug=True)
 
 # if esmpy.pet_count() != 6:
 #     print ("ESMPy cubed sphere regridding example requires 6 processors")
 #     import sys; sys.exit(0)
 
-grid1 = "examples/data/ll1deg_grid.nc"
+grid1 = os.path.join(DATA_DIR, "ll1deg_grid.nc")
+if not os.path.exists(grid1):
+    raise DataMissing("Data not available, try 'make download'.")
 
 # Create a cubed sphere grid with 20 elements per tile
 regDecompPTile = numpy.array([[2,2,1,1,1,1],[2,2,2,2,2,2]], dtype=numpy.int32)
@@ -67,7 +73,6 @@ xctfield.data[...] = 200.0 + x + y + z
 dstfield.data[...] = 1e20
 
 # write regridding weights to file
-import os
 filename = "esmpy_example_weight_file_cs.nc"
 if esmpy.local_pet() == 0:
     if os.path.isfile(os.path.join(os.getcwd(), filename)):

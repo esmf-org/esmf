@@ -14,25 +14,33 @@
 import os
 import esmpy
 
+from esmpy.util.cache_data import DATA_DIR
+from esmpy.util.exceptions import DataMissing
+
 # This call enables debug logging
 # esmpy.Manager(debug=True)
 
-# Set up the DATADIR
-DATADIR = os.path.join(os.getcwd(), "examples/data")
+datafile = os.path.join(DATA_DIR, "so_Omon_GISS-E2.nc")
+if not os.path.exists(datafile):
+    raise DataMissing("Data not available, try 'make download'.")
+meshfile = os.path.join(DATA_DIR, "mpas_uniform_10242_dual_counterclockwise.nc")
+if not os.path.exists(meshfile):
+    raise DataMissing("Data not available, try 'make download'.")
+
 
 # Create a  global grid from a GRIDSPEC formatted file
-grid = esmpy.Grid(filename=os.path.join(DATADIR, "so_Omon_GISS-E2.nc"),
+grid = esmpy.Grid(filename=os.path.join(DATA_DIR, datafile),
                  filetype=esmpy.FileFormat.GRIDSPEC)
 
 # Create a field on the centers of the grid, with extra dimensions
 srcfield = esmpy.Field(grid, staggerloc=esmpy.StaggerLoc.CENTER, ndbounds=[33, 2])
 
 # Read the field data from file
-srcfield.read(filename=os.path.join(DATADIR, "so_Omon_GISS-E2.nc"),
+srcfield.read(filename=os.path.join(DATADIR, datafile),
            variable="so", timeslice=2)
 
 # Create an ESMF formatted unstructured mesh with clockwise cells removed
-mesh = esmpy.Mesh(filename=os.path.join(DATADIR, "mpas_uniform_10242_dual_counterclockwise.nc"),
+mesh = esmpy.Mesh(filename=os.path.join(DATADIR, meshfile),
                  filetype=esmpy.FileFormat.ESMFMESH)
 
 # Create a field on the nodes of the mesh

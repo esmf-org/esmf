@@ -14,6 +14,11 @@
 import esmpy
 import numpy
 
+import os
+
+from esmpy.util.cache_data import DATA_DIR
+from esmpy.util.exceptions import DataMissing
+
 def plot_error(field1, field2, uninitval):
 
     try:
@@ -94,11 +99,15 @@ def plot_field(field2, uninitval):
 
 # these are for a new test using opendap, dataset has periodic failures..
 # meshfile = "http://coastalmodeldev.data.noaa.gov/thredds/dodsC/aggregAtlanticESTOFS"
-meshfile = "examples/data/aggregAtlanticESTOFS.nc"
+meshfile = os.path.join(DATA_DIR, "aggregAtlanticESTOFS.nc")
+if not os.path.exists(meshfile):
+    raise DataMissing("Data not available, try 'make download'.")
 mesh = esmpy.Mesh(filename=meshfile, filetype=esmpy.FileFormat.UGRID, meshname='adcirc_mesh')
 
 # Create a global latlon grid from a SCRIP formatted file
-gridfile = "examples/data/ll1deg_grid.nc"
+gridfile = os.path.join(DATA_DIR, "ll1deg_grid.nc")
+if not os.path.exists(gridfile):
+    raise DataMissing("Data not available, try 'make download'.")
 grid = esmpy.Grid(filename=gridfile, filetype=esmpy.FileFormat.SCRIP,
                  add_corner_stagger=True, is_sphere=True)
 

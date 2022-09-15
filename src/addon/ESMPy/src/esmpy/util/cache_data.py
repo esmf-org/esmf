@@ -1,7 +1,12 @@
 import os
+import inspect
+import esmpy
+
+DATA_DIR = os.environ.get('ESMPY_DATA_DIR', os.path.join(os.path.dirname(inspect.getfile(esmpy)),'data'))
+DATA_URL = 'http://data.earthsystemmodeling.org/download/data/'
 
 # If fname doesn't exist, retrieve it from the remote server via http.
-def cache_data_file(fname, DATA_URL_ROOT=None):
+def cache_data_file(fname):
     import sys
     if sys.version_info[0] >= 3:
         from urllib.request import urlopen, URLError
@@ -10,12 +15,9 @@ def cache_data_file(fname, DATA_URL_ROOT=None):
 
     from shutil import copyfileobj
 
-    if DATA_URL_ROOT == None:
-        DATA_URL_ROOT = 'http://data.earthsystemmodeling.org/download/data/'
-
     status_ok = True
     if not os.path.exists(fname):
-        url = os.path.join(DATA_URL_ROOT, os.path.basename(fname))
+        url = os.path.join(DATA_URL, os.path.basename(fname))
         print('Retrieving ' + url + '...\n')
         try:
             req = urlopen(url)
@@ -31,7 +33,7 @@ def cache_data_file(fname, DATA_URL_ROOT=None):
     return status_ok
 
 
-def cache_data_files(dataurl=None):
+def download_example_data():
     # Filenames to download.
     datafilelist = ["aggregAtlanticESTOFS.nc",
                     "GRIDSPEC_ACCESS1.nc",
@@ -42,14 +44,18 @@ def cache_data_files(dataurl=None):
                     "T42_grid.nc",
                     ]
 
-    # Create data subdirectory if it doesn't exist.
-    datadir = os.path.join('examples', 'data')
-    if not os.path.exists(datadir):
-        os.mkdir(datadir)
+    wget = True
+    if 'ESMPY_DATA_DIR' in os.environ:
+        wget = False
 
-    # Download each test file.
-    for fname in datafilelist:
-        # Retrieve the data files needed for the test cases from the remote server.
-        status_ok = cache_data_file(os.path.join(datadir, fname), dataurl)
-        if not status_ok:
-            raise IOError("Error downloading '{}'".format(fname))
+    # Create data subdirectory if it doesn't exist.
+    if not os.path.exists(DATA_DIR):
+        os.mkdir(DATA_DIR)
+    
+    if wget:
+        # Download each test file.
+        for fname in datafilelist:
+            # Retrieve the data files needed for the test cases from the remote server.
+            status_ok = cache_data_file(os.path.join(DATA_DIR, fname))
+            if not status_ok:
+                raise IOError("Error downloading '{}'".format(fname))

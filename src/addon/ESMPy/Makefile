@@ -2,7 +2,6 @@
 
 clean:
 		rm -rf build || :
-		rm -rf dist || :
 		find . -name "*.egg-info" -exec rm -rf {} \; || :
 		find . -name "*.pyc" -exec rm -f {} \; || :
 		find . -name "*.log" -exec rm -f {} \; || :
@@ -13,9 +12,7 @@ clean:
 		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
 		find . -name "*.report.json" -exec rm -rf {} \; || :
 		find . -name "*.test" -exec rm -rf {} \; || :
-		rm -rf src/esmpy/test/regrid_from_file/data || :
-		rm -rf examples/data || :
-
+		rm -rf src/esmpy/data || :
 dust:
 		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
 		find . -name "*.report.json" -exec rm -rf {} \; || :

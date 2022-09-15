@@ -43,6 +43,10 @@ class RequiredArgs(ESMPyException):
     """Required arguments were not specified."""
     pass
 
+class DataMissing(ESMPyException):
+    """Data is missing, try 'make download'."""
+    pass
+
 
 class GridException(ESMPyException):
     """Base class for errors in the Grid class."""

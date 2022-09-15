@@ -14,14 +14,22 @@
 import esmpy
 import numpy
 
+import os
+
 import esmpy.util.helpers as helpers
 import esmpy.api.constants as constants
+from esmpy.util.cache_data import DATA_DIR
+from esmpy.util.exceptions import DataMissing
 
 # This call enables debug logging
 # esmpy = esmpy.Manager(debug=True)
 
-grid1 = "examples/data/GRIDSPEC_ACCESS1.nc"
-grid2 = "examples/data/tx0.1v2_070911.nc"
+grid1 = os.path.join(DATA_DIR, "GRIDSPEC_ACCESS1.nc")
+if not os.path.exists(grid1):
+    raise DataMissing("Data not available, try 'make download'.")
+grid2 = os.path.join(DATA_DIR, "tx0.1v2_070911.nc")
+if not os.path.exists(grid2):
+    raise DataMissing("Data not available, try 'make download'.")
 
 # Create a  grid from a GRIDSPEC formatted file
 grid = esmpy.Grid(filename=grid1, filetype=esmpy.FileFormat.GRIDSPEC,

@@ -12,11 +12,19 @@
 import esmpy
 import numpy
 
+import os
+
 import esmpy.util.helpers as helpers
 import esmpy.api.constants as constants
+from esmpy.util.cache_data import DATA_DIR
+from esmpy.util.exceptions import DataMissing
 
 # This call enables debug logging
 esmpy.Manager(debug=True)
+
+grid1 = os.path.join(DATA_DIR, "ll1deg_grid.nc")
+if not os.path.exists(grid1):
+    raise DataMissing("Data not available, try 'make download'.")
 
 from esmpy.util.locstream_utilities import create_locstream_spherical_16, create_locstream_spherical_16_parallel
 coord_sys=esmpy.CoordSys.SPH_DEG
@@ -26,7 +34,6 @@ if esmpy.pet_count() == 1:
 else:
     locstream = create_locstream_spherical_16_parallel(coord_sys=coord_sys, domask=domask)
 
-grid1 = "examples/data/ll1deg_grid.nc"
 grid = esmpy.Grid(filename=grid1, filetype=esmpy.FileFormat.SCRIP)
 
 # create a field

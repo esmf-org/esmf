@@ -2,15 +2,11 @@
 Constants required for the regrid from file tests.
 """
 import os
-try:
-    import esmpy
-except:
-    raise ImportError('The ESMF library cannot be found!')
+import esmpy
+
 #
 TEST_REGRID_DIR = 'src/esmpy/test/regrid_from_file/'
 CONTROL_FNAME = 'regrid_test_data.txt'
-DATA_SUBDIR = os.path.join(TEST_REGRID_DIR,'data/')
-DATA_URL_ROOT = 'http://data.earthsystemmodeling.org/download/data/'
 UNINITVAL = 422397696.
 EPSILON = 1E-30
 #

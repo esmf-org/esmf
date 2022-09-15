@@ -17,7 +17,7 @@ import traceback
 
 from esmpy import *
 from esmpy.api.constants import _ESMF_NETCDF, _ESMF_PIO
-from esmpy.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR
+from esmpy.util.cache_data import DATA_DIR
 from esmpy.test.regrid_from_file.regrid_check import regrid_check
 from esmpy.test.regrid_from_file.read_test_cases_from_control_file import read_control_file
 
@@ -44,8 +44,12 @@ def test_run_regrid_from_file(test_case):
     test_str = 'Regrid %s to %s as %s with %s itrp_mean_err=%f, itrp_max_err=%f, and csrv_err=%f' % (src_fname, dst_fname, regrid_method, options, itrp_mean_err, itrp_max_err, csrv_err)
     if local_pet() == 0:
         print ('\n' + test_str)
-    src_fname_full = os.path.join(DATA_SUBDIR, src_fname)
-    dst_fname_full = os.path.join(DATA_SUBDIR, dst_fname)
+    src_fname_full = os.path.join(DATA_DIR, src_fname)
+    if not os.path.exists(src_fname_full):
+        raise DataMissing("Data not available, try 'make download'.")
+    dst_fname_full = os.path.join(DATA_DIR, dst_fname)
+    if not os.path.exists(dst_fname_full):
+        raise DataMissing("Data not available, try 'make download'.")
     
     # run the data file retrieval and regridding through try/except
     regrid_check(src_fname_full, dst_fname_full, regrid_method, 

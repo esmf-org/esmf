@@ -13,11 +13,21 @@
 
 import esmpy
 
+import os
+
+from esmpy.util.cache_data import DATA_DIR
+from esmpy.util.exceptions import DataMissing
+
 # This call enables debug logging
 esmpy.Manager(debug=True)
 
-datafile = "examples/data/so_Omon_GISS-E2.nc"
-gridfile = "examples/data/ll1deg_grid.nc"
+datafile = os.path.join(DATA_DIR, "so_Omon_GISS-E2.nc")
+if not os.path.exists(datafile):
+    raise DataMissing("Data not available, try 'make download'.")
+
+gridfile = os.path.join(DATA_DIR, "ll1deg_grid.nc")
+if not os.path.exists(gridfile):
+    raise DataMissing("Data not available, try 'make download'.")
 
 # Create a  grid from a GRIDSPEC formatted file
 srcgrid = esmpy.Grid(filename=datafile, filetype=esmpy.FileFormat.GRIDSPEC)

@@ -14,14 +14,22 @@
 import esmpy
 import numpy
 
+import os
+
 import esmpy.util.helpers as helpers
 import esmpy.api.constants as constants
+from esmpy.util.cache_data import DATA_DIR
+from esmpy.util.exceptions import DataMissing
 
 # This call enables debug logging
 # esmpy = esmpy.Manager(debug=True)
 
-grid1 = "examples/data/ll2.5deg_grid.nc"
-grid2 = "examples/data/T42_grid.nc"
+grid1 = os.path.join(DATA_DIR, "ll2.5deg_grid.nc")
+if not os.path.exists(grid1):
+    raise DataMissing("Data not available, try 'make download'.")
+grid2 = os.path.join(DATA_DIR, "T42_grid.nc")
+if not os.path.exists(grid2):
+    raise DataMissing("Data not available, try 'make download'.")
 
 # the number of elements in the extra field dimensions
 levels = 2

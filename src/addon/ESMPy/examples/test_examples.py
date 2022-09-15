@@ -15,8 +15,8 @@ from esmpy.api.esmpymanager import Manager
 mg = Manager(debug=True)
 
 if mg.pet_count == 1:
-    from esmpy.util.cache_data import cache_data_files
-    cache_data_files()
+    from esmpy.util.cache_data import download_example_data
+    download_example_data()
 
 class TestExamples(TestBase):
         

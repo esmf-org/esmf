@@ -11,40 +11,37 @@ the regridding.
 import sys
 import os
 
-from esmpy.test.regrid_from_file.regrid_from_file_consts import DATA_SUBDIR
-from esmpy.util.cache_data import cache_data_file
+from esmpy.util.cache_data import cache_data_file, DATA_DIR
 from esmpy.test.regrid_from_file.read_test_cases_from_control_file import read_control_file
 
-def cache_data_files_for_test_cases(test_cases, DATA_URL_ROOT=None):
+def cache_data_files_for_test_cases(test_cases):
+    wget = True
+    if 'ESMPY_DATA_DIR' in os.environ:
+        wget = False
+
     # Create data subdirectory if it doesn't exist.
-    if not os.path.exists(DATA_SUBDIR):
-        os.mkdir(DATA_SUBDIR)
-
-    if DATA_URL_ROOT == None:
-        DATA_URL_ROOT = 'http://data.earthsystemmodeling.org/download/data/'
-
-    # For each test case line from the control file parse the line and call
-    # the test subroutine.
+    if not os.path.exists(DATA_DIR):
+        os.mkdir(DATA_DIR)
+  
     status_ok = True
-    for test_case in test_cases:
-        (src_fname, dst_fname, regrid_method, options, mean_err, max_err, 
-         max_area_err) = test_case
-        src_fname_full = os.path.join(DATA_SUBDIR, src_fname)
-        dst_fname_full = os.path.join(DATA_SUBDIR, dst_fname)
-
-        # run the data file retrieval and regridding through try/except
-        correct = False
-        status_ok = cache_data_file(src_fname_full) and cache_data_file(dst_fname_full, DATA_URL_ROOT)
-        if not status_ok:
-            break
+    if wget:
+      # For each test case line from the control file parse the line and call
+      # the test subroutine.
+      for test_case in test_cases:
+          (src_fname, dst_fname, regrid_method, options, mean_err, max_err, 
+           max_area_err) = test_case
+          src_fname_full = os.path.join(DATA_DIR, src_fname)
+          dst_fname_full = os.path.join(DATA_DIR, dst_fname)
+  
+          # run the data file retrieval and regridding through try/except
+          correct = False
+          status_ok = cache_data_file(src_fname_full) and cache_data_file(dst_fname_full)
+          if not status_ok:
+              break
     return status_ok
-
-DATAURL = None
-if len(sys.argv) > 1:
-    DATAURL = sys.argv[1]
 
 # Read the test case parameters from the control file.
 test_cases = read_control_file()
 
 # Retrieve the data files needed for the test cases from the remote server.
-cache_data_files_for_test_cases(test_cases, DATAURL)
+cache_data_files_for_test_cases(test_cases)

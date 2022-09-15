@@ -20,10 +20,8 @@ build
 dist
 doc/esmpy_doc
 src/ESMPy.egg-info
-examples/data
-src/esmpy/test/data
+src/esmpy/data
 examples/notebooks/ESMPy-data
-src/esmpy/test/regrid_from_file/data
 
 # notebooks #
 #############

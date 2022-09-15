@@ -13,10 +13,16 @@
 import esmpy
 import numpy
 
+import os
+
 import esmpy.util.helpers as helpers
 import esmpy.api.constants as constants
+from esmpy.util.cache_data import DATA_DIR
+from esmpy.util.exceptions import DataMissing
 
-gridfile = "examples/data/ll2.5deg_grid.nc"
+gridfile = os.path.join(DATA_DIR, "ll2.5deg_grid.nc")
+if not os.path.exists(gridfile):
+    raise DataMissing("Data not available, try 'make download'.")
 
 # This call enables debug logging
 # esmpy = esmpy.Manager(debug=True)
