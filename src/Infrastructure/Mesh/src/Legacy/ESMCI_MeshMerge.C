@@ -212,16 +212,24 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   MPI_Allreduce(&nelem, &gnelem, 2, MPI_INT, MPI_SUM, Par::Comm());
 
   // if src and dst mesh are neigbors, just sew them together
-  if(gnelem[1] == 0) 
+  if(gnelem[1] == 0) {
     sew_meshes(srcmesh, dstmesh, meshmrg);
-  else
+  } else  {
     concat_meshes(srcmesh, dstmesh, meshmrg, *mesh_src, *mesh_dst, sres, &res_map);
+  }
 
   // clean up memory
-  if(interp) delete interp;
   interp_map_iter it = res_map.begin(), ie = res_map.end();
   for(; it != ie; ++it)
     delete it->second;
+
+  // Get rid of interp and search results
+  if(interp) {
+    delete interp; // This also gets rid of search results
+  } else {
+    // If no interp, then need to get rid of search results independantly
+    DestroySearchResult(sres);
+  }
 
 }
 
