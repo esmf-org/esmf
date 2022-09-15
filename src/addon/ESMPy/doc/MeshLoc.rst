@@ -2,6 +2,6 @@
 MeshLoc
 ~~~~~~~
 
-.. autoclass:: ESMF.api.constants.MeshLoc
+.. autoclass:: esmpy.api.constants.MeshLoc
     :members:
     :exclude-members: __new__

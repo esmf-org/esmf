@@ -7,18 +7,18 @@
 # DD = os.path.join(os.getcwd(), "examples/data")
 # if not os.path.isdir(DD):
 #     os.makedirs(DD)
-# from ESMF.util.cache_data import cache_data_file
+# from esmpy.util.cache_data import cache_data_file
 # cache_data_file(os.path.join(DD, "ll2.5deg_grid.nc"))
 # cache_data_file(os.path.join(DD, "T42_grid.nc"))
 
-import ESMF
+import esmpy
 import numpy
 
-import ESMF.util.helpers as helpers
-import ESMF.api.constants as constants
+import esmpy.util.helpers as helpers
+import esmpy.api.constants as constants
 
 # This call enables debug logging
-# esmpy = ESMF.Manager(debug=True)
+# esmpy = esmpy.Manager(debug=True)
 
 grid1 = "examples/data/ll2.5deg_grid.nc"
 grid2 = "examples/data/T42_grid.nc"
@@ -28,39 +28,39 @@ levels = 2
 time = 5
 
 # Create a uniform global latlon grid from a SCRIP formatted file
-srcgrid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP,
+srcgrid = esmpy.Grid(filename=grid1, filetype=esmpy.FileFormat.SCRIP,
                     add_corner_stagger=True)
 
 # Create a uniform global latlon grid from a SCRIP formatted file
-dstgrid = ESMF.Grid(filename=grid2, filetype=ESMF.FileFormat.SCRIP,
+dstgrid = esmpy.Grid(filename=grid2, filetype=esmpy.FileFormat.SCRIP,
                     add_corner_stagger=True)
 
 # Create a field on the center stagger locations of the source grid
-srcfield = ESMF.Field(srcgrid, name='srcfield',
-                      staggerloc=ESMF.StaggerLoc.CENTER,
+srcfield = esmpy.Field(srcgrid, name='srcfield',
+                      staggerloc=esmpy.StaggerLoc.CENTER,
                       ndbounds=[levels, time])
 
 # Create a field on the center stagger locations of the destination grid
-dstfield = ESMF.Field(dstgrid, name='dstfield',
-                      staggerloc=ESMF.StaggerLoc.CENTER,
+dstfield = esmpy.Field(dstgrid, name='dstfield',
+                      staggerloc=esmpy.StaggerLoc.CENTER,
                       ndbounds=[levels, time])
 
 # Create a field on the center stagger locations of the destination grid
-xctfield = ESMF.Field(dstgrid, name='xctfield',
-                      staggerloc=ESMF.StaggerLoc.CENTER,
+xctfield = esmpy.Field(dstgrid, name='xctfield',
+                      staggerloc=esmpy.StaggerLoc.CENTER,
                       ndbounds=[levels, time])
 
 # Create fields needed to analyze accuracy of conservative regridding
-srcfracfield = ESMF.Field(srcgrid, name='srcfracfield')
-dstfracfield = ESMF.Field(dstgrid, name='dstfracfield')
-srcareafield = ESMF.Field(srcgrid, name='srcareafield')
-dstareafield = ESMF.Field(dstgrid, name='dstareafield')
+srcfracfield = esmpy.Field(srcgrid, name='srcfracfield')
+dstfracfield = esmpy.Field(dstgrid, name='dstfracfield')
+srcareafield = esmpy.Field(srcgrid, name='srcareafield')
+dstareafield = esmpy.Field(dstgrid, name='dstareafield')
 
 
 # Get the coordinate pointers and initialize the source field
 [lon,lat] = [0, 1]
-gridXCoord = srcfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
-gridYCoord = srcfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
+gridXCoord = srcfield.grid.get_coords(lon, esmpy.StaggerLoc.CENTER)
+gridYCoord = srcfield.grid.get_coords(lat, esmpy.StaggerLoc.CENTER)
 
 deg2rad = 3.14159/180
 
@@ -73,8 +73,8 @@ for level in range(levels):
                                           (gridYCoord*deg2rad)**2
 
 # Get the coordinate pointers and initialize the exact solution
-gridXCoord = xctfield.grid.get_coords(lon, ESMF.StaggerLoc.CENTER)
-gridYCoord = xctfield.grid.get_coords(lat, ESMF.StaggerLoc.CENTER)
+gridXCoord = xctfield.grid.get_coords(lon, esmpy.StaggerLoc.CENTER)
+gridYCoord = xctfield.grid.get_coords(lat, esmpy.StaggerLoc.CENTER)
 
 for level in range(levels):
     for timestep in range(time):
@@ -87,9 +87,9 @@ for level in range(levels):
 dstfield.data[...] = 1e20
 
 # Create an object to regrid data from the source to the destination field
-regrid = ESMF.Regrid(srcfield, dstfield,
-                     regrid_method=ESMF.RegridMethod.CONSERVE,
-                     unmapped_action=ESMF.UnmappedAction.ERROR,
+regrid = esmpy.Regrid(srcfield, dstfield,
+                     regrid_method=esmpy.RegridMethod.CONSERVE,
+                     unmapped_action=esmpy.UnmappedAction.ERROR,
                      src_frac_field=srcfracfield,
                      dst_frac_field=dstfracfield)
 
@@ -126,14 +126,14 @@ if dstmass != 0:
     csrverr = numpy.abs(srcmass - dstmass) / dstmass
 
 # Handle the parallel case
-if ESMF.pet_count() > 1:
+if esmpy.pet_count() > 1:
     relerr = helpers.reduce_val(relerr, op=constants.Reduce.SUM)
     num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
     srcmass = helpers.reduce_val(srcmass, op=constants.Reduce.SUM)
     dstmass = helpers.reduce_val(dstmass, op=constants.Reduce.SUM)
 
 # Output the results from one processor only
-if ESMF.local_pet() == 0:
+if esmpy.local_pet() == 0:
     meanrelerr = relerr / num_nodes
     csrverr = numpy.abs(srcmass - dstmass) / dstmass
 

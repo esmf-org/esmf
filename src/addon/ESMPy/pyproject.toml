@@ -1,0 +1,38 @@
+[build-system]
+requires = [ "setuptools>=41", "wheel", "setuptools-git-versioning"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ESMPy"
+description = "ESMF Python interface"
+# readme = "README.md"
+maintainers = [{author = "ESMF Core Team", email = "esmf_support@ucar.edu"}]
+requires-python = ">=3.7"
+license = {text = "University of Illinois-NCSA"}
+dependencies = [
+    "numpy",
+    "pytest-json-report",
+    'importlib-metadata; python_version<"3.8"',
+]
+dynamic = ["version"]
+
+[tool.setuptools-git-versioning]
+enabled = true
+template = "{tag}"
+dev_template = "{tag}"
+dirty_template = "{tag}"
+starting_version = "8.4.0" # this is a backup for pip <= 22.0 where git-versioning doesn't work
+
+[tool.dynamic]
+version = "placeholder" # this is a placeholder for the version pulled with git-versioning
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["doc*"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "src/esmpy/test/test_api",
+    "examples/test_examples.py", 
+    "src/esmpy/test/regrid_from_file/test_regrid_from_file.py", 
+]

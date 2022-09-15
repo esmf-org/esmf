@@ -6,42 +6,34 @@
 # DD = os.path.join(os.getcwd(), "examples/data")
 # if not os.path.isdir(DD):
 #     os.makedirs(DD)
-# from ESMF.util.cache_data import cache_data_file
+# from esmpy.util.cache_data import cache_data_file
 # cache_data_file(os.path.join(DD, "ll1deg_grid.nc"))
 
-try:
-    from unittest import SkipTest
-except ImportError:
-    from nose import SkipTest
-
-import ESMF
+import esmpy
 import numpy
 
-import ESMF.util.helpers as helpers
-import ESMF.api.constants as constants
+import esmpy.util.helpers as helpers
+import esmpy.api.constants as constants
 
 # This call enables debug logging
-ESMF.Manager(debug=True)
+esmpy.Manager(debug=True)
 
-from ESMF.util.locstream_utilities import create_locstream_spherical_16, create_locstream_spherical_16_parallel
-coord_sys=ESMF.CoordSys.SPH_DEG
+from esmpy.util.locstream_utilities import create_locstream_spherical_16, create_locstream_spherical_16_parallel
+coord_sys=esmpy.CoordSys.SPH_DEG
 domask=True
-if ESMF.pet_count() == 1:
+if esmpy.pet_count() == 1:
     locstream = create_locstream_spherical_16(coord_sys=coord_sys, domask=domask)
 else:
-    if constants._ESMF_MPIRUN_NP != 4:
-        raise SkipTest('processor count must be 4 or 1 for this example')
-    else:
-        locstream = create_locstream_spherical_16_parallel(coord_sys=coord_sys, domask=domask)
+    locstream = create_locstream_spherical_16_parallel(coord_sys=coord_sys, domask=domask)
 
 grid1 = "examples/data/ll1deg_grid.nc"
-grid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
+grid = esmpy.Grid(filename=grid1, filetype=esmpy.FileFormat.SCRIP)
 
 # create a field
-srcfield = ESMF.Field(grid, name='srcfield')
+srcfield = esmpy.Field(grid, name='srcfield')
 
-dstfield = ESMF.Field(locstream, name='dstfield')
-xctfield = ESMF.Field(locstream, name='xctfield')
+dstfield = esmpy.Field(locstream, name='dstfield')
+xctfield = esmpy.Field(locstream, name='xctfield')
 
 # initialize the fields
 [x, y] = [0, 1]
@@ -53,9 +45,9 @@ srcfield.data[...] = 10.0 + numpy.cos(gridXCoord * deg2rad) ** 2 + numpy.cos(2 *
 
 gridXCoord = locstream["ESMF:Lon"]
 gridYCoord = locstream["ESMF:Lat"]
-if coord_sys == ESMF.CoordSys.SPH_DEG:
+if coord_sys == esmpy.CoordSys.SPH_DEG:
     xctfield.data[...] = 10.0 + numpy.cos(gridXCoord * deg2rad) ** 2 + numpy.cos(2 * gridYCoord * deg2rad)
-elif coord_sys == ESMF.CoordSys.SPH_RAD:
+elif coord_sys == esmpy.CoordSys.SPH_RAD:
     xctfield.data[...] = 10.0 + numpy.cos(gridXCoord) ** 2 + numpy.cos(2 * gridYCoord)
 else:
     raise ValueError("coordsys value does not work in this example")
@@ -67,13 +59,13 @@ dst_mask_values=None
 if domask:
     dst_mask_values=numpy.array([0])
 
-regrid = ESMF.Regrid(srcfield, dstfield,
-                     regrid_method=ESMF.RegridMethod.BILINEAR,
-                     unmapped_action=ESMF.UnmappedAction.ERROR,
+regrid = esmpy.Regrid(srcfield, dstfield,
+                     regrid_method=esmpy.RegridMethod.BILINEAR,
+                     unmapped_action=esmpy.UnmappedAction.ERROR,
                      dst_mask_values=dst_mask_values)
 
 # do the regridding from source to destination field
-dstfield = regrid(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
+dstfield = regrid(srcfield, dstfield, zero_region=esmpy.Region.SELECT)
 
 # compute the mean relative error
 num_nodes = numpy.prod(xctfield.data.shape[:])
@@ -89,12 +81,12 @@ if num_nodes != 0:
     meanrelerr = relerr / num_nodes
 
 # handle the parallel case
-if ESMF.pet_count() > 1:
+if esmpy.pet_count() > 1:
     relerr = helpers.reduce_val(relerr, op=constants.Reduce.SUM)
     num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
 
 # output the results from one processor only
-if ESMF.local_pet() == 0:
+if esmpy.local_pet() == 0:
     meanrelerr = relerr / num_nodes
     print ("ESMPy Grid LocStream Regridding Example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))

@@ -2,6 +2,6 @@
 UnmappedAction
 ~~~~~~~~~~~~~~
 
-.. autoclass:: ESMF.api.constants.UnmappedAction
+.. autoclass:: esmpy.api.constants.UnmappedAction
     :members:
     :exclude-members: __new__

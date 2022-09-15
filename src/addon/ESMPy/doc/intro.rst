@@ -2,7 +2,7 @@
 Overview
 --------
 
-.. automodule:: ESMF
+.. automodule:: esmpy
 
 ---------------
 Important Links
@@ -28,4 +28,3 @@ Information on these can be found in the
 <http://earthsystemmodeling.org/docs/release/latest/ESMF_refdoc/>`_.
 
 Please contact esmf_support@ucar.edu with any questions or problems.
-

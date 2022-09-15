@@ -1,37 +1,29 @@
 # This example demonstrates how to regrid between a mesh and a locstream.
 
-try:
-    from unittest import SkipTest
-except ImportError:
-    from nose import SkipTest
-
-import ESMF
+import esmpy
 import numpy
 
-import ESMF.util.helpers as helpers
-import ESMF.api.constants as constants
+import esmpy.util.helpers as helpers
+import esmpy.api.constants as constants
 
 # This call enables debug logging
-# ESMF.Manager(debug=True)
+# esmpy.Manager(debug=True)
 
-from ESMF.util.mesh_utilities import mesh_create_5, mesh_create_5_parallel
-from ESMF.util.locstream_utilities import create_locstream_16, create_locstream_16_parallel
-if ESMF.pet_count() == 1:
+from esmpy.util.mesh_utilities import mesh_create_5, mesh_create_5_parallel
+from esmpy.util.locstream_utilities import create_locstream_16, create_locstream_16_parallel
+if esmpy.pet_count() == 1:
     mesh, _, _, _, _, _ = mesh_create_5()
     locstream = create_locstream_16()
 else:
-    if constants._ESMF_MPIRUN_NP != 4:
-        raise SkipTest('processor count must be 4 or 1 for this example')
-    else:
-        mesh, _, _, _, _ = mesh_create_5_parallel()
-        locstream = create_locstream_16_parallel()
+    mesh, _, _, _, _ = mesh_create_5_parallel()
+    locstream = create_locstream_16_parallel()
 
 # create a field
-srcfield = ESMF.Field(mesh, name='srcfield')#, meshloc=ESMF.MeshLoc.ELEMENT)
+srcfield = esmpy.Field(mesh, name='srcfield')#, meshloc=esmpy.MeshLoc.ELEMENT)
 
 # create a field on the locstream
-dstfield = ESMF.Field(locstream, name='dstfield')
-xctfield = ESMF.Field(locstream, name='xctfield')
+dstfield = esmpy.Field(locstream, name='dstfield')
+xctfield = esmpy.Field(locstream, name='xctfield')
 
 # initialize the fields
 [x, y] = [0, 1]
@@ -49,8 +41,8 @@ dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
 # TODO: this example seems to fail occasionally with UnmappedAction.ERROR, probably due to a tolerance issue - ask Bob
-regrid = ESMF.Regrid(srcfield=srcfield, dstfield=dstfield, regrid_method=ESMF.RegridMethod.BILINEAR,
-                     unmapped_action=ESMF.UnmappedAction.IGNORE)
+regrid = esmpy.Regrid(srcfield=srcfield, dstfield=dstfield, regrid_method=esmpy.RegridMethod.BILINEAR,
+                     unmapped_action=esmpy.UnmappedAction.IGNORE)
 
 # do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
@@ -65,12 +57,12 @@ if num_nodes != 0:
     meanrelerr = relerr / num_nodes
 
 # handle the parallel case
-if ESMF.pet_count() > 1:
+if esmpy.pet_count() > 1:
     relerr = helpers.reduce_val(relerr, op=constants.Reduce.SUM)
     num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
 
 # output the results from one processor only
-if ESMF.local_pet() == 0:
+if esmpy.local_pet() == 0:
     meanrelerr = relerr / num_nodes
     print ("ESMPy Grid Mesh Regridding Example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))
