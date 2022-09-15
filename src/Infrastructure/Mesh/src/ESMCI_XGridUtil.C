@@ -135,6 +135,9 @@ double polygon::area(int sdim) const {
       ccw_sense += angle;
     }
 
+    // Free coordinate memory
+    delete [] coords;
+
 #if BOB_XGRID_DEBUG
     if (xgu_debug) {
       printf("ccw_sense=%30.27f \n",ccw_sense);
