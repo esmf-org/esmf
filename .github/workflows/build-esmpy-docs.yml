@@ -21,7 +21,7 @@ jobs:
       with:
           repository: esmf-org/esmf-containers
           path: esmf-containers
-          ref: main
+          ref: esmpy-patch-8.3.1
     
     - name: Build Docker image  
       run: | 
