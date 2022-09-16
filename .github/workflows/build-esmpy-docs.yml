@@ -26,7 +26,7 @@ jobs:
     - name: Build Docker image  
       run: | 
         cd ${{ github.workspace }}/esmf-containers/build-esmf-docs/esmpy
-        docker build . --tag esmf/build-esmpy-docs
+        docker build . --tag esmf/build-esmpy-docs --build-arg ESMF_BRANCH="${{ github.ref_name }}" --no-cache
         
     - name: Copy artifacts
       run: |
