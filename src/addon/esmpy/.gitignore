@@ -1,0 +1,28 @@
+# Compiled source #
+###################
+*.pyc
+
+# Misc #
+########
+*~
+*.orig
+*.log
+#.Log
+PET*
+*.stdout
+*.out
+*.vtk
+*.csv
+
+# ESMPy build and docs #
+########################
+build
+dist
+doc/esmpy_doc
+src/esmpy.egg-info
+src/esmpy/data
+examples/notebooks/esmpy-data
+
+# notebooks #
+#############
+examples/notebooks/.ipynb_checkpoints/
