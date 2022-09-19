@@ -774,7 +774,9 @@ PIOc_InitDecomp(int iosysid, int pio_type, int ndims, const int *gdimlen, int ma
 /**
  * Initialize the decomposition used with distributed arrays. The
  * decomposition describes how the data will be distributed between
- * tasks.
+ * tasks.  This is a readonly version of this function.  In this version
+ * compmap is allowed to have repeated mappings so that one value on storage
+ * may be read to multiple locations in memory.
  *
  * Internally, this function will:
  * <ul>
@@ -967,6 +969,12 @@ PIOc_InitDecomp_ReadOnly(int iosysid, int pio_type, int ndims, const int *gdimle
         iodesc->rearranger = ios->default_rearranger;
     else
         iodesc->rearranger = *rearranger;
+
+    if (iodesc->rearranger != PIO_REARR_SUBSET){
+
+        return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
+    }
+
     PLOG((2, "iodesc->rearranger = %d", iodesc->rearranger));
 
     /* Is this the subset rearranger? */

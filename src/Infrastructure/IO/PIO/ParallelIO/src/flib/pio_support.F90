@@ -139,20 +139,18 @@ contains
   !! Fortran interface to write a mapping file.
   !!
   !! @param file : The file where the decomp map will be written.
-  !! @param gdims : The dimensions of the data array in memory.
+  !! @param gdims : The global dimensions of the data array as stored in memory.
   !! @param DOF : The multidimensional array of indexes that describes how
   !! data in memory are written to a file.
   !! @param comm : The MPI comm index.
-  !! @param punit : Optional argument that is no longer used.
   !! @author T Craig
   !<
-  subroutine pio_writedof (file, gdims, DOF, comm, punit)
+  subroutine pio_writedof (file, gdims, DOF, comm)
     implicit none
     character(len=*),intent(in) :: file
     integer, intent(in) :: gdims(:)
     integer(PIO_OFFSET_KIND)  ,intent(in) :: dof(:)
     integer         ,intent(in) :: comm
-    integer,optional,intent(in) :: punit
     integer :: err
     integer :: ndims
 
@@ -169,7 +167,6 @@ contains
          integer(C_INT), value, intent(in) :: f90_comm
        end function PIOc_writemap_from_f90
     end interface
-    if (present(punit)) continue ! to suppress warning
     ndims = size(gdims)
     err = PIOc_writemap_from_f90(trim(file)//C_NULL_CHAR, ndims, gdims, int(size(dof),C_SIZE_T), dof, comm)
 
@@ -255,15 +252,13 @@ contains
   !! @param DOF Pointer to an integer array where the Decomp map will
   !! be stored.
   !! @param comm MPI comm index
-  !! @param punit Optional argument that is no longer used.
   !! @author T Craig
   !<
-  subroutine pio_readdof (file, ndims, gdims, DOF, comm, punit)
+  subroutine pio_readdof (file, ndims, gdims, DOF, comm)
     implicit none
     character(len=*),intent(in) :: file
     integer(PIO_OFFSET_KIND),pointer:: dof(:)
     integer         ,intent(in) :: comm
-    integer,optional,intent(in) :: punit
     integer, intent(out) :: ndims
     integer, pointer :: gdims(:)
     integer(PIO_OFFSET_KIND) :: maplen
@@ -281,12 +276,10 @@ contains
          integer(C_INT), value, intent(in) :: f90_comm
        end function PIOc_readmap_from_f90
     end interface
-    if (present(punit)) continue ! to suppress warning
     ierr = PIOc_readmap_from_f90(trim(file)//C_NULL_CHAR, ndims, tgdims, maplen, tmap, comm);
 
     call c_f_pointer(tgdims, gdims, (/ndims/))
     call c_f_pointer(tmap, DOF, (/maplen/))
-    !    DOF = DOF+1
   end subroutine pio_readdof
 
   !>

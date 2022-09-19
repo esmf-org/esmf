@@ -143,7 +143,8 @@ module piolib_mod
        PIO_deletefile, &
        PIO_get_numiotasks, &
        PIO_iotype_available, &
-       PIO_set_rearr_opts
+       PIO_set_rearr_opts, &
+       PIO_initdecomp_readonly
 
   !-----------------------------------------------------------------------
   !
@@ -917,6 +918,102 @@ contains
     deallocate(cdims)
 
   end subroutine PIO_initdecomp_internal
+
+
+  !>
+  !! @public
+  !! @ingroup PIO_initdecomp_readonly
+  !! Implements the degrees of freedom decomposition for
+  !! PIO_initdecomp(). This provides the ability to describe a
+  !! computational decomposition in PIO using degrees of freedom
+  !! method. This is a decomposition that can not be easily described
+  !! using a start and count method.  This version of initdecomp allows the
+  !! decomposition to contain repeated values so that the same source point
+  !! may be mapped to multiple destinations.
+  !!
+  !! Optional parameters for this subroutine allows for the
+  !! specififcation of io decomposition using iostart and iocount
+  !! arrays. If iostart and iocount arrays are not specified by the
+  !! user, and rearrangement is turned on then PIO will calculate an
+  !! suitable IO decomposition.
+  !!
+  !! @param iosystem @copydoc iosystem_desc_t
+  !! @param basepiotype @copydoc use_PIO_kinds
+  !! @param dims An array of the global length of each dimesion of the
+  !! variable(s)
+  !! @param compdof Mapping of the storage order for the computational
+  !! decomposition to its memory order
+  !! @param iodesc @copydoc iodesc_generate
+  !! @param rearr rearranger
+  !! @param iostart The start index for the block-cyclic io
+  !! decomposition
+  !! @param iocount The count for the block-cyclic io decomposition
+  !! @author Jim Edwards
+  !<
+  subroutine PIO_initdecomp_readonly(iosystem,basepiotype,dims, compdof, iodesc, rearr, iostart, iocount)
+    type (iosystem_desc_t), intent(in) :: iosystem
+    integer(i4), intent(in)           :: basepiotype
+    integer(i4), intent(in)           :: dims(:)
+    integer (PIO_OFFSET_KIND), intent(in) :: compdof(:)   ! global degrees of freedom for computational decomposition
+    integer, optional, target :: rearr
+    integer (PIO_OFFSET_KIND), optional :: iostart(:), iocount(:)
+    type (io_desc_t), intent(inout)     :: iodesc
+
+    integer(c_int) :: ndims
+    integer(c_int), dimension(:), allocatable, target :: cdims
+    integer(PIO_OFFSET_KIND), dimension(:), allocatable, target :: cstart, ccount
+    integer :: maplen
+
+    type(C_PTR) :: crearr
+    interface
+       integer(C_INT) function PIOc_InitDecomp_ReadOnly(iosysid,basetype,ndims,dims, &
+            maplen, compmap, ioidp, rearr, iostart, iocount)  &
+            bind(C,name="PIOc_InitDecomp_ReadOnly")
+         use iso_c_binding
+         integer(C_INT), value :: iosysid
+         integer(C_INT), value :: basetype
+         integer(C_INT), value :: ndims
+         integer(C_INT) :: dims(*)
+         integer(C_INT), value :: maplen
+         integer(C_SIZE_T) :: compmap(*)
+         integer(C_INT) :: ioidp
+         type(C_PTR), value :: rearr
+         type(C_PTR), value :: iostart
+         type(C_PTR), value :: iocount
+       end function PIOc_InitDecomp_ReadOnly
+    end interface
+    integer :: ierr,i
+
+    ndims = size(dims)
+    allocate(cdims(ndims))
+    do i=1,ndims
+       cdims(i) = dims(ndims-i+1)
+    end do
+
+    if(present(rearr)) then
+       crearr = C_LOC(rearr)
+    else
+       crearr = C_NULL_PTR
+    endif
+    maplen = size(compdof)
+    if(present(iostart) .and. present(iocount)) then
+       allocate(cstart(ndims), ccount(ndims))
+       do i=1,ndims
+          cstart(i) = iostart(ndims-i+1)-1
+          ccount(i) = iocount(ndims-i+1)
+       end do
+
+       ierr = PIOc_InitDecomp_ReadOnly(iosystem%iosysid, basepiotype, ndims, cdims, &
+            maplen, compdof, iodesc%ioid, crearr, C_LOC(cstart), C_LOC(ccount))
+       deallocate(cstart, ccount)
+    else
+       ierr = PIOc_InitDecomp_ReadOnly(iosystem%iosysid, basepiotype, ndims, cdims, &
+            maplen, compdof, iodesc%ioid, crearr, C_NULL_PTR, C_NULL_PTR)
+    end if
+
+    deallocate(cdims)
+
+  end subroutine PIO_initdecomp_readonly
 
   !>
   !! @public
