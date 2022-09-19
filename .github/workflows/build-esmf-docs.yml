@@ -51,8 +51,8 @@ jobs:
 
     - name: Copy docs
       run: | 
-        cd ${{ github.workspace }}/esmf-org.github.io
-        mkdir -p docs/nightly/${{ github.ref_name }}
+        cd ${{ github.workspace }}/esmf-org.github.io        
+        mkdir -p docs/nightly/${{ github.ref_name }}/dev_guide
         cd ${{ github.workspace }}/artifacts
         unzip doc-artifacts.zip
         cd ${{ github.workspace }}/artifacts/artifacts/doc-esmf
@@ -62,7 +62,7 @@ jobs:
         cp -rf NUOPC_refdoc.pdf ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
         cp -rf NUOPC_howtodoc ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
         cp -rf NUOPC_howtodoc.pdf ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
-        cd ${{ github.workspace }}/artifacts/artifacts/doc-dev_guide
+        cd ${{ github.workspace }}/artifacts/artifacts/doc-dev_guide        
         cp -rf ./dev_guide/dev_guide/* ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/dev_guide/
         
     - name: Commit and publish docs
