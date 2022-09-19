@@ -137,7 +137,7 @@ The applcation can then be built as typically via cmake commands, only requiring
     include $(ESMFMKFILE)
 
     build/externalApp: externalApp.F90 esmxBuild.yaml
-	    cmake -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
+	    cmake -H. -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
 	    cmake --build ./build
 
 ### esmxBuild.yaml and esmxRun.config
