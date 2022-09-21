@@ -18,7 +18,7 @@ def cache_data_file(fname):
     status_ok = True
     if not os.path.exists(fname):
         url = os.path.join(DATA_URL, os.path.basename(fname))
-        print('Retrieving ' + url + '...\n')
+        print('Retrieving ' + url + '...')
         try:
             req = urlopen(url)
         except URLError:
@@ -31,7 +31,6 @@ def cache_data_file(fname):
             except:
                 status_ok = False
     return status_ok
-
 
 def download_example_data():
     # Filenames to download.
@@ -47,6 +46,8 @@ def download_example_data():
     wget = True
     if 'ESMPY_DATA_DIR' in os.environ:
         wget = False
+    else:
+        print ('Data directory: {}'.format(DATA_DIR))
 
     # Create data subdirectory if it doesn't exist.
     if not os.path.exists(DATA_DIR):

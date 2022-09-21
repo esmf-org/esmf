@@ -18,12 +18,13 @@ def cache_data_files_for_test_cases(test_cases):
     wget = True
     if 'ESMPY_DATA_DIR' in os.environ:
         wget = False
+    else:
+        print ('Data directory: {}'.format(DATA_DIR))
 
     # Create data subdirectory if it doesn't exist.
     if not os.path.exists(DATA_DIR):
         os.mkdir(DATA_DIR)
   
-    status_ok = True
     if wget:
       # For each test case line from the control file parse the line and call
       # the test subroutine.
@@ -34,11 +35,10 @@ def cache_data_files_for_test_cases(test_cases):
           dst_fname_full = os.path.join(DATA_DIR, dst_fname)
   
           # run the data file retrieval and regridding through try/except
-          correct = False
           status_ok = cache_data_file(src_fname_full) and cache_data_file(dst_fname_full)
           if not status_ok:
-              break
-    return status_ok
+              raise ESMPyException("Error downloading files")
+    return
 
 # Read the test case parameters from the control file.
 test_cases = read_control_file()
