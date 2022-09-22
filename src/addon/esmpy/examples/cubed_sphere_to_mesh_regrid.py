@@ -21,7 +21,7 @@ from esmpy.util.cache_data import DATA_DIR
 from esmpy.util.exceptions import DataMissing
 
 # This call enables debug logging when debug=True
-# mg = esmpy.Manager(debug=True)
+mg = esmpy.Manager(debug=True)
 
 # if esmpy.pet_count() != 6:
 #     print ("ESMPy cubed sphere regridding example requires 6 processors")
