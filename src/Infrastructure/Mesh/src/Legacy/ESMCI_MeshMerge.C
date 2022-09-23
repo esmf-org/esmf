@@ -231,6 +231,17 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
     DestroySearchResult(sres);
   }
 
+  // Get rid of sintd nodes before the vector goes away
+  for (auto i=0; i<sintd_nodes.size(); i++) {
+    delete sintd_nodes[i]; // delete
+    sintd_nodes[i]=NULL; // mark as empty
+   }
+
+  // Get rid of sintd cells before the vector goes away
+  for (auto i=0; i<sintd_cells.size(); i++) {
+    delete sintd_cells[i]; // Free memory
+    sintd_cells[i]=NULL; // mark as empty
+   }
 }
 
 bool subject_is_offplane(unsigned int sdim, unsigned int subject_num_nodes, double *cd){
@@ -442,6 +453,17 @@ void MeshCreateDiff(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp, double threshol
   for(; it != ie; ++it)
     delete it->second;
 
+  // Get rid of sintd nodes before the vector goes away
+  for (auto i=0; i<sintd_nodes.size(); i++) {
+    delete sintd_nodes[i]; // delete
+    sintd_nodes[i]=NULL; // mark as empty
+   }
+
+  // Get rid of sintd cells before the vector goes away
+  for (auto i=0; i<sintd_cells.size(); i++) {
+    delete sintd_cells[i]; // Free memory
+    sintd_cells[i]=NULL; // mark as empty
+   }
 }
 
   extern bool mathutil_debug;
