@@ -55,10 +55,6 @@ _ESMF_VERSION = None
 #  checking that the ESMF_VERSION matches esmpy.__version__
 _ESMPY_VERSION = None
 
-# ESMF_MPIRUN
-_ESMF_MPIRUN = None
-_ESMF_MPIRUN_NP = None
-
 #### NAMED CONSTANTS ##########################################################
 
 # CoordSys

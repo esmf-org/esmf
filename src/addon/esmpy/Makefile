@@ -1,5 +1,12 @@
 .PHONY: clean install test test_int test_all uninstall
 
+-include $(ESMFMKFILE)
+
+ifndef ESMF_INTERNAL_MPIRUN
+		ESMF_INTERNAL_MPIRUN=mpiexec
+endif
+
+
 clean:
 		rm -rf build || :
 		find . -name "*.egg-info" -exec rm -rf {} \; || :
@@ -12,7 +19,6 @@ clean:
 		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
 		find . -name "*.report.json" -exec rm -rf {} \; || :
 		find . -name "*.test" -exec rm -rf {} \; || :
-		rm -rf src/esmpy/data || :
 dust:
 		find . -name "*ESMF_LogFile*" -exec rm -f {} \; || :
 		find . -name "*.report.json" -exec rm -rf {} \; || :
@@ -29,26 +35,26 @@ download_regrid_from_file:
 
 download: download_examples download_regrid_from_file
 
-test:
-		bash src/esmpy/test/test_all.bash
+test: dust
+		bash src/esmpy/test/test_all.bash ${ESMF_INTERNAL_MPIRUN}
 
 test_unit:
 		python3 -m pytest -vs
 
 test_unit_parallel:
-		mpiexec -n 4 python3 -vs
+		$(ESMF_INTERNAL_MPIRUN) -np 4 python3 -vs
 
 test_examples:
 		python3 -m pytest -vs examples/test_examples.py
 
 test_examples_parallel:
-		mpiexec -n 4 python3 -m pytest -vs examples/test_examples.py
+		$(ESMF_INTERNAL_MPIRUN) -np 4 python3 -m pytest -vs examples/test_examples.py
 
 test_regrid_from_file:
 		python3 -m pytest -vs src/esmpy/test/regrid_from_file/test_regrid_from_file.py
 
 test_regrid_from_file_parallel:
-		mpiexec -n 4 python3 -m pytest -vs src/esmpy/test/regrid_from_file/test_regrid_from_file.py
+		$(ESMF_INTERNAL_MPIRUN) -np 4 python3 -m pytest -vs src/esmpy/test/regrid_from_file/test_regrid_from_file.py
 
 test_serial: test_unit test_examples test_regrid_from_file
 

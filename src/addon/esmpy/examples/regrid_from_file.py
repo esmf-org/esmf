@@ -36,11 +36,11 @@ grid = esmpy.Grid(filename=os.path.join(DATA_DIR, datafile),
 srcfield = esmpy.Field(grid, staggerloc=esmpy.StaggerLoc.CENTER, ndbounds=[33, 2])
 
 # Read the field data from file
-srcfield.read(filename=os.path.join(DATADIR, datafile),
+srcfield.read(filename=os.path.join(DATA_DIR, datafile),
            variable="so", timeslice=2)
 
 # Create an ESMF formatted unstructured mesh with clockwise cells removed
-mesh = esmpy.Mesh(filename=os.path.join(DATADIR, meshfile),
+mesh = esmpy.Mesh(filename=os.path.join(DATA_DIR, meshfile),
                  filetype=esmpy.FileFormat.ESMFMESH)
 
 # Create a field on the nodes of the mesh

@@ -17,12 +17,13 @@ PET*
 # ESMPy build and docs #
 ########################
 build
-dist
 doc/esmpy_doc
 src/esmpy.egg-info
-src/esmpy/data
 examples/notebooks/esmpy-data
 
 # notebooks #
 #############
 examples/notebooks/.ipynb_checkpoints/
+examples/notebooks/*.nc
+examples/notebooks/*.rh
+examples/notebooks/*.mp4

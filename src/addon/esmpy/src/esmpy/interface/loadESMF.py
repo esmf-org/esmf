@@ -124,21 +124,6 @@ if "mpiuni" not in esmfcomm:
 if "mpiuni" in esmfcomm:
     constants._ESMF_COMM = constants._ESMF_COMM_MPIUNI
 
-# look for ESMPY_MPIRUN, set accordingly
-try:
-    constants._ESMF_MPIRUN = os.environ['ESMPY_MPIRUN']
-except:
-    if constants._ESMF_OS == constants._ESMF_OS_UNICOS:
-        constants._ESMF_MPIRUN = "aprun"
-    else:
-        constants._ESMF_MPIRUN = "mpiexec"
-
-# look for ESMF_NUM_PROCS
-try:
-    constants._ESMF_MPIRUN_NP = os.environ['ESMF_NUM_PROCS']
-except:
-    constants._ESMF_MPIRUN_NP = 4
-
 # in-memory factors only supported on the GNU stack given inability to
 # deallocate Fortran pointers associated using c_f_pointer in other compilers.
 # some compilers may support this, but only the GNU stack is guaranteed at this
