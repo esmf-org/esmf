@@ -129,7 +129,6 @@ The typical situation where `ESMX_Driver` comes into play is where a user applic
     # Specific project settings
     project(ExternalDriverAPIProto VERSION 0.1.0)
     add_executable(externalApp externalApp.F90)
-    install(TARGETS externalApp)
     target_include_directories(externalApp PUBLIC ${PROJECT_BINARY_DIR})
     target_link_libraries(externalApp PUBLIC esmx_driver)
 
@@ -138,7 +137,7 @@ The applcation can then be built as typically via cmake commands, only requiring
     include $(ESMFMKFILE)
 
     build/externalApp: externalApp.F90 esmxBuild.yaml
-	    cmake -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
+	    cmake -H. -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
 	    cmake --build ./build
 
 ### esmxBuild.yaml and esmxRun.config
@@ -152,3 +151,20 @@ The run-time configuration needed by `ESMX_Driver` can either be supplied by the
 - The `ESMX_component_list`, child component, and run sequence information is ingested from `config` as described under the [unfied driver executable section](#esmxrunconfig).
 - If the parent level passes an `ESMF_Clock` object to `ESMX_Driver` during initialize, the driver uses it instead of looking for `startTime` and `stopTime` in `config`.
 - For the case where a clock is provided by the parent layer, its `timeStep` is used as the *default* time step of the outer run sequence loop when using the `@*` syntax. If a specific time step is set in the run sequence with `@DT`, then `DT` must be a divisor of the `timeStep` provided by the parent clock.
+
+## ESMX Software Dependencies
+
+The ESMX layer has the following dependencies:
+- **ESMF Library**: The ESMX layer is part of the ESMF repository. In order to use ESMX as described above, the ESMF library first needs to be built following the instructions for [Building ESMF](https://github.com/esmf-org/esmf#building-esmf).
+- **CMake**: v3.5.2 or greater.
+- **Python**: v3.5 or greater.
+  - `python3` must be in `$PATH`.
+  - `PyYaml` must be installed in the Python environment.
+  
+There are many ways to provide a suitable Python environment. One portable way based on [venv](https://docs.python.org/3/library/venv.html) is shown below.
+
+    python3 -m venv ESMXenv
+    source ESMXenv/bin/activate (for Bash)  or   source ESMXenv/bin/activate.csh (for Csh)
+    pip install pyyaml
+    ... Environment ready for ESMX ...
+    deactivate
