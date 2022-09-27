@@ -28,16 +28,53 @@ class TestLocStream(TestBase):
         # test the deleting a LocStream has no ill effects
         del locstream
 
-    def test_mask(self):
-        locstream = LocStream(5, name="Test LocStream")
-        locstream["ESMF:X"] = (1, 2, 3, 4, 5)
-        locstream["ESMF:Y"] = np.array([7, 7, 7, 7, 7])
+    def test_create_sph_deg(self):
+        # LocStream creation and simple validation
+        locstream = LocStream(5, coord_sys=CoordSys.SPH_DEG, name="Test LocStream Spherical")
+        assert locstream.size == 5
 
-        assert (locstream.mask == None)
-
+        locstream["ESMF:Lon"] = [1, 2, 3, 4, 5]
+        locstream["ESMF:Lat"] = (7, 7, 7, 7, 7)
         locstream["ESMF:Mask"] = np.array([0, 0, 1, 1, 1])
 
-        self.assertNumpyAll(locstream.mask, np.array([0, 0, 1, 1, 1]))
+        if local_pet() == 0:
+            assert locstream.lower_bounds == [0]
+            assert locstream.upper_bounds == [5]
+
+        print (locstream)
+
+        # test the deleting a LocStream has no ill effects
+        del locstream
+
+    def test_create_sph_rad_3d(self):
+        # LocStream creation and simple validation
+        locstream = LocStream(5, coord_sys=CoordSys.SPH_RAD, name="Test LocStream Spherical 3D")
+        assert locstream.size == 5
+
+        locstream["ESMF:Lon"] = [1, 2, 3, 4, 5]
+        locstream["ESMF:Lat"] = (7, 7, 7, 7, 7)
+        locstream["ESMF:Radius"] = (4, 4, 4, 4, 4)
+        locstream["ESMF:Mask"] = np.array([0, 0, 1, 1, 1])
+
+        if local_pet() == 0:
+            assert locstream.lower_bounds == [0]
+            assert locstream.upper_bounds == [5]
+
+        print (locstream)
+
+        # test the deleting a LocStream has no ill effects
+        del locstream
+
+    def test_mask(self):
+       locstream = LocStream(5, name="Test LocStream")
+       locstream["ESMF:X"] = (1, 2, 3, 4, 5)
+       locstream["ESMF:Y"] = np.array([7, 7, 7, 7, 7])
+
+       assert (locstream.mask == None)
+
+       locstream["ESMF:Mask"] = np.array([0, 0, 1, 1, 1])
+
+       self.assertNumpyAll(locstream.mask, np.array([0, 0, 1, 1, 1]))
 
     def test_copy(self):
         # LocStream creation and simple validation
@@ -75,11 +112,3 @@ class TestLocStream(TestBase):
         import pickle
 
         pickle.dumps(locstream)
-
-    @pytest.mark.xfail
-    def test_properties(self):
-        locstream = LocStream(10, name="Test LocStream")
-        locstream["ESMF:X"] = (1, 2, 3, 4, 5)
-        locstream["ESMF:Y"] = np.array([7, 7, 7, 7, 7])
-
-        locstream.size = 5
