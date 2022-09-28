@@ -130,6 +130,13 @@ class ExtrapMethod(IntEnum):
     """
     NEAREST_STOD = 1
     """
+    Nearest source to destination.
+    Here each destination point is mapped to the closest source point. A given
+    source point may go to multiple destination points, but no destination
+    point will receive input from more than one source point.
+    """
+    NEAREST_IDAVG = 2
+    """
     Inverse distance weighted average. 
     Here the value of a destination point is the weighted average of the 
     closest N source points. The weight is the reciprocal of the distance of 
@@ -137,13 +144,6 @@ class ExtrapMethod(IntEnum):
     weights contributing to one destination point are normalized so that they 
     sum to 1.0. The user can choose N and P when using this method, but 
     defaults are also provided.
-    """
-    NEAREST_IDAVG = 2
-    """
-    Nearest source to destination. 
-    Here each destination point is mapped to the closest source point. A given 
-    source point may go to multiple destination points, but no destination 
-    point will receive input from more than one source point.
     """
     CREEP_FILL = 3
     """
