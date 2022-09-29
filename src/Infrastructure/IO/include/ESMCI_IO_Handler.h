@@ -78,7 +78,7 @@ namespace ESMCI {
   private:
 //    IO(ESMC_IOFmt_Flag fmtArg, int rank, int *rc);
   protected:
-    ~IO_Handler() { destruct(); }
+    virtual ~IO_Handler() { destruct(); }
     // create() and destroy()
   public:
     static IO_Handler *create(ESMC_IOFmt_Flag iofmt, int ntiles, int *rc = NULL);
