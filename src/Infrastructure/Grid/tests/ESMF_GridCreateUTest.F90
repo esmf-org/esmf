@@ -3158,7 +3158,7 @@ program ESMF_GridCreateUTest
 
   ! Init correct flag
   correct=.true.
-
+  rc = ESMF_SUCCESS
 
   !! Check overall index space to make sure it looks ok
 
@@ -3244,7 +3244,7 @@ program ESMF_GridCreateUTest
 
   ! Init correct flag
   correct=.true.
-
+  rc = ESMF_SUCCESS
 
   !! Check overall index space to make sure it looks ok
 
