@@ -95,8 +95,7 @@ ESMF_F90DEFAULT         = mpif90
 endif
 ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
-# FIXME(wjs, 2022-09-23) Make the following line more dynamic rather than hard-coding libraries
-ESMF_F90LINKLIBS       += -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh
+ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90_forcxx $(ESMF_F90DEFAULT))
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
