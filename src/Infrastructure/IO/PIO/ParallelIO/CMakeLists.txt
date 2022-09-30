@@ -4,7 +4,7 @@
 
 # Jim Edwards
 
-cmake_minimum_required (VERSION 3.7)
+cmake_minimum_required (VERSION 3.5.2)
 project (PIO C)
 
 # The project version number.
