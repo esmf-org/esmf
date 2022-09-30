@@ -3448,7 +3448,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
   
-  subroutine routine_executeGridComp(is, i, phase, activeClock, name, userrc, rc)
+  recursive subroutine routine_executeGridComp(is, i, phase, activeClock, name, userrc, rc)
     type(type_InternalState)        :: is
     integer,          intent(in)    :: i, phase
     type(ESMF_Clock), intent(inout) :: activeClock
@@ -3493,7 +3493,7 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
   
-  subroutine routine_executeCplComp(is, i, j, phase, activeClock, name, userrc, rc)
+  recursive subroutine routine_executeCplComp(is, i, j, phase, activeClock, name, userrc, rc)
     type(type_InternalState)        :: is
     integer,          intent(in)    :: i, j, phase
     type(ESMF_Clock), intent(inout) :: activeClock
