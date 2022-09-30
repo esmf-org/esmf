@@ -244,9 +244,9 @@ ESMF_F90LINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lgfortran -lc++
+ESMF_CXXLINKLIBS += -lgfortran
 # With clang, we use a C++ linker for Fortran programs, so use the same link libs as for CXX:
-ESMF_F90LINKLIBS += -lgfortran -lc++
+ESMF_F90LINKLIBS += -lgfortran
 
 ############################################################
 # Shared library options
