@@ -246,7 +246,8 @@ endif ()
 
 # Allow argument mismatch in gfortran versions > 10 for mpi library compatibility
 if (CMAKE_C_COMPILER_NAME STREQUAL "GNU")
-  if ("${CMAKE_Fortran_COMPILER_VERSION}" VERSION_GREATER_EQUAL 10)
+  if ("${CMAKE_Fortran_COMPILER_VERSION}" VERSION_LESS 10)
+  else()
     set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
   endif()
 endif()
