@@ -1,8 +1,10 @@
 Settings for Darwin (Mac OS X), using the GNU gfortran compiler and the
 clang C++ compiler (clang++). Note that, on Mac OS X, the system-level
 g++ invokes clang++, so unless you ensure that you have a true g++ early
-in your path, you will end up using clang even if you think you are
-using the GNU C++ compiler, and so you should use this configuration.
+in your path (or build the MPI compiler wrappers to ensure that they
+wrap the true g++), you will end up using clang even if you think you
+are using the GNU C++ compiler, and so you should use this
+configuration.
 
 Requires the following environment settings:
 

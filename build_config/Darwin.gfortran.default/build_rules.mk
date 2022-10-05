@@ -114,14 +114,15 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 # See if g++ is really clang
 #
 ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
+ifeq ($(ESMF_CLANGSTR), clang)
+$(error "The detected C++ compiler is actually clang. Set ESMF_COMPILER=gfortranclang.")
+endif
 
 ############################################################
 # Special debug flags
 #
 ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fimplicit-none -fcheck=all,no-pointer
-ifneq ($(ESMF_CLANGSTR), clang)
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
-endif
 
 ############################################################
 # Fortran symbol convention
@@ -193,27 +194,19 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ifneq ($(ESMF_CLANGSTR), clang)
 ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
 ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
-else
-ESMF_OPENMP=OFF
-endif
 
 ############################################################
 # OpenACC compiler and linker flags
 #
-ifneq ($(ESMF_CLANGSTR), clang)
 ESMF_OPENACCDEFAULT = OFF
 ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
 ESMF_OPENACC_CXXCOMPILEOPTS += -fopenacc
 ESMF_OPENACC_F90LINKOPTS    += -fopenacc
 ESMF_OPENACC_CXXLINKOPTS    += -fopenacc
-else
-ESMF_OPENACC=OFF
-endif
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
@@ -255,9 +248,6 @@ ESMF_CLINKRPATHS        =
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lstdc++
-ifeq ($(ESMF_CLANGSTR), clang)
-ESMF_F90LINKLIBS += -lc++
-endif
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
