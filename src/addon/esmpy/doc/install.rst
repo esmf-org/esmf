@@ -68,9 +68,6 @@ The path of this file is:
 
     <ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
 
-If ``ESMFMKFILE`` is set when building ESMPy then it will not need to be
-referenced again. 
-
 An installation of ESMPy in the default location for Python packages can be done
 with the following command issued from the top level ESMPy directory:
 
@@ -89,6 +86,8 @@ To use ESMPy in an external program, import it with:
 .. code::
 
     import esmpy
+
+The environment variable ``ESMFMKFILE`` must be set when to use ESMPy.
 
 ----------
 Validation
