@@ -884,7 +884,7 @@ int ESMC_FieldRegridStoreFile(
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
     enum ESMC_Logical *create_rh,                  // in
-    ESMC_FileMode_Flag *filemode,                  // in
+    enum ESMC_FileMode_Flag *filemode,                  // in
     const char *srcFile,                           // in
     const char *dstFile,                           // in
     enum ESMC_FileFormat_Flag *srcFileType,        // in
