@@ -19,7 +19,7 @@ if (CMAKE_BUILD_TYPE)
     set(CMAKE_CXX_FLAGS_${_build_type} "")
 endif()
 
-
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set (src topology.c pio_file.c pioc_support.c pio_lists.c
   pioc.c pioc_sc.c pio_spmd.c pio_rearrange.c pio_nc4.c pioc_async.c

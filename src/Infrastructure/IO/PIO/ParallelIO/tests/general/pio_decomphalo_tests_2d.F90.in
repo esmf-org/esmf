@@ -155,14 +155,14 @@ END SUBROUTINE
 ! Write with one decomp (to force rearrangement) and read with another (no
 ! rearrangement)
 PIO_TF_TEMPLATE<PIO_TF_PREDEF_TYPENAME PIO_TF_DATA_TYPE, PIO_TF_PREDEF_TYPENAME PIO_TF_FC_DATA_TYPE>
-PIO_TF_AUTO_TEST_SUB_BEGIN nc_write_read_2d_col_decomp_with_halo
+PIO_TF_AUTO_TEST_SUB_BEGIN nc_write_read_2d_halo_decomp
   implicit none
   type(var_desc_t)  :: pio_var
   type(file_desc_t) :: pio_file
   integer, parameter :: NDIMS = 2
   character(len=PIO_TF_MAX_STR_LEN) :: filename
   type(io_desc_t) :: wr_iodesc, rd_iodesc
-  integer, dimension(:), allocatable :: compdof
+  integer(PIO_OFFSET_KIND), dimension(:), allocatable :: compdof
   integer, dimension(NDIMS) :: start, count
   PIO_TF_FC_DATA_TYPE, dimension(:,:), allocatable :: rbuf, wbuf, exp_val
   integer, dimension(NDIMS) :: dims
@@ -180,14 +180,15 @@ PIO_TF_AUTO_TEST_SUB_BEGIN nc_write_read_2d_col_decomp_with_halo
 
   ! Allocate with space for a 1 row /column halo
 
-  allocate(wbuf(nrows+2, ncols+2))
-  allocate(compdof((nrows+2) * (ncols+2)))
+  allocate(wbuf(nrows, ncols))
+  allocate(compdof(nrows * ncols))
   compdof = 0
+  wbuf = 0
   do j=1,ncols
     do i=1,nrows
-      wbuf(i+1,j+1) = (start(2) - 1 + j - 1) * nrows + i
-      tmp_idx = j * (nrows+2) + i+1
-      compdof(tmp_idx) = int(wbuf(i+1,j+1))
+      wbuf(i,j) = (start(2) - 1 + j - 1) * nrows + i
+      tmp_idx = (j - 1) * nrows + i
+      compdof(tmp_idx) = int(wbuf(i,j))
     end do
   end do
 
@@ -202,17 +203,22 @@ PIO_TF_AUTO_TEST_SUB_BEGIN nc_write_read_2d_col_decomp_with_halo
   allocate(rbuf(nrows+2, ncols+2))
   allocate(compdof((nrows+2) * (ncols+2)))
   allocate(exp_val(nrows+2, ncols+2))
+  rbuf = 0
   compdof = 0
+  exp_val = 0
   do j=1,ncols
     do i=1,nrows
       tmp_idx = j * (nrows+2) + i+1
-      compdof(tmp_idx) = (start(2) - 1 + j - 1) * nrows + i
+!      compdof(tmp_idx) = (start(2) - 1 + j - 1) * nrows + i
       ! Expected value, after reading, is the same as the compdof
-      exp_val(i+1,j+1) = compdof(tmp_idx)
+      exp_val(i+1,j+1) = (start(2) - 1 + j - 1) * nrows + i
     end do
   end do
 
-  call PIO_initdecomp(pio_tf_iosystem_, PIO_TF_DATA_TYPE, dims, compdof, rd_iodesc)
+  compdof = reshape(exp_val, (/(nrows+2)*(ncols+2)/))
+  ! Readonly decomp only supports subset rearranger
+  call PIO_initdecomp_readonly(pio_tf_iosystem_, PIO_TF_DATA_TYPE, dims, compdof, rd_iodesc,&
+       PIO_REARR_SUBSET)
   deallocate(compdof)
 
   num_iotypes = 0
@@ -243,7 +249,8 @@ PIO_TF_AUTO_TEST_SUB_BEGIN nc_write_read_2d_col_decomp_with_halo
 
     call PIO_read_darray(pio_file, pio_var, rd_iodesc, rbuf, ierr)
     PIO_TF_CHECK_ERR(ierr, "Failed to read darray : " // trim(filename))
-
+!    print *,__FILE__,__LINE__,rbuf(nrows+2,ncols+2), exp_val(nrows+2,ncols+2)
+!    PIO_TF_CHECK_VAL((rbuf(2:nrows+1,2:ncols+1), exp_val), "Got wrong val")
     PIO_TF_CHECK_VAL((rbuf, exp_val), "Got wrong val")
 
     call PIO_closefile(pio_file)
@@ -261,4 +268,4 @@ PIO_TF_AUTO_TEST_SUB_BEGIN nc_write_read_2d_col_decomp_with_halo
   deallocate(exp_val)
   deallocate(rbuf)
   deallocate(wbuf)
-PIO_TF_AUTO_TEST_SUB_END nc_write_read_2d_col_decomp_with_halo
+PIO_TF_AUTO_TEST_SUB_END nc_write_read_2d_halo_decomp
