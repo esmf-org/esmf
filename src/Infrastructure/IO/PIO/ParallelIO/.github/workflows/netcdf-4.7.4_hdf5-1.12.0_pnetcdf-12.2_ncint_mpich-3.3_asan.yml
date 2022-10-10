@@ -144,8 +144,8 @@ jobs:
         source .bashrc
         export CC=/home/runner/mpich/bin/mpicc
         export FC=/home/runner/mpich/bin/mpifort
-        export CFLAGS="-fsanitize=address -fno-omit-frame-pointer"
-        export FCFLAGS="-fsanitize=address -fno-omit-frame-pointer"
+        export CFLAGS="-g -O0 -fsanitize=address -fno-omit-frame-pointer"
+        export FCFLAGS="-g -O0 -fsanitize=address -fno-omit-frame-pointer"
         autoreconf -i
         ./configure --enable-fortran --enable-netcdf-integration
         make -j check

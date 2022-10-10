@@ -32,6 +32,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMAllToAllUTest \
 		$(ESMF_TESTDIR)/ESMF_VMAllToAllVUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBarrierUTest \
+		$(ESMF_TESTDIR)/ESMF_VMEpochLargeMsgUTest \
 		$(ESMF_TESTDIR)/ESMF_VMComponentUTest
 
 TESTS_RUN     = RUN_ESMC_VMUTest \
@@ -51,6 +52,7 @@ TESTS_RUN     = RUN_ESMC_VMUTest \
                 RUN_ESMF_VMAllToAllUTest \
                 RUN_ESMF_VMAllToAllVUTest \
 		RUN_ESMF_VMBarrierUTest \
+		RUN_ESMF_VMEpochLargeMsgUTest \
 		RUN_ESMF_VMComponentUTest 
 
 TESTS_RUN_UNI = RUN_ESMC_VMUTestUNI \
@@ -232,6 +234,11 @@ RUN_ESMF_VMBarrierUTest:
 RUN_ESMF_VMBarrierUTestUNI:
 	$(MAKE) TNAME=VMBarrier NP=1 ftest
 
+#
+# VM Epoch and Large Messages
+#
+RUN_ESMF_VMEpochLargeMsgUTest:
+	$(MAKE) TNAME=VMEpochLargeMsg NP=2 ftest
 #
 # VM Component
 #

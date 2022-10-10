@@ -1,17 +1,18 @@
 # $Id$
 #
-# Darwin.gfortran.default
+# Darwin.gfortranclang.default
 #
 
 ############################################################
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = gfortran
-ESMF_CXXDEFAULT         = clang
+ESMF_F90LINKERDEFAULT   = clang++
+ESMF_CXXDEFAULT         = clang++
 ESMF_CDEFAULT           = clang
 ESMF_CPPDEFAULT         = clang -E -P -x c
 
-ESMF_CXXCOMPILECPPFLAGS += -x c++
+ESMF_CXXCOMPILEOPTS    += -x c++ -mmacosx-version-min=10.7 -stdlib=libc++
 
 ############################################################
 # Default MPI setting.
@@ -30,11 +31,12 @@ ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
-ifeq ($(ESMF_COMM),mpich)
-# Mpich ----------------------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
+ifeq ($(ESMF_COMM),mpich1)
+# Mpich1 ---------------------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH1
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH1
 ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKERDEFAULT   = mpiCC
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
@@ -44,6 +46,7 @@ else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
@@ -51,18 +54,21 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
-ifeq ($(ESMF_COMM),mpich3)
-# Mpich3 ---------------------------------------------------
+ifeq ($(ESMF_COMM),mpich)
+# Mpich3 and up --------------------------------------------
 ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_CXXLINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.mpich3f90)
+ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.mpich3f90)
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mvapich2)
 # Mvapich2 -------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
+ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
@@ -72,6 +78,7 @@ ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with gfortran) ------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
+ESMF_F90LINKERDEFAULT   = mpic++
 ESMF_CXXDEFAULT         = mpic++
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
@@ -86,8 +93,9 @@ ESMF_F90DEFAULT         = mpifort
 else
 ESMF_F90DEFAULT         = mpif90
 endif
+ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
-ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90 $(ESMF_F90DEFAULT))
+ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90_forcxx $(ESMF_F90DEFAULT))
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
@@ -116,7 +124,7 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} -v --version
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fimplicit-none -fcheck=all,no-pointer
+ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fimplicit-none -fcheck=all,no-pointer
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 
 ############################################################
@@ -208,27 +216,17 @@ ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 ESMF_F90COMPILEOPTS += -ffree-line-length-none
 
 ############################################################
+# Trying to produce a backtrace can lead programs to hang without any useful information
+# rather than aborting cleanly, so disable backtraces.
+#
+ESMF_F90COMPILEOPTS += -fno-backtrace
+
+############################################################
 # Set rpath syntax
 #
 ESMF_F90RPATHPREFIX         = -Wl,-rpath,
 ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 ESMF_CRPATHPREFIX           = -Wl,-rpath,
-
-############################################################
-# Determine where clang's libraries are located
-#
-# TODO: The -print-file-name option doesn't seem to work properly yet.
-#ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.dylib)
-#ifeq ($(ESMF_LIBSTDCXX),libstdc++.dylib)
-#ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libstdc++.a)
-#endif
-#ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
-
-#ESMF_LIBCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
-#ifeq ($(ESMF_LIBCXX),libc++.dylib)
-#ESMF_LIBCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
-#endif
-#ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBCXX))
 
 ############################################################
 # Determine where gfortran's libraries are located
@@ -239,21 +237,22 @@ ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
 endif
 ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))
-
-############################################################
-# Link against libesmf.a using the F90 linker front-end
-#
-ESMF_F90LINKLIBS += -lstdc++ -lc++
+# With clang, we use a C++ linker for Fortran programs, so use the same link paths as for CXX:
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
+ESMF_F90LINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lgfortran -lstdc++ -lc++
+ESMF_CXXLINKLIBS += -lgfortran
+# With clang, we use a C++ linker for Fortran programs, so use the same link libs as for CXX:
+ESMF_F90LINKLIBS += -lgfortran
 
 ############################################################
 # Shared library options
 ESMF_SL_LIBOPTS  += -dynamiclib
-ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+# No need for "$(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS)" in the following because they are identical to the CXX versions:
+ESMF_SL_LIBLIBS  += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
 
 ############################################################
 # Static builds on Darwin do not support trace lib due to missing linker option

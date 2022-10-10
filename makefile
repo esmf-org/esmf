@@ -73,10 +73,10 @@ test_esmfmkfile:
 script_info: test_esmfmkfile
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
-	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
+	-@echo "ESMF_VERSION_STRING:      $(ESMF_VERSION_STRING)"
 ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
-	@if [ -d $(ESMF_DIR)/.git ] ; then \
-	echo $(ESMF_VERSION_STRING_GIT);\
+	@if [ "$(ESMF_VERSION_STRING_GIT)" != "" ] ; then \
+	echo "ESMF_VERSION_STRING_GIT: $(ESMF_VERSION_STRING_GIT)";\
 	echo "--------------------------------------------------------------" ;\
 	git status ;\
 	else \
@@ -147,6 +147,9 @@ endif
 	-@echo "ESMF_DEFER_LIB_BUILD:   $(ESMF_DEFER_LIB_BUILD)"
 	-@echo "ESMF_SHARED_LIB_BUILD:  $(ESMF_SHARED_LIB_BUILD)"
 	-@echo "ESMF_TRACE_LIB_BUILD:   $(ESMF_TRACE_LIB_BUILD)"
+ifeq ($(ESMF_TRACE_LIB_BUILD),ON)
+	-@echo "ESMF_TRACE_BUILD_SHARED:$(ESMF_TRACE_BUILD_SHARED)"
+endif
 	-@echo "ESMF_TESTEXHAUSTIVE:    $(ESMF_TESTEXHAUSTIVE)"
 	-@echo "ESMF_TESTCOMPTUNNEL:    $(ESMF_TESTCOMPTUNNEL)"
 	-@echo "ESMF_TESTWITHTHREADS:   $(ESMF_TESTWITHTHREADS)"
@@ -423,7 +426,7 @@ info_mk: chkdir_lib
 	-@echo "#----------------------------------------------" >> $(MKINFO)
 	-@echo "ESMF_VERSION_STRING=$(ESMF_VERSION_STRING)"     >> $(MKINFO)
 ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
-	@if [ -d $(ESMF_DIR)/.git ] ; then \
+	@if [ "$(ESMF_VERSION_STRING_GIT)" != "" ] ; then \
 	echo "ESMF_VERSION_STRING_GIT=$(ESMF_VERSION_STRING_GIT)" >> $(MKINFO) ; \
 	else \
 	echo "# Not a Git repository" >> $(MKINFO) ; \
@@ -442,6 +445,7 @@ endif
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_APPSDIR=$(ESMF_APPSDIR)" >> $(MKINFO)
 	-@echo "ESMF_LIBSDIR=$(ESMF_LIBDIR)" >> $(MKINFO)
+	-@echo "ESMF_ESMXDIR=$(ESMF_ESMXDIR)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_F90COMPILER=$(ESMF_F90COMPILER)" >> $(MKINFO)
@@ -505,7 +509,7 @@ endif
 	-@echo "# Internal ESMF variables, do NOT depend on these!" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_INTERNAL_DIR=$(ESMF_DIR)" >> $(MKINFO)
-	-@echo "ESMF_INTERNAL_MPIRUN=$(ESMF_MPIRUN)" >> $(MKINFO)
+	-@echo "ESMF_INTERNAL_MPIRUN=\"$(ESMF_MPIRUN)\"" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "#" >> $(MKINFO)
 	-@echo "# !!! The following options were used on this ESMF build !!!" >> $(MKINFO)
@@ -655,7 +659,7 @@ endif
 
 # Rewrite esmf.mk during installation to ensure correct installation paths are encoded
 install_info_mk:
-	$(MAKE) info_mk ESMF_APPSDIR=$(ESMF_INSTALL_BINDIR_ABSPATH) ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	$(MAKE) info_mk ESMF_APPSDIR=$(ESMF_INSTALL_BINDIR_ABSPATH) ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_ESMXDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)/ESMX ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
 
 # Relink apps during installation to ensure correct shared library location is encoded
 install_apps:
@@ -692,6 +696,7 @@ install:
 	cp -f $(ESMF_BUILD)/src/include/ESMC.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	cp -f $(ESMF_BUILD)/src/include/ESMC_*.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	cp -f $(ESMF_DIR)/build_config/$(ESMF_OS).$(ESMF_COMPILER).$(ESMF_SITE)/ESMC_Conf.h $(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	cp -fr $(ESMF_ESMXDIR) $(ESMF_INSTALL_HEADERDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_MODDIR_ABSPATH)
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)

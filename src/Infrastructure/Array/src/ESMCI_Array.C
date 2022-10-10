@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -3891,7 +3891,7 @@ int Array::read(
 // !DESCRIPTION:
 //   Read Array data from file and put it into an ESMF_Array object.
 //   For this API to be functional, the environment variable ESMF_PIO
-//   should be set to "internal" when the ESMF library is built.
+//   should be set to either "internal" or "external" when the ESMF library is built.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -3969,7 +3969,7 @@ int Array::write(
 //
 // !DESCRIPTION:
 //   Write Array data into a file. For this API to be functional, the
-//   environment variable {\tt ESMF\_PIO} should be set to "internal" when
+//   environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external" when
 //   the ESMF library is built.
 //
 //EOPI
@@ -3998,36 +3998,6 @@ int Array::write(
     localstatus = ESMC_FILESTATUS_UNKNOWN;
   } else {
     localstatus = *status;
-  }
-
-  // It is an error to supply a variable name in binary mode
-  if (ESMF_IOFMT_BIN == localiofmt) {
-    if (variableName.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
-          "NetCDF variable name not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
-  }
-
-  // It is an error to supply Attribute convention in binary mode
-  if (ESMF_IOFMT_BIN == localiofmt) {
-    if (convention.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
-          "NetCDF Attribute convention not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
-  }
-
-  // It is an error to supply Attribute purpose in binary mode
-  if (ESMF_IOFMT_BIN == localiofmt) {
-    if (purpose.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
-          "NetCDF Attribute convention not allowed in binary mode",
-          ESMC_CONTEXT, &rc);
-      return rc;
-    }
   }
 
   DistGrid *dg = getDistGrid();

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -415,9 +415,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{sloppypar}
 ! \item[{[petList]}]
 !   List of parent {\tt PET}s given to the created child component by the
-!   parent component. If {\tt petList} is not specified all of the
-!   parent {\tt PET}s will be given to the child component. The order of
-!   PETs in {\tt petList} determines how the child local PETs refer back to
+!   parent component. If {\tt petList} is not specified, or is empty, all of the
+!   parent {\tt PET}s are given to the child component. The order of
+!   PETs in {\tt petList} determines how the child local PETs map back to
 !   the parent PETs.
 ! \item[{[contextflag]}]
 !   Specify the component's VM context. The default context is
@@ -885,6 +885,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (cplcomp%isNamedAlias .and. present(name)) then
+      ! access NamedAlias name
+      name = trim(cplcomp%name)
+    endif
 
     ! call Comp method
     call ESMF_CompStatusGet(compStatus, &
@@ -1900,12 +1905,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    ! call Comp method
-    call ESMF_CompSet(cplcomp%compp, name, clock=clock, configFile=configFile, &
-      config=config, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (cplcomp%isNamedAlias .and. present(name)) then
+      ! set NamedAlias name
+      cplcomp%name = trim(name)
+      ! call Comp method (without name)
+      call ESMF_CompSet(cplcomp%compp, clock=clock, &
+        configFile=configFile, config=config, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! call Comp method
+      call ESMF_CompSet(cplcomp%compp, name=name, clock=clock, &
+        configFile=configFile, config=config, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2547,19 +2563,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_CplCompSetVM()
   recursive subroutine ESMF_CplCompSetVMShObj(cplcomp, userRoutine, &
-    keywordEnforcer, sharedObj, userRc, rc)
+    keywordEnforcer, sharedObj, userRoutineFound, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
     character(len=*),    intent(in)            :: userRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
+    logical,             intent(out), optional :: userRoutineFound
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.4.0] Added argument {\tt userRoutineFound}.
+!              The new argument provides a way to test availability without
+!              causing error conditions.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2601,6 +2624,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
 !   searched for {\tt userRoutine}.
+! \item[{[userRoutineFound]}]
+!   Report back whether the specified {\tt userRoutine} was found and executed,
+!   or was not available. If this argument is present, not finding the
+!   {\tt userRoutine} will not result in returning an error in {\tt rc}.
+!   The default is to return an error if the {\tt userRoutine} cannot be found.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -2612,6 +2640,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc                       ! local error status
     integer :: localUserRc
     character(len=0) :: emptyString
+    type(ESMF_Logical)  :: userRoutineFoundHelp
+    logical             :: userRoutineFoundHelpHelp
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2620,15 +2650,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
 
     if (present(sharedObj)) then
-      call c_ESMC_SetVMShObj(cplcomp, userRoutine, sharedObj, localUserRc, &
-        localrc)
+      call c_ESMC_SetVMShObj(cplcomp, userRoutine, sharedObj, &
+        userRoutineFoundHelp, localUserRc, localrc)
     else
-      call c_ESMC_SetVMShObj(cplcomp, userRoutine, emptyString, localUserRc, &
-        localrc)
+      call c_ESMC_SetVMShObj(cplcomp, userRoutine, emptyString, &
+        userRoutineFoundHelp, localUserRc, localrc)
     endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! translate ESMF_Logical -> logical
+    userRoutineFoundHelpHelp = userRoutineFoundHelp
+
+    ! report back
+    if (present(userRoutineFound)) userRoutineFound = userRoutineFoundHelpHelp
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc

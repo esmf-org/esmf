@@ -1,5 +1,6 @@
 #!/bin/sh
 # return the ESMF version from Git if available, or empty string otherwise
-if [ -d $ESMF_DIR/.git ] ; then \
+# test looks for .git directory or .git file (when esmf is a submodule)
+if [ -d $ESMF_DIR/.git ] || [ -s $ESMF_DIR/.git ] ; then \
 git describe --tags 2>&1 | grep -v fatal
 fi

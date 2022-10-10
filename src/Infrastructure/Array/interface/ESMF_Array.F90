@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -459,9 +459,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Set the name in Base object
     if (present(name)) then
-      call c_ESMC_SetName(array, "Array", name, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (array%isNamedAlias) then
+        array%name = trim(name)
+      else
+        call c_ESMC_SetName(array, "Array", name, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     ! Deal with (optional) array arguments
@@ -3831,7 +3835,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Write Array data into a file. For this API to be functional, the 
-!   environment variable {\tt ESMF\_PIO} should be set to "internal" when 
+!   environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external" when
 !   the ESMF library is built.  Please see the section on 
 !   Data I/O,~\ref{io:dataio}. 
 !
@@ -3854,7 +3858,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -3864,6 +3867,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    The {\tt ESMF\_Array} object that contains data to be written.
 !   \item[fileName]
 !    The name of the output file to which Array data is written.
+!    If this is a multi-tile Array, then fileName must contain
+!    exactly one instance of "\#"; this is a placeholder that will be replaced
+!    by the tile number, with each tile being written to a separate file. (For
+!    example, for a fileName of "myfile\#.nc", tile 1 will be written to
+!    "myfile1.nc", tile 2 to "myfile2.nc", etc.)
+!    (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[variableName]}]
 !    Variable name in the output file; default is the "name" of Array.
 !    Use this argument only in the I/O format (such as NetCDF) that
@@ -3882,18 +3891,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing Array data may
-!      {\em not} be overwritten. If .true., the overwrite behavior depends
-!      on the value of {\tt iofmt} as shown below:
-!    \begin{description}
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
-!      be overwritten with each Array's data.
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF, ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET}:]\ Only the
-!      data corresponding to each Array's name will be
+!      {\em not} be overwritten. If .true., only the
+!      data corresponding to the Array's name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
 !      the given timeslice may be overwritten.
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
-!    \end{description}
 !    \end{sloppypar}
 !   \item[{[status]}]
 !    \begin{sloppypar}
@@ -3922,10 +3925,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[iofmt]}]
 !    \begin{sloppypar}
 !    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
-!    of options. If not present, file names with a {\tt .bin} extension will
-!    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
-!    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
-!    {\tt ESMF\_IOFMT\_NETCDF}.
+!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !    \end{sloppypar}
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3962,19 +3962,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (fileName, '.') > 0) then
-        file_ext_p = index (fileName, '.', back=.true.)
-        select case (fileName(file_ext_p:))
-        case ('.nc')
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        case ('.bin')
-          opt_iofmt = ESMF_IOFMT_BIN
-        case default
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        end select
-      else
-        opt_iofmt = ESMF_IOFMT_NETCDF
-      end if
+      opt_iofmt = ESMF_IOFMT_NETCDF
     end if
 
     ! Attributes

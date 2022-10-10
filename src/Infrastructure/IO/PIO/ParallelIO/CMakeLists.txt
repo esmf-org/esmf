@@ -10,7 +10,7 @@ project (PIO C)
 # The project version number.
 set(VERSION_MAJOR   2   CACHE STRING "Project major version number.")
 set(VERSION_MINOR   5   CACHE STRING "Project minor version number.")
-set(VERSION_PATCH   7   CACHE STRING "Project patch version number.")
+set(VERSION_PATCH   9   CACHE STRING "Project patch version number.")
 mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
 # Create version info in autotools parlance for pio_meta.h.
@@ -92,6 +92,7 @@ option (PIO_USE_MPIIO        "Enable support for MPI-IO auto detect"        ON)
 option (PIO_USE_MPISERIAL    "Enable mpi-serial support (instead of MPI)"   OFF)
 option (PIO_USE_PNETCDF_VARD       "Use pnetcdf put_vard "  OFF)
 option (WITH_PNETCDF         "Require the use of PnetCDF"                   ON)
+option (BUILD_SHARED_LIBS    "Build shared libraries"                       OFF)
 
 if(APPLE)
   # The linker on macOS does not include `common symbols` by default
@@ -243,6 +244,13 @@ if (PIO_ENABLE_COVERAGE)
   endif ()
 endif ()
 
+# Allow argument mismatch in gfortran versions > 10 for mpi library compatibility
+if (CMAKE_C_COMPILER_NAME STREQUAL "GNU")
+  if ("${CMAKE_Fortran_COMPILER_VERSION}" VERSION_LESS 10)
+  else()
+    set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+  endif()
+endif()
 # Include this so we can check values in netcdf_meta.h.
 INCLUDE(CheckCSourceCompiles)
 INCLUDE(FindNetCDF)

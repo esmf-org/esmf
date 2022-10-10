@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,    
+// Copyright 2002-2022, University Corporation for Atmospheric Research,    
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -102,7 +102,8 @@ int Test(
     if (!only)
       fprintf(stderr, "%s\n", msgbuf.str().c_str());
   }else {
-    msgbuf << "FAIL " << name << ", " << file << ", line " << line;
+    msgbuf << "FAIL " << name << ", " << file << ", line " << line << ": "
+      << failMsg;
     whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s\n", msgbuf.str().c_str());

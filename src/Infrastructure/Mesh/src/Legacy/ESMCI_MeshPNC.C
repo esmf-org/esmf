@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -122,7 +122,7 @@ void LoadNCDualMeshPar(Mesh &mesh, const std::string fname) {
       local_grid_start = my_start*grid_dims[0];
     }
     
-    int local_grid_dims[2] = {grid_dims[0], my_num > 0 ? my_num+1 : 0};
+    int local_grid_dims[2] = {grid_dims[0], (int) my_num > 0 ? (int) my_num+1 : 0};
 
     Par::Out() << "min_row=" << min_row << ", max_row=" << max_row << std::endl;
     Par::Out() << "local_grid_start=" << local_grid_start << ", local_grid_size:" << local_grid_size << std::endl;

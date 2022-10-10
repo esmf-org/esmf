@@ -1,10 +1,17 @@
 // $Id$
 //
 // Earth System Modeling Framework
+<<<<<<< HEAD
 // Copyright 2002-2021, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+=======
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+>>>>>>> develop
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //

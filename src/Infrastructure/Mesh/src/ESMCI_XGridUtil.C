@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -134,6 +134,9 @@ double polygon::area(int sdim) const {
       // Sum
       ccw_sense += angle;
     }
+
+    // Free coordinate memory
+    delete [] coords;
 
 #if BOB_XGRID_DEBUG
     if (xgu_debug) {
@@ -726,6 +729,7 @@ bool disjoint(int pdim, int sdim, const std::vector<xpoint> & subject, const std
   s_contains_c = true;
   c_contains_s = true;
 
+  // Load polygons into coordinate arrays
   double * subject_cd = new double[sdim*subject.size()];
   polygon_to_coords(polygon(subject), sdim, subject_cd);
   double * clip_cd = new double[sdim*clip.size()];
@@ -769,7 +773,11 @@ bool disjoint(int pdim, int sdim, const std::vector<xpoint> & subject, const std
   if(c_contains_s) n_cond ++;
   if(n_cond > 1 && !(c_contains_s && s_contains_c)) Throw() << "Invalid spatial relation between subject and clip\n";
 
-  delete [] subject_cd, clip_cd;
+  // Free coordinate memory
+  delete [] subject_cd;
+  delete [] clip_cd;
+
+  // Return result
   return disjoint;
 }
 

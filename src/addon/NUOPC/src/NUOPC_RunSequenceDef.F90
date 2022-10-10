@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -28,7 +28,8 @@ module NUOPC_RunSequenceDef
   public NUOPC_RunSequenceAdd, NUOPC_RunSequenceSet, NUOPC_RunSequencePrint
   public NUOPC_RunSequenceDeallocate
   public NUOPC_RunSequenceIterate
-  
+  public NUOPC_RunSeqEventHandler
+
 !==============================================================================
 ! 
 ! DERIVED TYPES
@@ -62,6 +63,15 @@ module NUOPC_RunSequenceDef
     type(ESMF_Clock)                :: prevMemberClock
     logical                         :: alarmBlock
     type(ESMF_Alarm)                :: alarm
+  end type
+
+  type NUOPC_RunSeqEventHandler
+    logical                         :: vFlag  ! verbosity bit-12
+    logical                         :: pFlag  ! profiling bit-12
+    integer                         :: loopLevelPrev
+    integer                         :: levelMemberPrev
+    integer                         :: loopIterationPrev
+    character(ESMF_MAXSTR)          :: name
   end type
 
 !==============================================================================
@@ -429,13 +439,15 @@ module NUOPC_RunSequenceDef
 !BOPI
 ! !IROUTINE: NUOPC_RunSequenceIterate - Iterate through a RunSequence
 ! !INTERFACE:
-  function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, rc)
+  function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, &
+    eventHandler, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_RunSequenceIterate
 ! !ARGUMENTS:
     type(NUOPC_RunSequence), pointer     :: runSeq(:)
     integer,                 intent(in)  :: runSeqIndex
     type(NUOPC_RunElement),  pointer     :: runElement
+    type(NUOPC_RunSeqEventHandler)       :: eventHandler
     integer, optional,       intent(out) :: rc
 ! !DESCRIPTION:
 !   Iterate through the RunSequence that is in position {\tt runSeqIndex} in the
@@ -522,7 +534,8 @@ module NUOPC_RunSequenceDef
     endif
     
     ! runElement may be a control element (either LINK or ENDDO)
-    NUOPC_RunSequenceIterate = NUOPC_RunSequenceCtrl(runSeq, runElement, rc=localrc)
+    NUOPC_RunSequenceIterate = NUOPC_RunSequenceCtrl(runSeq, runElement, &
+      eventHandler, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
@@ -680,11 +693,14 @@ module NUOPC_RunSequenceDef
 !BOPI
 ! !IROUTINE: NUOPC_RunSequenceCtrl - Recursive iterator through a RunSequence
 ! !INTERFACE:
-  recursive logical function NUOPC_RunSequenceCtrl(runSeq, runElement, rc) &
+  recursive logical function NUOPC_RunSequenceCtrl(runSeq, runElement, &
+    eventHandler, rc) &
 ! !ARGUMENTS:
     result(NUOPC_RunSequenceCtrlResult)
+    type(NUOPC_RunSeqEventHandler)         :: eventHandler
     type(NUOPC_RunSequence), pointer       :: runSeq(:)
     type(NUOPC_RunElement),  pointer       :: runElement
+    
     integer, optional,       intent(out)   :: rc
 ! !DESCRIPTION:
 !EOP
@@ -694,9 +710,13 @@ module NUOPC_RunSequenceDef
     logical           :: clockIsStopTime, ringing
     integer           :: i
     type(ESMF_Time)   :: currTime
+    logical           :: needHandler
 
     if (present(rc)) rc = ESMF_SUCCESS
     NUOPC_RunSequenceCtrlResult = .false. ! initialize to safe return value
+
+    ! determine if event handler is needed
+    needHandler = (eventHandler%vFlag .or. eventHandler%pFlag)
 
     ! sanity checks
     if (.not.associated(runSeq)) then
@@ -715,6 +735,12 @@ module NUOPC_RunSequenceDef
       if (associated(runElement%next)) then
         ! simple component element
         NUOPC_RunSequenceCtrlResult = .true.
+        if (needHandler) then
+          call NUOPC_RunSequenceHandleEvent(runElement%runSeq, eventHandler, &
+            rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        endif
         return
       else
         ! invalid element
@@ -740,7 +766,7 @@ module NUOPC_RunSequenceDef
     if (.not.associated(runElement%next)) then
       ! "ENDDO" element
 #if 0
-      print *, "found ENDDO element"
+      call ESMF_LogWrite("Found ENDDO element", ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
       if (runElement%runSeq%alarmBlock) then
         ! end of alarm block -> advance the clock
@@ -762,6 +788,13 @@ module NUOPC_RunSequenceDef
         if (clockIsStopTime) then
           if (.not.associated(runSeq(i)%stack)) then
             ! reached the end of top level loop
+            if (needHandler) then
+              call NUOPC_RunSequenceHandleEvent(runSeq(i), eventHandler, &
+                endFlag=.true., rc=localrc)
+              if (ESMF_LogFoundError(rcToCheck=localrc, &
+                msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, file=FILENAME, &
+                rcToReturn=rc)) return  ! bail out
+            endif
             return  ! break out
           else
             ! reached the end of a nested run sequence loop -> move up the stack
@@ -780,7 +813,7 @@ module NUOPC_RunSequenceDef
     else
       ! "LINK" element
 #if 0
-      print *, "found LINK element"
+      call ESMF_LogWrite("Found LINK element", ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
       if (associated(runSeq(i)%stack)) then
         ! detected recursive link
@@ -802,6 +835,16 @@ module NUOPC_RunSequenceDef
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
           ! set the linked RunSequence level index one higher than current one
           runSeq(i)%loopLevel = runElement%runSeq%loopLevel + 1
+          if (runElement%runSeq%loopIteration==1) then
+            ! first time into this alarm again during loop
+            runElement%runSeq%levelChildren = runElement%runSeq%levelChildren + 1
+            runSeq(i)%levelMember = runElement%runSeq%levelChildren
+            runSeq(i)%loopIteration = 1
+            runSeq(i)%levelChildren = 0
+          else
+            ! coming in subsequent times
+            runSeq(i)%loopIteration = runSeq(i)%loopIteration + 1
+          endif
           ! put the next element in the current level onto the new levels stack
           runSeq(i)%stack => runElement%next  ! set stack pointer for return
           ! follow the link: start at the top of linked sequence
@@ -848,13 +891,120 @@ module NUOPC_RunSequenceDef
       endif
     endif
 
+    if (needHandler) then
+      call NUOPC_RunSequenceHandleEvent(runElement%runSeq, eventHandler, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+
     ! recursive call...
     NUOPC_RunSequenceCtrlResult = NUOPC_RunSequenceCtrl(runSeq, runElement, &
-      rc=localrc)
+      eventHandler, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  subroutine NUOPC_RunSequenceHandleEvent(runSeq, eh, endFlag, rc)
+    type(NUOPC_RunSequence)         :: runSeq
+    type(NUOPC_RunSeqEventHandler)  :: eh
+    logical, optional, intent(in)   :: endFlag
+    integer, intent(out)            :: rc
+
+    integer                         :: loopLevel
+    integer                         :: levelMember
+    integer                         :: loopIteration
+    logical                         :: enterCurrent, exitPrevious
+    character(ESMF_MAXSTR)          :: traceString, msgString, timeString
+    logical                         :: endFlagInternal
+
+    rc = ESMF_SUCCESS
+
+    loopLevel         = runSeq%loopLevel
+    levelMember       = runSeq%levelMember
+    loopIteration     = runSeq%loopIteration
+
+    endFlagInternal = .false. ! default
+    if (present(endFlag)) endFlagInternal = endFlag
+
+    if (endFlagInternal) then
+      if ((eh%loopLevelPrev/=0).and.(eh%levelMemberPrev/=0).and. &
+        (eh%loopIterationPrev/=0)) then
+        if (eh%pFlag) then
+          ! an actual previous iteration does exist -> exit trace region
+          write(traceString,"('RunSequenceRegion.',I4.4,'.',I4.4,'.',I4.4)") &
+            eh%loopLevelPrev, eh%levelMemberPrev, eh%loopIterationPrev
+!call ESMF_LogWrite("TRExit: "//trim(traceString), ESMF_LOGMSG_DEBUG, rc=rc)
+          call ESMF_TraceRegionExit(trim(traceString), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(eh%name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+      endif
+    else
+      if ((loopLevel/=eh%loopLevelPrev).or.(levelMember/=eh%levelMemberPrev).or.&
+        (loopIteration/=eh%loopIterationPrev)) then
+        ! found a time loop event
+        if (eh%pFlag) then
+          enterCurrent = .true.
+          exitPrevious = .false.
+          if ((eh%loopLevelPrev/=0).and.(eh%levelMemberPrev/=0).and. &
+            (eh%loopIterationPrev/=0)) then
+            ! an actual previous event does exist
+            exitPrevious = .true.
+            if (loopLevel > eh%loopLevelPrev) then
+              ! going down another level in the loop nesting hierarchy
+              exitPrevious = .false.
+            else if (loopLevel < eh%loopLevelPrev) then
+              ! coming back up a level in the loop nesting hierarchy
+              enterCurrent = .false.
+            endif
+          endif
+          if (exitPrevious) then
+            write(traceString,"('RunSequenceRegion.',I4.4,'.',I4.4,'.',I4.4)") &
+              eh%loopLevelPrev, eh%levelMemberPrev, eh%loopIterationPrev
+!call ESMF_LogWrite("TRExit: "//trim(traceString), ESMF_LOGMSG_DEBUG, rc=rc)
+            call ESMF_TraceRegionExit(trim(traceString), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(eh%name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+          if (enterCurrent) then
+            ! enter new trace region
+            write(traceString,"('RunSequenceRegion.',I4.4,'.',I4.4,'.',I4.4)") &
+              loopLevel, levelMember, loopIteration
+!call ESMF_LogWrite("TREntr: "//trim(traceString), ESMF_LOGMSG_DEBUG, rc=rc)
+            call ESMF_TraceRegionEnter(trim(traceString), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(eh%name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+          endif
+        endif
+        ! update the "Prev" variables
+        eh%loopLevelPrev     = loopLevel
+        eh%levelMemberPrev   = levelMember
+        eh%loopIterationPrev = loopIteration
+        if (eh%vFlag) then
+          ! write iteration info to Log
+          write(msgString,"(A,I4,A,I4,A,I4)") &
+            trim(eh%name)//": RunSequence event loopLevel=", loopLevel, &
+            "  levelMember=", levelMember, "  loopIteration=", loopIteration
+          call ESMF_ClockPrint(runSeq%clock, options="currTime", &
+            preString=trim(msgString)//", current time: ", &
+            unit=timeString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(eh%name)//":"//FILENAME)) return  ! bail out
+          call ESMF_LogWrite(timeString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(eh%name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+      endif
+    endif
+  end subroutine
   !-----------------------------------------------------------------------------
 
 end module NUOPC_RunSequenceDef

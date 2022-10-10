@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -256,6 +256,30 @@ ESMC_VM ESMC_VMGetGlobal(
 //  \begin{description}
 //  \item[{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_VMLogMemInfo - Log memory measurements to file
+//
+// !INTERFACE:
+int ESMC_VMLogMemInfo(
+  const char *prefix                // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Write memory info to the log file.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[prefix] 
+//    String value to indicate the location of the memory measurement
 //  \end{description}
 //
 //EOP

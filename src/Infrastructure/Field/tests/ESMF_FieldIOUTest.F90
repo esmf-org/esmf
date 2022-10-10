@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -49,8 +49,8 @@ program ESMF_FieldIOUTest
   type(ESMF_Field) :: field_r2de, field_w2de
   type(ESMF_Field) :: field_md
   real(ESMF_KIND_R8), pointer :: Farray_w(:,:) => null (), Farray_r(:,:) => null ()
-  real(ESMF_KIND_R8), pointer :: Farray_tw(:,:) => null (), Farray_tr(:,:) => null ()
-  real(ESMF_KIND_R8), pointer :: Farray_sw(:,:) => null (), Farray_sr(:,:) => null ()
+  real(ESMF_KIND_R8), pointer :: Farray_tw(:,:) => null (), Farray_sw(:,:) => null ()
+  real(ESMF_KIND_R8), pointer :: Farray_tr(:,:,:) => null (), Farray_sr(:,:,:) => null ()
   real(ESMF_KIND_R4), pointer :: fptr(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: t_ptr(:,:,:) => null (), t_ptr2(:,:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_md(:,:) => null ()
@@ -661,9 +661,8 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------
 ! Recall my Fortran array at time=t=... :
-#ifdef ESMF_MPICH
-  !TODO: Remove this once timeslicing is fixed for multi-PET with MPICH
-  ! right now under MPICH always the first slice is pulled out by FieldRead()
+#ifdef ESMF_MPICH1
+  ! For multi-PET with MPICH1 always first slice is pulled out by FieldRead()
   t = 1
 #else
   t = 3
@@ -681,8 +680,8 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Create an empty new Field
-  field_tr = ESMF_FieldCreate(grid, arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
-             name="temperature",  rc=rc)
+  field_tr = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R8, indexflag=ESMF_INDEX_DELOCAL, &
+       name="temperature",  ungriddedLBound=(/1/), ungriddedUBound=(/t/), rc=rc)
   write(failMsg, *) ""
   write(name, *) "Create new Field_r"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -693,7 +692,7 @@ program ESMF_FieldIOUTest
   ! Read data at time=t to Object Field_r with Halos
   write(failMsg, *) ""
   write(name, *) "Read data time=t to object field_r per slice"
-  call ESMF_FieldRead(field_tr, fileName="field_time.nc", timeslice=t, rc=rc)
+  call ESMF_FieldRead(field_tr, fileName="field_time.nc", timeslice=t, rc=rc) 
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -718,7 +717,7 @@ program ESMF_FieldIOUTest
   Maxvalue = 0.0
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
-    diff = abs(Farray_tw(i,j) - Farray_tr(i,j))
+    diff = abs(Farray_tw(i,j) - Farray_tr(i,j,t))
     if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
@@ -741,8 +740,8 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Create an empty new Field
-  field_sr = ESMF_FieldCreate(grid, arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
-             name="temperature",  rc=rc)
+  field_sr = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R8, indexflag=ESMF_INDEX_DELOCAL, &
+             name="temperature",  ungriddedLBound=(/1/), ungriddedUBound=(/t/), rc=rc)
   write(failMsg, *) ""
   write(name, *) "Create new Field_s for without Halo"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -778,7 +777,7 @@ program ESMF_FieldIOUTest
   Maxvalue = 0.0
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
-    diff = abs(Farray_tw(i,j) - Farray_sr(i,j))
+    diff = abs(Farray_tw(i,j) - Farray_sr(i,j,t))
     if (Maxvalue.le.diff) Maxvalue=diff
   enddo
   enddo
@@ -1331,7 +1330,7 @@ program ESMF_FieldIOUTest
 #if !defined (ESMF_PNETCDF)
     case ("_FillValue")
       call ESMF_AttributeSet (field_att,  &
-          attrNames(i), valueList=(/ -1.e+10 /),  &
+          attrNames(i), valueList=(/ -1.e+10_ESMF_KIND_R8 /),  &
           convention=apConv, purpose=apPurp,  &
           rc=rc)
       if (rc /= ESMF_SUCCESS) exit
@@ -1564,7 +1563,7 @@ program ESMF_FieldIOUTest
 #if !defined (ESMF_PNETCDF)
     case ("_FillValue")
       call ESMF_AttributeSet (field_ugd_att,  &
-          attrNames(i), valueList=(/ -1.e+10 /),  &
+          attrNames(i), valueList=(/ -1.e+10_ESMF_KIND_R8 /),  &
           convention=apConv, purpose=apPurp,  &
           rc=rc)
       if (rc /= ESMF_SUCCESS) exit

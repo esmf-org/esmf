@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -89,13 +89,18 @@ program ESMF_GridCreateUTest
   real(ESMF_KIND_R4), pointer :: lonPtrR4(:,:), latPtrR4(:,:)
   real(ESMF_KIND_R8), allocatable :: lonDiff(:,:), latDiff(:,:)
   real(ESMF_KIND_R8), allocatable :: mean(:)
+  real(ESMF_KIND_R8), pointer :: lonPtrR81D(:), latPtrR81D(:)
+  real(ESMF_KIND_R8), pointer :: xPtrR81D(:), yPtrR81D(:)
   real(ESMF_KIND_R8) :: lonmin, latmin, lonmax, latmax, lonmean, latmean
-  real(ESMF_KIND_R8) :: threshhold
+  real(ESMF_KIND_R8) :: threshhold, calc_lon, calc_lat
+  real(ESMF_KIND_R8) :: calc_x, calc_y
   type(ESMF_DELayout) :: delayout
   integer :: total, s,  decount, localDe
   type(ESMF_Staggerloc) :: staggerLocList(2)
   type(ESMF_CubedSphereTransform_Args) :: transformArgs
- 
+  type(ESMF_Routehandle)  :: rh
+
+
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -619,12 +624,30 @@ program ESMF_GridCreateUTest
 
 
   ! Create Grid 2 from the original grid and distgrid
-  grid2=ESMF_GridCreate(grid, name=trim(grid_name), distgrid=distgrid, rc=localrc)
+  grid2=ESMF_GridCreate(grid, name=trim(grid_name), distgrid=distgrid, routehandle=rh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! If the grid create copy works, then grid2 should now be 
   ! a perfect copy of grid, so check that match returns true
-  if (ESMF_GridMatch(grid,grid2,rc=localrc)/=ESMF_GRIDMATCH_EXACT) correct=.false.
+  correct = (ESMF_GridMatch(grid,grid2,rc=localrc)==ESMF_GRIDMATCH_EXACT)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing GridRedist()"
+  write(failMsg, *) "Incorrect result"
+
+  ! Redist coordinates from grid -> grid2
+  call ESMF_GridRedist(srcGrid=grid, dstGrid=grid2, routehandle=rh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! If the grid create copy works, then grid2 should now be 
+  ! a perfect copy of grid, so check that match returns true
+  correct = (ESMF_GridMatch(grid,grid2,rc=localrc)==ESMF_GRIDMATCH_EXACT)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get rid of first grid
@@ -2680,7 +2703,7 @@ program ESMF_GridCreateUTest
   grid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/20,20/), &
        minCornerCoord=(/-180.0_ESMF_KIND_R8,-80.0_ESMF_KIND_R8/), &
        maxCornerCoord=(/ 180.0_ESMF_KIND_R8,80.0_ESMF_KIND_R8/), &
-        polekindflag=(/ESMF_POLEKIND_BIPOLE,ESMF_POLEKIND_BIPOLE/), &
+       polekindflag=(/ESMF_POLEKIND_BIPOLE,ESMF_POLEKIND_BIPOLE/), &
 !       polekindflag=(/ESMF_POLEKIND_BIPOLE,ESMF_POLEKIND_MONOPOLE/), &
        staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        rc=localrc)
@@ -3117,6 +3140,181 @@ program ESMF_GridCreateUTest
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test creating uniform spherical Grid with >32bit index space"
+  write(failMsg, *) "Incorrect result"
+
+  ! This test uses the uniform Grid create so that it tests the underlying grid create call as well as
+  ! testing adding and setting coordinates, creating different staggerlocs, etc. 
+  grid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/129600, 64800/), &
+       regDecomp=(/2,2/), & 
+       minCornerCoord=(/0.0_ESMF_KIND_R8,-90.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/360.0_ESMF_KIND_R8,90.0_ESMF_KIND_R8/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Init correct flag
+  correct=.true.
+  rc = ESMF_SUCCESS
+
+  !! Check overall index space to make sure it looks ok
+
+  ! Make sure center index space looks ok
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (minIndex(1) .ne. 1) correct=.false.
+  if (minIndex(2) .ne. 1) correct=.false.
+  if (maxIndex(1) .ne. 129600) correct=.false.
+  if (maxIndex(2) .ne. 64800) correct=.false.
+
+  ! Make sure corner index space looks ok
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (minIndex(1) .ne. 1) correct=.false.
+  if (minIndex(2) .ne. 1) correct=.false.
+  if (maxIndex(1) .ne. 129600) correct=.false.
+  if (maxIndex(2) .ne. 64801) correct=.false.
+
+
+  !! As a simple check that things are working loop through and make sure corner coords are correct
+  
+  ! Get local DE count
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Loop through DEs checking coords
+  do lDE=0, localDECount-1
+
+     ! Get lon coords
+     call ESMF_GridGetCoord(grid, coordDim=1, localDe=lDE, &
+          staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonPtrR81D, &
+          computationalLBound=clbnd,computationalUBound=cubnd, &
+          rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! Loop through lon coords making sure that they are at least close
+     do i1=clbnd(1), cubnd(1)
+        calc_lon=360.0*(REAL(i1-1,ESMF_KIND_R8)/REAL(129600,ESMF_KIND_R8)) 
+        if (ABS(lonPtrR81D(i1)-calc_lon) > 1.0E-10) correct=.false.
+     enddo
+
+     ! Get lat coords
+     call ESMF_GridGetCoord(grid, coordDim=2, localDe=lDE, &
+          staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latPtrR81D, &
+          computationalLBound=clbnd,computationalUBound=cubnd, &
+          rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! Loop through lat coords making sure that they are at least close
+     do i1=clbnd(1), cubnd(1)
+        calc_lat=(180.0*(REAL(i1-1,ESMF_KIND_R8)/REAL(64800,ESMF_KIND_R8)))-90.0 
+        if (ABS(latPtrR81D(i1)-calc_lat) > 1.0E-10) correct=.false.
+     enddo
+  enddo
+
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test creating uniform Cartesian Grid with >32bit index space"
+  write(failMsg, *) "Incorrect result"
+
+  ! This test uses the uniform Grid create so that it tests the underlying grid create call as well as
+  ! testing adding and setting coordinates, creating different staggerlocs, etc. 
+  grid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/129600, 64800/), &
+       regDecomp=(/2,2/), & 
+       minCornerCoord=(/0.0_ESMF_KIND_R8,0.0_ESMF_KIND_R8/), &
+       maxCornerCoord=(/100.0_ESMF_KIND_R8,100.0_ESMF_KIND_R8/), &
+       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
+       coordSys=ESMF_COORDSYS_CART, &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Init correct flag
+  correct=.true.
+  rc = ESMF_SUCCESS
+
+  !! Check overall index space to make sure it looks ok
+
+  ! Make sure center index space looks ok
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (minIndex(1) .ne. 1) correct=.false.
+  if (minIndex(2) .ne. 1) correct=.false.
+  if (maxIndex(1) .ne. 129600) correct=.false.
+  if (maxIndex(2) .ne. 64800) correct=.false.
+
+  ! Make sure corner index space looks ok
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
+           minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (minIndex(1) .ne. 1) correct=.false.
+  if (minIndex(2) .ne. 1) correct=.false.
+  if (maxIndex(1) .ne. 129601) correct=.false.
+  if (maxIndex(2) .ne. 64801) correct=.false.
+
+
+  !! As a simple check that things are working loop through and make sure corner coords are correct
+  
+  ! Get local DE count
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Loop through DEs checking coords
+  do lDE=0, localDECount-1
+
+     ! Get X coords
+     call ESMF_GridGetCoord(grid, coordDim=1, localDe=lDE, &
+          staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=xPtrR81D, &
+          computationalLBound=clbnd,computationalUBound=cubnd, &
+          rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! Loop through X coords making sure that they are at least close
+     do i1=clbnd(1), cubnd(1)
+        calc_x=100.0*(REAL(i1-1,ESMF_KIND_R8)/REAL(129600,ESMF_KIND_R8)) 
+        if (ABS(xPtrR81D(i1)-calc_x) > 1.0E-10) correct=.false.
+     enddo
+
+     ! Get Y coords
+     call ESMF_GridGetCoord(grid, coordDim=2, localDe=lDE, &
+          staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=yPtrR81D, &
+          computationalLBound=clbnd,computationalUBound=cubnd, &
+          rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     ! Loop through Y coords making sure that they are at least close
+     do i1=clbnd(1), cubnd(1)
+        calc_y=(100.0*(REAL(i1-1,ESMF_KIND_R8)/REAL(64800,ESMF_KIND_R8)))
+        if (ABS(yPtrR81D(i1)-calc_y) > 1.0E-10) correct=.false.
+     enddo
+  enddo
+
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+
+  !-----------------------------------------------------------------------------
+  ! Stop testing
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 

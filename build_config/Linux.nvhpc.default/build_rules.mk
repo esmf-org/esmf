@@ -8,7 +8,7 @@
 #
 ESMF_F90DEFAULT         = nvfortran
 ESMF_CXXDEFAULT         = nvc++
-ESMF_CDEFAULT           = nvcc
+ESMF_CDEFAULT           = nvc
 
 ############################################################
 # Default MPI setting.
@@ -43,10 +43,10 @@ ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
-ifeq ($(ESMF_COMM),mpich)
-# Mpich ----------------------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
+ifeq ($(ESMF_COMM),mpich1)
+# Mpich1 ---------------------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH1
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH1
 ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lpmpich++ -lmpich
 ESMF_CXXDEFAULT         = mpiCC
@@ -65,8 +65,8 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
-ifeq ($(ESMF_COMM),mpich3)
-# Mpich3 ---------------------------------------------------
+ifeq ($(ESMF_COMM),mpich)
+# Mpich3 and up --------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
@@ -130,9 +130,9 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} --version
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
-ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} --version -c
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version -c
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version -c
 
 ############################################################
 # Currently no support the Fortran2018 assumed type feature
@@ -200,6 +200,7 @@ ESMF_OPENMP_CXXLINKOPTS    += -mp
 ############################################################
 # OpenACC compiler and linker flags (the -Minfo just there for debugging)
 #
+ESMF_OPENACCDEFAULT = OFF
 ESMF_OPENACC_F90COMPILEOPTS += -acc -Minfo
 ESMF_OPENACC_CXXCOMPILEOPTS += -acc -Minfo
 ESMF_OPENACC_F90LINKOPTS    += -acc -Minfo

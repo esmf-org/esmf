@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -7719,10 +7719,7 @@ void GridIter::setDEBnds(
 
   // Temporarily set min/max
   int localrc;
-  const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeToDeMap();
-  const int *DETileList = staggerDistgrid->getTileListPDe();
-  int tile=DETileList[localDEList[localDE]];
- 
+  int tile=staggerDistgrid->getTilePLocalDe(localDE, &localrc);
   const int *tileMin=staggerDistgrid->getMinIndexPDimPTile(tile, &localrc);
   const int *tileMax=staggerDistgrid->getMaxIndexPDimPTile(tile, &localrc);
 
@@ -8771,10 +8768,10 @@ void GridCellIter::getDEBnds(
       } else {
         // Get tile min/max
         int localrc,rc;
-        const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeToDeMap();
-        const int *DETileList = staggerDistgrid->getTileListPDe();
-        int tile=DETileList[localDEList[localDE]];
-        
+        int tile=staggerDistgrid->getTilePLocalDe(localDE, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &rc)) throw rc;
+
         const int *tileMin=staggerDistgrid->getMinIndexPDimPTile(tile, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                           &rc)) throw rc;
@@ -8851,10 +8848,7 @@ void GridCellIter::setDEBnds(
 
   // Temporarily set min/max
   int localrc;
-  const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeToDeMap();
-  const int *DETileList = staggerDistgrid->getTileListPDe();
-  int tile=DETileList[localDEList[localDE]];
-
+  int tile=staggerDistgrid->getTilePLocalDe(localDE, &localrc);
   const int *tileMin=staggerDistgrid->getMinIndexPDimPTile(tile, &localrc);
   const int *tileMax=staggerDistgrid->getMaxIndexPDimPTile(tile, &localrc);
     

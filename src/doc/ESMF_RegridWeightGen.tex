@@ -32,7 +32,17 @@ different formats:  the SCRIP format~\ref{sec:fileformat:scrip} as is used as an
 the ESMF unstructured grid format~\ref{sec:fileformat:esmf} or the proposed CF unstructured grid data model (UGRID) ~\ref{sec:fileformat:ugrid}.  GRIDSPEC is a proposed CF extension for the annotation of complex Earth system grids.  In the latest ESMF library, we added support for multi-tile GRIDSPEC Mosaic file with non-overlapping tiles. For UGRID, we support the 2D flexible mesh topology with mixed triangles and quadrilaterals and fully 3D unstructured mesh topology with hexahedrons and tetrahedrons.  
 
 In the latest ESMF implementation, the {\tt ESMF\_RegridWeightGen} command line toll can detect the type of the input grid files automatically.  The user
-doesn't need to provide the source and destination grid file type arguments anymore.  The following arguments {\tt -t}, {\tt --src\_type}, {\tt --dst\_type}, {\tt --src\_meshname}, and {\tt --dst\_meshname} are no longer needed.  If provided, the application will simply ingore them.
+doesn't need to provide the source and destination grid file type arguments anymore.  The following arguments {\tt -t}, {\tt --src\_type}, {\tt --dst\_type}, {\tt --src\_meshname}, and {\tt --dst\_meshname} are no longer needed.  If provided, the application will simply ingore them. The rule to determine the file format is the following:
+
+\begin{itemize}
+  \item ESMF\_FILEFORMAT\_SCRIP:  variables grid\_corner\_lon and grid\_corner\_lat exists
+  \item ESMF\_FILEFORMAT\_UGRID: a variable with attribute "cf\_role" or "standard\_name" set to "mesh\_topology"
+  \item ESMF\_FILEFORMAT\_ESMFMESH: variables nodeCoords and elementConn exists
+  \item ESMF\_FILEFORMAT\_CFGRID: variables with attributes "degree\_north" and "degree\_east" exists
+  \item ESMF\_FILEFORMAT\_MOSAIC: a variable with attribute "standard\_name" set to "grid\_mosaic\_spec"
+  \item ESMF\_FILEFORMAT\_TILE:  a varilable with attribute "standard\_name" set to "grid\_tile\_spec"
+\end{itemize}
+
 
 This command line tool can do regrid weight generation from a global or regional source grid to a global or regional destination grid.
 As is true with many global models, this application currently assumes the latitude and longitude values refer to positions on a perfect sphere, as opposed to a more complex and accurate representation of the Earth's true shape such as would be used in a GIS system. (ESMF's current user base doesn't require this level of detail in representing the Earth's shape, but it could be added in the future if necessary.)

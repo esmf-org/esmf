@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -176,7 +176,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -249,7 +249,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -265,7 +265,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -281,7 +281,7 @@ module ESMF_CompMod
 #endif
     !private
     type(ESMF_CompClass), pointer :: compp
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -1190,6 +1190,7 @@ contains
     ! Wrap comp so it's passed to C++ correctly.
     compp%compw%compp => compp
     ESMF_INIT_SET_CREATED(compp%compw)
+    compp%compw%isNamedAlias = .false.
 
     ! Set up the arguments
     if (compp%iAmParticipant) then
@@ -2631,9 +2632,10 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
 !------------------------------------------------------------------------------
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Set init code
     ESMF_INIT_SET_CREATED(cw)
+    cw%isNamedAlias = .false.
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS

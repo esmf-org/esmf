@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2016,12 +2016,11 @@ end function ESMF_MeshCreateFromFile
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromFileOld()"
-!BOP
+!BOPI
 !\label{API:MeshCreateFromFileOld}
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a file
+! !IROUTINE: ESMF_MeshCreate - Previous version of Mesh create from a file
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFileOld(filename, fileformat, keywordEnforcer, &
                  convertToDual, addUserArea, maskFlag, varname, &
                  nodalDistgrid, elementDistgrid, name, rc)
@@ -2095,7 +2094,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     logical::  localConvertToDual      ! local flag
     logical::  localAddUserArea
@@ -3760,7 +3759,10 @@ end function ESMF_MeshCreateDual
 !   a bit easier.
 !   After this call the Mesh is usable, for
 !   example, a Field may be built on the created Mesh object and
-!   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
+!   this Field may be used in {\tt ESMF\_FieldRegridStore()}. However, the Mesh created by this
+!   call consists of a set of disconnected elements, and so shouldn't be used in a situation where
+!   connections between elements are necessary (e.g. bilinear regridding on element centers, patch regridding,
+!   or second-order conservative regridding). 
 !
 !   This call sets the dimension of the elements in the Mesh
 !   via {\tt parametricDim} and the number of coordinate dimensions in the mesh
@@ -3903,7 +3905,10 @@ end function ESMF_MeshCreateDual
 !   Internally these corners are turned into nodes forming the outside edges of the elements.
 !   After this call the Mesh is usable, for
 !   example, a Field may be built on the created Mesh object and
-!   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
+!   this Field may be used in {\tt ESMF\_FieldRegridStore()}. However, the Mesh created by this
+!   call consists of a set of disconnected elements, and so shouldn't be used in a situation where
+!   connections between elements are necessary (e.g. bilinear regridding on element centers, patch regridding,
+!   or second-order conservative regridding). 
 !
 !   This call sets the dimension of the elements in the Mesh
 !   via {\tt parametricDim} and the number of coordinate dimensions in the mesh

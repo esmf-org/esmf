@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2021, University Corporation for Atmospheric Research,
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2574,13 +2574,9 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
 
     // Get tile number
     if (_tile != NULL) {
-      // Get de
-      const int *localDEList=grid->getDistGrid()->getDELayout()->getLocalDeToDeMap();
-      int de=localDEList[localDE];
-
-      // Get tile
-      const int *DETileList = grid->getDistGrid()->getTileListPDe();
-      *_tile=DETileList[de];
+      *_tile = grid->getDistGrid()->getTilePLocalDe(localDE, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(_rc))) return;
     }
 
 

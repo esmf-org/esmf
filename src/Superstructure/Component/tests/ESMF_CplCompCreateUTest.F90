@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -66,6 +66,7 @@
     type(ESMF_Config)       :: config
     integer                 :: fred, i
     character(len=:), allocatable :: labelList(:)
+    integer, allocatable          :: petList(:)
 #endif
 
 !-------------------------------------------------------------------------------
@@ -549,9 +550,6 @@
     write(failMsg, *) "Did not return correct value in fred"
     write(name, *) "Config handling Test - validate attribute value"
     call ESMF_Test((fred==1), name, failMsg, result, ESMF_SRCLINE)
-    
-
-
 
 !-------------------------------------------------------------------------
 !   !
@@ -575,9 +573,96 @@
     write(name, *) "Destroying a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component with petList
+    cpl = ESMF_CplCompCreate(petList=(/0/), rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component with petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component created with petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component with empty petList
+    allocate(petList(0))
+    cpl = ESMF_CplCompCreate(petList=petList, rc=rc)
+    deallocate(petList)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component with empty petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component created with empty petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component with petList
+    cpl = ESMF_CplCompCreate(petList=(/0/), rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component with petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component created with petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component with empty petList
+    allocate(petList(0))
+    cpl = ESMF_CplCompCreate(petList=petList, rc=rc)
+    deallocate(petList)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component with empty petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component created with empty petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 #endif
 
     call ESMF_TestEnd(ESMF_SRCLINE)
 
     end program ESMF_CplCompCreateUTest
-    
+

@@ -1,8 +1,9 @@
-[![ESMF](https://circleci.com/gh/esmf-org/esmf.svg?style=svg)](http://www.earthsystemmodeling.org/docs/nightly/develop/ESMF_refdoc/)  
+[![ESMF Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml)
+[![ESMPy Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml)
 
-# Earth System Modeling Framework (ESMF)  
+# Earth System Modeling Framework (ESMF)
 
->Copyright (c) 2002-2021 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
+>Copyright (c) 2002-2022 University Corporation for Atmospheric Research, Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory, University of Michigan, National Centers for Environmental Prediction, Los Alamos National Laboratory, Argonne National Laboratory, NASA Goddard Space Flight Center. All rights reserved.
 
 Hello and welcome to ESMF.
 
@@ -18,7 +19,7 @@ Hello and welcome to ESMF.
 
 ## Building ESMF
 
- * To build ESMF from source consult the [Building ESMF](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node9.html) section of the [ESMF User's Guide](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/).
+ * To build ESMF from source consult the [Building ESMF](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node10.html) section of the [ESMF User's Guide](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/).
  * For testing ESMF, see [Testing makefile targets](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node11.html).
  * Pre-built binaries for ESMF and ESMPy are also available on `conda-forge` (_note Windows is not supported_):
 ```
@@ -32,8 +33,10 @@ conda create -c conda-forge -n <env> esmf esmpy
 ## Add-On Packages
 
 Several add-on packages are included with ESMF under [`./src/addon`](https://github.com/esmf-org/esmf/tree/master/src/addon):  
- * [ESMPy](src/addon/ESMPy/README.md) - Python interface to ESMF.
- * [NUOPC](src/addon/NUOPC/README) - Interoperability layer developed under the National Unified Operational Prediction Capability (NUOPC) program.
+ * [ESMPy](src/addon/esmpy) - Python interface to ESMF.
+ * [ESMX](src/addon/ESMX) - A layer providing the Earth System Model eXecutable.
+   The ESMX layer is built on top of ESMF and NUOPC.
+ * [NUOPC](src/addon/NUOPC) - Interoperability layer developed under the National Unified Operational Prediction Capability (NUOPC) program.
 
 See each addon package for a specific README file.
 

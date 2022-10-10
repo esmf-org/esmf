@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research,
+! Copyright 2002-2022, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -255,16 +255,6 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-! ! Given an ESMF array, write the binary file. Currently not supported by PIO
-  write(name, *) "Write ESMF_Array with Halo to binary Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_withhalo, fileName='file3D_withhalo.bin', &
-       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_BIN, rc=rc)
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-!------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array without Halo to NetCDF Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -385,16 +375,6 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-! ! Read in a binary file to an ESMF array. Currently not supported by PIO
-  write(name, *) "Read ESMF_Array with Halo from binary Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_withhalo3, fileName='file3D_withhalo.bin', &
-       iofmt=ESMF_IOFMT_BIN, rc=rc)
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-!------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
 ! ! Compare read in and the existing file
   write(name, *) "Compare read in data to the existing NetCDF data - 3D with halo"
   Maxvalue(1) = 0
@@ -419,15 +399,6 @@ program ESMF_ArrayIOUTest
   deallocate (totalLWidth, totalUWidth)
   deallocate (exclusiveLBound, exclusiveUBound)
 
-!------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-! ! Read in a binary file to an ESMF array specifying a variable.
-  write(name, *) "Read ESMF_Array variable with Halo from binary Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayRead(array_withhalo3, fileName='file3D_withhalo.bin', &
-       iofmt=ESMF_IOFMT_BIN, variableName='dummyname', rc=rc)
- ! Should fail since varname not supported in binary mode
-  call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

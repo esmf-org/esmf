@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2021, University Corporation for Atmospheric Research, 
+! Copyright 2002-2022, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -61,9 +61,8 @@ module ESMF_ArrayBundleMod
 #ifndef ESMF_NO_SEQUENCE
   sequence
 #endif
-  private
     type(ESMF_Pointer) :: this
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------
@@ -991,7 +990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
-    
+
     ! Fill arrayNameList
     if (present(arrayNameList)) then
       do i=1, min(size(arrayNameList), opt_arrayCount)
@@ -1000,20 +999,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
-    
+
     ! Garbage collection
     deallocate(opt_arrayPtrList)
 
     ! Special call to get name out of Base class
     if (present(name)) then
-      call c_ESMC_GetName(arraybundle, name, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (arraybundle%isNamedAlias) then
+        name = trim(arraybundle%name)
+      else
+        call c_ESMC_GetName(arraybundle, name, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
-    
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-  
+
   end subroutine ESMF_ArrayBundleGetListAll
 !------------------------------------------------------------------------------
 
@@ -1667,12 +1670,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Read Array data to an ArrayBundle object from file(s).
 !   For this API to be functional, the environment variable {\tt ESMF\_PIO} 
-!   should be set to "internal" when the ESMF library is built.
+!   should be set to either "internal" or "external" when the ESMF library is built.
 !   Please see the section on Data I/O,~\ref{io:dataio}.
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays are supported.
+!     \item For multi-tile Arrays, all Arrays in the ArrayBundle must contain
+!     the same number of tiles.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -1682,6 +1686,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     An {\tt ESMF\_ArrayBundle} object.
 !   \item[fileName]
 !     The name of the file from which ArrayBundle data is read.
+!     If the ArrayBundle contains multi-tile Arrays, then fileName must contain
+!     exactly one instance of "\#"; this is a placeholder that will be replaced
+!     by the tile number, with each tile being read from a separate file. (For
+!     example, for a fileName of "myfile\#.nc", tile 1 will be read from
+!     "myfile1.nc", tile 2 from "myfile2.nc", etc.)
+!     (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all Arrays in the bundle 
 !     are stored in one single file. If .false., each Array is stored 
@@ -1693,10 +1703,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
 !    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
-!    of options. If not present, file names with a {\tt .bin} extension will
-!    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
-!    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
-!    {\tt ESMF\_IOFMT\_NETCDF}.
+!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !     \end{sloppypar}
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1729,19 +1736,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (fileName, '.') > 0) then
-        file_ext_p = index (fileName, '.', back=.true.)
-        select case (fileName(file_ext_p:))
-        case ('.nc')
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        case ('.bin')
-          opt_iofmt = ESMF_IOFMT_BIN
-        case default
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        end select
-      else
-        opt_iofmt = ESMF_IOFMT_NETCDF
-      end if
+      opt_iofmt = ESMF_IOFMT_NETCDF
     end if
 
     ! Call into the C++ interface, which will call IO object
@@ -3820,7 +3815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Write the Arrays into a file. For this API to be functional,
-!   the environment variable {\tt ESMF\_PIO} should be set to "internal"
+!   the environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external"
 !   when the ESMF library is built. Please see the section on 
 !   Data I/O,~\ref{io:dataio}.
 !
@@ -3835,7 +3830,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays are supported.
+!     \item For multi-tile Arrays,all Arrays in the ArrayBundle must contain
+!     the same number of tiles.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -3845,6 +3841,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     An {\tt ESMF\_ArrayBundle} object.
 !   \item[fileName]
 !     The name of the output file to which array bundle data is written.
+!     If the ArrayBundle contains multi-tile Arrays, then fileName must contain
+!     exactly one instance of "\#"; this is a placeholder that will be replaced
+!     by the tile number, with each tile being written to a separate file. (For
+!     example, for a fileName of "myfile\#.nc", tile 1 will be written to
+!     "myfile1.nc", tile 2 to "myfile2.nc", etc.)
+!     (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[convention]}]
 !     Specifies an Attribute package associated with the ArrayBundle, and the
 !     contained Arrays, used to create NetCDF dimension labels and attributes
@@ -3866,18 +3868,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
 !      A logical flag, the default is .false., i.e., existing Array data may
-!      {\em not} be overwritten. If .true., the overwrite behavior depends
-!      on the value of {\tt iofmt} as shown below:
-!    \begin{description}
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
-!      be overwritten with each Arrays's data.
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF, ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET}:]\ Only the
+!      {\em not} be overwritten. If .true., only the
 !      data corresponding to each Array's name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
 !      the given timeslice may be overwritten.
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
-!    \end{description}
 !    \end{sloppypar}
 !   \item[{[status]}]
 !    \begin{sloppypar}
@@ -3904,10 +3900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
 !    The I/O format.  Please see Section~\ref{opt:iofmtflag} for the list
-!    of options. If not present, file names with a {\tt .bin} extension will
-!    use {\tt ESMF\_IOFMT\_BIN}, and file names with a {\tt .nc} extension
-!    will use {\tt ESMF\_IOFMT\_NETCDF}.  Other files default to
-!    {\tt ESMF\_IOFMT\_NETCDF}.
+!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !     \end{sloppypar}
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3952,19 +3945,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present (iofmt)) then
       opt_iofmt = iofmt
     else
-      if (index (fileName, '.') > 0) then
-        file_ext_p = index (fileName, '.', back=.true.)
-        select case (fileName(file_ext_p:))
-        case ('.nc')
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        case ('.bin')
-          opt_iofmt = ESMF_IOFMT_BIN
-        case default
-          opt_iofmt = ESMF_IOFMT_NETCDF
-        end select
-      else
-        opt_iofmt = ESMF_IOFMT_NETCDF
-      end if
+      opt_iofmt = ESMF_IOFMT_NETCDF
     end if
 
     ! Call into the C++ interface, which will call IO object

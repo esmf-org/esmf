@@ -82,6 +82,36 @@ Component that drives and coordinates initialization of its child components: Mo
       \item Optional. By default CplList attributes are  not modified.
       \item Modify the CplList attribute on the child components as desired. This can be useful to set custom Connection Options for specific Field pairs.
     \end{itemize}
+    \item {\bf label\_PreChildrenAdvertise}
+    \begin{itemize}
+      \item Optional.
+      \item Allow driver to execute specific code before calling the Advertise phase of its children.
+    \end{itemize}
+    \item {\bf label\_PostChildrenAdvertise}
+    \begin{itemize}
+      \item Optional.
+      \item Allow driver to execute specific code after calling the Advertise phase of its children.
+    \end{itemize}
+    \item {\bf label\_PreChildrenRealize}
+    \begin{itemize}
+      \item Optional.
+      \item Allow driver to execute specific code before calling the Realize phase of its children.
+    \end{itemize}
+    \item {\bf label\_PostChildrenRealize}
+    \begin{itemize}
+      \item Optional.
+      \item Allow driver to execute specific code after calling the Realize phase of its children.
+    \end{itemize}
+    \item {\bf label\_PreChildrenDataInitialize}
+    \begin{itemize}
+      \item Optional.
+      \item Allow driver to execute specific code before calling the DataInitialize phase of its children.
+    \end{itemize}
+    \item {\bf label\_PostChildrenDataInitialize}
+    \begin{itemize}
+      \item Optional.
+      \item Allow driver to execute specific code after calling the DataInitialize phase of its children.
+    \end{itemize}
   \end{itemize}
   \item Run:
   \begin{itemize}
