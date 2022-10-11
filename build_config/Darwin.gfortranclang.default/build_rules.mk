@@ -128,11 +128,6 @@ ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-du
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 
 ############################################################
-# Gfortran runtime library on Darwin does not currently seem thread-safe
-#
-ESMF_PTHREADS := OFF
-
-############################################################
 # Fortran symbol convention
 #
 ifeq ($(ESMF_FORTRANSYMBOLS),default)
