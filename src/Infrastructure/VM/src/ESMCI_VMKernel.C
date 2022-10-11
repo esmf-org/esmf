@@ -759,6 +759,12 @@ void VMK::abort(){
 
 
 VMK::Affinities VMK::setAffinities(void *ssarg){
+{
+  std::stringstream msg;
+  msg << "VMK::Affinities()#" << __LINE__
+    << " just entering";
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+}
   SpawnArg *sarg = (SpawnArg *)ssarg;
   Affinities affs;
   affs.mypthid = mypthid;
@@ -782,6 +788,12 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
     int numthreads = ncpet[mypet]; // default
     if (sarg->openmpnumthreads>=0)
       numthreads = sarg->openmpnumthreads;
+{
+  std::stringstream msg;
+  msg << "VMK::Affinities()#" << __LINE__
+    << " calling omp_set_num_threads() with numthreads=" << numthreads;
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+}
     omp_set_num_threads(numthreads);
 #if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
     if (sarg->openmphandling>1){
