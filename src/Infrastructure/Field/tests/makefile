@@ -9,6 +9,7 @@ LOCDIR	  = src/Infrastructure/Field/tests
 .NOTPARALLEL:
 TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMC_FieldUTest \
+		$(ESMF_TESTDIR)/ESMC_FieldReadWriteUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldRegridCsrvUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldGridRegridUTest \
@@ -41,10 +42,11 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
 
 # TESTS_BUILD   = \
-#		$(ESMF_TESTDIR)/ESMC_FieldRegridCsrvUTest
+# 		$(ESMF_TESTDIR)/ESMC_FieldReadWriteUTest
 
 TESTS_RUN     = \
 		RUN_ESMC_FieldUTest \
+		RUN_ESMC_FieldReadWriteUTest \
 		RUN_ESMC_FieldRegridUTest \
 		RUN_ESMC_FieldRegridCsrvUTest \
 		RUN_ESMC_FieldGridRegridUTest \
@@ -130,6 +132,11 @@ RUN_ESMC_FieldUTest:
 	cp -r data $(ESMF_TESTDIR)
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=Field NP=1 ctest
+
+RUN_ESMC_FieldReadWriteUTest:
+	cp -r data $(ESMF_TESTDIR)
+	chmod u+rw $(ESMF_TESTDIR)/data/*
+	$(MAKE) TNAME=FieldReadWrite NP=4 ctest
 
 RUN_ESMC_FieldUTestUNI:
 	cp -r data $(ESMF_TESTDIR)
