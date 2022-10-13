@@ -72,13 +72,7 @@ import sys
 
 msg = ""
 
-if (sys.version_info >= (3,8)):
-    # this requires Python 3.8 or higher
-    import importlib.metadata as ilm
-    
-    msg = ilm.metadata("esmpy")
-
-else:
+if (sys.version_info <= (3,8)):
     # pre Python 3.8, not sure how far yet
     from pkg_resources import get_distribution
     try: 
@@ -92,11 +86,24 @@ else:
     # parse it using email.Parser
     from email import message_from_string
     msg = message_from_string(pkgInfo)
+elif (sys.version_info >= (3,8)):
+    # this requires Python 3.8 or higher
+    import importlib.metadata as ilm
+    
+    msg = ilm.metadata("esmpy")
+
+# this might be only a Mac M1 thing? 
+if (sys.version_info >= (3,10)):
+
+    import setuptools_git_versioning
+    msg["Version"] = setuptools_git_versioning.version_from_git()
+
 
 # set the private metadata
 __name__ = msg["Name"]
 __version__ = msg["Version"]
 constants._ESMPY_VERSION = __version__ # required to check against ESMF_VERSION in loadESMF
+
 __license__ = msg["License"]
 __email__ = msg["Maintainer-email"]
 __description__ = msg["Summary"]

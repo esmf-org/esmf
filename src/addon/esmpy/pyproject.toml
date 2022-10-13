@@ -12,7 +12,8 @@ license = {text = "University of Illinois-NCSA"}
 dependencies = [
     "numpy",
     "pytest-json-report",
-    'importlib-metadata; python_version<"3.8"',
+    'importlib-metadata; python_version < "3.8"',
+    'setuptools-git-versioning; python_version >= "3.10"',
 ]
 dynamic = ["version"]
 
