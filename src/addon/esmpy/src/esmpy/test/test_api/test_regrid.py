@@ -666,7 +666,7 @@ class TestRegrid(TestBase):
 
         # Write the regridding operation weights to file
         dstfield.data[:] = -999
-        filename = '_esmf_test_weights_.nc'
+        filename = os.path.join(DATA_DIR, '_esmf_test_weights_.nc')
         _ = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR,
                    src_mask_values=np.atleast_1d(np.array([0])),
                    unmapped_action=UnmappedAction.IGNORE,
