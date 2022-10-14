@@ -32,6 +32,7 @@
 #include "ESMCI_DistGrid.h"
 
 #include "Mesh/include/ESMCI_MathUtil.h"
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -45,13 +46,63 @@ using namespace ESMCI;
 template <class GEOM>
 class Pgon {
 
-  int num_pnts;
-  double *pnt_coords;
-  
+  // Coords
+  vector<double> pnt_coords;
+
+  // is this a hole? 
   bool is_hole;
 
 public:
-  
+
+  // Full constructor
+  Pgon(bool _is_hole): is_hole(_is_hole) {
+
+    // Error check number of coords
+    if ((GEOM::pnt_size != 2) && (GEOM::pnt_size != 3)) Throw() << "Pgon only supports 2D or 3D points.";
+  }
+
+  // Default constructor
+  Pgon():Pgon(false) { }
+
+
+  // Reserve to add future points
+  void reserve(int num_pnts) {
+    pnt_coords.reserve(num_pnts*GEOM::pnt_size);
+  }
+
+  // Add a point
+  void add_pnt(double *pnt) {
+
+    // Add point 0 & 1
+    pnt_coords.push_back(pnt[0]);
+    pnt_coords.push_back(pnt[1]);
+
+    // Maybe add 3
+    if (GEOM::pnt_size > 2) pnt_coords.push_back(pnt[2]);
+
+    // Only support 3 coords right now, this is error checked in creation
+  }
+
+  // Calc area of the polygon
+  double area() {
+
+    // if not empty, return area
+    if (!pnt_coords.empty()) {
+      GEOM::calc_area_polygon(pnt_coords.size(), pnt_coords.data()); 
+    } else { // else return 0
+      return 0.0;
+    }
+  }
+
+
+  // Get methods
+  bool get_is_hole() {return is_hole;}
+  int get_num_pnts() {return pnt_coords.size();}  
+  int get_pnt_size() {return GEOM::pnt_size;}
+
+  // Returns a direct pointer to the coordinate memory
+  // (coordinates for a given point are stored next to each other in memory) 
+  double *get_coord_mem() {return pnt_coords.data();}
 
   
 };
