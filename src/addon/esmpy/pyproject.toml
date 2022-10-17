@@ -21,7 +21,7 @@ enabled = true
 template = "{tag}"
 dev_template = "{tag}"
 dirty_template = "{tag}"
-starting_version = "8.4.0" # this is a backup for pip <= 22.0 where git-versioning doesn't work
+starting_version = "8.5.0" # this is a backup for pip <= 22.0 where git-versioning doesn't work
 
 [tool.dynamic]
 version = "placeholder" # this is a placeholder for the version pulled with git-versioning
