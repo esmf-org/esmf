@@ -421,7 +421,7 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     int mode = 0;
     piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
     // if the file was created with netcdf4, it cannot be opened with pnetcdf
-    if (piorc == PIO_EINVAL || PIO_ENOTBUILT){
+    if (piorc == PIO_EINVAL || piorc == PIO_ENOTBUILT){
         pio_type = PIO_IOTYPE_NETCDF;
         piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
     }
