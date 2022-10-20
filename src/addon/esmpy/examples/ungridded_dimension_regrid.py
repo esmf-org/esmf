@@ -1,15 +1,6 @@
 # This example demonstrates how to regrid a field with extra dimensions,
 # such as time and vertical layers. This
-# The data files can be retrieved from the ESMF data repository by uncommenting the
-# following block of code:
-#
-# import os
-# DD = os.path.join(os.getcwd(), "examples/data")
-# if not os.path.isdir(DD):
-#     os.makedirs(DD)
-# from esmpy.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(DD, "ll2.5deg_grid.nc"))
-# cache_data_file(os.path.join(DD, "T42_grid.nc"))
+
 
 import esmpy
 import numpy
@@ -20,6 +11,13 @@ import esmpy.util.helpers as helpers
 import esmpy.api.constants as constants
 from esmpy.util.cache_data import DATA_DIR
 from esmpy.util.exceptions import DataMissing
+
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+# from esmpy.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(DATA_DIR, "ll2.5deg_grid.nc"))
+# cache_data_file(os.path.join(DATA_DIR, "T42_grid.nc"))
 
 # This call enables debug logging
 # esmpy = esmpy.Manager(debug=True)

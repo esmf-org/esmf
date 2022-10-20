@@ -1,15 +1,5 @@
 # This example demonstrates how to regrid between a GRIDSPEC grid and a tripole grid,
 # both grids use masking.
-# The data files can be retrieved from the ESMF data repository by uncommenting the
-# following block of code:
-#
-# import os
-# DD = os.path.join(os.getcwd(), "examples/data")
-# if not os.path.isdir(DD):
-#     os.makedirs(DD)
-# from esmpy.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(DD, "GRIDSPEC_ACCESS1.nc"))
-# cache_data_file(os.path.join(DD, "tx0.1v2_070911.nc"))
 
 import esmpy
 import numpy
@@ -20,6 +10,13 @@ import esmpy.util.helpers as helpers
 import esmpy.api.constants as constants
 from esmpy.util.cache_data import DATA_DIR
 from esmpy.util.exceptions import DataMissing
+
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+# from esmpy.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(DATA_DIR, "GRIDSPEC_ACCESS1.nc"))
+# cache_data_file(os.path.join(DATA_DIR, "tx0.1v2_070911.nc"))
 
 # This call enables debug logging
 # esmpy = esmpy.Manager(debug=True)

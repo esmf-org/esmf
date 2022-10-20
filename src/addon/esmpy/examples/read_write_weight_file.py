@@ -1,20 +1,14 @@
 # This example demonstrates how to regrid between a Grid and a Mesh.
-# The data files can be retrieved from the ESMF data repository by uncommenting the
-# following block of code:
-#
-# import os
-# DD = os.path.join(os.getcwd(), "examples/data")
-# if not os.path.isdir(DD):
-#     os.makedirs(DD)
-# from esmpy.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(DD, "ll2.5deg_grid.nc"))
-# cache_data_file(os.path.join(DD, "mpas_uniform_10242_dual_counterclockwise.nc"))
+
 
 import esmpy
 import numpy
 
+import os
+
 import esmpy.util.helpers as helpers
 import esmpy.api.constants as constants
+
 
 # This call enables debug logging
 mg = esmpy.Manager(debug=True)
@@ -91,7 +85,6 @@ dstfield.data[:] = 1e20
 # write regridding weights to file
 filename = "esmpy_example_weight_file.nc"
 if esmpy.local_pet() == 0:
-    import os
     if os.path.isfile(
         os.path.join(os.getcwd(), filename)):
         os.remove(os.path.join(os.getcwd(), filename))
