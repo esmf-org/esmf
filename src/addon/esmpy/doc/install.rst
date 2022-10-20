@@ -79,7 +79,7 @@ Please contact esmf_support@ucar.edu with any questions.
 
 .. Note::
 
-   With some python versions, there is a problem with the automatic installation of the required package ``setuptools-git-versioning``. If the output from the ``pip install`` command ends with ``Successfully installed esmpy-0.0.0``, this indicates that the ``setuptools-git-versioning`` package was not invoked and the build thinks you are using ESMF version 0.0.0. This will cause problems when you try to use ESMPy. To solve this problem, first uninstall ESMPy with ``python3 -m pip uninstall esmpy``, then manually install ``setuptools-git-versioning`` with ``python3 -m pip install setuptools-git-versioning``, then reinstall ESMPy using the above instructions. You should see a reasonable version number at the end, such as, ``Successfully installed esmpy-8.4.0``.
+   With some python versions, there is a problem with the automatic installation of the required package ``setuptools-git-versioning``. If the output from the ``pip install`` command ends with ``Successfully installed esmpy-0.0.0``, this indicates that the ``setuptools-git-versioning`` package was not invoked and the build thinks you are using ESMF version 0.0.0. This will cause problems when you try to use ESMPy. To solve this problem, simply rerun the above installation command (``python3 -m pip install .``). You should then see a reasonable version number at the end, such as, ``Successfully installed esmpy-8.4.0``.
 
 ---------------
 Importing ESMPy
