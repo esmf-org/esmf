@@ -92,13 +92,6 @@ elif (sys.version_info >= (3,8)):
     
     msg = ilm.metadata("esmpy")
 
-# this might be only a Mac M1 thing? 
-if (sys.version_info >= (3,10)):
-
-    import setuptools_git_versioning
-    msg["Version"] = setuptools_git_versioning.version_from_git()
-
-
 # set the private metadata
 __name__ = msg["Name"]
 __version__ = msg["Version"]
