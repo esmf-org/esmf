@@ -7,8 +7,8 @@ import site
 # inspect returns local module directory by default (not installed directory)
 # DATA_DIR = os.environ.get('ESMPY_DATA_DIR', os.path.join(os.path.dirname(inspect.getfile(esmpy)),'data'))
 DATA_DIR = os.environ.get('ESMPY_DATA_DIR', os.path.join(site.getsitepackages()[0], "esmpy/data"))
-# DATA_URL = 'http://data.earthsystemmodeling.org/download/data/'
-DATA_URL = 'https://raw.github.com/esmf-org/esmf-test-data/main/grids/'
+DATA_URL = 'http://data.earthsystemmodeling.org/download/data/'
+# DATA_URL = 'https://raw.github.com/esmf-org/esmf-test-data/main/grids/'
 
 
 
