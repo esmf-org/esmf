@@ -12,6 +12,7 @@ from esmpy.api.constants import _ESMF_NETCDF, _ESMF_PIO
 from esmpy.util.field_utilities import compare_fields
 from esmpy.util.grid_utilities import *
 from esmpy.util.mesh_utilities import *
+from esmpy.util.cache_data import DATA_DIR
 
 
 class TestRegrid(TestBase):
@@ -311,13 +312,6 @@ class TestRegrid(TestBase):
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     # remove this test for 8.2.0 due to unexplained segv
     def _field_regrid_file_withaux(self):
-        import os
-        DD = os.path.join(os.getcwd(), "test/data")
-        if not os.path.isdir(DD):
-            os.makedirs(DD)
-        from esmpy.util.cache_data import cache_data_file
-        cache_data_file(os.path.join(DD, "ll2.5deg_grid.nc"))
-        cache_data_file(os.path.join(DD, "T42_grid.nc"))
 
         mgr = Manager()
         filename = 'esmpy_test_field_regrid_withaux.nc'
@@ -327,10 +321,11 @@ class TestRegrid(TestBase):
                 os.remove(path)
         mgr.barrier()
 
-        grid1 = "test/data/ll2.5deg_grid.nc"
+
+        grid1 = os.path.join(DATA_DIR, "ll2.5deg_grid.nc")
         srcgrid = esmpy.Grid(filename=grid1, filetype=esmpy.FileFormat.SCRIP, add_corner_stagger=True)
 
-        grid2 = "test/data/T42_grid.nc"
+        grid2 = os.path.join(DATA_DIR, "T42_grid.nc")
         dstgrid = esmpy.Grid(filename=grid2, filetype=esmpy.FileFormat.SCRIP, add_corner_stagger=True)
 
         srcfield = esmpy.Field(srcgrid)
@@ -671,7 +666,7 @@ class TestRegrid(TestBase):
 
         # Write the regridding operation weights to file
         dstfield.data[:] = -999
-        filename = '_esmf_test_weights_.nc'
+        filename = os.path.join(DATA_DIR, '_esmf_test_weights_.nc')
         _ = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR,
                    src_mask_values=np.atleast_1d(np.array([0])),
                    unmapped_action=UnmappedAction.IGNORE,

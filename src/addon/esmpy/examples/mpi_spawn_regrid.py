@@ -4,16 +4,6 @@
 # NOTE: MPI.COMM_WORLD.Spawn does not seem to work for mpi4py installations
 #       installations built with mpich, however openmpi does work (July 2016).
 #
-# The data files can be retrieved from the ESMF data repository by uncommenting the
-# following block of code:
-#
-# import os
-# DD = os.path.join(os.getcwd(), "examples/data")
-# if not os.path.isdir(DD):
-#     os.makedirs(DD)
-# from esmpy.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(DD, "ll1deg_grid.nc"))
-# cache_data_file(os.path.join(DD, "mpas_uniform_10242_dual_counterclockwise.nc"))
 
 import numpy
 from mpi4py import MPI
@@ -21,6 +11,14 @@ import sys, os
 
 from esmpy.util.cache_data import DATA_DIR
 from esmpy.util.exceptions import DataMissing
+
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+# from esmpy.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(DATA_DIR, "ll1deg_grid.nc"))
+# cache_data_file(os.path.join(DATA_DIR, "mpas_uniform_10242_dual_counterclockwise.nc"))
+
 
 def regrid():
     try:
