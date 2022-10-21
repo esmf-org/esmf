@@ -1,15 +1,4 @@
 # This example demonstrates how to regrid between a UGRID Mesh and a Grid.
-# The data files can be retrieved from the ESMF data repository by uncommenting the
-# following block of code:
-#
-# import os
-# DD = os.path.join(os.getcwd(), "examples/data")
-# if not os.path.isdir(DD):
-#     os.makedirs(DD)
-# from esmpy.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(DD, "ll1deg_grid.nc"))
-# cache_data_file(os.path.join(DD, "ne30np4-t2UGRID_nodual.nc"))
-# cache_data_file(os.path.join(DD, "aggregAtlanticESTOFS.nc"))
 
 import esmpy
 import numpy
@@ -18,6 +7,15 @@ import os
 
 from esmpy.util.cache_data import DATA_DIR
 from esmpy.util.exceptions import DataMissing
+
+# The data files can be retrieved from the ESMF data repository by uncommenting the
+# following block of code:
+#
+
+# from esmpy.util.cache_data import cache_data_file
+# cache_data_file(os.path.join(DATA_DIR, "ll1deg_grid.nc"))
+# cache_data_file(os.path.join(DATA_DIR, "aggregAtlanticESTOFS.nc"))
+
 
 def plot_error(field1, field2, uninitval):
 
