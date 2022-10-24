@@ -218,7 +218,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
       }
       
       // do is in
-      double sdist;
+      double sdist=0.0;
       bool in_tri = tri_shape_func::is_in(p, &sdist);
 
       // Don't need to transform tri parametric coords because tri shape func seems to use [0,1], but
@@ -250,7 +250,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
       pcoord[1]=2*p[1]-1.0;    
 
       // do is in
-      double sdist;
+      double sdist=0.0;
       bool in_quad = quad_shape_func::is_in(pcoord, &sdist);
     
       // Distance to quad
@@ -284,7 +284,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
         pcoord[1]=p2;
 
         // do is in
-        double sdist;
+        double sdist=0.0;
         bool in_tri = tri_shape_func::is_in(pcoord, &sdist);
         
         // Distance to tri
@@ -307,7 +307,7 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
         pcoord[1]=2*p2-1.0;
 
         // do is in
-        double sdist;
+        double sdist=0.0;
         bool in_quad = quad_shape_func::is_in(pcoord, &sdist);
         
         // Distance to quad

@@ -803,10 +803,9 @@ send_all_start_count(iosystem_desc_t *ios, io_desc_t *iodesc, PIO_Offset llen,
               "invalid inputs", __FILE__, __LINE__);
 
     /* Do a handshake. */
-#ifdef DO_HANDSHAKE
     if ((mpierr = MPI_Recv(&ierr, 1, MPI_INT, 0, 0, ios->io_comm, &status)))
         return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-#endif
+
     /* Send local length of iobuffer for each field (all
      * fields are the same length). */
     if ((mpierr = MPI_Send((void *)&llen, 1, MPI_OFFSET, 0, ios->io_rank, ios->io_comm)))
@@ -905,10 +904,9 @@ recv_and_write_data(file_desc_t *file, const int *varids, const int *frame,
         if (rtask)
         {
             /* handshake - tell the sending task I'm ready */
-#ifdef DO_HANDSHAKE
             if ((mpierr = MPI_Send(&ierr, 1, MPI_INT, rtask, 0, ios->io_comm)))
                 return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
-#endif
+
             /* Get length of iobuffer for each field on this
              * task (all fields are the same length). */
             if ((mpierr = MPI_Recv(&rlen, 1, MPI_OFFSET, rtask, rtask, ios->io_comm,
@@ -1682,10 +1680,12 @@ pio_read_darray_nc_serial(file_desc_t *file, io_desc_t *iodesc, int vid,
                  * tasks. rtask here is the io task rank and
                  * ios->num_iotasks is the number of iotasks actually
                  * used in this decomposition. */
-                if (rtask < ios->num_iotasks && tmp_bufsize > 0)
+                if (rtask < ios->num_iotasks && tmp_bufsize > 0){
+		  
                     if ((mpierr = MPI_Send(iobuf, tmp_bufsize, iodesc->mpitype, rtask,
                                            4 * ios->num_iotasks + rtask, ios->io_comm)))
                         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+		}
             }
         }
     }

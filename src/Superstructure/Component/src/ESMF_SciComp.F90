@@ -476,10 +476,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompGet(scicomp%compp, name=name, compStatus=compStatus, &
        rc=localrc)
-print *, "Name: ", name
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=localrc)) return
+
+    if (scicomp%isNamedAlias .and. present(name)) then
+      ! access NamedAlias name
+      name = trim(scicomp%name)
+    endif
 
     ! call Comp method
     call ESMF_CompStatusGet(compStatus, rc = localrc)
@@ -616,11 +620,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit,scicomp,rc)
 
-    ! call Comp method
-    call ESMF_CompSet(scicomp%compp, name=name, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (scicomp%isNamedAlias .and. present(name)) then
+      ! set NamedAlias name
+      scicomp%name = trim(name)
+      ! call Comp method (without name)
+      call ESMF_CompSet(scicomp%compp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! call Comp method
+      call ESMF_CompSet(scicomp%compp, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

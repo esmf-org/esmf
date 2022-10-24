@@ -72,6 +72,7 @@ module NUOPC
   public NUOPC_CompSetEntryPoint          ! method
   public NUOPC_CompSetInternalEntryPoint  ! method
   public NUOPC_CompSetServices            ! method
+  public NUOPC_CompSetVM                  ! method
   public NUOPC_CompSpecialize             ! method
   public &
     label_ExternalAdvertise, &

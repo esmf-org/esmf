@@ -69,9 +69,9 @@ module ESMF_ArrayCreateMod
 ^ifndef ESMF_NO_SEQUENCE
   sequence
 ^endif
-  private
+!  private
     type(ESMF_Pointer) :: this
-    ESMF_INIT_DECLARE
+    ESMF_INIT_DECLARE_NAMED_ALIAS
   end type
 
 !------------------------------------------------------------------------------

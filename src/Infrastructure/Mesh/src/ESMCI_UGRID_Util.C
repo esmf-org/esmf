@@ -354,7 +354,7 @@ void get_elementConn_info_from_UGRID_file(int pioSystemDesc, int pioFileDesc, ch
   // Init elementConn decomp
   int ec_iodesc;
   int gdimlen2D[2]={(int)elementCount,(int)max_num_conns_per_elem};
-  piorc = PIOc_InitDecomp(pioSystemDesc, PIO_INT, 
+  piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_INT, 
                           2, gdimlen2D, totNumRectElementConn,
                           ec_offsets, &ec_iodesc, 
                           &rearr, NULL, NULL);
@@ -650,7 +650,7 @@ void get_coords_from_UGRID_file(int pioSystemDesc, int pioFileDesc, char *filena
   // Init coords decomp
   int iodesc;
   int gdimlen=global_count;
-  piorc = PIOc_InitDecomp(pioSystemDesc, PIO_DOUBLE, 1, &gdimlen, num_ids, offsets, &iodesc, 
+  piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_DOUBLE, 1, &gdimlen, num_ids, offsets, &iodesc, 
                           &rearr, NULL, NULL);
   if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
@@ -1070,7 +1070,7 @@ void get_mask_from_UGRID_file(int pioSystemDesc, int pioFileDesc, char *filename
     
   // Init elem mask decomp
   int em_iodesc;
-  piorc = PIOc_InitDecomp(pioSystemDesc, PIO_DOUBLE, num_dims, dim_sizes, num_ids, em_offsets, &em_iodesc, 
+  piorc = PIOc_InitDecomp_ReadOnly(pioSystemDesc, PIO_DOUBLE, num_dims, dim_sizes, num_ids, em_offsets, &em_iodesc, 
                           &rearr, NULL, NULL);
   if (!CHECKPIOERROR(piorc, std::string("Error initializing PIO decomp for element mask from file ") + filename,
                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;

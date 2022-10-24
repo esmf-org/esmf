@@ -249,7 +249,7 @@ end subroutine ESMF_InfoDescribePrint
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "fillMembersState()"
-subroutine fillMembersState(self, state, root_key, keywordEnforcer, rc)
+recursive subroutine fillMembersState(self, state, root_key, keywordEnforcer, rc)
   class(ESMF_InfoDescribe), intent(inout) :: self
   type(ESMF_State), intent(in) :: state
   character(*), intent(in) :: root_key
@@ -568,7 +568,7 @@ end subroutine updateWithDistGrid
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "updateWithState()"
-subroutine updateWithState(self, state, root_key, keywordEnforcer, rc)
+recursive subroutine updateWithState(self, state, root_key, keywordEnforcer, rc)
   class(ESMF_InfoDescribe), intent(inout) :: self
   type(ESMF_State), intent(in) :: state
   character(*), intent(in) :: root_key

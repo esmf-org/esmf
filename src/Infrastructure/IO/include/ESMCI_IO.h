@@ -132,12 +132,38 @@ namespace ESMCI {
   // global information
     IO_Handler    *ioHandler;
     std::vector<IO_ObjectContainer *> objects;
+
+    // All of the arrays handled by a given IO_Handler must have the same number
+    // of tiles. Since an IO object only contains a single IO_Handler, this
+    // implies that a given IO object is associated with a specific number of
+    // tiles in the arrays it can read and write. We could relax that
+    // restriction in the future by having multiple IO_Handlers, each handling a
+    // different number of tiles.
+    int             ntiles;         // Number of tiles in arrays handled by this object
+                                    // (should only be accessed via getNtiles(), even
+                                    // internally)
+    bool            ntilesIsLocked; // Once ntiles has been set explicitly or queried for
+                                    // any purpose, it cannot be changed further;
+                                    // ntilesIsLocked indicates that state.
     
   public:
     // native constructor and destructor
     IO(int *rc = NULL) {
       ioHandler = (IO_Handler *)NULL;
       // No constructor call for objects -- use default Allocator
+
+      // Start by assuming ntiles = 1. Typically we expect this to be set
+      // explicitly via a call to setOrCheckNtiles before it is accessed.
+      // However, there are some theoretical cases where setOrCheckNtiles may
+      // not be called, such as writing a file that doesn't contain any arrays
+      // (just attributes / metadata). In these cases, we want to default to the
+      // single-tile case. However, we want to ensure that a given IO object
+      // always uses the same value of ntiles - so once we have explicitly set
+      // ntiles or have done any operations that depend on ntiles (such as
+      // opening a file), the ntiles value becomes locked and cannot be changed.
+      // The ntilesIsLocked variable tracks this state.
+      ntiles = 1;
+      ntilesIsLocked = false;
       // return successfully
       if (rc != NULL) {
         *rc = ESMF_SUCCESS;
@@ -238,9 +264,39 @@ namespace ESMCI {
                     const ESMC_AttReconcileFlag &attreconflag);
 #endif // TBI
 
+  private:
+    const int getNtiles(void) {
+      // Once ntiles has been queried for any reason, it becomes locked and cannot be
+      // changed. (See comment in the constructor for more details.)
+      ntilesIsLocked = true;
+      return ntiles;
+    }
+
+    // If ntiles has not yet been set (i.e., this function has not yet been
+    // called), then set ntiles to the given value. If ntiles has already been
+    // set, then verify that ntiles matches the already-set value; if it
+    // doesn't, return an error via the return value. Note that all arrays
+    // handled by this IO object must have the same number of tiles; to confirm
+    // that this is the case, this function should be called for each array,
+    // specifying the number of tiles for that array.
+    //
+    // If this IO object will be handling multi-tile arrays, then this function
+    // must be called before calling open or any other function that depends on
+    // the number of tiles.
+    int setOrCheckNtiles(int ntiles_arg);
+
+    // Verify that the given value of ntiles matches the already-set ntiles (set
+    // via a prior call to setOrCheckNtiles); if it doesn't, return an error via
+    // the return value. (Note that all arrays handled by this IO object must
+    // have the same number tiles.)
+    //
+    // It is often better to use setOrCheckNtiles, since that version will set
+    // ntiles if it hasn't already been set; this version is meant only for the
+    // situation where ntiles should already have been set previously.
+    int checkNtiles(int ntiles_arg) const;
+
 // Don't know yet if we will need these
 #if 0
-  private:
     // Attribute writing
     int writeStartElement(const std::string& name,
                           const std::string& value,
