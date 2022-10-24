@@ -3448,7 +3448,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
   
-  subroutine routine_executeGridComp(is, i, phase, activeClock, name, userrc, rc)
+  recursive subroutine routine_executeGridComp(is, i, phase, activeClock, name, userrc, rc)
     type(type_InternalState)        :: is
     integer,          intent(in)    :: i, phase
     type(ESMF_Clock), intent(inout) :: activeClock
@@ -3493,7 +3493,7 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
   
-  subroutine routine_executeCplComp(is, i, j, phase, activeClock, name, userrc, rc)
+  recursive subroutine routine_executeCplComp(is, i, j, phase, activeClock, name, userrc, rc)
     type(type_InternalState)        :: is
     integer,          intent(in)    :: i, j, phase
     type(ESMF_Clock), intent(inout) :: activeClock
@@ -4412,14 +4412,16 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
+    nullify(cmEntry%wrap%petList) ! invalidate the petList 
     if (present(petList)) then
-      allocate(cmEntry%wrap%petList(size(petList)))
-      cmEntry%wrap%petList = petList  ! copy the petList elements
-    else
-      nullify(cmEntry%wrap%petList) ! invalidate the petList
+      if (size(petList)>0) then
+        ! a usable petList was provided
+        allocate(cmEntry%wrap%petList(size(petList)))
+        cmEntry%wrap%petList = petList  ! copy the petList elements
+      endif
     endif
-  
+
     if (btest(verbosity,13)) then
       if (associated(cmEntry%wrap%petList)) then
         write (lString, *) size(cmEntry%wrap%petList)
@@ -4585,14 +4587,16 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
+    nullify(cmEntry%wrap%petList) ! invalidate the petList 
     if (present(petList)) then
-      allocate(cmEntry%wrap%petList(size(petList)))
-      cmEntry%wrap%petList = petList  ! copy the petList elements
-    else
-      nullify(cmEntry%wrap%petList) ! invalidate the petList
+      if (size(petList)>0) then
+        ! a usable petList was provided
+        allocate(cmEntry%wrap%petList(size(petList)))
+        cmEntry%wrap%petList = petList  ! copy the petList elements
+      endif
     endif
-  
+
     if (btest(verbosity,13)) then
       if (associated(cmEntry%wrap%petList)) then
         write (lString, *) size(cmEntry%wrap%petList)
@@ -8190,6 +8194,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (stateIsCreated) then
       ! - complete all the fields in the importState
+      if (btest(verbosity,4)) then
+        call ESMF_LogWrite("Calling into completeAllFields() for importState", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       call completeAllFields(importState, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -8201,6 +8212,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (stateIsCreated) then
       ! - complete all the fields in the exportState
+      if (btest(verbosity,4)) then
+        call ESMF_LogWrite("Calling into completeAllFields() for exportState", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       call completeAllFields(exportState, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -8252,18 +8270,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (associated(fieldList)) then
         do i=1, size(fieldList)
-          
+
           ! See if the Field is shared. If so, don't need to do anything
           ! here, because the Connector will have realized the Fields 
           ! automatically, using reference sharing. Otherwise realize here.
-          
+
           call NUOPC_GetAttribute(fieldList(i), name="ShareStatusField", &
             value=value, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          
-          if (trim(value)=="not shared") then
+
+          if (trim(value)=="shared") then
+            ! shared -> must complete the field here
+            if (btest(verbosity,4)) then
+              call ESMF_LogWrite("- "//trim(itemNameList(i))// &
+                ": shared --> don't know what to do!!!!!.", ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
+          else
             ! not shared -> must complete the field here
+            if (btest(verbosity,4)) then
+              call ESMF_LogWrite("- "//trim(itemNameList(i))// &
+                ": not shared --> complete here.", ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
             call NUOPC_Realize(stateList(i), fieldName=itemNameList(i), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

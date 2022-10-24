@@ -1,5 +1,4 @@
-Settings for Unicos/lc on Cray XT/XE/XK, using gfortran and g++ out of the GNU Compiler Collection.  Due to bugs in early versions of gfortran, ESMF
-requires gfortran version 4.3 or newer.
+Settings for Unicos/lc on Cray XT/XE/XK, using gfortran and g++ out of the GNU Compiler Collection.
 
 Requires the following environment settings:
 

@@ -337,7 +337,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return 
       endif 
       ! on success LogErr is assumed to be functioning
-      
+
       ! obtain global VM
       call ESMF_VMGetGlobal(localvm, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1220,7 +1220,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (endflag==ESMF_END_ABORT) abortFlag = .true.
         if (endflag==ESMF_END_KEEPMPI) keepMpiFlag = ESMF_TRUE
       endif
-      
+
       if (abortFlag) then
         ! Abort the VM
         call ESMF_VMAbort(rc=localrc)

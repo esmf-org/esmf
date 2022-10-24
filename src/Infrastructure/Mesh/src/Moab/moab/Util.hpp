@@ -29,7 +29,7 @@
 #elif defined MOAB_HAVE_FINITE
 #define moab_isfinite( f ) finite( f )
 #else
-#define moab_isfinite( f ) ( !isinf( double( f ) ) && !isnan( double( f ) ) )
+#define moab_isfinite(f) (!std::isinf(f) && !std::isnan(f))
 #endif
 
 namespace moab

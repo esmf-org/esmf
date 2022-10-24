@@ -134,7 +134,7 @@
              ncStatus = nf90_inquire_attribute(gridid, i, 'standard_name', len=len)
           endif
         endif
-        if (ncStatus == nf90_noerror) then
+        if ((ncStatus == nf90_noerror) .and. (len .ge. 1)) then
           if (attvalue(len:len) .eq. achar(0)) len = len-1
           if (attvalue(1:len) .eq. 'mesh_topology') then
              fileType=ESMF_FILEFORMAT_UGRID
@@ -165,8 +165,8 @@
         endif
         ! check if it is CFGRID
         ! check if the coordinate variables exist or not
-                ncStatus = nf90_inquire_attribute(gridid, i, "units", len=len)
-        if (ncStatus == nf90_noerror) then
+        ncStatus = nf90_inquire_attribute(gridid, i, "units", len=len)
+        if ((ncStatus == nf90_noerror) .and. (len .ge. 1)) then
           ncStatus=nf90_get_att(gridid, i, 'units', attvalue)
           if (ncStatus /= nf90_noerror) then
             print '("NetCDF error: ", A)', trim(nf90_strerror(ncStatus))

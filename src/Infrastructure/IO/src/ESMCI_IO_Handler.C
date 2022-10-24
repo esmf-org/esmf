@@ -25,6 +25,8 @@
 
 // higher level, 3rd party or system includes here
 #include <iostream>
+#include <string>
+#include <algorithm>
 #include <fstream>
 
 // other ESMF include files here.
@@ -68,7 +70,8 @@ IO_Handler::IO_Handler (
 //
 //
 // !ARGUMENTS:
-  ESMC_IOFmt_Flag fmtArg               // (in)  - the desired I/O format
+  ESMC_IOFmt_Flag fmtArg,              // (in)  - the desired I/O format
+  int ntilesArg                        // (in)  - the number of tiles in arrays handled by this object
 //
   ) {
 //
@@ -83,7 +86,7 @@ IO_Handler::IO_Handler (
   fileStatusFlag = ESMC_FILESTATUS_UNKNOWN;
   overwrite = false;
   filename[0] = '\0';
-
+  ntiles = ntilesArg;
 }
 //-----------------------------------------------------------------------------
 
@@ -108,13 +111,14 @@ IO_Handler *IO_Handler::create (
 //
 // !ARGUMENTS:
       ESMC_IOFmt_Flag iofmt,              // (in)  the desired I/O format
+      int ntiles,                         // (in)  the number of tiles in arrays handled by this object
 //
   int *rc                                 // (out) return code
   ) {
 //
 // !DESCRIPTION:
 //    Create an initialized {\tt IO_Handler} object of the correct type for
-//    the specified I/O format (iofmt).
+//    the specified I/O format (iofmt) and number of tiles (ntiles).
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -141,7 +145,7 @@ IO_Handler *IO_Handler::create (
       // No break
     case ESMF_IOFMT_NETCDF4C:
 #if  defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
-      iohandler = new PIO_Handler(iofmt, &localrc);
+      iohandler = new PIO_Handler(iofmt, ntiles, &localrc);
 #else // defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
       errmsg = "PIO & (P)NetCDF libraries required for I/O operation";
       localrc = ESMF_RC_LIB_NOT_PRESENT;
@@ -196,13 +200,14 @@ IO_Handler *IO_Handler::create (
 // !ARGUMENTS:
       const std::string& file,             // (in) A file for Handler
       ESMC_IOFmt_Flag iofmt,               // (in) the desired I/O format
+      int ntiles,                          // (in) the number of tiles in arrays handled by this object
 //
   int *rc                                  // (out) return code
   ) {
 //
 // !DESCRIPTION:
 //    Create an initialized {\tt IO_Handler} object of the correct type for
-//    the specified I/O format (iofmt).
+//    the specified I/O format (iofmt) and number of tiles (ntiles).
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -211,7 +216,7 @@ IO_Handler *IO_Handler::create (
     *rc = ESMF_RC_NOT_IMPL;   // final return code
   }
 
-  IO_Handler *iohandler = IO_Handler::create(iofmt, &localrc);
+  IO_Handler *iohandler = IO_Handler::create(iofmt, ntiles, &localrc);
 
   if (ESMC_NULL_POINTER != iohandler)
     iohandler->filename = file;
@@ -361,6 +366,101 @@ void IO_Handler::finalize (
 } // end IO_Handler::finalize
 //-------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::arrayRead()"
+//BOPI
+// !IROUTINE:  ESMCI::IO_Handler::arrayRead    - Read an array from a file
+//
+// !INTERFACE:
+void IO_Handler::arrayRead(
+//
+// !RETURN VALUE:
+//
+//
+// !ARGUMENTS:
+//
+  Array *arr_p,                           // (inout) - Destination of read
+  const char * const name,                // (in)    - Optional array name
+  int *timeslice,                         // (in)    - Optional timeslice
+  int *rc                                 // (out)   - Error return code
+  ) {
+//
+// !DESCRIPTION:
+//    Read data from field <name> from the open file. If timeslice is not
+//    NULL, it should point to an integer representing the timeslice to read
+//    from the Array.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMF_RC_NOT_IMPL;         // local return code
+  if (rc != NULL) {
+    *rc = ESMF_RC_NOT_IMPL;               // final return code
+  }
+
+  PRINTPOS;
+
+  for (int tile = 1; tile <= ntiles; ++tile) {
+    arrayReadOneTileFile(arr_p, tile, name, timeslice, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+      return;
+  }
+  // return successfully
+  if (rc != NULL) {
+    *rc = ESMF_SUCCESS;
+  }
+} // IO_Handler::arrayRead()
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::arrayWrite()"
+//BOPI
+// !IROUTINE:  ESMCI::IO_Handler::arrayWrite    - Write an Array to a file
+//
+// !INTERFACE:
+void IO_Handler::arrayWrite(
+//
+// !RETURN VALUE:
+//
+//
+// !ARGUMENTS:
+  Array *arr_p,                           // (in) Destination of write
+  const char * const name,                // (in) Optional array name
+  const std::vector<std::string> &dimLabels, // (in) Optional dimension labels
+  int *timeslice,                         // (in) Optional timeslice
+  const ESMCI::Info *varAttPack,            // (in) Optional per-variable Attribute Package
+  const ESMCI::Info *gblAttPack,            // (in) Optional global Attribute Package
+  int *rc                                 // (out) - Error return code
+//
+  ) {
+//
+// !DESCRIPTION:
+//    Write data to field <name> to the open file.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMF_RC_NOT_IMPL;         // local return code
+  if (rc != NULL) {
+    *rc = ESMF_RC_NOT_IMPL;               // final return code
+  }
+
+  PRINTPOS;
+
+  for (int tile = 1; tile <= ntiles; ++tile) {
+    arrayWriteOneTileFile(arr_p, tile, name, dimLabels, timeslice,
+                          varAttPack, gblAttPack, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+      return;
+  }
+  // return successfully
+  if (rc != NULL) {
+    *rc = ESMF_SUCCESS;
+  }
+} // IO_Handler::arrayWrite()
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -392,7 +492,7 @@ int IO_Handler::setFilename(
   int localrc = ESMF_RC_NOT_IMPL;         // local return code
 
   // It is an error if we already have an open file
-  if (isOpen() != ESMF_FALSE) {
+  if (isOpenAnyTile() != ESMF_FALSE) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_ACTIVE,
       "- Cannot change name, file open", ESMC_CONTEXT, &rc);
     return rc;
@@ -410,6 +510,67 @@ int IO_Handler::setFilename(
 } // end IO_Handler::setFilename
 //-------------------------------------------------------------------------
 
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::getFilename()"
+//BOPI
+// !IROUTINE:  IO_Handler::getFilename - get filename for this object, possibly tile-specific
+//
+// !INTERFACE:
+const std::string IO_Handler::getFilename(
+//
+// !RETURN VALUE:
+//    filename associated with this IO_Handler object, possibly tile-specific
+//
+// !ARGUMENTS:
+  int tile,                           // (in)  - tile number for which filename is requested
+  int *rc                             // (out) - return code
+  )const{
+//
+// !DESCRIPTION:
+//      Return the filename for this IO_Handler object.
+//      If doing multi-tile IO, then the tile placeholder in the originally-specified
+//      filename will be replaced by the current tile number.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  if (rc != NULL) {
+    *rc = ESMF_RC_NOT_IMPL;
+  }
+
+  if (ntiles > 1) {
+    const char tilePlaceholder = '#';  // the character that will get replaced by the tile number
+    int numOccurrences = std::count(filename.begin(), filename.end(), tilePlaceholder);
+    if (numOccurrences != 1) {
+      std::stringstream errmsg;
+      errmsg << "For multi-tile IO, the specified file name must have exactly "
+             << "one occurrence of '" << tilePlaceholder << "', which will be "
+             << "replaced by the tile number. Filename <" << filename
+             << "> has " << numOccurrences << " occurrences.";
+      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_VAL_WRONG, errmsg, ESMC_CONTEXT, rc)) {
+        return "";
+      }
+    }
+
+    size_t pos = filename.find(tilePlaceholder);
+    std::string tileStr = std::to_string(tile);
+    std::string actualFilename = filename;
+    actualFilename.replace(pos, 1, tileStr);
+    if (rc != NULL) {
+      *rc = ESMF_SUCCESS;
+    }
+    return actualFilename;
+
+  } else {
+    // Single tile; no need to do any replacement of template character
+    if (rc != NULL) {
+      *rc = ESMF_SUCCESS;
+    }
+    return filename;
+  }
+} // end IO_Handler::getFilename
+//-------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -482,6 +643,46 @@ bool IO_Handler::fileExists(
 } // end IO_Handler::fileExists
 //-------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::checkArray()"
+//BOPI
+// !IROUTINE:  IO_Handler::checkArray - Check compatibility of an array with this object
+//
+// !INTERFACE:
+int IO_Handler::checkArray(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+  const Array *arr_p        // (in) - array to check
+  )const{
+//
+// !DESCRIPTION:
+//      Checks compatibility of an array with this IO Handler object (correct number of tiles).
+//      Returns an error code if incompatible.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  int thisNtiles = arr_p->getDistGrid()->getTileCount();
+  if (thisNtiles == ntiles) {
+    rc = ESMF_SUCCESS;
+    return rc;
+  } else {
+    std::stringstream errmsg;
+    errmsg << "Number of tiles in array for IO (" << thisNtiles
+           << ") does not match this IO Handler's ntiles value (" << ntiles
+           << "). All arrays handled by a given IO handler must have the same "
+           << "number of tiles.";
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_VAL_WRONG, errmsg, ESMC_CONTEXT, &rc);
+    return rc;
+  }
+} // end IO_Handler::checkArray
+//-------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -493,7 +694,7 @@ bool IO_Handler::fileExists(
 void IO_Handler::open (
 //
 // !RETURN VALUE:
-//     int error return code
+//
 //
 // !ARGUMENTS:
 
@@ -521,33 +722,147 @@ void IO_Handler::open (
     localrc = ESMF_RC_PTR_NULL;
     ESMC_LogDefault.MsgFoundError(localrc, "- NULL filename argument pointer",
       ESMC_CONTEXT, rc);
-  } else if (isOpen() == ESMF_TRUE) {
-    // Check to make sure that a file is not already open
-    localrc = ESMF_RC_FILE_OPEN;
-    ESMC_LogDefault.MsgFoundError(localrc, "- File already open", ESMC_CONTEXT,
-      rc);
+    return;
   }
 
-  if (ESMF_SUCCESS == localrc) {
-    // Set the filename
-    localrc = setFilename(file);
-  }
+  // Set the filename
+  localrc = setFilename(file);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+    return;
 
-  if (ESMF_SUCCESS == localrc) {
-    // Store the IO status and overwrite fields
-    fileStatusFlag = filestatusflag_arg;
-    overwrite = overwrite_arg;
-    // Open the file
-    open(readonly_arg, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, "- Error opening file", ESMC_CONTEXT,
-      rc);
+  // Store the IO status and overwrite fields
+  fileStatusFlag = filestatusflag_arg;
+  overwrite = overwrite_arg;
+  // Open the file(s)
+  for (int tile = 1; tile <= ntiles; ++tile) {
+    if (isOpen(tile) == ESMF_TRUE) {
+      // Check to make sure that a file is not already open
+      localrc = ESMF_RC_FILE_OPEN;
+      ESMC_LogDefault.MsgFoundError(localrc, "- File already open", ESMC_CONTEXT, rc);
+      return;
+    }
+    openOneTileFile(tile, readonly_arg, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, "- Error opening file", ESMC_CONTEXT, rc))
+      return;
   }
 
   // return
-  if (rc != (int *)NULL) {
-    *rc = localrc;
+  if (rc != NULL) {
+    *rc = ESMF_SUCCESS;
   }
 }  // end IO_Handler::open
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::isOpenAnyTile()"
+//BOPI
+// !IROUTINE:  IO_Handler::isOpenAnyTile - Determine if the file for any tile is open
+//
+// !INTERFACE:
+ESMC_Logical IO_Handler::isOpenAnyTile(
+//
+// !RETURN VALUE:
+//
+//  ESMC_Logical ESMF_TRUE if the file for any tile is open, ESMF_FALSE otherwise
+//
+// !ARGUMENTS:
+  ) {
+// !DESCRIPTION:
+//      Determine if the file for any tile is open, returning ESMF_TRUE if so,
+//      or ESMF_FALSE if no associated files are open. (For I/O on typical
+//      single-tile arrays, this is the same as calling isOpen(1), but for
+//      multi-tile arrays, with each tile being read / written to a different
+//      file, this checks the status of all associated files.)
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  for (int tile = 1; tile <= ntiles; ++tile) {
+    if (isOpen(tile) == ESMF_TRUE) {
+      return ESMF_TRUE;
+    }
+  }
+  return ESMF_FALSE;
+}  // end IO_Handler::isOpenAnyTile
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::flush()"
+//BOPI
+// !IROUTINE:  IO_Handler::flush - Flush any pending I/O operations
+//
+// !INTERFACE:
+void IO_Handler::flush(
+//
+// !RETURN VALUE:
+//
+//
+// !ARGUMENTS:
+  int *rc                                 // (out) - Error return code
+  ) {
+// !DESCRIPTION:
+//      Flush any pending I/O operations.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMF_RC_NOT_IMPL;         // local return code
+  if (rc != NULL) {
+    *rc = ESMF_RC_NOT_IMPL;               // final return code
+  }
+
+  PRINTPOS;
+  for (int tile = 1; tile <= ntiles; ++tile) {
+    flushOneTileFile(tile, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+      return;
+  }
+  // return successfully
+  if (rc != NULL) {
+    *rc = ESMF_SUCCESS;
+  }
+}  // end IO_Handler::flush
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::close()"
+//BOPI
+// !IROUTINE:  IO_Handler::close - Close possibly-open file(s)
+//
+// !INTERFACE:
+void IO_Handler::close(
+//
+// !RETURN VALUE:
+//
+//
+// !ARGUMENTS:
+  int *rc                                 // (out) - Error return code
+  ) {
+// !DESCRIPTION:
+//      Close possibly-open file(s)
+//      It is NOT an error if no file is open
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMF_RC_NOT_IMPL;         // local return code
+  if (rc != NULL) {
+    *rc = ESMF_RC_NOT_IMPL;               // final return code
+  }
+
+  PRINTPOS;
+  for (int tile = 1; tile <= ntiles; ++tile) {
+    closeOneTileFile(tile, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+      return;
+  }
+  // return successfully
+  if (rc != NULL) {
+    *rc = ESMF_SUCCESS;
+  }
+}  // end IO_Handler::close
 //-------------------------------------------------------------------------
 
 }  // end namespace ESMCI

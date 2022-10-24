@@ -65,6 +65,7 @@
     type(ESMF_Config)             :: config
     integer                       :: fred, i
     character(len=:), allocatable :: labelList(:)
+    integer, allocatable          :: petList(:)
 #endif
 
 !-------------------------------------------------------------------------------
@@ -102,7 +103,7 @@
     !------------------------------------------------------------------------
     !NEX_UTest
     cname = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(name=cname, configFile="comp.rc", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="comp.rc", rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -196,7 +197,7 @@
     !------------------------------------------------------------------------
     !NEX_UTest
     cname = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(name=cname, configFile="comp.rc", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="comp.rc", rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -225,7 +226,7 @@
 !   !
     !EX_UTest
 !   !  Test creation of a Component
-    comp1 = ESMF_GridCompCreate(rc=rc)  
+    comp1 = ESMF_GridCompCreate(rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
@@ -769,7 +770,7 @@
     !EX_UTest
 !   !  Test creation of a Component
     cname = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(name=cname, configFile="comp.rc", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="comp.rc", rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
@@ -1134,9 +1135,53 @@
     write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component with petList
+    comp1 = ESMF_GridCompCreate(petList=(/0/), rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component with petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component created with petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test creation of a Component with empty petList
+    allocate(petList(0))
+    comp1 = ESMF_GridCompCreate(petList=petList, rc=rc)
+    deallocate(petList)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component with empty petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component created with empty petList Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 #endif
 
     call ESMF_TestEnd(ESMF_SRCLINE)
 
     end program ESMF_GridCompCreateUTest
-    
+

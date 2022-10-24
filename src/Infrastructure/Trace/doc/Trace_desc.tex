@@ -25,7 +25,7 @@ different formats:
 \item in text at the end of ESMF Log files
 \item in separate text file, one per PET (if the ESMF Logs are turned off)
 \item in a single summary text file that aggregates timings over multiple PETs
-\item in a binary format for import into \htmladdnormallink{Cupid}{https://cupid.readthedocs.io/en/latest/} for detailed analysis
+\item in a binary format for import into the \htmladdnormallink{esmf-profiler}{https://github.com/esmf-org/esmf-profiler} for profile visualization
 \end{itemize}
 
 The following table lists important environment variables that control
@@ -68,9 +68,9 @@ Of the tools listed below, the first one is designed specifically for
 analyzing ESMF applications and the second two are general purpose tools
 for working with all CTF traces.
 \begin{itemize}
-\item \htmladdnormallink{Cupid}{https://cupid.readthedocs.io/en/latest/}
-  is a plugin for the Eclipse Integrated Development Environment
-  that can read and analyze ESMF traces.
+\item \htmladdnormallink{esmf-profiler}{https://github.com/esmf-org/esmf-profiler}
+  is a tool that ingests traces from an ESMF application and generates
+  performance profile plots.
 \item \htmladdnormallink{TraceCompass}{http://tracecompass.org/}
   is a general purpose tool for reading, analyzing, and visualizing traces.
 \item \htmladdnormallink{Babeltrace}{http://www.efficios.com/babeltrace}
@@ -86,7 +86,6 @@ are recorded with a high-precision timestamp to allow timing analyses.
 \item [phase\_exit] indicates exit from an initialize, run, or finalize ESMF component routine
 \item [region\_enter] indicates entry into a user-defined code region
 \item [region\_exit] indicates exit from a user-defined code region
-\item [mem] records current memory usage information
 \end{description}
 
 The following table lists important environment variables that control
