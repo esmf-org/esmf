@@ -164,6 +164,24 @@
         !------------------------------------------------------------------------
         !NEX_UTest_Multi_Proc_Only
         ! Create a field from an fortran 2d array
+        call test2a_isalloc(ESMF_DATACOPY_VALUE, rc)
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 2d " // &
+            "using ESMF_DATACOPY_VALUE and test isESMFAllocated"
+        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
+        call test2a_isalloc(ESMF_DATACOPY_REFERENCE, rc)
+        write(failMsg, *) ""
+        write(name, *) "Creating a Field from a fortran array 2d " // &
+            "using ESMF_DATACOPY_REFERENCE and test isESMFAllocated"
+        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Create a field from an fortran 2d array
         call test2b(rc)
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d, " // &
@@ -2590,6 +2608,66 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test2a_fail
+
+    subroutine test2a_isalloc(datacopyflag, rc)
+        type(ESMF_DataCopy_Flag), intent(in) :: datacopyflag        
+        integer, intent(out)  :: rc
+        integer               :: localrc
+        type(ESMF_Field)      :: field
+        type(ESMF_Grid)       :: grid
+        type(ESMF_StaggerLoc) :: sloc
+        real, dimension(:,:), allocatable :: farray
+        integer, dimension(2) :: ec
+        logical               :: isESMFAllocated
+
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
+                                  regDecomp=(/4,1/), name="testgrid", rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
+           exclusiveCount=ec, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        allocate(farray(ec(1), ec(2)))
+
+        field = ESMF_FieldCreate(grid, farray, indexflag=ESMF_INDEX_DELOCAL, &
+           datacopyflag=datacopyflag, staggerloc=sloc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldGet(field, isESMFAllocated=isESMFAllocated, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       
+        if (datacopyflag == ESMF_DATACOPY_VALUE .and. isESMFAllocated /= .true.) then 
+           localrc = ESMF_FAILURE
+        end if
+        if (datacopyflag == ESMF_DATACOPY_REFERENCE .and. isESMFAllocated /= .false.) then
+           localrc = ESMF_FAILURE
+        end if
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        deallocate(farray)
+
+    end subroutine test2a_isalloc
 
     subroutine test2b(rc)
         integer, intent(out)  :: rc
