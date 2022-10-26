@@ -1,0 +1,178 @@
+// $Id$
+//
+// Earth System Modeling Framework
+// Copyright 2002-2022, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_HConfig.C"
+//==============================================================================
+//
+// HConfig class implementation (body) file
+//
+//-----------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file implements the C++ HConfig methods declared
+// in the companion file ESMCI_HConfig.h
+//
+//-----------------------------------------------------------------------------
+
+// include associated header file
+#include "ESMCI_HConfig.h"
+
+// include higher level, 3rd party or system headers
+#include <cerrno>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <sstream>
+
+// include ESMF headers
+#include "ESMCI_Macros.h"
+#include "ESMCI_VM.h"
+
+// LogErr headers
+#include "ESMCI_LogErr.h"                  // for LogErr
+
+using namespace std;
+
+namespace ESMCI {
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::create()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::create - Create a new HConfig
+//
+// !INTERFACE:
+HConfig *HConfig::create(
+//
+// !RETURN VALUE:
+//  pointer to newly allocated HConfig
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Set up HConfig internals.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  HConfig *hconfig = NULL;
+  try{
+
+    // new object
+    hconfig = new HConfig;
+
+  }catch(int catchrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return NULL;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::HConfig.", ESMC_CONTEXT, rc);
+    return NULL;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return hconfig;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::destroy()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::destroy - free a HConfig
+//
+// !INTERFACE:
+int HConfig::destroy(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    HConfig **hconfig){   // in - HConfig object to destroy
+    
+//
+// !DESCRIPTION:
+//  ESMF routine which destroys a HConfig object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // return with errors for NULL pointer
+  if (hconfig == ESMC_NULL_POINTER || *hconfig == ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to HConfig", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  // delete the HConfig object
+  delete (*hconfig);            // completely delete the object, free heap
+  *hconfig = ESMC_NULL_POINTER; // mark as invalid
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::ingest()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::ingest - fill a HConfig from string
+//
+// !INTERFACE:
+int HConfig::ingest(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    const std::string& content){       // in
+// 
+// !DESCRIPTION: 
+//  ESMF routine which fills in the contents from a string.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+  try {
+#ifdef ESMF_YAMLCPP
+    this->doc = YAML::Load(content);
+  } catch(...) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception ingesting content", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+#endif
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+} // namespace ESMCI
