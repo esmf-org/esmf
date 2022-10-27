@@ -11,7 +11,7 @@ Major objectives of ESMX are:
  - **Promotion** of hierarchical model component testing.
  - **Reduction** of maintenance cost for established NUOPC-based systems.
  - **Improved** alignment and interoperability between different NUOPC-based systems. (Configuration files, build procedures, etc.)
- - **Faster and more coordinated** role out and adoption of new NUOPC/ESMF features.
+ - **Faster and more coordinated** roll-out and adoption of new NUOPC/ESMF features.
 
 ESMX unifies, provides, and maintains those parts of NUOPC-based modeling systems that are common across most such implementations. This includes the top level application and driver code, parts of the build infrastructure, and tools to manage run configurations.
 
