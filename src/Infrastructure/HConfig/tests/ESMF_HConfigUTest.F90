@@ -82,9 +82,9 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "HConfigIngest()"
+  write(name, *) "HConfigLoad()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_HConfigIngest(hconfig, content="[1, 2, 3]", rc=rc)
+  call ESMF_HConfigLoad(hconfig, content="[1, 2, 3]", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------

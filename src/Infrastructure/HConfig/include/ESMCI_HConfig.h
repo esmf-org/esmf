@@ -57,8 +57,8 @@ namespace ESMCI {
       // depend on default constructor and destructor
       static HConfig *create(int *rc=NULL);
       static int destroy(HConfig **hconfig);
-      int read(const std::string& filename);
-      int ingest(const std::string& content);
+      int loadFile(const std::string& filename);
+      int load(const std::string& content);
   };   // class HConfig
 
 } // namespace ESMCI

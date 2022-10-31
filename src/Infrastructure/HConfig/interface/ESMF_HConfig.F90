@@ -77,7 +77,7 @@ module ESMF_HConfigMod
 
   public ESMF_HConfigCreate
   public ESMF_HConfigDestroy
-  public ESMF_HConfigIngest
+  public ESMF_HConfigLoad
 
 ! - ESMF-internal methods:
   public ESMF_HConfigGetInit
@@ -381,12 +381,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIngest()"
+#define ESMF_METHOD "ESMF_HConfigLoad()"
 !BOP
-! !IROUTINE: ESMF_HConfigIngest - Ingest string into HConfig
+! !IROUTINE: ESMF_HConfigLoad - Load string into HConfig
 
 ! !INTERFACE:
-  subroutine ESMF_HConfigIngest(hconfig, content, keywordEnforcer, rc)
+  subroutine ESMF_HConfigLoad(hconfig, content, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig),       intent(in)            :: hconfig
@@ -395,7 +395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   Ingest string into HConfig.
+!   Load string into HConfig.
 !
 !   The arguments are:
 !   \begin{description}
@@ -419,14 +419,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigIngest(hconfig, content, localrc)
+    call c_ESMC_HConfigLoad(hconfig, content, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_HConfigIngest
+  end subroutine ESMF_HConfigLoad
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-internal method -----------------------------

@@ -69,10 +69,10 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN_X(c_esmc_hconfigingest)(ESMCI::HConfig **ptr,
+  void FTN_X(c_esmc_hconfigload)(ESMCI::HConfig **ptr,
     const char *content, int *rc, ESMCI_FortranStrLenArg content_l){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigingest()"
+#define ESMC_METHOD "c_esmc_hconfigload()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -80,7 +80,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(*ptr, rc)
     // call into C++
-    localrc = (*ptr)->ingest(std::string(content,content_l));
+    localrc = (*ptr)->load(std::string(content,content_l));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully

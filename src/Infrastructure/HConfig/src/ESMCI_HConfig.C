@@ -136,12 +136,12 @@ int HConfig::destroy(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::ingest()"
+#define ESMC_METHOD "ESMCI::HConfig::load()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::ingest - fill a HConfig from string
+// !IROUTINE:  ESMCI::HConfig::load - fill a HConfig from string
 //
 // !INTERFACE:
-int HConfig::ingest(
+int HConfig::load(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -162,7 +162,7 @@ int HConfig::ingest(
     this->doc = YAML::Load(content);
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception ingesting content", ESMC_CONTEXT, &rc);
+      "Caught exception loading content", ESMC_CONTEXT, &rc);
     return rc;
   }
 
