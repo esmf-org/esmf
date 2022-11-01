@@ -27,7 +27,9 @@ DIRS        =
 #
 
 RUN_ESMF_HConfigUTest:
+	cp -f sample.yaml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=HConfig NP=4 ftest
 
 RUN_ESMF_HConfigUTestUNI:
+	cp -f sample.yaml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=HConfig NP=1 ftest

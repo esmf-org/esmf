@@ -88,6 +88,13 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "HConfigLoadFile()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_HConfigLoadFile(hconfig, fileName="sample.yaml", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Destroy test HConfig"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_HConfigDestroy(hconfig, rc=rc)

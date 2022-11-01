@@ -78,6 +78,7 @@ module ESMF_HConfigMod
   public ESMF_HConfigCreate
   public ESMF_HConfigDestroy
   public ESMF_HConfigLoad
+  public ESMF_HConfigLoadFile
 
 ! - ESMF-internal methods:
   public ESMF_HConfigGetInit
@@ -196,7 +197,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_HConfigEQ(HConfig1, HConfig2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_HConfigEQ
 
@@ -244,7 +245,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_HConfigNE(HConfig1, HConfig2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_HConfigNE
 
@@ -273,13 +274,13 @@ contains
 
 ! !INTERFACE:
   function ESMF_HConfigCreate(keywordEnforcer, rc)
-!         
+!
 ! !RETURN VALUE:
     type(ESMF_HConfig) :: ESMF_HConfigCreate
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                       intent(out), optional :: rc
+    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Create a new HConfig.
@@ -298,7 +299,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! invalidate return value
     hconfig%this = ESMF_NULL_POINTER
     ESMF_HConfigCreate = hconfig
@@ -333,8 +334,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(inout)          :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(out),  optional :: rc  
-!         
+     integer,            intent(out), optional :: rc
+
 ! !DESCRIPTION:
 !   Destroys an {\tt ESMF\_HConfig}, releasing the resources associated
 !   with the object.
@@ -379,6 +380,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_HConfigDestroy
 !------------------------------------------------------------------------------
 
+
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigLoad()"
@@ -389,11 +391,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigLoad(hconfig, content, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),       intent(in)            :: hconfig
-    character(len=*),         intent(in)            :: content
+    type(ESMF_HConfig), intent(in)            :: hconfig
+    character(len=*),   intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                  intent(out), optional :: rc
-!         
+    integer,            intent(out), optional :: rc
+!
 ! !DESCRIPTION:
 !   Load string into HConfig.
 !
@@ -414,7 +416,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
@@ -429,6 +431,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_HConfigLoad
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigLoadFile()"
+!BOP
+! !IROUTINE: ESMF_HConfigLoadFile - Load file into HConfig
+
+! !INTERFACE:
+  subroutine ESMF_HConfigLoadFile(hconfig, filename, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+    character(len=*),   intent(in)            :: filename
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Load string into HConfig.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[filename]}]
+!     Name of the YAML file to be loaded.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigLoadFile(hconfig, filename, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_HConfigLoadFile
+!------------------------------------------------------------------------------
+
+
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigGetInit"
@@ -436,22 +490,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-      function ESMF_HConfigGetInit(hconfig)
+  function ESMF_HConfigGetInit(hconfig)
 !
 ! !RETURN VALUE:
-      ESMF_INIT_TYPE :: ESMF_HConfigGetInit
+    ESMF_INIT_TYPE :: ESMF_HConfigGetInit
 !
 ! !ARGUMENTS:
-      type(ESMF_HConfig), intent(in), optional :: hconfig
+    type(ESMF_HConfig), intent(in), optional :: hconfig
 !
 ! !DESCRIPTION:
-!      Access deep object init code.
+!   Access deep object init code.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [hconfig]
-!           HConfig object.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [hconfig]
+!     HConfig object.
+!   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -461,7 +515,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_HConfigGetInit = ESMF_INIT_CREATED
     endif
 
-    end function ESMF_HConfigGetInit
+  end function ESMF_HConfigGetInit
 !------------------------------------------------------------------------------
 
 end module ESMF_HConfigMod

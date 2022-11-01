@@ -138,7 +138,7 @@ int HConfig::destroy(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::load()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::load - fill a HConfig from string
+// !IROUTINE:  ESMCI::HConfig::load - load a HConfig from string
 //
 // !INTERFACE:
 int HConfig::load(
@@ -150,26 +150,67 @@ int HConfig::load(
     const std::string& content){       // in
 // 
 // !DESCRIPTION: 
-//  ESMF routine which fills in the contents from a string.
+//  ESMF routine which loads HConfig from string.
 //
 //EOP
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;
 
-  try {
 #ifdef ESMF_YAMLCPP
+  try {
     this->doc = YAML::Load(content);
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception loading content", ESMC_CONTEXT, &rc);
+      "Caught exception loading content from string", ESMC_CONTEXT, &rc);
     return rc;
   }
 
+  // return successfully
+  rc = ESMF_SUCCESS;
 #endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::loadFile()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::loadFile - load a HConfig from file
+//
+// !INTERFACE:
+int HConfig::loadFile(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    const std::string& filename){       // in
+// 
+// !DESCRIPTION: 
+//  ESMF routine which loads HConfig from file.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try {
+    this->doc = YAML::LoadFile(filename);
+  } catch(...) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+    return rc;
+  }
 
   // return successfully
   rc = ESMF_SUCCESS;
+#endif
+
   return rc;
 }
 //-----------------------------------------------------------------------------
