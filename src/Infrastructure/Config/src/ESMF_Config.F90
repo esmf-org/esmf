@@ -38,7 +38,8 @@
       use ESMF_BaseMod
       use ESMF_DELayoutMod
       use ESMF_IOUtilMod
-      use ESMF_LogErrMod 
+      use ESMF_LogErrMod
+      use ESMF_HConfigMod
       use ESMF_InitMacrosMod
 
       implicit none
@@ -222,7 +223,7 @@
           sequence
 #endif
 #endif
-          !private              
+          !private
           character(len=NBUF_MAX),pointer :: buffer => null ()    ! hold the whole file
           character(len=LSZ),     pointer :: this_line => null () ! the current line
           integer :: nbuf                              ! actual size of buffer 
@@ -235,6 +236,7 @@
           integer :: nattr                             ! number of attributes
                                                        !   in the "used" table
           character(len=LSZ)          :: current_attr  ! the current attr label
+          type(ESMF_HConfig) :: hconfig  ! hierarchical configuration
           ESMF_INIT_DECLARE
        end type ESMF_ConfigClass
 
@@ -625,6 +627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
+      integer :: localrc
       integer :: memstat
       type(ESMF_ConfigClass), pointer :: config_local
       type(ESMF_ConfigAttrUsed), dimension(:), pointer :: attr_used_local
@@ -653,6 +656,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       config_local%next_line = 0
 
       config_local%attr_used => attr_used_local
+
+      config_local%hconfig = ESMF_HConfigCreate(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present( rc ))  rc = ESMF_SUCCESS
 
@@ -763,11 +770,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ConfigCreateFromSection % cptr % value_begin = 1
 
       call ESMF_ConfigParseAttributes(ESMF_ConfigCreateFromSection, &
-                                      unique=unique, rc=localrc)
+        unique=unique, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ESMF_ConfigCreateFromSection%cptr%hconfig = ESMF_HConfigCreate(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
+
+      ESMF_INIT_SET_CREATED(ESMF_ConfigCreateFromSection)
+      return
 
     end function ESMF_ConfigCreateFromSection
 
@@ -804,7 +818,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      integer :: i
+      integer :: i, localrc
       integer :: memstat
 
       ! Initialize return code; assume routine not implemented
@@ -824,12 +838,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                      ESMF_CONTEXT, rcToReturn=rc)) return
         end if
       end do
+
       deallocate(config%cptr%attr_used, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating local buffer 2", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
       deallocate(config%cptr%buffer, config%cptr%this_line, stat = memstat)
       if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating local buffer 1", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call ESMF_HConfigDestroy(config%cptr%hconfig, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
       deallocate(config%cptr, stat = memstat)
       if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating config type", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1055,12 +1076,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        keywordEnforcer, label, default, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_Config), intent(inout)         :: config     
+!      type(ESMF_Config), intent(inout)         :: config
 !      <value argument>, see below for supported values
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!      character(len=*),  intent(in),  optional :: label 
-!      character(len=*),  intent(in),  optional :: default 
-!      integer,           intent(out), optional :: rc     
+!      character(len=*),  intent(in),  optional :: label
+!      character(len=*),  intent(in),  optional :: default
+!      integer,           intent(out), optional :: rc
 !
 !
 ! !STATUS:
@@ -1076,7 +1097,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Supported values for <value argument> are:
 !      \begin{description}
 !      \item character(len=*), intent(out)          :: value
-!      \item real(ESMF\_KIND\_R4), intent(out)      :: value    
+!      \item real(ESMF\_KIND\_R4), intent(out)      :: value
 !      \item real(ESMF\_KIND\_R8), intent(out)      :: value
 !      \item integer(ESMF\_KIND\_I4), intent(out)   :: value
 !      \item integer(ESMF\_KIND\_I8), intent(out)   :: value
@@ -1106,13 +1127,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        keywordEnforcer, count, label, default, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_Config), intent(inout)         :: config     
-!      <value list argument>, see below for values      
+!      type(ESMF_Config), intent(inout)         :: config
+!      <value list argument>, see below for values
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      integer,           intent(in)   optional :: count
-!      character(len=*),  intent(in),  optional :: label 
-!      character(len=*),  intent(in),  optional :: default 
-!      integer,           intent(out), optional :: rc     
+!      character(len=*),  intent(in),  optional :: label
+!      character(len=*),  intent(in),  optional :: default
+!      integer,           intent(out), optional :: rc
 !
 !
 ! !STATUS:
@@ -1164,15 +1185,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, label, default, eolFlag, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)       :: config     
+      type(ESMF_Config), intent(inout)       :: config
       character(len=*), intent(out)          :: value
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character(len=*), intent(in), optional :: label 
-      character(len=*), intent(in), optional :: default 
+      character(len=*), intent(in), optional :: label
+      character(len=*), intent(in), optional :: default
       logical, intent(out), optional         :: eolFlag
-      integer, intent(out), optional         :: rc     
+      integer, intent(out), optional         :: rc
 !
-! !DESCRIPTION: Gets a sequence of characters. It will be 
+! !DESCRIPTION: Gets a sequence of characters. It will be
 !               terminated by the first white space.
 !
 !   The arguments are:
@@ -1302,13 +1323,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config),  intent(inout)         :: config    
+      type(ESMF_Config),  intent(inout)         :: config
       character(len=*),   intent(out)           :: valueList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,            intent(in),  optional :: count 
-      character(len=*),   intent(in),  optional :: label 
+      integer,            intent(in),  optional :: count
+      character(len=*),   intent(in),  optional :: label
       character(len=*),   intent(in),  optional :: default
-      integer,            intent(out), optional :: rc    
+      integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION: 
 !  Gets a string {\tt valueList} of a given {\tt count} from
@@ -1413,12 +1434,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)      :: config    
-      real(ESMF_KIND_R4), intent(out)          :: value    
+      type(ESMF_Config), intent(inout)         :: config
+      real(ESMF_KIND_R4), intent(out)          :: value
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), intent(in), optional   :: label
-      real(ESMF_KIND_R4), intent(in), optional :: default 
-      integer, intent(out), optional           :: rc     
+      real(ESMF_KIND_R4), intent(in), optional :: default
+      integer, intent(out), optional           :: rc
 !
 ! !DESCRIPTION: 
 !   Gets a 4-byte real {\tt value} from the {\tt config} object.
@@ -1506,12 +1527,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)      :: config    
-      real(ESMF_KIND_R8), intent(out)          :: value 
+      type(ESMF_Config), intent(inout)          :: config
+      real(ESMF_KIND_R8), intent(out)           :: value
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character(len=*), intent(in), optional   :: label
-      real(ESMF_KIND_R8), intent(in), optional :: default 
-      integer, intent(out), optional           :: rc     
+      character(len=*), intent(in), optional    :: label
+      real(ESMF_KIND_R8), intent(in), optional  :: default
+      integer, intent(out), optional            :: rc
 !
 ! !DESCRIPTION: 
 !   Gets an 8-byte real {\tt value} from the {\tt config} object.
@@ -1599,13 +1620,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config),  intent(inout)         :: config    
-      real(ESMF_KIND_R4), intent(inout)         :: valueList(:) 
+      type(ESMF_Config),  intent(inout)         :: config
+      real(ESMF_KIND_R4), intent(inout)         :: valueList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,            intent(in),  optional :: count 
-      character(len=*),   intent(in),  optional :: label 
+      integer,            intent(in),  optional :: count
+      character(len=*),   intent(in),  optional :: label
       real(ESMF_KIND_R4), intent(in),  optional :: default
-      integer,            intent(out), optional :: rc    
+      integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION: 
 !  Gets a 4-byte real {\tt valueList} of a given {\tt count} from
@@ -1702,13 +1723,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config),  intent(inout)         :: config    
-      real(ESMF_KIND_R8), intent(inout)         :: valueList(:) 
+      type(ESMF_Config),  intent(inout)         :: config
+      real(ESMF_KIND_R8), intent(inout)         :: valueList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,            intent(in),  optional :: count 
-      character(len=*),   intent(in),  optional :: label 
+      integer,            intent(in),  optional :: count
+      character(len=*),   intent(in),  optional :: label
       real(ESMF_KIND_R8), intent(in),  optional :: default
-      integer,            intent(out), optional :: rc    
+      integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION: 
 !   Gets an 8-byte real {\tt valueList} of a given {\tt count} from the
@@ -1804,12 +1825,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)          :: config     
-      integer(ESMF_KIND_I4), intent(out)           :: value
+      type(ESMF_Config), intent(inout)            :: config
+      integer(ESMF_KIND_I4), intent(out)          :: value
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character(len=*), intent(in), optional       :: label 
-      integer(ESMF_KIND_I4), intent(in), optional  :: default
-      integer, intent(out), optional               :: rc   
+      character(len=*), intent(in), optional      :: label
+      integer(ESMF_KIND_I4), intent(in), optional :: default
+      integer, intent(out), optional              :: rc
 
 !
 ! !DESCRIPTION: 
@@ -1903,12 +1924,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)          :: config     
-      integer(ESMF_KIND_I8), intent(out)           :: value
+      type(ESMF_Config), intent(inout)            :: config
+      integer(ESMF_KIND_I8), intent(out)          :: value
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character(len=*), intent(in), optional       :: label 
-      integer(ESMF_KIND_I8), intent(in), optional  :: default
-      integer, intent(out), optional               :: rc   
+      character(len=*), intent(in), optional      :: label
+      integer(ESMF_KIND_I8), intent(in), optional :: default
+      integer, intent(out), optional              :: rc
 
 !
 ! !DESCRIPTION: 
@@ -2001,13 +2022,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config),     intent(inout)         :: config      
-      integer(ESMF_KIND_I4), intent(inout)         :: valueList(:)  
+      type(ESMF_Config),     intent(inout)         :: config
+      integer(ESMF_KIND_I4), intent(inout)         :: valueList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,               intent(in),  optional :: count  
-      character(len=*),      intent(in),  optional :: label 
+      integer,               intent(in),  optional :: count
+      character(len=*),      intent(in),  optional :: label
       integer(ESMF_KIND_I4), intent(in),  optional :: default
-      integer,               intent(out), optional :: rc    
+      integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION: 
 !  Gets a 4-byte integer {\tt valueList} of given {\tt count} from the 
@@ -2103,13 +2124,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config),     intent(inout)         :: config      
-      integer(ESMF_KIND_I8), intent(inout)         :: valueList(:)  
+      type(ESMF_Config),     intent(inout)         :: config
+      integer(ESMF_KIND_I8), intent(inout)         :: valueList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,               intent(in),  optional :: count  
-      character(len=*),      intent(in),  optional :: label 
+      integer,               intent(in),  optional :: count
+      character(len=*),      intent(in),  optional :: label
       integer(ESMF_KIND_I8), intent(in),  optional :: default
-      integer,               intent(out), optional :: rc    
+      integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION: 
 !  Gets an 8-byte integer {\tt valueList} of given {\tt count} from
@@ -2204,12 +2225,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)         :: config     
+      type(ESMF_Config), intent(inout)         :: config
       logical,           intent(out)           :: value
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character(len=*),  intent(in),  optional :: label 
+      character(len=*),  intent(in),  optional :: label
       logical,           intent(in),  optional :: default
-      integer,           intent(out), optional :: rc   
+      integer,           intent(out), optional :: rc
 
 !
 ! !DESCRIPTION: 
@@ -2315,13 +2336,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)         :: config      
-      logical,           intent(inout)         :: valueList(:)  
+      type(ESMF_Config), intent(inout)         :: config
+      logical,           intent(inout)         :: valueList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,           intent(in),  optional :: count  
-      character(len=*),  intent(in),  optional :: label 
+      integer,           intent(in),  optional :: count
+      character(len=*),  intent(in),  optional :: label
       logical,           intent(in),  optional :: default
-      integer,           intent(out), optional :: rc    
+      integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION: 
 !  Gets a logical {\tt valueList} of given {\tt count} from the 
@@ -2417,12 +2438,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)         :: config 
+      type(ESMF_Config), intent(inout)         :: config
       character,         intent(out)           :: value
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character(len=*),  intent(in),  optional :: label   
+      character(len=*),  intent(in),  optional :: label
       character,         intent(in),  optional :: default
-      integer,           intent(out), optional :: rc    
+      integer,           intent(out), optional :: rc
 !
 !
 ! !STATUS:
@@ -2608,7 +2629,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Config), intent(inout)          :: config 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),  intent(in),   optional :: label
-      integer,           intent(out),  optional :: rc         
+      integer,           intent(out),  optional :: rc
 !
 !
 ! !STATUS:
@@ -2694,7 +2715,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_Config), intent(in)            :: config
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(out), optional :: rc
+    integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !   Return {\tt .true.} if the {\tt config} has been created. Otherwise return 
@@ -2730,12 +2751,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       keywordEnforcer, delayout, unique, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config),   intent(inout)         :: config     
-      character(len=*),    intent(in)            :: filename 
+      type(ESMF_Config),   intent(inout)         :: config
+      character(len=*),    intent(in)            :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_DELayout), intent(in),  optional :: delayout 
-      logical,             intent(in),  optional :: unique 
-      integer,             intent(out), optional :: rc         
+      type(ESMF_DELayout), intent(in),  optional :: delayout
+      logical,             intent(in),  optional :: unique
+      integer,             intent(out), optional :: rc
 !
 !
 ! !STATUS:
@@ -3168,11 +3189,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       keywordEnforcer, label, rc)
 !
 ! !ARGUMENTS:
-!     type(ESMF_Config), intent(inout)           :: config     
+!     type(ESMF_Config), intent(inout)           :: config
 !     <value argument>, see below for supported values
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     character(len=*),  intent(in),   optional  :: label 
-!     integer,           intent(out),  optional  :: rc   
+!     character(len=*),  intent(in),   optional  :: label
+!     integer,           intent(out),  optional  :: rc
 !
 !
 !
@@ -3217,11 +3238,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         keywordEnforcer, label, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config),     intent(inout)         :: config     
+      type(ESMF_Config),     intent(inout)         :: config
       integer(ESMF_KIND_I4), intent(in)            :: value
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character(len=*),      intent(in),  optional :: label 
-      integer,               intent(out), optional :: rc   
+      character(len=*),      intent(in),  optional :: label
+      integer,               intent(out), optional :: rc
 
 !
 ! !DESCRIPTION: 
