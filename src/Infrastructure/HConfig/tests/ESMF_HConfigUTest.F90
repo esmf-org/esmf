@@ -26,7 +26,6 @@ program ESMF_HConfigUTest
 !-----------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod     ! test methods
-  use ESMF_HconfigMod !!!!!!!!!!! remove !!!!!!!!!1
   use ESMF
 
   implicit none
