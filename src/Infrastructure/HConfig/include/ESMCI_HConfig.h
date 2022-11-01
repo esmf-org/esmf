@@ -36,6 +36,8 @@ namespace ESMCI {
   class HConfig;
 }
 
+#include "ESMCI_Config.h"
+
 #ifdef ESMF_YAMLCPP
 #include "yaml-cpp/yaml.h"
 #endif
@@ -59,6 +61,7 @@ namespace ESMCI {
       static int destroy(HConfig **hconfig);
       int load(const std::string& content);
       int loadFile(const std::string& filename);
+      int toConfig(ESMCI_Config *config);
   };   // class HConfig
 
 } // namespace ESMCI

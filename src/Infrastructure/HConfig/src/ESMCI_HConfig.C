@@ -32,6 +32,7 @@
 #include <cstdio>
 #include <cstring>
 #include <sstream>
+#include <string>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -204,6 +205,62 @@ int HConfig::loadFile(
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::toConfig()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::toConfig - fill a Config from HConfig to the level possible
+//
+// !INTERFACE:
+int HConfig::toConfig(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    ESMCI_Config *config){       // in
+// 
+// !DESCRIPTION: 
+//  ESMF routine which attempts to fill Config from HConfig.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+  std::stringstream debugmsg;
+  debugmsg << "gjt in ESMCI::HConfig::toConfig";
+  ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+
+#ifdef ESMF_YAMLCPP
+  try {
+
+    YAML::Node node;
+    node = doc["my_file_names"];
+    for (auto it=node.begin(); it!=node.end(); it++){
+      debugmsg.str("");  //clear
+      debugmsg << "doc[]: " << it->as<string>();
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+    }
+    node = doc["radius_of_the_earth"];
+    debugmsg.str("");  //clear
+    debugmsg << "doc[]: " << node.as<int>();
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+  } catch(...) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception in YAML-CPP", ESMC_CONTEXT, &rc);
     return rc;
   }
 

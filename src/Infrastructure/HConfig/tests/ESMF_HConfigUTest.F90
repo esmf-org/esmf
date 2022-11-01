@@ -50,6 +50,7 @@ program ESMF_HConfigUTest
   type(ESMF_VM):: vm
   integer:: petCount, localPet
   type(ESMF_HConfig):: hconfig
+  type(ESMF_Config) :: config
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -98,6 +99,28 @@ program ESMF_HConfigUTest
   write(name, *) "Destroy test HConfig"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_HConfigDestroy(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ConfigCreate()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  config = ESMF_ConfigCreate(rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ConfigLoadFile()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ConfigLoadFile(config, fileName="sample.yaml", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy test Config"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ConfigDestroy(config, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

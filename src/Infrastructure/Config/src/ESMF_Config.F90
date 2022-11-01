@@ -53,6 +53,7 @@
        public :: ESMF_ConfigFindLabel  ! selects a label (key)
        public :: ESMF_ConfigFindNextLabel  ! selects a following label (key)
        public :: ESMF_ConfigNextLine   ! selects next line (for tables)
+       public :: ESMF_ConfigGet        ! generic get
        public :: ESMF_ConfigGetAttribute ! returns next value
        public :: ESMF_ConfigGetChar    ! returns only a single character
        public :: ESMF_ConfigGetLen ! gets number of words in the line(function)
@@ -1067,6 +1068,54 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_ConfigFindNextLabel
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigGet"
+!BOP
+!
+! !IROUTINE: ESMF_ConfigGet - Generic accessor method
+!
+! !INTERFACE:
+  subroutine ESMF_ConfigGet(config, keywordEnforcer, hconfig, rc)
+
+! !ARGUMENTS:
+    type(ESMF_Config),  intent(inout)          :: config
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(out),  optional :: hconfig
+    integer,            intent(out),  optional :: rc
+
+!
+! !DESCRIPTION: Access Config internals.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [config]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [{[hconfig]}]
+!     Internally kept {\tt ESMF\_HConfig} object.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP --------------------------------------------------------------------------
+    integer               :: localrc        ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    !check variables
+    ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+
+    if (present(hconfig)) then
+      hconfig = config%cptr%hconfig
+    endif
+
+  end subroutine ESMF_ConfigGet
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get an attribute value from Config object
 !
@@ -2785,6 +2834,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP -------------------------------------------------------------------
 
       integer :: localrc
+      character(len=len(filename))  :: lower_filename
+      character(len=*), parameter   :: suffix=".yaml"
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2793,23 +2844,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      call ESMF_ConfigLoadFile_1proc_( config, filename, localrc )
-           if (ESMF_LogFoundError(localrc, &
-                                msg="unable to load file: " // trim (filename), &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+      lower_filename = ESMF_UtilStringLowerCase(trim(filename), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
-      call ESMF_ConfigParseAttributes( config, unique, localrc )
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      if (lower_filename(len(lower_filename)-len(suffix)+1:) == suffix) then
+        ! This is a YAML file
 
-      if ( present (delayout) ) then
+        call ESMF_HConfigLoadFile(config%cptr%hconfig, trim(filename), &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! construct a regular Config from HConfig to the level possible
+        call c_ESMC_HConfigToConfig(config%cptr%hconfig, config, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! Assume this is an old Config resource file
+
+        call ESMF_ConfigLoadFile_1proc_( config, filename, localrc )
+        if (ESMF_LogFoundError(localrc, &
+          msg="unable to load file: " // trim (filename), &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_ConfigParseAttributes( config, unique, localrc )
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if ( present (delayout) ) then
          call ESMF_LogWrite("DELayout not used yet", ESMF_LOGMSG_WARNING, &
                            ESMF_CONTEXT)
+        endif
       endif
 
-      if (present( rc )) then
-        rc = localrc 
-      endif
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_ConfigLoadFile
 
