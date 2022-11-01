@@ -151,7 +151,7 @@ type(ESMF_XGridSpec), intent(out), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatB2X(:)
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatX2B(:)
 type(ESMF_Array),     intent(inout), optional :: sideAGeomIndArray
-type(ESMF_Array),     intent(out), optional :: sideBGeomIndArray
+type(ESMF_Array),     intent(inout), optional :: sideBGeomIndArray
 character (len=*),    intent(out), optional :: name
 integer,              intent(out), optional :: rc 
 !

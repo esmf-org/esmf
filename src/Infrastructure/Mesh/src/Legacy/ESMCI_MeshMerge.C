@@ -54,6 +54,7 @@ namespace ESMCI {
   typedef std::vector<sintd_node *> * Sintd_nodes;
   typedef std::vector<sintd_cell *> * Sintd_cells;
 
+
   void calc_clipped_poly(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map);
   void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh);
   void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, const Mesh & mesh_src, const Mesh & mesh_dst, 
