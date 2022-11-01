@@ -7,12 +7,12 @@ import pytest
 import numpy as np
 
 import os
-import inspect
 
 from esmpy import *
 from esmpy.interface.cbindings import *
 from esmpy.test.base import TestBase
 from esmpy.api.constants import _ESMF_NETCDF
+from esmpy.util.cache_data import DATA_DIR
 
 class TestGrid(TestBase):
     
@@ -432,11 +432,14 @@ class TestGrid(TestBase):
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_slice_grid_created_from_file_scrip(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid = Grid(filename=datafile,
                         filetype=FileFormat.SCRIP,
                         pole_kind=[PoleKind.MONOPOLE, PoleKind.BIPOLE],
                         reg_decomp=reg_decomp)
@@ -632,9 +635,12 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_gridspec1D(self):
-        import esmpy
-        esmfdir = os.path.dirname(inspect.getfile(esmpy))
-        grid = Grid(filename=os.path.join(esmfdir, "test/data/gridspec1Dcoords.nc"),
+        datafile = os.path.join(DATA_DIR, "gridspec1Dcoords.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
+        grid = Grid(filename=datafile,
                     filetype=FileFormat.GRIDSPEC, add_corner_stagger=True,
                     coord_names=["longitude", "latitude"])
 
@@ -642,11 +648,14 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp)
         except:
@@ -654,13 +663,16 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_balanced_balanced(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.BALANCED, DecompFlag.BALANCED],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -668,13 +680,16 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_balanced_restfirst(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.BALANCED, DecompFlag.RESTFIRST],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -682,13 +697,16 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_balanced_restlast(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.BALANCED, DecompFlag.RESTLAST],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -697,13 +715,16 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_balanced_cyclic(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.BALANCED, DecompFlag.CYCLIC],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -711,13 +732,16 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restfirst_balanced(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.BALANCED],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -725,13 +749,16 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restfirst_restfirst(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.RESTFIRST],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -739,13 +766,16 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restfirst_restlast(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.RESTLAST],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -754,13 +784,16 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restfirst_cyclic(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTFIRST, DecompFlag.CYCLIC],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -768,13 +801,16 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restlast_balanced(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.BALANCED],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -782,13 +818,16 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restlast_restfirst(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.RESTFIRST],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -796,13 +835,16 @@ class TestGrid(TestBase):
 
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restlast_restlast(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.RESTLAST],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -811,13 +853,16 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_restlast_cyclic(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.RESTLAST, DecompFlag.CYCLIC],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -826,13 +871,16 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_cyclic_balanced(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.BALANCED],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -841,13 +889,16 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_cyclic_restfirst(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.RESTFIRST],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -856,13 +907,16 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_cyclic_restlast(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.RESTLAST],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:
@@ -871,13 +925,16 @@ class TestGrid(TestBase):
     @pytest.mark.xfail
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_grid_create_from_file_scrip_decomp_cyclic_cyclic(self):
-        import esmpy
+        datafile = os.path.join(DATA_DIR, "T42_grid.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
         reg_decomp = [pet_count(), 1]
         decompflag = np.array([DecompFlag.CYCLIC, DecompFlag.CYCLIC],
                               dtype=np.int32)
         try:
-            esmfdir = os.path.dirname(inspect.getfile(esmpy))
-            grid_from_file = Grid(filename=os.path.join(esmfdir, "test/data/T42_grid.nc"),
+            grid_from_file = Grid(filename=datafile,
                                   filetype=FileFormat.SCRIP,
                                   reg_decomp=reg_decomp, decompflag=decompflag)
         except:

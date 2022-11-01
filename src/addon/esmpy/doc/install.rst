@@ -68,9 +68,6 @@ The path of this file is:
 
     <ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
 
-If ``ESMFMKFILE`` is set when building ESMPy then it will not need to be
-referenced again. 
-
 An installation of ESMPy in the default location for Python packages can be done
 with the following command issued from the top level ESMPy directory:
 
@@ -79,6 +76,10 @@ with the following command issued from the top level ESMPy directory:
     python3 -m pip install .
 
 Please contact esmf_support@ucar.edu with any questions.
+
+.. Note::
+
+   With some python versions, there is a problem with the automatic installation of the required package ``setuptools-git-versioning``. If the output from the ``pip install`` command ends with ``Successfully installed esmpy-0.0.0``, this indicates that the ``setuptools-git-versioning`` package was not invoked and the build thinks you are using ESMF version 0.0.0. This will cause problems when you try to use ESMPy. To solve this problem, simply rerun the above installation command (``python3 -m pip install .``). You should then see a reasonable version number at the end, such as, ``Successfully installed esmpy-8.4.0``.
 
 ---------------
 Importing ESMPy
@@ -89,6 +90,8 @@ To use ESMPy in an external program, import it with:
 .. code::
 
     import esmpy
+
+The environment variable ``ESMFMKFILE`` must be set when to use ESMPy.
 
 ----------
 Validation

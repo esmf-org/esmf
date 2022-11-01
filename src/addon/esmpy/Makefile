@@ -30,10 +30,13 @@ install:
 download_examples:
 		python3 examples/test_examples_download.py
 	
+download_unittest:
+		python3 src/esmpy/test/test_api/test_unit_download.py
+	
 download_regrid_from_file:
 		python3 src/esmpy/test/regrid_from_file/test_regrid_from_file_download.py
 
-download: download_examples download_regrid_from_file
+download: download_unittest download_examples download_regrid_from_file
 
 test: dust
 		bash src/esmpy/test/test_all.bash ${ESMF_INTERNAL_MPIRUN}
