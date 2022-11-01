@@ -70,20 +70,18 @@ namespace ESMCI {
     // global information
     static std::vector<int> activePioInstances;
     int pioSystemDesc; // Descriptor for initialized PIO inst.
-    int pioFileDesc;       // Descriptor for open PIO file
-    int pioIODesc;           // Descriptor created by initdecomp
+    int *pioFileDesc;  // Descriptor(s) for open PIO file (typically just one, but multiple for I/O of multi-tile arrays)
     MPI_Comm communicator;
     int my_rank;
     int num_iotasks;
     int stride;
     int rearr;
     int base;
-    int user_count;
-    bool new_file;
+    bool *new_file; // Typically just one value, but multiple for I/O of multi-tile arrays
 
   public:
     // native constructor and destructor
-    PIO_Handler(ESMC_IOFmt_Flag fmtArg, int *rc);
+    PIO_Handler(ESMC_IOFmt_Flag fmtArg, int ntilesArg, int *rc);
     // Static initialize and finalize routines for PIO
     static void initialize(int comp_rank, MPI_Comm comp_comm,
                            int num_iotasks, 
@@ -105,17 +103,17 @@ namespace ESMCI {
 
     // read()
     // Non-atomic reads which are only successful on an open IO stream
-    void arrayRead(Array *arr_p, const char * const name,
-                   int *timeslice = NULL, int *rc = NULL);
+    void arrayReadOneTileFile(Array *arr_p, int tile, const char * const name,
+                              int *timeslice = NULL, int *rc = NULL);
 
     // write()
     // Non-atomic writes which are only successful on an open IO stream
-    void arrayWrite(Array *arr_p, const char * const name,
-                    const std::vector<std::string> &dimLabels,
-                    int *timeslice = NULL,
-                    const ESMCI::Info *varAttPack = NULL,
-                    const ESMCI::Info *gblAttPack = NULL,
-                    int *rc = NULL);
+    void arrayWriteOneTileFile(Array *arr_p, int tile, const char * const name,
+                               const std::vector<std::string> &dimLabels,
+                               int *timeslice = NULL,
+                               const ESMCI::Info *varAttPack = NULL,
+                               const ESMCI::Info *gblAttPack = NULL,
+                               int *rc = NULL);
 
     // get() and set()
   public:
@@ -131,23 +129,23 @@ namespace ESMCI {
     }
 
     // open() and close()
-    void open(bool readonly_arg, int *rc = NULL);
-    ESMC_Logical isOpen(void);
-    ESMC_Logical isNewFile(void) {
-      return (new_file ? ESMF_TRUE : ESMF_FALSE);
+    void openOneTileFile(int tile, bool readonly_arg, int *rc = NULL);
+    ESMC_Logical isOpen(int tile);
+    ESMC_Logical isNewFile(int tile) {  // note 1-based indexing for tile
+      return (new_file[tile-1] ? ESMF_TRUE : ESMF_FALSE);
     }
-    void flush(int *rc = NULL);
-    void close(int *rc = NULL);
+    void flushOneTileFile(int tile, int *rc = NULL);
+    void closeOneTileFile(int tile, int *rc = NULL);
 
   private:
-    int getIODesc(int iosys, Array *arr_p,
+    int getIODesc(int iosys, Array *arr_p, int tile,
                             int ** iodims = (int **)NULL,
                             int *nioDims = (int *)NULL,
                             int ** arrdims = (int **)NULL,
                             int *narrDims = (int *)NULL,
                             int *basepiotype = (int *)NULL,
                             int *rc = (int *)NULL);
-    void attPackPut (int vardesc, const ESMCI::Info *attPack, int *rc);
+    void attPackPut (int vardesc, const ESMCI::Info *attPack, int tile, int *rc);
 
   public:
     // Error recording routine

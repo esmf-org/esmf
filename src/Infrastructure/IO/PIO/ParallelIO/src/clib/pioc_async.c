@@ -1,8 +1,8 @@
 /**
  * @file
- * Some initialization and support functions.
+ * Some initialization and support functions for async operations.
  * @author Jim Edwards
- * @date  2014
+ * @date  2022
  *
  * @see https://github.com/NCAR/ParallelIO
  */
@@ -30,6 +30,13 @@ extern int diosysid;
 #endif /* NETCDF_INTEGRATION */
 
 extern int default_error_handler; /* defined in pioc.c */
+
+/**
+ * @defgroup PIO_init_async Initialize an ASYNC IO System
+ * Initialize the IOSystem, including specifying number of IO and
+ * computation tasks in C.
+ *
+ */
 
 /**
  * Library initialization used when IO tasks are distinct from compute
@@ -107,8 +114,8 @@ extern int default_error_handler; /* defined in pioc.c */
  * gets the iosysid for each component.
  *
  * @return PIO_NOERR on success, error code otherwise.
- * @ingroup PIO_init_c
- * @author Ed Hartnett
+ * @ingroup PIO_init_async
+ * @author Ed Hartnett, Jim Edwards
  */
 int
 PIOc_init_async(MPI_Comm world, int num_io_procs, int *io_proc_list,
@@ -570,8 +577,8 @@ PIOc_init_async(MPI_Comm world, int num_io_procs, int *io_proc_list,
  * gets the iosysid for each component.
  *
  * @return PIO_NOERR on success, error code otherwise.
- * @ingroup PIO_init_c
- * @author Jim Edwards
+ * @ingroup PIO_init_async
+ * @author Jim Edwards, Ed Hartnet
  */
 int
 PIOc_init_async_from_comms(MPI_Comm world, int component_count, MPI_Comm *comp_comm,
@@ -704,7 +711,7 @@ PIOc_init_async_from_comms(MPI_Comm world, int component_count, MPI_Comm *comp_c
  * @param iosysidp pointer to array of length component_count that
  * gets the iosysid for each component.
  * @returns 0 for success, error code otherwise
- * @ingroup PIO_init_c
+ * @ingroup PIO_init_async
  * @author Jim Edwards
  */
 int
@@ -782,7 +789,7 @@ PIOc_init_async_from_F90(int f90_world_comm,
  * @param iosysidp pointer to array of length component_count that
  * gets the iosysid for each component.
  * @returns 0 for success, error code otherwise
- * @ingroup PIO_init_c
+ * @ingroup PIO_init_async
  * @author Jim Edwards
  */
 int

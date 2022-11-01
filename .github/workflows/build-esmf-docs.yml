@@ -2,10 +2,11 @@ name: Build ESMF Docs
 
 on:
   workflow_dispatch:
-#  push:
-#    branches: [ "develop" ]
-#  pull_request:
-#    branches: [ "develop" ]
+  push:
+
+concurrency: 
+  group: build-esmf-docs-${{ github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
 
@@ -40,17 +41,18 @@ jobs:
       with:
         name: esmf-docs
         path: ${{ github.workspace }}/artifacts
-        
+       
     - name: Checkout esmf-org.github.io
       uses: actions/checkout@v3
       with:
           repository: esmf-org/esmf-org.github.io
-          path: esmf-org.github.io          
-    
+          path: esmf-org.github.io
+          token: ${{ secrets.ESMF_WEB_TOKEN }}
+
     - name: Copy docs
       run: | 
-        cd ${{ github.workspace }}/esmf-org.github.io
-        mkdir -p docs/nightly/${{ github.ref_name }}
+        cd ${{ github.workspace }}/esmf-org.github.io        
+        mkdir -p docs/nightly/${{ github.ref_name }}/dev_guide
         cd ${{ github.workspace }}/artifacts
         unzip doc-artifacts.zip
         cd ${{ github.workspace }}/artifacts/artifacts/doc-esmf
@@ -60,11 +62,14 @@ jobs:
         cp -rf NUOPC_refdoc.pdf ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
         cp -rf NUOPC_howtodoc ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
         cp -rf NUOPC_howtodoc.pdf ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/
-        cd ${{ github.workspace }}/artifacts/artifacts/doc-dev_guide
+        cd ${{ github.workspace }}/artifacts/artifacts/doc-dev_guide        
         cp -rf ./dev_guide/dev_guide/* ${{ github.workspace }}/esmf-org.github.io/docs/nightly/${{ github.ref_name }}/dev_guide/
         
     - name: Commit and publish docs
       uses: actions-js/push@master
       with:
+        repository: esmf-org/esmf-org.github.io
         directory: ${{ github.workspace }}/esmf-org.github.io
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: master
+        github_token: ${{ secrets.ESMF_WEB_TOKEN }}
+        message: 'Publish ESMF Docs'

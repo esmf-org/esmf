@@ -3448,7 +3448,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
   
-  subroutine routine_executeGridComp(is, i, phase, activeClock, name, userrc, rc)
+  recursive subroutine routine_executeGridComp(is, i, phase, activeClock, name, userrc, rc)
     type(type_InternalState)        :: is
     integer,          intent(in)    :: i, phase
     type(ESMF_Clock), intent(inout) :: activeClock
@@ -3493,7 +3493,7 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
   
-  subroutine routine_executeCplComp(is, i, j, phase, activeClock, name, userrc, rc)
+  recursive subroutine routine_executeCplComp(is, i, j, phase, activeClock, name, userrc, rc)
     type(type_InternalState)        :: is
     integer,          intent(in)    :: i, j, phase
     type(ESMF_Clock), intent(inout) :: activeClock
@@ -4412,14 +4412,16 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
+    nullify(cmEntry%wrap%petList) ! invalidate the petList 
     if (present(petList)) then
-      allocate(cmEntry%wrap%petList(size(petList)))
-      cmEntry%wrap%petList = petList  ! copy the petList elements
-    else
-      nullify(cmEntry%wrap%petList) ! invalidate the petList
+      if (size(petList)>0) then
+        ! a usable petList was provided
+        allocate(cmEntry%wrap%petList(size(petList)))
+        cmEntry%wrap%petList = petList  ! copy the petList elements
+      endif
     endif
-  
+
     if (btest(verbosity,13)) then
       if (associated(cmEntry%wrap%petList)) then
         write (lString, *) size(cmEntry%wrap%petList)
@@ -4585,14 +4587,16 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
+    nullify(cmEntry%wrap%petList) ! invalidate the petList 
     if (present(petList)) then
-      allocate(cmEntry%wrap%petList(size(petList)))
-      cmEntry%wrap%petList = petList  ! copy the petList elements
-    else
-      nullify(cmEntry%wrap%petList) ! invalidate the petList
+      if (size(petList)>0) then
+        ! a usable petList was provided
+        allocate(cmEntry%wrap%petList(size(petList)))
+        cmEntry%wrap%petList = petList  ! copy the petList elements
+      endif
     endif
-  
+
     if (btest(verbosity,13)) then
       if (associated(cmEntry%wrap%petList)) then
         write (lString, *) size(cmEntry%wrap%petList)

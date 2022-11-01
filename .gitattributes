@@ -1,3 +1,5 @@
 src/doc		export-ignore
 .gitattributes	export-ignore
 .gitignore	export-ignore
+
+*.C linguist-language=C++

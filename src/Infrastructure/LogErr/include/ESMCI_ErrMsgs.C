@@ -97,9 +97,10 @@ static const char *errMsg[] = {
   "File already exists ",                             //   63 = ESMF_RC_FILE_EXISTS
   "File is not a directory ",                         //   64 = ESMF_RC_FILE_NOTDIR
   "The MOAB library returned an error ",              //   65 = ESMF_RC_MOAB_ERROR
-  "The NetCDF Library returned an error ",            //   66 = ESMF_RC_NETCDF_ERROR
-  "",                                                 //   67 = ESMF_RC_NOOP
+  "",                                                 //   66 = ESMF_RC_NOOP
+  "The NetCDF Library returned an error ",            //   67 = ESMF_RC_NETCDF_ERROR
 
+  
 // 68-499 reserved for future F90 symmetric return code definitions
 
                                                      "","","","","","","","",
@@ -204,9 +205,10 @@ static const char *errMsg[] = {
   "File already exists ",                             //  563 = ESMC_RC_FILE_EXISTS
   "File is not a directory ",                         //  564 = ESMC_RC_FILE_NOTDIR
   "The MOAB library returned an error ",              //  565 = ESMC_RC_MOAB_ERROR
-  "The NetCDF library returned an error ",            //  566 = ESMC_RC_NETCDF_ERROR
-  "",                                                 //  567 = ESMC_RC_NOOP
+  "",                                                 //  566 = ESMC_RC_NOOP
+  "The NetCDF library returned an error ",            //  567 = ESMC_RC_NETCDF_ERROR
 
+  
 // 568-999 reserved for future C++ symmetric return code definitions
 
                                                         "","","","","","","",

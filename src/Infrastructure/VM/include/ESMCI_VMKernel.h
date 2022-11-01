@@ -283,9 +283,9 @@ class VMK{
 #ifndef ESMF_NO_PTHREADS
 #if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
     cpu_set_t cpuset;
+#endif
 #ifndef ESMF_NO_OPENMP
     int omp_num_threads;
-#endif
 #endif
 #endif
    public:
@@ -293,9 +293,9 @@ class VMK{
 #ifndef ESMF_NO_PTHREADS
 #if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
       pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#endif
 #ifndef ESMF_NO_OPENMP
       omp_set_num_threads(omp_num_threads);
-#endif
 #endif
 #endif
     }

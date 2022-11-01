@@ -359,8 +359,8 @@ void VMK::InitPreMPI(){
 void VMK::set(bool globalResourceControl){
 #ifndef ESMF_NO_GETHOSTID
 #ifndef ESMF_NO_PTHREADS
-#if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
   if (globalResourceControl){
+#if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
     // setting affinity on this level might interfer with user level pinning
     // therefore only do it by user request
     // set thread affinity
@@ -368,11 +368,11 @@ void VMK::set(bool globalResourceControl){
     CPU_ZERO(&cpuset);
     CPU_SET(ssipe[mypet], &cpuset);
     pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#endif
 #ifndef ESMF_NO_OPENMP
     omp_set_num_threads(1);
 #endif
   }
-#endif
 #endif
 #endif
 }
@@ -772,6 +772,7 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
   for (int i=0; i<ncpet[mypet]; i++)
     CPU_SET(ssipe[cid[mypet][i]], &cpuset);
   pthread_setaffinity_np(mypthid, sizeof(cpu_set_t), &cpuset);
+#endif
 #ifndef ESMF_NO_OPENMP
   // get the current omp max thread count
   affs.omp_num_threads = omp_get_max_threads();
@@ -782,6 +783,7 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
     if (sarg->openmpnumthreads>=0)
       numthreads = sarg->openmpnumthreads;
     omp_set_num_threads(numthreads);
+#if !defined(ESMF_OS_Darwin) && !defined(ESMF_OS_Cygwin)
     if (sarg->openmphandling>1){
 #pragma omp parallel
       {
@@ -795,8 +797,8 @@ VMK::Affinities VMK::setAffinities(void *ssarg){
         }
       }
     }
-  }
 #endif
+  }
 #endif
 #endif
   return affs;

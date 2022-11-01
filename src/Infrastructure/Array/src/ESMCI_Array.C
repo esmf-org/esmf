@@ -3891,7 +3891,7 @@ int Array::read(
 // !DESCRIPTION:
 //   Read Array data from file and put it into an ESMF_Array object.
 //   For this API to be functional, the environment variable ESMF_PIO
-//   should be set to "internal" when the ESMF library is built.
+//   should be set to either "internal" or "external" when the ESMF library is built.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -3969,7 +3969,7 @@ int Array::write(
 //
 // !DESCRIPTION:
 //   Write Array data into a file. For this API to be functional, the
-//   environment variable {\tt ESMF\_PIO} should be set to "internal" when
+//   environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external" when
 //   the ESMF library is built.
 //
 //EOPI

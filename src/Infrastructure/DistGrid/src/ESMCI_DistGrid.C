@@ -4962,6 +4962,52 @@ ESMC_I8 DistGrid::getElementCountPDe(
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::getTilePLocalDe()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::getTilePLocalDe
+//
+// !INTERFACE:
+int DistGrid::getTilePLocalDe(
+//
+// !RETURN VALUE:
+//    int tile number for local de
+//
+// !ARGUMENTS:
+//
+  int localDe,                          // in  - local DE = {0, ..., localDeCount-1}
+  int *rc                               // out - return code
+  )const{
+//
+// !DESCRIPTION:
+//    Get the tile number for the given local de. Note that tiles are basis 1.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  if (ESMC_BaseGetStatus()!=ESMF_STATUS_READY) throw ESMC_RC_OBJ_DELETED;
+
+  // initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // check input
+  const int localDeCount = delayout->getLocalDeCount();
+  if (localDe < 0 || localDe > localDeCount-1){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "Specified local DE out of bounds", ESMC_CONTEXT, rc);
+    return -1; // bail out
+  }
+
+  // calculate result
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
+  int tile = tileListPDe[localDeToDeMap[localDe]];
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return tile;
+}
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -5099,8 +5145,9 @@ template<typename T> int DistGrid::tGetSequenceIndexLocalDe(
       tArbSeqIndexListPCollPLocalDe[0][localDe][linExclusiveIndex]);
   }else{
     // determine the sequentialized index by construction of default tile rule
-    const int *localDeToDeMap = delayout->getLocalDeToDeMap();
-    int tile = tileListPDe[localDeToDeMap[localDe]];  // tiles are basis 1 !!!!
+    int tile = getTilePLocalDe(localDe, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc;
     if (tile == 0){
       // means that the localDe does not have any elements thus not on tile
     }else{

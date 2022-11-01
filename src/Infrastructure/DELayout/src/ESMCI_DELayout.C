@@ -3913,7 +3913,6 @@ int XXE::exec(
           xxeSendInfo->indirectionFlag);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-//TODO: 32-bit limit
         vm->send(buffer, size, xxeSendInfo->dstPet, xxeSendInfo->tag);
         xxeSendInfo->activeFlag = true;     // set
         xxeSendInfo->cancelledFlag = false; // set
@@ -3936,7 +3935,6 @@ int XXE::exec(
           xxeRecvInfo->indirectionFlag);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-//TODO: 32-bit limit
         vm->recv(buffer, size, xxeRecvInfo->srcPet, xxeRecvInfo->tag);
         xxeRecvInfo->activeFlag = true;     // set
         xxeRecvInfo->cancelledFlag = false; // set
@@ -3955,7 +3953,6 @@ int XXE::exec(
         sprintf(msg, "XXE::sendRRA: size=%Ld", xxeSendRRAInfo->size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-//TODO: 32-bit limit
         vm->send(rraList[xxeSendRRAInfo->rraIndex]
           + rraOffset, size, xxeSendRRAInfo->dstPet, xxeSendRRAInfo->tag);
         xxeSendRRAInfo->activeFlag = true;      // set
@@ -3975,7 +3972,6 @@ int XXE::exec(
         sprintf(msg, "XXE::recvRRA: size=%Ld", xxeRecvRRAInfo->size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-//TODO: 32-bit limit
         vm->recv(rraList[xxeRecvRRAInfo->rraIndex]
           + rraOffset, size, xxeRecvRRAInfo->srcPet, xxeRecvRRAInfo->tag);
         xxeRecvRRAInfo->activeFlag = true;      // set
@@ -4063,7 +4059,6 @@ int XXE::exec(
 #ifdef XXE_EXEC_MEMLOG_on
   VM::logMemInfo(std::string("XXE::exec():sendnb2.0"));
 #endif
-//TODO: 32-bit limit
         vm->send(buffer, size, xxeSendnbInfo->dstPet, xxeSendnbInfo->commhandle,
           xxeSendnbInfo->tag);
 #ifdef XXE_EXEC_MEMLOG_on
@@ -4087,7 +4082,6 @@ int XXE::exec(
           xxeRecvnbInfo->srcPet, size, buffer);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-//TODO: 32-bit limit
         vm->recv(buffer, size, xxeRecvnbInfo->srcPet, xxeRecvnbInfo->commhandle,
           xxeRecvnbInfo->tag);
         xxeRecvnbInfo->activeFlag = true;     // set
@@ -4108,7 +4102,6 @@ int XXE::exec(
           xxeSendnbRRAInfo->dstPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-//TODO: 32-bit limit
         vm->send(rraList[xxeSendnbRRAInfo->rraIndex]
           + rraOffset, size, xxeSendnbRRAInfo->dstPet,
           xxeSendnbRRAInfo->commhandle, xxeSendnbRRAInfo->tag);
@@ -4130,7 +4123,6 @@ int XXE::exec(
           xxeRecvnbRRAInfo->srcPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-//TODO: 32-bit limit
         vm->recv(rraList[xxeRecvnbRRAInfo->rraIndex]
           + rraOffset, size, xxeRecvnbRRAInfo->srcPet,
           xxeRecvnbRRAInfo->commhandle, xxeRecvnbRRAInfo->tag);
@@ -5246,7 +5238,6 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           buffer, xxeZeroMemsetInfo->vectorFlag, byteCount);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-//TODO: 32-bit limit
         memset(buffer, 0, byteCount);
       }
       break;
@@ -5264,14 +5255,12 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           xxeZeroMemsetRRAInfo->vectorFlag, byteCount);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_DEBUG);
 #endif
-//TODO: 32-bit limit
         memset(rraBase, 0, byteCount);
       }
       break;
     case memCpy:
       {
         xxeMemCpyInfo = (MemCpyInfo *)xxeElement;
-//TODO: 32-bit limit
         memcpy(xxeMemCpyInfo->dstMem, xxeMemCpyInfo->srcMem,
           xxeMemCpyInfo->size);
       }
@@ -5279,7 +5268,6 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     case memCpySrcRRA:
       {
         xxeMemCpySrcRRAInfo = (MemCpySrcRRAInfo *)xxeElement;
-//TODO: 32-bit limit
         memcpy(xxeMemCpySrcRRAInfo->dstMem,
           rraList[xxeMemCpySrcRRAInfo->rraIndex]
           + xxeMemCpySrcRRAInfo->rraOffset,
@@ -5378,7 +5366,6 @@ printf("gjt - DID NOT CANCEL commhandle\n");
             {
               char *dstPointer = dstBase;
               for (int k=0; k<xxeMemGatherSrcRRAInfo->chunkCount; k++){
-//TODO: 32-bit limit
                 unsigned long long int size = vectorL;
                 size *= countList[k];
                 memcpy(dstPointer, rraBase + rraOffsetList[k] * vectorL, size);

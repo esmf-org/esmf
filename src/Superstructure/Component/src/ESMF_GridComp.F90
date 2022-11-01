@@ -520,9 +520,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{sloppypar}
 ! \item[{[petList]}]
 !   List of parent {\tt PET}s given to the created child component by the
-!   parent component. If {\tt petList} is not specified all of the
-!   parent {\tt PET}s will be given to the child component. The order of
-!   PETs in {\tt petList} determines how the child local PETs refer back to
+!   parent component. If {\tt petList} is not specified, or is empty, all of the
+!   parent {\tt PET}s are given to the child component. The order of
+!   PETs in {\tt petList} determines how the child local PETs map back to
 !   the parent PETs.
 ! \item[{[contextflag]}]
 !   Specify the component's VM context. The default context is

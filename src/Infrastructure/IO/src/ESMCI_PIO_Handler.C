@@ -81,6 +81,7 @@ namespace ESMCI
     int *dims;                // The shape of the Array IO
     int basepiotype;          // PIO version of Array data type
     Array *array_p;           // The array matched to this descriptor
+    int tile;                 // The tile number in the array for this descriptor (1-based indexing)
     int arrayRank;            // The rank of array_p
     int *arrayShape;          // The shape of array_p
   public:
@@ -90,6 +91,7 @@ namespace ESMCI
       array_p = arrayArg;
       nDims = 0;
       dims = (int *)NULL;
+      tile = 0;
       arrayRank = 0;
       arrayShape = (int *)NULL;
     }
@@ -97,7 +99,7 @@ namespace ESMCI
   public:
     ~PIO_IODescHandler();
     static void finalize(void);
-    static int constructPioDecomp(int iosys, Array *arr_p,
+    static int constructPioDecomp(int iosys, Array *arr_p, int tile,
                                   int *newDecomp_p);
     static int freePioDecomp(int *decomp_p);
     static int getDims(const int &iodesc,
@@ -107,7 +109,7 @@ namespace ESMCI
                        int ** arrDims = (int **)NULL);
     static int getIOType(const int &iodesc, int *rc = (int *)NULL);
     static int getIODesc(int iosys,
-                                   Array *arrayArg, int *rc = (int *)NULL);
+                         Array *arrayArg, int tileArg, int *rc = (int *)NULL);
   };
 
 //
@@ -466,8 +468,9 @@ PIO_Handler::PIO_Handler(
 // !ARGUMENTS:
 //
   ESMC_IOFmt_Flag fmtArg,                 // (in)  - File format for PIO to use
+  int ntilesArg,                          // (in)  - Number of tiles in arrays handled by this object
   int *rc                                 // (out) - Error return code
-  ) : IO_Handler(fmtArg) {
+  ) : IO_Handler(fmtArg, ntilesArg) {
 //
 // !DESCRIPTION:
 //    Construct the internal information structure of an ESMCI::PIO_Handler
@@ -487,13 +490,17 @@ PIO_Handler::PIO_Handler(
 
   try {
 
-    // fill in the PIO_Handler objecte
-      pioSystemDesc =  0;
-    pioFileDesc = 0;
-    pioIODesc = 0;
-    user_count = 0;
+    // fill in the PIO_Handler object
+    pioSystemDesc =  0;
+    pioFileDesc = new int[ntilesArg];
+    for (int i = 0; i < ntilesArg; ++i) {
+      pioFileDesc[i] = 0;
+    }
     localrc = ESMF_SUCCESS;
-    new_file = false;
+    new_file = new bool[ntilesArg];
+    for (int i = 0; i < ntilesArg; ++i) {
+      new_file[i] = false;
+    }
     // Get the rest from initialize
     localrc = initializeVM();
 
@@ -538,26 +545,27 @@ void PIO_Handler::destruct (void
 //-----------------------------------------------------------------------------
   int localrc; // Only for debug!
   PRINTPOS;
-  // Make sure the file is closed
-  if (isOpen() == ESMF_TRUE) {
-    PRINTMSG(" (" << my_rank << "): closing file");
-    close((int *)NULL);     // Don't care about an error, continue with cleanup
-  }
+  // Make sure the file is closed (note that it's okay to call this even if the file is already closed)
+  PRINTMSG(" (" << my_rank << "): closing file");
+  close((int *)NULL);     // Don't care about an error, continue with cleanup
   // kill the pointer to the PIO_Handler object
   // NB: This does not shutdown the PIO instance, it may be reused.
   pioSystemDesc = 0;
+  // Deallocate some memory
+  delete[] pioFileDesc;
+  delete[] new_file;
 } // PIO_Handler::destruct()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::arrayRead()"
+#define ESMC_METHOD "ESMCI::PIO_Handler::arrayReadOneTileFile()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::arrayRead    - Read an array from a file
+// !IROUTINE:  ESMCI::PIO_Handler::arrayReadOneTileFile    - Read an array from a file, for the given tile
 //
 // !INTERFACE:
-void PIO_Handler::arrayRead(
+void PIO_Handler::arrayReadOneTileFile(
 //
 // !RETURN VALUE:
 //
@@ -565,15 +573,17 @@ void PIO_Handler::arrayRead(
 // !ARGUMENTS:
 //
   Array *arr_p,                           // (inout) - Destination of read
+  int tile,                               // (in)    - Tile we are reading (1-based indexing)
   const char * const name,                // (in)    - Optional array name
   int *timeslice,                         // (in)    - Optional timeslice
   int *rc                                 // (out)   - Error return code
   ) {
 //
 // !DESCRIPTION:
-//    Read data from field <name> from the open file. If timeslice is not
-//    NULL, it should point to an integer representing the timeslice to read
-//    from the Array.
+//    Read data from field <name> from the open file for the given tile.
+//    For typical single-tile arrays, this will just be called once per arrayRead, with tile=1.
+//    If timeslice is not NULL, it should point to an integer representing the
+//    timeslice to read from the Array.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -584,6 +594,7 @@ void PIO_Handler::arrayRead(
   int * arrDims;                          // Array shape
   int narrDims;                           // Array rank
   int iodesc;                             // PIO IO descriptor
+  int filedesc;                           // PIO file descriptor
   int vardesc;                            // PIO variable descriptor
   int basepiotype;                        // PIO version of Array data type
   void *baseAddress;                      // The address of the Array IO data
@@ -598,27 +609,46 @@ void PIO_Handler::arrayRead(
   }
 
   PRINTPOS;
+
   // File open?
-  if (isOpen() != ESMF_TRUE)
+  if (isOpen(tile) != ESMF_TRUE)
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_READ, "file not open",
         ESMC_CONTEXT, rc)) return;
+
+  // Array compatible with this object?
+  localrc = checkArray(arr_p);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+    return;
+
+  filedesc = pioFileDesc[tile-1]; // note that tile indices are 1-based
 
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
   localDE = 0;
-  baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
-  int arrlen = 1;
+  int tileOfThisDe = arr_p->getDistGrid()->getTilePLocalDe(localDE, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+    return;
+  // arrlen will be the size owned locally (0 if this DE doesn't own the current tile)
+  // (though note that this value isn't actually used by PIO)
+  int arrlen;
+  if (tileOfThisDe == tile) {
+    baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
+    arrlen = 1;
+  } else {
+    baseAddress = NULL;
+    arrlen = 0;
+  }
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
     int nDims;
 
     // If frame >= 0 then we need to not use the unlimited dim in the iodesc.
-    iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
+    iodesc = getIODesc(pioSystemDesc, arr_p, tile, &ioDims, &nioDims,
 		       &arrDims, &narrDims, &basepiotype, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 				      ESMC_CONTEXT, rc)) return;
 
     // This should work if it is a NetCDF file.
-    piorc = PIOc_inq(pioFileDesc, &nDims,
+    piorc = PIOc_inq(filedesc, &nDims,
 		     &nVar, &nAtt, &unlim);
     if (!CHECKPIOERROR(piorc, "File is not in NetCDF format", ESMF_RC_FILE_READ, (*rc))) {
       return;
@@ -630,7 +660,7 @@ void PIO_Handler::arrayRead(
       varname = arr_p->getName();
     }
 
-    piorc = PIOc_inq_varid(pioFileDesc, varname.c_str(), &vardesc);
+    piorc = PIOc_inq_varid(filedesc, varname.c_str(), &vardesc);
     // An error here means the variable is not in the file
     const std::string errmsg = "variable " + varname + " not found in file";
     if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
@@ -643,23 +673,24 @@ void PIO_Handler::arrayRead(
       // Do not use the unlimited dim in iodesc calculation
       //
       int dimids[narrDims];
-      piorc = PIOc_inq_vardimid(pioFileDesc, vardesc, dimids);
+      piorc = PIOc_inq_vardimid(filedesc, vardesc, dimids);
       // This should never happen
       const std::string errmsg = "variable " + varname + " inq_dimid failed";
       if (!CHECKPIOERROR(piorc, errmsg, ESMF_RC_FILE_READ, (*rc))) {
 	return;
       }
-       
+
       if(unlim == dimids[narrDims-1]){
 	narrDims = narrDims - 1;
       }
       for (int i=0; i<narrDims; i++){
+        // Note that arrDims[i] will be 0 if this DE doesn't own the current tile
 	arrlen *= arrDims[i];
       }
 
       int dimid_time;
       MPI_Offset time_len;
-      piorc = PIOc_inq_dimid(pioFileDesc, "time", &dimid_time);
+      piorc = PIOc_inq_dimid(filedesc, "time", &dimid_time);
       if (!CHECKPIOERROR(piorc, "No time dimension found in file", ESMF_RC_FILE_READ, (*rc))) {
         return;
       }
@@ -674,7 +705,7 @@ void PIO_Handler::arrayRead(
         }
       }
       // Check to make sure the requested record is in the file
-      piorc = PIOc_inq_dimlen(pioFileDesc,
+      piorc = PIOc_inq_dimlen(filedesc,
           dimid_time, &time_len);
       if (!CHECKPIOERROR(piorc, "Error finding time length", ESMF_RC_FILE_READ, (*rc))) {
         return;
@@ -682,7 +713,7 @@ void PIO_Handler::arrayRead(
       if (*timeslice > time_len) {
         PRINTMSG(" (" << my_rank << "): " <<
                  "Timeframe is greater than that in file" <<
-                 getFilename() << ", file time = " << time_len <<
+                 getFilename(tile) << ", file time = " << time_len <<
                  ", requested record = " << *timeslice);
         if (ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED,
             "Timeframe is greater than max in file",
@@ -694,13 +725,14 @@ void PIO_Handler::arrayRead(
     } else {
       frame = -1;
       for (int i=0; i<narrDims; i++){
+        // Note that arrDims[i] will be 0 if this DE doesn't own the current tile
 	arrlen *= arrDims[i];
       }
 
     }
     if (unlim >= 0 && frame > 0) {
         PRINTMSG("calling setframe for read_darray, frame = " << frame);
-        PIOc_setframe(pioFileDesc, vardesc, frame-1);
+        PIOc_setframe(filedesc, vardesc, frame-1);
     }
 
 #endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
@@ -710,7 +742,7 @@ void PIO_Handler::arrayRead(
 
   PRINTMSG("calling read_darray, pio type = " << basepiotype << ", address = " << baseAddress);
   // Read in the array
-  piorc = PIOc_read_darray(pioFileDesc, vardesc, iodesc,
+  piorc = PIOc_read_darray(filedesc, vardesc, iodesc,
                            arrlen, (void *)baseAddress);
 
   if (!CHECKPIOERROR(piorc, "Error reading array data", ESMF_RC_FILE_READ, (*rc))) {
@@ -721,23 +753,24 @@ void PIO_Handler::arrayRead(
   if (rc != NULL) {
     *rc = localrc;
   }
-} // PIO_Handler::arrayRead()
+} // PIO_Handler::arrayReadOneTileFile()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::arrayWrite()"
+#define ESMC_METHOD "ESMCI::PIO_Handler::arrayWriteOneTileFile()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::arrayWrite    - Write an Array to a file
+// !IROUTINE:  ESMCI::PIO_Handler::arrayWriteOneTileFile    - Write an Array to a file, for the given tile
 //
 // !INTERFACE:
-void PIO_Handler::arrayWrite(
+void PIO_Handler::arrayWriteOneTileFile(
 //
 // !RETURN VALUE:
 //
 //
 // !ARGUMENTS:
   Array *arr_p,                           // (in) Destination of write
+  int tile,                               // (in) Tile we are writing (1-based indexing)
   const char * const name,                // (in) Optional array name
   const std::vector<std::string> &dimLabels, // (in) Optional dimension labels
   int *timeslice,                         // (in) Optional timeslice
@@ -748,7 +781,9 @@ void PIO_Handler::arrayWrite(
   ) {
 //
 // !DESCRIPTION:
-//    Call the appropriate PIO write_darray_<rank>_<typekind> function
+//    Write data to field <name> to the open file, for the given tile.
+//    For typical single-tile arrays, this will just be called once per arrayWrite, with tile=1.
+//    Calls the appropriate PIO write_darray_<rank>_<typekind> function.
 //    It is an error if this handler object does not have an open
 //    PIO file descriptor and a valid PIO IO descriptor (these items should
 //    all be in place after a successful call to PIO_Handler::open).
@@ -762,8 +797,9 @@ void PIO_Handler::arrayWrite(
   int nioDims;                            // Array IO rank
   int * arrDims;                          // Array shape
   int narrDims;                           // Array rank
-  int iodesc;                   // PIO IO descriptor
-  int vardesc = 0;          // PIO variable descriptor
+  int iodesc;                             // PIO IO descriptor
+  int filedesc;                           // PIO file descriptor
+  int vardesc = 0;                        // PIO variable descriptor
   int basepiotype;                        // PIO version of Array data type
   void *baseAddress;                      // The address of the Array IO data
   int localDE;                            // DE to use for IO
@@ -778,15 +814,22 @@ void PIO_Handler::arrayWrite(
   }
 
   PRINTPOS;
+
   if ((int *)NULL != timeslice) {
     timesliceVal = *timeslice;
   }
   // File open?
-  if (isOpen() != ESMF_TRUE)
+  if (isOpen(tile) != ESMF_TRUE)
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_READ, "file not open",
         ESMC_CONTEXT, rc)) return;
 
-  iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
+  // Array compatible with this object?
+  localrc = checkArray(arr_p);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+    return;
+
+  filedesc = pioFileDesc[tile-1]; // note that tile indices are 1-based
+  iodesc = getIODesc(pioSystemDesc, arr_p, tile, &ioDims, &nioDims,
       &arrDims, &narrDims, &basepiotype, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return;
@@ -808,13 +851,22 @@ void PIO_Handler::arrayWrite(
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
   localDE = 0;
-  baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
-  PRINTMSG("baseAddress = 0x" << (void *)baseAddress);
-//  int arrlen = arr_p->getLocalarrayList()[localDE]->getByteCount();
-  int arrlen = 1;
-  const int *counts = arr_p->getLocalarrayList()[localDE]->getCounts();
-  for (int i=0; i<narrDims; i++)
-      arrlen *= counts[i]; 
+  int tileOfThisDe = arr_p->getDistGrid()->getTilePLocalDe(localDE, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, rc)) return;
+  int arrlen;
+  if (tileOfThisDe == tile) {
+    baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
+    PRINTMSG("baseAddress = 0x" << (void *)baseAddress);
+    // arrlen = arr_p->getLocalarrayList()[localDE]->getByteCount();
+    arrlen = 1;
+    const int *counts = arr_p->getLocalarrayList()[localDE]->getCounts();
+    for (int i=0; i<narrDims; i++)
+      arrlen *= counts[i];
+  } else {
+    baseAddress = NULL;
+    arrlen = 0;
+  }
   PRINTMSG("arrlen = " << arrlen);
 
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
@@ -825,14 +877,14 @@ void PIO_Handler::arrayWrite(
       varname = arr_p->getName();
     }
     PRINTMSG("varname = \"" << varname << "\"");
-    if (ESMF_TRUE == isNewFile()) {
+    if (ESMF_TRUE == isNewFile(tile)) {
       varExists = false;
     } else {
       int nVar;                           // Number of variables in file
       int nAtt;                           // Number of attributes in file
       int nfDims;                         // Number of dimensions in file
       PRINTMSG("Entering NetCDF define mode (redef)");
-      piorc = PIOc_redef(pioFileDesc);
+      piorc = PIOc_redef(filedesc);
       // Not all NetCDF errors are really errors here so we need to check
       if ((PIO_NOERR != piorc) && (NC_EINDEFINE != piorc)) {
         if (!CHECKPIOERROR(piorc,
@@ -846,7 +898,7 @@ void PIO_Handler::arrayWrite(
 
       // This should work if it is a NetCDF file.
       PRINTMSG("Calling PIOc_inq");
-      piorc = PIOc_inq(pioFileDesc, &nfDims,
+      piorc = PIOc_inq(filedesc, &nfDims,
                                 &nVar, &nAtt, &unlim);
       if (!CHECKPIOERROR(piorc, "File is not in NetCDF format",
           ESMF_RC_FILE_WRITE, (*rc))) {
@@ -855,7 +907,7 @@ void PIO_Handler::arrayWrite(
 
       // We have a NetCDF file, see if the variable is in there
       PRINTMSG("Looking for variable in file");
-      piorc = PIOc_inq_varid(pioFileDesc, varname.c_str(), &vardesc);
+      piorc = PIOc_inq_varid(filedesc, varname.c_str(), &vardesc);
       // This should succeed if the variable exists
       varExists = (PIO_NOERR == piorc);
     }
@@ -866,8 +918,8 @@ void PIO_Handler::arrayWrite(
     int dimidTime;
     PIO_Offset timeLen;
     PRINTMSG("Checking time dimension");
-    //piorc = PIOc_inq_dimid(pioFileDesc, "time", &dimidTime);
-    piorc = PIOc_inq_unlimdim(pioFileDesc, &dimidTime);
+    //piorc = PIOc_inq_dimid(filedesc, "time", &dimidTime);
+    piorc = PIOc_inq_unlimdim(filedesc, &dimidTime);
     // NetCDF does not specify which error code goes with with
     // condition so we will guess that there is no time dimension
     // on any error condition (This may be an error depending on context).
@@ -877,7 +929,7 @@ void PIO_Handler::arrayWrite(
     PRINTMSG("unlim = " << unlim);
     if (hasTimeDim) {
       // Retrieve the max time field
-      piorc = PIOc_inq_dimlen(pioFileDesc, dimidTime, &timeLen);
+      piorc = PIOc_inq_dimlen(filedesc, dimidTime, &timeLen);
       PRINTMSG("inq_dimlen = " << piorc);
       PRINTMSG("dimidTime = " << dimidTime);
       PRINTMSG("timeLen = " << timeLen);
@@ -921,7 +973,7 @@ void PIO_Handler::arrayWrite(
     int nArrdims = nioDims + ((timeFrame > 0) ? 1 : 0);
 
     // Check compatibility between array to write and existing variable.
-    piorc = PIOc_inq_varndims(pioFileDesc, vardesc, &nDims);
+    piorc = PIOc_inq_varndims(filedesc, vardesc, &nDims);
     if (!CHECKPIOERROR(piorc, "Error retrieving information about variable",
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
@@ -939,7 +991,7 @@ void PIO_Handler::arrayWrite(
 
     PRINTMSG("Calling pio_cpp_inq_vardimid_vdesc");
     std::vector<int> dimIds(nDims);
-    piorc = PIOc_inq_vardimid(pioFileDesc, vardesc, &dimIds.front());
+    piorc = PIOc_inq_vardimid(filedesc, vardesc, &dimIds.front());
     if (!CHECKPIOERROR(piorc, "Error retrieving information about variable",
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
@@ -948,7 +1000,7 @@ void PIO_Handler::arrayWrite(
     MPI_Offset dimLen;
     int ioDimNum = 0;
     for (int i = 0; i < nDims; i++) {
-      piorc = PIOc_inq_dimlen(pioFileDesc, dimIds[i], &dimLen);
+      piorc = PIOc_inq_dimlen(filedesc, dimIds[i], &dimLen);
       if (!CHECKPIOERROR(piorc, "Error retrieving dimension information",
           ESMF_RC_FILE_WRITE, (*rc))) {
         return;
@@ -996,7 +1048,7 @@ void PIO_Handler::arrayWrite(
   if (!varExists) {
     // Ensure we are in define mode
     PRINTMSG("Going into NetCDF define mode (redef)");
-    piorc = PIOc_redef(pioFileDesc);
+    piorc = PIOc_redef(filedesc);
     // Not all NetCDF errors are really errors here so we need to check
     if ((PIO_NOERR != piorc) && (NC_EINDEFINE != piorc)) {
       if (!CHECKPIOERROR(piorc,
@@ -1023,10 +1075,10 @@ void PIO_Handler::arrayWrite(
 
       // if dimension already exists, use it.
       int dimid_existing;
-      piorc = PIOc_inq_dimid(pioFileDesc, axis.c_str(), &dimid_existing);
+      piorc = PIOc_inq_dimid(filedesc, axis.c_str(), &dimid_existing);
       if (PIO_NOERR == piorc) {
         MPI_Offset dim_len;
-        piorc = PIOc_inq_dimlen(pioFileDesc, dimid_existing, &dim_len);
+        piorc = PIOc_inq_dimlen(filedesc, dimid_existing, &dim_len);
         if (!CHECKPIOERROR(piorc, "Error finding existing dimension length", ESMF_RC_FILE_WRITE, (*rc))) {
           return;
         }
@@ -1041,7 +1093,7 @@ void PIO_Handler::arrayWrite(
         ncDims[nioDims - i - 1] = dimid_existing;
       } else {
         PRINTMSG("Defining dimension " << i);
-        piorc = PIOc_def_dim(pioFileDesc, axis.c_str(),
+        piorc = PIOc_def_dim(filedesc, axis.c_str(),
                                 ioDims[i], &ncDims[nioDims - i - 1]);
         if (!CHECKPIOERROR(piorc, std::string("Defining dimension: ") + axis,
             ESMF_RC_FILE_WRITE, (*rc))) {
@@ -1056,14 +1108,14 @@ void PIO_Handler::arrayWrite(
         for(int i=nioDims;i>0;i--)
             ncDims[i] = ncDims[i-1];
       if (hasTimeDim) {
-        piorc = PIOc_inq_dimid (pioFileDesc, "time", &ncDims[0]);
+        piorc = PIOc_inq_dimid (filedesc, "time", &ncDims[0]);
         if (!CHECKPIOERROR(piorc, "Attempting to obtain 'time' dimension ID",
             ESMF_RC_FILE_WRITE, (*rc))) {
           return;
         }
       } else {
         PRINTMSG("Defining time dimension");
-        piorc = PIOc_def_dim(pioFileDesc, "time",
+        piorc = PIOc_def_dim(filedesc, "time",
                                 PIO_UNLIMITED, &ncDims[0]);
         if (!CHECKPIOERROR(piorc, "Attempting to define 'time' dimension",
             ESMF_RC_FILE_WRITE, (*rc))) {
@@ -1076,8 +1128,8 @@ void PIO_Handler::arrayWrite(
   if (!varExists) {
     PRINTMSG("niodims = " << nioDims);
     PRINTMSG("basepiotype = " << basepiotype);
-     
-    piorc = PIOc_def_var(pioFileDesc, varname.c_str(), basepiotype,
+
+    piorc = PIOc_def_var(filedesc, varname.c_str(), basepiotype,
                          nioDims, ncDims, &vardesc);
     if (!CHECKPIOERROR(piorc, "Attempting to define PIO vardesc for: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
@@ -1087,10 +1139,10 @@ void PIO_Handler::arrayWrite(
   if (timeFrame >= 0) {
 #ifdef ESMFIO_DEBUG
     int nvdims;
-    PIOc_inq_varndims(pioFileDesc, vardesc, &nvdims);
+    PIOc_inq_varndims(filedesc, vardesc, &nvdims);
     PRINTMSG("calling setframe, timeFrame = " << timeFrame);
 #endif // ESMFIO_DEBUG
-    piorc = PIOc_setframe(pioFileDesc, vardesc, timeFrame-1);
+    piorc = PIOc_setframe(filedesc, vardesc, timeFrame-1);
     if (!CHECKPIOERROR(piorc, "Attempting to setframe for: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
@@ -1103,21 +1155,21 @@ void PIO_Handler::arrayWrite(
     if (varExists) {
       int varid;
       int lrc;
-      lrc = PIOc_inq_varid(pioFileDesc, varname.c_str(), &varid);
+      lrc = PIOc_inq_varid(filedesc, varname.c_str(), &varid);
       PRINTMSG("varid = " << varid);
     }
 #endif // ESMFIO_DEBUG
 
     // ESMF Attribute Package -> NetCDF variable and global attributes
     if (varAttPack) {
-      attPackPut (vardesc, varAttPack, &localrc);
+      attPackPut (vardesc, varAttPack, tile, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) {
         return;
       }
     }
     if (gblAttPack) {
-      attPackPut (NC_GLOBAL, gblAttPack, &localrc);
+      attPackPut (NC_GLOBAL, gblAttPack, tile, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) {
         return;
@@ -1127,7 +1179,7 @@ void PIO_Handler::arrayWrite(
 
   PRINTMSG("calling enddef, status = " << rc);
 
-    piorc = PIOc_enddef(pioFileDesc);
+    piorc = PIOc_enddef(filedesc);
     if (!CHECKPIOERROR(piorc,  "Attempting to end definition of variable: " + varname,
         ESMF_RC_FILE_WRITE, (*rc))) {
       return;
@@ -1140,13 +1192,13 @@ void PIO_Handler::arrayWrite(
 #endif // ESMFIO_DEBUG
   // Write the array
   ESMCI_IOREGION_ENTER("PIOc_write_darray");
-  piorc =  PIOc_write_darray(pioFileDesc, vardesc, iodesc, arrlen,
+  piorc =  PIOc_write_darray(filedesc, vardesc, iodesc, arrlen,
                              (void *)baseAddress, NULL);
   if (!CHECKPIOERROR(piorc, "Attempting to write file",
             ESMF_RC_FILE_WRITE, (*rc))) {
       return;
   }
-  new_file = false;
+  new_file[tile-1] = false;
   ESMCI_IOREGION_EXIT("PIOc_write_darray");
 
 
@@ -1155,29 +1207,31 @@ void PIO_Handler::arrayWrite(
   if (rc != NULL) {
     *rc = ESMF_SUCCESS;
   }
-} // PIO_Handler::arrayWrite()
+} // PIO_Handler::arrayWriteOneTileFile()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::open()"
+#define ESMC_METHOD "ESMCI::PIO_Handler::openOneTileFile()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::open    - open a stream with stored filename
+// !IROUTINE:  ESMCI::PIO_Handler::openOneTileFile    - open a stream with stored filename, for the given tile
 //
 // !INTERFACE:
-void PIO_Handler::open(
+void PIO_Handler::openOneTileFile(
 //
 // !RETURN VALUE:
 //
 //
 // !ARGUMENTS:
 //
+  int tile,                            // (in)  - tile for which we're opening the file (1-based indexing)
   bool readonly,                       // (in)  - if false, then read/write
   int *rc                              // (out) - Error return code
   ) {
 //
 // !DESCRIPTION:
-//    Open a file for reading and/or writing.
+//    Open a file for reading and/or writing for the given tile.
+//    For typical single-tile arrays, this will just be called once per open, with tile=1.
 //    PIO must be initialized for this routine to succeed (ESMF_RC_INTNRL_BAD)
 //    It is an error if a file is already open (ESMF_RC_FILE_OPEN)
 //
@@ -1225,9 +1279,9 @@ void PIO_Handler::open(
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_INTNRL_BAD,
         "PIO not initialized",
         ESMC_CONTEXT, rc)) return;
-  } else if (isOpen() == ESMF_TRUE) {
+  } else if (isOpen(tile) == ESMF_TRUE) {
     if (ESMC_LogDefault.MsgFoundError (ESMF_RC_FILE_OPEN,
-        "PIO not initialized",
+        "File is already open",
         ESMC_CONTEXT, rc)) return;
   } else if (pioSystemDesc <= 0 ) {
     // Just grab last created PIO instance for now (TBD: need way to choose)
@@ -1263,8 +1317,11 @@ void PIO_Handler::open(
     mode = PIO_WRITE;
   }
   // Figure out if we need to call createfile or openfile
-  new_file = false;
-  bool file_exists = IO_Handler::fileExists(getFilename(), !readonly);
+  new_file[tile-1] = false;
+  const std::string thisFilename = getFilename(tile, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+    return;
+  bool file_exists = IO_Handler::fileExists(thisFilename, !readonly);
   switch(getFileStatusFlag()) {
   case ESMC_FILESTATUS_UNKNOWN:
     if (file_exists) {
@@ -1302,47 +1359,47 @@ void PIO_Handler::open(
     // Looks like we are ready to try and create the file
     mode |= clobberMode;
     switch (getFormat()){
-    case ESMF_IOFMT_NETCDF_64BIT_OFFSET: 
+    case ESMF_IOFMT_NETCDF_64BIT_OFFSET:
     {
         mode |= PIO_64BIT_OFFSET;
         break;
     }
-    case ESMF_IOFMT_NETCDF_64BIT_DATA: 
+    case ESMF_IOFMT_NETCDF_64BIT_DATA:
     {
         mode |= PIO_64BIT_DATA;
         break;
     }
-    }    
+    }
     ESMCI_IOREGION_ENTER("PIOc_createfile");
 
-    piorc = PIOc_createfile(pioSystemDesc, &pioFileDesc,
-                                 &iotype, getFilename(), mode);
+    piorc = PIOc_createfile(pioSystemDesc, &(pioFileDesc[tile-1]),
+                            &iotype, thisFilename.c_str(), mode);
     ESMCI_IOREGION_EXIT("PIOc_createfile");
-    if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ") + getFilename(),
+    if (!CHECKPIOWARN(piorc, std::string("Unable to create file: ") + thisFilename,
       ESMF_RC_FILE_OPEN, (*rc))) {
       return;
     } else {
-      new_file = true;
-      PRINTMSG("call to PIOc_createfile: success for " << getFilename() << " iotype= "<< iotype << " Mode "<< mode << " ESMF FMT "<<getFormat() );
+      new_file[tile-1] = true;
+      PRINTMSG("call to PIOc_createfile: success for " << thisFilename << " iotype= "<< iotype << " Mode "<< mode << " ESMF FMT "<<getFormat() );
     }
 #ifdef ESMFIO_DEBUG
     PIOc_set_log_level(0);
 #endif // ESMFIO_DEBUG
-    piorc = PIOc_set_fill(pioFileDesc, PIO_NOFILL, NULL);
-    if (!CHECKPIOWARN(piorc, std::string("Unable to set fill on file: ") + getFilename(),
+    piorc = PIOc_set_fill(pioFileDesc[tile-1], PIO_NOFILL, NULL);
+    if (!CHECKPIOWARN(piorc, std::string("Unable to set fill on file: ") + thisFilename,
                       ESMF_RC_FILE_OPEN, (*rc))) {
         return;
     }
   } else {
     PRINTMSG(" calling PIOc_openfile with mode = " << mode <<
-             ", file = \"" << getFilename() << "\"");
+             ", file = \"" << thisFilename << "\"");
     // Looks like we are ready to go
     ESMCI_IOREGION_ENTER("PIOc_openfile");
-    piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc,
-                               &iotype, getFilename(), mode);
+    piorc = PIOc_openfile(pioSystemDesc, &(pioFileDesc[tile-1]),
+                          &iotype, thisFilename.c_str(), mode);
     ESMCI_IOREGION_EXIT("PIOc_openfile");
-    PRINTMSG(", called PIOc_openfile on " << getFilename());
-    if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + getFilename(),
+    PRINTMSG(", called PIOc_openfile on " << thisFilename);
+    if (!CHECKPIOWARN(piorc, std::string("Unable to open existing file: ") + thisFilename,
         ESMF_RC_FILE_OPEN, (*rc))) {
       return;
     }
@@ -1352,7 +1409,7 @@ void PIO_Handler::open(
   if (rc != NULL) {
     *rc = ESMF_SUCCESS;
   }
-} // PIO_Handler::open()
+} // PIO_Handler::openOneTileFile()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1370,6 +1427,7 @@ void PIO_Handler::attPackPut (
 //
   int vardesc,      // (in) - variable to write attributes into, NULL for global
   const ESMCI::Info *attPack,  // (in) - AttPack containing name/value(s) pairs
+  int tile,                    // (in) - Tile number for which we are putting attributes (1-based indexing)
   int *rc                      // (out) - Error return code
   ) {
 //
@@ -1381,6 +1439,7 @@ void PIO_Handler::attPackPut (
 //-----------------------------------------------------------------------------
   int localrc;
   int piorc;
+  int filedesc = pioFileDesc[tile-1]; // note that tile indices are 1-based
 
   const json &j = attPack->getStorageRef();
   for (json::const_iterator it=j.cbegin(); it!=j.cend(); it++) {
@@ -1417,7 +1476,7 @@ void PIO_Handler::attPackPut (
             return;
         }
         const std::string value = jcurr[0];
-        piorc = PIOc_put_att_text (pioFileDesc, vardesc,
+        piorc = PIOc_put_att_text (filedesc, vardesc,
                                    it.key().c_str(), strlen(value.c_str()), value.c_str());
         if (!CHECKPIOERROR(piorc, "Attempting to set string Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
@@ -1425,7 +1484,7 @@ void PIO_Handler::attPackPut (
       }
       case ESMC_TYPEKIND_I8: {
         const std::vector<long> value = jcurr.get<std::vector<long>>();
-        piorc = PIOc_put_att_long (pioFileDesc, vardesc,
+        piorc = PIOc_put_att_long (filedesc, vardesc,
                                    it.key().c_str(), att_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set I8 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
@@ -1433,7 +1492,7 @@ void PIO_Handler::attPackPut (
       }
       case ESMC_TYPEKIND_R8: {
         const std::vector<double> value = jcurr.get<std::vector<double>>();
-        piorc = PIOc_put_att_double (pioFileDesc, vardesc,
+        piorc = PIOc_put_att_double (filedesc, vardesc,
                                      it.key().c_str(), att_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set R8 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
@@ -1441,7 +1500,7 @@ void PIO_Handler::attPackPut (
       }
       case ESMC_TYPEKIND_I4: {
         const std::vector<int> value = jcurr.get<std::vector<int>>();
-        piorc = PIOc_put_att_int (pioFileDesc, vardesc,
+        piorc = PIOc_put_att_int (filedesc, vardesc,
                                   it.key().c_str(), att_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set I4 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
@@ -1449,7 +1508,7 @@ void PIO_Handler::attPackPut (
       }
       case ESMC_TYPEKIND_R4: {
         const std::vector<float> value = jcurr.get<std::vector<float>>();
-        piorc = PIOc_put_att_float (pioFileDesc, vardesc,
+        piorc = PIOc_put_att_float (filedesc, vardesc,
                                     it.key().c_str(), att_type, size, value.data());
         if (!CHECKPIOERROR(piorc, "Attempting to set R4 Attribute: " + it.key(),
                            ESMF_RC_FILE_WRITE, (*rc))) return;
@@ -1482,6 +1541,8 @@ ESMC_Logical PIO_Handler::isOpen(
 //
 // !ARGUMENTS:
 //
+  int tile  // (in) - tile number for which we check if a file is open (relevant for
+            // multi-tile arrays with IO to a separate file for each array) (1-based indexing)
   ) {
 //
 // !DESCRIPTION:
@@ -1491,16 +1552,18 @@ ESMC_Logical PIO_Handler::isOpen(
 //EOPI
 //-----------------------------------------------------------------------------
   PRINTPOS;
-  if (pioFileDesc == 0) {
+  int filedesc = pioFileDesc[tile-1]; // note that tile indices are 1-based
+  if (filedesc == 0) {
     PRINTMSG("pioFileDesc is NULL");
     return ESMF_FALSE;
-  } else if (PIOc_File_is_Open(pioFileDesc) != 0) {
+  } else if (PIOc_File_is_Open(filedesc) != 0) {
     PRINTMSG("File is open");
     return ESMF_TRUE;
   } else {
     // This really should not happen, warn and clean up just in case
     std::string errmsg;
-    errmsg = std::string ("File, ") + getFilename() + ", closed by PIO";
+    const std::string thisFilename = getFilename(tile);
+    errmsg = std::string ("File, ") + thisFilename + ", closed by PIO";
     ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     return ESMF_FALSE;
   }
@@ -1509,23 +1572,26 @@ ESMC_Logical PIO_Handler::isOpen(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::flush()"
+#define ESMC_METHOD "ESMCI::PIO_Handler::flushOneTileFile()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::flush    - Flush any pending I/O operations
+// !IROUTINE:  ESMCI::PIO_Handler::flushOneTileFile    - Flush any pending I/O operations for this tile's file
 //
 // !INTERFACE:
-void PIO_Handler::flush(
+void PIO_Handler::flushOneTileFile(
 //
 // !RETURN VALUE:
 //
 //
 // !ARGUMENTS:
 //
+  int tile,                               // (in)  - Tile for which we want to flush the file (1-based indexing)
   int *rc                                 // (out) - Error return code
   ) {
 //
 // !DESCRIPTION:
-//    xxx
+//    Flush any pending I/O operations for this tile's file.
+//    For typical single-tile arrays, this will just be called once per flush, with tile=1.
+//    It is safe to call this on a non-open file; in this case, nothing is done.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1538,40 +1604,42 @@ void PIO_Handler::flush(
 
   PRINTPOS;
   // Not open? No problem, just skip
-  if (isOpen() == ESMF_TRUE) {
+  if (isOpen(tile) == ESMF_TRUE) {
     PRINTMSG("calling sync");
     ESMCI_IOREGION_ENTER("PIOc_sync");
-    PIOc_sync(pioFileDesc);
+    PIOc_sync(pioFileDesc[tile-1]);
     ESMCI_IOREGION_EXIT("PIOc_sync");
   }
   // return successfully
   if (rc != NULL) {
     *rc = ESMF_SUCCESS;
   }
-} // PIO_Handler::flush()
+} // PIO_Handler::flushOneTileFile()
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::close()"
+#define ESMC_METHOD "ESMCI::PIO_Handler::closeOneTileFile()"
 //BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::close    - Close an open file
+// !IROUTINE:  ESMCI::PIO_Handler::closeOneTileFile    - Close this tile's possibly-open file
 //
 // !INTERFACE:
-void PIO_Handler::close(
+void PIO_Handler::closeOneTileFile(
 //
 // !RETURN VALUE:
 //
 //
 // !ARGUMENTS:
 //
+  int tile,                               // (in)  - Tile for which we want to close the file (1-based indexing)
   int *rc                                 // (out) - Error return code
   ) {
 //
 // !DESCRIPTION:
-//    Close the open file (if any).
-//    It is not an error if no file is open
+//    Close the open file associated with this tile (if any).
+//    For typical single-tile arrays, this will just be called once per close, with tile=1.
+//    It is NOT an error if no file is open
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1584,11 +1652,11 @@ void PIO_Handler::close(
 
   PRINTPOS;
   // Not open? No problem, just skip
-  if (isOpen() == ESMF_TRUE) {
-      ESMCI_IOREGION_ENTER("PIOc_closefile");
-    int piorc = PIOc_closefile(pioFileDesc);
-      ESMCI_IOREGION_EXIT("PIOc_closefile");
-    new_file = false;
+  if (isOpen(tile) == ESMF_TRUE) {
+    ESMCI_IOREGION_ENTER("PIOc_closefile");
+    int piorc = PIOc_closefile(pioFileDesc[tile-1]);
+    ESMCI_IOREGION_EXIT("PIOc_closefile");
+    new_file[tile-1] = false;
     if (rc != NULL) *rc = piorc;
   }
 
@@ -1596,7 +1664,7 @@ void PIO_Handler::close(
   if (rc != NULL) {
     *rc = ESMF_SUCCESS;
   }
-} // PIO_Handler::close()
+} // PIO_Handler::closeOneTileFile()
 //-----------------------------------------------------------------------------
 
 
@@ -1617,6 +1685,7 @@ void PIO_Handler::close(
 //
   int iosys,          // (in)  - PIO system handle to use
   Array *arr_p,                       // (in)  - Array for IO decompomposition
+  int tile,                           // (in)  - Tile number in array (1-based indexing)
   int ** ioDims,                      // (out) - Array shape for IO
   int *nioDims,                       // (out) - Rank of Array IO
   int ** arrDims,                     // (out) - Array shape for IO
@@ -1639,11 +1708,11 @@ void PIO_Handler::close(
   }
 
   PRINTPOS;
-  new_io_desc = PIO_IODescHandler::getIODesc(iosys, arr_p, &localrc);
+  new_io_desc = PIO_IODescHandler::getIODesc(iosys, arr_p, tile, &localrc);
   if ((int)NULL == new_io_desc) {
     PRINTMSG("calling constructPioDecomp");
     localrc = PIO_IODescHandler::constructPioDecomp(iosys,
-                                                    arr_p, &new_io_desc);
+                                                    arr_p, tile, &new_io_desc);
     PRINTMSG("constructPioDecomp call complete" << ", localrc = " << localrc);
   }
   if ((ioDims != (int **)NULL) || (nioDims != (int *)NULL) ||
@@ -1870,8 +1939,9 @@ int PIO_IODescHandler::constructPioDecomp(
 //
 // !ARGUMENTS:
 //
-  int iosys,          // (in)  - PIO system handle to use
-  Array *arr_p,                       // (in)  - Array for IO decompomposition
+  int iosys,                // (in)  - PIO system handle to use
+  Array *arr_p,             // (in)  - Array for IO decompomposition
+  int tile,                 // (in)  - Tile number in array (1-based indexing)
   int *newDecomp_p          // (out) - New decomposition descriptor
   ) {
 //
@@ -1885,6 +1955,7 @@ int PIO_IODescHandler::constructPioDecomp(
 
   // initialize return code; assume routine not implemented
   int localrc = ESMF_RC_NOT_IMPL;   // local return code
+  int rc;
   int localDe;                      // The DE being processed
   int localDeCount;                 // The number of DEs on this PET
   int pioDofCount;                  // Number
@@ -1898,6 +1969,11 @@ int PIO_IODescHandler::constructPioDecomp(
     ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL, "- arr_p cannot be NULL",
       ESMC_CONTEXT, &localrc);
     return ESMF_RC_ARG_BAD;
+  }
+  if (tile < 1) {
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, "- tile must be >= 1",
+      ESMC_CONTEXT, &localrc);
+    return localrc;
   }
   if ((int *)NULL == newDecomp_p) {
     ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL,
@@ -1917,6 +1993,9 @@ int PIO_IODescHandler::constructPioDecomp(
     return ESMF_RC_NOT_IMPL;
   }
 
+  // TODO: To support multiple DEs per PE, we would need to extend this to be an array
+  bool thisDeIsThisTile = false;
+
   // We need the total number of elements
   pioDofCount = 0;
   int const *localDeToDeMap = arr_p->getDistGrid()->getDELayout()->getLocalDeToDeMap();
@@ -1924,11 +2003,18 @@ int PIO_IODescHandler::constructPioDecomp(
   for (localDe = 0; localDe < localDeCount; ++localDe) {
     // consider the fact that replicated dimensions may lead to local elements in the
     // Array, that are not accounted for by actual exclusive elements in the DistGrid
-    if (arr_p->getDistGrid()->getElementCountPDe()[localDeToDeMap[localDe]]>0)
+    int tileOfThisDe = arr_p->getDistGrid()->getTilePLocalDe(localDe, &rc);
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc))
+      return localrc;
+    if (tileOfThisDe == tile) {
+      // TODO: As noted above, to support multiple DEs per PE, we would need to extend this to be an array
+      thisDeIsThisTile = true;
+    }
+    if (thisDeIsThisTile && arr_p->getDistGrid()->getElementCountPDe()[localDeToDeMap[localDe]]>0)
       pioDofCount += arr_p->getTotalElementCountPLocalDe()[localDe];
   }
 
-  //  PRINTMSG("(" << my_rank << "): pioDofCount = " << pioDofCount);
+  PRINTMSG("pioDofCount = " << pioDofCount);
   try {
     // Allocate space for the DOF list
     pioDofList = new MPI_Offset[pioDofCount];
@@ -1943,8 +2029,11 @@ int PIO_IODescHandler::constructPioDecomp(
     return localrc;
   }
   // Fill in the PIO DOF list (local to global map)
-  // TODO: This is where we would need to make some magic to include
-  // TODO: multiple DEs.
+  // TODO: This is where we would need to make some magic to include multiple DEs.
+  // TODO: (Particular care may be needed in the multi-tile case, where some DEs on the
+  // TODO: current PE may be part of the current tile, while others are not.
+  // TODO: For now, with one DE, we can assume that, if pioDofCount>0, then this DE
+  // TODO: corresponds to the current tile.)
   localDe = 0;
   if (pioDofCount>0){
     // construct the mapping of the local elements
@@ -1992,13 +2081,11 @@ int PIO_IODescHandler::constructPioDecomp(
     }
   }
 
-  int tile = 0;
   distGrid = arr_p->getDistGrid();
   const int *minIndexPDimPTile = distGrid->getMinIndexPDimPTile();
   const int *maxIndexPDimPTile = distGrid->getMaxIndexPDimPTile();
-  const int *totalLBound = arr_p->getTotalLBound();
-  const int *totalUBound = arr_p->getTotalUBound();
 
+  handle->tile = tile;
 // NB: Is this part of the restrictions on Array I/O?
 //    nDims = arr_p->getRank();
   handle->nDims = distGrid->getDimCount();
@@ -2008,11 +2095,11 @@ int PIO_IODescHandler::constructPioDecomp(
     handle->dims = (int *)NULL;
   }
   handle->dims = new int[handle->nDims];
-  // Step through the distGrid dimensions, getting the size of the
-  // dimension.
+  // Step through the distGrid dimensions, getting the size of the dimension. (This is the
+  // size of the full array across all PEs.)
   for (int i = 0; i < handle->nDims; i++) {
-    handle->dims[i] = (maxIndexPDimPTile[(tile * handle->nDims) + i] -
-                       minIndexPDimPTile[(tile * handle->nDims) + i] + 1);
+    handle->dims[i] = (maxIndexPDimPTile[((tile - 1) * handle->nDims) + i] -
+                       minIndexPDimPTile[((tile - 1) * handle->nDims) + i] + 1);
   }
 
   handle->arrayRank = arr_p->getRank();
@@ -2021,20 +2108,39 @@ int PIO_IODescHandler::constructPioDecomp(
     handle->arrayShape = (int *)NULL;
   }
   handle->arrayShape = new int[handle->arrayRank];
-  for (int i = 0; i < handle->arrayRank; ++i) {
-    handle->arrayShape[i] = (totalUBound[(tile * handle->arrayRank) + i] -
-                             totalLBound[(tile * handle->arrayRank) + i] +
-                             1);
+  // Get the size of each dimension owned locally.
+  if (thisDeIsThisTile) {
+    const int *totalLBound = arr_p->getTotalLBound();
+    const int *totalUBound = arr_p->getTotalUBound();
+    for (int i = 0; i < handle->arrayRank; ++i) {
+      // TODO: This is another place that would need to be generalized to handle more than
+      // one DE per PE: totalLBound and totalUBound are dimensioned
+      // [redDimCount*ssiLocalDeCount], so the below expression (which doesn't include the
+      // current DE count) would need to be adjusted to handle multiple DEs.
+      handle->arrayShape[i] = (totalUBound[i] - totalLBound[i] + 1);
+    }
+  } else {
+    // This DE is for some other tile, so as far as this tile is concerned, we own 0 elements
+    for (int i = 0; i < handle->arrayRank; ++i) {
+      handle->arrayShape[i] = 0;
+    }
   }
 
 #ifdef ESMFIO_DEBUG
   {
-    char dimstr[64];
+    char shapestr[64];
     for (int i = 0; i < handle->arrayRank; i++) {
-      sprintf((dimstr + (5 * i)), " %03d%c", handle->arrayShape[i],
+      sprintf((shapestr + (5 * i)), " %03d%c", handle->arrayShape[i],
               (((handle->arrayRank - 1) == i) ? ' ' : ','));
     }
-    PRINTMSG(", IODesc shape = [" << dimstr << "], calling pio_initdecomp");
+    PRINTMSG(", IODesc shape = [" << shapestr << "], calling pio_initdecomp");
+
+    char dimstr[64];
+    for (int i = 0; i < handle->nDims; i++) {
+        sprintf((dimstr + (5 * i)), " %03d%c", handle->dims[i],
+                (((handle->nDims - 1) == i) ? ' ' : ','));
+    }
+    PRINTMSG(", IODesc dims = [" << dimstr << "]");
   }
   PIOc_set_log_level(PIO_DEBUG_LEVEL);
 #endif // ESMFIO_DEBUG
@@ -2042,7 +2148,6 @@ int PIO_IODescHandler::constructPioDecomp(
   for(int i=0; i<handle->nDims; i++)
       ddims[i] = handle->dims[handle->nDims - i - 1];
   // Create the decomposition
-  int *rc;
   ESMCI_IOREGION_ENTER("PIOc_InitDecomp");
   PIOc_InitDecomp(iosys, handle->basepiotype, handle->nDims,
                   ddims, pioDofCount, pioDofList,
@@ -2263,8 +2368,9 @@ int PIO_IODescHandler::getIODesc(
 // !ARGUMENTS:
 //
   int iosys,              // (in)  - The PIO IO system
-  Array *arrayArg,                        // (in)  - The IO descriptor
-  int *rc                                 // (out) - Error return code
+  Array *arrayArg,        // (in)  - The IO descriptor
+  int tileArg,            // (in)  - Tile number in array (1-based indexing)
+  int *rc                 // (out) - Error return code
   ) {
 //
 // !DESCRIPTION:
@@ -2282,7 +2388,7 @@ int PIO_IODescHandler::getIODesc(
   for (it = PIO_IODescHandler::activePioIoDescriptors.begin();
        it < PIO_IODescHandler::activePioIoDescriptors.end();
        ++it) {
-    if ((iosys == (*it)->ios) && (arrayArg == (*it)->array_p)) {
+    if ((iosys == (*it)->ios) && (arrayArg == (*it)->array_p) && (tileArg == (*it)->tile)) {
       iodesc = (*it)->io_descriptor;
       localrc = ESMF_SUCCESS;
     }

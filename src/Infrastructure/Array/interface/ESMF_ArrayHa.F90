@@ -639,12 +639,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Read Array data from file and put it into an {\tt ESMF\_Array} object.
 !   For this API to be functional, the environment variable {\tt ESMF\_PIO}
-!   should be set to "internal" when the ESMF library is built.
+!   should be set to either "internal" or "external" when the ESMF library is built.
 !   Please see the section on Data I/O,~\ref{io:dataio}.
 ! 
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -654,6 +653,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    The {\tt ESMF\_Array} object in which the read data is returned.
 !   \item[fileName]
 !    The name of the file from which Array data is read.
+!    If this is a multi-tile Array, then fileName must contain
+!    exactly one instance of "\#"; this is a placeholder that will be replaced
+!    by the tile number, with each tile being read from a separate file. (For
+!    example, for a fileName of "myfile\#.nc", tile 1 will be read from
+!    "myfile1.nc", tile 2 from "myfile2.nc", etc.)
+!    (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[variableName]}]
 !    Variable name in the file; default is the "name" of Array.
 !    Use this argument only in the I/O format (such as NetCDF) that
