@@ -10,10 +10,10 @@
 !
 !==============================================================================
 !
-      program ESMF_VMSendNbVMRecvNbUTest
+program ESMF_VMSendNbVMRecvNbUTest
 
 !------------------------------------------------------------------------------
- 
+
 #include "ESMF_Macros.inc"
 
 !==============================================================================
@@ -23,9 +23,7 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives the F90 non-blocking VM Send Receive tests. The 
-!   VM Send Receive function is complex enough to require a separate test file.
-!   It runs on multiple processors.
+! The code in this file drives the F90 non-blocking VM Send Receive tests.
 !
 !-----------------------------------------------------------------------------
 ! !USES:
@@ -45,35 +43,31 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
-      character(len=8) :: strvalue
-      character(ESMF_MAXSTR) :: infostring
+      character(ESMF_MAXSTR) :: msgStr
 
       ! local variables
       integer:: i, rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
       integer:: count, src, dst
-      integer, allocatable:: localData(:),soln(:)
-      real(ESMF_KIND_R8), allocatable:: r8_localData(:),r8_soln(:)
-      real(ESMF_KIND_R4), allocatable:: r4_localData(:),r4_soln(:)
 
-      type(ESMF_logical), allocatable:: local_logical(:),logical_soln(:)
-     
-      integer, allocatable::  i_recvData(:)
-      real(ESMF_KIND_R8), allocatable:: r8_recvData(:)
-      real(ESMF_KIND_R4), allocatable:: r4_recvData(:)
+      integer, parameter:: countParameter = 2800000
 
-      type(ESMF_logical), allocatable::  recv_logical(:)
+      integer(ESMF_KIND_I4), allocatable  :: i4_data(:), i4_test(:)
+      integer(ESMF_KIND_I8), allocatable  :: i8_data(:), i8_test(:)
+      real(ESMF_KIND_R4),    allocatable  :: r4_data(:), r4_test(:)
+      real(ESMF_KIND_R8),    allocatable  :: r8_data(:), r8_test(:)
+      type(ESMF_Logical),    allocatable  :: lg_data(:), lg_test(:)
+      character(10)                       :: char_data, char_test, char_soln
+      character(10),         allocatable  :: ch_data(:), ch_test(:)
 
-      integer :: isum
-      real(ESMF_KIND_R8) :: R8Sum
-      real(ESMF_KIND_R4) :: R4Sum
+      integer(ESMF_KIND_I4) :: I4Sum
+      integer(ESMF_KIND_I8) :: I8Sum
+      real(ESMF_KIND_R4)    :: R4Sum
+      real(ESMF_KIND_R8)    :: R8Sum
+      integer               :: LGSum, CHSum
 
-      type(ESMF_CommHandle):: commhandleI4s, commhandleR4s, commhandleR8s
-      type(ESMF_CommHandle):: commhandleLOGICALs
-
-      type(ESMF_CommHandle):: commhandleI4r, commhandleR4r, commhandleR8r
-      type(ESMF_CommHandle):: commhandleLOGICALr
+      type(ESMF_CommHandle):: commhandle
 
 !------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -83,461 +77,708 @@
 !   added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------
 
-
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! Get count of PETs and which PET number we are
       call ESMF_VMGetGlobal(vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-      ! Allocate localData
-      count = 2
-
-!------------------------------------------------------------------------------
-! IMPORTANT NOTE:
-!   The correct operation of this unit test depends on sufficient internal 
-!   buffering within VMSend and VMRecv! There will be an implementation 
-!   specific threshold for count above which this unit test will start to hang!
-!------------------------------------------------------------------------------
-
-      allocate(localData(count))
-      allocate(r8_localData(count))
-      allocate(r4_localData(count))
-      allocate(local_logical(count))
-
-      allocate(i_recvData(count))
-      allocate(r8_recvData(count))
-      allocate(r4_recvData(count))
-      allocate(recv_logical(count))
-
-      ! Allocate the solution arrays
-      Allocate(soln(count))
-      Allocate(r8_soln(count))
-      Allocate(r4_soln(count))
-      allocate(logical_soln(count))
-
-      !Assign values
-      do i=1,count
-        localData(i)    = localPet*100+i 
-        r4_localData(i) = real( localData(i), ESMF_KIND_R4 )
-        r8_localData(i) = real( localData(i), ESMF_KIND_R8 )
-        if (mod(localData(i)+localPet,2).eq.0) then
-          local_logical(i)= ESMF_TRUE
-        else
-          local_logical(i)= ESMF_FALSE
-        endif
-      end do 
-
-!===============================================================================
-! First round of tests use explicit commhandles and wait on each recv call 
-! individually.
-!===============================================================================
-
-      ! Set src and dst for the first round
       src = localPet - 1
-      do while (src < 0) 
-        src = src + petCount
-      enddo
+      if (src < 0) src = petCount - 1
+
       dst = localPet + 1
-      do while (dst > petCount - 1) 
-        dst = dst - petCount
-      enddo
-      
-      write(infostring, *) "First round: src=",src," dst=",dst
-      call ESMF_LogWrite(infostring, ESMF_LOGMSG_INFO)
+      if (dst > petCount -1) dst = 0
 
-      !The solution to test against is..
-      do  i=1,count
-        soln(i)    = src*100+i
-        r8_soln(i) = real(soln(i), ESMF_KIND_R8)
-        r4_soln(i) = real(r8_soln(i), ESMF_KIND_R4)
-        if ( mod(soln(i)+src,2) .eq. 0 ) then
-          logical_soln(i)= ESMF_TRUE
-        else
-          logical_soln(i)= ESMF_FALSE
-        endif
-      end do 
-
-     !Test with integer arguments
-     !===========================     
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Send local data to dst
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Sending local I4 data Test"
-      call ESMF_VMSend(vm, sendData=localData, count=count, dstPet=dst, &
-        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleI4s, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      print *, localPet," Before recv LocalData is ", i_recvData(1),i_recvData(2)
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! dst receives local data from src
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Receiving local I4 data Test"
-      call ESMF_VMRecv(vm, recvData=i_recvData, count=count, srcPet=src, &
-        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleI4r, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-     !Test with REAL_KIND_R4 arguments
-     !================================
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Send local data to dst
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Sending local R4 data Test"
-      call ESMF_VMSend(vm, sendData=r4_localData, count=count, dstPet=dst, &
-        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleR4s, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      print *, localPet,"Before recv: R4_LocalData is ", r4_recvData(1),r4_recvData(2)
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! dst receives local data from src
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Receiving local R4 data Test"
-      call ESMF_VMRecv(vm, recvData=r4_recvData, count=count, srcPet=src, &
-        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleR4r, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-     !Test with ESMF_KIND_R8 arguments
-     !================================
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Send local data to dst
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Sending local R8 data Test"
-      call ESMF_VMSend(vm, sendData=r8_localData, count=count, dstPet=dst, &
-        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleR8s, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      print *, localPet,"Before recv: R8_LocalData is ", r8_recvData(1),r8_recvData(2)
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! dst receives local data from src
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Receiving local R8 data Test"
-      call ESMF_VMRecv(vm, recvData=r8_recvData, count=count, srcPet=src, &
-        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleR8r, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-     !Test with logical arguments
-     !===========================
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Send local data to dst
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Sending local LOGICAL data Test"
-      call ESMF_VMSend(vm, sendData=local_logical, count=count, dstPet=dst, &
-        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleLOGICALs, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      call ESMF_LogicalString(recv_logical(1), strvalue, rc)
-      print *, localPet, "before recv: recv_logical(1) is ", trim(strvalue)
-      call ESMF_LogicalString(recv_logical(2), strvalue, rc)
-      print *, localPet, "before recv: recv_logical(2) is ", trim(strvalue)
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! dst receives local data from src
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Receiving local LOGICAL data Test"
-      call ESMF_VMRecv(vm, recvData=recv_logical, count=count, srcPet=src, &
-        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleLOGICALr, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-
-     !Test with integer arguments
-     !===========================     
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Wait on integer recv
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Waiting for I4 RecvNb"
-      call ESMF_VMCommWait(vm, commhandleI4r, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Verify localData after VM Receive
-      isum=0
-      write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify local I4 data after receive Test"
-      print *,localPet, " After rcv LocalData is ", i_recvData(1),i_recvData(2)
-      isum=isum+ (i_recvData(1) - soln(1)) + (i_recvData(2) - soln(2))
-      call ESMF_Test( (isum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
-
-     !Test with REAL_KIND_R4 arguments
-     !================================
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Wait on R4 recv
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Waiting for R4 RecvNb"
-      call ESMF_VMCommWait(vm, commhandleR4r, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Verify localData after VM Receive
-      R4Sum=0.
-      write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify local R4 data after receive Test"
-      print *,localPet, "After recv LocalData is ", r4_recvData(1),r4_recvData(2)
-      R4Sum=(r4_recvData(1) - r4_soln(1)) +  &
-            (r4_recvData(2) - r4_soln(2))
-      call ESMF_Test( (R4Sum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
-
-     !Test with ESMF_KIND_R8 arguments
-     !================================
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Wait on R8 recv
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Waiting for R8 RecvNb"
-      call ESMF_VMCommWait(vm, commhandleR8r, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Verify localData after VM Receive
-      R8Sum=0.
-      write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify local R8 data after receive Test"
-      print *,localPet, "After recv LocalData is ", r8_recvData(1),r8_recvData(2)
-      R8Sum=(r8_recvData(1) - r8_soln(1)) +  &
-            (r8_recvData(2) - r8_soln(2))
-      call ESMF_Test( (R8Sum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
-
-     !Test with logical arguments
-     !===========================
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Wait on LOGICAL recv
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Waiting for LOGICAL RecvNb"
-      call ESMF_VMCommWait(vm, commhandleLOGICALr, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Verify localData after VM Receive
-      ISum=0.
-      write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify local LOGICAL data after receive Test"
-      call ESMF_LogicalString(recv_logical(1), strvalue, rc)
-      print *, localPet, "After recv: recv_logical(1) is ", trim(strvalue)
-      call ESMF_LogicalString(recv_logical(2), strvalue, rc)
-      print *, localPet, "After recv: recv_logical(2) is ", trim(strvalue)
-      call ESMF_LogicalString(logical_soln(1), strvalue, rc)
-      print *, localPet, "After recv: Logical_soln(1) is ", trim(strvalue)
-      call ESMF_LogicalString(logical_soln(2), strvalue, rc)
-      print *, localPet, "After recv: logical_soln(2) is ", trim(strvalue)
-      do i=1,count
-        if (recv_logical(i).ne. logical_soln(i)) ISum= ISum + 1
-      end do
-      call ESMF_Test( (ISum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
-
+      write(msgStr, *) "src=",src," dst=",dst
+      call ESMF_LogWrite(msgStr, ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !===============================================================================
-! Second round of tests don't use commhandles but rely on ESMF's internal
-! request queue. After all of the non-blocking calls are queued and before
-! testing the received values a call to ESMF_VMCommWaitAll() waits on _all_
-! outstanding non-blocking communication calls for the current VM.
+! First round of tests use explicit commhandles and wait on each recv call.
 !===============================================================================
 
-      ! Set src and dst for the second round
-      src = localPet - 2
-      do while (src < 0) 
-        src = src + petCount
+      !Test with ESMF_KIND_I4 arguments
+      !================================
+      count = countParameter
+      allocate(i4_data(count), i4_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data I4 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        i4_data(i) = int(localPet*100+i, ESMF_KIND_I4)
       enddo
-      dst = localPet + 2
-      do while (dst > petCount - 1) 
-        dst = dst - petCount
+      call ESMF_VMSend(vm, sendData=i4_data, count=count, dstPet=dst, &
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Receiving local data I4 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=i4_test, count=count, srcPet=src, &
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Waiting for received local data I4 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWait(vm, commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      write(name, *) "Verify local data after receive I4 Test"
+      write(failMsg, *) "Wrong Local Data"
+      I4Sum=0
+      do i=1, count
+        I4Sum = I4Sum + (i4_test(i) - int(src*100+i, ESMF_KIND_I4))
       enddo
+      call ESMF_Test( (I4Sum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
-      write(infostring, *) "Second round: src=",src," dst=",dst
-      call ESMF_LogWrite(infostring, ESMF_LOGMSG_INFO)
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      deallocate(i4_data, i4_test)
 
-      !The solution to test against is..
-      do  i=1,count
-        soln(i)    = src*100+i
-        r8_soln(i) = real(soln(i), ESMF_KIND_R8)
-        r4_soln(i) = real(r8_soln(i), ESMF_KIND_R4)
-        if ( mod(soln(i)+src,2) .eq. 0 ) then
-          logical_soln(i)= ESMF_TRUE
-        else
-          logical_soln(i)= ESMF_FALSE
-        endif
-      end do 
+      !Test with ESMF_KIND_I8 arguments
+      !================================
+      count = countParameter
+      allocate(i8_data(count), i8_test(count))
 
-     !Test with integer arguments
-     !===========================     
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! Send local data to dst
+      write(name, *) "Sending local data I8 Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Sending local I4 data Test"
-      call ESMF_VMSend(vm, sendData=localData, count=count, dstPet=dst, &
+      do i=1, count
+        i8_data(i) = int(localPet*100+i, ESMF_KIND_I8)
+      enddo
+      call ESMF_VMSend(vm, sendData=i8_data, count=count, dstPet=dst, &
         syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      print *, localPet," Before recv i_recvData is ", i_recvData(1),i_recvData(2)
+      !NEX_UTest
+      write(name, *) "Receiving local data I8 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=i8_test, count=count, srcPet=src, &
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! dst receives local data from src
+      write(name, *) "Waiting for received local data I8 Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Receiving local I4 data Test"
-      call ESMF_VMRecv(vm, recvData=i_recvData, count=count, srcPet=src, &
+      call ESMF_VMCommWait(vm, commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      write(name, *) "Verify local data after receive I8 Test"
+      write(failMsg, *) "Wrong Local Data"
+      I8Sum=0
+      do i=1, count
+        I8Sum = I8Sum + (i8_test(i) - int(src*100+i, ESMF_KIND_I8))
+      enddo
+      call ESMF_Test( (I8Sum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      deallocate(i8_data, i8_test)
+
+      !Test with ESMF_KIND_R4 arguments
+      !================================
+      count = countParameter
+      allocate(r4_data(count), r4_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data R4 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        r4_data(i) = real(localPet*100+i, ESMF_KIND_R4)
+      enddo
+      call ESMF_VMSend(vm, sendData=r4_data, count=count, dstPet=dst, &
         syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
-     !Test with REAL_KIND_R4 arguments
-     !================================
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! Send local data to dst
+      write(name, *) "Receiving local data R4 Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Sending local R4 data Test"
-      call ESMF_VMSend(vm, sendData=r4_localData, count=count, dstPet=dst, &
+      call ESMF_VMRecv(vm, recvData=r4_test, count=count, srcPet=src, &
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(name, *) "Waiting for received local data R4 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWait(vm, commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      write(name, *) "Verify local data after receive R4 Test"
+      write(failMsg, *) "Wrong Local Data"
+      R4Sum=0
+      do i=1, count
+        R4Sum = R4Sum + (r4_test(i) - real(src*100+i, ESMF_KIND_R4))
+      enddo
+      call ESMF_Test( (R4Sum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      deallocate(r4_data, r4_test)
+
+      !Test with ESMF_KIND_R8 arguments
+      !================================
+      count = countParameter
+      allocate(r8_data(count), r8_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data R8 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        r8_data(i) = real(localPet*100+i, ESMF_KIND_R8)
+      enddo
+      call ESMF_VMSend(vm, sendData=r8_data, count=count, dstPet=dst, &
         syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      print *, localPet,"Before recv: r4_recvData is ", r4_recvData(1),r4_recvData(2)
+      !NEX_UTest
+      write(name, *) "Receiving local data R8 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=r8_test, count=count, srcPet=src, &
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! dst receives local data from src
+      write(name, *) "Waiting for received local data R8 Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Receiving local R4 data Test"
-      call ESMF_VMRecv(vm, recvData=r4_recvData, count=count, srcPet=src, &
+      call ESMF_VMCommWait(vm, commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      write(name, *) "Verify local data after receive R8 Test"
+      write(failMsg, *) "Wrong Local Data"
+      R8Sum=0
+      do i=1, count
+        R8Sum = R8Sum + (r8_test(i) - real(src*100+i, ESMF_KIND_R8))
+      enddo
+      call ESMF_Test( (R8Sum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      deallocate(r8_data, r8_test)
+
+      !Test with ESMF_Logical arguments
+      !================================
+      count = countParameter
+      allocate(lg_data(count), lg_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data Logical Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        lg_data(i) = (mod(localPet*100+i,2) == 0)
+      enddo
+      call ESMF_VMSend(vm, sendData=lg_data, count=count, dstPet=dst, &
         syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
-     !Test with ESMF_KIND_R8 arguments
-     !================================
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! Send local data to dst
+      write(name, *) "Receiving local data Logical Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Sending local R8 data Test"
-      call ESMF_VMSend(vm, sendData=r8_localData, count=count, dstPet=dst, &
+      call ESMF_VMRecv(vm, recvData=lg_test, count=count, srcPet=src, &
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Waiting for received local data Logical Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWait(vm, commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      write(name, *) "Verify local data after receive Logical Test"
+      write(failMsg, *) "Wrong Local Data"
+      LGSum=0
+      do i=1, count
+        if ((lg_test(i)==ESMF_TRUE) .neqv. (mod(src*100+i,2)==0)) &
+          LGSum = LGSum + 1
+      enddo
+      call ESMF_Test( (LGSum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      deallocate(lg_data, lg_test)
+
+      !Test with character string arguments
+      !====================================
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data Character String Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write (char_data, "(i2.2,i3)") localPet, 1
+      call ESMF_VMSend(vm, sendData=char_data, count=len(char_data), &
+        dstPet=dst, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Receiving local data Character String Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=char_test, count=len(char_test), &
+        srcPet=src, syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandle, &
+        rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Waiting for received local data Character String Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWait(vm, commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      write(name, *) "Verify local data after receive Character String Test"
+      write(failMsg, *) "Wrong Local Data"
+      CHSum=0
+      write (char_soln, "(i2.2,i3)") src, 1
+      if (char_test /= char_soln) CHSum = CHSum + 1
+      call ESMF_Test( (CHSum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !Test with character string array arguments
+      !==========================================
+      count = min(1000,countParameter)  ! performance issue for too large
+      allocate(ch_data(count), ch_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data Character String array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        write (ch_data(i), "(i2.2,i3)") localPet, i
+      enddo
+      call ESMF_VMSend(vm, sendData=ch_data, count=count*len(ch_data), &
+        dstPet=dst, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Receiving local data Character String array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=ch_test, count=count*len(ch_test), &
+        srcPet=src, syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandle, &
+        rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Waiting for received local data Character String array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWait(vm, commhandle, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      write(name, *) "Verify local data after receive Character String array Test"
+      write(failMsg, *) "Wrong Local Data"
+      CHSum=0
+      do i=1, count
+        write (char_soln, "(i2.2,i3)") src, i
+        if (ch_test(i) /= char_soln) CHSum = CHSum + 1
+      enddo
+      call ESMF_Test( (CHSum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      deallocate(ch_data, ch_test)
+
+!===============================================================================
+! Second round of tests use ESMF's internal request queue to wait on outstanding
+! comms.
+!===============================================================================
+
+      !Test with ESMF_KIND_I4 arguments
+      !================================
+      count = countParameter
+      allocate(i4_data(count), i4_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data I4 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        i4_data(i) = int(localPet*100+i, ESMF_KIND_I4)
+      enddo
+      call ESMF_VMSend(vm, sendData=i4_data, count=count, dstPet=dst, &
         syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
-      print *, localPet,"Before recv: r8_recvData is ", r8_recvData(1),r8_recvData(2)
-      !------------------------------------------------------------------------
       !NEX_UTest
-      ! dst receives local data from src
+      write(name, *) "Receiving local data I4 Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Receiving local R8 data Test"
-      call ESMF_VMRecv(vm, recvData=r8_recvData, count=count, srcPet=src, &
+      call ESMF_VMRecv(vm, recvData=i4_test, count=count, srcPet=src, &
         syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
-     !Test with logical arguments
-     !===========================
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! Send local data to dst
+      write(name, *) "Waiting for all outstanding comms for I4 Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Sending local LOGICAL data Test"
-      call ESMF_VMSend(vm, sendData=local_logical, count=count, dstPet=dst, &
-        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      call ESMF_LogicalString(recv_logical(1), strvalue, rc)
-      print *, localPet, "before recv: recv_logical(1) is ", trim(strvalue)
-      call ESMF_LogicalString(recv_logical(2), strvalue, rc)
-      print *, localPet, "before recv: recv_logical(2) is ", trim(strvalue)
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! dst receives local data from src
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Receiving local LOGICAL data Test"
-      call ESMF_VMRecv(vm, recvData=recv_logical, count=count, srcPet=src, &
-        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-
-     !Test the VMCommWaitAll function to wait on all outstanding nb comms for VM
-     !===========================     
-      !------------------------------------------------------------------------
-      !NEX_UTest
-      ! Wait on integer sendrecv
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Waiting for all queued non-blocking comms in VM"
       call ESMF_VMCommWaitAll(vm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
-
-     !Test with integer arguments
-     !===========================     
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Verify localData after VM Receive
-      isum=0
+      write(name, *) "Verify local data after receive I4 Test"
       write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify local I4 data after receive Test"
-      print *,localPet, " After rcv LocalData is ", i_recvData(1),i_recvData(2)
-      isum=isum+ (i_recvData(1) - soln(1)) + (i_recvData(2) - soln(2))
-      call ESMF_Test( (isum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
+      I4Sum=0
+      do i=1, count
+        I4Sum = I4Sum + (i4_test(i) - int(src*100+i, ESMF_KIND_I4))
+      enddo
+      call ESMF_Test( (I4Sum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
-     !Test with REAL_KIND_R4 arguments
-     !================================
+      deallocate(i4_data, i4_test)
+
+      !Test with ESMF_KIND_I8 arguments
+      !================================
+      count = countParameter
+      allocate(i8_data(count), i8_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data I8 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        i8_data(i) = int(localPet*100+i, ESMF_KIND_I8)
+      enddo
+      call ESMF_VMSend(vm, sendData=i8_data, count=count, dstPet=dst, &
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Receiving local data I8 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=i8_test, count=count, srcPet=src, &
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Waiting for all outstanding comms for I8 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Verify localData after VM Receive
-      R4Sum=0.
+      write(name, *) "Verify local data after receive I8 Test"
       write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify local R4 data after receive Test"
-      print *,localPet, "After recv LocalData is ", r4_recvData(1),r4_recvData(2)
-      R4Sum=(r4_recvData(1) - r4_soln(1)) +  &
-            (r4_recvData(2) - r4_soln(2))
-      call ESMF_Test( (R4Sum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
+      I8Sum=0
+      do i=1, count
+        I8Sum = I8Sum + (i8_test(i) - int(src*100+i, ESMF_KIND_I8))
+      enddo
+      call ESMF_Test( (I8Sum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
-     !Test with ESMF_KIND_R8 arguments
-     !================================
+      deallocate(i8_data, i8_test)
+
+      !Test with ESMF_KIND_R4 arguments
+      !================================
+      count = countParameter
+      allocate(r4_data(count), r4_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data R4 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        r4_data(i) = real(localPet*100+i, ESMF_KIND_R4)
+      enddo
+      call ESMF_VMSend(vm, sendData=r4_data, count=count, dstPet=dst, &
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Receiving local data R4 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=r4_test, count=count, srcPet=src, &
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(name, *) "Waiting for all outstanding comms for  R4 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Verify localData after VM Receive
-      R8Sum=0.
+      write(name, *) "Verify local data after receive R4 Test"
       write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify local R8 data after receive Test"
-      print *,localPet, "After recv LocalData is ", r8_recvData(1),r8_recvData(2)
-      R8Sum=(r8_recvData(1) - r8_soln(1)) +  &
-            (r8_recvData(2) - r8_soln(2))
-      call ESMF_Test( (R8Sum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
+      R4Sum=0
+      do i=1, count
+        R4Sum = R4Sum + (r4_test(i) - real(src*100+i, ESMF_KIND_R4))
+      enddo
+      call ESMF_Test( (R4Sum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
-     !Test with logical arguments
-     !===========================
+      deallocate(r4_data, r4_test)
+
+      !Test with ESMF_KIND_R8 arguments
+      !================================
+      count = countParameter
+      allocate(r8_data(count), r8_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data R8 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        r8_data(i) = real(localPet*100+i, ESMF_KIND_R8)
+      enddo
+      call ESMF_VMSend(vm, sendData=r8_data, count=count, dstPet=dst, &
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Receiving local data R8 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=r8_test, count=count, srcPet=src, &
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Waiting for all outstanding comms for R8 Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Verify localData after VM Receive
-      ISum=0.
+      write(name, *) "Verify local data after receive R8 Test"
       write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify local LOGICAL data after receive Test"
-      call ESMF_LogicalString(recv_logical(1), strvalue, rc)
-      print *, localPet, "After recv: recv_logical(1) is ", trim(strvalue)
-      call ESMF_LogicalString(recv_logical(2), strvalue, rc)
-      print *, localPet, "After recv: recv_logical(2) is ", trim(strvalue)
-      call ESMF_LogicalString(logical_soln(1), strvalue, rc)
-      print *, localPet, "After recv: Logical_soln(1) is ", trim(strvalue)
-      call ESMF_LogicalString(logical_soln(2), strvalue, rc)
-      print *, localPet, "After recv: logical_soln(2) is ", trim(strvalue)
-      do i=1,count
-        if (recv_logical(i).ne. logical_soln(i)) ISum= ISum + 1
-      end do
-      call ESMF_Test( (ISum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
+      R8Sum=0
+      do i=1, count
+        R8Sum = R8Sum + (r8_test(i) - real(src*100+i, ESMF_KIND_R8))
+      enddo
+      call ESMF_Test( (R8Sum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
+      deallocate(r8_data, r8_test)
+
+      !Test with ESMF_Logical arguments
+      !================================
+      count = countParameter
+      allocate(lg_data(count), lg_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data Logical Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        lg_data(i) = (mod(localPet*100+i,2) == 0)
+      enddo
+      call ESMF_VMSend(vm, sendData=lg_data, count=count, dstPet=dst, &
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Receiving local data Logical Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=lg_test, count=count, srcPet=src, &
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Waiting for all outstanding comms for Logical Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      write(name, *) "Verify local data after receive Logical Test"
+      write(failMsg, *) "Wrong Local Data"
+      LGSum=0
+      do i=1, count
+        if ((lg_test(i)==ESMF_TRUE) .neqv. (mod(src*100+i,2)==0)) &
+          LGSum = LGSum + 1
+      enddo
+      call ESMF_Test( (LGSum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      deallocate(lg_data, lg_test)
+
+      !Test with character string arguments
+      !====================================
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data Character String Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write (char_data, "(i2.2,i3)") localPet, 1
+      call ESMF_VMSend(vm, sendData=char_data, count=len(char_data), &
+        dstPet=dst, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Receiving local data Character String Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=char_test, count=len(char_test), &
+        srcPet=src, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Waiting for all outstanding comms for Character String Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      write(name, *) "Verify local data after receive Character String Test"
+      write(failMsg, *) "Wrong Local Data"
+      CHSum=0
+      write (char_soln, "(i2.2,i3)") src, 1
+      if (char_test /= char_soln) CHSum = CHSum + 1
+      call ESMF_Test( (CHSum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !Test with character string array arguments
+      !==========================================
+      count = min(1000,countParameter)  ! performance issue for too large
+      allocate(ch_data(count), ch_test(count))
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Sending local data Character String array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      do i=1, count
+        write (ch_data(i), "(i2.2,i3)") localPet, i
+      enddo
+      call ESMF_VMSend(vm, sendData=ch_data, count=count*len(ch_data), &
+        dstPet=dst, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Receiving local data Character String array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMRecv(vm, recvData=ch_test, count=count*len(ch_test), &
+        srcPet=src, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Waiting for all outstanding comms for Character String array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMCommWaitAll(vm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      write(name, *) "Verify local data after receive Character String array Test"
+      write(failMsg, *) "Wrong Local Data"
+      CHSum=0
+      do i=1, count
+        write (char_soln, "(i2.2,i3)") src, i
+        if (ch_test(i) /= char_soln) CHSum = CHSum + 1
+      enddo
+      call ESMF_Test( (CHSum == 0), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      deallocate(ch_data, ch_test)
 
       call ESMF_TestEnd(ESMF_SRCLINE)
 
-      end program ESMF_VMSendNbVMRecvNbUTest
+end program ESMF_VMSendNbVMRecvNbUTest

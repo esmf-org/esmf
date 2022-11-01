@@ -3759,7 +3759,10 @@ end function ESMF_MeshCreateDual
 !   a bit easier.
 !   After this call the Mesh is usable, for
 !   example, a Field may be built on the created Mesh object and
-!   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
+!   this Field may be used in {\tt ESMF\_FieldRegridStore()}. However, the Mesh created by this
+!   call consists of a set of disconnected elements, and so shouldn't be used in a situation where
+!   connections between elements are necessary (e.g. bilinear regridding on element centers, patch regridding,
+!   or second-order conservative regridding). 
 !
 !   This call sets the dimension of the elements in the Mesh
 !   via {\tt parametricDim} and the number of coordinate dimensions in the mesh
@@ -3902,7 +3905,10 @@ end function ESMF_MeshCreateDual
 !   Internally these corners are turned into nodes forming the outside edges of the elements.
 !   After this call the Mesh is usable, for
 !   example, a Field may be built on the created Mesh object and
-!   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
+!   this Field may be used in {\tt ESMF\_FieldRegridStore()}. However, the Mesh created by this
+!   call consists of a set of disconnected elements, and so shouldn't be used in a situation where
+!   connections between elements are necessary (e.g. bilinear regridding on element centers, patch regridding,
+!   or second-order conservative regridding). 
 !
 !   This call sets the dimension of the elements in the Mesh
 !   via {\tt parametricDim} and the number of coordinate dimensions in the mesh

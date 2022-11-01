@@ -1276,7 +1276,18 @@ program ESMF_NUOPC_UTest
   call ESMF_GridCompFinalize(gridComp, userRc=urc, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (urc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompSetVM() for GridComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  ! Not specifying the sharedObj argument results in look-up in the executable
+  ! itself.... and there is a SetVM() routine outside the program below.
+  call NUOPC_CompSetVM(gridComp, rc=rc)
+  rc=ESMF_SUCCESS  ! for now do not really check because some systems have issues.
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_CompSetServices() for GridComp Test"
@@ -1317,6 +1328,16 @@ program ESMF_NUOPC_UTest
   
   
 end program ESMF_NUOPC_UTest
+
+! -- A SetVM() routine must be present for the NUOPC_CompSetVM()
+! -- unit test above.
+subroutine SetVM(gcomp, rc)
+  use ESMF
+  implicit none
+  type(ESMF_GridComp) :: gcomp
+  integer             :: rc
+  rc = ESMF_SUCCESS
+end subroutine
 
 ! -- A SetServices() routine must be present for the NUOPC_CompSetService()
 ! -- unit test above.

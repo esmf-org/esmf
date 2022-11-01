@@ -8,7 +8,7 @@
 #
 ESMF_F90DEFAULT         = nvfortran
 ESMF_CXXDEFAULT         = nvc++
-ESMF_CDEFAULT           = nvcc
+ESMF_CDEFAULT           = nvc
 
 ############################################################
 # Default MPI setting.
@@ -130,9 +130,9 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} --version
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version
-ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} --version -c
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} --version -c
+ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version -c
 
 ############################################################
 # Currently no support the Fortran2018 assumed type feature
@@ -200,6 +200,7 @@ ESMF_OPENMP_CXXLINKOPTS    += -mp
 ############################################################
 # OpenACC compiler and linker flags (the -Minfo just there for debugging)
 #
+ESMF_OPENACCDEFAULT = OFF
 ESMF_OPENACC_F90COMPILEOPTS += -acc -Minfo
 ESMF_OPENACC_CXXCOMPILEOPTS += -acc -Minfo
 ESMF_OPENACC_F90LINKOPTS    += -acc -Minfo

@@ -1,0 +1,9 @@
+#!/bin/sh
+# This script obtains the Fortran OpenMPI libraries that need to be explicitly added to
+# the link line when linking with a C++ linker. (This adds an extra instance of -lmpi, but
+# that shouldn't be a problem.)
+OPENMPI_MPIF90=`which $1`
+libs=`${OPENMPI_MPIF90} --showme:libs`
+# The above returns the names of the libraries without '-l'. Here we add '-l' to the start
+# of each library name:
+echo $libs | sed -E 's/(^| ) */ -l/g'
