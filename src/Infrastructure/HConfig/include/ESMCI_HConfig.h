@@ -61,7 +61,7 @@ namespace ESMCI {
       static int destroy(HConfig **hconfig);
       int load(const std::string& content);
       int loadFile(const std::string& filename);
-      int toConfig(ESMCI_Config *config);
+      int toConfig(ESMCI_Config **config);
   };   // class HConfig
 
 } // namespace ESMCI

@@ -116,7 +116,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(*ptr, rc)
     // call into C++
-    localrc = (*ptr)->toConfig(*ptr2);
+    localrc = (*ptr)->toConfig(ptr2);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully

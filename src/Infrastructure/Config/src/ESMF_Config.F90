@@ -61,6 +61,7 @@
                                    ! and max number of columns by word 
                                    ! counting disregarding type (function)
        public :: ESMF_ConfigIsCreated
+       public :: ESMF_ConfigLog    ! log the content of config object
        public :: ESMF_ConfigPrint  ! print content of config object
        public :: ESMF_ConfigSetAttribute ! sets value
        public :: ESMF_ConfigValidate   ! validates config object
@@ -142,7 +143,7 @@
     interface ESMF_ConfigSetAttribute
    
 ! !PRIVATE MEMBER FUNCTIONS:
-!        module procedure ESMF_ConfigSetString
+        module procedure ESMF_ConfigSetString
 !        module procedure ESMF_ConfigSetFloatR4
 !        module procedure ESMF_ConfigSetFloatR8
 !        module procedure ESMF_ConfigSetFloatsR4
@@ -228,10 +229,8 @@
           character(len=NBUF_MAX),pointer :: buffer => null ()    ! hold the whole file
           character(len=LSZ),     pointer :: this_line => null () ! the current line
           integer :: nbuf                              ! actual size of buffer 
-          integer :: next_line                         ! index_ for next line 
-                                                       !   on buffer
-          integer :: value_begin                       ! index of beginning of
-                                                       !   value
+          integer :: next_line                         ! index_ for next line on buffer
+          integer :: value_begin                       ! index of beginning of value
           type(ESMF_ConfigAttrUsed), dimension(:), &
                                   pointer :: attr_used => null () ! used attributes table
           integer :: nattr                             ! number of attributes
@@ -3191,6 +3190,104 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigLog"
+!BOP
+!
+! !IROUTINE: ESMF_ConfigLog - Write content of Config object to log
+!
+! !INTERFACE:
+  subroutine ESMF_ConfigLog(config, keywordEnforcer, raw, prefix, logMsgFlag, &
+    log, rc)
+
+! !ARGUMENTS:
+    type(ESMF_Config),      intent(in)              :: config
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),    optional :: raw
+    character (len=*),      intent(in),    optional :: prefix
+    type(ESMF_LogMsg_Flag), intent(in),    optional :: logMsgFlag
+    type(ESMF_Log),         intent(inout), optional :: log
+    integer,                intent(out),   optional :: rc
+!
+!
+! !DESCRIPTION:
+!   Write content of {\tt ESMF\_Config} object to ESMF log.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[config]
+!     The {\tt ESMF\_Config} object to be logged.
+!   \item [{[raw]}]
+!     For {\tt .true.} output the internal buffer as is, for {\tt .false.}
+!     output in the interpreted format. The default is {\tt .false.}.
+!   \item [{[prefix]}]
+!     String to prefix the memory info message. Default is no prefix.
+!   \item [{[logMsgFlag]}]
+!     Type of log message generated. See section \ref{const:logmsgflag} for
+!     a list of valid message types. Default is {\tt ESMF\_LOGMSG\_INFO}.
+!   \item [{[log]}]
+!     {\tt ESMF\_Log} object that can be used instead of the default Log.
+!     Default is to use the default log.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP -------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_LogMsg_Flag)  :: logMsg
+    integer                 :: lbeg, lend
+    character(240)          :: msgString
+    logical                 :: rawArg
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! deal with optionl logMsgFlag
+    logMsg = ESMF_LOGMSG_INFO ! default
+    if (present(logMsgFlag)) logMsg = logMsgFlag
+
+    write(msgString, '(a)') prefix//&
+      "--- ESMF_ConfigLog() start -------------------------------------"
+    call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rawArg = .false.  ! default
+    if (present(raw)) rawArg = raw
+
+    if (rawArg) then
+      call ESMF_LogWrite(config%cptr%buffer(1:config%cptr%nbuf), logMsg, &
+        log=log, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      lbeg = 2
+      lend = index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
+      do while (lend >= lbeg .and. lend < config % cptr % nbuf)
+        write(msgString, '(a)') prefix//trim(config % cptr % buffer(lbeg:lend))
+        call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        lbeg = lend + 2
+        lend = lend + &
+          index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
+      end do
+    endif
+
+    write(msgString, '(a)') prefix//&
+      "--- ESMF_ConfigLog() end ---------------------------------------"
+    call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ConfigLog
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigPrint"
 !BOP
 !
@@ -3458,6 +3555,171 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
       return
     end subroutine ESMF_ConfigSetIntI4
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigSetString"
+!BOPI
+!
+! !IROUTINE: ESMF_ConfigSetAttribute - Set a 4-byte integer number
+
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ConfigSetAttribute()
+      subroutine ESMF_ConfigSetString(config, value, &
+        keywordEnforcer, label, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Config),     intent(inout)         :: config
+      character(*),          intent(in)            :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character(len=*),      intent(in),  optional :: label
+      integer,               intent(out), optional :: rc
+
+!
+! !DESCRIPTION: 
+!  Sets an integer {\tt value} in the {\tt config} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [config]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [value]
+!     String to set.
+!   \item [{[label]}]
+!     Identifying attribute label. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI -------------------------------------------------------------------
+!
+      integer :: localrc
+      character(len=ESMF_MAXSTR) :: logmsg
+      character(len=LSZ) :: curVal, newVal
+      integer :: i, j, k, m, nchar, ninsert, ndelete, lenThisLine
+
+      ! Initialize return code; assume routine not implemented
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      !check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+
+      ! Set config buffer at desired attribute
+      if ( present (label) ) then
+         call ESMF_ConfigGetString( config, curVal, label=label, rc=localrc)
+      else
+         call ESMF_ConfigGetString( config, curVal, rc = localrc )
+      endif
+
+      if ( localrc /= ESMF_SUCCESS ) then
+        if ( localrc == ESMF_RC_NOT_FOUND ) then
+          ! set config buffer at end for appending
+          i = config%cptr%nbuf
+        else
+          if ( present( rc ) ) then
+            rc = localrc
+          endif
+          return
+        endif
+      else ! attribute found
+        ! set config buffer for overwriting/inserting
+        i = config%cptr%value_begin
+        curVal = BLK // trim(curVal) // BLK // EOL ! like config%cptr%this_line
+      endif
+
+      ! for appending, create new attribute string with label and value
+      if ( i .eq. config%cptr%nbuf .and. present(label) ) then
+        write(newVal, *) label, value
+        newVal = trim(adjustl(newVal)) // EOL
+        j = i + len_trim(newVal)
+
+        ! check to ensure len of newVal doesn't exceed LSZ
+        if ( (j-i) .gt. LSZ) then
+           write(logmsg, *) ", attribute label, value & EOL are ", j-i, &
+               " characters long, only ", LSZ, " characters allowed per line"
+           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        ! check if enough space left in config buffer
+        if (j .ge. NBUF_MAX) then   ! room for EOB if necessary
+           write(logmsg, *) ", attribute label & value require ", j-i+1, &
+               " characters (including EOL & EOB), only ", NBUF_MAX-i, &
+               " characters left in config buffer"
+           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+      endif
+
+      ! overwrite, with possible insertion or deletion of extra characters
+      if (i .eq. config%cptr%value_begin) then
+         write(newVal, *) value
+         newVal = BLK // trim(adjustl(newVal)) // EOL
+         j = i + len_trim(newVal) - 1
+
+         !  check if we need more space to insert new characters;
+         !  shift buffer down (linked-list redesign would be better!)
+         nchar = j-i+1
+         lenThisLine = len_trim(curVal) - 1
+         if ( nchar .gt. lenThisLine) then
+
+            ! check to ensure length of extended line doesn't exceed LSZ
+            do m = i, 1, -1
+              if (config%cptr%buffer(m:m) .eq. EOL) then
+                exit
+              endif
+            enddo
+            if (j-m+1 .gt. LSZ) then
+               write(logmsg, *) ", attribute label, value & EOL are ", j-m+1, &
+                  " characters long, only ", LSZ, " characters allowed per line"
+               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+
+            ! check if enough space left in config buffer to extend line
+            if (j+1 .ge. NBUF_MAX) then   ! room for EOB if necessary
+               write(logmsg, *) ", attribute label & value require ", j-m+1, &
+                   " characters (including EOL & EOB), only ", NBUF_MAX-i, &
+                   " characters left in config buffer"
+               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+
+            ninsert = nchar - lenThisLine
+            do k = config%cptr%nbuf, j, -1
+               config%cptr%buffer(k+ninsert:k+ninsert) = config%cptr%buffer(k:k)
+            enddo
+            config%cptr%nbuf = config%cptr%nbuf + ninsert
+
+         ! or if we need less space and remove characters;
+         ! shift buffer up
+         elseif ( nchar .lt. lenThisLine ) then
+           ndelete = lenThisLine - nchar
+            do k = j+1, config%cptr%nbuf
+               config%cptr%buffer(k-ndelete:k-ndelete) = config%cptr%buffer(k:k)
+            enddo
+            config%cptr%nbuf = config%cptr%nbuf - ndelete
+         endif
+      endif
+
+      ! write new attribute value into config
+      config%cptr%buffer(i:j) = newVal(1:len_trim(newVal))
+
+      ! if appended, reset EOB marker and nbuf
+      if (i .eq. config%cptr%nbuf) then
+        j = j + 1
+        config%cptr%buffer(j:j) = EOB
+        config%cptr%nbuf = j
+      endif
+
+      if( present( rc )) then
+        rc = ESMF_SUCCESS
+      endif
+      
+      return
+    end subroutine ESMF_ConfigSetString
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,3 +1,5 @@
+# A YAML representation of the basic sample.rc
+
 # mapping to sequences
 
 my_file_names:      [jan87.dat, jan88.dat, jan89.dat]  # all strings

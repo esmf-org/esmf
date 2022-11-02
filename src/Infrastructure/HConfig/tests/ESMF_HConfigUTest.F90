@@ -113,8 +113,26 @@ program ESMF_HConfigUTest
   !NEX_UTest
   write(name, *) "ConfigLoadFile()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ConfigLoadFile(config, fileName="sample.rc", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+call ESMF_ConfigLog(config, prefix="Before Set:", rc=rc)
+
+call ESMF_ConfigSetAttribute(config, "this is a test string", label="gjt:", rc=rc)
+
+call ESMF_ConfigLog(config, prefix="After Set:", rc=rc)
+
+#if 1
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ConfigLoadFile()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ConfigLoadFile(config, fileName="sample.yaml", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+call ESMF_ConfigLog(config, prefix="After YAML LoadFile:", rc=rc)
 
   !------------------------------------------------------------------------
   !NEX_UTest

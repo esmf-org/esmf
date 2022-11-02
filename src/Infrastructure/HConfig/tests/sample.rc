@@ -1,0 +1,33 @@
+# This is an example Resource File.  
+# It contains a list of <label,value> pairs.
+# The colon after the label is required. 
+
+# The values after the label can be an list.
+# Multiple types are authorized.
+ 
+ my_file_names:         jan87.dat jan88.dat jan89.dat  # all strings
+ constants:             3.1415   25                    # float and integer
+ my_favorite_colors:    green blue 022               
+
+
+# Or, the data can be a list of single value pairs. 
+# It is simplier to retrieve data in this format:
+
+ radius_of_the_earth:   6.37E6         
+ parameter_1:           89
+ parameter_2:           78.2
+ input_file_name:       dummy_input.netcdf 
+
+
+# Or, the data can be located in a table using the following
+# syntax:
+
+ my_table_name::
+  1000     3000     263.0
+   925     3000     263.0
+   850     3000     263.0
+   700     3000     269.0
+   500     3000     287.0
+   400     3000     295.8
+   300     3000     295.8
+ ::

@@ -43,6 +43,14 @@
 
 using namespace std;
 
+extern "C" {
+
+  void FTN_X(f_esmf_configsetstring)(ESMCI_Config** config, const char* value,
+    const char* label, int* rc, ESMCI_FortranStrLenArg vlen, 
+    ESMCI_FortranStrLenArg llen);
+
+}; // end prototypes for fortran interface
+
 namespace ESMCI {
 
 //-----------------------------------------------------------------------------
@@ -230,7 +238,7 @@ int HConfig::toConfig(
 //  int error return code
 //
 // !ARGUMENTS:
-    ESMCI_Config *config){       // in
+    ESMCI_Config **config){       // in
 // 
 // !DESCRIPTION: 
 //  ESMF routine which attempts to fill Config from HConfig.
@@ -238,6 +246,7 @@ int HConfig::toConfig(
 //EOP
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;
 
   std::stringstream debugmsg;
@@ -254,10 +263,17 @@ int HConfig::toConfig(
       debugmsg << "doc[]: " << it->as<string>();
       ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
     }
-    node = doc["radius_of_the_earth"];
+    string label=string("radius_of_the_earth");
+    node = doc[label];
     debugmsg.str("");  //clear
-    debugmsg << "doc[]: " << node.as<int>();
+    debugmsg << "doc[]: " << node.as<string>();
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+
+#if 0
+    FTN_X(f_esmf_configsetstring)(config, node.as<string>().c_str(),
+      label.c_str(), &localrc, node.as<string>().size(), label.size());
+#endif
+
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception in YAML-CPP", ESMC_CONTEXT, &rc);
