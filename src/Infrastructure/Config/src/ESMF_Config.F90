@@ -2798,13 +2798,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_ConfigLoadFile(config, filename, &
-      keywordEnforcer, delayout, unique, rc)
+      keywordEnforcer, delayout, & ! DEPRECATED ARGUMENT
+      unique, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config),   intent(inout)         :: config
       character(len=*),    intent(in)            :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_DELayout), intent(in),  optional :: delayout
+      type(ESMF_DELayout), intent(in),  optional :: delayout  ! DEPRECATED ARGUMENT
       logical,             intent(in),  optional :: unique
       integer,             intent(out), optional :: rc
 !
@@ -2812,19 +2813,43 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.5.0] Support for loading basic YAML files was added.\newline
+!    Marked argument {\tt delayout} as deprecated. This argument was
+!    never used internally, and it is unclear what the original intention was.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION: 
-!  Resource file with {\tt filename} is loaded into memory.
+!  The resource file named {\tt filename} is loaded into memory. Both the
+!  classic Config file format, described in this document, and the YAML file
+!  format are supported. YAML support is limited to a small subset of the full
+!  YAML language specification, allowing access through the classic Config API.
+!  Specifically, in YAML mode, the top level is expected to be a mapping
+!  (dictionary) of scalar keys to the following value options:
+!  \begin{itemize}
+!  \item Scalars
+!  \item List of scalars
+!  \item List of lists of scalars
+!  \end{itemize}
+!  All other YAML constructs are silently ignored when loaded through this
+!  interface. Constructs successfully ingested become available in the
+!  {\tt config} object, and can be accessed via the regular {\tt ESMF\_Config}
+!  methods.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item [config]
 !     Already created {\tt ESMF\_Config} object.
 !   \item [filename]
-!     Configuration file name.
-!   \item [{[delayout]}]
+!     Name of the configuration file. Files ending in {\tt .yaml}, {\tt .yml},
+!     or any combination of upper and lower case letters that can be mapped
+!     to these two options, are interpreted as YAML files. All other names
+!     are interpreted as classic Config files.
+!   \item [{[delayout]}] ! DEPRECATED ARGUMENT
 !     {\tt ESMF\_DELayout} associated with this {\tt config} object.
+!     This argument is not currently used.
 !   \item [{[unique]}]
 !     If specified as true, uniqueness of labels are checked and 
 !     error code set if duplicates found.
@@ -2836,7 +2861,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       integer :: localrc
       character(len=len(filename))  :: lower_filename
-      character(len=*), parameter   :: suffix=".yaml"
+      character(len=*), parameter   :: dotYaml=".yaml"
+      character(len=*), parameter   :: dotYml=".yml"
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2849,7 +2875,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      if (lower_filename(len(lower_filename)-len(suffix)+1:) == suffix) then
+      if ((lower_filename(len(lower_filename)-len(dotYaml)+1:)==dotYaml) &
+        .or. (lower_filename(len(lower_filename)-len(dotYml)+1:)==dotYml)) &
+        then
         ! This is a YAML file
 
         call ESMF_HConfigLoadFile(config%cptr%hconfig, trim(filename), &
@@ -3382,6 +3410,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !      Supported values for <value argument> are:
 !      \begin{description}
+!      \item character(len=*),        intent(in)            :: value
 !      \item integer(ESMF\_KIND\_I4), intent(in)            :: value
 !      \end{description}
 !
