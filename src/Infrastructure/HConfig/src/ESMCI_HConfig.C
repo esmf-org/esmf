@@ -33,6 +33,7 @@
 #include <cstring>
 #include <sstream>
 #include <string>
+#include <vector>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -229,7 +230,7 @@ int HConfig::loadFile(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::toConfig()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::toConfig - fill a Config from HConfig to the level possible
+// !IROUTINE:  ESMCI::HConfig::toConfig - fill a Config from HConfig
 //
 // !INTERFACE:
 int HConfig::toConfig(
@@ -241,42 +242,102 @@ int HConfig::toConfig(
     ESMCI_Config **config){       // in
 // 
 // !DESCRIPTION: 
-//  ESMF routine which attempts to fill Config from HConfig.
-//
+//  ESMF routine which attempts to fill Config from HConfig to the level
+//  that this is supported. Expectation on the highest level (doc-level) is
+//  a map of scalars keys to the following three value options:
+//    (1) scalar
+//    (2) list of scalars
+//    (3) list of lists of scalars
+//  Anything else is not supported, and is silently skipped.
 //EOP
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;
 
-  std::stringstream debugmsg;
-  debugmsg << "gjt in ESMCI::HConfig::toConfig";
-  ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
-
 #ifdef ESMF_YAMLCPP
-  try {
+  try{
 
-    YAML::Node node;
-    node = doc["my_file_names"];
-    for (auto it=node.begin(); it!=node.end(); it++){
-      debugmsg.str("");  //clear
-      debugmsg << "doc[]: " << it->as<string>();
-      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+    if (doc.IsMap()){
+      // only support map on the doc level
+      for (auto it=doc.begin(); it!=doc.end(); ++it){
+        if (it->first.IsScalar()){
+          // support scalar keys
+          string label = it->first.as<string>() + ":";  // use colon separator
+          vector<vector<string> > values;
+          if (it->second.IsScalar()){
+            // support scalar values
+            values.resize(1);
+            values[0].push_back(it->second.as<string>());
+          }else if (it->second.IsSequence()){
+            // support sequence values
+            bool firstRound = true; // mark first round for check below
+            bool isScalar;          // will be set below for first round
+            for (auto itV=it->second.begin(); itV!=it->second.end(); ++itV){
+              if (itV->IsScalar()){
+                // support sequence of scalar values
+                if (firstRound){
+                  firstRound = false;
+                  isScalar = true;
+                  values.resize(1);
+                }else if (!isScalar){
+                  ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                    "Inconsistent values in list", ESMC_CONTEXT, &rc);
+                  throw rc;
+                }
+                values[0].push_back(itV->as<string>());
+              }else if (itV->IsSequence()){
+                // support sequence of sequences
+                if (firstRound){
+                  firstRound = false;
+                  isScalar = false;
+                }else if (isScalar){
+                  ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                    "Inconsistent values in list", ESMC_CONTEXT, &rc);
+                  throw rc;
+                }
+                vector<string> vString;
+                for (auto itVV=itV->begin(); itVV!=itV->end(); ++itVV){
+                  if (itVV->IsScalar()){
+                    // support sequence of sequences of scalar values
+                    vString.push_back(itVV->as<string>());
+                  }
+                }
+                values.push_back(vString);
+              }
+            }
+          }
+          if (values.size()){
+            // values present
+            string value;
+            bool tableFlag = false;
+            if (values.size()>1){
+              label += ":";
+              tableFlag = true;
+            }
+            for (auto it=values.begin(); it!=values.end(); ++it){
+              if (tableFlag) value += "\n";
+              for (auto itV=it->begin(); itV!=it->end(); ++itV)
+                value += *itV + " "; // use white space delimiter
+            }
+            if (tableFlag) value += "\n::";
+            FTN_X(f_esmf_configsetstring)(config, value.c_str(),
+              label.c_str(), &localrc, value.size(), label.size());
+            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+              ESMC_CONTEXT, &rc)) throw rc;
+          }
+        }
+      }
     }
-    string label=string("radius_of_the_earth");
-    node = doc[label];
-    debugmsg.str("");  //clear
-    debugmsg << "doc[]: " << node.as<string>();
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
-
-#if 0
-    FTN_X(f_esmf_configsetstring)(config, node.as<string>().c_str(),
-      label.c_str(), &localrc, node.as<string>().size(), label.size());
-#endif
-
-  } catch(...) {
+  }catch(int catchrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    return rc;
+  }catch(...){
+    // catch any other exception, e.g. thrown by YAML-CPP
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception in YAML-CPP", ESMC_CONTEXT, &rc);
+      "Caught exception thrown by YAML-CPP", ESMC_CONTEXT, &rc);
     return rc;
   }
 

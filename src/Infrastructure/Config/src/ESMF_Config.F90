@@ -652,8 +652,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundAllocError(memstat, msg="Allocating local buffer 2", &
                                         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      config_local%nbuf = 0
-      config_local%next_line = 0
+      config_local%nbuf = 2
+      config_local%buffer(1:1) = EOL
+      config_local%buffer(2:2) = EOB
+      config_local%next_line = 2
 
       config_local%attr_used => attr_used_local
 
@@ -2866,15 +2868,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
           msg="unable to load file: " // trim (filename), &
           ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
 
-        call ESMF_ConfigParseAttributes( config, unique, localrc )
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_ConfigParseAttributes( config, unique, localrc )
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if ( present (delayout) ) then
-         call ESMF_LogWrite("DELayout not used yet", ESMF_LOGMSG_WARNING, &
+      if ( present (delayout) ) then
+       call ESMF_LogWrite("DELayout not used yet", ESMF_LOGMSG_WARNING, &
                            ESMF_CONTEXT)
-        endif
       endif
 
       ! return successfully
@@ -3246,7 +3248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logMsg = ESMF_LOGMSG_INFO ! default
     if (present(logMsgFlag)) logMsg = logMsgFlag
 
-    write(msgString, '(a)') prefix//&
+    write(msgString, "(a)") prefix//&
       "--- ESMF_ConfigLog() start -------------------------------------"
     call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3254,6 +3256,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     rawArg = .false.  ! default
     if (present(raw)) rawArg = raw
+
+    write(msgString, "(a,i8,a,l,a)") prefix//" nbuf=", config%cptr%nbuf, &
+      " buffer(raw=", rawArg, "):"
+    call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (rawArg) then
       call ESMF_LogWrite(config%cptr%buffer(1:config%cptr%nbuf), logMsg, &
@@ -3264,7 +3272,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       lbeg = 2
       lend = index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
       do while (lend >= lbeg .and. lend < config % cptr % nbuf)
-        write(msgString, '(a)') prefix//trim(config % cptr % buffer(lbeg:lend))
+        write(msgString, "(a)") prefix//trim(config % cptr % buffer(lbeg:lend))
         call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3274,7 +3282,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end do
     endif
 
-    write(msgString, '(a)') prefix//&
+    write(msgString, "(a)") prefix//&
       "--- ESMF_ConfigLog() end ---------------------------------------"
     call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3336,7 +3344,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       lbeg = 2
       lend = index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
       do while (lend >= lbeg .and. lend < config % cptr % nbuf)
-        write(iounit, '(a)') trim(config % cptr % buffer(lbeg:lend))
+        write(iounit, "(a)") trim(config % cptr % buffer(lbeg:lend))
         lbeg = lend + 2
         lend = lend + &
           index_( config % cptr % buffer(lbeg:config % cptr % nbuf), EOL )
@@ -3466,7 +3474,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! for appending, create new attribute string with label and value
       if ( i .eq. config%cptr%nbuf .and. present(label) ) then
-        write(newVal, *) label, value
+        write(newVal, *) label, BLK, value
         newVal = trim(adjustl(newVal)) // EOL
         j = i + len_trim(newVal)
 
@@ -3544,7 +3552,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! if appended, reset EOB marker and nbuf
       if (i .eq. config%cptr%nbuf) then
-        j = j + 1
         config%cptr%buffer(j:j) = EOB
         config%cptr%nbuf = j
       endif
@@ -3552,7 +3559,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if( present( rc )) then
         rc = ESMF_SUCCESS
       endif
-      
+
       return
     end subroutine ESMF_ConfigSetIntI4
 
@@ -3631,7 +3638,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! for appending, create new attribute string with label and value
       if ( i .eq. config%cptr%nbuf .and. present(label) ) then
-        write(newVal, *) label, value
+        write(newVal, *) label, BLK, value
         newVal = trim(adjustl(newVal)) // EOL
         j = i + len_trim(newVal)
 
@@ -3709,7 +3716,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! if appended, reset EOB marker and nbuf
       if (i .eq. config%cptr%nbuf) then
-        j = j + 1
         config%cptr%buffer(j:j) = EOB
         config%cptr%nbuf = j
       endif
@@ -3717,7 +3723,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if( present( rc )) then
         rc = ESMF_SUCCESS
       endif
-      
+
       return
     end subroutine ESMF_ConfigSetString
 
