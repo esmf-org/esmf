@@ -2815,7 +2815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[8.5.0] Support for loading basic YAML files was added.\newline
+! \item[8.5.0] Added support for loading basic YAML files.\newline
 !    Marked argument {\tt delayout} as deprecated. This argument was
 !    never used internally, and it is unclear what the original intention was.
 ! \end{description}
