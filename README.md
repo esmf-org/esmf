@@ -45,8 +45,11 @@ See each addon package for a specific README file.
 Information about the ESMF project can be found at the ESMF web site:
  * https://www.earthsystemmodeling.org/
 
-Software documentation for the last public release is at:
- * http://earthsystemmodeling.org/doc/ -> Users -> User Docs
+Software documentation for the last release:
+ * http://earthsystemmodeling.org/doc/
 
-Software documentation for all releases is at:
+Software documentation for all releases:
  * http://earthsystemmodeling.org/static/releases.html
+ 
+ Support:
+ * http://earthsystemmodeling.org/support/

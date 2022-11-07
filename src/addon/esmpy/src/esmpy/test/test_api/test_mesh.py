@@ -6,12 +6,12 @@ mesh unit test file
 import pytest
 
 import os
-import inspect
 
 from esmpy import *
 from esmpy.test.base import TestBase
 from esmpy.api.constants import _ESMF_NETCDF, _ESMF_PIO
 from esmpy.util.mesh_utilities import *
+from esmpy.util.cache_data import DATA_DIR
 
 class TestMesh(TestBase):
 
@@ -142,16 +142,22 @@ class TestMesh(TestBase):
     @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_mesh_create_from_file_scrip(self):
-        esmfdir = os.path.dirname(inspect.getfile(esmpy))
-        mesh_from_file = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-pentagons.nc"),
-                                  filetype=FileFormat.SCRIP)
+        datafile = os.path.join(DATA_DIR, "ne4np4-pentagons.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
+        mesh_from_file = Mesh(filename=datafile, filetype=FileFormat.SCRIP)
 
     @pytest.mark.skipif(_ESMF_PIO==False, reason="PIO required in ESMF build")
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     def test_mesh_create_from_file_esmfmesh(self):
-        esmfdir = os.path.dirname(inspect.getfile(esmpy))
-        mesh_from_file = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-esmf.nc"),
-                                  filetype=FileFormat.ESMFMESH)
+        datafile = os.path.join(DATA_DIR, "ne4np4-esmf.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
+        mesh_from_file = Mesh(filename=datafile, filetype=FileFormat.ESMFMESH)
 
     @pytest.mark.skipif(pet_count() not in {1, 4}, reason="test requires 1 or 4 cores")
     def test_mesh_copy(self):
@@ -196,8 +202,13 @@ class TestMesh(TestBase):
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_slice_mesh_created_from_file_scrip(self):
-        esmfdir = os.path.dirname(inspect.getfile(esmpy))
-        mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-pentagons.nc"),
+        datafile = os.path.join(DATA_DIR, "ne4np4-pentagons.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
+
+        mesh = Mesh(filename=datafile,
                     filetype=FileFormat.SCRIP,
                     convert_to_dual=True)
 
@@ -218,9 +229,12 @@ class TestMesh(TestBase):
     @pytest.mark.skipif(_ESMF_NETCDF==False, reason="NetCDF required in ESMF build")
     @pytest.mark.skipif(pet_count()!=1, reason="test must be run in serial")
     def test_slice_mesh_created_from_file_esmfmesh(self):
-        esmfdir = os.path.dirname(inspect.getfile(esmpy))
-        mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne4np4-esmf.nc"),
-                              filetype=FileFormat.ESMFMESH)
+        datafile = os.path.join(DATA_DIR, "ne4np4-esmf.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
+        mesh = Mesh(filename=datafile, filetype=FileFormat.ESMFMESH)
 
         mesh2 = mesh[0:5]
 
@@ -242,9 +256,12 @@ class TestMesh(TestBase):
     #TODO: remove expected failure once we have a smaller data file with mesh element coordinates to use
     # TODO: have to define slicing for mesh element coordinates as well..
     def test_slice_mesh_created_from_file_elem_coords(self):
-        esmfdir = os.path.dirname(inspect.getfile(esmpy))
-        mesh = Mesh(filename=os.path.join(esmfdir, "test/data/ne30np4-t2.nc"),
-                    filetype=FileFormat.SCRIP)
+        datafile = os.path.join(DATA_DIR, "ne30np4-t2.nc")
+
+        if not os.path.exists(datafile):
+            raise DataMissing("Data not available, try 'make download'.")
+
+        mesh = Mesh(filename=datafile, filetype=FileFormat.SCRIP)
 
         mesh2 = mesh[0:5]
 

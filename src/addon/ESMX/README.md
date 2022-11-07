@@ -2,40 +2,37 @@
 
 ESMX is the **E**arth **S**ystem **M**odel e**X**ecutable layer.
 
-The ESMX layer is built on top of ESMF and NUOPC. ESMX user interfaces are typically implemented through configuration files.
+The ESMX layer is built on top of the ESMF and NUOPC APIs.
 
-The idea is to make it as simple as possible for a user to build, run, and test NUOPC based systems. The approach implemented by ESMX is the same whether applied to a single component, or a fully coupled system of NUOPC-compliant components.
+The idea behind ESMX is to make it as simple as possible for a user to build, run, and test NUOPC based systems. The approach implemented is the same whether applied to a single component, or a fully coupled system of NUOPC-compliant components. ESMX user interfaces are implemented through configuration files.
+
+Major objectives of ESMX are:
+ - **Simplification** of standing up new NUOPC-based systems.
+ - **Promotion** of hierarchical model component testing.
+ - **Reduction** of maintenance cost for established NUOPC-based systems.
+ - **Improved** alignment and interoperability between different NUOPC-based systems. (Configuration files, build procedures, etc.)
+ - **Faster and more coordinated** roll-out and adoption of new NUOPC/ESMF features.
 
 ESMX unifies, provides, and maintains those parts of NUOPC-based modeling systems that are common across most such implementations. This includes the top level application and driver code, parts of the build infrastructure, and tools to manage run configurations.
 
-The objectives of ESMX are:
- - **Simplification** of standing up new NUOPC-based systems.
- - **Reduction** of maintenance cost for established NUOPC-based systems.
- - **Improved** alignment and interoperability between different NUOPC-based systems. (Configuration files, procedures, etc.)
- - **Faster and more coordinated** role out of new NUOPC/ESMF features.
-
 ## The Unified Driver Executable
 
-One of the main features provided by ESMX is the *unified driver executable*. A good starting point to explore this feature is the [ESMX_AtmOcnProto](https://github.com/esmf-org/nuopc-app-prototypes/tree/develop/ESMX_AtmOcnProto) under the NUOPC prototype repository.
+One of the main pieces provided by ESMX is the *unified driver executable*. A good starting point to explore this feature is the [ESMX_AtmOcnProto](https://github.com/esmf-org/nuopc-app-prototypes/tree/develop/ESMX_AtmOcnProto) example under the NUOPC prototype repository.
 
-The name of the unified driver executable built by ESMX is lower case `esmx`. This will be used for the remainder of this section to refer to the unfied driver executable.
+The name of the unified driver executable created by ESMX is all lower case `esmx`. This name will be used for the remainder of this section to refer to the unfied driver executable.
 
-### Project integration
+ESMX is CMake based. The following two commands, executed from anywhere in your terminal, will build the `esmx` executable under a local `build` sub-drirectory:
 
-A build target for `esmx` needs to be added to the projects build system. ESMX provides a CMake based approach that makes this easy. A simple target based on GNU Make looks like this:
+	cmake -H$ESMF_ESMXDIR -Bbuild
+	cmake --build ./build
 
-    include $(ESMFMKFILE)
-
-    esmx: esmxBuild.yaml
-	    cmake -H$(ESMF_ESMXDIR) -Bbuild
-	    cmake --build ./build
-
-The `ESMF_ESMXDIR` variable used is defined by the ESMF installation through the `esmf.mk` file included in the first line.
-A successful execution of this target will result in the unfied driver executable as `build/esmx`.
+Here shell variable `ESMF_ESMXDIR` is assumed to be set according to your ESMF installation. The correct value for `ESMF_ESMXDIR` can be looked up in the `esmf.mk` file, which should be accessible via shell variable `ESMFMKFILE`. (E.g. `cat $ESMFMKFILE`.)
+	
+For a successful build, the ESMX build system expects to find a configuration file called `esmxBuild.yaml` in the directory from which the above commands are executed. Details of this file are discussed next.
 
 ### esmxBuild.yaml
 
-As shown above, building `esmx` has a dependency on file `esmxBuild.yaml`. This is a yaml file with a very simple format. An example is given here:
+The ESMX build system depends on file `esmxBuild.yaml`. This is a [YAML](https://yaml.org/) file with a very simple format. An example is given here:
 
     components:
 
@@ -46,22 +43,44 @@ As shown above, building `esmx` has a dependency on file `esmxBuild.yaml`. This 
       lumo:
         cmake_config: Lumo/lumo.cmake
 
-In this example two components are built into `esmx` explicitly. (Read about dynamically loading components from shared objects at run-time later.)
+In this example two components are built into `esmx` explicitly. (Read about dynamic loading of components from shared objects at run-time later.)
 
-Each component is given a name, here `tawas` and `lumo`. Components will be referred to by this *component-name* in the run-time configuration (esmxRun.config) discussed below.
+Each component is given a name, here `tawas` and `lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.config) discussed below.
 
-Each component must define the `cmake_config` key, specifying a file that can be included by the CMake based `esmx` build. This file must provide three CMake elements:
+Each component must define the `cmake_config` key, specifying a CMake configuration file that can be included by the CMake based ESMX build system to access the respective component.
+
+A component CMake configuration file must provide the following three standard CMake elements:
 - `add_library(component-name ... )`
 - `set_target_properties(component-name ... )`
 - `target_link_libraries(esmx_driver PUBLIC component-name)`
 
-Here *component-name* is the name under which the component was defined in the `esmxBuild.yaml` file, here `tawas` or `lumo`. 
+Here *component-name* must correspond to the name under which the component was defined in the `esmxBuild.yaml` file. For the example this would be `tawas` or `lumo`. 
 
-Further, a component can optionally provide the `fort_module` key. This explicitly specifys the name of the Fortran module that provides the entry points into the respective NUOPC component. By default the *component-name* is used.
+In addition to the required `cmake_config` key, a component can optionally provide the `fort_module` key in its `esmxBuild.yaml` section. This allows explicit specification of the Fortran module name that provides the entry points into the respective NUOPC component. By default the *component-name* is used as the Fortran module name.
+
+### Project integration
+
+It can be convenient (and in many cases necessary) to integrate the above outlined ESMX CMake procedure into a project's existing build system. This is particularily true when using ESMX in the context of hierarchical testing, where each test might specify a custom `esmxBuild.yaml` configuration. In this case each test will need to build a separate `esmx` executable when it is triggered.
+
+Integration e.g. into a GNU Makefile is very straight forward:
+
+    include $(ESMFMKFILE)
+
+    esmx: esmxBuild.yaml
+	    cmake -H$(ESMF_ESMXDIR) -Bbuild
+	    cmake --build ./build
+
+Inluding the `esmf.mk` file via the environment variable `ESMFMKFILE` automatically sets the `ESMF_ESMXDIR` variable needed to find the corresponding ESMX CMake build files.
+
+The `esmx` target indicates a dependency on configuration file `esmxBuild.yaml` to ensure rebuilding of the `esmx` executable each time the build configuration changes. The build rule for `esmx` simply executes the two standard CMake commands introduced earlier.
+
+A successful execution of the `esmx` target will result in the creation of the unfied driver executable as `build/esmx` under the local directory.
 
 ### esmxRun.config
 
-The esmxRun.config file needs to be located under the run directory from where the `esmx` executable is launched. It is read by `esmx` during startup. It specifies a few global ESMF and ESMX level settings, the list of components accessed during this run, details about the components, and finally the run sequence.
+The `esmx` executable is launched the same way any other ESMF or NUOPC application is launched. Typically this means starting it through the system specific MPI launch facility (mpirun, mpiexec, srun, ...).
+
+At startup, the `esmx` executable expects to find a file named `esmxRun.config` in the run directory from which it is launched. This run-time configuration file specifies a few global ESMF and ESMX level settings, the list of components accessed during this run, details about the components, and finally the run sequence.
 
     logKindFlag:            ESMF_LOGKIND_MULTI
     globalResourceControl:  .true.
@@ -108,7 +127,7 @@ Finally the `startTime` and `stopTime` fields set the start and stop time of the
 
 ### Dynamically loading components from shared objects at run-time
 
-There are two options recognized when specifying the value of the `XXX_model` field:
+There are two options recognized when specifying the value of the `XXX_model` field for a component in the `esmxRun.config` file:
 - First, if the value specified is recognized as a *component-name* provided by any of the components built into `esmx` during build-time, as specified by `esmxBuild.yaml`, the respective component is accessed via its Fortran module.
 - Second, if the value does not match a build-time dependency, it is assumed to correspond to a shared object. In that case the attempt is made to load the specified shared object at run-time, and to associate with the generic component label.
 
