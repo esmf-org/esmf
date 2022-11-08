@@ -2645,10 +2645,10 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        
-        if (datacopyflag == ESMF_DATACOPY_VALUE .and. isESMFAllocated /= .true.) then 
+        if ((datacopyflag == ESMF_DATACOPY_VALUE) .and. isESMFAllocated ) then 
            localrc = ESMF_FAILURE
         end if
-        if (datacopyflag == ESMF_DATACOPY_REFERENCE .and. isESMFAllocated /= .false.) then
+        if ((datacopyflag == ESMF_DATACOPY_REFERENCE) .and. .not.isESMFAllocated) then
            localrc = ESMF_FAILURE
         end if
         if (ESMF_LogFoundError(localrc, &
