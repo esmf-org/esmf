@@ -14,21 +14,34 @@ Hello and welcome to ESMF.
 
 ## Downloading ESMF
 
- * The ESMF library source code is also available for download at:
-    * https://github.com/esmf-org/esmf/releases
+The ESMF library source code is available for download at GitHub:
+ * https://github.com/esmf-org/esmf/releases
 
 ## Building ESMF
 
- * To build ESMF from source consult the [Building ESMF](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node10.html) section of the [ESMF User's Guide](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/).
+To build ESMF from source:
+ * Consult the [Building ESMF](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node10.html) section of the [ESMF User's Guide](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/).
  * For testing ESMF, see [Testing makefile targets](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node11.html).
- * Pre-built binaries for ESMF and ESMPy are also available on `conda-forge` (_note Windows is not supported_):
-```
-conda create -c conda-forge -n <env> esmf esmpy
-```
+ 
+## Pre-built ESMF
+ 
+Pre-built binaries for ESMF and ESMPy are available through different channels:
+ * [Docker Hub](https://hub.docker.com/): Under [ESMF Organization](https://hub.docker.com/u/esmf). To install locally, run:
+ ```
+ docker run -it --rm esmf/esmf-build-release
+ ```
+ * [Anaconda Conda-Forge](https://anaconda.org/conda-forge/): Under [conda-forge/esmf](https://anaconda.org/conda-forge/esmf). To install locally (_note Windows is not supported_), run:
+ ```
+ conda install -c conda-forge esmf
+ ```
+
+## Running ESMF Command Line Tools
+
+ * To use the ESMF command line tools follow the instructions located in [Using Bundled ESMF Command Line Tools](https://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node9.html).
 
 ## Linking to ESMF
 
- * To link your application to an ESMF installation follow instructions located in [Compiling and Linking User Code against an ESMF Installation](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node7.html).
+ * To build your application against an ESMF installation follow the instructions located in [Compiling and Linking User Code against an ESMF Installation](http://earthsystemmodeling.org/docs/nightly/develop/ESMF_usrdoc/node7.html).
 
 ## Add-On Packages
 
