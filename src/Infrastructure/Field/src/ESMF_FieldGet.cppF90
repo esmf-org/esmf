@@ -180,7 +180,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              image (SSI).\newline
 !              Added argument {\tt localDeToDeMap} to support DE handling from
 !              the Field level rather than require user to go to Array level.
-! \item[8.4.0] Added argument {\tt isESMFAllocated} to support user query of
+! \item[8.5.0] Added argument {\tt isESMFAllocated} to support user query of
 !              whether ESMF or user is responsible for the data allocation
 !              referenced by this object.
 ! \end{description}

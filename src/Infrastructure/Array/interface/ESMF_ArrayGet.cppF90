@@ -194,7 +194,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              between PETs on the same single system image (SSI).\newline
 !              Added argument {\tt vm} in order to offer information about the
 !              VM on which the Array was created.
-! \item[8.4.0] Added argument {\tt isESMFAllocated} to support user query of
+! \item[8.5.0] Added argument {\tt isESMFAllocated} to support user query of
 !              whether ESMF or user is responsible for the data allocation
 !              referenced by this object.
 ! \end{description}
