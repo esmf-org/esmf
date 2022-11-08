@@ -51,10 +51,15 @@ namespace ESMCI {
   bool get_global_id_from_localDE(DistGrid *distgrid, int localDE, int *index,
                                   int *_gid, bool *_is_local);
 
-  void calc_corner_offset(Grid *grid, int corner_offset[NUM_QUAD_CORNERS][2]);
+  int get_corner_staggerloc_for_dim(int dim);
 
-  void calc_center_offset(int corner_offset[NUM_QUAD_CORNERS][2], int center_offset[NUM_QUAD_CORNERS][2]);
+  int get_center_staggerloc_for_dim(int dim);
 
+  template<unsigned int DIM> void calc_corner_offset(Grid *grid, int (*corner_offset)[DIM]);
+    //  void calc_corner_offset(Grid *grid, int corner_offset[NUM_QUAD_CORNERS][2]);
+
+  template<unsigned int DIM> void calc_center_offset(int (*corner_offset)[DIM], int (*center_offset)[DIM]);
+  //  void calc_center_offset(int (*corner_offset)[2], int (*center_offset)[2]);
 
   void gid_to_proc(int gid, DistGrid *distgrid, int *_proc);
 

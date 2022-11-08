@@ -119,7 +119,6 @@ namespace ESMCI {
 
   }
 
-
   bool get_global_id_from_localDE(DistGrid *distgrid, int localDE, int *index,
                              int *_gid, bool *_is_local) {
 
@@ -133,43 +132,83 @@ namespace ESMCI {
                                     _gid, _is_local);
   }
 
+  // Get Corner staggerloc for a given dim
+  int get_center_staggerloc_for_dim(int dim) {
+    if (dim == 2) return ESMC_STAGGERLOC_CENTER;
+    else if (dim == 3) return ESMC_STAGGERLOC_CENTER_VCENTER;
+    else Throw() <<" dim=",dim," not supported for this method";
+  }
+
+
+  // Get Corner staggerloc for a given dim
+  int get_corner_staggerloc_for_dim(int dim) {
+    if (dim == 2) return ESMC_STAGGERLOC_CORNER;
+    else if (dim == 3) return ESMC_STAGGERLOC_CORNER_VFACE;
+    else Throw() <<" dim=",dim," not supported for this method";
+  }
 
 
   // Calculate index offsets for corners around a given center
- void calc_corner_offset(Grid *grid, int corner_offset[NUM_QUAD_CORNERS][2]) {
-    int default_offset[NUM_QUAD_CORNERS][2]={{0,0},{1,0},{1,1},{0,1}};
+  template<unsigned int DIM>
+  void calc_corner_offset(Grid *grid, int (*corner_offset)[DIM]) {
+#define MAX_DIM 3
+#define NUM_CORNERS(dim) (2<<dim)     
+
+    // Make sure were not using it with more dims than allowed
+    if (DIM > MAX_DIM) Throw() <<"Exceeding maximum dim for this method";
+
+    // Get default offsets up to max dim
+    // TODO: NEED TO EXTEND THIS TO WORK WITH 3D 
+    int default_offset[NUM_CORNERS(MAX_DIM)][MAX_DIM]={{0,0,0},{1,0,0},{1,1,0},{0,1,0},
+                                                       {0,0,1},{1,0,1},{1,1,1},{0,1,1}};
 
     // Get Alignment for staggerloc
-    const int *staggerAlign= grid->getStaggerAlign(ESMCI_STAGGERLOC_CORNER);
+    // TODO: NEED TO EXTEND THIS TO WORK WITH 3D (ALSO NEED SAME THING IN ACTUAL GridToMesh())
+    const int *staggerAlign= grid->getStaggerAlign(get_corner_staggerloc_for_dim(DIM));
 
     // Get off set due to alignment
-    int align_off[2];
-    for (int i=0; i<2; i++) {
+    int align_off[DIM];
+    for (int i=0; i<DIM; i++) {
       if (staggerAlign[i] < 1) align_off[i]=0;
       else align_off[i]=-1;
     }
 
     // Change default offset to correspond with alignment
-    for (int i=0; i<NUM_QUAD_CORNERS; i++) {
-      for (int j=0; j<2; j++) {
+    for (int i=0; i<NUM_CORNERS(DIM); i++) {
+      for (int j=0; j<DIM; j++) {
         corner_offset[i][j]=default_offset[i][j]+align_off[j];
       }
     }
+
+#undef NUM_CORNERS
+#undef MAX_DIM 
   }
+  template void calc_corner_offset(Grid *grid, int (*corner_offset)[2]);
+  template void calc_corner_offset(Grid *grid, int (*corner_offset)[3]);
+
 
   // Calculate index offsets for centers around a given corner
   // Since a given corner is one of the corners of the centers
   // surrounding it just invert the corner offsets
-  void calc_center_offset(int corner_offset[NUM_QUAD_CORNERS][2], int center_offset[NUM_QUAD_CORNERS][2]) {
+  //  void calc_center_offset(int corner_offset[NUM_QUAD_CORNERS][2], int center_offset[NUM_QUAD_CORNERS][2]) {
+  template<unsigned int DIM>
+  void calc_center_offset(int (*corner_offset)[DIM], int (*center_offset)[DIM]) {
+#define NUM_CORNERS(dim) (2<<dim)     
 
     // Invert corner offsets
-    for (int i=0; i<NUM_QUAD_CORNERS; i++) {
-      for (int j=0; j<2; j++) {
+    for (int i=0; i<NUM_CORNERS(DIM); i++) {
+      for (int j=0; j<DIM; j++) {
         center_offset[i][j]=-corner_offset[i][j];
       }
     }
-  }
 
+#undef NUM_CORNERS
+  }
+  template void calc_center_offset(int (*corner_offset)[2], int (*center_offset)[2]);
+  template void calc_center_offset(int (*corner_offset)[3], int (*center_offset)[3]);
+
+
+  // Calculate which proc a gid is located on given a distgrid
   void gid_to_proc(int gid, DistGrid *distgrid, int *_proc) {
 
     // Init to bad value
