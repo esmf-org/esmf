@@ -30,7 +30,7 @@ Pre-built binaries for ESMF and ESMPy are available through a number of channels
  ```
  docker run -it --rm esmf/esmf-build-release
  ```
- * [Anaconda Conda-Forge](https://anaconda.org/conda-forge/): Under [conda-forge/esmf](https://anaconda.org/conda-forge/esmf). To install locally (_note Windows is not supported_), run:
+ * [Anaconda Conda-Forge](https://anaconda.org/conda-forge/): Under [conda-forge/esmpy](https://anaconda.org/conda-forge/esmf). To install locally (_note Windows is not supported_), run:
  ```
  conda create -n esmpy -c conda-forge esmpy
  ```
