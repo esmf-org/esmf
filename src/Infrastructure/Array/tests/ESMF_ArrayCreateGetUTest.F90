@@ -81,6 +81,7 @@ program ESMF_ArrayCreateGetUTest
   logical:: isCreated
   logical:: dataCorrect
   logical:: ssiSharedMemoryEnabled
+  logical:: isESMFAllocated
 
   integer:: count
 
@@ -444,6 +445,14 @@ program ESMF_ArrayCreateGetUTest
   farrayPtr2D     = real(localPet+20, ESMF_KIND_R8)  ! fill with data to check
   arrayCpy = ESMF_ArrayCreate(array, datacopyflag=ESMF_DATACOPY_VALUE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet isESMFAllocated from Array Copy (VALUE) Test"
+  write(failMsg, *) "Did not return .true."
+  call ESMF_ArrayGet(arrayCpy, isESMFAllocated=isESMFAllocated, rc=rc)
+  print *, "Array is allocated internally: ", isESMFAllocated
+  call ESMF_Test(isESMFAllocated, name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -536,6 +545,14 @@ program ESMF_ArrayCreateGetUTest
   farrayPtr2D     = real(localPet+30, ESMF_KIND_R8)  ! fill with data to check
   arrayCpy = ESMF_ArrayCreate(array, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayGet isESMFAllocated from Array Copy (REF) Test"
+  write(failMsg, *) "Did not return .false."
+  call ESMF_ArrayGet(arrayCpy, isESMFAllocated=isESMFAllocated, rc=rc)
+  print *, "Array is allocated internally: ", isESMFAllocated
+  call ESMF_Test(.not.isESMFAllocated, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
