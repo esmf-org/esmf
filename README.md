@@ -25,14 +25,14 @@ To build ESMF from source:
  
 ## Pre-built ESMF
  
-Pre-built binaries for ESMF and ESMPy are available through different channels:
+Pre-built binaries for ESMF and ESMPy are available through a number of channels:
  * [Docker Hub](https://hub.docker.com/): Under [ESMF Organization](https://hub.docker.com/u/esmf). To install locally, run:
  ```
  docker run -it --rm esmf/esmf-build-release
  ```
  * [Anaconda Conda-Forge](https://anaconda.org/conda-forge/): Under [conda-forge/esmf](https://anaconda.org/conda-forge/esmf). To install locally (_note Windows is not supported_), run:
  ```
- conda install -c conda-forge esmf
+ conda create -n esmpy -c conda-forge esmpy
  ```
 
 ## Running ESMF Command Line Tools
