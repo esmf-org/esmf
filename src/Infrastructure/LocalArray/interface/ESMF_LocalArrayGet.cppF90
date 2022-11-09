@@ -313,7 +313,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[8.5.0] Added argument {\tt isESMFAllocated} to support user query of
-!              whether ESMF or user is responsible for the data allocation.
+!              whether ESMF or user is responsible for the data allocation
 !              referenced by this object.
 ! \end{description}
 ! \end{itemize}
