@@ -1051,7 +1051,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
 ! redistribution, allowing scaling of the data, e.g. for unit transformation.
-!  
+!
 ! Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
 ! order of tiles within the DistGrid or by user-supplied arbitrary sequence
@@ -1061,16 +1061,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source Array, destination Array, and the factor may be of different
 ! <type><kind>. Further, source and destination Arrays may differ in shape,
 ! however, the number of elements must match. 
-!  
-! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
-! to an identity mapping of the sequentialized source Array to the
-! sequentialized destination Array. If the {\tt srcToDstTransposeMap}
-! argument is provided it must be identical on all PETs. The
-! {\tt srcToDstTransposeMap} allows source and destination Array dimensions to
-! be transposed during the redistribution. The number of source and destination
-! Array dimensions must be equal under this condition and the size of mapped
-! dimensions must match.
-!  
+!
+! The default redistribution operation, when {\tt srcToDstTransposeMap} is not
+! specified, corresponds to the identity mapping: each element of the
+! sequentialized source Array is copied to the sequentialized
+! destination Array element in order.
+!
+! \begin{sloppypar}
+! If the {\tt srcToDstTransposeMap} argument is provided it must be identical
+! across all PETs. The {\tt srcToDstTransposeMap} allows source and destination
+! Array dimensions to be transposed during the redistribution. To support this
+! option, the number of source and destination Array dimensions must be equal
+! and the size of the associated dimensions must match.
+! See section \ref{Array:Redist:TransposeMode} for more details about the
+! use of the {\tt srcToDstTransposeMap} argument.
+! \end{sloppypar}
+!
 ! It is erroneous to specify the identical Array object for {\tt srcArray} and
 ! {\tt dstArray} arguments. 
 !
@@ -1482,7 +1488,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
 ! redistribution, allowing scaling of the data, e.g. for unit transformation.
-!  
+!
 ! Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
 ! order of tiles within the DistGrid or by user-supplied arbitrary sequence
@@ -1493,15 +1499,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! <type><kind>. Further, source and destination Arrays may differ in shape,
 ! however, the number of elements must match. 
 !  
-! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
-! to an identity mapping of the sequentialized source Array to the
-! sequentialized destination Array. If the {\tt srcToDstTransposeMap}
-! argument is provided it must be identical on all PETs. The
-! {\tt srcToDstTransposeMap} allows source and destination Array dimensions to
-! be transposed during the redistribution. The number of source and destination
-! Array dimensions must be equal under this condition and the size of mapped
-! dimensions must match.
-!  
+! The default redistribution operation, when {\tt srcToDstTransposeMap} is not
+! specified, corresponds to the identity mapping: each element of the
+! sequentialized source Array is copied to the sequentialized
+! destination Array element in order.
+!
+! \begin{sloppypar}
+! If the {\tt srcToDstTransposeMap} argument is provided it must be identical
+! across all PETs. The {\tt srcToDstTransposeMap} allows source and destination
+! Array dimensions to be transposed during the redistribution. To support this
+! option, the number of source and destination Array dimensions must be equal
+! and the size of the associated dimensions must match.
+! See section \ref{Array:Redist:TransposeMode} for more details about the
+! use of the {\tt srcToDstTransposeMap} argument.
+! \end{sloppypar}
+!
 ! It is erroneous to specify the identical Array object for {\tt srcArray} and
 ! {\tt dstArray} arguments. 
 !
@@ -2069,7 +2081,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
 ! redistribution, allowing scaling of the data, e.g. for unit transformation.
-!  
+!
 ! Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
 ! order of tiles within the DistGrid or by user-supplied arbitrary sequence
@@ -2079,16 +2091,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source Array, destination Array, and the factor may be of different
 ! <type><kind>. Further, source and destination Arrays may differ in shape,
 ! however, the number of elements must match. 
-!  
-! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
-! to an identity mapping of the sequentialized source Array to the
-! sequentialized destination Array. If the {\tt srcToDstTransposeMap}
-! argument is provided it must be identical on all PETs. The
-! {\tt srcToDstTransposeMap} allows source and destination Array dimensions to
-! be transposed during the redistribution. The number of source and destination
-! Array dimensions must be equal under this condition and the size of mapped
-! dimensions must match.
-!  
+!
+! The default redistribution operation, when {\tt srcToDstTransposeMap} is not
+! specified, corresponds to the identity mapping: each element of the
+! sequentialized source Array is copied to the sequentialized
+! destination Array element in order.
+!
+! \begin{sloppypar}
+! If the {\tt srcToDstTransposeMap} argument is provided it must be identical
+! across all PETs. The {\tt srcToDstTransposeMap} allows source and destination
+! Array dimensions to be transposed during the redistribution. To support this
+! option, the number of source and destination Array dimensions must be equal
+! and the size of the associated dimensions must match.
+! See section \ref{Array:Redist:TransposeMode} for more details about the
+! use of the {\tt srcToDstTransposeMap} argument.
+! \end{sloppypar}
+!
 ! It is erroneous to specify the identical Array object for {\tt srcArray} and
 ! {\tt dstArray} arguments. 
 !
@@ -2246,7 +2264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
 ! redistribution, allowing scaling of the data, e.g. for unit transformation.
-!  
+!
 ! Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
 ! order of tiles within the DistGrid or by user-supplied arbitrary sequence
@@ -2256,16 +2274,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source Array, destination Array, and the factor may be of different
 ! <type><kind>. Further, source and destination Arrays may differ in shape,
 ! however, the number of elements must match. 
-!  
-! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
-! to an identity mapping of the sequentialized source Array to the
-! sequentialized destination Array. If the {\tt srcToDstTransposeMap}
-! argument is provided it must be identical on all PETs. The
-! {\tt srcToDstTransposeMap} allows source and destination Array dimensions to
-! be transposed during the redistribution. The number of source and destination
-! Array dimensions must be equal under this condition and the size of mapped
-! dimensions must match.
-!  
+!
+! The default redistribution operation, when {\tt srcToDstTransposeMap} is not
+! specified, corresponds to the identity mapping: each element of the
+! sequentialized source Array is copied to the sequentialized
+! destination Array element in order.
+!
+! \begin{sloppypar}
+! If the {\tt srcToDstTransposeMap} argument is provided it must be identical
+! across all PETs. The {\tt srcToDstTransposeMap} allows source and destination
+! Array dimensions to be transposed during the redistribution. To support this
+! option, the number of source and destination Array dimensions must be equal
+! and the size of the associated dimensions must match.
+! See section \ref{Array:Redist:TransposeMode} for more details about the
+! use of the {\tt srcToDstTransposeMap} argument.
+! \end{sloppypar}
+!
 ! It is erroneous to specify the identical Array object for {\tt srcArray} and
 ! {\tt dstArray} arguments. 
 !
