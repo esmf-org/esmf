@@ -11,45 +11,46 @@
 !==============================================================================
 
 !==============================================================================
-!ESMF_EXAMPLE        String used by test script to count examples.
+!ESMF_disabled_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{Accessing the MPI Communicator from an VM object}
+! \subsubsection{Using the MPI Communicator with the Fortran 2008 MPI binding}
 !
-! Sometimes user code requires access to the MPI communicator, e.g. to support
-! legacy code that contains explict MPI communication calls. The correct way of
-! wrapping such code into ESMF is to obtain the MPI intra-communicator out of
-! the VM object. In order not to interfere with ESMF communications it is
-! advisable to duplicate the communicator before using it in user-level MPI
-! calls. In this example the duplicated communicator is used for a user
-! controlled {\tt MPI\_Barrier()}.
-!
+! The Fortran 2008 MPI language binding defines {\tt type MPI\_Comm} to
+! represent the MPI communicator. The following example demonstrates
+! how the MPI communicator queried from the VM object can be used with the
+! Fortran 2008 MPI binding.
+! 
 !EOE
 !------------------------------------------------------------------------------
 
-program ESMF_VMGetMPICommunicatorEx
+program ESMF_VMGetMPICommunicatorF08Ex.F90
 #include "ESMF.h"
 
   use ESMF
   use ESMF_TestMod
-  
+!BOC
+  use mpi_f08
+!EOC
+
   implicit none
-  
+
   ! local variables
   integer:: rc
-#ifndef ESMF_MPIUNI     
+#ifndef ESMF_MPIUNI
   integer:: ierr
 #endif
   type(ESMF_VM):: vm
 !BOC
-  integer:: mpic
-!EOC  
-#ifndef ESMF_MPIUNI     
+  integer       :: int_mpic
+  type(MPI_Comm):: mpic
+!EOC
+#ifndef ESMF_MPIUNI
 !BOC
-  integer:: mpic2
+  type(MPI_Comm):: mpic2
 !EOC
 #endif
 
@@ -62,7 +63,7 @@ program ESMF_VMGetMPICommunicatorEx
 !-------------------------------------------------------------------------
 
   write(failMsg, *) "Example failure"
-  write(testname, *) "Example ESMF_VMGetMPICommunicatorEx"
+  write(testname, *) "Example ESMF_VMGetMPICommunicatorF08Ex"
 
 
 ! ------------------------------------------------------------------------------
@@ -74,13 +75,17 @@ program ESMF_VMGetMPICommunicatorEx
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  call ESMF_VMGet(vm, mpiCommunicator=mpic, rc=rc)
+  call ESMF_VMGet(vm, mpiCommunicator=int_mpic, rc=rc)
   ! The returned MPI communicator spans the same MPI processes that the VM
   ! is defined on.
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-#ifndef ESMF_MPIUNI     
+#ifndef ESMF_MPIUNI
 !BOC
+  mpic%mpi_val = int_mpic ! integer version of communicator -> type(MPI_Comm)
+
+  ! Now mpic can be used in the Fortran 2008 MPI binding interfaces
+
   call MPI_Comm_dup(mpic, mpic2, ierr)
   ! Duplicate the MPI communicator not to interfere with ESMF communications.
   ! The duplicate MPI communicator can be used in any MPI call in the user
@@ -96,8 +101,8 @@ program ESMF_VMGetMPICommunicatorEx
   call ESMF_Finalize(rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
-    print *, "PASS: ESMF_VMGetMPICommunicatorEx.F90"
+    print *, "PASS: ESMF_VMGetMPICommunicatorF08Ex.F90"
   else
-    print *, "FAIL: ESMF_VMGetMPICommunicatorEx.F90"
+    print *, "FAIL: ESMF_VMGetMPICommunicatorF08Ex.F90"
   endif
 end program

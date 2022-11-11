@@ -79,6 +79,7 @@
 \input{ESMF_VMDefaultBasicsEx_fapi}
 \input{ESMF_VMComponentEx_fapi}
 \input{ESMF_VMGetMPICommunicatorEx_fapi}
+\input{ESMF_VMGetMPICommunicatorF08Ex_fapi}
 \input{ESMF_VMUserMpiEx_fapi}
 \input{ESMF_VMUserMpiCommEx_fapi}
 \input{ESMF_VMUserMpiCommMultiEx_fapi}
