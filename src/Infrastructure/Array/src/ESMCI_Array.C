@@ -6209,34 +6209,62 @@ template<typename SIT, typename DIT>
       return rc;
     }
 
-    // check srcToDstTransposeMap input
+    // srcToDstTransposeMap must have one dimension
     if (srcToDstTransposeMap->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "srcToDstTransposeMap must be of rank 1", ESMC_CONTEXT, &rc);
       return rc;
     }
-    if (srcToDstTransposeMap->extent[0] != rank){
+
+    // process srcToDstTransposeMap
+    vector<vector<int> > srcToDstTMap(tileCount);
+    vector<vector<bool> > srcToDstInvertMap(tileCount);
+    if (srcToDstTransposeMap->extent[0] == rank){
+      // rank number of elements -> all tiles the same
+      for (int tile=0; tile<tileCount; tile++){
+        srcToDstTMap[tile].resize(rank);
+        srcToDstInvertMap[tile].resize(rank);
+        for (int i=0; i<rank; i++){
+          // negative sign -> invert
+          srcToDstInvertMap[tile][i] = (srcToDstTransposeMap->array[i] < 0);
+          // shift to base 0
+          srcToDstTMap[tile][i] = abs(srcToDstTransposeMap->array[i]) - 1;
+        }
+      }
+    }else if(srcToDstTransposeMap->extent[0] == tileCount * rank){
+      // each tile srcToDstTransposeMap provided separately
+      int j=0;
+      for (int tile=0; tile<tileCount; tile++){
+        srcToDstTMap[tile].resize(rank);
+        srcToDstInvertMap[tile].resize(rank);
+        for (int i=0; i<rank; i++){
+          // negative sign -> invert
+          srcToDstInvertMap[tile][i] = (srcToDstTransposeMap->array[j] < 0);
+          // shift to base 0
+          srcToDstTMap[tile][i] = abs(srcToDstTransposeMap->array[j]) - 1;
+          ++j;
+        }
+      }
+    }else{
+      // only rank or tileCount*rank sizes supported
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "srcToDstTransposeMap must provide rank values", ESMC_CONTEXT, &rc);
+        "srcToDstTransposeMap of unsupported size", ESMC_CONTEXT, &rc);
       return rc;
     }
-    vector<int> srcToDstTMap(rank);
-    vector<bool> srcToDstInvertMap(rank);
-    for (int i=0; i<rank; i++){
-      srcToDstInvertMap[i] = (srcToDstTransposeMap->array[i] < 0);  // - invert
-      srcToDstTMap[i] = abs(srcToDstTransposeMap->array[i]) - 1;    // to base 0
-    }
+
     // check for complete mapping
-    for (int i=0; i<rank; i++){
-      int j;
-      for (j=0; j<rank; j++)
-        if (srcToDstTMap[j] == i) break;
-      if (j==rank){
-        // did not find value i in the transpose map
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          "srcToDstTransposeMap values must be unique and within range:"
-          " [1,..,rank].", ESMC_CONTEXT, &rc);
-        return rc;
+    for (int tile=0; tile<tileCount; tile++){
+      for (int i=0; i<rank; i++){
+        int j;
+        for (j=0; j<rank; j++)
+          if (srcToDstTMap[tile][j] == i) break;
+        if (j==rank){
+          // did not find value i in the transpose map
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "srcToDstTransposeMap values must be unique and within range:"
+            " [1,..,rank].", ESMC_CONTEXT, &rc);
+          return rc;
+        }
       }
     }
 
@@ -6307,7 +6335,7 @@ fprintf(stderr, "%d start:%d, size:%d\n", localPet, localStart[i], localSize[i])
           ++srcTensorIndex;
           tileFactorListCount *= srcSize;
         }
-        int jjj = srcToDstTMap[jj];         // src -> dst dimension mapping
+        int jjj = srcToDstTMap[i][jj];         // src -> dst dimension mapping
         j = dstArrayToDistGridMap[jjj];     // j is dimIndex bas 1, or 0 undist.
         if (j){
           // decomposed dimension
@@ -6381,12 +6409,12 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         // redist is identity mapping, but must consider srcToDstTMap
         // srcTuple --(srcToDstTMap)--> dstTuple
         for (int j=0; j<rank; j++){
-          if(srcToDstInvertMap[j]){
+          if(srcToDstInvertMap[i][j]){
             // invert this dimension orientation
-            dstTuple[srcToDstTMap[j]] = allSizes[j] - srcTuple[j] - 1;
+            dstTuple[srcToDstTMap[i][j]] = allSizes[j] - srcTuple[j] - 1;
           }else{
             // keep this dimension orientation
-            dstTuple[srcToDstTMap[j]] = srcTuple[j];
+            dstTuple[srcToDstTMap[i][j]] = srcTuple[j];
           }
         }
         // determine seq indices

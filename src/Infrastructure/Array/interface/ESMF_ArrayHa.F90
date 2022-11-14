@@ -1111,10 +1111,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Factor by which to multiply source data.
 !
 !   \item [{[srcToDstTransposeMap]}]
-!     List with as many entries as there are dimensions in {\tt srcArray}. Each
-!     entry maps the corresponding {\tt srcArray} dimension against the 
-!     specified {\tt dstArray} dimension. Mixing of distributed and
+!     A list with as many entries as there are dimensions in {\tt srcArray}, or
+!     {\tt tileCount} times this many entries.
+!     Each entry maps the corresponding {\tt srcArray} dimension against the
+!     specified {\tt dstArray} dimension. Mixing distributed and
 !     undistributed dimensions is supported.
+!     Negative entries reverse the order of elements along the specified
+!     dimension when going from source to destination.
+!     When providing $rank \times tileCount$ elements in
+!     {\tt srcToDstTransposeMap},  each block of size {\tt rank} is associated
+!     with the corresponding tile (in order), and interpreted as the
+!     tile-specific transpose map.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when not all elements match
@@ -1553,10 +1560,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Factor by which to multiply source data.
 !
 !   \item [{[srcToDstTransposeMap]}]
-!     List with as many entries as there are dimensions in {\tt srcArray}. Each
-!     entry maps the corresponding {\tt srcArray} dimension against the 
-!     specified {\tt dstArray} dimension. Mixing of distributed and
+!     A list with as many entries as there are dimensions in {\tt srcArray}, or
+!     {\tt tileCount} times this many entries.
+!     Each entry maps the corresponding {\tt srcArray} dimension against the
+!     specified {\tt dstArray} dimension. Mixing distributed and
 !     undistributed dimensions is supported.
+!     Negative entries reverse the order of elements along the specified
+!     dimension when going from source to destination.
+!     When providing $rank \times tileCount$ elements in
+!     {\tt srcToDstTransposeMap},  each block of size {\tt rank} is associated
+!     with the corresponding tile (in order), and interpreted as the
+!     tile-specific transpose map.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when not all elements match
@@ -2133,10 +2147,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Handle to the precomputed Route.
 !
 !   \item [{[srcToDstTransposeMap]}]
-!     List with as many entries as there are dimensions in {\tt srcArray}. Each
-!     entry maps the corresponding {\tt srcArray} dimension against the 
-!     specified {\tt dstArray} dimension. Mixing of distributed and
+!     A list with as many entries as there are dimensions in {\tt srcArray}, or
+!     {\tt tileCount} times this many entries.
+!     Each entry maps the corresponding {\tt srcArray} dimension against the
+!     specified {\tt dstArray} dimension. Mixing distributed and
 !     undistributed dimensions is supported.
+!     Negative entries reverse the order of elements along the specified
+!     dimension when going from source to destination.
+!     When providing $rank \times tileCount$ elements in
+!     {\tt srcToDstTransposeMap},  each block of size {\tt rank} is associated
+!     with the corresponding tile (in order), and interpreted as the
+!     tile-specific transpose map.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when not all elements match
@@ -2321,10 +2342,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     from {\tt dstArray} to {\tt srcArray}.
 !
 !   \item [{[srcToDstTransposeMap]}]
-!     List with as many entries as there are dimensions in {\tt srcArray}. Each
-!     entry maps the corresponding {\tt srcArray} dimension against the 
-!     specified {\tt dstArray} dimension. Mixing of distributed and
+!     A list with as many entries as there are dimensions in {\tt srcArray}, or
+!     {\tt tileCount} times this many entries.
+!     Each entry maps the corresponding {\tt srcArray} dimension against the
+!     specified {\tt dstArray} dimension. Mixing distributed and
 !     undistributed dimensions is supported.
+!     Negative entries reverse the order of elements along the specified
+!     dimension when going from source to destination.
+!     When providing $rank \times tileCount$ elements in
+!     {\tt srcToDstTransposeMap},  each block of size {\tt rank} is associated
+!     with the corresponding tile (in order), and interpreted as the
+!     tile-specific transpose map.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when not all elements match

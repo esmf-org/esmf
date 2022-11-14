@@ -437,13 +437,37 @@ program ESMF_ArrayRedistEx
 ! By construction {\tt srcArray} and {\tt dstArray} hold the same number of
 ! elements, albeit in a very different layout. Nevertheless, with a
 ! {\tt srcToDstTransposeMap} that maps matching dimensions from source to
-! destination an Array redistribution becomes a well defined operation between
-! {\tt srcArray} and {\tt dstArray}.
+! destination, the following Array redistribution becomes a well defined
+! operation between {\tt srcArray} and {\tt dstArray}.
 !EOE
 
 !BOC
   call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
     routehandle=redistHandle, srcToDstTransposeMap=(/3,1,4,2/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_ArrayRedist(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=redistHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! The {\tt srcToDstTransposeMap} mechanism supports negative map entries.
+! Negative entries indicate that the order of elements is to be reversed when
+! going from source to destination.
+! Using the same {\tt srcArray} and {\tt dstArray} objects as in the previous
+! example, the following code maps the first {\tt srcArray} dimension to the
+! third {\tt dstArray} dimension, as before. However, the ordering of
+! the elements along this dimension is reversed between source and destination.
+!EOE
+
+!BOC
+  call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=redistHandle, srcToDstTransposeMap=(/-3,1,4,2/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -465,6 +489,23 @@ program ESMF_ArrayRedistEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_DistGridDestroy(dstDistgrid, rc=rc) ! destroy the DistGrid object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Redistribution of multi-tile Arrays is supported, although not shown as an
+! example here. In {\em default} mode, the
+! index space defined by both source and destination Arrays must match,
+! regardless of how it is comprised by tiles. In particular, there is no
+! restriction on the number of source and desination tiles, as long as both
+! sides define the same global index space.
+!
+! The situation is different in {\em transpose} mode. Here the number of source
+! and destination tiles must match. In this case, the redistribution is defined
+! tile-by-tile in order. If the provided 
+! {\tt srcToDstTransposeMap} is of size {\tt rank}, it is used for all of the
+! tiles. The other supported option is where {\tt srcToDstTransposeMap} is of
+! size $rank \times tileCount$. In that case each source-destination tile-pair
+! has its own transpose map.
+!EOE
 
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
