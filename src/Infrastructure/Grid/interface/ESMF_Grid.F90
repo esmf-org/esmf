@@ -14738,9 +14738,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical                                    :: docenter, docorner
     !real(ESMF_KIND_R8)                        :: starttime, endtime
 
-    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
-    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
-
     if (present(rc)) rc=ESMF_SUCCESS
   !------------------------------------------------------------------------
   ! get global vm information
@@ -15016,8 +15013,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          else ! ESMF_TYPE_KIND_R4
            if (docenter) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonPtrR4 = lonPtrR8 * todeg
-               latPtrR4 = latPtrR8 * todeg
+               lonPtrR4 = lonPtrR8 * ESMF_COORDSYS_RAD2DEG
+               latPtrR4 = latPtrR8 * ESMF_COORDSYS_RAD2DEG
             else
                lonPtrR4 = lonPtrR8
                latPtrR4 = latPtrR8
@@ -15026,8 +15023,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
            if (docorner) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonCornerPtrR4 = lonCornerPtrR8 * todeg
-               latCornerPtrR4 = latCornerPtrR8 * todeg
+               lonCornerPtrR4 = lonCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
+               latCornerPtrR4 = latCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
             else
                lonCornerPtrR4 = lonCornerPtrR8
                latCornerPtrR4 = latCornerPtrR8
@@ -15200,9 +15197,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                                    :: myde, startde, endde
     integer                                    :: tiles, totalelmt
     !real(ESMF_KIND_R8)                        :: starttime, endtime
-
-    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
-    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
 
     if (present(rc)) rc=ESMF_SUCCESS
   !------------------------------------------------------------------------
@@ -15500,8 +15494,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          else ! ESMF_TYPE_KIND_R4
            if (docenter) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonPtrR4 = lonPtrR8 * todeg
-               latPtrR4 = latPtrR8 * todeg
+               lonPtrR4 = lonPtrR8 * ESMF_COORDSYS_RAD2DEG
+               latPtrR4 = latPtrR8 * ESMF_COORDSYS_RAD2DEG
             else
                lonPtrR4 = lonPtrR8
                latPtrR4 = latPtrR8
@@ -15510,8 +15504,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
            if (docorner) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonCornerPtrR4 = lonCornerPtrR8 * todeg
-               latCornerPtrR4 = latCornerPtrR8 * todeg
+               lonCornerPtrR4 = lonCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
+               latCornerPtrR4 = latCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
             else
                lonCornerPtrR4 = lonCornerPtrR8
                latCornerPtrR4 = latCornerPtrR8
@@ -15874,8 +15868,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Mosaic)                          :: mosaic
     integer                                    :: totallen
     integer                                    :: posVec(2), orientVec(2)
-    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
-    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
     integer                                    :: regDecomp(2)
     type(ESMF_Decomp_Flag)                     :: decompflag(2)
     type(ESMF_Index_Flag)                      :: localIndexFlag
@@ -16414,8 +16406,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Mosaic)                          :: mosaic
     integer                                    :: totallen
     integer                                    :: posVec(2), orientVec(2)
-    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
-    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
     type(ESMF_Index_Flag)                      :: localIndexFlag
     logical                                    :: isGlobal
     integer, pointer                           :: deBlockList(:,:,:), deToTileMap(:)
