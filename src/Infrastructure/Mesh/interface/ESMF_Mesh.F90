@@ -4199,8 +4199,6 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, name, rc)
   type(ESMF_VM)         :: vm
   integer               :: PetNo, PetCnt
   integer, parameter    :: f_p = selected_real_kind(15)   ! double precision
-  real,  parameter      :: pi = 3.1415926
-  real , parameter      :: todeg = 180.0/pi          ! convert to degrees
   real(ESMF_KIND_R8), allocatable :: lonEdge(:,:), latEdge(:,:)
   real(ESMF_KIND_R8), allocatable :: lonEdge1D(:), latEdge1D(:)
   real(ESMF_KIND_R8), allocatable :: NodeCoords(:), CenterCoords(:)
@@ -4339,8 +4337,8 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, name, rc)
                  tile=tileno(i), lonCenter=lonCenter, latCenter=latCenter)
         endif
         !call ESMF_VMWtime(endtime, rc=rc)
-        lonCenter = lonCenter * todeg
-        latCenter = latCenter * todeg
+        lonCenter = lonCenter * ESMF_COORDSYS_RAD2DEG
+        latCenter = latCenter * ESMF_COORDSYS_RAD2DEG
         do j=1,count(2,i)
           do l=1,count(1,i)
              ElemIds(k) = (tileno(i)-1)*tilesize*tilesize+(j+start(2,i)-2)*(tileSize)+start(1,i)+l-1
@@ -4354,8 +4352,8 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, name, rc)
 
      totalnodes = (tileSize+1)*(tileSize+1)*6
      ! convert radius to degrees
-     lonEdge = lonEdge * todeg
-     latEdge = latEdge * todeg
+     lonEdge = lonEdge * ESMF_COORDSYS_RAD2DEG
+     latEdge = latEdge * ESMF_COORDSYS_RAD2DEG
      !Find unique set of node coordinates
      allocate(map(totalnodes))
      TOL=0.0000000001
