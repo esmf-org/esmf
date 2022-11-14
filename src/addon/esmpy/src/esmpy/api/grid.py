@@ -381,8 +381,8 @@ class Grid(object):
                 #       dimension.. is that true?
         elif cubed_sphere:
             staggerloclist = np.array([StaggerLoc.CENTER], dtype=np.int32)
-            if add_corner_stagger == True:
-                staggerloclist.push_back(StaggerLoc.CORNER)
+            if add_corner_stagger == True:                    
+                staggerloclist.append(StaggerLoc.CORNER)
             self._struct = ESMP_GridCreateCubedSphere(tilesize,
                 regDecompPTile=regDecompPTile,
                 #decompFlagPTile=decompFlagPTile,
