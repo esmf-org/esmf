@@ -36,6 +36,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <stdbool.h>
 #include "ESMC_Util.h"
 
 #if defined (__cplusplus)
