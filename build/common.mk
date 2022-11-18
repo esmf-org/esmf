@@ -271,6 +271,10 @@ ifndef ESMF_CXXSTD
 export ESMF_CXXSTD = default
 endif
 
+ifndef ESMF_CSTD
+export ESMF_CSTD = default
+endif
+
 #-------------------------------------------------------------------------------
 # For some variables having the literal string "default" is ok;
 # for others, look for this string and override it.
@@ -1136,6 +1140,20 @@ ifneq ($(ESMF_CXXSTD),sysdefault)
 # Most compilers know the -std=c++XX flag. Overwrite in build_rules.mk if needed.
 ESMF_CXXSTDFLAG         = -std=c++$(ESMF_CXXSTD)
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_CXXSTD=$(ESMF_CXXSTD)
+endif
+
+#-------------------------------------------------------------------------------
+# Add C standard string to compile options if non-system-default is chosen.
+# The ESMF default is currently C99.
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_CSTD),default)
+ESMF_CSTD = 99
+endif
+
+ifneq ($(ESMF_CSTD),sysdefault)
+# Most compilers know the -std=cXX flag. Overwrite in build_rules.mk if needed.
+ESMF_CSTDFLAG         = -std=c$(ESMF_CSTD)
+ESMF_CCOMPILECPPFLAGS += -DESMF_CSTD=$(ESMF_CSTD)
 endif
 
 # - Archive library
