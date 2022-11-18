@@ -1082,6 +1082,7 @@ ifeq ($(origin ESMF_CLINKPATHS_ENV), environment)
 ESMF_CLINKPATHS = $(ESMF_CLINKPATHS_ENV)
 endif
 ESMF_CLINKPATHS    += -L$(ESMF_LDIR) $(ESMF_CLINKPATHSTHIRD)
+ESMF_CLINKPATHSTHIRD += $(ESMF_CXXLINKPATHSTHIRD)
 # - make sure environment variable gets prepended _once_
 ifeq ($(origin ESMF_CLINKRPATHS), environment)
 export ESMF_CLINKRPATHS_ENV := $(ESMF_CLINKRPATHS)
@@ -1091,6 +1092,7 @@ ifeq ($(origin ESMF_CLINKRPATHS_ENV), environment)
 ESMF_CLINKRPATHS = $(ESMF_CLINKRPATHS_ENV)
 endif
 ESMF_CLINKRPATHS   += $(ESMF_CRPATHPREFIX)$(ESMF_LDIR) $(ESMF_CLINKRPATHSTHIRD)
+ESMF_CLINKRPATHSTHIRD += $(ESMF_CXXLINKRPATHSTHIRD)
 # - make sure environment variable gets prepended _once_
 ifeq ($(origin ESMF_CLINKLIBS), environment)
 export ESMF_CLINKLIBS_ENV := $(ESMF_CLINKLIBS)
