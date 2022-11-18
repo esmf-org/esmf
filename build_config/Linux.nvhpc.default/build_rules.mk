@@ -11,6 +11,12 @@ ESMF_CXXDEFAULT         = nvc++
 ESMF_CDEFAULT           = nvc
 
 ############################################################
+# Do not use an explicit std switch for C99
+#
+ESMF_CSTD               = sysdefault
+ESMF_CSTDFLAG           =
+
+############################################################
 # Default MPI setting.
 #
 ifeq ($(ESMF_COMM),default)

@@ -15,6 +15,11 @@ ESMF_CXXDEFAULT         = pgCC
 endif
 ESMF_CDEFAULT           = pgcc
 
+############################################################
+# Do not use an explicit std switch for C99
+#
+ESMF_CSTD               = sysdefault
+ESMF_CSTDFLAG           =
 
 ############################################################
 # Default MPI setting.
