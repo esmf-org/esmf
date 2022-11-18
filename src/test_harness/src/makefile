@@ -5,7 +5,7 @@ ALL:      build_unit_tests
 LOCDIR	  = src/test_harness
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_TestHarnessUTest \
-                $(ESMF_TESTDIR)/ESMC_TestHarnessLatexPPUTest
+                $(ESMF_TESTDIR)/ESMCI_TestHarnessLatexPPUTest
 
 
 include ${ESMF_DIR}/makefile
@@ -25,4 +25,4 @@ ESMF_TestHarnessParser.o: ESMF_TestHarnessTypesMod.o  ESMF_TestHarnessGridMod.o 
 
 ESMF_TestHarnessUTest.o: ESMF_TestHarnessTypesMod.o ESMF_TestHarnessMod.o ESMF_TestHarnessParser.o ESMF_TestHarnessGridMod.o  ESMF_TestHarnessDistMod.o ESMF_TestHarnessReportMod.o 
 
-#ESMC_TestHarnessLatexPPUTest.o : ESMF_TestHarnessLatexPPUTest.o
+#ESMCI_TestHarnessLatexPPUTest.o : ESMF_TestHarnessLatexPPUTest.o
