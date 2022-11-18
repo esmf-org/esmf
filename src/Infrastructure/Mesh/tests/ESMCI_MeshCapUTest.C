@@ -23,7 +23,7 @@
 #if defined ESMF_MOAB
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
-#include "ESMC_MCTGen.C"
+#include "ESMCI_MCTGen.C"
 #endif
 
 #include "ESMCI_MeshCap.h"
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
 
   //----------------------------------------------------------------------------
   // Start the test with an alternate name for log and stdout files
-  ESMC_TestStart("ESMC_MeshCapGenUTest.C", __LINE__, 0);
+  ESMC_TestStart("ESMCI_MeshCapGenUTest.C", __LINE__, 0);
 
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
 
   // output stream to write test tag to the generated source file
   std::ofstream tagfile;
-  tagfile.open("ESMC_MeshCapGenUTest.C", std::ios_base::app);
+  tagfile.open("ESMCI_MeshCapGenUTest.C", std::ios_base::app);
 
   // this is an easy way to comment a single line to toggle mbmesh/native
   bool mbmesh = false;
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
   tagfile.close();
 
   //----------------------------------------------------------------------------
-  ESMC_TestEnd("ESMC_MeshCapGenUTest.C", __LINE__, 0);
+  ESMC_TestEnd("ESMCI_MeshCapGenUTest.C", __LINE__, 0);
 
   return 0;
 }

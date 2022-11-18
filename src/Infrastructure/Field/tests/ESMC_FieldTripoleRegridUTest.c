@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
 
 
-void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
+void create_grid(ESMC_Grid *grid, double max_x_in, double max_y_in)
 {
 
   // Create a Grid
@@ -46,32 +46,32 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   ESMC_InterArrayInt i_maxIndex;
   int dimcount = 2;
   maxIndex = (int *)malloc(dimcount*sizeof(int));
-  maxIndex[0] = int(max_x);
-  maxIndex[1] = int(max_y);
+  maxIndex[0] = (int)max_x;
+  maxIndex[1] = (int)max_y;
   ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
-  ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
-  ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
+  enum ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
+  enum ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
   ESMC_InterArrayInt i_pkr;
   int polekind[2];
   polekind[0] = ESMC_POLEKIND_MONOPOLE;
   polekind[1] = ESMC_POLEKIND_BIPOLE;
   ESMC_InterArrayIntSet(&i_pkr, polekind, 2);
 
-  grid = ESMC_GridCreate1PeriDim(&i_maxIndex, &i_pkr, NULL, NULL, &coordsys, &typekind,
-                                 NULL, NULL);
+  *grid = ESMC_GridCreate1PeriDim(&i_maxIndex, &i_pkr, NULL, NULL, &coordsys,
+    &typekind, NULL, NULL);
 
   // free memory
   free(maxIndex);
   //----------------------------------------------------------------------------
 
   // add coordinates to center
-  int rc = ESMC_GridAddCoord(grid, ESMC_STAGGERLOC_CENTER);
+  int rc = ESMC_GridAddCoord(*grid, ESMC_STAGGERLOC_CENTER);
 
 #ifdef masking
-  rc = ESMC_GridAddItem(grid, ESMC_GRIDITEM_MASK, ESMC_STAGGERLOC_CENTER);
+  rc = ESMC_GridAddItem(*grid, ESMC_GRIDITEM_MASK, ESMC_STAGGERLOC_CENTER);
 
-  int *mask = (int *)ESMC_GridGetItem(grid, ESMC_GRIDITEM_MASK,
+  int *mask = (int *)ESMC_GridGetItem(*grid, ESMC_GRIDITEM_MASK,
                                             ESMC_STAGGERLOC_CENTER, NULL);
 #endif
 
@@ -79,10 +79,10 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   int *exLBound_c = (int *)malloc(dimcount*sizeof(int));
   int *exUBound_c = (int *)malloc(dimcount*sizeof(int));
 
-  double *gridXCoord_c = (double *)ESMC_GridGetCoord(grid, 1,
+  double *gridXCoord_c = (double *)ESMC_GridGetCoord(*grid, 1,
                                                    ESMC_STAGGERLOC_CORNER, NULL,
                                                    exLBound_c, exUBound_c, NULL);
-  double *gridYCoord_c = (double *)ESMC_GridGetCoord(grid, 2,
+  double *gridYCoord_c = (double *)ESMC_GridGetCoord(*grid, 2,
                                                    ESMC_STAGGERLOC_CORNER, NULL,
                                                    NULL, NULL, NULL);
 
@@ -101,10 +101,10 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   int *exLBound = (int *)malloc(dimcount*sizeof(int));
   int *exUBound = (int *)malloc(dimcount*sizeof(int));
 
-  double *gridXCoord = (double *)ESMC_GridGetCoord(grid, 1,
+  double *gridXCoord = (double *)ESMC_GridGetCoord(*grid, 1,
                                                    ESMC_STAGGERLOC_CENTER, NULL,
                                                    exLBound, exUBound, NULL);
-  double *gridYCoord = (double *)ESMC_GridGetCoord(grid, 2,
+  double *gridYCoord = (double *)ESMC_GridGetCoord(*grid, 2,
                                                    ESMC_STAGGERLOC_CENTER, NULL,
                                                    NULL, NULL, NULL);
 
@@ -175,8 +175,8 @@ int main(void){
   //----------------------------------------------------------------------------
   //----------------------- Grid CREATION --------------------------------------
   //----------------------------------------------------------------------------
-  create_grid(srcgrid, 18, 10);
-  create_grid(dstgrid, 10, 8);
+  create_grid(&srcgrid, 18, 10);
+  create_grid(&dstgrid, 10, 8);
 
   //----------------------------------------------------------------------------
   //----------------------- Field CREATION --------------------------------------
@@ -254,8 +254,8 @@ int main(void){
   rc = ESMC_InterArrayIntSet(&i_maskValues, maskValues, 1);
 
   //----------------------------------------------------------------------------
-  ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
-  ESMC_RegridMethod_Flag regridmethod = ESMC_REGRIDMETHOD_CONSERVE;
+  enum ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
+  enum ESMC_RegridMethod_Flag regridmethod = ESMC_REGRIDMETHOD_CONSERVE;
 #ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle,
                              NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,

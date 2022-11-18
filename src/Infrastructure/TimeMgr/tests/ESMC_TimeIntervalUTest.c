@@ -12,7 +12,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+#include <math.h>
 
 // ESMF header
 #include "ESMC.h"
@@ -22,7 +22,7 @@
 
 //==============================================================================
 //BOP
-// !PROGRAM: ESMC_TimeUTest - Check ESMC_Time functionality
+// !PROGRAM: ESMC_TimeIntervalUTest - Check ESMC_TimeInterval functionality
 //
 // !DESCRIPTION:
 //
@@ -36,60 +36,40 @@ int main(void){
   int result = 0;
   int rc;
   
-  ESMC_Calendar calendar;
-  ESMC_Calendar calendarOut;
-  ESMC_Time time1;
-  ESMC_I4 yy;
-  ESMC_I4 yy1=2006;
-  ESMC_I4 h;
-  ESMC_I4 h1=0;
-  ESMC_CalKind_Flag calKind;
-  ESMC_CalKind_Flag calKind1=ESMC_CALKIND_GREGORIAN;
-  int tZ;
-  int tZ1=-6;
+  ESMC_TimeInterval timeInterval1;
+  ESMC_I4 h_I4;
+  ESMC_I4 h1_I4=1;
+  ESMC_I8 s_I8;
+  ESMC_I8 s1_I8=0;
+  ESMC_R8 h_R8;
+  ESMC_R8 hl_R8=0;
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
+
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Create ESMC_Calendar object");
+  strcpy(name, "Set a TimeInterval");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  calendar = ESMC_CalendarCreate("Gregorian", ESMC_CALKIND_GREGORIAN, &rc);
-  printf("After CalendarCreate rc = %d \n",rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-  
-  //----------------------------------------------------------------------------
-  //NEX_UTest
-  strcpy(name, "Print ESMC_Calendar object");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CalendarPrint(calendar);
+  rc = ESMC_TimeIntervalSet(&timeInterval1, h1_I4);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Set a Time");
+  strcpy(name, "Print ESMC_TimeInterval object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_TimeSet(&time1, yy1, h1, calendar, calKind1, tZ1);
+  rc = ESMC_TimeIntervalPrint(timeInterval1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  strcpy(name, "Print ESMC_Time object");
+  strcpy(name, "Get a TimeInterval");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_TimePrint(time1);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest
-  strcpy(name, "Get a Time");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_TimeGet(time1, &yy, &h, &calendarOut, &calKind, &tZ);
+  rc = ESMC_TimeIntervalGet(timeInterval1, &s_I8, &h_R8);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -97,29 +77,21 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //EX_UTest
-  strcpy(name, "Check that TimeZone parameter is set and get correctly");
-  strcpy(failMsg, "tZ is different from tZ1");
-  ESMC_Test((tZ==tZ1), name, failMsg, &result, __FILE__, __LINE__, 0);
+  strcpy(name, "Check that hour parameter is returned correctly");
+  strcpy(failMsg, "h_R8 is not 1.");
+  ESMC_Test((fabs(h_R8-1.) < 1.e-10), name, failMsg, &result, __FILE__,
+    __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //EX_UTest
-  strcpy(name, "Check that ESMC_Calendar parameter is set and get correctly");
-  strcpy(failMsg, "calendar.ptr is different from calendarOut.ptr");
-  ESMC_Test((calendar.ptr==calendarOut.ptr), name, failMsg, &result, __FILE__,
-    __LINE__, 0);
+  strcpy(name, "Check that the integer sec. parameter is returned correctly");
+  strcpy(failMsg, "s_I8 is not 3600");
+  ESMC_Test(((int)s_I8==3600), name, failMsg, &result, __FILE__, __LINE__, 0); 
   //----------------------------------------------------------------------------
 
 #endif
-  
-  //----------------------------------------------------------------------------
-  //NEX_UTest
-  strcpy(name, "Destroy ESMC_Calendar object");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CalendarDestroy(&calendar);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-  
+
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

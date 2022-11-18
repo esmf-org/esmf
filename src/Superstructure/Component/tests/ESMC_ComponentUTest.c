@@ -158,10 +158,8 @@ void myCplRegistrationInC(ESMC_CplComp cplcomp, int *rc){
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
-extern "C"{
-  void FTN_X(my_registrationinfortran)(ESMC_GridComp comp, int *rc);
-  void FTN_X(my_cplregistrationinfortran)(ESMC_CplComp comp, int *rc);
-}
+void FTN_X(my_registrationinfortran)(ESMC_GridComp comp, int *rc);
+void FTN_X(my_cplregistrationinfortran)(ESMC_CplComp comp, int *rc);
 
 
 int main(void){
@@ -175,7 +173,7 @@ int main(void){
   ESMC_Time startTime;
   ESMC_I4 yy1;
   ESMC_I4 h1;
-  ESMC_CalKind_Flag calKind1;
+  enum ESMC_CalKind_Flag calKind1;
   int tZ1;
   ESMC_Time stopTime;
   ESMC_I4 h2;

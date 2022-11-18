@@ -23,7 +23,7 @@
 
 #if defined ESMF_MOAB
 #include "ESMCI_MBMesh.h"
-#include "ESMC_MCT.C"
+#include "ESMCI_MCT.C"
 #endif
 
 #include "ESMCI_MeshCap.h"

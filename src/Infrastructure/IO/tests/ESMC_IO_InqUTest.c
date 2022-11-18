@@ -20,10 +20,8 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-extern "C" {
-  void ESMC_ScripInq (const char *, int *, int *, int *);
-  void ESMC_GridspecInq (const char *, int *, int *, int *);
-}
+void ESMC_ScripInq (const char *, int *, int *, int *);
+void ESMC_GridspecInq (const char *, int *, int *, int *);
 
 //==============================================================================
 //BOP

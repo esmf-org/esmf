@@ -10,6 +10,7 @@
 //
 //==============================================================================
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -120,8 +121,8 @@ int main(void){
   int out[4];
   in[0] = 1; in[1] = 1; in[2] = 1; in[3] = 1;
   out[0] = 0; out[1] = 0; out[2] = 0; out[3] = 0;
-  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I4;
-  ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
+  enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I4;
+  enum ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
   rc = ESMC_VMReduce(vm, in, out, len, &tk, &rd, root);
   bool correct = true;
   if (localPet == 0) {
@@ -146,8 +147,8 @@ int main(void){
   long long out[4];
   in[0] = 1; in[1] = 1; in[2] = 1; in[3] = 1;
   out[0] = 0; out[1] = 0; out[2] = 0; out[3] = 0;
-  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I8;
-  ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
+  enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I8;
+  enum ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
   rc = ESMC_VMReduce(vm, in, out, len, &tk, &rd, root);
   bool correct = true;
   if (localPet == 0) {
@@ -172,8 +173,8 @@ int main(void){
   float out[4];
   in[0] = 1; in[1] = 1; in[2] = 1; in[3] = 1;
   out[0] = 0; out[1] = 0; out[2] = 0; out[3] = 0;
-  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R4;
-  ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
+  enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R4;
+  enum ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
   rc = ESMC_VMReduce(vm, in, out, len, &tk, &rd, root);
   bool correct = true;
   if (localPet == 0) {
@@ -198,8 +199,8 @@ int main(void){
   double out[4];
   in[0] = 1; in[1] = 1; in[2] = 1; in[3] = 1;
   out[0] = 0; out[1] = 0; out[2] = 0; out[3] = 0;
-  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
-  ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
+  enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
+  enum ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
   rc = ESMC_VMReduce(vm, in, out, len, &tk, &rd, root);
   bool correct = true;
   if (localPet == 0) {
@@ -226,7 +227,7 @@ int main(void){
   } else {
     bcast[0] = 2; bcast[1] = 2; bcast[2] = 2; bcast[3] = 2;
   }
-  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I4;
+  enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I4;
   rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
   bool correct = true;
   for (int i = 0; i < len; ++i) {
@@ -251,7 +252,7 @@ int main(void){
   } else {
     bcast[0] = 2; bcast[1] = 2; bcast[2] = 2; bcast[3] = 2;
   }
-  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I8;
+  enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I8;
   rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
   bool correct = true;
   for (int i = 0; i < len; ++i) {
@@ -276,7 +277,7 @@ int main(void){
   } else {
     bcast[0] = 2; bcast[1] = 2; bcast[2] = 2; bcast[3] = 2;
   }
-  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R4;
+  enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R4;
   rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
   bool correct = true;
   for (int i = 0; i < len; ++i) {
@@ -301,7 +302,7 @@ int main(void){
   } else {
     bcast[0] = 2; bcast[1] = 2; bcast[2] = 2; bcast[3] = 2;
   }
-  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
+  enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
   rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
   bool correct = true;
   for (int i = 0; i < len; ++i) {
@@ -326,7 +327,7 @@ int main(void){
   } else {
     bcast[0] = false; bcast[1] = false; bcast[2] = false; bcast[3] = false;
   }
-  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_LOGICAL;
+  enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_LOGICAL;
   rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
   bool correct = true;
   for (int i = 0; i < len; ++i) {
@@ -351,7 +352,7 @@ int main(void){
   // } else {
   //   bcast[0] = 'y'; bcast[1] = 'y'; bcast[2] = 'y'; bcast[3] = 'y';
   // }
-  // ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_CHARACTER;
+  // enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_CHARACTER;
   // rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
   // bool correct = true;
   // for (int i = 0; i < len; ++i) {

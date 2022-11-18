@@ -41,14 +41,13 @@ int main(void){
   int localrc;
   int rank = 2;
   int rank_out=0;
-  ESMC_TypeKind_Flag typekind; 
-  ESMC_TypeKind_Flag typekind_out; 
+  enum ESMC_TypeKind_Flag typekind; 
+  enum ESMC_TypeKind_Flag typekind_out; 
   typekind= ESMC_TYPEKIND_I4;
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -87,6 +86,6 @@ int main(void){
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
+
   return 0;
 }

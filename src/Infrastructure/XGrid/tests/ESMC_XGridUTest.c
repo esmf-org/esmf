@@ -39,7 +39,7 @@ int main(void){
   int localPet, petCount;
   int localrc, rc;
   bool correct;
-  ESMC_StaggerLoc stagger = ESMC_STAGGERLOC_CORNER;
+  enum ESMC_StaggerLoc stagger = ESMC_STAGGERLOC_CORNER;
 
   ESMC_VM vm;
   bool pass;
@@ -605,9 +605,9 @@ ESMC_Grid create_grid_2D(int *maxIndex, double *minCoord, double *maxCoord, int 
   }
 
   // Set coordinate information 
-  ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
-  ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
-  ESMC_IndexFlag     indexflag=ESMC_INDEX_GLOBAL;
+  enum ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
+  enum ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
+  enum ESMC_IndexFlag     indexflag=ESMC_INDEX_GLOBAL;
 
   // Create Grid
   outGrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, &indexflag, &localrc);

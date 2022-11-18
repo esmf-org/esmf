@@ -20,11 +20,12 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#define center
+#define masking
+#define areas
 
 //==============================================================================
 //BOP
-// !PROGRAM: ESMC_FieldRegridParUTest - Check ESMC_FieldRegrid functionality
+// !PROGRAM: ESMC_FieldGridRegridCsrvUTest - Check ESMC_FieldRegrid functionality
 //
 // !DESCRIPTION:
 //
@@ -39,13 +40,14 @@ int main(void){
   int result = 0;
   int rc;
 
+  // VM variables
   int localPet, petCount;
   ESMC_VM vm;
   
   // Field variables
-  ESMC_ArraySpec arrayspec;
   ESMC_RouteHandle routehandle;
-  ESMC_Field srcfield, dstfield, exactfield;
+  ESMC_Field srcfield, dstfield, srcAreaField, dstAreaField, 
+             srcFracField, dstFracField;
 
   // Grid variables
   ESMC_Grid srcgrid;
@@ -59,10 +61,10 @@ int main(void){
   ESMC_Mesh dstmesh;
   int num_elem, num_node;
 
-
   // computation variables
-  int p;
   double x, y, exact, tol;
+  int p;
+
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -83,35 +85,32 @@ int main(void){
 
 #ifdef ESMF_TESTEXHAUSTIVE
   //----------------------------------------------------------------------------
-  double ub_x, lb_x, max_x, min_x, cellwidth_x, cellcenter_x;
-  double ub_y, lb_y, max_y, min_y, cellwidth_y, cellcenter_y;
-  ub_x = 21;
-  ub_y = 21;
+  //EX_UTest
+  // Create a Grid
+  double ub_x, lb_x, max_x, min_x, cellwidth_x;
+  double ub_y, lb_y, max_y, min_y, cellwidth_y;
+  ub_x = 4;
+  ub_y = 4;
   lb_x = 0;
   lb_y = 0;
-  max_x = 21;
-  max_y = 21;
+  max_x = 4;
+  max_y = 4;
   min_x = 0;
   min_y = 0;
+
   cellwidth_x = (max_x-min_x)/(ub_x-lb_x);
   cellwidth_y = (max_y-min_y)/(ub_y-lb_y);
 
-  cellcenter_x = cellwidth_x/double(2);
-  cellcenter_y = cellwidth_y/double(2);
-
   maxIndex = (int *)malloc(dimcount*sizeof(int));
-  maxIndex[0] = int(ub_x);
-  maxIndex[1] = int(ub_y);
+  maxIndex[0] = (int)ub_x;
+  maxIndex[1] = (int)ub_y;
   rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
-  //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
-  ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
-  ESMC_IndexFlag indexflag = ESMC_INDEX_GLOBAL;
-  srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, &indexflag, &rc);
+  enum ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
+  enum ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
+  srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // free memory
@@ -123,18 +122,39 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "GridAddCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CENTER);
   rc = ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CORNER);
+  rc = ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CENTER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddItem");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef masking
+  rc = ESMC_GridAddItem(srcgrid, ESMC_GRIDITEM_MASK, ESMC_STAGGERLOC_CENTER);
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridGetItem - mask");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef masking
+  int *mask = (int *)ESMC_GridGetItem(srcgrid, ESMC_GRIDITEM_MASK, 
+                                      ESMC_STAGGERLOC_CENTER, NULL, &rc);
+#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   // CORNERS
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   // get and fill first coord array and computational bounds
   int *exLB_corner = (int *)malloc(dimcount*sizeof(int));
   int *exUB_corner = (int *)malloc(dimcount*sizeof(int));
@@ -156,11 +176,11 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  printf("exLB_corner = [%d,%d]\n", exLB_corner[0], exLB_corner[1]);
-  printf("exUB_corner = [%d,%d]\n", exUB_corner[0], exUB_corner[1]);
+  //printf("exLB_corner = [%d,%d]\n", exLB_corner[0], exLB_corner[1]);
+  //printf("exUB_corner = [%d,%d]\n", exUB_corner[0], exUB_corner[1]);
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   // get and fill second coord array
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -182,7 +202,7 @@ int main(void){
   // CENTERS
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   // get and fill first coord array and computational bounds
   int *exLB_center = (int *)malloc(dimcount*sizeof(int));
   int *exUB_center = (int *)malloc(dimcount*sizeof(int));
@@ -204,11 +224,11 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  printf("exLB_center = [%d,%d]\n", exLB_center[0], exLB_center[1]);
-  printf("exUB_center = [%d,%d]\n", exUB_center[0], exUB_center[1]);
+  //printf("exLB_center = [%d,%d]\n", exLB_center[0], exLB_center[1]);
+  //printf("exUB_center = [%d,%d]\n", exUB_center[0], exUB_center[1]);
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   // get and fill second coord array
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -227,245 +247,119 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+#ifdef masking
+  // set the masking
+  p = 0;
+  for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
+    for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+      if (i0 == 2 ) {
+        mask[p] = 1;
+        //printf("Masked value at [%f,%f]\n", gridXCenter[p], gridYCenter[p]);
+      } else mask[p] = 0;
+      ++p;
+    }
+  }
+#endif
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddItem - area");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef areas
+  rc = ESMC_GridAddItem(srcgrid, ESMC_GRIDITEM_AREA, ESMC_STAGGERLOC_CENTER);
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridGetItem - area");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef areas
+  double *area = (double *)ESMC_GridGetItem(srcgrid, ESMC_GRIDITEM_AREA,
+                                      ESMC_STAGGERLOC_CENTER, NULL, &rc);
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+#ifdef areas
+  // set the areas of the grid
+  p = 0;
+  for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
+    for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+      area[p] = 1.0/4.0;
+      //printf("Area at [%f,%f] = %f\n", gridXCenter[p], gridYCenter[p], area[p]);
+      ++p;
+    }
+  }
+#endif
+
 
 
 
   //              Destination Mesh
   // 
   //
-  //  20.0 3.0   13 ------ 14 ------ 15     [15] ----------- 16    
-  //             |         |         |       |               |
-  //             |         |         |       |               |
-  //             |    8    |    9    |       |       10      |
-  //             |         |         |       |               |
-  //             |         |         |       |               |
-  //  15.0 2.0  [9] ----- [10] ---- [11]    [11] ---------- [12]
-  //                                                              
-  //           1.0       1.5       2.0     2.0             3.0 
-  //           1.0       10.0      15.0    15.0            20.0 
-  //          
-  //                    PET 2                      PET 3
-  //          
-  //          
-  //  15.0 2.0   9 ------- 10 ------ 11     [11] ----------- 12      
-  //             |         |         |       |               |
-  //             |    5    |    6    |       |       7       |
-  //             |         |         |       |               |
-  //  10.0 1.5   5 ------- 6 ------- 7      [7] -----------  8
-  //             |         |  \   3  |       |               |
-  //             |    1    |    \    |       |       4       |
-  //             |         | 2    \  |       |               |
-  //  1.0  1.0   1 ------- 2 ------- 3      [3] ------------ 4
-  //                                                    
-  //           1.0       1.5       2.0     2.0             3.0 
-  //           1.0       10.0       15.0    15.0            20.0 
-  // 
-  //                PET 0                      PET 1
+  //  3.0   13 -------14 --------15--------16
+  //        |         |          |         |
+  //        |    7    |    8     |   9     |
+  //        |         |          |         |
+  //  2.5   9 ------- 10 --------11--------12
+  //        |         |          |         |
+  //        |    4    |    5     |   6     |
+  //        |         |          |         |
+  //  1.5   5 ------- 6 -------- 7-------- 8
+  //        |         |          |         |
+  //        |    1    |    2     |   3     |
+  //        |         |          |         |
+  //  1.0   1 ------- 2 -------- 3-------- 4
+  //      
+  //       1.0       1.5        2.5       3.0
   //
-  //               Node Id labels at corners
-  //              Element Id labels in centers
+  //      Node Ids at corners
+  //      Element Ids in centers
+  //
+  //
+  //      ( Everything owned by PET 0) 
+  // 
 
 
-  // set Mesh parameters
-  int *nodeId;
-  double *nodeCoord;
-  int *nodeOwner;
+  num_elem = 9;
+  num_node = 16;
 
-  int *elemId;
-  int *elemType;
-  int *elemConn;
-
-
-  if (localPet == 0){
-    num_node = 9;
-    num_elem = 5;
-
-    nodeId    = (int *) malloc (num_node * sizeof (int));
-    nodeCoord = (double *) malloc (2*num_node * sizeof (double));
-    nodeOwner = (int *) malloc (num_node * sizeof (int));
-    elemId   = (int *) malloc (num_elem * sizeof (int));
-    elemType = (int *) malloc (num_elem * sizeof (int));
-    elemConn = (int *) malloc (4*num_elem * sizeof (int));
-
-    nodeId[0]=1;
-    nodeId[1]=2;
-    nodeId[2]=3;
-    nodeId[3]=5;
-    nodeId[4]=6;
-    nodeId[5]=7;
-    nodeId[6]=9;
-    nodeId[7]=10;
-    nodeId[8]=11;
-    nodeCoord[0]=1.0;nodeCoord[1]=1.0;
-    nodeCoord[2]=10.0;nodeCoord[3]=1.0;
-    nodeCoord[4]=15.0;nodeCoord[5]=1.0;
-    nodeCoord[6]=1.0;nodeCoord[7]=10.0;
-    nodeCoord[8]=10.0;nodeCoord[9]=10.0;
-    nodeCoord[10]=15.0;nodeCoord[11]=10.0;
-    nodeCoord[12]=1.0;nodeCoord[13]=15.0;
-    nodeCoord[14]=10.0;nodeCoord[15]=15.0;
-    nodeCoord[16]=15.0;nodeCoord[17]=15.0;
-/*    nodeCoord[0]=1.0;nodeCoord[1]=1.0;
-    nodeCoord[2]=1.5;nodeCoord[3]=1.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=1.0;
-    nodeCoord[6]=1.0;nodeCoord[7]=1.5;
-    nodeCoord[8]=1.5;nodeCoord[9]=1.5;
-    nodeCoord[10]=2.0;nodeCoord[11]=1.5;
-    nodeCoord[12]=1.0;nodeCoord[13]=2.0;
-    nodeCoord[14]=1.5;nodeCoord[15]=2.0;
-    nodeCoord[16]=2.0;nodeCoord[17]=2.0;*/
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=0;
-    nodeOwner[4]=0;
-    nodeOwner[5]=0;
-    nodeOwner[6]=0;
-    nodeOwner[7]=0;
-    nodeOwner[8]=0;
-    elemId[0]=1;
-    elemId[1]=2;
-    elemId[2]=3;
-    elemId[3]=5;
-    elemId[4]=6;
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_TRI;
-    elemType[2]=ESMC_MESHELEMTYPE_TRI;
-    elemType[3]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[4]=ESMC_MESHELEMTYPE_QUAD;
-    // ESMF_MESHELEMTYPE_QUAD=9
-    // ESMF_MESHELEMTYPE_TRI=5
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-
-    elemConn[4]=2;elemConn[5]=3;elemConn[6]=5;
-    elemConn[7]=3;elemConn[8]=6;elemConn[9]=5;
-    elemConn[10]=4;elemConn[11]=5;elemConn[12]=8;elemConn[13]=7;
-    elemConn[14]=5;elemConn[15]=6;elemConn[16]=9;elemConn[17]=8;
-  }
-  else if (localPet == 1) {
-    num_node = 6;
-    num_elem = 2;
-
-    nodeId    = (int *) malloc (num_node * sizeof (int));
-    nodeCoord = (double *) malloc (2*num_node * sizeof (double));
-    nodeOwner = (int *) malloc (num_node * sizeof (int));
-    elemId   = (int *) malloc (num_elem * sizeof (int));
-    elemType = (int *) malloc (num_elem * sizeof (int));
-    elemConn = (int *) malloc (4*num_elem * sizeof (int));
-
-    nodeId[0]=3;
-    nodeId[1]=4;
-    nodeId[2]=7;
-    nodeId[3]=8;
-    nodeId[4]=11;
-    nodeId[5]=12;
-    nodeCoord[0]=15.0;nodeCoord[1]=1.0;
-    nodeCoord[2]=20.0;nodeCoord[3]=1.0;
-    nodeCoord[4]=15.0;nodeCoord[5]=10.0;
-    nodeCoord[6]=20.0;nodeCoord[7]=10.0;
-    nodeCoord[8]=15.0;nodeCoord[9]=15.0;
-    nodeCoord[10]=20.0;nodeCoord[11]=15.0;
-    /*nodeCoord[0]=2.0;nodeCoord[1]=1.0;
-    nodeCoord[2]=3.0;nodeCoord[3]=1.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=1.5;
-    nodeCoord[6]=3.0;nodeCoord[7]=1.5;
-    nodeCoord[8]=2.0;nodeCoord[9]=2.0;
-    nodeCoord[10]=3.0;nodeCoord[11]=2.0;*/
-    nodeOwner[0]=0;
-    nodeOwner[1]=1;
-    nodeOwner[2]=0;
-    nodeOwner[3]=1;
-    nodeOwner[4]=0;
-    nodeOwner[5]=1;
-    elemId[0]=4;
-    elemId[1]=7;
-    // ESMF_MESHELEMTYPE_QUAD=9
-    // ESMF_MESHELEMTYPE_TRI=5
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-    elemConn[4]=3;elemConn[5]=4;elemConn[6]=6;elemConn[7]=5;
-  }
-  else if (localPet == 2) {
-    num_node = 6;
-    num_elem = 2;
-
-    nodeId    = (int *) malloc (num_node * sizeof (int));
-    nodeCoord = (double *) malloc (2*num_node * sizeof (double));
-    nodeOwner = (int *) malloc (num_node * sizeof (int));
-    elemId   = (int *) malloc (num_elem * sizeof (int));
-    elemType = (int *) malloc (num_elem * sizeof (int));
-    elemConn = (int *) malloc (4*num_elem * sizeof (int));
-
-    nodeId[0]=9;
-    nodeId[1]=10;
-    nodeId[2]=11;
-    nodeId[3]=13;
-    nodeId[4]=14;
-    nodeId[5]=15;
-    nodeCoord[0]=1.0;nodeCoord[1]=15.0;
-    nodeCoord[2]=10.0;nodeCoord[3]=15.0;
-    nodeCoord[4]=15.0;nodeCoord[5]=15.0;
-    nodeCoord[6]=1.0;nodeCoord[7]=20.0;
-    nodeCoord[8]=10.0;nodeCoord[9]=20.0;
-    nodeCoord[10]=15.0;nodeCoord[11]=20.0;
-    /*nodeCoord[0]=1.0;nodeCoord[1]=2.0;
-    nodeCoord[2]=1.5;nodeCoord[3]=2.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=2.0;
-    nodeCoord[6]=1.0;nodeCoord[7]=3.0;
-    nodeCoord[8]=1.5;nodeCoord[9]=3.0;
-    nodeCoord[10]=2.0;nodeCoord[11]=3.0;*/
-    nodeOwner[0]=0;
-    nodeOwner[1]=0;
-    nodeOwner[2]=0;
-    nodeOwner[3]=2;
-    nodeOwner[4]=2;
-    nodeOwner[5]=2;
-    elemId[0]=8;
-    elemId[1]=9;
-    // ESMF_MESHELEMTYPE_QUAD=9
-    // ESMF_MESHELEMTYPE_TRI=5
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemType[1]=ESMC_MESHELEMTYPE_QUAD;
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
-    elemConn[4]=2;elemConn[5]=3;elemConn[6]=6;elemConn[7]=5;
-  }
-  else if (localPet == 3) {
-    num_node = 4;
-    num_elem = 1;
-
-    nodeId    = (int *) malloc (num_node * sizeof (int));
-    nodeCoord = (double *) malloc (2*num_node * sizeof (double));
-    nodeOwner = (int *) malloc (num_node * sizeof (int));
-    elemId   = (int *) malloc (num_elem * sizeof (int));
-    elemType = (int *) malloc (num_elem * sizeof (int));
-    elemConn = (int *) malloc (4*num_elem * sizeof (int));
-
-    nodeId[0]=11;
-    nodeId[1]=12;
-    nodeId[2]=15;
-    nodeId[3]=16;
-    nodeCoord[0]=15.0;nodeCoord[1]=15.0;
-    nodeCoord[2]=20.0;nodeCoord[3]=15.0;
-    nodeCoord[4]=15.0;nodeCoord[5]=20.0;
-    nodeCoord[6]=20.0;nodeCoord[7]=20.0;
-    /*nodeCoord[0]=2.0;nodeCoord[1]=2.0;
-    nodeCoord[2]=3.0;nodeCoord[3]=2.0;
-    nodeCoord[4]=2.0;nodeCoord[5]=3.0;
-    nodeCoord[6]=3.0;nodeCoord[7]=3.0;*/
-    nodeOwner[0]=0;
-    nodeOwner[1]=1;
-    nodeOwner[2]=2;
-    nodeOwner[3]=3;
-    elemId[0]=10;
-    // ESMF_MESHELEMTYPE_QUAD=9
-    // ESMF_MESHELEMTYPE_TRI=5
-    elemType[0]=ESMC_MESHELEMTYPE_QUAD;
-    elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-  }
+  int nodeId [] ={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+  double nodeCoord [] ={1.0,1.0, 1.5,1.0, 2.5,1.0, 3.0,1.0,
+               1.0,1.5, 1.5,1.5, 2.5,1.5, 3.0,1.5,
+               1.0,2.5, 1.5,2.5, 2.5,2.5, 3.0,2.5,
+               1.0,3.0, 1.5,3.0, 2.5,3.0, 3.0,3.0};
+  int nodeOwner [] ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  int elemId [] ={1,2,3,4,5,6,7,8,9};
+  // ESMF_MESHELEMTYPE_QUAD
+  int elemType [] = {ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD,
+                     ESMC_MESHELEMTYPE_QUAD};
+  int elemConn [] ={1,2,6,5,
+              2,3,7,6,
+              3,4,8,7,
+              5,6,10,9,
+              6,7,11,10,
+              7,8,12,11,
+              9,10,14,13,
+              10,11,15,14,
+              11,12,16,15};
+#ifdef areas
+  double a = 4.0/9.0;
+  double cellAreas [] ={a,a,a,a,a,a,a,a,a,a};
+#endif
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dstmesh = ESMC_MeshCreate(pdim,sdim,&coordsys,&rc);
@@ -473,7 +367,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshAddNodes(dstmesh, num_node, nodeId, nodeCoord, nodeOwner);
@@ -481,16 +375,21 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef areas
   rc = ESMC_MeshAddElements(dstmesh, num_elem, elemId, elemType, elemConn, 
-                            NULL,NULL, NULL);
+                            NULL, cellAreas, NULL);
+#else
+  rc = ESMC_MeshAddElements(dstmesh, num_elem, elemId, elemType, elemConn, 
+                            NULL, NULL, NULL);
+#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "MeshGetNodeCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_node_out;
@@ -498,10 +397,10 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS) && num_node==num_node_out, 
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("num_node = %d\nnum_node_out=%d\n", num_node, num_node_out);
+  //printf("num_node = %d\nnum_node_out=%d\n", num_node, num_node_out);
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "MeshGetElementCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_elem_out;
@@ -509,8 +408,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS) && num_elem==num_elem_out, 
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("num_elem = %d\nnum_elem_out=%d\n", num_elem, num_elem_out);
-
+  //printf("num_elem = %d\nnum_elem_out=%d\n", num_elem, num_elem_out);
 
   //----------------------------------------------------------------------------
   //---------------------- FIELD CREATION --------------------------------------
@@ -518,132 +416,102 @@ int main(void){
 
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Create ESMC_Field object from a Grid via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-#ifdef corner
-  srcfield = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
-    ESMC_STAGGERLOC_CORNER, NULL, NULL, NULL, "srcfield", &rc);
-#endif
-#ifdef center
   srcfield = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
     ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "srcfield", &rc);
-#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Create ESMC_Field object from a Mesh via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dstfield = ESMC_FieldCreateMeshTypeKind(dstmesh, 
-    ESMC_TYPEKIND_R8, ESMC_MESHLOC_NODE, NULL, NULL, NULL, "dstfield", &rc);
+    ESMC_TYPEKIND_R8, ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "dstfield", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
-  //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
-  strcpy(name, "Create ESMC_Field object from a Mesh via TypeKind");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  exactfield = ESMC_FieldCreateMeshTypeKind(dstmesh, 
-    ESMC_TYPEKIND_R8, ESMC_MESHLOC_NODE, NULL, NULL, NULL, "dstfield", &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-  
+
   //----------------------------------------------------------------------------
   //-------------------------- REGRIDDING --------------------------------------
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double * srcfieldptr = (double *)ESMC_FieldGetPtr(srcfield, 0, &rc);
+  double *srcfieldptr = (double *)ESMC_FieldGetPtr(srcfield, 0, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-#ifdef corner
-  // define analytic field on source field
-  p = 0;
-  for (int i1=exLB_corner[1]; i1<=exUB_corner[1]; ++i1) {
-    for (int i0=exLB_corner[0]; i0<=exUB_corner[0]; ++i0) {
-      x = gridXCorner[p];
-      y = gridYCorner[p];
-      //srcfieldptr[p] = 20.0;
-      srcfieldptr[p] = 20.0+x+y;
-      ++p;
-    }
-  }
-#endif
-#ifdef center
   // define analytic field on source field
   p = 0;
   for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
     for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
       x = gridXCenter[p];
       y = gridYCenter[p];
-      //srcfieldptr[p] = 20.0;
-      srcfieldptr[p] = 20.0+x+y;
+#ifdef masking
+      if (mask[p] == 1)
+        srcfieldptr[p] = 10000000;
+      else
+#endif
+      srcfieldptr[p] = 20.0 + x + y;
       ++p;
     }
   }
-#endif
-  
-  //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
-  strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double * dstfieldptr = (double *)ESMC_FieldGetPtr(dstfield, 0, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double * exactptr = (double *)ESMC_FieldGetPtr(exactfield, 0, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
-  strcpy(name, "Get the ownedNode count from ESMC_Mesh object");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  int num_onode;
-  rc = ESMC_MeshGetOwnedNodeCount(dstmesh, &num_onode);
+  double *dstfieldptr = (double *)ESMC_FieldGetPtr(dstfield, 0, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   // initialize destination field
-  for(int i=0; i<num_onode; ++i)
+  for(int i=0; i<num_elem; ++i)
     dstfieldptr[i] = 0.0;
 
-  // initialize destination field
-  p = 0;
-  for(int i=0; i<num_node; ++i) {
-    if (nodeOwner[i] == localPet) {
-      x = nodeCoord[2*i];
-      y = nodeCoord[2*i+1];
-      exactptr[p] = 20.0 + x + y;
-      p++;
-    }
-  }
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  int *maskValues = (int *)malloc(sizeof(int));
+  maskValues[0] = 1;
+  strcpy(name, "Create an InterArray for maskValues in ESMC_FieldRegridStore()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_InterArrayInt i_maskValues;
+  rc = ESMC_InterArrayIntSet(&i_maskValues, maskValues, 1);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_RegridMethod_Flag regridmethod = ESMC_REGRIDMETHOD_BILINEAR;
-  ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_ERROR;
-  rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
+
+  srcFracField = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "srcFracField", &rc);
+  dstFracField = ESMC_FieldCreateMeshTypeKind(dstmesh, ESMC_TYPEKIND_R8,
+    ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "dstFracField", &rc);
+
+  enum ESMC_RegridMethod_Flag regridmethod = ESMC_REGRIDMETHOD_CONSERVE;
+  enum ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
+#ifdef masking
+  rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
                              &regridmethod, NULL, NULL, NULL, NULL, 
-                             NULL, NULL, NULL, NULL, &unmappedaction,
-                             NULL, NULL, NULL, NULL, NULL, NULL);
+                             NULL, NULL, NULL, NULL, &unmappedaction, NULL, NULL, NULL,
+                             NULL, &srcFracField, &dstFracField);
+#else
+  rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
+                             &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+                             &srcFracField, &dstFracField);
+#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
@@ -651,46 +519,166 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
+  strcpy(name, "Execute ESMC_RouteHandlePrint()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_RouteHandlePrint(routehandle);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
   strcpy(name, "Release an ESMC_RouteHandle via ESMC_FieldRegridRelease()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridRelease(&routehandle);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+#if 0
+  // Source Grid
+  p = 0;
+  printf("\nSource Grid center coords: \n");
+  for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
+    for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+      x = gridXCenter[p];
+      y = gridYCenter[p];
+      printf("[%f,%f]\n", x, y); 
+      ++p;
+    }
+  }
+  printf("\n");
   
+  // Destination Mesh
+  printf("\nDestination Mesh corner coords: \n");
+  for(int i=0; i<num_node; ++i) { 
+    x=nodeCoord[2*i];
+    y=nodeCoord[2*i+1];
+    printf("[%f,%f]\n", x, y); 
+  }
+  printf("\n");
+#endif
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Execute ESMC_FieldRegridGetArea() - source");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  srcAreaField = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "srcAreaField", &rc);
+
+  rc = ESMC_FieldRegridGetArea(srcAreaField);
+
+  //printf("Source Area Field pointer\n");
+  double *srcAreaFieldPtr = (double *)ESMC_FieldGetPtr(srcAreaField, 0, &rc);
+  bool pass = true;
+  p = 0;
+  for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
+    for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+    //printf("%f\n",srcAreaFieldPtr[p]);
+    if (srcAreaFieldPtr[p] <= 0.0) pass = false;
+      ++p;
+    }
+  }
+  //printf("\n");
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Execute ESMC_FieldRegridGetArea() - destination");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  dstAreaField = ESMC_FieldCreateMeshTypeKind(dstmesh, ESMC_TYPEKIND_R8,
+    ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "dstAreaField", &rc);
+
+  rc = ESMC_FieldRegridGetArea(dstAreaField);
+
+  //printf("Destination Area Field pointer\n");
+  double * dstAreaFieldPtr = (double *)ESMC_FieldGetPtr(dstAreaField, 0, &rc);
+  pass = true;
+  for(int i=0; i<num_elem; ++i) {
+    //printf("%f\n",dstAreaFieldPtr[i]);
+    if (dstAreaFieldPtr[i] <= 0.0) pass = false;
+  }
+  //printf("\n");
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
   //----------------------------------------------------------------------------
   //-------------------------- REGRID VALIDATION -------------------------------
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Regridding Validation");
   strcpy(failMsg, "Did not have acceptable accuracy");
 
-  bool correct = true;
-  // check destination field against analytic field
-  for(int i=0; i<num_onode; ++i) {
-    tol = .0001;
-    if (ESMC_dabs(dstfieldptr[i]-exactptr[i]) > tol) {
-      printf("PET%d: dstfieldptr[%d]:%f /= %f\n", 
-             localPet, i, dstfieldptr[i], exactptr[i]);
-      correct=false;
+  // get the fraction fields
+  double * srcFracFieldPtr = (double *)ESMC_FieldGetPtr(srcFracField, 0, &rc);
+  double * dstFracFieldPtr = (double *)ESMC_FieldGetPtr(dstFracField, 0, &rc);
+
+  double srcmass = 0;
+  p = 0;
+  for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
+    for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+      //printf("%f - %f - %f\n", srcfieldptr[p], srcAreaFieldPtr[p], srcFracFieldPtr[p]);
+      srcmass += srcfieldptr[p]*srcAreaFieldPtr[p]*srcFracFieldPtr[p];
+      ++p;
     }
   }
+
+  // check destination field against source field
+  bool correct = true; 
+  double dstmass = 0;
+  int offset = 0; 
+  for(int i=0; i<num_elem; ++i) {
+    // compute the mass
+    dstmass += dstfieldptr[i]*dstAreaFieldPtr[i];
+    //printf("%f - %f - %f\n", dstfieldptr[i], dstAreaFieldPtr[i], dstFracFieldPtr[i]);
+    // compute the analytic field
+    if (elemType[i] == 5) {
+      printf("Cannot compute a non-constant analytic field for a mesh with\
+              triangular elements\n");
+      ESMC_TestEnd(__FILE__, __LINE__, 0);
+    }
+    double x1 = nodeCoord[(elemConn[offset]-1)*2];
+    double x2 = nodeCoord[(elemConn[offset+1]-1)*2];
+    double y1 = nodeCoord[(elemConn[offset+1]-1)*2+1];
+    double y2 = nodeCoord[(elemConn[offset+3]-1)*2+1];
+    x = (x1+x2)/2.0;
+    y = (y1+y2)/2.0;
+    exact = 20.0 + x + y;
+    // set tolerance differently for masking
+    // we can get away with this because in this case we are just testing that
+    // the masking actually worked, if it didn't the remapped values would be
+    // many order of magnitude larger than this.  However, in the masking case
+    // the regridding accuracy is not checked very well.
+#ifdef masking
+    tol = 100;
+#else
+    tol = .0001;
+#endif
+    if (ESMC_dabs(dstfieldptr[i]-exact) > tol) {
+      printf("dstfieldptr[%d]:\n%f /= %f\n", 
+             i, dstfieldptr[i], exact);
+      correct=false;
+    }
+    offset = offset + 4;
+  }
+  // check that the mass is conserved
+  if (ESMC_dabs(srcmass - dstmass) > .0001) correct = false;
+  //printf("srcmass = %f, dstmass = %f\n", srcmass, dstmass);
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  free(nodeId);
-  free(nodeCoord);
-  free(nodeOwner);
-  free(elemId);
-  free(elemType);
-  free(elemConn);
-  free(exLB_corner);
-  free(exUB_corner);
   free(exLB_center);
   free(exUB_center);
+  free(exLB_corner);
+  free(exUB_corner);
+  free(maskValues);
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldDestroy(&srcfield);
@@ -698,7 +686,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldDestroy(&dstfield);
@@ -706,7 +694,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Destroy ESMC_Grid object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridDestroy(&srcgrid);
@@ -714,14 +702,14 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest_Multi_Proc_Only
+  //EX_UTest
   strcpy(name, "Destroy ESMC_Mesh object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshDestroy(&dstmesh);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-#endif
 
+#endif
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

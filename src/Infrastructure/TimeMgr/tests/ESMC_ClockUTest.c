@@ -54,7 +54,7 @@ int main(void){
   ESMC_I4 yy1=2006;
   ESMC_I4 h1=0;
   ESMC_I4 h2=1;
-  ESMC_CalKind_Flag calKind1=ESMC_CALKIND_GREGORIAN;
+  enum ESMC_CalKind_Flag calKind1=ESMC_CALKIND_GREGORIAN;
   int tZ1=-6;
   const ESMC_I4 one=1;
   ESMC_TimeInterval currSimTime;
@@ -148,7 +148,7 @@ int main(void){
   //EX_UTest
   strcpy(name, "Verify that currSimTime in second units");
   strcpy(failMsg, "Did not return 3600");
-  ESMC_Test((int(currSec1)==3600), name, failMsg, &result, __FILE__, __LINE__,
+  ESMC_Test(((int)currSec1==3600), name, failMsg, &result, __FILE__, __LINE__,
     0);
   //----------------------------------------------------------------------------
  
@@ -156,7 +156,7 @@ int main(void){
   //EX_UTest
   strcpy(name, "Verify that currSimTime in hour units");
   strcpy(failMsg, "Did not return 1");
-  ESMC_Test((int(currHour1)==1), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(((int)currHour1==1), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 #endif
 

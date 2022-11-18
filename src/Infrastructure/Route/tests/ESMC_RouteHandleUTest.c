@@ -84,12 +84,12 @@ int main(void){
   cellwidth_y = (max_y-min_y)/(ub_y-lb_y);
 
   maxIndex = (int *)malloc(dimcount*sizeof(int));
-  maxIndex[0] = int(ub_x);
-  maxIndex[1] = int(ub_y);
+  maxIndex[0] = (int)ub_x;
+  maxIndex[1] = (int)ub_y;
   rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
-  ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
-  ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
+  enum ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
+  enum ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
   srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, &coordsys, &typekind, NULL, &rc);
 
   free(maxIndex);
@@ -135,8 +135,8 @@ int main(void){
 
 
   maxIndex_d = (int *)malloc(dimcount*sizeof(int));
-  maxIndex_d[0] = int(ub_x);
-  maxIndex_d[1] = int(ub_y);
+  maxIndex_d[0] = (int)ub_x;
+  maxIndex_d[1] = (int)ub_y;
   rc = ESMC_InterArrayIntSet(&i_maxIndex_d, maxIndex_d, dimcount);
 
   dstgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex_d, &coordsys, &typekind, NULL, &rc);
@@ -254,7 +254,7 @@ int main(void){
   //-------------------------- REGRIDDING --------------------------------------
   //----------------------------------------------------------------------------
 
-  ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
+  enum ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &rh, 
                              NULL, NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL, NULL, &unmappedaction,
