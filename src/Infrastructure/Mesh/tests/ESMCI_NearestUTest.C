@@ -21,7 +21,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#include "ESMC_MeshTestGenPL.C"
+#include "ESMCI_MeshTestGenPL.C"
 
 // other headers
 #include "ESMCI_Regrid_Nearest.h"

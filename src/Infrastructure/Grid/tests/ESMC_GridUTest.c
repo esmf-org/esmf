@@ -141,7 +141,7 @@ int main(void){
   // free(decompFlagPTile);
   // free(deLabelList);
 
-  ESMC_StaggerLoc stagger = ESMC_STAGGERLOC_CENTER;
+  enum ESMC_StaggerLoc stagger = ESMC_STAGGERLOC_CENTER;
 
   //NEX_UTest
   strcpy(name, "GridWrite(cubedsphere)");
@@ -193,8 +193,8 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Create a Grid
-  ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
-  ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
+  enum ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
+  enum ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = 12;
   maxIndex[1] = 20;

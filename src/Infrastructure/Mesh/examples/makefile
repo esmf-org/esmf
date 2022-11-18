@@ -13,10 +13,10 @@ LOCDIR	  = src/Infrastructure/Mesh/examples
 .NOTPARALLEL:
 EXAMPLES_BUILD    = \
                       $(ESMF_EXDIR)/ESMF_MeshEx \
-                      $(ESMF_EXDIR)/ESMC_DCatEx \
-                      $(ESMF_EXDIR)/ESMC_RefineEx \
+                      $(ESMF_EXDIR)/ESMCI_DCatEx \
+                      $(ESMF_EXDIR)/ESMCI_RefineEx \
 
-EXAMPLES_RUN      = run_ESMF_MeshEx 
+EXAMPLES_RUN      = run_ESMF_MeshEx
 
 EXAMPLES_RUN_UNI  =
 
@@ -43,10 +43,10 @@ endif
 #
 #  Run targets
 #
-run_ESMC_RefineEx:
-	$(MAKE) EXNAME=Refine NP=4 excrun
+run_ESMCI_RefineEx:
+	$(MAKE) EXNAME=Refine NP=4 excirun
 
-run_ESMC_RefineEx_uni:
+run_ESMCI_RefineEx_uni:
 	echo "PASS: ESMF_RefineEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_RefineEx.stdout
 
 run_ESMF_MeshEx:

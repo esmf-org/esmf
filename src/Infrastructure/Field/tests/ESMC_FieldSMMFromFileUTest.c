@@ -71,7 +71,7 @@ int main(void){
   maxIndex[1] = 8;
   rc = ESMC_InterArrayIntSet(&i_maxIndex, maxIndex, dimcount);
 
-  ESMC_IndexFlag indexflag = ESMC_INDEX_GLOBAL;
+  enum ESMC_IndexFlag indexflag = ESMC_INDEX_GLOBAL;
   srcgrid = ESMC_GridCreateNoPeriDim(&i_maxIndex, NULL, NULL, &indexflag, &rc);
   if (rc != ESMF_SUCCESS) return 0;
 
@@ -189,7 +189,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_FieldRegridStoreFile test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_Logical create_rh = ESMF_TRUE;
+  enum ESMC_Logical create_rh = ESMF_TRUE;
   rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, 
                                  "data/weights_esmc_smmsff.nc", NULL, NULL,
                                  &routehandle, NULL, NULL, NULL, NULL, NULL,

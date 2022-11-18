@@ -114,29 +114,6 @@ ESMF_CXXCOMPILECPPFLAGS += -DNO_TIMES
 ESMF_PTHREADS := OFF
 
 ############################################################
-# Fortran symbol convention
-#
-#ifeq ($(ESMF_FORTRANSYMBOLS),default)
-#ESMF_F90COMPILEOPTS       += -fno-second-underscore
-#ESMF_F90LINKOPTS          += -fno-second-underscore
-#ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
-#else
-#ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
-#ESMF_F90COMPILEOPTS       += -fno-second-underscore
-#ESMF_F90LINKOPTS          += -fno-second-underscore
-#ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
-#else
-#ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
-#ESMF_F90COMPILEOPTS       +=
-#ESMF_F90LINKOPTS          +=
-#ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
-#else
-#$(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
-#endif
-#endif
-#endif
-
-############################################################
 # Construct the ABISTRING
 #
 ifeq ($(ESMF_MACHINE),x86_64)

@@ -14,7 +14,7 @@ TESTS_BUILD = \
 		$(ESMF_TESTDIR)/ESMF_TraceUTest \
 		$(ESMF_TESTDIR)/ESMF_TraceIOUTest \
 		$(ESMF_TESTDIR)/ESMF_TraceMPIUTest \
-                $(ESMF_TESTDIR)/ESMC_TraceRegionUTest \
+                $(ESMF_TESTDIR)/ESMCI_TraceRegionUTest \
 		$(ESMF_TESTDIR)/ESMF_ProfileUTest 
 
 
@@ -24,7 +24,7 @@ TESTS_RUN = \
 		RUN_ESMF_TraceClkMonoSyncUTest \
 		RUN_ESMF_TraceIOUTest \
 		RUN_ESMF_TraceMPIUTest \
-                RUN_ESMF_TraceRegionUTest \
+                RUN_ESMCI_TraceRegionUTest \
 		RUN_ESMF_ProfileUTest	
 
 TESTS_RUN_UNI = \
@@ -33,7 +33,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_TraceClkMonoSyncUTestUNI \
 		RUN_ESMF_TraceIOUTestUNI \
 		RUN_ESMF_TraceMPIUTestUNI \
-		RUN_ESMF_TraceRegionUTestUNI \
+		RUN_ESMCI_TraceRegionUTestUNI \
 		RUN_ESMF_ProfileUTestUNI
 
 include ${ESMF_DIR}/makefile
@@ -102,11 +102,11 @@ RUN_ESMF_TraceMPIUTestUNI:
 
 # --- TraceRegionUTest
 
-RUN_ESMF_TraceRegionUTest:
-	$(MAKE) TNAME=TraceRegion NP=4 ctest
+RUN_ESMCI_TraceRegionUTest:
+	$(MAKE) TNAME=TraceRegion NP=4 citest
 
-RUN_ESMF_TraceRegionUTestUNI:
-	$(MAKE) TNAME=TraceRegion NP=1 ctest
+RUN_ESMCI_TraceRegionUTestUNI:
+	$(MAKE) TNAME=TraceRegion NP=1 citest
 
 
 # --- ProfileUTest

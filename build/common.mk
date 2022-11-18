@@ -1099,7 +1099,7 @@ endif
 ifeq ($(origin ESMF_CLINKLIBS_ENV), environment)
 ESMF_CLINKLIBS = $(ESMF_CLINKLIBS_ENV)
 endif
-ESMF_CLINKLIBS     +=
+ESMF_CLINKLIBS     += $(ESMF_CXXLINKLIBS)
 ESMF_CESMFLINKLIBS += -lesmf $(ESMF_CLINKLIBS)
 
 # - tools: AR + RANLIB + ...
@@ -3097,13 +3097,12 @@ $(ESMF_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_EXE_F90LINKOPTS) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMF_UTEST_$(*)_OBJS) $(TESTS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
 	$(ESMF_RM) -f *.o *.mod
 
-
-$(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
-	$(ESMF_CXXLINKER) $(ESMF_EXE_CXXLINKOPTS) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMC_UTEST_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.mod
-
 $(ESMF_TESTDIR)/ESMCI_%UTest : ESMCI_%UTest.o $(ESMFLIB)
 	$(ESMF_CXXLINKER) $(ESMF_EXE_CXXLINKOPTS) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMCI_UTEST_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
+	$(ESMF_RM) -f *.o *.mod
+
+$(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
+	$(ESMF_CLINKER) $(ESMF_EXE_CLINKOPTS) $(ESMF_CLINKOPTS) $(ESMF_CLINKPATHS) $(ESMF_CLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMC_UTEST_$(*)_OBJS) $< $(ESMF_CESMFLINKLIBS)
 	$(ESMF_RM) -f *.o *.mod
 
 # debugging aid:  link the executable, standard output, and log file to
@@ -3516,9 +3515,12 @@ $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_EXE_F90LINKOPTS) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMF_EXAMPLE_$(*)_OBJS) $< $(ESMF_F90ESMFLINKLIBS)
 	$(ESMF_RM) -f *.o *.mod
 
+$(ESMF_EXDIR)/ESMCI_%Ex: ESMCI_%Ex.o $(ESMFLIB)
+	$(ESMF_CXXLINKER) $(ESMF_EXE_CXXLINKOPTS) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMC_EXAMPLE_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
+	$(ESMF_RM) $<
 
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
-	$(ESMF_CXXLINKER) $(ESMF_EXE_CXXLINKOPTS) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMC_EXAMPLE_$(*)_OBJS) $< $(ESMF_CXXESMFLINKLIBS)
+	$(ESMF_CLINKER) $(ESMF_EXE_CLINKOPTS) $(ESMF_CXXLINKOPTS) $(ESMF_CLINKPATHS) $(ESMF_CLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMC_EXAMPLE_$(*)_OBJS) $< $(ESMF_CESMFLINKLIBS)
 	$(ESMF_RM) $<
 
 #
@@ -3601,6 +3603,18 @@ exfrun:
 	cat ./PET*$(EXNAME)Ex*.Log> ./ESMF_$(EXNAME)Ex.Log ; \
 	$(ESMF_RM) ./PET*$(EXNAME)Ex*.Log
 
+excirun:
+	-@cd $(ESMF_EXDIR) ; \
+	$(ESMF_RM) ./PET*$(EXNAME)Ex.Log ; \
+	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMCI_$(EXNAME)Ex ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMCI_$(EXNAME)Ex ; \
+	else \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMCI_$(EXNAME)Ex \> ./ESMCI_$(EXNAME)Ex.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMCI_$(EXNAME)Ex > ./ESMCI_$(EXNAME)Ex.stdout 2>&1 ; \
+	fi ; \
+	cat ./PET*$(EXNAME)Ex*.Log> ./ESMCI_$(EXNAME)Ex.Log ; \
+	$(ESMF_RM) ./PET*$(EXNAME)Ex*.Log
 
 excrun:
 	-@cd $(ESMF_EXDIR) ; \
@@ -3800,19 +3814,14 @@ endif
 
 
 #-------------------------------------------------------------------------------
-# Suffixes (TODO: seems that the last three have become obsolete *gjt*)
+# Suffixes
 #-------------------------------------------------------------------------------
-.SUFFIXES: .f .f90 .F .F90 .cppF90 .C .$(ESMF_SL_SUFFIX) .$(ESMF_LIB_SUFFIX) .cpp .cc .r .rm
+.SUFFIXES: .f .f90 .F .F90 .cppF90 .C .$(ESMF_SL_SUFFIX) .$(ESMF_LIB_SUFFIX) .cpp .cc .c .r .rm
 
 #-------------------------------------------------------------------------------
 #  Compile rules for F90, C++, and c files for both to .o and .a files
 #-------------------------------------------------------------------------------
 
-# TODO:  why were we not passing the mod dirpath to the .f and .f90 files?
-# they are fixed format, but that does not mean they cannot use mods.
-# i went ahead and added the mod dir to the rules but if this causes problems
-# it should be removed.  it was not here originally and had been this way
-# a long time.
 # TODO more: add CXXFLAGS
 ESMF_F90COMPILEFREECPP_CMD = $(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) \
 			     $(ESMF_F90COMPILEPATHSLOCAL) $(ESMF_F90COMPILEPATHS) \
@@ -3830,6 +3839,10 @@ ESMF_CXXCOMPILE_CMD = $(ESMF_CXXCOMPILER) -c $(ESMF_CXXCOMPILEOPTS) \
 		      $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) \
 		      $(ESMF_CXXCOMPILECPPFLAGS)
 
+ESMF_CCOMPILE_CMD = $(ESMF_CCOMPILER) -c $(ESMF_CCOMPILEOPTS) \
+		      $(ESMF_CCOMPILEPATHSLOCAL) $(ESMF_CCOMPILEPATHS) \
+		      $(ESMF_CCOMPILECPPFLAGS)
+
 $(ESMF_OBJDIR)/%.o : %.F90
 	$(ESMF_F90COMPILEFREECPP_CMD) $< $(ESMF_OBJOUT_OPTION)
 
@@ -3843,7 +3856,7 @@ $(ESMF_OBJDIR)/%.o : %.f
 	$(ESMF_F90COMPILEFIXNOCPP_CMD) $< $(ESMF_OBJOUT_OPTION)
 
 $(ESMF_OBJDIR)/%.o : %.c
-	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
+	$(ESMF_CCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
 
 $(ESMF_OBJDIR)/%.o : %.C
 	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
@@ -3869,7 +3882,7 @@ $(ESMF_LOCOBJDIR)/%.o : %.f
 
 $(ESMF_LOCOBJDIR)/%.o : %.c
 	$(MAKE) chkdir_locobj
-	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
+	$(ESMF_CCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
 
 $(ESMF_LOCOBJDIR)/%.o : %.C
 	$(MAKE) chkdir_locobj
@@ -3892,7 +3905,7 @@ $(ESMF_LOCOBJDIR)/%.o : %.cpp
 	$(ESMF_F90COMPILEFIXNOCPP_CMD) $<
 
 .c.o:
-	$(ESMF_CXXCOMPILE_CMD) $<
+	$(ESMF_CCOMPILE_CMD) $<
 
 .C.o:
 	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
@@ -3925,7 +3938,7 @@ $(ESMF_LOCOBJDIR)/%.o : %.cpp
 	$(ESMF_RM) $*.o
 
 .c.$(ESMF_LIB_SUFFIX):
-	$(ESMF_CXXCOMPILE_CMD) $<
+	$(ESMF_CCOMPILE_CMD) $<
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
