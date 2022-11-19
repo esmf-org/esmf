@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -18,31 +18,47 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 
-
-#include <limits>
 #include <string>
 #include <ostream>
 #include <iterator>
-#include <vector>
+#include <algorithm>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
+#include "ESMCI_Array.h"
+#include "ESMC_Util.h"
 
-#include "VM/include/ESMC_VM.h"
+#include "ESMCI_TraceMacros.h"  // for profiling
+
+#include "Mesh/include/ESMCI_Pgon.h"
+#include "Mesh/include/ESMCI_MathUtil.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
-// static const char *const version = "$Id$";
+ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
-
-
 using namespace ESMCI;
-using namespace std;
+
+ // Dump to vtk file for debugging
+template void Pgon<GEOM_CART2D>::write_to_vtk(const char *filename) {
+  write_2D_poly_woid_to_vtk(filename, pnt_coords.size(), pnt_coords.data());
+}
+
+// Dump to vtk file for debugging
+template void Pgon<GEOM_SPH2D3D>::write_to_vtk(const char *filename) {
+  write_3D_poly_woid_to_vtk(filename, pnt_coords.size(), pnt_coords.data());
+}
+
+// Method for subtracting polygon clipper from polygon subject to yield the results
+// list of new polygons
+template<class GEOM>
+void Pgon<GEOM>::difference(Pgon<GEOM> subject, Pgon<GEOM> clipper,
+                            std::vector< Pgon<GEOM> > reults) {
 
 
 
-
+}

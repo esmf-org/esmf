@@ -54,6 +54,7 @@ class Pgon {
 
 public:
 
+  
   // Full constructor
   Pgon(bool _is_hole): is_hole(_is_hole) {
 
@@ -104,6 +105,8 @@ public:
   // (coordinates for a given point are stored next to each other in memory) 
   double *get_coord_mem() {return pnt_coords.data();}
 
+  // Write to vtk file for debuggin
+  void write_to_vtk(const char *filename);
   
 };
 
