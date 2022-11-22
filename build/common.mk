@@ -1492,7 +1492,7 @@ ifdef ESMF_NCCONFIG
   endif
   ifneq ($(origin ESMF_NETCDF_LIBS), environment)
     # query nc-config for the -lnetcdf* options
-    ESMF_NETCDF_LIBS := $(filter -lnetcdf%,$(shell $(ESMF_NCCONFIG) --libs))
+    ESMF_NETCDF_LIBS := $(filter -l%,$(shell $(ESMF_NCCONFIG) --libs))
     export ESMF_NETCDF_LIBS
   endif
   ifneq ($(origin ESMF_NETCDF_LIBPATH), environment)
@@ -1518,14 +1518,14 @@ ifdef ESMF_NCCONFIG
     ifdef ESMF_NFCONFIG
       ifeq ($(shell $(ESMF_DIR)/scripts/nfconfigtest $(ESMF_NFCONFIG)),working)
         # a working nf-config -> use it to get -lnetcdf* options
-        ESMF_NETCDFF_LIBS    := $(filter -lnetcdf%,$(shell $(ESMF_NFCONFIG) --flibs))
+        ESMF_NETCDFF_LIBS    := $(filter -l%,$(shell $(ESMF_NFCONFIG) --flibs))
       else
         # not a working nf-config -> try manually guessing the correct -lnetcdf* option
         ESMF_NETCDFF_LIBS    := -lnetcdff
       endif
     else
       # no nf-config available -> use nc-config to get -lnetcdf* options
-      ESMF_NETCDFF_LIBS    := $(filter -lnetcdf%,$(shell $(ESMF_NCCONFIG) --flibs))
+      ESMF_NETCDFF_LIBS    := $(filter -l%,$(shell $(ESMF_NCCONFIG) --flibs))
     endif
     export ESMF_NETCDFF_LIBS
   endif
