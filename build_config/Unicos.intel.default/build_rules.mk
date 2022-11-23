@@ -129,6 +129,7 @@ ESMF_CXXLINKOPTS          += -Wl,--no-as-needed
 #
 ESMF_EXE_F90LINKOPTS          += -dynamic
 ESMF_EXE_CXXLINKOPTS          += -dynamic
+ESMF_EXE_CLINKOPTS            += -dynamic
 
 ############################################################
 # Shared library options
