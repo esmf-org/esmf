@@ -40,9 +40,9 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec_mpt $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mpt)
 # MPT with compiler wrappers -------------------------------
-ESMF_F90DEFAULT         = mpifort
+ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lmpi++
-ESMF_CXXDEFAULT         = mpic++
+ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
