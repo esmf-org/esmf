@@ -52,6 +52,7 @@ module ESMF
     use ESMF_ArrayMod
     use ESMF_ArrayBundleMod
 
+    use ESMF_HConfigMod
     use ESMF_ConfigMod
 
     use ESMF_XGridGeomBaseMod
