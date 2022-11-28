@@ -32,6 +32,6 @@ RUN_ESMF_HConfigUTest:
 	$(MAKE) TNAME=HConfig NP=4 ftest
 
 RUN_ESMF_HConfigUTestUNI:
-	cp -f sample.yaml $(ESMF_TESTDIR)
+	cp -f sample.rc $(ESMF_TESTDIR)
 	cp -f sample.yaml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=HConfig NP=1 ftest
