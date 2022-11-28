@@ -1105,7 +1105,7 @@ endif
 ifeq ($(origin ESMF_CLINKLIBS_ENV), environment)
 ESMF_CLINKLIBS = $(ESMF_CLINKLIBS_ENV)
 endif
-ESMF_CLINKLIBS     += $(ESMF_CXXLINKLIBS)
+ESMF_CLINKLIBS     += $(ESMF_CXXLINKLIBS) $(ESMF_F90LINKLIBS)
 ESMF_CESMFLINKLIBS += -lesmf $(ESMF_CLINKLIBS)
 
 # - tools: AR + RANLIB + ...
@@ -1492,7 +1492,7 @@ ifdef ESMF_NCCONFIG
   endif
   ifneq ($(origin ESMF_NETCDF_LIBS), environment)
     # query nc-config for the -lnetcdf* options
-    ESMF_NETCDF_LIBS := $(filter -lnetcdf%,$(shell $(ESMF_NCCONFIG) --libs))
+    ESMF_NETCDF_LIBS := $(filter -l%,$(shell $(ESMF_NCCONFIG) --libs))
     export ESMF_NETCDF_LIBS
   endif
   ifneq ($(origin ESMF_NETCDF_LIBPATH), environment)
@@ -1518,14 +1518,14 @@ ifdef ESMF_NCCONFIG
     ifdef ESMF_NFCONFIG
       ifeq ($(shell $(ESMF_DIR)/scripts/nfconfigtest $(ESMF_NFCONFIG)),working)
         # a working nf-config -> use it to get -lnetcdf* options
-        ESMF_NETCDFF_LIBS    := $(filter -lnetcdf%,$(shell $(ESMF_NFCONFIG) --flibs))
+        ESMF_NETCDFF_LIBS    := $(filter -l%,$(shell $(ESMF_NFCONFIG) --flibs))
       else
         # not a working nf-config -> try manually guessing the correct -lnetcdf* option
         ESMF_NETCDFF_LIBS    := -lnetcdff
       endif
     else
       # no nf-config available -> use nc-config to get -lnetcdf* options
-      ESMF_NETCDFF_LIBS    := $(filter -lnetcdf%,$(shell $(ESMF_NCCONFIG) --flibs))
+      ESMF_NETCDFF_LIBS    := $(filter -l%,$(shell $(ESMF_NCCONFIG) --flibs))
     endif
     export ESMF_NETCDFF_LIBS
   endif
@@ -1839,6 +1839,8 @@ ESMF_F90COMPILEOPTS += $(ESMF_OPENMP_F90COMPILEOPTS)
 ESMF_F90LINKOPTS    += $(ESMF_OPENMP_F90LINKOPTS)
 ESMF_CXXCOMPILEOPTS += $(ESMF_OPENMP_CXXCOMPILEOPTS)
 ESMF_CXXLINKOPTS    += $(ESMF_OPENMP_CXXLINKOPTS)
+ESMF_CCOMPILEOPTS   += $(ESMF_OPENMP_CXXCOMPILEOPTS)
+ESMF_CLINKOPTS      += $(ESMF_OPENMP_CXXLINKOPTS)
 ESMF_SL_LIBOPTS     += $(ESMF_OPENMP_CXXLINKOPTS)
 endif
 
@@ -1855,6 +1857,8 @@ ESMF_F90COMPILEOPTS += $(ESMF_OPENACC_F90COMPILEOPTS)
 ESMF_F90LINKOPTS    += $(ESMF_OPENACC_F90LINKOPTS)
 ESMF_CXXCOMPILEOPTS += $(ESMF_OPENACC_CXXCOMPILEOPTS)
 ESMF_CXXLINKOPTS    += $(ESMF_OPENACC_CXXLINKOPTS)
+ESMF_CCOMPILEOPTS   += $(ESMF_OPENACC_CXXCOMPILEOPTS)
+ESMF_CLINKOPTS      += $(ESMF_OPENACC_CXXLINKOPTS)
 endif
 
 #-------------------------------------------------------------------------------
@@ -2569,6 +2573,10 @@ tree_build_apps: $(APPS_BUILD)
 #  Link rule for apps, switch between C and Fortran
 #
 ifeq ($(APPS_MAINLANGUAGE),C)
+$(ESMF_APPSDIR)/% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
+	$(MAKE) chkdir_apps
+	$(ESMF_CLINKER) $(ESMF_EXE_CLINKOPTS) $(ESMF_CLINKOPTS) $(ESMF_CLINKPATHS) $(ESMF_CLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMF_CESMFLINKLIBS)
+else ifeq ($(APPS_MAINLANGUAGE),C++)
 $(ESMF_APPSDIR)/% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
 	$(MAKE) chkdir_apps
 	$(ESMF_CXXLINKER) $(ESMF_EXE_CXXLINKOPTS) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMF_CXXESMFLINKLIBS)
