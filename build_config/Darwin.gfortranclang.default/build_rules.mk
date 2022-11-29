@@ -166,18 +166,24 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_32)
 ESMF_CXXCOMPILEOPTS       += -m32
 ESMF_CXXLINKOPTS          += -m32
+ESMF_CCOMPILEOPTS         += -m32
+ESMF_CLINKOPTS            += -m32
 ESMF_F90COMPILEOPTS       += -m32
 ESMF_F90LINKOPTS          += -m32
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
+ESMF_CCOMPILEOPTS         += -m64 -mcmodel=small
+ESMF_CLINKOPTS            += -m64 -mcmodel=small
 ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
 ESMF_F90LINKOPTS          += -m64 -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_CCOMPILEOPTS         += -m64 -mcmodel=medium
+ESMF_CLINKOPTS            += -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
 endif
@@ -188,8 +194,10 @@ endif
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -pthread
 ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_CCOMPILEOPTS   += -pthread
 ESMF_F90LINKOPTS    += -pthread
 ESMF_CXXLINKOPTS    += -pthread
+ESMF_CLINKOPTS      += -pthread
 endif
 
 ############################################################
@@ -230,8 +238,6 @@ ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
 endif
 ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))
-ESMF_CLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
-ESMF_CLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))
 # With clang, we use a C++ linker for Fortran programs, so use the same link paths as for CXX:
 ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 ESMF_F90LINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))

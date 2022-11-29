@@ -7,7 +7,7 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = ifort
-ESMF_CXXDEFAULT         = clang
+ESMF_CXXDEFAULT         = clang++
 ESMF_CDEFAULT           = clang
 ESMF_CPPDEFAULT         = clang -E -P -x c
 
@@ -144,12 +144,16 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_32)
 ESMF_CXXCOMPILEOPTS       += -m32
 ESMF_CXXLINKOPTS          += -m32
+ESMF_CCOMPILEOPTS         += -m32
+ESMF_CLINKOPTS            += -m32
 ESMF_F90COMPILEOPTS       += -m32
 ESMF_F90LINKOPTS          += -m32
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64
 ESMF_CXXLINKOPTS          += -m64
+ESMF_CCOMPILEOPTS         += -m64
+ESMF_CLINKOPTS            += -m64
 ESMF_F90COMPILEOPTS       += -m64
 ESMF_F90LINKOPTS          += -m64
 endif
@@ -160,8 +164,10 @@ endif
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -threads
 ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_CCOMPILEOPTS   += -pthread
 ESMF_F90LINKOPTS    += -threads
 ESMF_CXXLINKOPTS    += -pthread
+ESMF_CLINKOPTS      += -pthread
 ESMF_SL_LIBOPTS     += -pthread
 endif
 
