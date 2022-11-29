@@ -27,11 +27,12 @@ def create_compList(_dict, odir):
         comp_str = [comp for comp in od.keys()]
         f.write('set(COMPS {})\n\n'.format(' '.join(comp_str)))
         for k1, v1 in od.items():
-          if 'cmake_config' in v1:
-            # only entires that have cmake_config field are considered
-            f.write('# - auto-generated section for component: {}\n'.format(k1))
-            configFile = os.path.join(os.getcwd(), v1['cmake_config'])
-            f.write('include({})\n\n'.format(configFile))
+          if type(v1) is dict:
+            if 'cmake_config' in v1:
+              # only entires that have cmake_config field are considered
+              f.write('# - auto-generated section for component: {}\n'.format(k1))
+              configFile = os.path.join(os.getcwd(), v1['cmake_config'])
+              f.write('include({})\n\n'.format(configFile))
 
 def create_compUse(_dict, odir):
     # open file
@@ -39,12 +40,11 @@ def create_compUse(_dict, odir):
         # loop through components and create use statements
         od = collections.OrderedDict(_dict['components'].items())
         for k1, v1 in od.items():
-          if 'cmake_config' in v1:
-            # only entires that have cmake_config field are considered
+          if type(v1) is dict:
             if 'fort_module' in v1:
               # if fort_module field present, use it to identify fortran module
               f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(v1['fort_module'], k1, k1))
-            else:
+            elif 'cmake_config' in v1:
               # otherwise use step of the cmake_config name
               f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(Path(v1['cmake_config']).stem, k1, k1))
 
@@ -55,7 +55,7 @@ def create_compDef(_dict, odir):
         i = 1
         od = collections.OrderedDict(_dict['components'].items())
         for k1, v1 in od.items():
-          if 'cmake_config' in v1:
+          if type(v1) is dict:
             # only entires that have cmake_config field are considered
             f.write('CompDef({})%ssPtr => {}SS\n'.format(i, k1))
             f.write('CompDef({})%svPtr => {}SV\n'.format(i, k1))
