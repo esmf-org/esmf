@@ -247,7 +247,7 @@ namespace ESMCI {
   bool _set_grad_info_using_greens_2D_2D_cart(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs, int se_id) {
 
     // Compute area of polygon
-#define MAX_NUM_NBRS 100
+#define MAX_NUM_NBRS 150
     double nbr_coords[2*MAX_NUM_NBRS];
 
     // Error check
@@ -393,7 +393,7 @@ namespace ESMCI {
   bool _is_src_cntr_in_nbr_poly_2D_2D_cart(double *src_cntr, std::vector<NBR_ELEM> *nbrs) {
 
     // For nbr poly coords
-#define MAX_NUM_NBRS 100
+#define MAX_NUM_NBRS 150
     int num_nbr_nodes;
     double nbr_coords[2*MAX_NUM_NBRS];
 
@@ -442,7 +442,7 @@ namespace ESMCI {
   double _calc_src_nbr_poly_overlap_area_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, std::vector<NBR_ELEM> *nbrs) {
 
     // For nbr poly coords
-#define MAX_NUM_NBRS 100
+#define MAX_NUM_NBRS 150
     int num_nbr_nodes;
     double nbr_coords[2*MAX_NUM_NBRS];
 
@@ -831,7 +831,7 @@ namespace ESMCI {
   bool _set_grad_info_using_greens(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs) {
 
     // Compute area of polygon
-#define MAX_NUM_NBRS 100
+#define MAX_NUM_NBRS 150
     double nbr_coords[3*MAX_NUM_NBRS];
 
     // Error check
@@ -1125,7 +1125,7 @@ namespace ESMCI {
   bool _is_src_cntr_in_nbr_poly_2D_3D_sph(double *src_cntr, std::vector<NBR_ELEM> *nbrs) {
 
     // For nbr poly coords
-#define MAX_NUM_NBRS 100
+#define MAX_NUM_NBRS 150
     int num_nbr_nodes;
     double nbr_coords[3*MAX_NUM_NBRS];
 
@@ -1173,7 +1173,7 @@ namespace ESMCI {
   double _calc_src_nbr_poly_overlap_area_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, std::vector<NBR_ELEM> *nbrs) {
 
     // For nbr poly coords
-#define MAX_NUM_NBRS 100
+#define MAX_NUM_NBRS 150
     int num_nbr_nodes;
     double nbr_coords[3*MAX_NUM_NBRS];
 
