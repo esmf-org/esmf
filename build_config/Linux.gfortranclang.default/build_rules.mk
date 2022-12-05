@@ -219,11 +219,10 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_OPENMP=OFF
-# ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
-# ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
-# ESMF_OPENMP_F90LINKOPTS    += -fopenmp
-# ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
