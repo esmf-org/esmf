@@ -205,9 +205,13 @@ endif
 #
 ESMF_OPENMP=OFF
 ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
-ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+# As of 2022-12-05, Apple's clang doesn't support -fopenmp directly; instead, it requires
+# -Xpreprocessor -fopenmp. In addition, you will need to install libomp and explicitly add
+# the appropriate include and link directories and libraries to pull it in (this is not
+# done here yet).
+ESMF_OPENMP_CXXCOMPILEOPTS += -Xpreprocessor -fopenmp
 ESMF_OPENMP_F90LINKOPTS    += -fopenmp
-ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -Xpreprocessor -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
