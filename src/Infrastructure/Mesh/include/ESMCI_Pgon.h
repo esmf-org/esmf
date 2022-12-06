@@ -47,7 +47,7 @@ template <class GEOM>
 class Pgon {
 
   // Coords
-  vector<double> pnt_coords;
+  std::vector<double> pnt_coords;
 
   // is this a hole? 
   bool is_hole;
@@ -107,7 +107,11 @@ public:
 
   // Write to vtk file for debuggin
   void write_to_vtk(const char *filename);
-  
+
+  // Compute difference of Pgons
+  static void difference(Pgon<GEOM> subject, Pgon<GEOM> clipper,
+                         std::vector< Pgon<GEOM> > reults);
+
 };
 
 
