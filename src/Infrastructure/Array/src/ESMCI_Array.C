@@ -6209,29 +6209,62 @@ template<typename SIT, typename DIT>
       return rc;
     }
 
-    // check srcToDstTransposeMap input
+    // srcToDstTransposeMap must have one dimension
     if (srcToDstTransposeMap->dimCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "srcToDstTransposeMap must be of rank 1", ESMC_CONTEXT, &rc);
       return rc;
     }
-    if (srcToDstTransposeMap->extent[0] != rank){
+
+    // process srcToDstTransposeMap
+    vector<vector<int> > srcToDstTMap(tileCount);
+    vector<vector<bool> > srcToDstInvertMap(tileCount);
+    if (srcToDstTransposeMap->extent[0] == rank){
+      // rank number of elements -> all tiles the same
+      for (int tile=0; tile<tileCount; tile++){
+        srcToDstTMap[tile].resize(rank);
+        srcToDstInvertMap[tile].resize(rank);
+        for (int i=0; i<rank; i++){
+          // negative sign -> invert
+          srcToDstInvertMap[tile][i] = (srcToDstTransposeMap->array[i] < 0);
+          // shift to base 0
+          srcToDstTMap[tile][i] = abs(srcToDstTransposeMap->array[i]) - 1;
+        }
+      }
+    }else if(srcToDstTransposeMap->extent[0] == tileCount * rank){
+      // each tile srcToDstTransposeMap provided separately
+      int j=0;
+      for (int tile=0; tile<tileCount; tile++){
+        srcToDstTMap[tile].resize(rank);
+        srcToDstInvertMap[tile].resize(rank);
+        for (int i=0; i<rank; i++){
+          // negative sign -> invert
+          srcToDstInvertMap[tile][i] = (srcToDstTransposeMap->array[j] < 0);
+          // shift to base 0
+          srcToDstTMap[tile][i] = abs(srcToDstTransposeMap->array[j]) - 1;
+          ++j;
+        }
+      }
+    }else{
+      // only rank or tileCount*rank sizes supported
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "srcToDstTransposeMap must provide rank values", ESMC_CONTEXT, &rc);
+        "srcToDstTransposeMap of unsupported size", ESMC_CONTEXT, &rc);
       return rc;
     }
-    int *srcToDstTMap = new int[rank];
-    for (int i=0; i<rank; i++){
-      srcToDstTMap[i] = srcToDstTransposeMap->array[i] - 1; // shift to base 0
-      int j;
-      for (j=0; j<rank; j++)
-        if (srcToDstTransposeMap->array[j] == i+1) break;
-      if (j==rank){
-        // did not find (i+1) value in transpose map
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          "srcToDstTransposeMap values must be unique and within range:"
-          " [1,..,rank].", ESMC_CONTEXT, &rc);
-        return rc;
+
+    // check for complete mapping
+    for (int tile=0; tile<tileCount; tile++){
+      for (int i=0; i<rank; i++){
+        int j;
+        for (j=0; j<rank; j++)
+          if (srcToDstTMap[tile][j] == i) break;
+        if (j==rank){
+          // did not find value i in the transpose map
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "srcToDstTransposeMap values must be unique and within range:"
+            " [1,..,rank].", ESMC_CONTEXT, &rc);
+          return rc;
+        }
       }
     }
 
@@ -6249,7 +6282,7 @@ template<typename SIT, typename DIT>
     int srcDimCount = srcArray->distgrid->getDimCount();
     int dstDimCount = dstArray->distgrid->getDimCount();
     // prepare dstArrayToTensorMap
-    int *dstArrayToTensorMap = new int[rank];
+    vector<int> dstArrayToTensorMap(rank);
     int tensorIndex = 0;
     for (int jj=0; jj<rank; jj++){
       if (dstArrayToDistGridMap[jj]==0){
@@ -6259,8 +6292,8 @@ template<typename SIT, typename DIT>
       }
     }
     factorListCount = 0;
-    int *localStart = new int[tileCount];  // localPet's start index
-    int *localSize = new int[tileCount];   // localPet's number of elements
+    vector<int> localStart(tileCount);  // localPet's start index
+    vector<int> localSize(tileCount);   // localPet's number of elements
     for (int i=0; i<tileCount; i++){
       int tileFactorListCount = 1;
       // prepare decomposition along last distributed dim in srcArray
@@ -6302,7 +6335,7 @@ fprintf(stderr, "%d start:%d, size:%d\n", localPet, localStart[i], localSize[i])
           ++srcTensorIndex;
           tileFactorListCount *= srcSize;
         }
-        int jjj = srcToDstTMap[jj];         // src -> dst dimension mapping
+        int jjj = srcToDstTMap[i][jj];         // src -> dst dimension mapping
         j = dstArrayToDistGridMap[jjj];     // j is dimIndex bas 1, or 0 undist.
         if (j){
           // decomposed dimension
@@ -6336,11 +6369,12 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
     factorIndexList = new SIT[(srcN+dstN)*factorListCount];
     // prepare to fill in factorIndexList elements
     int factorIndexListIndex = 0; // reset
-    int *dstTuple = new int[rank];
+    vector<int> dstTuple(rank);
     for (int i=0; i<tileCount; i++){
       // initialize multi dim index loop
       vector<int> offsets;
       vector<int> sizes;
+      vector<int> allSizes;
       int tensorIndex = 0;  // reset
       for (int jj=0; jj<rank; jj++){
         int j = srcArrayToDistGridMap[jj];  // j is dimIndex bas 1, or 0 undist.
@@ -6356,10 +6390,14 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
             sizes.push_back(srcMaxIndexPDimPTile[i*srcDimCount+j]
               - srcMinIndexPDimPTile[i*srcDimCount+j] + 1);
           }
+          allSizes.push_back(srcMaxIndexPDimPTile[i*srcDimCount+j]
+            - srcMinIndexPDimPTile[i*srcDimCount+j] + 1);
         }else{
           // tensor dimension
           offsets.push_back(0);
           sizes.push_back(srcArray->undistUBound[tensorIndex]
+            - srcArray->undistLBound[tensorIndex] + 1);
+          allSizes.push_back(srcArray->undistUBound[tensorIndex]
             - srcArray->undistLBound[tensorIndex] + 1);
           ++tensorIndex;
         }
@@ -6370,13 +6408,20 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         const int *srcTuple = multiDimIndexLoop.getIndexTuple();
         // redist is identity mapping, but must consider srcToDstTMap
         // srcTuple --(srcToDstTMap)--> dstTuple
-        for (int j=0; j<rank; j++)
-          dstTuple[srcToDstTMap[j]] = srcTuple[j];
+        for (int j=0; j<rank; j++){
+          if(srcToDstInvertMap[i][j]){
+            // invert this dimension orientation
+            dstTuple[srcToDstTMap[i][j]] = allSizes[j] - srcTuple[j] - 1;
+          }else{
+            // keep this dimension orientation
+            dstTuple[srcToDstTMap[i][j]] = srcTuple[j];
+          }
+        }
         // determine seq indices
         SeqIndex<SIT> srcSeqIndex =
           srcArray->getSequenceIndexTile<SIT>(i+1, srcTuple);
         SeqIndex<DIT> dstSeqIndex =
-          dstArray->getSequenceIndexTile<DIT>(i+1, dstTuple);
+          dstArray->getSequenceIndexTile<DIT>(i+1, &(dstTuple[0]));
         // fill this info into factorIndexList
         int fili = 4*factorIndexListIndex;
         factorIndexList[fili]   = srcSeqIndex.decompSeqIndex;
@@ -6388,12 +6433,6 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         multiDimIndexLoop.next();
       } // multi dim index loop
     }
-    // garbage collection
-    delete [] srcToDstTMap;
-    delete [] dstArrayToTensorMap;
-    delete [] localStart;
-    delete [] localSize;
-    delete [] dstTuple;
   }
 
 #if 0

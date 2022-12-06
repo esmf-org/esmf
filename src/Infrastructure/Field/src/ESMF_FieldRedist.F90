@@ -317,7 +317,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
 ! redistribution, allowing scaling of the data, e.g. for unit transformation.
-!  
+!
 ! Both {\tt srcField} and {\tt dstField} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
 ! order of tiles within the DistGrid or by user-supplied arbitrary sequence
@@ -327,16 +327,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source Field, destination Field, and the factor may be of different
 ! <type><kind>. Further, source and destination Fields may differ in shape,
 ! however, the number of elements must match. 
-!  
-! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
-! to an identity mapping of the sequentialized source Field to the
-! sequentialized destination Field. If the {\tt srcToDstTransposeMap}
-! argument is provided it must be identical on all PETs. The
-! {\tt srcToDstTransposeMap} allows source and destination Field dimensions to
-! be transposed during the redistribution. The number of source and destination
-! Field dimensions must be equal under this condition and the size of mapped
-! dimensions must match.
-!  
+!
+! The default redistribution operation, when {\tt srcToDstTransposeMap} is not
+! specified, corresponds to the identity mapping: each element of the
+! sequentialized source Field is copied to the sequentialized
+! destination Field element in order.
+!
+! \begin{sloppypar}
+! If the {\tt srcToDstTransposeMap} argument is provided it must be identical
+! across all PETs. The {\tt srcToDstTransposeMap} allows source and destination
+! Field dimensions to be transposed during the redistribution. To support this
+! option, the number of source and destination Field dimensions must be equal
+! and the size of the associated dimensions must match.
+! See section \ref{Array:Redist:TransposeMode} for more details about the
+! use of the {\tt srcToDstTransposeMap} argument.
+! \end{sloppypar}
+!
 ! It is erroneous to specify the identical Field object for {\tt srcField} and
 ! {\tt dstField} arguments. 
 !
@@ -370,11 +376,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [factor]
 !   Factor by which to multiply data. Default is 1. See full method
 !   description above for details on the interplay with other PETs.
-! \item [{[srcToDstTransposeMap]}] 
-!   List with as many entries as there are dimensions in {\tt srcField}. Each
-!   entry maps the corresponding {\tt srcField} dimension against the specified
-!   {\tt dstField} dimension. Mixing of distributed and undistributed
-!   dimensions is supported.
+! \item [{[srcToDstTransposeMap]}]
+!   A list with as many entries as there are dimensions in {\tt srcField}, or
+!   {\tt tileCount} times this many entries.
+!   Each entry maps the corresponding {\tt srcField} dimension against the
+!   specified {\tt dstField} dimension. Mixing distributed and
+!   undistributed dimensions is supported.
+!   Negative entries reverse the order of elements along the specified
+!   dimension when going from source to destination.
+!   When providing $rank \times tileCount$ elements in
+!   {\tt srcToDstTransposeMap},  each block of size {\tt rank} is associated
+!   with the corresponding tile (in order), and interpreted as the
+!   tile-specific transpose map.
 ! \item [{[ignoreUnmatchedIndices]}]
 !   A logical flag that affects the behavior for when not all elements match
 !   between the {\tt srcField} and {\tt dstField} side. The default setting
@@ -678,7 +691,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
 ! redistribution, allowing scaling of the data, e.g. for unit transformation.
-!  
+!
 ! Both {\tt srcField} and {\tt dstField} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
 ! order of tiles within the DistGrid or by user-supplied arbitrary sequence
@@ -688,16 +701,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source Field, destination Field, and the factor may be of different
 ! <type><kind>. Further, source and destination Fields may differ in shape,
 ! however, the number of elements must match. 
-!  
-! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
-! to an identity mapping of the sequentialized source Field to the
-! sequentialized destination Field. If the {\tt srcToDstTransposeMap}
-! argument is provided it must be identical on all PETs. The
-! {\tt srcToDstTransposeMap} allows source and destination Field dimensions to
-! be transposed during the redistribution. The number of source and destination
-! Field dimensions must be equal under this condition and the size of mapped
-! dimensions must match.
-!  
+!
+! The default redistribution operation, when {\tt srcToDstTransposeMap} is not
+! specified, corresponds to the identity mapping: each element of the
+! sequentialized source Field is copied to the sequentialized
+! destination Field element in order.
+!
+! \begin{sloppypar}
+! If the {\tt srcToDstTransposeMap} argument is provided it must be identical
+! across all PETs. The {\tt srcToDstTransposeMap} allows source and destination
+! Field dimensions to be transposed during the redistribution. To support this
+! option, the number of source and destination Field dimensions must be equal
+! and the size of the associated dimensions must match.
+! See section \ref{Array:Redist:TransposeMode} for more details about the
+! use of the {\tt srcToDstTransposeMap} argument.
+! \end{sloppypar}
+!
 ! It is erroneous to specify the identical Field object for {\tt srcField} and
 ! {\tt dstField} arguments. 
 !
@@ -723,11 +742,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     destroyed by this call.
 ! \item [routehandle] 
 !   Handle to the precomputed Route. 
-! \item [{[srcToDstTransposeMap]}] 
-!   List with as many entries as there are dimensions in {\tt srcField}. Each
-!   entry maps the corresponding {\tt srcField} dimension against the specified
-!   {\tt dstField} dimension. Mixing of distributed and undistributed
-!   dimensions is supported.
+! \item [{[srcToDstTransposeMap]}]
+!   A list with as many entries as there are dimensions in {\tt srcField}, or
+!   {\tt tileCount} times this many entries.
+!   Each entry maps the corresponding {\tt srcField} dimension against the
+!   specified {\tt dstField} dimension. Mixing distributed and
+!   undistributed dimensions is supported.
+!   Negative entries reverse the order of elements along the specified
+!   dimension when going from source to destination.
+!   When providing $rank \times tileCount$ elements in
+!   {\tt srcToDstTransposeMap},  each block of size {\tt rank} is associated
+!   with the corresponding tile (in order), and interpreted as the
+!   tile-specific transpose map.
 ! \item [{[ignoreUnmatchedIndices]}]
 !   A logical flag that affects the behavior for when not all elements match
 !   between the {\tt srcField} and {\tt dstField} side. The default setting

@@ -32,7 +32,6 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_Util.h"
 #include "ESMCI_Arg.h"
-#include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
 
 //-----------------------------------------------------------------------------
@@ -41,10 +40,7 @@
 static const char* const version = "$Id$";
 //-----------------------------------------------------------------------------
 
-// class declaration type -> this should be moved into ESMCI namespace
-class ESMCI_Config{
-  ESMCI::F90ClassHolder fortranclass;
-};
+#include "ESMCI_Config.h"
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

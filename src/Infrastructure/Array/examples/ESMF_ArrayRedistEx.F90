@@ -104,10 +104,14 @@ program ESMF_ArrayRedistEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
+
+! \paragraph{Default Mode}
+! \label{Array:Redist:DefaultMode}
+!
 ! By construction {\tt srcArray} and {\tt dstArray} are of identical type and
 ! kind. Further the number of exclusive elements matches between both Arrays.
 ! These are the prerequisites for the application of an Array redistribution
-! in default mode. In order to increase performance of the actual 
+! in {\em default} mode. In order to increase performance of the actual 
 ! redistribution the communication pattern is precomputed once, and stored in
 ! an {\tt ESMF\_RouteHandle} object.
 !EOE
@@ -178,12 +182,15 @@ program ESMF_ArrayRedistEx
 
 !BOE
 ! The following variation of the code shows that the same RouteHandle can be
-! applied to an Array pair where the number of undistributed dimensions does
-! not match between source and destination Array. Here we prepare a source
-! Array with {\em two} undistributed dimensions, in position 1 and 3, that 
-! multiply out to 2x5=10 undistributed elements. The destination array is the
-! same as before with only a {\em single} undistributed dimension in position 1
-! of size 10.
+! applied to an Array pair even when the number of undistributed dimensions does
+! not match between source and destination Array, as long as to the total
+! {\em number} of undistributed {\em elements} matches.
+!
+! We prepare a source Array with {\em two} undistributed dimensions, in position
+! 1 and 3, of size $2$ and $5$, respectively. Thus there are $2 \times 5=10$
+! undistributed source elements. The destination array is the same as before
+! with only a {\em single} undistributed dimension in position 1
+! of size $10$.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec4d, typekind=ESMF_TYPEKIND_R8, rank=4, rc=rc)
@@ -225,8 +232,11 @@ program ESMF_ArrayRedistEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOE
+! \paragraph{Transpose Mode}
+! \label{Array:Redist:TransposeMode}
+!
 ! \begin{sloppypar}
-! In {\em default} mode, i.e. without providing the optional
+! In default mode, i.e. without providing the optional
 ! {\tt srcToDstTransposeMap} argument, {\tt ESMF\_ArrayRedistStore()} does not
 ! require equal number of dimensions in source and destination Array. Only the
 ! total number of elements must match.
@@ -427,13 +437,37 @@ program ESMF_ArrayRedistEx
 ! By construction {\tt srcArray} and {\tt dstArray} hold the same number of
 ! elements, albeit in a very different layout. Nevertheless, with a
 ! {\tt srcToDstTransposeMap} that maps matching dimensions from source to
-! destination an Array redistribution becomes a well defined operation between
-! {\tt srcArray} and {\tt dstArray}.
+! destination, the following Array redistribution becomes a well defined
+! operation between {\tt srcArray} and {\tt dstArray}.
 !EOE
 
 !BOC
   call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
     routehandle=redistHandle, srcToDstTransposeMap=(/3,1,4,2/), rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_ArrayRedist(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=redistHandle, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! The {\tt srcToDstTransposeMap} mechanism supports negative map entries.
+! Negative entries indicate that the order of elements is to be reversed when
+! going from source to destination.
+! Using the same {\tt srcArray} and {\tt dstArray} objects as in the previous
+! example, the following code maps the first {\tt srcArray} dimension to the
+! third {\tt dstArray} dimension, as before. However, the ordering of
+! the elements along this dimension is reversed between source and destination.
+!EOE
+
+!BOC
+  call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=redistHandle, srcToDstTransposeMap=(/-3,1,4,2/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -457,136 +491,22 @@ program ESMF_ArrayRedistEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! \begin{sloppypar}
-! The default mode of Array redistribution, i.e. without providing a
-! {\tt srcToDstTransposeMap} to {\tt ESMF\_ArrayRedistStore()}, also supports
-! undistributed Array dimensions. The requirement in this case is that the 
-! total undistributed element count, i.e. the product of the sizes of all
-! undistributed dimensions, be the same for source and destination Array.
-! In this mode the number of undistributed dimensions need not match between
-! source and destination.
-! \end{sloppypar}
-!EOE
-!BOC
-  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=4, rc=rc)
-!EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-  srcDistgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
-    regDecomp=(/4,1/), rc=rc)
-!EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-  srcArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgrid, &
-    undistLBound=(/1,1/), undistUBound=(/2,4/), rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-  dstDistgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
-    regDecomp=(/1,4/), rc=rc)
-!EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
-!BOC
-  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, &
-    distgridToArrayMap=(/2,3/), undistLBound=(/1,1/), undistUBound=(/2,4/), &
-    rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
-! Both {\tt srcArray} and {\tt dstArray} have two undistributed dimensions and
-! a total count of undistributed elements of $ 2 \times 4 = 8$.
+! Redistribution of multi-tile Arrays is supported, although not shown as an
+! example here. In {\em default} mode, the
+! index space defined by both source and destination Arrays must match,
+! regardless of how it is comprised by tiles. In particular, there is no
+! restriction on the number of source and desination tiles, as long as both
+! sides define the same global index space.
 !
-! The Array redistribution operation is defined in terms of sequentialized
-! undistributed dimensions. In the above case this means that a unique sequence
-! index will be assigned to each of the 8 undistributed elements. The sequence
-! indices will be 1, 2, ..., 8, where sequence index 1 is assigned to the first
-! element in the first (i.e. fastest varying in memory) undistributed dimension.
-! The following undistributed elements are labeled in consecutive order as they
-! are stored in memory.
+! The situation is different in {\em transpose} mode. Here the number of source
+! and destination tiles must match. In this case, the redistribution is defined
+! tile-by-tile in order. If the provided 
+! {\tt srcToDstTransposeMap} is of size {\tt rank}, it is used for all of the
+! tiles. The other supported option is where {\tt srcToDstTransposeMap} is of
+! size $rank \times tileCount$. In that case each source-destination tile-pair
+! has its own transpose map.
 !EOE
-!BOC
-  call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=redistHandle, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
-!BOE
-! The redistribution operation by default applies the identity operation between
-! the elements of undistributed dimensions. This means that source element with
-! sequence index 1 will be mapped against destination element with sequence
-! index 1 and so forth. Because of the way source and destination Arrays
-! in the current example were constructed this corresponds to a mapping of
-! dimensions 3 and 4 on {\tt srcArray} to dimensions 1 and 4 on {\tt dstArray},
-! respectively.
-!EOE
-!BOC
-  call ESMF_ArrayRedist(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=redistHandle, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-!BOE
-! Array redistribution does {\em not} require the same number of undistributed
-! dimensions in source and destination Array, merely the total number of
-! undistributed elements must match.
-!EOE
-!BOC
-  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
-!EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-  dstArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=dstDistgrid, &
-    distgridToArrayMap=(/1,3/), undistLBound=(/11/), undistUBound=(/18/), &
-    rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
-! This {\tt dstArray} object only has a single undistributed dimension, while
-! the {\tt srcArray}, defined further back, has two undistributed dimensions.
-! However, the total undistributed element count for both Arrays is 8.
-!EOE
-!BOC
-  call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=redistHandle, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
-!BOE
-! In this case the default identity operation between the elements of
-! undistributed dimensions corresponds to a {\em merging} of dimensions
-! 3 and 4 on {\tt srcArray} into dimension 2 on {\tt dstArray}.
-!EOE
-!BOC
-  call ESMF_ArrayRedist(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=redistHandle, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!! THIS IS WHERE I NEED TO ADD:
-!!!! - example for new ArrayRedistStore() interface that allows override of
-!!!!   default identity operation in tensor space -> transpose of undistr. dims.
-!!!! - example that demonstrates transposing between distributed and undistr. d
-
-
-  call ESMF_ArrayDestroy(srcArray, rc=rc) ! destroy the Array object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_DistGridDestroy(srcDistgrid, rc=rc) ! destroy the DistGrid object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_DistGridDestroy(dstDistgrid, rc=rc) ! destroy the DistGrid object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 10 continue
@@ -595,7 +515,7 @@ program ESMF_ArrayRedistEx
   call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize(rc=rc)
-  
+
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_ArrayRedistEx.F90"
@@ -604,5 +524,5 @@ program ESMF_ArrayRedistEx
   endif
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
-  
+
 end program
