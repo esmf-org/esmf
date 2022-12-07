@@ -26,6 +26,8 @@
 
 #define MALLOC_TRIM_REPORT_off
 
+#define SCATTER_LOG_on
+
 //==============================================================================
 // Set OPTION!!!
 #define SMMSLSQV_OPTION 2
@@ -5075,6 +5077,10 @@ int Array::scatter(
   VMK::commhandle **commhList =
     new VMK::commhandle*[dimCount]; // used for indexList comm
 
+#ifdef SCATTER_LOG_on
+  VM::logMemInfo(std::string("prepare for comms: "));
+#endif
+
   // the following code depends on the "contiguousFlag" -> may need to construct
   if (localDeCount && (contiguousFlag[0]==-1)){
     // has local DEs and contiguousFlag has no yet been constructed
@@ -5106,6 +5112,16 @@ int Array::scatter(
       delete [] message;
       return rc;
     }
+#ifdef SCATTER_LOG_on
+    {
+      std::stringstream msg;
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " posted to recv() from rootPet = " << rootPet << " to localDe=" << i
+        << " DE=" << de << " recvSize=" << recvSize;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      VM::logMemInfo(std::string("recvBuffer new: "));
+    }
+#endif
   }
   // - done issuing nb receives (potentially all Pets) -
 
@@ -5145,10 +5161,31 @@ int Array::scatter(
           }
         } // j
 
+#ifdef SCATTER_LOG_on
+    {
+      std::stringstream msg;
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " root for DE=" << de << " commhListCount=" << commhListCount;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
         // prepare contiguous sendBuffer for this DE
         int sendSize =
           exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
+        sendBuffer[de] = NULL;
         sendBuffer[de] = new char[sendSize];
+
+#ifdef SCATTER_LOG_on
+    {
+      std::stringstream msg;
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " root allocate for DE=" << de << " sendBuffer=" << (void *)sendBuffer[de]
+        << " sendSize=" << sendSize;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      VM::logMemInfo(std::string("sendBuffer new: "));
+    }
+#endif
 
         // initialize multi dim index loop
         vector<int> sizes;
@@ -5225,6 +5262,17 @@ int Array::scatter(
         localrc = vm->send(sendBuffer[de], sendSize, dstPet,
           &(commhDataList[nbCount]));
         ++nbCount;  // count this non-blocking send
+#ifdef SCATTER_LOG_on
+    {
+      std::stringstream msg;
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " root send() for DE=" << de << " dstPet=" << dstPet
+        << " sendBuffer=" << (void *)sendBuffer[de]
+        << " sendSize=" << sendSize;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
         if (localrc){
           char *message = new char[160];
           sprintf(message, "VMKernel/MPI error #%d\n", localrc);
@@ -5242,7 +5290,14 @@ int Array::scatter(
 
         // see if outstanding nb-sends have reached boostSize limit
         if (nbCount >= boostSize){
-//printf("clearing Scatter() boost at nbCount = %d\n", nbCount);
+#ifdef SCATTER_LOG_on
+          {
+            std::stringstream msg;
+            msg << "SCATTER_LOG:" << __LINE__ <<
+              " clearing Scatter() boost at nbCount = " << nbCount;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+          }
+#endif
           // wait for nb-sends to finish before posting any more
           for (int j=0; j<nbCount; j++){
             vm->commwait(&(commhDataList[j]));
@@ -5253,7 +5308,14 @@ int Array::scatter(
 
       } // DE on tile
     } // i -> de
-//printf("clearing Scatter() boost at nbCount = %d\n", nbCount);
+#ifdef SCATTER_LOG_on
+    {
+      std::stringstream msg;
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " clearing Scatter() boost at nbCount = " << nbCount;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
     // wait for nb-sends to finish before exiting
     for (int j=0; j<nbCount; j++){
       vm->commwait(&(commhDataList[j]));
@@ -5291,6 +5353,14 @@ int Array::scatter(
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           }
         } // j
+#ifdef SCATTER_LOG_on
+    {
+      std::stringstream msg;
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " non-root for DE=" << de << " commhListCount=" << commhListCount;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
       } // DE on tile
     } // i -> de
     // wait for all outstanding indexList sends issued by fillIndexListPDimPDe()
@@ -5332,6 +5402,14 @@ int Array::scatter(
       // clean-up
       delete [] recvBuffer[i];
     } // !contiguousFlag
+#ifdef SCATTER_LOG_on
+    {
+      std::stringstream msg;
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " completed data move for DE=" << de;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
   } // i -> de
 
   // garbage collection

@@ -18,7 +18,7 @@
 #define VM_PTHREADLOG_on
 #define VM_PETMANAGEMENTLOG_off
 #define VM_MEMLOG_off
-#define VM_COMMQUEUELOG_off
+#define VM_COMMQUEUELOG_on
 #define VM_EPOCHLOG_off
 #define VM_EPOCHMEMLOG_off
 #define VM_SSISHMLOG_off
@@ -3568,13 +3568,35 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
   // container (only) if the *ch was part of the commqueue!
 //fprintf(stderr, "(%d)VMK::commwait: nhandles=%d\n", mypet, nhandles);
 //fprintf(stderr, "(%d)VMK::commwait: *ch=%p\n", mypet, *ch);
+#ifdef VM_COMMQUEUELOG_on
+  {
+    std::stringstream msg;
+    msg << "VMK::commwait():" << __LINE__ << " ch=" << ch << " *ch=" << *ch;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
   int localrc=0;
   if (status)
     status->comm_type = VM_COMM_TYPE_MPIUNI;  // safe initialization
   if ((epoch!=epochBuffer) && (ch!=NULL) && ((*ch)!=NULL)){
+#ifdef VM_COMMQUEUELOG_on
+  {
+    std::stringstream msg;
+    msg << "VMK::commwait():" << __LINE__ << " processing...";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
     // wait for all non-blocking requests in commhandle to complete
     if ((*ch)->type==0){
       // this is a commhandle container
+#ifdef VM_COMMQUEUELOG_on
+  {
+    std::stringstream msg;
+    msg << "VMK::commwait():" << __LINE__ << " commhandle container -> recurse"
+      << " nelements=" << (*ch)->nelements;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
       for (int i=0; i<(*ch)->nelements; i++){
         localrc = commwait(&((*ch)->handles[i]));  // recursive call
         delete (*ch)->handles[i];
@@ -3582,6 +3604,14 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
       delete [] (*ch)->handles;
     }else if ((*ch)->type==1){
       // this commhandle contains MPI_Requests
+#ifdef VM_COMMQUEUELOG_on
+  {
+    std::stringstream msg;
+    msg << "VMK::commwait():" << __LINE__ << " MPI_Requests"
+      << " nelements=" << (*ch)->nelements;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
       if (status)
         status->comm_type = VM_COMM_TYPE_MPI1;
       MPI_Status *mpi_s;
@@ -3641,7 +3671,7 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
 #ifndef ESMF_NO_PTHREADS
           if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
-#ifdef DEBUG_WAIT
+#ifdef VM_COMMQUEUELOG_on
           MPI_Status mpis;
           localrc = MPI_Wait(&((*ch)->mpireq[i]), &mpis);
           int canc;
@@ -3650,7 +3680,7 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
           MPI_Get_count(&mpis, MPI_BYTE, &cnt);
           {
             std::stringstream msg;
-            msg << "commwait: " << __LINE__
+            msg << "VMK::commwait() <DEBUG-WAIT>: " << __LINE__
               << " canc=" << canc
               << " src=" << mpis.MPI_SOURCE
               << " tag=" << mpis.MPI_TAG
@@ -3705,7 +3735,15 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
     }
   }
   // if this *ch is in the request queue x-> unlink and delete
-  if (commqueueitem_unlink(*ch)){ 
+  if (commqueueitem_unlink(*ch)){
+#ifdef VM_COMMQUEUELOG_on
+  {
+    std::stringstream msg;
+    msg << "VMK::commwait():" << __LINE__ << " unlinked *ch=" << *ch
+      << " now delete!";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
     delete *ch; // delete the container commhandle that was linked
     *ch = NULL; // ensure this container will not point to anything
   }
@@ -3715,10 +3753,12 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
 
 void VMK::commqueuewait(){
 #ifdef VM_COMMQUEUELOG_on
+  {
     std::stringstream msg;
-    msg << "commqueue:" << __LINE__ << " VMK::commqueuewait() nhandles=" <<
+    msg << "VMK::commqueuewait():" << __LINE__ << " nhandles=" <<
       nhandles;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
 #endif
   int n=nhandles;
   commhandle *fh;
@@ -3726,6 +3766,14 @@ void VMK::commqueuewait(){
     fh = firsthandle;
     commwait(&fh);
   }
+#ifdef VM_COMMQUEUELOG_on
+  {
+    std::stringstream msg;
+    msg << "VMK::commqueuewait():" << __LINE__ << " nhandles=" <<
+      nhandles;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+  }
+#endif
 }
 
 
