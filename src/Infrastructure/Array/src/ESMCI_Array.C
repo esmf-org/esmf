@@ -5073,9 +5073,8 @@ int Array::scatter(
   int redDimCount = rank - tensorCount;
 
   // prepare for comms
-  VMK::commhandle **commh = new VMK::commhandle*; // used by all comm calls
-  VMK::commhandle **commhList =
-    new VMK::commhandle*[dimCount]; // used for indexList comm
+  VMK::commhandle *commh;                       // used by all comm calls
+  vector<VMK::commhandle*> commhList(dimCount); // used for indexList comm
 
 #ifdef SCATTER_LOG_on
   VM::logMemInfo(std::string("prepare for comms: "));
@@ -5092,24 +5091,25 @@ int Array::scatter(
 
   // all PETs may be receivers of data, each PET issues a maximum of one
   // non-blocking receive, so no problem with too many outstanding comms here
-  char **recvBuffer = new char*[localDeCount];
+  vector<char *> recvBuffer(localDeCount);
   for (int i=0; i<localDeCount; i++){
     int de = localDeToDeMap[i];
     if (tileListPDe[de] != tile) continue; // skip to next local DE
-    recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
+    recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: assume contiguous
     int recvSize =
       exclusiveElementCountPDe[de]*tensorElementCount*dataSize; // bytes
-    if (!contiguousFlag[i])
+    if (!contiguousFlag[i]){
+      // this de has non-contiguous storage -> need a receive buffer
       recvBuffer[i] = new char[recvSize];
-    *commh = NULL; // invalidate
+    }
+    commh = NULL; // invalidate
     // receive data into recvBuffer
-    localrc = vm->recv(recvBuffer[i], recvSize, rootPet, commh);
+    localrc = vm->recv(recvBuffer[i], recvSize, rootPet, &commh);
     if (localrc){
-      char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        message, ESMC_CONTEXT, &rc);
-      delete [] message;
+      std::stringstream message;
+      message << "VMKernel/MPI error: " << localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, message.str(),
+        ESMC_CONTEXT, &rc);
       return rc;
     }
 #ifdef SCATTER_LOG_on
@@ -5138,8 +5138,7 @@ int Array::scatter(
     int nbCount = 0; // reset: count of outstanding non-blocking comms
     const int boostSize = 512;  // max number of posted non-blocking calls:
                                 // stay below typical system limits
-    VMK::commhandle **commhDataList =
-      new VMK::commhandle*[boostSize]; // used for data comms
+    vector<VMK::commhandle*> commhDataList(boostSize); // used for data comms
 
     char *array = (char *)arrayArg;
 #ifdef SCATTER_LOG_on
@@ -5153,22 +5152,22 @@ int Array::scatter(
     // rootPet scatters information to _all_ DEs
     // for each DE of the Array memcpy together a single contiguous sendBuffer
     // from "array" data and send it to the receiving PET non-blocking.
-    char **sendBuffer = new char*[deCount]; // contiguous sendBuffer
+    vector<char *> sendBuffer(deCount); // contiguous sendBuffers
     for (int i=0; i<deCount; i++){
       int de = i;
       if (tileListPDe[de] == tile){
         // this DE is located on receiving tile
-        int **indexList = new int*[dimCount];
+        vector<vector<int> > indexList(dimCount);
         int tensorIndex=0;  // reset
         int commhListCount = 0;  // reset
         for (int j=0; j<dimCount; j++){
           if(distgridToArrayMap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
             // -> obtain indexList for this DE and dim
-            indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
+            indexList[j].resize(indexCountPDimPDe[de*dimCount+j]);
             commhList[commhListCount] = NULL; // prime for later test
-            localrc = distgrid->fillIndexListPDimPDe(indexList[j], de, j+1,
-              &(commhList[commhListCount]), localPet, vm);
+            localrc = distgrid->fillIndexListPDimPDe(&(indexList[j][0]), de,
+              j+1, &(commhList[commhListCount]), localPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
             if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -5188,7 +5187,6 @@ int Array::scatter(
         // prepare contiguous sendBuffer for this DE
         int sendSize =
           exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
-        sendBuffer[de] = NULL;
         sendBuffer[de] = new char[sendSize];
 
 #ifdef SCATTER_LOG_on
@@ -5214,8 +5212,7 @@ int Array::scatter(
             // decomposed dimension
             --j;  // shift to basis 0
             sizes.push_back(indexCountPDimPDe[de*dimCount+j]);
-            if (jj==0)
-              firstDimContig = contigFlagPDimPDe[de*dimCount+j];
+            if (jj==0) firstDimContig = contigFlagPDimPDe[de*dimCount+j];
           }else{
             // tensor dimension
             sizes.push_back(
@@ -5306,6 +5303,13 @@ int Array::scatter(
         commhDataList[nbCount] = NULL;  // invalidate
         localrc = vm->send(sendBuffer[de], sendSize, dstPet,
           &(commhDataList[nbCount]));
+        if (localrc){
+          std::stringstream message;
+          message << "VMKernel/MPI error: " << localrc;
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, message.str(),
+            ESMC_CONTEXT, &rc);
+          return rc;
+        }
         ++nbCount;  // count this non-blocking send
 #ifdef SCATTER_LOG_on
     {
@@ -5318,23 +5322,9 @@ int Array::scatter(
     }
 #endif
 
-        if (localrc){
-          char *message = new char[160];
-          sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-            message, ESMC_CONTEXT, &rc);
-          delete [] message;
-          return rc;
-        }
-
-        // clean-up
-        for (int j=0; j<dimCount; j++)
-          if(contigFlagPDimPDe[de*dimCount+j]==0)
-            delete [] indexList[j];
-        delete [] indexList;
-
         // see if outstanding nb-sends have reached boostSize limit
         if (nbCount >= boostSize){
+          // wait for nb-sends to finish before posting any more
 #ifdef SCATTER_LOG_on
           {
             std::stringstream msg;
@@ -5343,7 +5333,6 @@ int Array::scatter(
             ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
           }
 #endif
-          // wait for nb-sends to finish before posting any more
           for (int j=0; j<nbCount; j++){
             vm->commwait(&(commhDataList[j]));
             delete commhDataList[j];
@@ -5352,7 +5341,7 @@ int Array::scatter(
         }
 
       } // DE on tile
-    } // i -> de
+    } // for i -> de
 #ifdef SCATTER_LOG_on
     {
       std::stringstream msg;
@@ -5361,19 +5350,17 @@ int Array::scatter(
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
-    // wait for nb-sends to finish before exiting
+    // wait for outstanding nb-sends to finish before exiting
     for (int j=0; j<nbCount; j++){
       vm->commwait(&(commhDataList[j]));
       delete commhDataList[j];
     }
     nbCount = 0;  // reset
-    delete [] commhDataList;
     // TODO: move the delete [] sendBuffer[] into nb-wait loops to lower
     // TODO: memory foot print.
     for (int i=0; i<deCount; i++)
       if (tileListPDe[i] == tile)
         delete [] sendBuffer[i];
-    delete [] sendBuffer;
   }
   // - done issuing nb sends (from rootPet) -
 
@@ -5392,10 +5379,10 @@ int Array::scatter(
             commhList[commhListCount] = NULL; // prime for later test
             localrc = distgrid->fillIndexListPDimPDe(NULL, de, j+1,
               &(commhList[commhListCount]), rootPet, vm);
-            if (commhList[commhListCount] != NULL)
-              ++commhListCount;
             if (ESMC_LogDefault.MsgFoundError(localrc,
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+            if (commhList[commhListCount] != NULL)
+              ++commhListCount;
           }
         } // j
 #ifdef SCATTER_LOG_on
@@ -5407,11 +5394,11 @@ int Array::scatter(
     }
 #endif
       } // DE on tile
-    } // i -> de
+    } // for i -> de
     // wait for all outstanding indexList sends issued by fillIndexListPDimPDe()
     for (int j=0; j<commhListCount; j++){
       vm->commwait(&(commhList[j]));
-        delete commhList[j];
+      delete commhList[j];
     }
   }
 
@@ -5444,7 +5431,7 @@ int Array::scatter(
         arrayElement.next();  // skip ahead to next contiguous line
       } // multi dim index loop
 
-      // clean-up
+      // clean-up contiguos receive buffer
       delete [] recvBuffer[i];
     } // !contiguousFlag
 #ifdef SCATTER_LOG_on
@@ -5455,12 +5442,7 @@ int Array::scatter(
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
-  } // i -> de
-
-  // garbage collection
-  delete [] recvBuffer;
-  delete commh;
-  delete [] commhList;
+  } // for i -> de
 
   // return successfully
   rc = ESMF_SUCCESS;
