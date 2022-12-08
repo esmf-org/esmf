@@ -5152,7 +5152,7 @@ int Array::scatter(
     // rootPet scatters information to _all_ DEs
     // for each DE of the Array memcpy together a single contiguous sendBuffer
     // from "array" data and send it to the receiving PET non-blocking.
-    vector<char *> sendBuffer(deCount); // contiguous sendBuffers
+    vector<char *> sendBuffer(boostSize); // contiguous sendBuffers
     for (int i=0; i<deCount; i++){
       int de = i;
       if (tileListPDe[de] == tile){
@@ -5187,17 +5187,17 @@ int Array::scatter(
         // prepare contiguous sendBuffer for this DE
         int sendSize =
           exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
-        sendBuffer[de] = new char[sendSize];
+        sendBuffer[nbCount] = new char[sendSize];
 
 #ifdef SCATTER_LOG_on
     {
       std::stringstream msg;
       msg << "SCATTER_LOG:" << __LINE__ <<
-        " root allocate for DE=" << de << " sendBuffer=" << (void *)sendBuffer[de]
-        << " sendSize=" << sendSize;
+        " root allocate for DE=" << de << " sendBuffer="
+        << (void *)sendBuffer[nbCount] << " sendSize=" << sendSize;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       VM::logMemInfo(std::string("sendBuffer new: "));
-      memset(sendBuffer[de], 0, sendSize);
+      memset(sendBuffer[nbCount], 0, sendSize);
       VM::logMemInfo(std::string("sendBuffer new fill: "));
     }
 #endif
@@ -5276,21 +5276,22 @@ int Array::scatter(
       msg << "SCATTER_LOG:" << __LINE__ <<
         " contig. memcpy() for DE=" << de
         << " sendBufferIndex=" << sendBufferIndex
-        << " sendBuffer address=" << (void *)(sendBuffer[de]+sendBufferIndex*dataSize)
+        << " sendBuffer address="
+        << (void *)(sendBuffer[nbCount]+sendBufferIndex*dataSize)
         << " linearIndex=" << linearIndex
         << " src address=" << (void *)(array+linearIndex*dataSize)
         << " size=" << multiDimIndexLoop.getIndexTupleEnd()[0]*dataSize;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
-            memcpy(sendBuffer[de]+sendBufferIndex*dataSize,
+            memcpy(sendBuffer[nbCount]+sendBufferIndex*dataSize,
               array+linearIndex*dataSize,
               multiDimIndexLoop.getIndexTupleEnd()[0]*dataSize);
             multiDimIndexLoop.next(); // skip to next contiguous line
             sendBufferIndex += multiDimIndexLoop.getIndexTupleEnd()[0];
           }else{
             // non-contiguous data in first dimension
-            memcpy(sendBuffer[de]+sendBufferIndex*dataSize,
+            memcpy(sendBuffer[nbCount]+sendBufferIndex*dataSize,
               array+linearIndex*dataSize, dataSize);
             multiDimIndexLoop.next(); // next element
             ++sendBufferIndex;
@@ -5301,7 +5302,7 @@ int Array::scatter(
         int dstPet;
         delayout->getDEMatchPET(de, *vm, NULL, &dstPet, 1);
         commhDataList[nbCount] = NULL;  // invalidate
-        localrc = vm->send(sendBuffer[de], sendSize, dstPet,
+        localrc = vm->send(sendBuffer[nbCount], sendSize, dstPet,
           &(commhDataList[nbCount]));
         if (localrc){
           std::stringstream message;
@@ -5316,7 +5317,7 @@ int Array::scatter(
       std::stringstream msg;
       msg << "SCATTER_LOG:" << __LINE__ <<
         " root send() for DE=" << de << " dstPet=" << dstPet
-        << " sendBuffer=" << (void *)sendBuffer[de]
+        << " sendBuffer=" << (void *)sendBuffer[nbCount]
         << " sendSize=" << sendSize;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
@@ -5336,6 +5337,7 @@ int Array::scatter(
           for (int j=0; j<nbCount; j++){
             vm->commwait(&(commhDataList[j]));
             delete commhDataList[j];
+            delete [] sendBuffer[j];
           }
           nbCount = 0;  // reset
         }
@@ -5354,13 +5356,9 @@ int Array::scatter(
     for (int j=0; j<nbCount; j++){
       vm->commwait(&(commhDataList[j]));
       delete commhDataList[j];
+      delete [] sendBuffer[j];
     }
     nbCount = 0;  // reset
-    // TODO: move the delete [] sendBuffer[] into nb-wait loops to lower
-    // TODO: memory foot print.
-    for (int i=0; i<deCount; i++)
-      if (tileListPDe[i] == tile)
-        delete [] sendBuffer[i];
   }
   // - done issuing nb sends (from rootPet) -
 
