@@ -5117,9 +5117,16 @@ int Array::scatter(
       std::stringstream msg;
       msg << "SCATTER_LOG:" << __LINE__ <<
         " posted to recv() from rootPet = " << rootPet << " to localDe=" << i
-        << " DE=" << de << " recvSize=" << recvSize;
+        << " DE=" << de << " contiguousFlag[localDe]=" << contiguousFlag[i];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+      msg.str("");  // clear
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " posted to recv() recvBuffer[localDe] = " << (void*)recvBuffer[i]
+        << " recvSize=" << recvSize;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       VM::logMemInfo(std::string("recvBuffer new: "));
+      memset(recvBuffer[i], 0, recvSize);
+      VM::logMemInfo(std::string("recvBuffer new fill: "));
     }
 #endif
   }
@@ -5135,6 +5142,14 @@ int Array::scatter(
       new VMK::commhandle*[boostSize]; // used for data comms
 
     char *array = (char *)arrayArg;
+#ifdef SCATTER_LOG_on
+    {
+      std::stringstream msg;
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " array = " << array;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
     // rootPet scatters information to _all_ DEs
     // for each DE of the Array memcpy together a single contiguous sendBuffer
     // from "array" data and send it to the receiving PET non-blocking.
@@ -5184,22 +5199,28 @@ int Array::scatter(
         << " sendSize=" << sendSize;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
       VM::logMemInfo(std::string("sendBuffer new: "));
+      memset(sendBuffer[de], 0, sendSize);
+      VM::logMemInfo(std::string("sendBuffer new fill: "));
     }
 #endif
 
         // initialize multi dim index loop
         vector<int> sizes;
         tensorIndex=0;  // reset
+        bool firstDimContig = false;
         for (int jj=0; jj<rank; jj++){
           int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 f tensor
           if (j){
             // decomposed dimension
             --j;  // shift to basis 0
             sizes.push_back(indexCountPDimPDe[de*dimCount+j]);
+            if (jj==0)
+              firstDimContig = contigFlagPDimPDe[de*dimCount+j];
           }else{
             // tensor dimension
             sizes.push_back(
               undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1);
+            if (jj==0) firstDimContig = true;
             ++tensorIndex;
           }
         }
@@ -5210,8 +5231,19 @@ int Array::scatter(
           delete commhList[j];
         }
 
+#ifdef SCATTER_LOG_on
+    {
+      std::stringstream msg;
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " sizes for multiDimIndexLoop:";
+      for (auto it=sizes.begin(); it!=sizes.end(); ++it)
+        msg << *it << ", ";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
+
         MultiDimIndexLoop multiDimIndexLoop(sizes);
-        if (contigFlagPDimPDe[de*dimCount])
+        if (firstDimContig)
           multiDimIndexLoop.setSkipDim(0); // contiguous data in first dimension
         // loop over all elements in exclusive region for this DE
         long unsigned int sendBufferIndex = 0;  // reset
@@ -5239,8 +5271,21 @@ int Array::scatter(
             }
           }
           // copy this element into the contiguous sendBuffer for this DE
-          if (contigFlagPDimPDe[de*dimCount]){
+          if (firstDimContig){
             // contiguous data in first dimension
+#ifdef SCATTER_LOG_on
+    {
+      std::stringstream msg;
+      msg << "SCATTER_LOG:" << __LINE__ <<
+        " contig. memcpy() for DE=" << de
+        << " sendBufferIndex=" << sendBufferIndex
+        << " sendBuffer address=" << (void *)(sendBuffer[de]+sendBufferIndex*dataSize)
+        << " linearIndex=" << linearIndex
+        << " src address=" << (void *)(array+linearIndex*dataSize)
+        << " size=" << multiDimIndexLoop.getIndexTupleEnd()[0]*dataSize;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
+    }
+#endif
             memcpy(sendBuffer[de]+sendBufferIndex*dataSize,
               array+linearIndex*dataSize,
               multiDimIndexLoop.getIndexTupleEnd()[0]*dataSize);
