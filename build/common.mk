@@ -1094,7 +1094,7 @@ endif
 ifeq ($(origin ESMF_CLINKRPATHS_ENV), environment)
 ESMF_CLINKRPATHS = $(ESMF_CLINKRPATHS_ENV)
 endif
-ESMF_CLINKRPATHS   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_CLINKPATHS))))
+ESMF_CLINKRPATHS   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_CLINKPATHS))))
 # - make sure environment variable gets prepended _once_
 ifeq ($(origin ESMF_CLINKLIBS), environment)
 export ESMF_CLINKLIBS_ENV := $(ESMF_CLINKLIBS)
