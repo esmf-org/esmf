@@ -26,7 +26,8 @@
 
 #define MALLOC_TRIM_REPORT_off
 
-#define SCATTER_LOG_on
+#define SCATTER_LOG_off
+#define GATHER_LOG_off
 
 //==============================================================================
 // Set OPTION!!!
@@ -4579,9 +4580,8 @@ int Array::gather(
       &rc)) return rc;
   }
 
-  // query the VM for localPet and petCount
+  // query the VM
   int localPet = vm->getLocalPet();
-  int petCount = vm->getPetCount();
 
   // deal with optional tile argument
   int tile = 1;  // default
@@ -4669,9 +4669,12 @@ int Array::gather(
   int redDimCount = rank - tensorCount;
 
   // prepare for comms
-  VMK::commhandle **commh = new VMK::commhandle*; // used by all comm calls
-  VMK::commhandle **commhList =
-    new VMK::commhandle*[dimCount]; // used for indexList comm
+  VMK::commhandle *commh;                       // used by all comm calls
+  vector<VMK::commhandle*> commhList(dimCount); // used for indexList comm
+
+#ifdef GATHER_LOG_on
+  VM::logMemInfo(std::string("GATHER_LOG: prepare for comms: "));
+#endif
 
   // the following code depends on the "contiguousFlag" -> may need to construct
   if (localDeCount && (contiguousFlag[0]==-1)){
@@ -4684,7 +4687,7 @@ int Array::gather(
 
   // all PETs may be senders of data, each PET issues a maximum of one
   // non-blocking send, so no problem with too many outstanding comms here
-  char **sendBuffer = new char*[localDeCount];
+  vector<char *> sendBuffer(localDeCount);
   for (int i=0; i<localDeCount; i++){
     int de = localDeToDeMap[i];
     if (tileListPDe[de] != tile) continue; // skip to next local DE
@@ -4714,31 +4717,29 @@ int Array::gather(
     } // !contiguousFlag
 
     // ready to send the sendBuffer to rootPet
-    *commh = NULL; // invalidate
-    localrc = vm->send(sendBuffer[i], sendSize, rootPet, commh);
+    commh = NULL; // invalidate
+    localrc = vm->send(sendBuffer[i], sendSize, rootPet, &commh);
     if (localrc){
-      char *message = new char[160];
-      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        message, ESMC_CONTEXT, &rc);
-      delete [] message;
+      std::stringstream message;
+      message << "VMKernel/MPI error: " << localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, message.str(),
+        ESMC_CONTEXT, &rc);
       return rc;
     }
-  } // i -> de
+  } // for i -> de
 
   // rootPet is the only receiver for gather data
-  char **recvBuffer;
+  vector<char *> recvBuffer;  // symbol must exist outside the following scope
   if (localPet == rootPet){
     int nbCount = 0;  // reset: count of outstanding non-blocking comms
     const int boostSize = 512;  // max number of posted non-blocking calls:
                                 // stay below typical system limits
-    VMK::commhandle **commhDataList =
-      new VMK::commhandle*[boostSize]; // used for data comms
+    vector<VMK::commhandle*> commhDataList(boostSize); // used for data comms
 
     // for each DE of the Array receive a single contiguous recvBuffer
     // from the associated PET non-blocking and memcpy it into the right
     // location in "array".
-    recvBuffer = new char*[deCount]; // contiguous recvBuffer
+    recvBuffer.resize(deCount); // contiguous recvBuffer
     for (int i=0; i<deCount; i++){
       int de = i;
       if (tileListPDe[de] == tile){
@@ -4754,17 +4755,15 @@ int Array::gather(
           &(commhDataList[nbCount]));
         ++nbCount;  // count this non-blocking recv
         if (localrc){
-          char *message = new char[160];
-          sprintf(message, "VMKernel/MPI error #%d\n", localrc);
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-            message, ESMC_CONTEXT, &rc);
-          delete [] message;
+          std::stringstream message;
+          message << "VMKernel/MPI error: " << localrc;
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, message.str(),
+            ESMC_CONTEXT, &rc);
           return rc;
         }
 
         // see if outstanding nb-recvs have reached boostSize limit
         if (nbCount >= boostSize){
-//printf("clearing Gather() boost at nbCount = %d\n", nbCount);
           // wait for nb-recvs to finish before posting any more
           for (int j=0; j<nbCount; j++){
             vm->commwait(&(commhDataList[j]));
@@ -4774,20 +4773,26 @@ int Array::gather(
         }
 
       } // DE on tile
-    } // i -> de
-//printf("clearing Gather() boost at nbCount = %d\n", nbCount);
+    } // for i -> de
     // wait for nb-recvs to finish before exiting
     for (int j=0; j<nbCount; j++){
       vm->commwait(&(commhDataList[j]));
       delete commhDataList[j];
     }
     nbCount = 0;  // reset
-    delete [] commhDataList;
   }
 
   // wait until all the local sends are complete
   vm->commqueuewait();
   // - done waiting on sends -
+
+  // take down send buffers that needed allocation
+  for (int i=0; i<localDeCount; i++){
+    int de = localDeToDeMap[i];
+    if (tileListPDe[de] != tile) continue; // skip to next local DE
+    if (!contiguousFlag[i])
+      delete [] sendBuffer[i];
+  }
 
   if (localPet == rootPet){
     char *array = (char *)arrayArg;
@@ -4796,17 +4801,17 @@ int Array::gather(
       int de = i;
       if (tileListPDe[de] == tile){
         // this DE is located on sending tile
-        int **indexList = new int*[dimCount];
+        vector<vector<int> > indexList(dimCount);
         int tensorIndex=0;  // reset
         int commhListCount = 0;  // reset
         for (int j=0; j<dimCount; j++){
           if(distgridToArrayMap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
             // -> obtain indexList for this DE and dim
-            indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
+            indexList[j].resize(indexCountPDimPDe[de*dimCount+j]);
             commhList[commhListCount] = NULL; // prime for later test
-            localrc = distgrid->fillIndexListPDimPDe(indexList[j], de, j+1,
-              &(commhList[commhListCount]), localPet, vm);
+            localrc = distgrid->fillIndexListPDimPDe(&(indexList[j][0]), de,
+              j+1, &(commhList[commhListCount]), localPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
             if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -4817,16 +4822,19 @@ int Array::gather(
         // initialize multi dim index loop
         vector<int> sizes;
         tensorIndex=0;  // reset
+        bool firstDimContig = false;
         for (int jj=0; jj<rank; jj++){
           int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 f tensor
           if (j){
             // decomposed dimension
             --j;  // shift to basis 0
             sizes.push_back(indexCountPDimPDe[de*dimCount+j]);
+            if (jj==0) firstDimContig = contigFlagPDimPDe[de*dimCount+j];
           }else{
             // tensor dimension
             sizes.push_back(
               undistUBound[tensorIndex] - undistLBound[tensorIndex] + 1);
+            if (jj==0) firstDimContig = true;
             ++tensorIndex;
           }
         }
@@ -4838,7 +4846,7 @@ int Array::gather(
         }
 
         MultiDimIndexLoop multiDimIndexLoop(sizes);
-        if (contigFlagPDimPDe[de*dimCount])
+        if (firstDimContig)
           multiDimIndexLoop.setSkipDim(0); // contiguous data in first dimension
         // loop over all elements in exclusive region for this DE
         long unsigned int recvBufferIndex = 0;  // reset
@@ -4866,7 +4874,7 @@ int Array::gather(
             }
           }
           // copy this element from the contiguous recvBuffer for this DE
-          if (contigFlagPDimPDe[de*dimCount]){
+          if (firstDimContig){
             // contiguous data in first dimension
             memcpy(array+linearIndex*dataSize,
               recvBuffer[de]+recvBufferIndex*dataSize,
@@ -4882,13 +4890,8 @@ int Array::gather(
           }
         } // multi dim index loop
 
-        // clean-up
-        for (int j=0; j<dimCount; j++)
-          if(contigFlagPDimPDe[de*dimCount+j]==0)
-            delete [] indexList[j];
-        delete [] indexList;
       } // DE on tile
-    } // i -> de
+    } // for i -> de
   }else{
     // localPet is _not_ rootPet -> provide localIndexList to rootPet if nec.
     int commhListCount = 0;  // reset
@@ -4910,11 +4913,11 @@ int Array::gather(
           }
         } // j
       } // DE on tile
-    } // i -> de
+    } // for i -> de
     // wait for all outstanding indexList sends issued by fillIndexListPDimPDe()
     for (int j=0; j<commhListCount; j++){
       vm->commwait(&(commhList[j]));
-        delete commhList[j];
+      delete commhList[j];
     }
   }
 
@@ -4925,17 +4928,7 @@ int Array::gather(
       if (tileListPDe[de] == tile)
         delete [] recvBuffer[de];
     }
-    delete [] recvBuffer;
   }
-  for (int i=0; i<localDeCount; i++){
-    int de = localDeToDeMap[i];
-    if (tileListPDe[de] != tile) continue; // skip to next local DE
-    if (!contiguousFlag[i])
-      delete [] sendBuffer[i];
-  }
-  delete [] sendBuffer;
-  delete commh;
-  delete [] commhList;
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -5077,7 +5070,7 @@ int Array::scatter(
   vector<VMK::commhandle*> commhList(dimCount); // used for indexList comm
 
 #ifdef SCATTER_LOG_on
-  VM::logMemInfo(std::string("prepare for comms: "));
+  VM::logMemInfo(std::string("SCATTER_LOG: prepare for comms: "));
 #endif
 
   // the following code depends on the "contiguousFlag" -> may need to construct
@@ -5124,9 +5117,9 @@ int Array::scatter(
         " posted to recv() recvBuffer[localDe] = " << (void*)recvBuffer[i]
         << " recvSize=" << recvSize;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-      VM::logMemInfo(std::string("recvBuffer new: "));
+      VM::logMemInfo(std::string("SCATTER_LOG: recvBuffer new: "));
       memset(recvBuffer[i], 0, recvSize);
-      VM::logMemInfo(std::string("recvBuffer new fill: "));
+      VM::logMemInfo(std::string("SCATTER_LOG: recvBuffer new fill: "));
     }
 #endif
   }
@@ -5196,9 +5189,9 @@ int Array::scatter(
         " root allocate for DE=" << de << " sendBuffer="
         << (void *)sendBuffer[nbCount] << " sendSize=" << sendSize;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
-      VM::logMemInfo(std::string("sendBuffer new: "));
+      VM::logMemInfo(std::string("SCATTER_LOG: sendBuffer new: "));
       memset(sendBuffer[nbCount], 0, sendSize);
-      VM::logMemInfo(std::string("sendBuffer new fill: "));
+      VM::logMemInfo(std::string("SCATTER_LOG: sendBuffer new fill: "));
     }
 #endif
 
@@ -5547,7 +5540,6 @@ template<typename IT>
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
     int localPet = vm->getLocalPet();
-    int petCount = vm->getPetCount();
 
 #ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore1"));
