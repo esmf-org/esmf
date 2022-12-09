@@ -1303,7 +1303,7 @@ void norm_poly3D(int num_p, double *p) {
   // this call.
   void calc_1st_order_weights_2D_3D_sph_src_and_dst_pnts(int num_src_nodes, double *src_coords,
                                                           int num_dst_nodes, double *dst_coords,
-                                                          int *valid, double *sintd_area, double *dst_area,
+                                                          int *valid, double *sintd_area, 
                                                           Mesh * midmesh,
                                                           std::vector<sintd_node *> * sintd_nodes,
                                                           std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
@@ -1323,16 +1323,6 @@ void norm_poly3D(int num_p, double *p) {
 
     // Error checking of dst cell (e.g. is smashed) done above
 
-    // calculate dst area
-    *dst_area=great_circle_area(num_dst_nodes, dst_coords);
-
-    // if destination area is 0.0, invalidate and go to next
-    if (*dst_area==0.0) {
-      *valid=0;
-       *sintd_area=0.0;
-      *dst_area=0.0;
-      return;
-    }
 
     // Make sure that we aren't going to go over size of tmp buffers
     if ((num_src_nodes + num_dst_nodes) > MAX_NUM_POLY_NODES) {
@@ -1355,7 +1345,6 @@ void norm_poly3D(int num_p, double *p) {
       if (num_sintd_nodes < 3) {
         *valid=0;
         *sintd_area=0.0;
-        *dst_area=0.0;
         return;
       }
 
@@ -1505,7 +1494,7 @@ void norm_poly3D(int num_p, double *p) {
 
       // See if dst cell concave
       bool is_concave=false;
-      if (num_src_nodes > 3) {
+      if (num_dst_nodes > 3) {
         bool left_turn=false;
         bool right_turn=false;
 
@@ -1522,16 +1511,35 @@ void norm_poly3D(int num_p, double *p) {
 
       // If not concave, calculate intersection and intersection area for 1
       if (!is_concave) {
-        int valid;
-        double sintd_area;
-        double dst_area;
-        calc_1st_order_weights_2D_3D_sph_src_and_dst_pnts(num_src_nodes, src_coords,
-                                                           num_dst_nodes, dst_coords,
-                                                           &valid, &sintd_area, &dst_area,
-                                                           midmesh,
-                                                           sintd_nodes,
-                                                           sintd_cells, res_map, zz);
 
+        // Init variables 
+        int valid=0;
+        double sintd_area=0.0;
+        double dst_area=0.0;
+        
+        // Compute dst area
+        dst_area=great_circle_area(num_dst_nodes, dst_coords);
+
+        // If destination area is non-zero, then compute intersection area
+        if (dst_area > 0.0) {
+          calc_1st_order_weights_2D_3D_sph_src_and_dst_pnts(num_src_nodes, src_coords,
+                                                            num_dst_nodes, dst_coords,
+                                                            &valid, &sintd_area,
+                                                            midmesh,
+                                                            sintd_nodes,
+                                                            sintd_cells, res_map, zz);
+        }
+
+        // Save area no matter what
+        (*dst_area_list)[i]=dst_area;
+        
+        // Set output based on validity
+        if (valid==1) {
+          (*valid_list)[i]=1;
+          (*sintd_area_list)[i]=sintd_area;
+        }
+        
+        
 #ifdef BOB_XGRID_DEBUG
 	if (valid && (global_src_id == 0)) {
 	  tot += sintd_area;
@@ -1541,16 +1549,6 @@ void norm_poly3D(int num_p, double *p) {
 	}
 #endif
 
-
-        // Set output based on validity
-        if (valid==1) {
-          (*valid_list)[i]=1;
-          (*sintd_area_list)[i]=sintd_area;
-          (*dst_area_list)[i]=dst_area;
-         }
-        // else {
-        //  Init to 0's above
-        //}
 
     } else { // If not concave, calculate intersection and intersection area for both and combine
 
@@ -1589,25 +1587,32 @@ void norm_poly3D(int num_p, double *p) {
         tri[7]=dst_coords[3*tri_ind[2]+1];
         tri[8]=dst_coords[3*tri_ind[2]+2];
 
-        // printf("Concave id=%d\n",src_elem->get_id());
-        // printf("tri 1=%d %d %d\n",tri_ind[0],tri_ind[1],tri_ind[2]);
-        // printf("tri 1=(%f %f) (%f %f) (%f %f)\n",tri[0],tri[1],tri[2],tri[3],tri[4],tri[5]);
 
-        int valid1;
-        double sintd_area1;
-        double dst_area1;
-        calc_1st_order_weights_2D_3D_sph_src_and_dst_pnts(num_src_nodes, src_coords,
-                                                           3, tri,
-                                                           &valid1, &sintd_area1, &dst_area1,
-                                                           midmesh,
-                                                           sintd_nodes,
-                                                           sintd_cells, res_map, zz);
+        // Init variables 
+        int valid1=0;
+        double sintd_area1=0.0;
+        double dst_area1=0.0;
+        
+        // Compute dst area
+        dst_area1=great_circle_area(3, tri);
 
-        // Set output based on validity
+        // If destination area is non-zero, then compute intersection area
+        if (dst_area1 > 0.0) {
+          calc_1st_order_weights_2D_3D_sph_src_and_dst_pnts(num_src_nodes, src_coords,
+                                                            3, tri,
+                                                            &valid1, &sintd_area1, 
+                                                            midmesh,
+                                                            sintd_nodes,
+                                                            sintd_cells, res_map, zz);
+        }
+
+        // Save area no matter what
+        (*dst_area_list)[i]=dst_area1;
+        
+        // Set other output based on validity
         if (valid1 == 1) {
           (*valid_list)[i]=1;
           (*sintd_area_list)[i]=sintd_area1;
-          (*dst_area_list)[i]=dst_area1;
         }
 
 
@@ -1624,23 +1629,33 @@ void norm_poly3D(int num_p, double *p) {
         tri[7]=dst_coords[3*tri_ind[5]+1];
         tri[8]=dst_coords[3*tri_ind[5]+2];
 
-        int valid2;
-        double sintd_area2;
-        double dst_area2;
-        calc_1st_order_weights_2D_3D_sph_src_and_dst_pnts(num_src_nodes, src_coords,
-                                                          3, tri,
-                                                          &valid2, &sintd_area2, &dst_area2,
-                                                          midmesh,
-                                                          sintd_nodes,
-                                                          sintd_cells, res_map, zz);
+        // Init variables 
+        int valid2=0;
+        double sintd_area2=0.0;
+        double dst_area2=0.0;
+        
+        // Compute dst area
+        dst_area2=great_circle_area(3, tri);
 
+        // If destination area is non-zero, then compute intersection area
+        if (dst_area2 > 0.0) {
+          calc_1st_order_weights_2D_3D_sph_src_and_dst_pnts(num_src_nodes, src_coords,
+                                                             3, tri,
+                                                             &valid2, &sintd_area2,
+                                                             midmesh,
+                                                             sintd_nodes,
+                                                             sintd_cells, res_map, zz);
+        }
 
+        // Save area no matter what
+        (*dst_area_list)[i] += dst_area2;
+        
         // Set output based on validity
         if (valid2 == 1) {
           (*valid_list)[i]=1;
           (*sintd_area_list)[i] += sintd_area2;
-          (*dst_area_list)[i]   += dst_area2;
         }
+        
       }
     }
 
