@@ -1378,7 +1378,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
       
       ! determine which stagger locations are available
       dstslc = 0
-      if (srcgt == ESMF_GEOMTYPE_GRID) then
+      if (dstgt == ESMF_GEOMTYPE_GRID) then
         call ESMF_FieldGet(dstField, grid=dstgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1396,7 +1396,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (ecip .eqv. .true.) dstslc = 2
-      else if (srcgt == ESMF_GEOMTYPE_MESH) then
+      else if (dstgt == ESMF_GEOMTYPE_MESH) then
         call ESMF_FieldGet(dstField, mesh=dstmesh, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1408,7 +1408,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
         dstslc = 1
         if (ecip .eqv. .true.) dstslc = 2
-      else if (srcgt == ESMF_GEOMTYPE_XGRID) then
+      else if (dstgt == ESMF_GEOMTYPE_XGRID) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
                             msg="- xgrid cannot retrieve areas", &
                             ESMF_CONTEXT, rcToReturn=rc)
