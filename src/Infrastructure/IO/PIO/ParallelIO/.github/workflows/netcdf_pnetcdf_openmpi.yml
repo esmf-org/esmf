@@ -1,4 +1,4 @@
-name: netcdf-4.7.4_pnetcdf-12.1_ncint_openmpi_4.0.4
+name: netcdf_pnetcdf_openmpi
 
 on:
   push:
@@ -14,19 +14,23 @@ jobs:
     env:
       CPPFLAGS: "-I/home/runner/openmpi/include -I/home/runner/hdf5/include -I/home/runner/netcdf-c/include -I/home/runner/netcdf-fortran/include -I/home/runner/pnetcdf/include"
       LDFLAGS: "-L/home/runner/openmpi/lib -L/home/runner/hdf5/lib -L/home/runner/netcdf-c/lib -L/home/runner/netcdf-fortran/lib -L/home/runner/pnetcdf/lib"
-      NETCDF_C_VERSION: 4.7.4
-      NETCDF_F_VERSION: 4.5.4
-      OPENMPI_VERSION: 4.0.4
+      NETCDF_C_VERSION: 4.9.0
+      NETCDF_F_VERSION: 4.6.0
+      OPENMPI_VERSION_MAJOR: 4.1
+      OPENMPI_VERSION_PATCH: 4
       PNETCDF_VERSION: 1.12.3
-      HDF5_VERSION: 1.10.6
+      HDF5_VERSION_PATCH: 2
+      HDF5_VERSION_MAJOR: 1.12
+      FCFLAGS: "-fallow-argument-mismatch"
+      FFLAGS: "-fallow-argument-mismatch"
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Installs
       run: |
         sudo apt-get install doxygen graphviz wget gfortran libjpeg-dev libz-dev
     - name: cache-openmpi
       id: cache-openmpi
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/openmpi
         key: openmpi-${{ runner.os }}-${{ env.OPENMPI_VERSION }}
@@ -34,19 +38,19 @@ jobs:
     - name: build-openmpi
       if: steps.cache-openmpi.outputs.cache-hit != 'true'
       run: |
-        wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-${{ env.OPENMPI_VERSION }}.tar.gz &> /dev/null
-        tar -xzf openmpi-${{ env.OPENMPI_VERSION }}.tar.gz
-        pushd openmpi-${{ env.OPENMPI_VERSION }}
+        wget https://download.open-mpi.org/release/open-mpi/v${{ env.OPENMPI_VERSION_MAJOR }}/openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH}}.tar.gz &> /dev/null
+        tar -xzf openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}.tar.gz
+        pushd openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}
         ./configure --prefix=/home/runner/openmpi
         make
         sudo make install
         popd
     - name: cache-hdf5
       id: cache-hdf5
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/hdf5
-        key: hdf5-${{ runner.os }}-${{ env.HDF5_VERSION }}-openmpi-${{ env.OPENMPI_VERSION }}
+        key: hdf5-${{ runner.os }}-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}-openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}
 
     - name: build-hdf5
       if: steps.cache-hdf5.outputs.cache-hit != 'true'
@@ -54,19 +58,19 @@ jobs:
         set -x
         export PATH="/home/runner/openmpi/bin:$PATH"
         export CC=/home/runner/openmpi/bin/mpicc
-        wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-${{ env.HDF5_VERSION }}/src/hdf5-${{ env.HDF5_VERSION }}.tar.gz &> /dev/null
-        tar -xzf hdf5-${{ env.HDF5_VERSION }}.tar.gz
-        pushd hdf5-${{ env.HDF5_VERSION }}
+        wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${{ env.HDF5_VERSION_MAJOR }}/hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}/src/hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}.tar.gz &> /dev/null
+        tar -xzf hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}.tar.gz
+        pushd hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}
         ./configure --prefix=/home/runner/hdf5 --enable-parallel --disable-tools --disable-fortran --disable-cxx --enable-parallel-tests
         make
         sudo make install
         popd
     - name: cache-netcdf-c
       id: cache-netcdf-c
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/netcdf-c
-        key: netcdf-c-${{ runner.os }}-${{ env.NETCDF_C_VERSION }}-openmpi-${{ env.OPENMPI_VERSION }}-hdf5-${{ env.HDF5_VERSION }}
+        key: netcdf-c-${{ runner.os }}-${{ env.NETCDF_C_VERSION }}-openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}-hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}
 
     - name: build-netcdf-c
       if: steps.cache-netcdf-c.outputs.cache-hit != 'true'
@@ -83,10 +87,10 @@ jobs:
         popd
     - name: cache-netcdf-fortran
       id: cache-netcdf-fortran
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/netcdf-fortran
-        key: netcdf-fortran-${{ runner.os }}-${{ env.NETCDF_F_VERSION }}-openmpi-${{ env.OPENMPI_VERSION }}-hdf5-${{ env.HDF5_VERSION }}
+        key: netcdf-fortran-${{ runner.os }}-${{ env.NETCDF_F_VERSION }}-openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}-hdf5-${{ env.HDF5_VERSION_MAJOR }}.${{ env.HDF5_VERSION_PATCH }}
 
     - name: build-netcdf-fortran
       if: steps.cache-netcdf-fortran.outputs.cache-hit != 'true'
@@ -103,10 +107,10 @@ jobs:
         popd
     - name: cache-pnetcdf
       id: cache-pnetcdf
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/pnetcdf
-        key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}-openmpi-${{ env.OPENMPI_VERSION }}
+        key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}-openmpi-${{ env.OPENMPI_VERSION_MAJOR }}.${{ env.OPENMPI_VERSION_PATCH }}
 
     - name: build-pnetcdf
       if: steps.cache-pnetcdf.outputs.cache-hit != 'true'
@@ -150,6 +154,3 @@ jobs:
         make VERBOSE=1
         make tests VERBOSE=1
         ctest -VV
-
-        
-        

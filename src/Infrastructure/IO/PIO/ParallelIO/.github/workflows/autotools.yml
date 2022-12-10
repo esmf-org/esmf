@@ -17,8 +17,9 @@ jobs:
       CPPFLAGS: "-I/usr/include -I/usr/local/include -I/home/runner/pnetcdf/include"
       LDFLAGS: "-L/home/runner/pnetcdf/lib"
       PNETCDF_VERSION: 1.12.3
+      FCFLAGS: "-fallow-argument-mismatch"
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Installs
       run: |
         set -x
@@ -39,7 +40,7 @@ jobs:
         sudo apt-get install libopenmpi-dev
     - name: cache-pnetcdf
       id: cache-pnetcdf
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/pnetcdf
         key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}
