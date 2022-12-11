@@ -110,7 +110,8 @@ ESMF_F90LINKPATHS +=
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -cxxlib -lrt -ldl
+ESMF_F90LINKOPTS += -cxxlib
+ESMF_F90LINKLIBS += -lrt -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end

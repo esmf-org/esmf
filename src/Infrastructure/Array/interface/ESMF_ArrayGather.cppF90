@@ -220,7 +220,8 @@ contains
     integer                       :: localrc        ! local return code @\
     integer                       :: counts(mrank)  ! counts vector @\
     integer                       :: lb(mrank)      ! lb vector @\
-    integer                       :: i, localPet, count @\
+    integer                       :: i, localPet @\
+    integer(ESMF_KIND_I8)         :: count @\
     type(ESMF_VM)                 :: vm_opt @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: fptr @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),allocatable :: farray_dummy @\

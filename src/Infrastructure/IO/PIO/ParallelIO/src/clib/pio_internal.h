@@ -65,7 +65,10 @@
 /** Some MPI implementations do not allow passing MPI_DATATYPE_NULL to
  * comm functions even though the send or recv length is 0, in these
  * cases we use MPI_CHAR */
-#if defined(MPT_VERSION) || defined(OPEN_MPI)
+// MPICH 4.x has joined the club of MPI implementations that do not
+// allow MPI_DATATYPE_NULL in comm functions even when count is 0.
+// Generally switch to using MPI_CHAR instead of MPI_DATATYPE_NULL.
+#if 1
 #define PIO_DATATYPE_NULL MPI_CHAR
 #else
 #define PIO_DATATYPE_NULL MPI_DATATYPE_NULL

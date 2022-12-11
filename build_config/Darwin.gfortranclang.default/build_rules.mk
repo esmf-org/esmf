@@ -192,10 +192,10 @@ endif
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
-ESMF_F90COMPILEOPTS += -pthread
+ESMF_F90COMPILEOPTS += -pthread -frecursive
 ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_CCOMPILEOPTS   += -pthread
-ESMF_F90LINKOPTS    += -pthread
+ESMF_F90LINKOPTS    += -pthread -frecursive
 ESMF_CXXLINKOPTS    += -pthread
 ESMF_CLINKOPTS      += -pthread
 endif
@@ -204,6 +204,14 @@ endif
 # OpenMP compiler and linker flags
 #
 ESMF_OPENMP=OFF
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+# As of 2022-12-05, Apple's clang doesn't support -fopenmp directly; instead, it requires
+# -Xpreprocessor -fopenmp. In addition, you will need to install libomp and explicitly add
+# the appropriate include and link directories and libraries to pull it in (this is not
+# done here yet).
+ESMF_OPENMP_CXXCOMPILEOPTS += -Xpreprocessor -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -Xpreprocessor -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
