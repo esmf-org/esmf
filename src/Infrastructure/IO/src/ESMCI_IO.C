@@ -1340,8 +1340,6 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
   std::vector<int> minIndexNew(rank*tileCount);
   std::vector<int> maxIndexNew(rank*tileCount);
   std::vector<int> deBlockList(rank*2*deCount);
-  std::vector<int> deBlockListLen(3);
-  deBlockListLen[0]=rank; deBlockListLen[1]=2; deBlockListLen[2]=deCount;
   int jj = 0;
   for (int i=0; i<rank; i++) {
     int j = arrayToDistGridMap[i];
@@ -1370,7 +1368,8 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
   }
 
   // create the fixed up DistGrid, making sure to use original DELayout
-  ESMCI::InterArray<int> deBlockListInterface(&deBlockList[0], 3, &deBlockListLen[0]);
+  int deBlockListLen[] = {rank, 2, deCount};
+  ESMCI::InterArray<int> deBlockListInterface(&deBlockList[0], 3, deBlockListLen);
   DELayout *delayout = dg->getDELayout();
   DistGrid *dg_temp;
   if (tileCount == 1) {
@@ -1383,9 +1382,7 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
       return;
     }
   } else {
-    int dummyLen[2];
-    dummyLen[0] = rank;
-    dummyLen[1] = tileCount;
+    int dummyLen[] = {rank, tileCount};
     ESMCI::InterArray<int> minIndexInterface(&minIndexNew[0], 2, dummyLen);
     ESMCI::InterArray<int> maxIndexInterface(&maxIndexNew[0], 2, dummyLen);
     ESMCI::InterArray<int> deToTileMapInterface((int*)(dg->getTileListPDe()), 1, &deCount);
