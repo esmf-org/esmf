@@ -4012,123 +4012,129 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \item[7.0.0] Added arguments {\tt ignoreDegenerate}, {\tt lineType},
-!              and {\tt normType}. The argument {\tt ignoreDegenerate} allows the user to skip degenerate
-!              cells in the regridding instead of stopping with an error. 
-!              The argument {\tt lineType} allows the user to 
-!              control the path of the line between two points on a sphere surface. 
-!              This allows the user to use their preferred line path for the calculation
-!              of distances and the shape of cells during regrid weight calculation on 
-!              a sphere. The argument {\tt normType} allows the user to 
-!              control the type of normalization done during conservative weight generation. 
+!   and {\tt normType}. The argument {\tt ignoreDegenerate} allows the user to
+!   skip degenerate cells in the regridding instead of stopping with an error.
+!   The argument {\tt lineType} allows the user to control the path of the line
+!   between two points on a sphere surface. This allows the user to use their
+!   preferred line path for the calculation of distances and the shape of cells
+!   during regrid weight calculation on a sphere. The argument {\tt normType}
+!   allows the user to control the type of normalization done during
+!   conservative weight generation. 
 ! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
-!              Added argument {\tt pipelineDepth}.
-!              The new arguments provide access to the tuning parameters
-!              affecting the performance and bit-for-bit behavior when applying
-!              the regridding weights.
+!   Added argument {\tt pipelineDepth}.
+!   The new arguments provide access to the tuning parameters
+!   affecting the performance and bit-for-bit behavior when applying
+!   the regridding weights.
 !
-!              Added arguments {\tt extrapMethod}, {\tt extrapNumSrcPnts}, and
-!              {\tt extrapDistExponent}. These three new extrapolation arguments allow the 
-!              user to extrapolate destination points not mapped by the regrid method. 
-!              {\tt extrapMethod} allows the user to choose the extrapolation method.
-!              {\tt extrapNumSrcPnts} and {\tt extrapDistExponent} are parameters that
-!              allow the user to tune the behavior of the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} 
-!              method.
-! \item[8.0.0] Added argument {\tt extrapNumLevels}. For level based extrapolation methods
-!              (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}) this argument allows the user to
-!              set how many levels to extrapolate.
+!   Added arguments {\tt extrapMethod}, {\tt extrapNumSrcPnts}, and
+!   {\tt extrapDistExponent}. These three new extrapolation arguments allow the
+!   user to extrapolate destination points not mapped by the regrid method.
+!   {\tt extrapMethod} allows the user to choose the extrapolation method.
+!   {\tt extrapNumSrcPnts} and {\tt extrapDistExponent} are parameters that
+!   allow the user to tune the behavior of the
+!   {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} method.
+! \item[8.0.0] Added argument {\tt extrapNumLevels}. For level based
+!   extrapolation methods (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}) this argument
+!   allows the user to set how many levels to extrapolate.
 !!
 ! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle} and
-!   {\tt dstFieldBundle} pair. 
-!  
-!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_FieldBundleRegrid()} on any pair of FieldBundles that matches 
+!   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle}
+!   and {\tt dstFieldBundle} pair.
+!
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call
+!   {\tt ESMF\_FieldBundleRegrid()} on any pair of FieldBundles that matches
 !   {\tt srcFieldBundle} and {\tt dstFieldBundle} in {\em type}, {\em kind},
-!   and memory layout of the {\em gridded} dimensions. However, the size, 
+!   and memory layout of the {\em gridded} dimensions. However, the size,
 !   number, and index order of {\em ungridded} dimensions may be different.
 !   See section \ref{RH:Reusability} for a more detailed discussion of
 !   RouteHandle reusability.
-!  
-!   This call is {\em collective} across the current VM.  
+!
+!   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [srcFieldbundle]
 !     Source {\tt ESMF\_FieldBundle} containing data to be regridded.
 !   \item [dstFieldbundle]
-!     Destination {\tt ESMF\_FieldBundle}. The data in this FieldBundle may be overwritten by this call. 
+!     Destination {\tt ESMF\_FieldBundle}. The data in this FieldBundle may be
+!     overwritten by this call.
 !  \item [{[srcMaskValues]}]
-!     Mask information can be set in the Grids (see~\ref{sec:usage:items}) or Meshes (see~\ref{sec:mesh:mask}) upon which
-!     the Fields in the {\tt srcFieldbundle} are built. 
-!     The {\tt srcMaskValues} argument specifies the values in that mask information which indicate a source point should be masked out. 
-!     In other words, a location is masked if and only if the value for that location in the mask information matches
-!     one of the values listed in {\tt srcMaskValues}.  
-!     If {\tt srcMaskValues} is not specified, no masking will occur. 
+!     Mask information can be set in the Grids (see~\ref{sec:usage:items})
+!     or Meshes (see~\ref{sec:mesh:mask}) upon which the Fields in the
+!     {\tt srcFieldbundle} are built. The {\tt srcMaskValues} argument
+!     specifies the values in that mask information which indicate a source
+!     point should be masked out. In other words, a location is masked if and
+!     only if the value for that location in the mask information matches one
+!     of the values listed in {\tt srcMaskValues}.
+!     If {\tt srcMaskValues} is not specified, no masking will occur.
 !  \item [{[dstMaskValues]}]
 !     Mask information can be set in the Grids (see~\ref{sec:usage:items}) or Meshes (see~\ref{sec:mesh:mask})
-!     upon which the Fields in the {\tt dstFieldbundle} are built. 
-!     The {\tt dstMaskValues} argument specifies the values in that mask information which indicate a destination point should be masked out. 
-!     In other words, a location is masked if and only if the value for that location in the mask information matches
-!     one of the values listed in {\tt dstMaskValues}.  
-!     If {\tt dstMaskValues} is not specified, no masking will occur. 
+!     upon which the Fields in the {\tt dstFieldbundle} are built.
+!     The {\tt dstMaskValues} argument specifies the values in that mask
+!     information which indicate a destination point should be masked out.
+!     In other words, a location is masked if and only if the value for that
+!     location in the mask information matches
+!     one of the values listed in {\tt dstMaskValues}.
+!     If {\tt dstMaskValues} is not specified, no masking will occur.
 !   \item [{[regridmethod]}]
 !     The type of interpolation. Please see Section~\ref{opt:regridmethod} for a list of
 !     valid options. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
 !   \item [{[polemethod]}]
-!    Which type of artificial pole
-!    to construct on the source Grid for regridding. Please see Section~\ref{const:polemethod} for a list of
-!    valid options. If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG}. 
+!     Which type of artificial pole
+!     to construct on the source Grid for regridding. Please see
+!     section~\ref{const:polemethod} for a list of valid options. If not
+!     specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG}.
 !   \item [{[regridPoleNPnts]}]
-!    If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
-!    This parameter indicates how many points should be averaged
-!    over. Must be specified if {\tt polemethod} is 
-!    {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
+!     If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
+!     This parameter indicates how many points should be averaged
+!     over. Must be specified if {\tt polemethod} is
+!     {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
 !   \item [{[lineType]}]
-!           This argument controls the path of the line which connects two points on a sphere surface. This in
-!           turn controls the path along which distances are calculated and the shape of the edges that make
-!           up a cell. Both of these quantities can influence how interpolation weights are calculated. 
-!           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
-!           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a 
-!           list of valid options for this argument. If not specified, the default depends on the 
-!           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
-!           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
-!  \item [{[normType]}] 
-!           This argument controls the type of normalization used when generating conservative weights. This option
-!           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
-!           Section~\ref{opt:normType} for a 
-!           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!     This argument controls the path of the line which connects two points on a sphere surface. This in
+!     turn controls the path along which distances are calculated and the shape of the edges that make
+!     up a cell. Both of these quantities can influence how interpolation weights are calculated.
+!     As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
+!     built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a
+!     list of valid options for this argument. If not specified, the default depends on the
+!     regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
+!     which line types are supported for each regrid method as well as showing the default line type by regrid method. 
+!  \item [{[normType]}]
+!     This argument controls the type of normalization used when generating conservative weights. This option
+!     only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see
+!     Section~\ref{opt:normType} for a
+!     list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}.
 !  \item [{[extrapMethod]}]
-!           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
-!           for a list of valid options. If not specified, defaults to 
-!           {\tt ESMF\_EXTRAPMETHOD\_NONE}.
-!  \item [{[extrapNumSrcPnts]}] 
-!           The number of source points to use for the extrapolation methods that use more than one source point 
-!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
-!  \item [{[extrapDistExponent]}] 
-!           The exponent to raise the distance to when calculating weights for 
-!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
-!           of more distant points. If not specified, defaults to 2.0.
+!     The type of extrapolation. Please see Section~\ref{opt:extrapmethod}
+!     for a list of valid options. If not specified, defaults to
+!     {\tt ESMF\_EXTRAPMETHOD\_NONE}.
+!  \item [{[extrapNumSrcPnts]}]
+!     The number of source points to use for the extrapolation methods that use more than one source point
+!     (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
+!  \item [{[extrapDistExponent]}]
+!     The exponent to raise the distance to when calculating weights for
+!     the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence
+!     of more distant points. If not specified, defaults to 2.0.
 !  \item [{[extrapNumLevels]}]
-!           The number of levels to output for the extrapolation methods that fill levels
-!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). When a method is used that requires this, then an error will be returned, if it
-!           is not specified.
+!     The number of levels to output for the extrapolation methods that fill levels
+!     (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). When a method is used that requires this, then an error will be returned, if it
+!     is not specified.
 !  \item [{[unmappedaction]}]
-!    Specifies what should happen if there are destination points that
-!    can not be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a
-!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
-!   \item [{[ignoreDegenerate]}]
-!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the 
-!           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
-!           If not specified, {\tt ignoreDegenerate} defaults to false.
+!     Specifies what should happen if there are destination points that
+!     can not be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a
+!     list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}.
+!  \item [{[ignoreDegenerate]}]
+!     Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the
+!     regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error.
+!     If not specified, {\tt ignoreDegenerate} defaults to false.
 !
 !   \item [{[srcTermProcessing]}]
 !     The {\tt srcTermProcessing} parameter controls how many source terms,
 !     located on the same PET and summing into the same destination element,
 !     are summed into partial sums on the source PET before being transferred
 !     to the destination PET. A value of 0 indicates that the entire arithmetic
-!     is done on the destination PET; source elements are neither multiplied 
+!     is done on the destination PET; source elements are neither multiplied
 !     by their factors nor added into partial sums before being sent off by the
 !     source PET. A value of 1 indicates that source elements are multiplied
 !     by their factors on the source side before being sent to the destination
@@ -4142,19 +4148,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     \begin{sloppypar}
 !     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
-!     for the {\tt srcTermProcessing} parameter. The intent on the 
-!     {\tt srcTermProcessing} argument is "{\tt inout}" in order to 
+!     for the {\tt srcTermProcessing} parameter. The intent on the
+!     {\tt srcTermProcessing} argument is "{\tt inout}" in order to
 !     support both overriding and accessing the auto-tuning parameter.
-!     If an argument $>= 0$ is specified, it is used for the 
+!     If an argument $>= 0$ is specified, it is used for the
 !     {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
 !     In this case the {\tt srcTermProcessing} argument is not modified on
 !     return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
 !     parameter is determined internally using the auto-tuning scheme. In this
 !     case the {\tt srcTermProcessing} argument is re-set to the internally
-!     determined value on return. Auto-tuning is also used if the optional 
+!     determined value on return. Auto-tuning is also used if the optional
 !     {\tt srcTermProcessing} argument is omitted.
 !     \end{sloppypar}
-!     
+!
 !   \item [{[pipelineDepth]}]
 !     The {\tt pipelineDepth} parameter controls how many messages a PET
 !     may have outstanding during a sparse matrix exchange. Larger values
@@ -4167,18 +4173,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
-!     for the {\tt pipelineDepth} parameter. The intent on the 
-!     {\tt pipelineDepth} argument is "{\tt inout}" in order to 
+!     for the {\tt pipelineDepth} parameter. The intent on the
+!     {\tt pipelineDepth} argument is "{\tt inout}" in order to
 !     support both overriding and accessing the auto-tuning parameter.
-!     If an argument $>= 0$ is specified, it is used for the 
+!     If an argument $>= 0$ is specified, it is used for the
 !     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
 !     In this case the {\tt pipelineDepth} argument is not modified on
 !     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
 !     parameter is determined internally using the auto-tuning scheme. In this
 !     case the {\tt pipelineDepth} argument is re-set to the internally
-!     determined value on return. Auto-tuning is also used if the optional 
+!     determined value on return. Auto-tuning is also used if the optional
 !     {\tt pipelineDepth} argument is omitted.
-!     
+!
 !   \item [{[routehandle]}]
 !     Handle to the precomputed Route.
 !   \item [{[rc]}]
@@ -4227,7 +4233,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       real(ESMF_KIND_R8), pointer       :: factorList(:)
       type(RHL), pointer                :: prev
     end type
-    
+
     type(RHL), pointer              :: rhList, rhListE, rhListG
     logical                         :: rhListMatch
     type(ESMF_Field), pointer       :: srcFieldsPtr(:), dstFieldsPtr(:)
