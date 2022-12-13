@@ -10,7 +10,8 @@ project (PIO C)
 # The project version number.
 set(VERSION_MAJOR   2   CACHE STRING "Project major version number.")
 set(VERSION_MINOR   5   CACHE STRING "Project minor version number.")
-set(VERSION_PATCH   9   CACHE STRING "Project patch version number.")
+set(VERSION_PATCH  10   CACHE STRING "Project patch version number.")
+
 mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
 # Create version info in autotools parlance for pio_meta.h.
@@ -256,7 +257,11 @@ INCLUDE(CheckCSourceCompiles)
 INCLUDE(FindNetCDF)
 message("Fortran Library build is ${PIO_ENABLE_FORTRAN}")
 if (PIO_ENABLE_FORTRAN)
-  find_package (NetCDF REQUIRED COMPONENTS C Fortran)
+  find_package (NetCDF COMPONENTS C Fortran)
+  if (NOT NetCDF_Fortran_FOUND)
+    include(FindPkgConfig)
+    pkg_check_modules(NetCDF_Fortran REQUIRED IMPORTED_TARGET "netcdf-fortran")
+  endif()
   if (WITH_PNETCDF)
     find_package (PnetCDF COMPONENTS C Fortran)
   endif()
