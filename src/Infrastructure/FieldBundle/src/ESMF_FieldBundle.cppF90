@@ -11,6 +11,7 @@
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_FieldBundle.F90"
 !==============================================================================
+#define FB_REGRID_LOG_off
 !
 ! ESMF FieldBundle Module
 module ESMF_FieldBundleMod
@@ -3988,6 +3989,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),        intent(in)              :: srcFieldBundle
     type(ESMF_FieldBundle),        intent(inout)           :: dstFieldBundle
+!TODO: why is there no ESMF_KeywordEnforcer here???
     integer(ESMF_KIND_I4),         intent(in),    optional :: srcMaskValues(:)
     integer(ESMF_KIND_I4),         intent(in),    optional :: dstMaskValues(:)
     type(ESMF_RegridMethod_Flag),  intent(in),    optional :: regridmethod
@@ -4457,10 +4459,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (.not.rhListMatch) then
         ! No match found: precompute new RH for this field pair
-^if 0
+#ifdef FB_REGRID_LOG_on
 call ESMF_LogWrite("no rhListMatch -> pre-compute new remapping!", &
-  ESMF_LOGMSG_INFO)
-^endif
+  ESMF_LOGMSG_DEBUG)
+#endif
         if (gridPair) then
           ! add a new rhList element
           allocate(rhListE)
@@ -4470,10 +4472,10 @@ call ESMF_LogWrite("no rhListMatch -> pre-compute new remapping!", &
 
         if (associated(rhListG)) then
           ! able to reuse already precomputed weight matrix
-^if 0
+#ifdef FB_REGRID_LOG_on
 call ESMF_LogWrite("able to reuse already precomputed weight matrix!", &
-  ESMF_LOGMSG_INFO)
-^endif
+  ESMF_LOGMSG_DEBUG)
+#endif
           factorList=>rhListG%factorList
           factorIndexList=>rhListG%factorIndexList
           call ESMF_FieldSMMStore(srcField=srcFields(i), &
@@ -4486,10 +4488,10 @@ call ESMF_LogWrite("able to reuse already precomputed weight matrix!", &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
           ! must precompute full regridding
-^if 0
+#ifdef FB_REGRID_LOG_on
 call ESMF_LogWrite("must precompute full regridding!", &
-  ESMF_LOGMSG_INFO)
-^endif
+  ESMF_LOGMSG_DEBUG)
+#endif
           factorList=>NULL()
           factorIndexList=>NULL()
           call ESMF_FieldRegridStore(srcField=srcFields(i), &
@@ -4532,10 +4534,10 @@ call ESMF_LogWrite("must precompute full regridding!", &
         endif
       else
         ! Match found: reuse previous RH for this field pair
-^if 0
+#ifdef FB_REGRID_LOG_on
 call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
-  ESMF_LOGMSG_INFO)
-^endif
+  ESMF_LOGMSG_DEBUG)
+#endif
         ! pull out the routehandle from the matching rhList element
         rhh = rhListE%rh
         ! deallocate temporary grid/field info
@@ -6402,15 +6404,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create an I/O object
-^if 0
-call ESMF_LogWrite("Bef IOCreate", ESMF_LOGMSG_INFO, rc=rc)
-^endif
+#if 0
+call ESMF_LogWrite("Bef IOCreate", ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
     io = ESMF_IOCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
         ESMF_CONTEXT, rcToReturn=rc)) return
-^if 0
-call ESMF_LogWrite("Aft IOCreate", ESMF_LOGMSG_INFO, rc=rc)
-^endif
+#if 0
+call ESMF_LogWrite("Aft IOCreate", ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
 
     ! From here on out, we need to clean up so no returning on error
     if (singlef) then
@@ -6434,16 +6436,16 @@ call ESMF_LogWrite("Aft IOCreate", ESMF_LOGMSG_INFO, rc=rc)
             ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
 
-^if 0
-call ESMF_LogWrite("Bef ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
-^endif
+#if 0
+call ESMF_LogWrite("Bef ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
       call ESMF_IOWrite(io, trim(fileName), overwrite=opt_overwriteflag,    &
           status=opt_status, timeslice=timeslice, iofmt=opt_iofmt, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
           ESMF_CONTEXT, rcToReturn=rc)) return
-^if 0
-call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
-^endif
+#if 0
+call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
+#endif
 
     else
       do i=1,fieldCount
@@ -6592,12 +6594,12 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       if (debug) then
         call ESMF_LogWrite(&
           ESMF_StringConcat(ESMF_METHOD , ": Calling ESMF_BaseSerialize"), &
-          ESMF_LOGMSG_INFO, rc=localrc)
+          ESMF_LOGMSG_DEBUG, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": offset (before)= "), offset
-        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_DEBUG, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6612,12 +6614,12 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 
       if (debug) then
         write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": offset (after)= "), offset
-        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_DEBUG, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
          logmsg = ESMF_StringConcat(ESMF_METHOD , ": Exited ESMF_BaseSerialize")
-         call ESMF_LogWrite(logmsg, ESMF_LOGMSG_INFO, rc=localrc)
+         call ESMF_LogWrite(logmsg, ESMF_LOGMSG_DEBUG, rc=localrc)
          if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6755,17 +6757,17 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
       if (debug) then
         call ESMF_LogWrite(&
            ESMF_StringConcat(ESMF_METHOD , ": Calling ESMF_BaseDeserialize"), &
-           ESMF_LOGMSG_INFO, rc=localrc)
+           ESMF_LOGMSG_DEBUG, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": buffer length= "), LEN(buffer)
-        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_DEBUG, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         write(logmsg, *) ESMF_StringConcat(ESMF_METHOD , ": offset= "), offset
-        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_INFO, rc=localrc)
+        call ESMF_LogWrite(TRIM(logmsg), ESMF_LOGMSG_DEBUG, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6780,7 +6782,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 
       if (debug) then
         logmsg = ESMF_StringConcat(ESMF_METHOD , ": Exited ESMF_BaseDeserialize")
-        call ESMF_LogWrite(logmsg, ESMF_LOGMSG_INFO, rc=localrc)
+        call ESMF_LogWrite(logmsg, ESMF_LOGMSG_DEBUG, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7112,13 +7114,13 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
         call ESMF_FieldGet(flist(i), array=alist(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-^if 0
+#if 0
         call ESMF_ArrayGet(alist(i), name=name, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         write(msgString,*) "alist(",i,") name:", trim(name)
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-^endif
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG)
+#endif
     enddo
 
     ESMF_FieldBundleToAB = ESMF_ArrayBundleCreate(arrayList=alist, rc=localrc)
