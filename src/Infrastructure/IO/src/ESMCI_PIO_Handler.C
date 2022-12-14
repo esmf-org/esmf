@@ -35,7 +35,6 @@
 
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
-#include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_ArrayBundle.h"
 #include "ESMCI_Info.h"

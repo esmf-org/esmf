@@ -16,6 +16,10 @@
 #ifndef ESMCI_Container_H
 #define ESMCI_Container_H
 
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_Container.h"
+//==============================================================================
+
 #include <utility>
 #include <map>
 #include <vector>

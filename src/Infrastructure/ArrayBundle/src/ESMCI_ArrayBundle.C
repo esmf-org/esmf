@@ -9,8 +9,6 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMCI_ArrayBundle.C"
-//==============================================================================
 #define AB_REDISTSTORE_LOG_off
 #define ABSMM_EXEC_INFO_off
 //==============================================================================
@@ -42,6 +40,10 @@
 #include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_IO.h"
+
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_ArrayBundle.C"
+//==============================================================================
 
 using namespace std;
 
