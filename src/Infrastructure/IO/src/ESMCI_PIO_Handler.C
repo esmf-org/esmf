@@ -18,7 +18,6 @@
 // declared in the companion file {\tt ESMCI\_PIO_Handler.h}
 //
 //-------------------------------------------------------------------------
-#define ESMC_FILENAME "ESMCI_PIO_Handler.C"
 #define PIO_DEBUG_LEVEL 0
 // include associated header file
 #include "ESMCI_PIO_Handler.h"
@@ -54,6 +53,10 @@
 #include "esmf_io_debug.h"
 
 using json = nlohmann::json;  // Convenience rename for JSON namespace.
+
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_PIO_Handler.C"
+//==============================================================================
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

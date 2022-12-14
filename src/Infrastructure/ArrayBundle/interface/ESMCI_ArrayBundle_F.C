@@ -9,8 +9,6 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMCI_ArrayBundle_F.C"
-//==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
 //
@@ -29,6 +27,10 @@
 using std::exception;
 using std::string;
 using std::vector;
+
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_ArrayBundle_F.C"
+//==============================================================================
 
 //------------------------------------------------------------------------------
 //BOP
