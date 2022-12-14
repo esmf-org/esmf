@@ -202,7 +202,7 @@ ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -pthread -frecursive
 ESMF_CXXCOMPILEOPTS += -pthread
 ESMF_CCOMPILEOPTS   += -pthread
-ESMF_F90LINKOPTS    += -pthread -frecursive
+ESMF_F90LINKOPTS    += -pthread
 ESMF_CXXLINKOPTS    += -pthread
 ESMF_CLINKOPTS      += -pthread
 endif
