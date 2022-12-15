@@ -31,7 +31,6 @@
 
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
-#include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
 #ifdef ESMF_PIO
 #include "ESMCI_PIO_Handler.h"

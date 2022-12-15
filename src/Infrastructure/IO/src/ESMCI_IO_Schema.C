@@ -47,7 +47,6 @@ lonUnits=('degrees_north','degree_north','degrees_N', # Allowed lon unit names
 
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
-#include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
 
 //-------------------------------------------------------------------------

@@ -8,6 +8,10 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_PIO_Handler.C"
+//==============================================================================
+//
 // ESMC IO method code (body) file
 //
 //-------------------------------------------------------------------------
@@ -18,7 +22,6 @@
 // declared in the companion file {\tt ESMCI\_PIO_Handler.h}
 //
 //-------------------------------------------------------------------------
-#define ESMC_FILENAME "ESMCI_PIO_Handler.C"
 #define PIO_DEBUG_LEVEL 0
 // include associated header file
 #include "ESMCI_PIO_Handler.h"
@@ -35,9 +38,7 @@
 
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
-#include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_ArrayBundle.h"
 #include "ESMCI_Info.h"
 #include "json.hpp"
 #include "ESMCI_TraceMacros.h"
