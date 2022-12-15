@@ -11,7 +11,7 @@
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_FieldBundle.F90"
 !==============================================================================
-#define FB_REGRID_LOG_off
+#define FB_REGRID_LOG_on
 !
 ! ESMF FieldBundle Module
 module ESMF_FieldBundleMod
@@ -114,10 +114,13 @@ module ESMF_FieldBundleMod
   end type
 
   type ESMF_RHL
+    type(ESMF_GeomType_Flag)          :: srcGeomtype, dstGeomtype
     type(ESMF_Grid)                   :: srcGrid, dstGrid
+    type(ESMF_Mesh)                   :: srcMesh, dstMesh
     ! field specific items, TODO: push into a FieldMatch() method
     type(ESMF_ArraySpec)              :: srcArraySpec, dstArraySpec
     type(ESMF_StaggerLoc)             :: srcStaggerLoc, dstStaggerLoc
+    type(ESMF_MeshLoc)                :: srcMeshLoc, dstMeshLoc
     integer, pointer                  :: srcGridToFieldMap(:)
     integer, pointer                  :: dstGridToFieldMap(:)
     integer, pointer                  :: srcUngriddedLBound(:)
@@ -4688,63 +4691,113 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
     integer                         :: j, localDeCount
     integer(ESMF_KIND_I4), pointer  :: factorIndexList(:,:)
     real(ESMF_KIND_R8), pointer     :: factorList(:)
-    type(ESMF_Grid)                 :: srcGrid, dstGrid
     type(ESMF_GeomType_Flag)        :: srcGeomtype, dstGeomtype
+    type(ESMF_Grid)                 :: srcGrid, dstGrid
+    type(ESMF_Mesh)                 :: srcMesh, dstMesh
     type(ESMF_ArraySpec)            :: srcArraySpec, dstArraySpec
     type(ESMF_StaggerLoc)           :: srcStaggerLoc, dstStaggerLoc
+    type(ESMF_MeshLoc)              :: srcMeshLoc, dstMeshLoc
     integer, pointer                :: srcGridToFieldMap(:)
     integer, pointer                :: dstGridToFieldMap(:)
     integer, pointer                :: srcUngriddedLBound(:)
     integer, pointer                :: srcUngriddedUBound(:)
     integer, pointer                :: dstUngriddedLBound(:)
     integer, pointer                :: dstUngriddedUBound(:)
-    integer                         :: fieldDimCount, gridDimCount
-    logical                         :: gridPair
+    integer                         :: fieldDimCount, geomDimCount
+    logical                         :: rhReuse
     type(ESMF_RHL), pointer         :: rhListE, rhListG
     logical                         :: rhListMatch
     type(ESMF_RouteHandle)          :: rhh
 
-    call ESMF_FieldGet(srcField, geomtype=srcGeomtype, rc=localrc)
+    call ESMF_FieldGet(srcField, geomtype=srcGeomtype, arrayspec=srcArraySpec, &
+      dimCount=fieldDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_FieldGet(dstField, geomtype=dstGeomtype, rc=localrc)
+    call ESMF_FieldGet(dstField, geomtype=dstGeomtype, arrayspec=dstArraySpec, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    gridPair = (srcGeomtype==ESMF_GEOMTYPE_GRID)
-    gridPair = gridPair .and. (dstGeomtype==ESMF_GEOMTYPE_GRID)
+    rhReuse = ((srcGeomtype==ESMF_GEOMTYPE_GRID) .or. &
+               (srcGeomtype==ESMF_GEOMTYPE_MESH))
+    rhReuse = rhReuse .and. ((dstGeomtype==ESMF_GEOMTYPE_GRID) .or. &
+                             (dstGeomtype==ESMF_GEOMTYPE_MESH))
 
     rhListMatch = .false.
     rhListG=>NULL()
 
-    if (gridPair) then
-      ! access the src and dst grid objects
-      call ESMF_FieldGet(srcField, arrayspec=srcArraySpec, grid=srcGrid, &
-        staggerLoc=srcStaggerLoc, dimCount=fieldDimCount, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_GridGet(srcGrid, dimCount=gridDimCount, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate(srcGridToFieldMap(gridDimCount))
-      allocate(srcUngriddedLBound(fieldDimCount-gridDimCount), &
-        srcUngriddedUBound(fieldDimCount-gridDimCount))
+    if (rhReuse) then
+
+#ifdef FB_REGRID_LOG_on
+call ESMF_LogWrite(ESMF_METHOD// &
+  ": Inside 'rhReuse' branch!", &
+  ESMF_LOGMSG_DEBUG)
+#endif
+
+      ! access src side information
+      if (srcGeomtype==ESMF_GEOMTYPE_GRID) then
+#ifdef FB_REGRID_LOG_on
+call ESMF_LogWrite(ESMF_METHOD// &
+  ": srcGeomtype==ESMF_GEOMTYPE_GRID", &
+  ESMF_LOGMSG_DEBUG)
+#endif
+        call ESMF_FieldGet(srcField, grid=srcGrid, staggerLoc=srcStaggerLoc, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_GridGet(srcGrid, dimCount=geomDimCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (srcGeomtype==ESMF_GEOMTYPE_MESH) then
+#ifdef FB_REGRID_LOG_on
+call ESMF_LogWrite(ESMF_METHOD// &
+  ": srcGeomtype==ESMF_GEOMTYPE_MESH", &
+  ESMF_LOGMSG_DEBUG)
+#endif
+        call ESMF_FieldGet(srcField, mesh=srcMesh, meshLoc=srcMeshLoc, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        geomDimCount = 1  ! Mesh always stored on 1D DistGrid
+      endif
+      allocate(srcGridToFieldMap(geomDimCount))
+      allocate(srcUngriddedLBound(fieldDimCount-geomDimCount), &
+        srcUngriddedUBound(fieldDimCount-geomDimCount))
       call ESMF_FieldGet(srcField, gridToFieldMap=srcGridToFieldMap, &
         ungriddedLBound=srcUngriddedLBound, &
         ungriddedUBound=srcUngriddedUBound,rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      call ESMF_FieldGet(dstField, arrayspec=dstArraySpec, grid=dstGrid, &
-        staggerLoc=dstStaggerLoc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_GridGet(dstGrid, dimCount=gridDimCount, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate(dstGridToFieldMap(gridDimCount))
-      allocate(dstUngriddedLBound(fieldDimCount-gridDimCount), &
-        dstUngriddedUBound(fieldDimCount-gridDimCount))
+      ! access dst side information
+      if (dstGeomtype==ESMF_GEOMTYPE_GRID) then
+#ifdef FB_REGRID_LOG_on
+call ESMF_LogWrite(ESMF_METHOD// &
+  ": dstGeomtype==ESMF_GEOMTYPE_GRID", &
+  ESMF_LOGMSG_DEBUG)
+#endif
+        call ESMF_FieldGet(dstField, grid=dstGrid, staggerLoc=dstStaggerLoc, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_GridGet(dstGrid, dimCount=geomDimCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else if (dstGeomtype==ESMF_GEOMTYPE_MESH) then
+#ifdef FB_REGRID_LOG_on
+call ESMF_LogWrite(ESMF_METHOD// &
+  ": dstGeomtype==ESMF_GEOMTYPE_MESH", &
+  ESMF_LOGMSG_DEBUG)
+#endif
+        call ESMF_FieldGet(dstField, mesh=dstMesh, meshLoc=dstMeshLoc, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        geomDimCount = 1  ! Mesh always stored on 1D DistGrid
+      endif
+      allocate(dstGridToFieldMap(geomDimCount))
+      allocate(dstUngriddedLBound(fieldDimCount-geomDimCount), &
+        dstUngriddedUBound(fieldDimCount-geomDimCount))
       call ESMF_FieldGet(dstField, gridToFieldMap=dstGridToFieldMap, &
         ungriddedLBound=dstUngriddedLBound, &
         ungriddedUBound=dstUngriddedUBound,rc=localrc)
@@ -4754,31 +4807,55 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
       ! search for a match
       rhListE=>rhList
       do while (associated(rhListE))
-        ! test src grid match
-        rhListMatch = ESMF_GridMatch(rhListE%srcGrid, srcGrid, &
-          globalflag=.true., rc=localrc) >= ESMF_GRIDMATCH_EXACT
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! test src geomtype match
+        rhListMatch = (rhListE%srcGeomtype==srcGeomtype)
         if (.not.rhListMatch) goto 123
-        ! test dst grid match
-        rhListMatch = ESMF_GridMatch(rhListE%dstGrid, dstGrid, &
-          globalflag=.true., rc=localrc) >= ESMF_GRIDMATCH_EXACT
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        if (srcGeomtype==ESMF_GEOMTYPE_GRID) then
+          ! test src grid match
+          rhListMatch = ESMF_GridMatch(rhListE%srcGrid, srcGrid, &
+            globalflag=.true., rc=localrc) >= ESMF_GRIDMATCH_EXACT
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (.not.rhListMatch) goto 123
+          ! test src staggerLoc match
+          rhListMatch = (rhListE%srcStaggerLoc==srcStaggerLoc)
+          if (.not.rhListMatch) goto 123
+        else if (srcGeomtype==ESMF_GEOMTYPE_MESH) then
+          ! test src mesh match
+          rhListMatch = (rhListE%srcMesh==srcMesh)  ! simple alias check only
+          if (.not.rhListMatch) goto 123
+          ! test src meshLoc match
+          rhListMatch = (rhListE%srcMeshLoc==srcMeshLoc)
+          if (.not.rhListMatch) goto 123
+        endif
+        ! test dst geomtype match
+        rhListMatch = (rhListE%dstGeomtype==dstGeomtype)
         if (.not.rhListMatch) goto 123
-        ! keep record of entry for which grids were matching
+        if (dstGeomtype==ESMF_GEOMTYPE_GRID) then
+          ! test dst grid match
+          rhListMatch = ESMF_GridMatch(rhListE%dstGrid, dstGrid, &
+            globalflag=.true., rc=localrc) >= ESMF_GRIDMATCH_EXACT
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (.not.rhListMatch) goto 123
+          ! test dst staggerLoc match
+          rhListMatch = (rhListE%dstStaggerLoc==dstStaggerLoc)
+          if (.not.rhListMatch) goto 123
+        else if (dstGeomtype==ESMF_GEOMTYPE_MESH) then
+          ! test dst mesh match
+          rhListMatch = (rhListE%dstMesh==dstMesh)  ! simple alias check only
+          if (.not.rhListMatch) goto 123
+          ! test dst meshLoc match
+          rhListMatch = (rhListE%dstMeshLoc==dstMeshLoc)
+          if (.not.rhListMatch) goto 123
+        endif
+        ! keep record of entry for which geom objects and loc are matching
         rhListG=>rhListE
         ! test src arrayspec match
         rhListMatch = (rhListE%srcArraySpec==srcArraySpec)
         if (.not.rhListMatch) goto 123
         ! test dst arrayspec match
         rhListMatch = (rhListE%dstArraySpec==dstArraySpec)
-        if (.not.rhListMatch) goto 123
-        ! test src staggerLoc match
-        rhListMatch = (rhListE%srcStaggerLoc==srcStaggerLoc)
-        if (.not.rhListMatch) goto 123
-        ! test dst staggerLoc match
-        rhListMatch = (rhListE%dstStaggerLoc==dstStaggerLoc)
         if (.not.rhListMatch) goto 123
         ! test srcGridToFieldMap
         rhListMatch = &
@@ -4903,10 +4980,11 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
     if (.not.rhListMatch) then
       ! No match found: precompute new RH for this field pair
 #ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite("no rhListMatch -> pre-compute new remapping!", &
+call ESMF_LogWrite(ESMF_METHOD// &
+  ": no rhListMatch -> pre-compute new remapping!", &
   ESMF_LOGMSG_DEBUG)
 #endif
-      if (gridPair) then
+      if (rhReuse) then
         ! add a new rhList element
         allocate(rhListE)
         rhListE%prev=>rhList  ! link new element to previous list head
@@ -4916,7 +4994,8 @@ call ESMF_LogWrite("no rhListMatch -> pre-compute new remapping!", &
       if (associated(rhListG)) then
         ! able to reuse already precomputed weight matrix
 #ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite("able to reuse already precomputed weight matrix!", &
+call ESMF_LogWrite(ESMF_METHOD// &
+  ": able to reuse already precomputed weight matrix!", &
   ESMF_LOGMSG_DEBUG)
 #endif
         factorList=>rhListG%factorList
@@ -4932,7 +5011,8 @@ call ESMF_LogWrite("able to reuse already precomputed weight matrix!", &
       else
         ! must precompute full regridding
 #ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite("must precompute full regridding!", &
+call ESMF_LogWrite(ESMF_METHOD// &
+  ": must precompute full regridding!", &
   ESMF_LOGMSG_DEBUG)
 #endif
         factorList=>NULL()
@@ -4955,14 +5035,20 @@ call ESMF_LogWrite("must precompute full regridding!", &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      if (gridPair) then
+      if (rhReuse) then
         ! store info in the new rhList element
+        rhListE%srcGeomtype         =  srcGeomtype
+        rhListE%dstGeomtype         =  dstGeomtype
+        rhListE%srcMesh             =  srcMesh
+        rhListE%dstMesh             =  dstMesh
         rhListE%srcGrid             =  srcGrid
         rhListE%dstGrid             =  dstGrid
         rhListE%srcArraySpec        =  srcArraySpec
         rhListE%dstArraySpec        =  dstArraySpec
         rhListE%srcStaggerLoc       =  srcStaggerLoc
         rhListE%dstStaggerLoc       =  dstStaggerLoc
+        rhListE%srcMeshLoc          =  srcMeshLoc
+        rhListE%dstMeshLoc          =  dstMeshLoc
         rhListE%srcGridToFieldMap   => srcGridToFieldMap
         rhListE%dstGridToFieldMap   => dstGridToFieldMap
         rhListE%srcUngriddedLBound  => srcUngriddedLBound
@@ -5025,7 +5111,8 @@ call ESMF_LogWrite("must precompute full regridding!", &
     else
       ! Match found: reuse previous RH for this field pair
 #ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
+call ESMF_LogWrite(ESMF_METHOD// &
+  ": found rhListMatch -> reuse routehandle!", &
   ESMF_LOGMSG_DEBUG)
 #endif
       ! pull out the routehandle from the matching rhList element
@@ -5070,8 +5157,8 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
 #endif
 
     ! local garbage collection
-    if (.not.gridPair) then
-      ! grid pairs will have factorIndexList and factorList in rhList struct
+    if (.not.rhReuse) then
+      ! for rhReuse factorIndexList and factorList allocs managed by rhList
       if (associated(factorIndexList)) deallocate(factorIndexList)
       if (associated(factorList)) deallocate(factorList)
     endif
