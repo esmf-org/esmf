@@ -17,6 +17,7 @@
 #define ESMCI_Container_H
 
 //==============================================================================
+#undef  ESMC_FILENAME
 #define ESMC_FILENAME "ESMCI_Container.h"
 //==============================================================================
 
@@ -25,6 +26,7 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <sstream>
 
 #include "ESMCI_LogErr.h"
 
@@ -102,8 +104,10 @@ namespace ESMCI {
           (k, --lastElement));      // store the iterator in multimap
       }else{
         if (!relaxed){
+          std::stringstream msg;
+          msg << "key already exists: " << k;
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-            "key already exists", ESMC_CONTEXT, &rc);
+            msg.str(), ESMC_CONTEXT, &rc);
           throw rc;  // bail out with exception
         }
         if (garbageActive)
@@ -168,14 +172,18 @@ namespace ESMCI {
     range = this->equal_range(k);
     if (range.first == range.second){
       // does not exist -> error
+      std::stringstream msg;
+      msg << "key does not exist: " << k;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "key does not exist", ESMC_CONTEXT, &rc);
+        msg.str(), ESMC_CONTEXT, &rc);
       throw rc;  // bail out with exception
     }
     if (range.first != --range.second){
       // key is not unique -> error
+      std::stringstream msg;
+      msg << "key is not unique: " << k;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "key is not unique", ESMC_CONTEXT, &rc);
+        msg.str(), ESMC_CONTEXT, &rc);
       throw rc;  // bail out with exception
     }
     return range.first->second->second;
@@ -311,8 +319,10 @@ namespace ESMCI {
     if (range.first == range.second){
       // key does not exist
       if (!relaxed){
+        std::stringstream msg;
+        msg << "key does not exist: " << k;
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "key does not exist", ESMC_CONTEXT, &rc);
+          msg.str(), ESMC_CONTEXT, &rc);
         throw rc;  // bail out with exception
       }
     }
@@ -321,8 +331,10 @@ namespace ESMCI {
       // key is not unique
       if (!multi){
         if (!relaxed){
+          std::stringstream msg;
+          msg << "key is not unique: " << k;
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-            "key is not unique", ESMC_CONTEXT, &rc);
+            msg.str(), ESMC_CONTEXT, &rc);
           throw rc;  // bail out with exception
         }
         return; // bail out without exception
@@ -358,8 +370,10 @@ namespace ESMCI {
     if (range.first == range.second){
       // does not exist
       if (!relaxed){
+        std::stringstream msg;
+        msg << "key does not exist: " << k;
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "key does not exist", ESMC_CONTEXT, &rc);
+          msg.str(), ESMC_CONTEXT, &rc);
         throw rc;  // bail out with exception
       }
       garbage.push_back(t); // object not used to replace item goes into garbage
@@ -370,8 +384,10 @@ namespace ESMCI {
       // key is not unique
       if (!multi){
         if (!relaxed){
+          std::stringstream msg;
+          msg << "key is not unique: " << k;
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-            "key is not unique", ESMC_CONTEXT, &rc);
+            msg.str(), ESMC_CONTEXT, &rc);
           throw rc;  // bail out with exception
         }
         garbage.push_back(t); // object not used to replace item into garbage
