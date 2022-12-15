@@ -8,6 +8,10 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_PIO_Handler.C"
+//==============================================================================
+//
 // ESMC IO method code (body) file
 //
 //-------------------------------------------------------------------------
@@ -35,7 +39,6 @@
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_ArrayBundle.h"
 #include "ESMCI_Info.h"
 #include "json.hpp"
 #include "ESMCI_TraceMacros.h"
@@ -53,10 +56,6 @@
 #include "esmf_io_debug.h"
 
 using json = nlohmann::json;  // Convenience rename for JSON namespace.
-
-//==============================================================================
-#define ESMC_FILENAME "ESMCI_PIO_Handler.C"
-//==============================================================================
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
