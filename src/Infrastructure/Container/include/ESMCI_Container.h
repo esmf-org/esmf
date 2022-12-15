@@ -31,7 +31,7 @@
 namespace ESMCI {
 
   template <typename Key, typename T>
-  class Container : public std::multimap<Key, 
+  class Container : public std::multimap<Key,
     typename std::list<std::pair<Key,T> >::iterator>{
     std::list<std::pair<Key,T> > orderedList;
     bool garbageActive;
@@ -78,7 +78,7 @@ namespace ESMCI {
     }
     void print()const;
   };
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Container::add()"
   // Add an element to the container. By default the method executes in strict
@@ -97,7 +97,7 @@ namespace ESMCI {
       if (multi){
         orderedList.push_back(std::pair<Key,T>(k, t)); // append to list
         lastElement = orderedList.end();
-        this->insert(pos, std::pair<Key, 
+        this->insert(pos, std::pair<Key,
           typename std::list<std::pair<Key,T> >::iterator>
           (k, --lastElement));      // store the iterator in multimap
       }else{
@@ -113,12 +113,12 @@ namespace ESMCI {
       // this is a new key
       orderedList.push_back(std::pair<Key,T>(k, t)); // append to list
       lastElement = orderedList.end();
-      this->insert(pos, std::pair<Key, 
+      this->insert(pos, std::pair<Key,
         typename std::list<std::pair<Key,T> >::iterator>
         (k, --lastElement));      // store the iterator in multimap
     }
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Container::addReplace()"
   // Add an element to the container if no element with the specified key
@@ -136,7 +136,7 @@ namespace ESMCI {
       // this is a new key
       orderedList.push_back(std::pair<Key,T>(k, t)); // append to list
       lastElement = orderedList.end();
-      this->insert(pos, std::pair<Key, 
+      this->insert(pos, std::pair<Key,
         typename std::list<std::pair<Key,T> >::iterator>
         (k, --lastElement));      // store the iterator in multimap
     }
@@ -155,7 +155,7 @@ namespace ESMCI {
     std::multimap<Key, typename std::list<std::pair<Key,T> >::iterator>
       ::clear(); // clear the multimap part of the container
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Container::get()"
   // Access an element by key. It is an error if no element with the specified
@@ -204,7 +204,7 @@ namespace ESMCI {
       v.resize(0);
     }
   }
-    
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Container::getCount()"
   // Number of items that match the key.
@@ -296,7 +296,7 @@ namespace ESMCI {
   // exists. In relaxed mode this condition turns this method into a no-op
   // and no error is thrown.
   // Further, for multi==false, the relaxed flag also covers the case where
-  // there are multiple items in the container that match the key. Again the 
+  // there are multiple items in the container that match the key. Again the
   // relaxed mode turns this into a no-op, and no error is thrown. None of
   // the multiple matching elements are removed under this condition.
   // With multi==true the latter condition isn't an error anyway, instead
@@ -335,7 +335,7 @@ namespace ESMCI {
     }
     this->erase(range.first, range.second); // remove entries from multimap part
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Container::replace()"
   // Replace the element that has matching key with the specified element. By
@@ -343,8 +343,8 @@ namespace ESMCI {
   // element with the same key as the specified element exists. In relaxed mode
   // this condition turns this method into a no-op and no error is thrown.
   // Further, for multi==false, the relaxed flag also covers the case where
-  // there are multiple items in the container that match the key. Again the 
-  // relaxed mode turns this into a no-op, and no error is thrown. Also none of 
+  // there are multiple items in the container that match the key. Again the
+  // relaxed mode turns this into a no-op, and no error is thrown. Also none of
   // the multiple items with matching key are replaced.
   // With multi==true the latter condition isn't an error anyway, instead
   // all items that match the key are replaced.
