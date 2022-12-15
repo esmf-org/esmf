@@ -5252,6 +5252,12 @@ int VMK::threadbarrier(){
 
 int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
   int localrc=0;
+  // sanity check root
+  if (root<0 || root>npets){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "'root' out of range", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
   if (mpionly){
     // Find corresponding MPI operation
     MPI_Op mpiop;
@@ -5995,6 +6001,12 @@ int VMK::reduce_scatter(void *in, void *out, int *outCounts,
     
 int VMK::scatter(void *in, void *out, int len, int root){
   int localrc=0;
+  // sanity check root
+  if (root<0 || root>npets){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "'root' out of range", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
   if (mpionly){
     localrc = MPI_Scatter(in, len, MPI_BYTE, out, len, MPI_BYTE, root, mpi_c);
   }else{
@@ -6025,9 +6037,14 @@ int VMK::scatter(void *in, void *out, int len, int root){
 }
 
 
-int VMK::scatter(void *in, void *out, int len, int root,
-  commhandle **ch){
+int VMK::scatter(void *in, void *out, int len, int root, commhandle **ch){
   int localrc=0;
+  // sanity check root
+  if (root<0 || root>npets){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "'root' out of range", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
   // check if this needs a new entry in the request queue
   if (*ch==NULL){
     *ch = new commhandle;
@@ -6079,6 +6096,12 @@ int VMK::scatter(void *in, void *out, int len, int root,
 int VMK::scatterv(void *in, int *inCounts, int *inOffsets, void *out,
   int outCount, vmType type, int root){
   int localrc=0;
+  // sanity check root
+  if (root<0 || root>npets){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "'root' out of range", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
@@ -6159,6 +6182,12 @@ int VMK::scatterv(void *in, int *inCounts, int *inOffsets, void *out,
 
 int VMK::gather(void *in, void *out, int len, int root){
   int localrc=0;
+  // sanity check root
+  if (root<0 || root>npets){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "'root' out of range", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
   if (mpionly){
     localrc = MPI_Gather(in, len, MPI_BYTE, out, len, MPI_BYTE, root, mpi_c);
   }else{
@@ -6191,6 +6220,12 @@ int VMK::gather(void *in, void *out, int len, int root){
 
 int VMK::gather(void *in, void *out, int len, int root, commhandle **ch){
   int localrc = 0;
+  // sanity check root
+  if (root<0 || root>npets){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "'root' out of range", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
   // check if this needs a new entry in the request queue
   if (*ch==NULL){
     *ch = new commhandle;
@@ -6239,9 +6274,15 @@ int VMK::gather(void *in, void *out, int len, int root, commhandle **ch){
 }
 
 
-int VMK::gatherv(void *in, int inCount, void *out, int *outCounts, 
+int VMK::gatherv(void *in, int inCount, void *out, int *outCounts,
   int *outOffsets, vmType type, int root){
   int localrc=0;
+  // sanity check root
+  if (root<0 || root>npets){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "'root' out of range", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
   if (mpionly){
     // Find corresponding MPI data type
     MPI_Datatype mpitype;
@@ -6635,6 +6676,12 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
 
 int VMK::broadcast(void *data, int len, int root){
   int localrc=0;
+  // sanity check root
+  if (root<0 || root>npets){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "'root' out of range", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
   if (mpionly){
     localrc = MPI_Bcast(data, len, MPI_BYTE, root, mpi_c);
   }else{
@@ -6657,6 +6704,12 @@ int VMK::broadcast(void *data, int len, int root){
 
 int VMK::broadcast(void *data, int len, int root, commhandle **ch){
   int localrc=0;
+  // sanity check root
+  if (root<0 || root>npets){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+      "'root' out of range", ESMC_CONTEXT, &localrc);
+    return localrc;
+  }
   // check if this needs a new entry in the request queue
   if (*ch==NULL){
     *ch = new commhandle;
