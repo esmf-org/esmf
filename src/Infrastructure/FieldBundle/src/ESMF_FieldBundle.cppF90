@@ -4257,6 +4257,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: rraShift, vectorLengthShift
     type(ESMF_RHL), pointer         :: rhList, rhListE
     type(ESMF_Field), pointer       :: srcFieldsPtr(:), dstFieldsPtr(:)
+    logical                         :: verbosityFlag
 
 #define USE_FB_RegridPair
 #ifndef USE_FB_RegridPair
@@ -4278,6 +4279,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RHL), pointer         :: rhListG
     logical                         :: rhListMatch
     type(ESMF_RouteHandle)          :: rhh
+#endif
+
+    verbosityFlag = .false.
+#ifdef FB_REGRID_LOG_on
+    verbosityFlag = .true.
 #endif
 
     ! Initialize return code; assume routine not implemented 
@@ -4371,7 +4377,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         regridPoleNPnts, lineType, normType, extrapMethod, extrapNumSrcPnts, &
         extrapDistExponent, extrapNumLevels, unmappedaction, ignoreDegenerate, &
         srcTermProcessing, pipelineDepth, rhList, routehandle, rraShift, &
-        vectorLengthShift, rc=localrc)
+        vectorLengthShift, verbosityFlag, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 #else
@@ -4659,8 +4665,8 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
     srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
     lineType, normType, extrapMethod, extrapNumSrcPnts, extrapDistExponent, &
     extrapNumLevels, unmappedaction, ignoreDegenerate, srcTermProcessing, &
-    pipelineDepth, rhList, routehandle, &
-    rraShift, vectorLengthShift, rc)
+    pipelineDepth, rhList, routehandle, rraShift, vectorLengthShift, &
+    verbosityFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field),               intent(in)              :: srcField
@@ -4684,7 +4690,8 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
     type(ESMF_RouteHandle),         intent(inout)           :: routehandle
     integer,                        intent(inout)           :: rraShift
     integer,                        intent(inout)           :: vectorLengthShift
-    integer,                        intent(out), optional   :: rc
+    logical,                        intent(in),    optional :: verbosityFlag
+    integer,                        intent(out),   optional :: rc
 !EOPI
 !------------------------------------------------------------------------------
     integer                         :: localrc
@@ -4708,6 +4715,10 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
     type(ESMF_RHL), pointer         :: rhListE, rhListG
     logical                         :: rhListMatch
     type(ESMF_RouteHandle)          :: rhh
+    logical                         :: verbosityFlagIntl
+
+    verbosityFlagIntl = .false. ! default
+    if (present(verbosityFlag)) verbosityFlagIntl = verbosityFlag
 
     call ESMF_FieldGet(srcField, geomtype=srcGeomtype, arrayspec=srcArraySpec, &
       dimCount=fieldDimCount, rc=localrc)
@@ -4728,19 +4739,19 @@ call ESMF_LogWrite("found rhListMatch -> reuse routehandle!", &
 
     if (rhReuse) then
 
-#ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite(ESMF_METHOD// &
-  ": Inside 'rhReuse' branch!", &
-  ESMF_LOGMSG_DEBUG)
-#endif
+      if (verbosityFlagIntl) then
+        call ESMF_LogWrite(ESMF_StringConcat(ESMF_METHOD, &
+          ": Inside 'rhReuse' branch!"), &
+          ESMF_LOGMSG_DEBUG)
+      endif
 
       ! access src side information
       if (srcGeomtype==ESMF_GEOMTYPE_GRID) then
-#ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite(ESMF_METHOD// &
-  ": srcGeomtype==ESMF_GEOMTYPE_GRID", &
-  ESMF_LOGMSG_DEBUG)
-#endif
+        if (verbosityFlagIntl) then
+          call ESMF_LogWrite(ESMF_StringConcat(ESMF_METHOD, &
+            ": srcGeomtype==ESMF_GEOMTYPE_GRID"), &
+            ESMF_LOGMSG_DEBUG)
+        endif
         call ESMF_FieldGet(srcField, grid=srcGrid, staggerLoc=srcStaggerLoc, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4749,11 +4760,11 @@ call ESMF_LogWrite(ESMF_METHOD// &
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else if (srcGeomtype==ESMF_GEOMTYPE_MESH) then
-#ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite(ESMF_METHOD// &
-  ": srcGeomtype==ESMF_GEOMTYPE_MESH", &
-  ESMF_LOGMSG_DEBUG)
-#endif
+        if (verbosityFlagIntl) then
+          call ESMF_LogWrite(ESMF_StringConcat(ESMF_METHOD, &
+            ": srcGeomtype==ESMF_GEOMTYPE_MESH"), &
+            ESMF_LOGMSG_DEBUG)
+        endif
         call ESMF_FieldGet(srcField, mesh=srcMesh, meshLoc=srcMeshLoc, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4771,11 +4782,11 @@ call ESMF_LogWrite(ESMF_METHOD// &
 
       ! access dst side information
       if (dstGeomtype==ESMF_GEOMTYPE_GRID) then
-#ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite(ESMF_METHOD// &
-  ": dstGeomtype==ESMF_GEOMTYPE_GRID", &
-  ESMF_LOGMSG_DEBUG)
-#endif
+        if (verbosityFlagIntl) then
+          call ESMF_LogWrite(ESMF_StringConcat(ESMF_METHOD, &
+            ": dstGeomtype==ESMF_GEOMTYPE_GRID"), &
+            ESMF_LOGMSG_DEBUG)
+        endif
         call ESMF_FieldGet(dstField, grid=dstGrid, staggerLoc=dstStaggerLoc, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4784,11 +4795,11 @@ call ESMF_LogWrite(ESMF_METHOD// &
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else if (dstGeomtype==ESMF_GEOMTYPE_MESH) then
-#ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite(ESMF_METHOD// &
-  ": dstGeomtype==ESMF_GEOMTYPE_MESH", &
-  ESMF_LOGMSG_DEBUG)
-#endif
+        if (verbosityFlagIntl) then
+          call ESMF_LogWrite(ESMF_StringConcat(ESMF_METHOD, &
+            ": dstGeomtype==ESMF_GEOMTYPE_MESH"), &
+            ESMF_LOGMSG_DEBUG)
+        endif
         call ESMF_FieldGet(dstField, mesh=dstMesh, meshLoc=dstMeshLoc, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4979,11 +4990,11 @@ call ESMF_LogWrite(ESMF_METHOD// &
 
     if (.not.rhListMatch) then
       ! No match found: precompute new RH for this field pair
-#ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite(ESMF_METHOD// &
-  ": no rhListMatch -> pre-compute new remapping!", &
-  ESMF_LOGMSG_DEBUG)
-#endif
+      if (verbosityFlagIntl) then
+        call ESMF_LogWrite(ESMF_StringConcat(ESMF_METHOD, &
+          ": no rhListMatch -> pre-compute new remapping!"), &
+          ESMF_LOGMSG_DEBUG)
+      endif
       if (rhReuse) then
         ! add a new rhList element
         allocate(rhListE)
@@ -4993,11 +5004,11 @@ call ESMF_LogWrite(ESMF_METHOD// &
 
       if (associated(rhListG)) then
         ! able to reuse already precomputed weight matrix
-#ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite(ESMF_METHOD// &
-  ": able to reuse already precomputed weight matrix!", &
-  ESMF_LOGMSG_DEBUG)
-#endif
+        if (verbosityFlagIntl) then
+          call ESMF_LogWrite(ESMF_StringConcat(ESMF_METHOD, &
+            ": able to reuse already precomputed weight matrix!"), &
+            ESMF_LOGMSG_DEBUG)
+        endif
         factorList=>rhListG%factorList
         factorIndexList=>rhListG%factorIndexList
         call ESMF_FieldSMMStore(srcField=srcField, &
@@ -5010,11 +5021,11 @@ call ESMF_LogWrite(ESMF_METHOD// &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         ! must precompute full regridding
-#ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite(ESMF_METHOD// &
-  ": must precompute full regridding!", &
-  ESMF_LOGMSG_DEBUG)
-#endif
+        if (verbosityFlagIntl) then
+          call ESMF_LogWrite(ESMF_StringConcat(ESMF_METHOD, &
+            ": must precompute full regridding!"), &
+            ESMF_LOGMSG_DEBUG)
+        endif
         factorList=>NULL()
         factorIndexList=>NULL()
         call ESMF_FieldRegridStore(srcField=srcField, &
@@ -5110,11 +5121,11 @@ call ESMF_LogWrite(ESMF_METHOD// &
       endif
     else
       ! Match found: reuse previous RH for this field pair
-#ifdef FB_REGRID_LOG_on
-call ESMF_LogWrite(ESMF_METHOD// &
-  ": found rhListMatch -> reuse routehandle!", &
-  ESMF_LOGMSG_DEBUG)
-#endif
+      if (verbosityFlagIntl) then
+        call ESMF_LogWrite(ESMF_StringConcat(ESMF_METHOD, &
+          ": found rhListMatch -> reuse routehandle!"), &
+          ESMF_LOGMSG_DEBUG)
+      endif
       ! pull out the routehandle from the matching rhList element
       rhh = rhListE%rh
       factorIndexList => rhListE%factorIndexList

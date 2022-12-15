@@ -5378,7 +5378,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             rh=is%wrap%cplSet(i)%rh, &
             zeroRegions=is%wrap%cplSet(i)%zeroRegions, &
             termOrders=is%wrap%cplSet(i)%termOrders, &
-            name=name, rc=rc)
+            name=name, verbosity=verbosity, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
@@ -5387,7 +5387,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           cplList=cplListTemp(1:j-1), rh=is%wrap%rh, &
           zeroRegions=is%wrap%zeroRegions, &
           termOrders=is%wrap%termOrders, &
-          name=name, rc=rc)
+          name=name, verbosity=verbosity, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
@@ -6984,7 +6984,7 @@ print *, "found match:"// &
   !-----------------------------------------------------------------------------
 
   subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, zeroRegions, &
-    termOrders, name, rc)
+    termOrders, name, verbosity, rc)
     ! This method will destroy srcFB/dstFB, and replace with newly created FBs.
     ! Order of fields in outgoing srcFB/dstFB may be different from incoming.
     ! Order of elements in termOrders matches those in outgoing srcFB/dstFB.
@@ -6995,6 +6995,7 @@ print *, "found match:"// &
     type(ESMF_Region_Flag),    pointer               :: zeroRegions(:)
     type(ESMF_TermOrder_Flag), pointer               :: termOrders(:)
     character(*),              intent(in)            :: name
+    integer,                   intent(in)            :: verbosity
     integer,                   intent(out), optional :: rc
 
     ! local variables
@@ -7043,7 +7044,7 @@ print *, "found match:"// &
     integer, pointer                :: dstUngriddedLBound(:)
     integer, pointer                :: dstUngriddedUBound(:)
     integer                         :: fieldDimCount, gridDimCount
-    logical                         :: gridPair
+    logical                         :: gridPair, verbosityFlag
 
     type RHL
       type(ESMF_Grid)                   :: srcGrid, dstGrid
@@ -7082,6 +7083,8 @@ print *, "found match:"// &
     type(RHL), pointer              :: rhList, rhListE
 #endif
     logical                         :: rhListMatch
+
+    verbosityFlag = btest(verbosity,12)
 
 #if 0
 call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
@@ -7712,11 +7715,13 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         unmappedaction=unmappedaction, ignoreDegenerate=ignoreDegenerate, &
         srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
         rhList=rhList, routehandle=rh, rraShift=rraShift, &
-        vectorLengthShift=vectorLengthShift, rc=localrc)
+        vectorLengthShift=vectorLengthShift, verbosityFlag=verbosityFlag, &
+        rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
 #else
+
       ! for now reuse of Regrid RouteHandle is only implemented for Grids
       
       call ESMF_FieldGet(srcFields(i), geomtype=srcGeomtype, rc=localrc)
