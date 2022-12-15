@@ -5545,8 +5545,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! component that was added under {\tt compLabel}.
 !
 ! If provided, the {\tt petList} argument will be associated with the petList
-! that was used to create the referenced component. This pointer must not be
-! deallocated by the user!
+! that was used to create the referenced component. This is an internal
+! allocation owned by the library. This pointer must {\bf not} be deallocated
+! by the user!
 !
 ! By default an error is returned if no component is associated with the
 ! specified {\tt compLabel}. This error can be suppressed by setting
@@ -5655,8 +5656,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! component that was added under {\tt compLabel}.
 !
 ! If provided, the {\tt petList} argument will be associated with the petList
-! that was used to create the referenced component. This pointer must not be
-! deallocated by the user!
+! that was used to create the referenced component. This is an internal
+! allocation owned by the library. This pointer must {\bf not} be deallocated
+! by the user!
 !
 ! By default an error is returned if no component is associated with the
 ! specified {\tt compLabel}. This error can be suppressed by setting
@@ -5737,11 +5739,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Get all the GridComp (i.e. Model, Mediator, or Driver) child components from a
-! Driver. The incoming {\tt compList} and {\tt petLists} arguments must be
+! Driver.
+!
+! The incoming {\tt compList} and {\tt petLists} arguments must enter
 ! unassociated. This means that the user code must explicitly call
 ! {\tt nullify()} or use the {\tt => null()} syntax on the variables passed in
-! as the actual arguments. On return it becomes the responsibility of the caller
-! to deallocate any associated {\tt compList} and {\tt petLists} arguments.
+! as the actual arguments.
+!
+! On return it becomes the responsibility of the caller to deallocate
+! associated {\tt compList} and {\tt petLists} arguments:
+! \begin{verbatim}
+!   if (associated(compList)) deallocate(compList)
+!   if (associated(petLists)) deallocate(petLists)
+! \end{verbatim}
+!
+! Notice that the {\tt petLists(i)\%ptr} members, if associated, are pointing to
+! an internal allocation owned by the library. These pointers must {\bf not} be
+! deallocated by the user!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -5844,12 +5858,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Get all the CplComp (i.e. Connector) child components from a
-! Driver. The incoming {\tt compList} and {\tt petLists} arguments must be
+! Get all the CplComp (i.e. Connector) child components from a Driver.
+!
+! The incoming {\tt compList} and {\tt petLists} arguments must enter
 ! unassociated. This means that the user code must explicitly call
 ! {\tt nullify()} or use the {\tt => null()} syntax on the variables passed in
-! as the actual arguments. On return it becomes the responsibility of the caller
-! to deallocate any associated {\tt compList} and {\tt petLists} arguments.
+! as the actual arguments.
+!
+! On return it becomes the responsibility of the caller to deallocate
+! associated {\tt compList} and {\tt petLists} arguments:
+! \begin{verbatim}
+!   if (associated(compList)) deallocate(compList)
+!   if (associated(petLists)) deallocate(petLists)
+! \end{verbatim}
+!
+! Notice that the {\tt petLists(i)\%ptr} members, if associated, are pointing to
+! an internal allocation owned by the library. These pointers must {\bf not} be
+! deallocated by the user!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
