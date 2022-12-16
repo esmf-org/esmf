@@ -536,7 +536,7 @@ namespace ESMCI {
         return;
       }
       ctx->latch_ts = 0;
-      ctx->fh == NULL;
+      ctx->fh = NULL;
 
       //store as global context
       traceCtx = ctx;
