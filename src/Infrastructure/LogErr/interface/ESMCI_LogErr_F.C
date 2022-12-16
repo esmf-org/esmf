@@ -253,7 +253,6 @@ extern "C" {
 // TimeStamp
 //EOP
 {
-    time_t tm;
     struct tm ti;
 #if !defined (ESMF_OS_MinGW)
     struct timeval tv;  

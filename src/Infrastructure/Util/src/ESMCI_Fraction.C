@@ -254,7 +254,7 @@ static const char *const version = "$Id$";
     // significant digits (at least DBL_DIG) is achieved.
     //   Worst case is 37 iterations for the
     //     golden ratio phi = (1 + sqrt(5))/2; the "most irrational number".
-    int i=0; f=0.0;
+    f=0.0;
     do {
       a = (ESMC_I8) r;            // Compute
       n = a * nprev + nprevprev;  //  next
