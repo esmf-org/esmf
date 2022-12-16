@@ -123,7 +123,7 @@ namespace ESMCI {
   public:
     const char *getName(void) const { return "ESMCI::IO_Handler"; }
     ESMC_IOFmt_Flag getFormat(void) { return iofmtFlag; }
-    const int getNtiles(void) const { return ntiles; }
+    int getNtiles(void) const { return ntiles; }
     virtual bool formatOk(ESMC_IOFmt_Flag *newIofmt) {
       return (((ESMC_IOFmt_Flag *)NULL != newIofmt) &&
               (*newIofmt == iofmtFlag));
