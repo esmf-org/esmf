@@ -1325,46 +1325,40 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
 
   int dimCount= dg->getDimCount();
   int deCount = dg->getDELayout()->getDeCount();
-
-  int tilecount = dg->getTileCount ();
-  if (tilecount != 1) {
-    localrc = ESMF_RC_NOT_IMPL;
-    std::stringstream errmsg;
-    errmsg << "tile count of " << tilecount << " != 1 - not supported yet";
-    if (ESMC_LogDefault.MsgFoundError(localrc, errmsg.str(), ESMC_CONTEXT,
-      rc)) return;
-  }
+  int tileCount = dg->getTileCount ();
 
   const int *arrayToDistGridMap = src_array_p->getArrayToDistGridMap();
   const int *undistLBound = src_array_p->getUndistLBound();
   const int *undistUBound = src_array_p->getUndistUBound();
-  const int *minIndexPTile = dg->getMinIndexPDimPTile();
-  const int *maxIndexPTile = dg->getMaxIndexPDimPTile();
+  const int *minIndexPDimPTile = dg->getMinIndexPDimPTile();
+  const int *maxIndexPDimPTile = dg->getMaxIndexPDimPTile();
   const int *minIndexPDimPDe = dg->getMinIndexPDimPDe();
   const int *maxIndexPDimPDe = dg->getMaxIndexPDimPDe();
 
   // construct the new minIndex and maxIndex and regDecomp taking into account
   // how Array dimensions are mapped against DistGrid dimensions
-  std::vector<int> minIndexNew(rank);
-  std::vector<int> maxIndexNew(rank);
+  std::vector<int> minIndexNew(rank*tileCount);
+  std::vector<int> maxIndexNew(rank*tileCount);
   std::vector<int> deBlockList(rank*2*deCount);
-  std::vector<int> deBlockListLen(3);
-  deBlockListLen[0]=rank; deBlockListLen[1]=2; deBlockListLen[2]=deCount;
   int jj = 0;
   for (int i=0; i<rank; i++) {
     int j = arrayToDistGridMap[i];
     if (j > 0) {
       // valid DistGrid dimension
-      minIndexNew[i] = minIndexPTile[j-1];
-      maxIndexNew[i] = maxIndexPTile[j-1];
+      for (int tile=0; tile<tileCount; tile++) {
+        minIndexNew[tile*rank + i] = minIndexPDimPTile[tile*dimCount + (j-1)];
+        maxIndexNew[tile*rank + i] = maxIndexPDimPTile[tile*dimCount + (j-1)];
+      }
       for (int k=0; k<deCount; k++){
         deBlockList[k*2*rank        + i] = minIndexPDimPDe[k*dimCount + (j-1)];
         deBlockList[k*2*rank + rank + i] = maxIndexPDimPDe[k*dimCount + (j-1)];
       }
     } else {
       // undistributed dimension
-      minIndexNew[i] = undistLBound[jj];
-      maxIndexNew[i] = undistUBound[jj];
+      for (int tile=0; tile<tileCount; tile++) {
+        minIndexNew[tile*rank + i] = undistLBound[jj];
+        maxIndexNew[tile*rank + i] = undistUBound[jj];
+      }
       for (int k=0; k<deCount; k++){
         deBlockList[k*2*rank        + i] = undistLBound[jj];
         deBlockList[k*2*rank + rank + i] = undistUBound[jj];
@@ -1374,15 +1368,31 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
   }
 
   // create the fixed up DistGrid, making sure to use original DELayout
-  ESMCI::InterArray<int> minIndexInterface(minIndexNew);
-  ESMCI::InterArray<int> maxIndexInterface(maxIndexNew);
-  ESMCI::InterArray<int> deBlockListInterface(&deBlockList[0], 3, &deBlockListLen[0]);
+  int deBlockListLen[] = {rank, 2, deCount};
+  ESMCI::InterArray<int> deBlockListInterface(&deBlockList[0], 3, deBlockListLen);
   DELayout *delayout = dg->getDELayout();
-  DistGrid *dg_temp = DistGrid::create(&minIndexInterface,
-    &maxIndexInterface, &deBlockListInterface,
-    NULL, NULL, NULL, delayout, NULL, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
-    return;
+  DistGrid *dg_temp;
+  if (tileCount == 1) {
+    ESMCI::InterArray<int> minIndexInterface(minIndexNew);
+    ESMCI::InterArray<int> maxIndexInterface(maxIndexNew);
+    dg_temp = DistGrid::create(&minIndexInterface,
+      &maxIndexInterface, &deBlockListInterface,
+      NULL, NULL, NULL, delayout, NULL, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+      return;
+    }
+  } else {
+    int dummyLen[] = {rank, tileCount};
+    ESMCI::InterArray<int> minIndexInterface(&minIndexNew[0], 2, dummyLen);
+    ESMCI::InterArray<int> maxIndexInterface(&maxIndexNew[0], 2, dummyLen);
+    ESMCI::InterArray<int> deToTileMapInterface((int*)(dg->getTileListPDe()), 1, &deCount);
+    dg_temp = DistGrid::create(&minIndexInterface,
+      &maxIndexInterface, &deBlockListInterface,
+      &deToTileMapInterface,
+      NULL, NULL, NULL, delayout, NULL, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+      return;
+    }
   }
 
   // finally, create the fixed up Array using pointer to original data.
