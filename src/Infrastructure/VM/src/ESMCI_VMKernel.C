@@ -5253,7 +5253,7 @@ int VMK::threadbarrier(){
 int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
   int localrc=0;
   // sanity check root
-  if (root<0 || root>npets){
+  if (root<0 || root>=npets){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "'root' out of range", ESMC_CONTEXT, &localrc);
     return localrc;
@@ -6002,7 +6002,7 @@ int VMK::reduce_scatter(void *in, void *out, int *outCounts,
 int VMK::scatter(void *in, void *out, int len, int root){
   int localrc=0;
   // sanity check root
-  if (root<0 || root>npets){
+  if (root<0 || root>=npets){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "'root' out of range", ESMC_CONTEXT, &localrc);
     return localrc;
@@ -6040,7 +6040,7 @@ int VMK::scatter(void *in, void *out, int len, int root){
 int VMK::scatter(void *in, void *out, int len, int root, commhandle **ch){
   int localrc=0;
   // sanity check root
-  if (root<0 || root>npets){
+  if (root<0 || root>=npets){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "'root' out of range", ESMC_CONTEXT, &localrc);
     return localrc;
@@ -6097,7 +6097,7 @@ int VMK::scatterv(void *in, int *inCounts, int *inOffsets, void *out,
   int outCount, vmType type, int root){
   int localrc=0;
   // sanity check root
-  if (root<0 || root>npets){
+  if (root<0 || root>=npets){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "'root' out of range", ESMC_CONTEXT, &localrc);
     return localrc;
@@ -6183,7 +6183,7 @@ int VMK::scatterv(void *in, int *inCounts, int *inOffsets, void *out,
 int VMK::gather(void *in, void *out, int len, int root){
   int localrc=0;
   // sanity check root
-  if (root<0 || root>npets){
+  if (root<0 || root>=npets){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "'root' out of range", ESMC_CONTEXT, &localrc);
     return localrc;
@@ -6221,7 +6221,7 @@ int VMK::gather(void *in, void *out, int len, int root){
 int VMK::gather(void *in, void *out, int len, int root, commhandle **ch){
   int localrc = 0;
   // sanity check root
-  if (root<0 || root>npets){
+  if (root<0 || root>=npets){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "'root' out of range", ESMC_CONTEXT, &localrc);
     return localrc;
@@ -6278,7 +6278,7 @@ int VMK::gatherv(void *in, int inCount, void *out, int *outCounts,
   int *outOffsets, vmType type, int root){
   int localrc=0;
   // sanity check root
-  if (root<0 || root>npets){
+  if (root<0 || root>=npets){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "'root' out of range", ESMC_CONTEXT, &localrc);
     return localrc;
@@ -6677,7 +6677,7 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
 int VMK::broadcast(void *data, int len, int root){
   int localrc=0;
   // sanity check root
-  if (root<0 || root>npets){
+  if (root<0 || root>=npets){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "'root' out of range", ESMC_CONTEXT, &localrc);
     return localrc;
@@ -6705,7 +6705,7 @@ int VMK::broadcast(void *data, int len, int root){
 int VMK::broadcast(void *data, int len, int root, commhandle **ch){
   int localrc=0;
   // sanity check root
-  if (root<0 || root>npets){
+  if (root<0 || root>=npets){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "'root' out of range", ESMC_CONTEXT, &localrc);
     return localrc;
