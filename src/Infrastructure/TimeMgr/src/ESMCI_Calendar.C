@@ -900,7 +900,7 @@ int Calendar::count=0;
         strncpy(tempName, this->name, nameLen-1);
         tempName[nameLen] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "For calendar name %s, "
                 "length >= given character array; truncated.", this->name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
