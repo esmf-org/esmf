@@ -67,7 +67,6 @@ class ESMC_Base;
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
-  class Info;
 
   class esmc_error : public std::exception
   {
