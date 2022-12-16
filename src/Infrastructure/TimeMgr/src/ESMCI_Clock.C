@@ -104,9 +104,9 @@ int Clock::count=0;
       } else {
         // truncate
         strncpy(clock->name, name, ESMF_MAXSTR-1);
-        clock->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+        clock->name[2*ESMF_MAXSTR-1] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "clock name %s, length >= ESMF_MAXSTR; truncated.",
                 name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -312,9 +312,9 @@ int Clock::count=0;
       } else {
         // truncate
         strncpy(this->name, name, ESMF_MAXSTR-1);
-        this->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+        this->name[2*ESMF_MAXSTR-1] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "clock name %s, length >= ESMF_MAXSTR; truncated.",
                 name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -438,7 +438,7 @@ int Clock::count=0;
         strncpy(tempName, this->name, nameLen-1);
         tempName[nameLen] = '\0';  // null terminate
 
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[2*ESMF_MAXSTR];
         sprintf(logMsg, "clock name %s, "
                 "length >= given character array; truncated.", this->name);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -664,7 +664,7 @@ int Clock::count=0;
             *((Alarm**)f90ArrayElementJ) = alarmList[i];
           } else {
             // list overflow!
-            char logMsg[ESMF_MAXSTR];
+            char logMsg[2*ESMF_MAXSTR];
             sprintf(logMsg, "For clock %s, "
                     "trying to report %dth ringing alarm, but given "
                     "ringingAlarmList array can only hold %d.",
@@ -1016,7 +1016,7 @@ int Clock::count=0;
     }
 
     if (alarmnameLen >= ESMF_MAXSTR) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "For alarmname %s, length >= ESMF_MAXSTR, "
                       "truncated.", alarmname);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -1024,7 +1024,7 @@ int Clock::count=0;
     }
 
     // TODO: use inherited methods from ESMC_Base
-    char alarmName[ESMF_MAXSTR];
+    char alarmName[2*ESMF_MAXSTR];
     strncpy(alarmName, alarmname, alarmnameLen);
     alarmName[alarmnameLen] = '\0';  // null terminate
 
@@ -1135,7 +1135,7 @@ int Clock::count=0;
 
         default :
           // unknown alarm list flag; return empty list
-          char logMsg[ESMF_MAXSTR];
+          char logMsg[2*ESMF_MAXSTR];
           sprintf(logMsg, "For clock %s, unknown alarm list flag %d.",
                   this->name, alarmlistflag);
           ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -1160,7 +1160,7 @@ int Clock::count=0;
             *((Alarm**)f90ArrayElementJ) = this->alarmList[i];
           } else {
             // list overflow!
-            char logMsg[ESMF_MAXSTR];
+            char logMsg[2*ESMF_MAXSTR];
             sprintf(logMsg, "For clock %s, "
                     "trying to return %dth requested alarm, but given "
                     "alarmList array can only hold %d.",
@@ -1589,7 +1589,7 @@ int Clock::count=0;
 
     if (direction != ESMF_DIRECTION_FORWARD && 
         direction != ESMF_DIRECTION_REVERSE) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "direction property %d is not ESMF_DIRECTION_FORWARD or "
               "ESMF_DIRECTION_REVERSE", direction);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
@@ -1754,7 +1754,7 @@ int Clock::count=0;
 
       // make options case insensitive
       // TODO: put this into function to share
-      char opts[ESMF_MAXSTR];
+      char opts[2*ESMF_MAXSTR];
       int i;
       for(i=0; i<strlen(options) && i<ESMF_MAXSTR-1; i++) {
         opts[i] = tolower(options[i]);
@@ -2020,7 +2020,7 @@ int Clock::count=0;
     }
 
     if (alarm == ESMC_NULL_POINTER) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "For clock %s, given alarm is NULL.", this->name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
       return(ESMF_FAILURE);
@@ -2028,7 +2028,7 @@ int Clock::count=0;
 
     // if alarm list full, re-allocate it
     if (alarmCount == alarmListCapacity) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "For clock %s, alarm list is full (%d alarms), "
               "re-allocating to hold %d alarms.",
                 this->name, alarmListCapacity, 
@@ -2100,7 +2100,7 @@ int Clock::count=0;
     }
 
     if (alarm == ESMC_NULL_POINTER) {
-      char logMsg[ESMF_MAXSTR];
+      char logMsg[2*ESMF_MAXSTR];
       sprintf(logMsg, "For clock %s, given alarm is NULL.", this->name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       return(ESMF_FAILURE);
@@ -2122,7 +2122,7 @@ int Clock::count=0;
     }
 
     // given alarm not found in list
-    char logMsg[ESMF_MAXSTR];
+    char logMsg[2*ESMF_MAXSTR];
     sprintf(logMsg, "For clock %s, given alarm is not in clock's alarmList.",
             this->name);
     ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
