@@ -28,11 +28,18 @@ def create_compList(_dict, odir):
         f.write('set(COMPS {})\n\n'.format(' '.join(comp_str)))
         for k1, v1 in od.items():
           if type(v1) is dict:
-            if 'cmake_config' in v1:
-              # only entires that have cmake_config field are considered
-              f.write('# - auto-generated section for component: {}\n'.format(k1))
+            cmake_config = v1.get('cmake_config', None)
+            cmake_target = v1.get('cmake_target', None)
+            f.write('# - auto-generated section for component: {}\n'.format(k1))
+            if (cmake_config): # include cmake_config for component
               configFile = os.path.join(os.getcwd(), v1['cmake_config'])
               f.write('include({})\n\n'.format(configFile))
+            if (cmake_target): # link library for component
+              f.write('target_link_libraries(esmx_driver PUBLIC {})\n'.format(cmake_target))
+            else:
+              sys.exit('Build configuration is missing cmake_target for: {}'.format(k1))
+          else:
+            sys.exit('Build configuration is missing arguments for: {}'.format(k1))
 
 def create_compUse(_dict, odir):
     # open file
@@ -41,12 +48,16 @@ def create_compUse(_dict, odir):
         od = collections.OrderedDict(_dict['components'].items())
         for k1, v1 in od.items():
           if type(v1) is dict:
-            if 'fort_module' in v1:
-              # if fort_module field present, use it to identify fortran module
-              f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(v1['fort_module'], k1, k1))
-            elif 'cmake_config' in v1:
-              # otherwise use step of the cmake_config name
-              f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(Path(v1['cmake_config']).stem, k1, k1))
+            cmake_config = v1.get('cmake_config', None)
+            fort_module = v1.get('fort_module', None)
+            if (fort_module): # if fort_module field present, use it to identify fortran module
+              f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(fort_module, k1, k1))
+            elif (cmake_config): # otherwise use step of the cmake_config name
+              f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(Path(cmake_config).stem, k1, k1))
+            else:
+              sys.exit('Build configuration is missing fort_module for: {}'.format(k1))
+          else:
+            sys.exit('Build configuration is missing arguments for: {}'.format(k1))
 
 def create_compDef(_dict, odir):
     # open file
@@ -55,12 +66,10 @@ def create_compDef(_dict, odir):
         i = 1
         od = collections.OrderedDict(_dict['components'].items())
         for k1, v1 in od.items():
-          if type(v1) is dict:
-            # only entires that have cmake_config field are considered
-            f.write('CompDef({})%ssPtr => {}SS\n'.format(i, k1))
-            f.write('CompDef({})%svPtr => {}SV\n'.format(i, k1))
-            f.write('CompDef({})%name = "{}"\n'.format(i, k1))
-            i = i+1
+          f.write('CompDef({})%ssPtr => {}SS\n'.format(i, k1))
+          f.write('CompDef({})%svPtr => {}SV\n'.format(i, k1))
+          f.write('CompDef({})%name = "{}"\n'.format(i, k1))
+          i = i+1
 
 def main(argv):
 

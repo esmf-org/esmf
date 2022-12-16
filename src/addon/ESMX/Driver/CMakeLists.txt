@@ -2,11 +2,7 @@
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 # Find ESMF
-if (NOT ESMF_FOUND)
-  find_package(ESMF 8.4.0 MODULE REQUIRED)
-elseif(ESMF_VERSION VERSION_LESS 8.4.0)
-  message(FATAL_ERROR "ESMF version required is at least \"8.4.0\" (using ${ESMF_VERSION})")
-endif()
+find_package(ESMF 8.4.0 MODULE REQUIRED)
 
 # Set compilers per ESMFMKFILE
 set(CMAKE_CXX_COMPILER ${ESMF_CXXCOMPILER})
