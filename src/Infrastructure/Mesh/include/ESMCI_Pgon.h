@@ -72,7 +72,7 @@ public:
   }
 
   // Add a point
-  void add_pnt(double *pnt) {
+  void push_back_pnt(double *pnt) {
 
     // Add point 0 & 1
     pnt_coords.push_back(pnt[0]);
@@ -84,6 +84,26 @@ public:
     // Only support 3 coords right now, this is error checked in creation
   }
 
+  // Add a point 2D case
+  void push_back_pnt(double x, double y) {
+
+    // Add point 0 & 1
+    pnt_coords.push_back(x);
+    pnt_coords.push_back(y);
+
+  }
+
+  // Add a point 3D case
+  void push_back_pnt(double x, double y, double z) {
+
+    // Add point 0 & 1 & 2
+    pnt_coords.push_back(x);
+    pnt_coords.push_back(y);
+    pnt_coords.push_back(z);
+  }
+
+  
+  
   // Calc area of the polygon
   double area() {
 
@@ -98,7 +118,7 @@ public:
 
   // Get methods
   bool get_is_hole() {return is_hole;}
-  int get_num_pnts() {return pnt_coords.size();}  
+  int get_num_pnts() {return pnt_coords.size()/GEOM::pnt_size;}  
   int get_pnt_size() {return GEOM::pnt_size;}
 
   // Returns a direct pointer to the coordinate memory
