@@ -9162,7 +9162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     do i=1, 10
       call ESMF_VMWtime(t_1)
       t_2 = t_1
-      do while (t_2 == t_1)
+      do while (t_2 <= t_1)
         call ESMF_VMWtime(t_2)
       end do
       if (t_2 - t_1 > temp_prec) temp_prec = t_2 - t_1

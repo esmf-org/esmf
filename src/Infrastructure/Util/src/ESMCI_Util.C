@@ -33,6 +33,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
+#include <iostream>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -676,17 +677,17 @@ extern "C" {
     // if n does not match the actual pointer size, return an error.
     // we cannot return good values if n is not correct.
     if (sizeof(n) != *n) {
-        printf("error: fortran pointer size does not match C pointer size\n");
-        printf("  fortran is sending %d bytes, C expects %ld bytes\n",
-                  *n, (long) sizeof(n));
+        cerr << "error: fortran pointer size does not match C pointer size\n";
+        cerr << "  fortran is sending " << *n << " bytes, C expects "
+             << (long) sizeof(n) << " bytes\n";
         *len = 0;
         return;
     }
 
     if (sizeof(n) != sizeof(ESMC_POINTER)) {
-        printf("error: C pointer size does not match include file value\n");
-        printf("  C pointer is %ld bytes, ESMC_POINTER is %ld bytes\n",
-                   (long) sizeof(n), (long) sizeof(ESMC_POINTER));
+        cerr << "error: C pointer size does not match include file value\n";
+        cerr << "  C pointer is " << (long) sizeof(n) << " bytes, ESMC_POINTER is "
+             << (long) sizeof(ESMC_POINTER) << " bytes\n";
         *len = 0;
         return;
     }
@@ -725,17 +726,17 @@ extern "C" {
     // if n does not match the actual pointer size, return an error.
     // we cannot return good values if n is not correct.
     if (sizeof(n) != *n) {
-        printf("error: fortran pointer size does not match C pointer size\n");
-        printf("  fortran is sending %d bytes, C expects %ld bytes\n",
-                  *n, (long) sizeof(n));
+        cerr << "error: fortran pointer size does not match C pointer size\n";
+        cerr << "  fortran is sending " << *n << " bytes, C expects "
+             << (long) sizeof(n) << " bytes\n";
         *len = 0;
         return;
     }
 
     if (sizeof(n) != sizeof(ESMC_POINTER)) {
-        printf("error: C pointer size does not match include file value\n");
-        printf("  C pointer is %ld bytes, ESMC_POINTER is %ld bytes\n",
-                   (long) sizeof(n), (long) sizeof(ESMC_POINTER));
+        cerr << "error: C pointer size does not match include file value\n";
+        cerr << "  C pointer is " << (long) sizeof(n) << " bytes, ESMC_POINTER is "
+             << (long) sizeof(ESMC_POINTER) << " bytes\n";
         *len = 0;
         return;
     }

@@ -821,7 +821,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
         // this is a dual component side -> sender
         ESMC_LogDefault.Write("dual2actual() vmBased (dual side)...",
           ESMC_LOGMSG_DEBUG, ESMC_CONTEXT);
-        for (int i=0; i<localSendToPetList.size(); i++)
+        for (unsigned int i=0; i<localSendToPetList.size(); i++)
           bridgeVM->send(msg, len, localSendToPetList[i], tag);
       }else{
         // this is the actual component side -> receiver
@@ -936,7 +936,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
         // this is a actual component side -> sender
         ESMC_LogDefault.Write("actual2dual() vmBased (actual side)...",
           ESMC_LOGMSG_DEBUG, ESMC_CONTEXT);
-        for (int i=0; i<localSendToPetList.size(); i++)
+        for (unsigned int i=0; i<localSendToPetList.size(); i++)
           bridgeVM->send(msg, len, localSendToPetList[i], tag);
       }else{
         // this is the dual component side -> receiver

@@ -58,11 +58,9 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
   public:
     // constructor and destructor
     ArrayBundle(){
-      arrayContainer;
       arrayCreator = false;
     }
     ArrayBundle(int baseID):ESMC_Base(baseID){// prevent baseID counter incr.
-      arrayContainer;
       arrayCreator = false;
     }
   private:

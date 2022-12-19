@@ -2303,8 +2303,11 @@ ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 endif
 
 # Builds library - action for the 'tree' target.
-tree_lib:
+tree_lib-default:
 	dir=`pwd`; cd $(ESMF_MODDIR); $(MAKE) -f $${dir}/makefile MAKEFILE=$${dir}/makefile esmflib
+
+%: %-default
+	@ true
 
 # Builds library
 esmflib:: chkdir_lib $(SOURCE)
