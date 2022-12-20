@@ -21,10 +21,11 @@ One of the main pieces provided by ESMX is the *unified driver executable*. A go
 
 The name of the unified driver executable created by ESMX is all lower case `esmx`. This name will be used for the remainder of this section to refer to the unfied driver executable.
 
-ESMX is CMake based. The following two commands, executed from anywhere in your terminal, will build the `esmx` executable under a local `build` sub-drirectory:
+ESMX is CMake based. The following two commands, executed from anywhere in your terminal, will build the `esmx` executable under a local `build` sub-drirectory and install the `esmx` executable under a local `install` sub-drirectory:
 
-	cmake -H$ESMF_ESMXDIR -Bbuild
-	cmake --build ./build
+	cmake -S$ESMF_ESMXDIR -Bbuild -DCMAKE_INSTALL_PREFIX="install"
+	cmake --build ./build -v
+	cmake --install build
 
 Here shell variable `ESMF_ESMXDIR` is assumed to be set according to your ESMF installation. The correct value for `ESMF_ESMXDIR` can be looked up in the `esmf.mk` file, which should be accessible via shell variable `ESMFMKFILE`. (E.g. `cat $ESMFMKFILE`.)
 	
@@ -45,18 +46,28 @@ The ESMX build system depends on file `esmxBuild.yaml`. This is a [YAML](https:/
 
 In this example two components are built into `esmx` explicitly. (Read about dynamic loading of components from shared objects at run-time later.)
 
-Each component is given a name, here `tawas` and `lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.config) discussed below.
+Each component is given a name, here `tawas` and `lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.config) discussed below. Component names are case-sensitive.
 
-Each component must define the `cmake_config` key, specifying a CMake configuration file that can be included by the CMake based ESMX build system to access the respective component.
+Build options for each component are defined usin [YAML](https://yaml.org/) syntax. Build options are defined as follows:
+| Option        | Description                                   | Default                     |
+| ------------- | --------------------------------------------- | --------------------------- |
+| build\_type   | preinsalled, external\_project, subdirectory  | preinstalled                |
+| cmake\_config | CMake configuration file                      | *component-name*.cmake      |
+| fort\_module  | fortran module filename for NUOPC SetServices | *component-name*.mod        |
+| library       | component library, linked to esmx             | *component-name*            |
+| build\_src    | build directory                               | *current-working-directory* |
+| build\_args   | build arguments passed to external project    | *None*                      |
+| install\_dir  | root directory for installation               | *component-name*            |
+| export\_dir   | subdirectory for cmake configuration file     | cmake                       |
+| include\_dir  | subdirectory for fortran module file          | *installation-root*         |
+| library\_dir  | subdirectory for library file                 | lib                         |
+|
 
-A component CMake configuration file must provide the following three standard CMake elements:
-- `add_library(component-name ... )`
-- `set_target_properties(component-name ... )`
-- `target_link_libraries(esmx_driver PUBLIC component-name)`
+A component CMake configuration file provided by a previous installation provides target information need for linking dependencies. A manually generated CMake configuration file includes the following standard CMake elements:
+- `add_library(library-name ... )`
+- `set_target_properties(library-name ... )`
 
-Here *component-name* must correspond to the name under which the component was defined in the `esmxBuild.yaml` file. For the example this would be `tawas` or `lumo`. 
-
-In addition to the required `cmake_config` key, a component can optionally provide the `fort_module` key in its `esmxBuild.yaml` section. This allows explicit specification of the Fortran module name that provides the entry points into the respective NUOPC component. By default the *component-name* is used as the Fortran module name.
+Here *component-name* must correspond to the library defined in the `esmxBuild.yaml` file. For the example this would be `tawas` or `lumo`. 
 
 ### Project integration
 
@@ -67,7 +78,7 @@ Integration e.g. into a GNU Makefile is very straight forward:
     include $(ESMFMKFILE)
 
     esmx: esmxBuild.yaml
-	    cmake -H$(ESMF_ESMXDIR) -Bbuild
+	    cmake -S$(ESMF_ESMXDIR) -Bbuild
 	    cmake --build ./build
 
 Inluding the `esmf.mk` file via the environment variable `ESMFMKFILE` automatically sets the `ESMF_ESMXDIR` variable needed to find the corresponding ESMX CMake build files.
@@ -156,7 +167,7 @@ The applcation can then be built as typically via cmake commands, only requiring
     include $(ESMFMKFILE)
 
     build/externalApp: externalApp.F90 esmxBuild.yaml
-	    cmake -H. -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
+	    cmake -S. -Bbuild -DESMF_ESMXDIR=$(ESMF_ESMXDIR)
 	    cmake --build ./build
 
 ### esmxBuild.yaml and esmxRun.config

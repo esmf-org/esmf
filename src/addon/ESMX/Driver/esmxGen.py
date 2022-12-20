@@ -27,19 +27,32 @@ def create_compList(_dict, odir):
         comp_str = [comp for comp in od.keys()]
         f.write('set(COMPS {})\n\n'.format(' '.join(comp_str)))
         for k1, v1 in od.items():
-          if type(v1) is dict:
-            cmake_config = v1.get('cmake_config', None)
-            cmake_target = v1.get('cmake_target', None)
-            f.write('# - auto-generated section for component: {}\n'.format(k1))
-            if (cmake_config): # include cmake_config for component
-              configFile = os.path.join(os.getcwd(), v1['cmake_config'])
-              f.write('include({})\n\n'.format(configFile))
-            if (cmake_target): # link library for component
-              f.write('target_link_libraries(esmx_driver PUBLIC {})\n'.format(cmake_target))
-            else:
-              sys.exit('Build configuration is missing cmake_target for: {}'.format(k1))
-          else:
-            sys.exit('Build configuration is missing arguments for: {}'.format(k1))
+          if type(v1) is not dict:
+            v1 = {'build_type': 'preinstalled'}
+          f.write('# - auto-generated section for component: {}\n'.format(k1))
+          build_type = v1.get('build_type', 'preinstalled')
+          cmake_config = v1.get('cmake_config', k1+'.cmake')
+          fort_module = v1.get('fort_module', (k1+'.mod').lower())
+          library = v1.get('library', k1)
+          build_src = v1.get('build_src', os.getcwd())
+          build_src = os.path.abspath(build_src)
+          build_args = v1.get('build_args', None)
+          install_dir = v1.get('install_dir', k1)
+          install_dir = os.path.abspath(install_dir)
+          export_dir = v1.get('export_dir', 'cmake')
+          include_dir = v1.get('include_dir', '.')
+          library_dir = v1.get('library_dir', 'lib')
+          f.write('set({}-BUILD_TYPE   {})\n'.format(k1, build_type))
+          f.write('set({}-CMAKE_CONFIG {})\n'.format(k1, cmake_config))
+          f.write('set({}-FORT_MODULE  {})\n'.format(k1, fort_module))
+          f.write('set({}-LIBRARY      {})\n'.format(k1, library))
+          f.write('set({}-BUILD_SRC    {})\n'.format(k1, build_src))
+          if (build_args):
+            f.write('set({}-BUILD_ARGS   {})\n'.format(k1, build_args))
+          f.write('set({}-INSTALL_DIR  {})\n'.format(k1, install_dir))
+          f.write('set({}-EXPORT_DIR   {})\n'.format(k1, export_dir))
+          f.write('set({}-INCLUDE_DIR  {})\n'.format(k1, include_dir))
+          f.write('set({}-LIBRARY_DIR  {})\n'.format(k1, library_dir))
 
 def create_compUse(_dict, odir):
     # open file
@@ -47,17 +60,10 @@ def create_compUse(_dict, odir):
         # loop through components and create use statements
         od = collections.OrderedDict(_dict['components'].items())
         for k1, v1 in od.items():
-          if type(v1) is dict:
-            cmake_config = v1.get('cmake_config', None)
-            fort_module = v1.get('fort_module', None)
-            if (fort_module): # if fort_module field present, use it to identify fortran module
-              f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(fort_module, k1, k1))
-            elif (cmake_config): # otherwise use step of the cmake_config name
-              f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(Path(cmake_config).stem, k1, k1))
-            else:
-              sys.exit('Build configuration is missing fort_module for: {}'.format(k1))
-          else:
-            sys.exit('Build configuration is missing arguments for: {}'.format(k1))
+          if type(v1) is not dict:
+            v1 = {'build_type': 'preinstalled'}
+          fort_module = v1.get('fort_module', (k1+'.mod').lower())
+          f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(Path(fort_module).stem, k1, k1))
 
 def create_compDef(_dict, odir):
     # open file
