@@ -49,25 +49,24 @@ In this example two components are built into `esmx` explicitly. (Read about dyn
 Each component is given a name, here `tawas` and `lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.config) discussed below. Component names are case-sensitive.
 
 Build options for each component are defined usin [YAML](https://yaml.org/) syntax. Build options are defined as follows:
-| Option        | Description                                   | Default                     |
-| ------------- | --------------------------------------------- | --------------------------- |
-| build\_type   | preinsalled, external\_project, subdirectory  | preinstalled                |
-| cmake\_config | CMake configuration file                      | *component-name*.cmake      |
-| fort\_module  | fortran module filename for NUOPC SetServices | *component-name*.mod        |
-| library       | component library, linked to esmx             | *component-name*            |
-| build\_src    | build directory                               | *current-working-directory* |
-| build\_args   | build arguments passed to external project    | *None*                      |
-| install\_dir  | root directory for installation               | *component-name*            |
-| export\_dir   | subdirectory for cmake configuration file     | cmake                       |
-| include\_dir  | subdirectory for fortran module file          | *installation-root*         |
-| library\_dir  | subdirectory for library file                 | lib                         |
-|
+| Option              | Description                                   | Default                |
+| ------------------- | --------------------------------------------- | ---------------------- |
+| build\_type         | preinstalled, external\_project, subdirectory | preinstalled           |
+| source\_dir         | source directory for build                    | *component-name*       |
+| cmake\_config       | CMake configuration file                      | *component-name*.cmake |
+| install\_prefix     | root directory for installation               | install                |
+| install\_confdir    | subdirectory for cmake configuration file     | cmake                  |
+| install\_libdir     | subdirectory for library file                 | lib                    |
+| install\_includedir | subdirectory for fortran module file          | *None*                 |
+| fort\_module        | fortran module filename for NUOPC SetServices | *component-name*.mod   |
+| library             | component library, linked to esmx             | *component-name*       |
+| build\_args         | build arguments passed to external\_project   | *None*                 |
 
-A component CMake configuration file provided by a previous installation provides target information need for linking dependencies. A manually generated CMake configuration file includes the following standard CMake elements:
+A component CMake configuration file provided by a previous installation includes target information needed for linking dependencies. A manually generated CMake configuration file includes the following standard CMake elements:
 - `add_library(library-name ... )`
 - `set_target_properties(library-name ... )`
 
-Here *component-name* must correspond to the library defined in the `esmxBuild.yaml` file. For the example this would be `tawas` or `lumo`. 
+Here *library-name* must correspond to the library defined in the `esmxBuild.yaml` file. For the example this would be `tawas` or `lumo`.
 
 ### Project integration
 

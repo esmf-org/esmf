@@ -31,28 +31,38 @@ def create_compList(_dict, odir):
             v1 = {'build_type': 'preinstalled'}
           f.write('# - auto-generated section for component: {}\n'.format(k1))
           build_type = v1.get('build_type', 'preinstalled')
+          source_dir = v1.get('source_dir', k1)
+          source_dir = os.path.abspath(source_dir)
           cmake_config = v1.get('cmake_config', k1+'.cmake')
+          if (cmake_config == os.path.basename(cmake_config)):
+            install_prefix = v1.get('install_prefix', 'install')
+          else:
+            install_prefix = v1.get('install_prefix', os.path.dirname(cmake_config))
+          cmake_config = os.path.basename(cmake_config)
+          install_prefix = os.path.abspath(install_prefix)
+          install_confdir = v1.get('install_confdir', 'cmake')
+          if (os.path.isabs(install_confdir)):
+            install_confdir = os.path.basename(install_confdir)
+          install_libdir = v1.get('install_libdir', 'lib')
+          if (os.path.isabs(install_libdir)):
+            install_libdir = os.path.basename(install_libdir)
+          install_includedir = v1.get('install_includedir', '')
+          if (os.path.isabs(install_includedir)):
+            install_includedir = os.path.basename(install_includedir)
           fort_module = v1.get('fort_module', (k1+'.mod').lower())
           library = v1.get('library', k1)
-          build_src = v1.get('build_src', os.getcwd())
-          build_src = os.path.abspath(build_src)
           build_args = v1.get('build_args', None)
-          install_dir = v1.get('install_dir', k1)
-          install_dir = os.path.abspath(install_dir)
-          export_dir = v1.get('export_dir', 'cmake')
-          include_dir = v1.get('include_dir', '.')
-          library_dir = v1.get('library_dir', 'lib')
           f.write('set({}-BUILD_TYPE   {})\n'.format(k1, build_type))
+          f.write('set({}-SOURCE_DIR   {})\n'.format(k1, source_dir))
           f.write('set({}-CMAKE_CONFIG {})\n'.format(k1, cmake_config))
+          f.write('set({}-INSTALL_PREFIX {})\n'.format(k1, install_prefix))
+          f.write('set({}-INSTALL_LIBDIR     {})\n'.format(k1, install_libdir))
+          f.write('set({}-INSTALL_CONFDIR    {})\n'.format(k1, install_confdir))
+          f.write('set({}-INSTALL_INCLUDEDIR {})\n'.format(k1, install_includedir))
           f.write('set({}-FORT_MODULE  {})\n'.format(k1, fort_module))
           f.write('set({}-LIBRARY      {})\n'.format(k1, library))
-          f.write('set({}-BUILD_SRC    {})\n'.format(k1, build_src))
           if (build_args):
             f.write('set({}-BUILD_ARGS   {})\n'.format(k1, build_args))
-          f.write('set({}-INSTALL_DIR  {})\n'.format(k1, install_dir))
-          f.write('set({}-EXPORT_DIR   {})\n'.format(k1, export_dir))
-          f.write('set({}-INCLUDE_DIR  {})\n'.format(k1, include_dir))
-          f.write('set({}-LIBRARY_DIR  {})\n'.format(k1, library_dir))
 
 def create_compUse(_dict, odir):
     # open file
