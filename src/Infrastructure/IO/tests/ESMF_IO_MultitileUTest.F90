@@ -52,8 +52,8 @@ program ESMF_IO_MultitileUTest
   ! Fields used for writing:
   !
   ! The following fields make up the field bundle:
-  type(ESMF_Field) :: field1, field2, field1Copy
-  real(ESMF_KIND_R8), pointer :: field1Data(:,:), field2Data(:,:), field1CopyData(:,:)
+  type(ESMF_Field) :: field1, field2, field1Copy, field4d
+  real(ESMF_KIND_R8), pointer :: field1Data(:,:), field2Data(:,:), field1CopyData(:,:), field4dData(:,:,:,:)
   type(ESMF_FieldBundle) :: fieldBundle
   ! This field is not in the field bundle:
   type(ESMF_Field) :: field3
@@ -62,8 +62,8 @@ program ESMF_IO_MultitileUTest
   ! Fields used for reading:
   !
   ! The following fields make up the field bundle:
-  type(ESMF_Field) :: field1Read, field2Read, field1CopyRead
-  real(ESMF_KIND_R8), pointer :: field1ReadData(:,:), field2ReadData(:,:), field1CopyReadData(:,:)
+  type(ESMF_Field) :: field1Read, field2Read, field1CopyRead, field4dRead
+  real(ESMF_KIND_R8), pointer :: field1ReadData(:,:), field2ReadData(:,:), field1CopyReadData(:,:), field4dReadData(:,:,:,:)
   type(ESMF_FieldBundle) :: fieldBundleRead
   ! This field is not in the field bundle:
   type(ESMF_Field) :: field3Read
@@ -145,12 +145,25 @@ program ESMF_IO_MultitileUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Confirm that FieldBundle-read fields match originals"
+  write(name, *) "Confirm that simple FieldBundle-read fields match originals"
   write(failMsg, *) "Some read-in fields differ from originals"
   allEqual = ( &
        all(field1ReadData == field1Data) .and. &
        all(field2ReadData == field2Data) .and. &
        all(field1CopyReadData == field1CopyData))
+#if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not fail as expected"
+  call ESMF_Test(.not. allEqual, name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Confirm that FieldBundle-read field with ungridded dim matches original"
+  write(failMsg, *) "Read-in field differs from original"
+  allEqual = all(field4dReadData == field4dData)
 #if (defined ESMF_PIO && (defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test(allEqual, name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -341,7 +354,11 @@ contains
 
     integer :: decompPTile(2,6)
     type(ESMF_ArraySpec) :: arraySpec
+    type(ESMF_ArraySpec) :: arraySpec_w_ungridded
     type(ESMF_Array) :: array1
+    real(ESMF_KIND_R8), pointer :: coordPtrX(:,:), coordPtrY(:,:)
+    integer :: u1, u2, i, j
+    real :: multiplier
 
     !------------------------------------------------------------------------
     ! Set up 6-tile grid
@@ -363,6 +380,8 @@ contains
     !------------------------------------------------------------------------
 
     call ESMF_ArraySpecSet(arraySpec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_ArraySpecSet(arraySpec_w_ungridded, typekind=ESMF_TYPEKIND_R8, rank=4, rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
     field1 = ESMF_FieldCreate(grid6tile, arraySpec, name="field1", rc=rc)
@@ -401,6 +420,37 @@ contains
     call ESMF_FieldGet(field3Read, farrayPtr=field3ReadData, rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
+    field4d = ESMF_FieldCreate(grid6tile, arraySpec_w_ungridded, name="field4d", &
+         ungriddedLBound=[2,15], ungriddedUBound=[4,18], &
+         ! 2nd and 4th dimensions are ungridded dimensions
+         gridToFieldMap=[1,3], &
+         rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(field4d, farrayPtr=field4dData, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_GridGetCoord(grid6tile, coordDim=1, farrayPtr=coordPtrX, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_GridGetCoord(grid6tile, coordDim=2, farrayPtr=coordPtrY, rc=rc)
+    do u1 = 2,4
+       do u2 = 15,18
+          do i = lbound(field4dData, 1), ubound(field4dData, 1)
+             do j = lbound(field4dData, 3), ubound(field4dData, 3)
+                multiplier = 5.**(u2-15)
+                field4dData(i,u1,j,u2) = u1*multiplier*(coordPtrX(i,j) - coordPtrY(i,j))
+             end do
+          end do
+       end do
+    end do
+
+    field4dRead = ESMF_FieldCreate(grid6tile, arraySpec_w_ungridded, name="field4d", &
+         ungriddedLBound=[2,15], ungriddedUBound=[4,18], &
+         ! 2nd and 4th dimensions are ungridded dimensions
+         gridToFieldMap=[1,3], &
+         rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    call ESMF_FieldGet(field4dRead, farrayPtr=field4dReadData, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
     ! Create a copy of field1 that uses the same array, so we can test writing
     ! the same array twice from a single call.
     call ESMF_FieldGet(field1, array=array1, rc=rc)
@@ -417,12 +467,12 @@ contains
 
     fieldBundle = ESMF_FieldBundleCreate(name="fb", rc=rc)
     if (rc /= ESMF_SUCCESS) return
-    call ESMF_FieldBundleAdd(fieldBundle, [field1, field2, field1Copy], rc=rc)
+    call ESMF_FieldBundleAdd(fieldBundle, [field1, field2, field1Copy, field4d], rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
     fieldBundleRead = ESMF_FieldBundleCreate(name="fbRead", rc=rc)
     if (rc /= ESMF_SUCCESS) return
-    call ESMF_FieldBundleAdd(fieldBundleRead, [field1Read, field2Read, field1CopyRead], rc=rc)
+    call ESMF_FieldBundleAdd(fieldBundleRead, [field1Read, field2Read, field1CopyRead, field4dRead], rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
   end subroutine createFields

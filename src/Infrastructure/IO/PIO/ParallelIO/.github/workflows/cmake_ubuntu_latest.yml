@@ -1,5 +1,5 @@
----   # cmake build with netcdf integration
-name: cmake_ncint
+---   # cmake build without netcdf integration
+name: cmake_ubuntu-latest
 
 on:
   push:
@@ -21,8 +21,9 @@ jobs:
       LDFLAGS: "-L/home/runner/pnetcdf/lib"
       LD_LIBRARY_PATH: "/home/runner/pnetcdf/lib"
       PNETCDF_VERSION: 1.12.3
+      FCFLAGS: "-fallow-argument-mismatch"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Installs
         run: |
           set -x
@@ -35,7 +36,7 @@ jobs:
 
       - name: cache-pnetcdf
         id: cache-pnetcdf
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/pnetcdf
           key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}

@@ -1423,11 +1423,12 @@ contains
          integer(c_int), value :: mode
        end function PIOc_openfile
     end interface
-    integer :: imode=0, i, nl
+    integer :: imode, i, nl
     character, allocatable :: cfname(:)
 #ifdef TIMING
     call t_startf("PIO:openfile")
 #endif
+    imode = 0
     if(present(mode)) imode = mode
     nl = len_trim(fname)
     allocate(cfname(nl+1))

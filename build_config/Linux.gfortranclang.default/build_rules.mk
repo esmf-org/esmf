@@ -7,7 +7,7 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = gfortran
-ESMF_CXXDEFAULT         = clang
+ESMF_CXXDEFAULT         = clang++
 ESMF_CDEFAULT           = clang
 ESMF_CPPDEFAULT		= clang -E -P -x c
 
@@ -182,18 +182,24 @@ endif
 ifeq ($(ESMF_ABISTRING),x86_64_32)
 ESMF_CXXCOMPILEOPTS       += -m32
 ESMF_CXXLINKOPTS          += -m32
+ESMF_CCOMPILEOPTS         += -m32
+ESMF_CLINKOPTS            += -m32
 ESMF_F90COMPILEOPTS       += -m32
 ESMF_F90LINKOPTS          += -m32
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_small)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=small
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=small
+ESMF_CCOMPILEOPTS         += -m64 -mcmodel=small
+ESMF_CLINKOPTS            += -m64 -mcmodel=small
 ESMF_F90COMPILEOPTS       += -m64 -mcmodel=small
 ESMF_F90LINKOPTS          += -m64 -mcmodel=small
 endif
 ifeq ($(ESMF_ABISTRING),x86_64_medium)
 ESMF_CXXCOMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_CXXLINKOPTS          += -m64 -mcmodel=medium
+ESMF_CCOMPILEOPTS         += -m64 -mcmodel=medium
+ESMF_CLINKOPTS            += -m64 -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -m64 -mcmodel=medium
 ESMF_F90LINKOPTS          += -m64 -mcmodel=medium
 endif
@@ -204,18 +210,19 @@ endif
 ifeq ($(ESMF_PTHREADS),ON)
 ESMF_F90COMPILEOPTS += -pthread
 ESMF_CXXCOMPILEOPTS += -pthread
+ESMF_CCOMPILEOPTS   += -pthread
 ESMF_F90LINKOPTS    += -pthread
 ESMF_CXXLINKOPTS    += -pthread
+ESMF_CLINKOPTS      += -pthread
 endif
 
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_OPENMP=OFF
-# ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
-# ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
-# ESMF_OPENMP_F90LINKOPTS    += -fopenmp
-# ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)

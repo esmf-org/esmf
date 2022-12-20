@@ -28,8 +28,7 @@ module ESMF_UtilCubedSphereMod
   end type
 
   real(ESMF_KIND_R8) :: csFac = -999
-  !  real(ESMF_KIND_R8),  parameter:: pi = 3.14159265358979323846_ESMF_KIND_R8
-  real(ESMF_KIND_R8),  parameter:: pi = 3.1415926
+  real(ESMF_KIND_R8),  parameter:: pi = 3.14159265358979323846_ESMF_KIND_R8
   real(ESMF_KIND_R8),  parameter:: radius = 6371.0
   real(ESMF_KIND_R8)            :: zeta = 1.0                ! non-linear flag 
   real(ESMF_KIND_R8) , parameter:: todeg = 180.0/pi          ! convert to degrees

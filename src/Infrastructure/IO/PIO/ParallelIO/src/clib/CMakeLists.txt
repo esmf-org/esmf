@@ -31,6 +31,9 @@ endif ()
 
 add_library (pioc ${src})
 
+# Always use -fPIC
+set_property(TARGET pioc PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 set_source_files_properties( 
     pioc_async.c 
     PROPERTIES

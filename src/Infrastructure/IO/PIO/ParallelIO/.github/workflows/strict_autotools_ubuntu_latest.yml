@@ -16,9 +16,10 @@ jobs:
       FC: mpifort
       CPPFLAGS: "-I/usr/include -I/usr/local/include -I/home/runner/pnetcdf/include"
       LDFLAGS: "-L/home/runner/pnetcdf/lib"
-
+      FCFLAGS: "-fallow-argument-mismatch"
+      PNETCDF_VERSION: 1.12.3
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Installs
       run: |
         set -x
@@ -31,18 +32,18 @@ jobs:
 
     - name: cache-pnetcdf
       id: cache-pnetcdf
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/pnetcdf
-        key: pnetcdf-${{ runner.os }}-1.12.1-1
+        key: pnetcdf-${{ runner.os }}-${{ env.PNETCDF_VERSION }}
 
     - name: build-pnetcdf
       if: steps.cache-pnetcdf.outputs.cache-hit != 'true'
       run: |
         set -x
-        wget https://parallel-netcdf.github.io/Release/pnetcdf-1.12.3.tar.gz &> /dev/null
-        tar -xzvf pnetcdf-1.12.3.tar.gz
-        pushd pnetcdf-1.12.3
+        wget https://parallel-netcdf.github.io/Release/pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz &> /dev/null
+        tar -xzvf pnetcdf-${{ env.PNETCDF_VERSION }}.tar.gz
+        pushd pnetcdf-${{ env.PNETCDF_VERSION }}
         ./configure --prefix=/home/runner/pnetcdf --enable-shared --disable-cxx
         make
         sudo make install
@@ -55,7 +56,7 @@ jobs:
         set -x
         export CFLAGS="-std=c99 -Wall"
         export FFLAGS="-Wall"
-        export FCFLAGS="-Wall"
+        export FCFLAGS="$FCFLAGS -Wall"
         export DISTCHECK_CONFIGURE_FLAGS="--enable-fortran --with-mpiexec='/usr/bin/mpiexec --oversubscribe'"
         ./configure
         make -j distcheck

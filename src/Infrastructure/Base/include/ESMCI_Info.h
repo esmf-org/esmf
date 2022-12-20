@@ -21,7 +21,6 @@
 #include <vector>
 #include <fstream>
 
-#include "ESMCI_Base.h"
 #include "ESMCI_Util.h"
 #include "json.hpp"
 

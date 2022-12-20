@@ -1085,8 +1085,7 @@ endif
 ifeq ($(origin ESMF_CLINKPATHS_ENV), environment)
 ESMF_CLINKPATHS = $(ESMF_CLINKPATHS_ENV)
 endif
-ESMF_CLINKPATHS    += -L$(ESMF_LDIR) $(ESMF_CLINKPATHSTHIRD)
-ESMF_CLINKPATHSTHIRD += $(ESMF_CXXLINKPATHSTHIRD)
+ESMF_CLINKPATHS    += $(ESMF_CXXLINKPATHS) $(ESMF_F90LINKPATHS)
 # - make sure environment variable gets prepended _once_
 ifeq ($(origin ESMF_CLINKRPATHS), environment)
 export ESMF_CLINKRPATHS_ENV := $(ESMF_CLINKRPATHS)
@@ -1095,8 +1094,7 @@ endif
 ifeq ($(origin ESMF_CLINKRPATHS_ENV), environment)
 ESMF_CLINKRPATHS = $(ESMF_CLINKRPATHS_ENV)
 endif
-ESMF_CLINKRPATHS   += $(ESMF_CRPATHPREFIX)$(ESMF_LDIR) $(ESMF_CLINKRPATHSTHIRD)
-ESMF_CLINKRPATHSTHIRD += $(ESMF_CXXLINKRPATHSTHIRD)
+ESMF_CLINKRPATHS   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_CLINKPATHS))))
 # - make sure environment variable gets prepended _once_
 ifeq ($(origin ESMF_CLINKLIBS), environment)
 export ESMF_CLINKLIBS_ENV := $(ESMF_CLINKLIBS)
@@ -2305,8 +2303,11 @@ ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 endif
 
 # Builds library - action for the 'tree' target.
-tree_lib:
+tree_lib-default:
 	dir=`pwd`; cd $(ESMF_MODDIR); $(MAKE) -f $${dir}/makefile MAKEFILE=$${dir}/makefile esmflib
+
+%: %-default
+	@ true
 
 # Builds library
 esmflib:: chkdir_lib $(SOURCE)

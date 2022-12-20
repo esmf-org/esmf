@@ -9,8 +9,6 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMCI_RHandle.C"
-//==============================================================================
 #define RH_CREATE_MEMLOG_off
 //==============================================================================
 //
@@ -45,6 +43,11 @@
 #include "ESMCI_LogErr.h"                  // for LogErr
 
 using namespace std;
+
+//==============================================================================
+#undef  ESMC_FILENAME
+#define ESMC_FILENAME "ESMCI_RHandle.C"
+//==============================================================================
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
