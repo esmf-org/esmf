@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2022, University Corporation for Atmospheric Research,
+// Copyright 2002-2023, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -52,12 +52,12 @@
 
 #define ESMF_VERSION_MAJOR        8
 #define ESMF_VERSION_MINOR        4
-#define ESMF_VERSION_REVISION     0
-#define ESMF_VERSION_PATCHLEVEL   0
-#define ESMF_VERSION_PUBLIC       'T'
-#define ESMF_VERSION_BETASNAPSHOT 'F'
+#define ESMF_VERSION_REVISION     1
+#define ESMF_VERSION_PATCHLEVEL   1
+#define ESMF_VERSION_PUBLIC       'F'
+#define ESMF_VERSION_BETASNAPSHOT 'T'
 
-#define ESMF_VERSION_STRING "8.4.0"
+#define ESMF_VERSION_STRING "8.4.1 beta snapshot"
 
 #endif   // ESMC_MACROS_H
 

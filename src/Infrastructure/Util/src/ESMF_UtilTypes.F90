@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2022, University Corporation for Atmospheric Research,
+! Copyright 2002-2023, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -83,12 +83,12 @@
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 8
       integer, parameter :: ESMF_VERSION_MINOR        = 4
-      integer, parameter :: ESMF_VERSION_REVISION     = 0
-      integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
-      logical, parameter :: ESMF_VERSION_PUBLIC       = .true.
-      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
+      integer, parameter :: ESMF_VERSION_REVISION     = 1
+      integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 1
+      logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
+      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "8.4.0"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.4.1 beta snapshot"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -2396,7 +2396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2022 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2023 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"
