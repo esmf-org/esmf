@@ -906,14 +906,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(ll_min, ll_max, ll_elecount) 
     endif ! present(index and elementCount)
 
-    if (present(name) .and. field%isNamedAlias) then
-      ! access NamedAlias name
-      name = trim(field%name)
-    else
-      call ESMF_GetName(ftype%base, name, localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(name)) then
+      if (field%isNamedAlias) then
+        name = trim(field%name)
+      else
+        call ESMF_GetName(ftype%base, name, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     if (present(vm)) then
