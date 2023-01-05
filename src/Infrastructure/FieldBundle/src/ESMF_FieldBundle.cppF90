@@ -11,7 +11,7 @@
 !==============================================================================
 ^define ESMF_FILENAME "ESMF_FieldBundle.F90"
 !==============================================================================
-#define FB_REGRID_LOG_on
+#define FB_REGRID_LOG_off
 !
 ! ESMF FieldBundle Module
 module ESMF_FieldBundleMod
@@ -4260,6 +4260,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical                         :: verbosityFlag
 
 #define USE_FB_RegridPair
+!TODO: Remove code that is under all the USE_FB_RegridPair-else branches after
+!TODO: plenty of testing across systems, and no issues with the ESMF level
+!TODO: implementation have been found or reported. I estimate this should happen
+!TODO: right before the ESMF 8.6.0 release.
 #ifndef USE_FB_RegridPair
     integer                         :: localDeCount, j
     integer(ESMF_KIND_I4), pointer  :: factorIndexList(:,:)

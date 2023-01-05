@@ -7077,6 +7077,10 @@ print *, "found match:"// &
     end type
 
 #define USE_ESMF_RHL
+!TODO: Remove code that is under all the USE_ESMF_RHL-else branches after
+!TODO: plenty of testing across systems, and no issues with the ESMF level
+!TODO: implementation have been found or reported. I estimate this should happen
+!TODO: right before the ESMF 8.6.0 release.
 #ifdef USE_ESMF_RHL
     type(ESMF_RHL), pointer         :: rhList, rhListE
 #else
