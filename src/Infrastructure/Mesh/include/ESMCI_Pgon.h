@@ -65,12 +65,17 @@ public:
   // Default constructor
   Pgon():Pgon(false) { }
 
-
+  // Clear points
+  void clear() {
+    pnt_coords.clear();
+  }
+  
   // Reserve to add future points
   void reserve(int num_pnts) {
     pnt_coords.reserve(num_pnts*GEOM::pnt_size);
   }
 
+ 
   // Add a point
   void push_back_pnt(double *pnt) {
 

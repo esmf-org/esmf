@@ -29,6 +29,7 @@ SOURCEC	  = \
             ESMCI_Search_Nearest.C \
             ESMCI_Search_NearestNPnts.C \
             ESMCI_Pgon.C \
+            ESMCI_Mesh_Pgon_Glue.C \
             ESMCI_XGridUtil.C
 
 
