@@ -2678,54 +2678,63 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    ! loop through all the model components
-    do i=0, is%wrap%modelCount
-      write (iString, *) i
-      areServicesSet = &
-        NUOPC_CompAreServicesSet(is%wrap%modelComp(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-      if (areServicesSet) then
-        ! translate NUOPC logical phase to ESMF actual phase
-        phase = 0 ! zero is reserved, use it here to see if need to skip
-        do k=1, is%wrap%modelPhaseMap(i)%phaseCount
-          if (trim(is%wrap%modelPhaseMap(i)%phaseKey(k)) &
-            == trim(phaseString)) &
-            phase = is%wrap%modelPhaseMap(i)%phaseValue(k)
-        enddo
-        if (phase == 0) cycle ! skip to next i
-        if (i==0) then
-          internalflag=.true.
-        else
-          internalflag=.false.
+
+    block
+      logical :: mustAttributeUpdate(0:is%wrap%modelCount)
+      mustAttributeUpdate =.false.  ! initialize
+      ! loop through all the model components first time to execute
+      do i=0, is%wrap%modelCount
+        write (iString, *) i
+        areServicesSet = &
+          NUOPC_CompAreServicesSet(is%wrap%modelComp(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        if (areServicesSet) then
+          ! translate NUOPC logical phase to ESMF actual phase
+          phase = 0 ! zero is reserved, use it here to see if need to skip
+          do k=1, is%wrap%modelPhaseMap(i)%phaseCount
+            if (trim(is%wrap%modelPhaseMap(i)%phaseKey(k)) &
+              == trim(phaseString)) &
+              phase = is%wrap%modelPhaseMap(i)%phaseValue(k)
+          enddo
+          if (phase == 0) cycle ! skip to next i
+          if (i==0) then
+            internalflag=.true.
+          else
+            internalflag=.false.
+          endif
+          call NUOPC_CompSearchRevPhaseMap(is%wrap%modelComp(i), &
+            ESMF_METHOD_INITIALIZE, internalflag=internalflag, &
+            phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ! attempt to make the actual call to initialize
+          call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
+            importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
+            clock=is%wrap%initClock(i), phase=phase, userRc=userrc, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase '"// &
+            trim(adjustl(pLabel))//"' Initialize for modelComp "// &
+            trim(adjustl(iString))//": "//trim(compName), &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          if (ESMF_LogFoundError(rcToCheck=userrc, msg="Phase '"// &
+            trim(adjustl(pLabel))//"' Initialize for modelComp "// &
+            trim(adjustl(iString))//": "//trim(compName)// &
+            " did not return ESMF_SUCCESS", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          if (present(execFlag)) execFlag = .true. ! at least this model executed
+          mustAttributeUpdate(i) = .not.internalflag
         endif
-        call NUOPC_CompSearchRevPhaseMap(is%wrap%modelComp(i), &
-          ESMF_METHOD_INITIALIZE, internalflag=internalflag, &
-          phaseIndex=phase, phaseLabel=pLabel, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        ! attempt to make the actual call to initialize
-        call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-        call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
-          importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-          clock=is%wrap%initClock(i), phase=phase, userRc=userrc, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase '"// &
-          trim(adjustl(pLabel))//"' Initialize for modelComp "// &
-          trim(adjustl(iString))//": "//trim(compName), &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-        if (ESMF_LogFoundError(rcToCheck=userrc, msg="Phase '"// &
-          trim(adjustl(pLabel))//"' Initialize for modelComp "// &
-          trim(adjustl(iString))//": "//trim(compName)// &
-          " did not return ESMF_SUCCESS", &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-        if (present(execFlag)) execFlag = .true. ! at least this model executed
-        if (.not.internalflag) then
+      enddo
+      ! loop through all the model components second time to update Attributes
+      do i=0, is%wrap%modelCount
+        if (mustAttributeUpdate(i)) then
           ! Ensure that Attributes are consistent across all the PETs of the
           ! component that just executed.
           call consistentComponentAttributes(is%wrap%modelComp(i), &
@@ -2733,8 +2742,8 @@ module NUOPC_Driver
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
-      endif
-    enddo
+      enddo
+    end block
   end subroutine
 
   !-----------------------------------------------------------------------------
