@@ -2581,6 +2581,10 @@ else ifeq ($(APPS_MAINLANGUAGE),C++)
 $(ESMF_APPSDIR)/% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
 	$(MAKE) chkdir_apps
 	$(ESMF_CXXLINKER) $(ESMF_EXE_CXXLINKOPTS) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMF_CXXESMFLINKLIBS)
+else ifeq ($(APPS_MAINLANGUAGE),script)
+$(ESMF_APPSDIR)/% : $(APPS_OBJ)
+	$(MAKE) chkdir_apps
+	cp -f $(APPS_OBJ) $@
 else
 $(ESMF_APPSDIR)/% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
 	$(MAKE) chkdir_apps
@@ -3845,7 +3849,7 @@ endif
 #-------------------------------------------------------------------------------
 # Suffixes
 #-------------------------------------------------------------------------------
-.SUFFIXES: .f .f90 .F .F90 .cppF90 .C .$(ESMF_SL_SUFFIX) .$(ESMF_LIB_SUFFIX) .cpp .cc .c .r .rm
+.SUFFIXES: .f .f90 .F .F90 .cppF90 .C .$(ESMF_SL_SUFFIX) .$(ESMF_LIB_SUFFIX) .cpp .cc .c .r .rm .sh
 
 #-------------------------------------------------------------------------------
 #  Compile rules for F90, C++, and c files for both to .o and .a files

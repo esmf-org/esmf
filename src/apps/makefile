@@ -6,7 +6,7 @@ LOCDIR   = src/apps
 
 include $(ESMF_DIR)/makefile
 
-DIRS      = ESMF_PrintInfo ESMF_PrintInfoC ESMF_RegridWeightGen ESMF_WebServController ESMF_Scrip2Unstruct  ESMF_Regrid
+DIRS      = ESMF_PrintInfo ESMF_PrintInfoC ESMF_RegridWeightGen ESMF_WebServController ESMF_Scrip2Unstruct  ESMF_Regrid ESMX_Builder
 
 CLEANDIRS   =
 CLEANFILES  =

@@ -113,7 +113,7 @@ foreach(CMP IN ITEMS ${COMPS})
       )
     endif()
     target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
-    unset(FND_CMAKE_CONFIG)
+    unset(FND_FORT_MODULE)
     find_library(FND_LIBRARY NAMES ${CMP_LIBRARY}
       HINTS ${CMP_INSTALL_PREFIX}
       PATH_SUFFIXES ${CMP_INSTALL_LIBDIR} "." "lib" "lib64"
