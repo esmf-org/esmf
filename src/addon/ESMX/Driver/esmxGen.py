@@ -50,7 +50,7 @@ def create_compList(_dict, odir):
           if (os.path.isabs(install_includedir)):
             install_includedir = os.path.basename(install_includedir)
           fort_module = v1.get('fort_module', (k1+'.mod').lower())
-          library = v1.get('library', k1)
+          libraries = v1.get('libraries', k1)
           build_args = v1.get('build_args', None)
           f.write('set({}-BUILD_TYPE   {})\n'.format(k1, build_type))
           f.write('set({}-SOURCE_DIR   {})\n'.format(k1, source_dir))
@@ -60,7 +60,7 @@ def create_compList(_dict, odir):
           f.write('set({}-INSTALL_CONFDIR    {})\n'.format(k1, install_confdir))
           f.write('set({}-INSTALL_INCLUDEDIR {})\n'.format(k1, install_includedir))
           f.write('set({}-FORT_MODULE  {})\n'.format(k1, fort_module))
-          f.write('set({}-LIBRARY      {})\n'.format(k1, library))
+          f.write('set({}-LIBRARIES    {})\n'.format(k1, libraries))
           if (build_args):
             f.write('set({}-BUILD_ARGS   {})\n'.format(k1, build_args))
 

@@ -59,7 +59,7 @@ Build options for each component are defined usin [YAML](https://yaml.org/) synt
 | install\_libdir     | subdirectory for library file                 | lib                    |
 | install\_includedir | subdirectory for fortran module file          | *None*                 |
 | fort\_module        | fortran module filename for NUOPC SetServices | *component-name*.mod   |
-| library             | component library, linked to esmx             | *component-name*       |
+| libraries           | component libraries, linked to esmx           | *component-name*       |
 | build\_args         | build arguments passed to external\_project   | *None*                 |
 
 A component CMake configuration file provided by a previous installation includes target information needed for linking dependencies. A manually generated CMake configuration file includes the following standard CMake elements:
