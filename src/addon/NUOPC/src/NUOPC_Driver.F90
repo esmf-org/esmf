@@ -1567,7 +1567,10 @@ module NUOPC_Driver
         integer                 :: i
         logical                 :: areServicesSet
         character(ESMF_MAXSTR)  :: iString, pLabel
+        logical                 :: mustAttributeUpdate(1:is%wrap%modelCount)
         rc = ESMF_SUCCESS
+        mustAttributeUpdate = .false.
+        ! loop through all the model components first time to execute
         do i=1, is%wrap%modelCount
           write (iString, *) i
           areServicesSet = &
@@ -1576,6 +1579,7 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
           if (areServicesSet) then
+            mustAttributeUpdate(i) = .true.
             if (phase==0) then
               pLabel="0"
             else
@@ -1604,6 +1608,11 @@ module NUOPC_Driver
               " did not return ESMF_SUCCESS", &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
+          endif
+        enddo
+        ! loop through all the model components second time to update Attributes
+        do i=1, is%wrap%modelCount
+          if (mustAttributeUpdate(i)) then
             ! need to update the Component attributes across all PETs
             if (associated(is%wrap%modelPetLists(i)%ptr)) then
               call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
@@ -2865,7 +2874,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-    ! loop through all the model components second time to update Attributes
+    ! loop through all the model components to update Attributes
     do i=0, is%wrap%modelCount
       if (mustAttributeUpdate(i)) then
         ! Ensure that Attributes are consistent across all the PETs of the
