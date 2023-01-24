@@ -185,7 +185,7 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
      // Get nodeOwner
      int *nodeOwner=NULL;
      bool nodeOwner_allocated=false;
-     if (present(nodeOwnerII)) { // if masks exist
+     if (present(nodeOwnerII)) { // if node owners exist
        // Error checking
        if (nodeOwnerII->dimCount !=1) {
          int localrc;
@@ -201,17 +201,18 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
        
        // Get array
        nodeOwner=nodeOwnerII->array;
-     } else {
 
-       // If parts of the mesh exist on this PET, then autofill owner info
-       if (num_nodes >0) {
+     } else { // automatically figure out node owners
+
+       // If parts of the mesh exist on this PET, then allocate nodeOwner array
+       if (num_nodes > 0) {
          // Create local version of owners array
          nodeOwner=new int[num_nodes];
          nodeOwner_allocated=true;
-
-         // Autofill
-         set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);         
        }
+       
+       // Autofill
+       set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);        
      }
 
 
@@ -6525,7 +6526,7 @@ void set_node_owners_wo_list(int num_nodes, int *node_ids, int *node_owners) {
   UInt curr_proc_best=0;
   bool first_time=true;
   std::vector<DDir<>::dentry>::iterator ri = lookups.begin(), re = lookups.end();
-     for (; ri != re; ++ri) {
+  for (; ri != re; ++ri) {
        DDir<>::dentry &dent = *ri;
 
        // Get info for this entry gid
