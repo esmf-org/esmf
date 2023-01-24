@@ -1,17 +1,16 @@
 [build-system]
-requires = [ "setuptools>=41", "wheel", "setuptools-git-versioning"]
+requires = [ "setuptools>=41", "wheel", "setuptools-git-versioning" ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "esmpy"
 description = "ESMF Python interface"
 # readme = "README.md"
-maintainers = [{author = "ESMF Core Team", email = "esmf_support@ucar.edu"}]
+maintainers = [ { author = "ESMF Core Team", email = "esmf_support@ucar.edu" } ]
 requires-python = ">=3.7"
-license = {text = "University of Illinois-NCSA"}
+license = { text = "University of Illinois-NCSA" }
 dependencies = [
     "numpy",
-    "pytest-json-report",
     'importlib-metadata; python_version < "3.8"',
     # setuptools-git-versioning shouldn't be needed here, but is
     # included as a workaround for problems with the build-time
@@ -21,7 +20,13 @@ dependencies = [
     # subsequent pip install of esmpy.
     'setuptools-git-versioning; python_version >= "3.10"',
 ]
-dynamic = ["version"]
+dynamic = [ "version" ]
+
+[project.optional-dependencies]
+testing = [
+    "pytest",
+    "pytest-json-report",
+]
 
 [tool.setuptools-git-versioning]
 enabled = true
@@ -34,8 +39,8 @@ starting_version = "8.5.0beta" # this is a backup for pip <= 22.0 where git-vers
 version = "placeholder" # this is a placeholder for the version pulled with git-versioning
 
 [tool.setuptools.packages.find]
-where = ["src"]
-exclude = ["doc*"]
+where = [ "src" ]
+exclude = [ "doc*" ]
 
 [tool.pytest.ini_options]
 testpaths = [

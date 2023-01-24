@@ -1,7 +1,6 @@
 ! $Id$
 !
 ! System test FieldRedistArb2Arb
-!  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.

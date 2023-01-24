@@ -3285,7 +3285,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rawArg = .false.  ! default
     if (present(raw)) rawArg = raw
 
-    write(msgString, "(a,i8,a,l,a)") prefix//" nbuf=", config%cptr%nbuf, &
+    write(msgString, "(a,i8,a,l2,a)") prefix//" nbuf=", config%cptr%nbuf, &
       " buffer(raw=", rawArg, "):"
     call ESMF_LogWrite(msgString, logMsg, log=log, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

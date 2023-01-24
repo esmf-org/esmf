@@ -647,6 +647,7 @@ module NUOPC_Driver
     character(len=80)         :: hierarchyProtocol
     type(ESMF_PtrInt1D), pointer :: petLists(:)
     integer, pointer          :: petList(:)
+    logical, allocatable      :: mustAttributeUpdate(:)
 
     rc = ESMF_SUCCESS
 
@@ -1297,32 +1298,48 @@ module NUOPC_Driver
 
     ! -> Encode the NUOPC IPDv00, IPDv01, IPDv02, IPDv03, IPDv04, IPDv05, IPDvX
 
+    allocate(mustAttributeUpdate(0:is%wrap%modelCount))
+    mustAttributeUpdate = .false.
+
     ! modelComps
-    call loopModelCompsS(driver, phaseString="IPDv00p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv00p1", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv01p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv01p1", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv02p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv02p1", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv03p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p1", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv04p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p1", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv05p1", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p1", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDvXp01", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDvXp01", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    ! update Attributes on models
+    call loopModelCompsAttributeUpdate(driver, &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1337,11 +1354,19 @@ module NUOPC_Driver
       return  ! bail out
 
     ! modelComps (new for IPDv05)
-    call loopModelCompsS(driver, phaseString="IPDv05p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p2", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDvXp02", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDvXp02", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    ! update Attributes on models
+    call loopModelCompsAttributeUpdate(driver, &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1390,32 +1415,39 @@ module NUOPC_Driver
       return  ! bail out
 
     ! modelComps
-    ! moved down one level
-    !call loopModelCompsS(driver, phaseString="IPDv00p2", rc=rc)
-    !if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    !  line=__LINE__, file=trim(name)//":"//FILENAME)) &
-    !  return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv01p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv01p2", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv02p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv02p2", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv03p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p2", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv04p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p2", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv05p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p3", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDvXp03", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDvXp03", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    ! update Attributes on models
+    call loopModelCompsAttributeUpdate(driver, &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1535,7 +1567,10 @@ module NUOPC_Driver
         integer                 :: i
         logical                 :: areServicesSet
         character(ESMF_MAXSTR)  :: iString, pLabel
+        logical                 :: mustAttributeUpdate(1:is%wrap%modelCount)
         rc = ESMF_SUCCESS
+        mustAttributeUpdate = .false.
+        ! loop through all the model components first time to execute
         do i=1, is%wrap%modelCount
           write (iString, *) i
           areServicesSet = &
@@ -1544,6 +1579,7 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
           if (areServicesSet) then
+            mustAttributeUpdate(i) = .true.
             if (phase==0) then
               pLabel="0"
             else
@@ -1572,6 +1608,11 @@ module NUOPC_Driver
               " did not return ESMF_SUCCESS", &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
+          endif
+        enddo
+        ! loop through all the model components second time to update Attributes
+        do i=1, is%wrap%modelCount
+          if (mustAttributeUpdate(i)) then
             ! need to update the Component attributes across all PETs
             if (associated(is%wrap%modelPetLists(i)%ptr)) then
               call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
@@ -1777,6 +1818,7 @@ module NUOPC_Driver
 
     ! local variables
     character(*), parameter   :: rName="InitializeIPDv02p3"
+    type(type_InternalState)  :: is
     integer                   :: userrc
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity, profiling
@@ -1785,6 +1827,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)    :: msgString, pLabel
     integer                   :: phase
     logical                   :: existflag
+    logical, allocatable      :: mustAttributeUpdate(:)
 
     rc = ESMF_SUCCESS
 
@@ -1820,6 +1863,17 @@ module NUOPC_Driver
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! query Component for the internal State
+    nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
 
     ! handle verbosity
     if (btest(verbosity,8)) then
@@ -1881,32 +1935,48 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
+    allocate(mustAttributeUpdate(0:is%wrap%modelCount))
+    mustAttributeUpdate = .false.
+
     ! modelComps
-    call loopModelCompsS(driver, phaseString="IPDv00p2", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv00p2", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv01p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv01p3", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv02p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv02p3", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv03p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p3", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv04p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p3", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv05p4", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p4", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDvXp04", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDvXp04", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    ! update Attributes on models
+    call loopModelCompsAttributeUpdate(driver, &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1929,19 +1999,29 @@ module NUOPC_Driver
       return  ! bail out
 
     ! modelComps
-    call loopModelCompsS(driver, phaseString="IPDv03p4", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p4", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv04p4", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p4", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv05p5", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p5", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDvXp05", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDvXp05", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    ! update Attributes on models
+    call loopModelCompsAttributeUpdate(driver, &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -1964,19 +2044,29 @@ module NUOPC_Driver
       return  ! bail out
 
     ! modelComps
-    call loopModelCompsS(driver, phaseString="IPDv03p5", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p5", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv04p5", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p5", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv05p6", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p6", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDvXp06", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDvXp06", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    ! update Attributes on models
+    call loopModelCompsAttributeUpdate(driver, &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -2031,31 +2121,38 @@ module NUOPC_Driver
       return  ! bail out
 
     ! modelComps
-    call loopModelCompsS(driver, phaseString="IPDv00p3", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv00p3", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv01p4", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv01p4", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv02p4", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv02p4", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv03p6", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p6", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv04p6", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p6", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDv05p7", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p7", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-    call loopModelCompsS(driver, phaseString="IPDvXp07", rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDvXp07", &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -2458,6 +2555,7 @@ module NUOPC_Driver
     logical                   :: execFlag, execFlagCollect
     integer                   :: execFlagIntReduced, execFlagInt
     character(len=160)        :: msgString
+    logical, allocatable      :: mustAttributeUpdate(:)
 
     rc = ESMF_SUCCESS
 
@@ -2511,50 +2609,62 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
+    allocate(mustAttributeUpdate(0:is%wrap%modelCount))
+    mustAttributeUpdate = .false.
+
     ! modelComps
     if (is%wrap%firstTimeDataInit) then
       ! IPDv < 02 data initialize phase only called once
-      call loopModelCompsS(driver, phaseString="IPDv00p4", rc=rc)
+      call loopModelCompsS(driver, phaseString="IPDv00p4", &
+        mustAttributeUpdate=mustAttributeUpdate, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
-      call loopModelCompsS(driver, phaseString="IPDv01p5", rc=rc)
+      call loopModelCompsS(driver, phaseString="IPDv01p5", &
+        mustAttributeUpdate=mustAttributeUpdate, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
       is%wrap%firstTimeDataInit=.false. ! set guard flag for next time
     endif
     execFlagCollect = .false.
-    call loopModelCompsS(driver, phaseString="IPDv02p5", execFlag=execFlag, &
-      rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv02p5", &
+      mustAttributeUpdate=mustAttributeUpdate, execFlag=execFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
-    call loopModelCompsS(driver, phaseString="IPDv03p7", execFlag=execFlag, &
-      rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv03p7", &
+      mustAttributeUpdate=mustAttributeUpdate, execFlag=execFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
-    call loopModelCompsS(driver, phaseString="IPDv04p7", execFlag=execFlag, &
-      rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv04p7", &
+      mustAttributeUpdate=mustAttributeUpdate, execFlag=execFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
-    call loopModelCompsS(driver, phaseString="IPDv05p8", execFlag=execFlag, &
-      rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDv05p8", &
+      mustAttributeUpdate=mustAttributeUpdate, execFlag=execFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
-    call loopModelCompsS(driver, phaseString="IPDvXp08", execFlag=execFlag, &
-      rc=rc)
+    call loopModelCompsS(driver, phaseString="IPDvXp08", &
+      mustAttributeUpdate=mustAttributeUpdate, execFlag=execFlag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
+
+    ! update Attributes on models
+    call loopModelCompsAttributeUpdate(driver, &
+      mustAttributeUpdate=mustAttributeUpdate, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
 
     ! determine whether to enter initialize data resolution loop
     call NUOPC_CompAttributeGet(driver, name="InitializeDataResolution", &
@@ -2642,12 +2752,14 @@ module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
 
-  recursive subroutine loopModelCompsS(driver, phaseString, execFlag, rc)
+  recursive subroutine loopModelCompsS(driver, phaseString, &
+    mustAttributeUpdate, execFlag, rc)
     ! only to be used for phase>0
-    type(ESMF_GridComp)     :: driver
-    character(*), intent(in):: phaseString
-    logical, intent(out), optional :: execFlag ! .true. if at least one executed
-    integer, intent(out)    :: rc
+    type(ESMF_GridComp)                 :: driver
+    character(*), intent(in)            :: phaseString
+    logical, intent(inout), allocatable :: mustAttributeUpdate(:)
+    logical, intent(out), optional      :: execFlag ! .true. if at least one executed
+    integer, intent(out)                :: rc
     ! local variables
     integer                 :: phase, i, k, userrc
     character(ESMF_MAXSTR)  :: iString, pLabel
@@ -2678,7 +2790,8 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    ! loop through all the model components
+
+    ! loop through all the model components first time to execute
     do i=0, is%wrap%modelCount
       write (iString, *) i
       areServicesSet = &
@@ -2725,16 +2838,57 @@ module NUOPC_Driver
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
         if (present(execFlag)) execFlag = .true. ! at least this model executed
-        if (.not.internalflag) then
-          ! Ensure that Attributes are consistent across all the PETs of the
-          ! component that just executed.
-          call consistentComponentAttributes(is%wrap%modelComp(i), &
-            is%wrap%modelPetLists(i)%ptr, name, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        endif
+        mustAttributeUpdate(i) = .not.internalflag
       endif
     enddo
+
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  recursive subroutine loopModelCompsAttributeUpdate(driver, &
+    mustAttributeUpdate, rc)
+    ! only to be used for phase>0
+    type(ESMF_GridComp)                 :: driver
+    logical, intent(inout), allocatable :: mustAttributeUpdate(:)
+    integer, intent(out)                :: rc
+    ! local variables
+    integer                 :: i
+    type(type_InternalState):: is
+    character(ESMF_MAXSTR)  :: name
+
+    ! initialize out arguments
+    rc = ESMF_SUCCESS
+    ! query the component for info
+    call NUOPC_CompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! query Component for the internal State
+    nullify(is%wrap)
+#ifdef ESMF_NO_F2018ASSUMEDTYPE
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+#else
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc=rc)
+#endif
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! loop through all the model components to update Attributes
+    do i=0, is%wrap%modelCount
+      if (mustAttributeUpdate(i)) then
+        ! Ensure that Attributes are consistent across all the PETs of the
+        ! component that just executed.
+        call consistentComponentAttributes(is%wrap%modelComp(i), &
+          is%wrap%modelPetLists(i)%ptr, name, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+    enddo
+
+    ! reset the mustAttributeUpdate(:) array
+    mustAttributeUpdate = .false.
+
   end subroutine
 
   !-----------------------------------------------------------------------------

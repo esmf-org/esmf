@@ -51,7 +51,7 @@ Software documentation for all releases is at:
 \end{verbatim}
 
 Documents are available to developers for editing through the
-ESMF repository on the SourceForge site.
+ESMF repository on the GitHub site.
 
 \subsubsection{File format}
 
@@ -382,21 +382,6 @@ must be maintained.  No {\tt intent} attributes are currently used with
 pointers because they are not part of Fortran-90 or Fortran-95.
 
 \subsection{Code: File Rules} 
-
-\subsubsection{Version Identification} 
-The first line of every file in ESMF
-  must be its CVS version identification. For example, each \LaTeX\ 
-  file must begin:
-\begin{verbatim}
-% $Id$ 
-\end{verbatim}
-
-In addition, for source code, the CVS identifier must have the 
-ability to be written to a variable for output to a configuration log.  
-Therefore each F90 module must contain a declaration:
-\begin{verbatim}
-character(len=80), private :: version = '$Id$'
-\end{verbatim}
 
 \subsubsection{License and Copyright Information}
 
