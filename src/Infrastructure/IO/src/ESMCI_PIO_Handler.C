@@ -1657,6 +1657,7 @@ void PIO_Handler::closeOneTileFile(
     ESMCI_IOREGION_ENTER("PIOc_closefile");
     int piorc = PIOc_closefile(pioFileDesc[tile-1]);
     ESMCI_IOREGION_EXIT("PIOc_closefile");
+    pioFileDesc[tile-1] = 0;
     new_file[tile-1] = false;
     if (rc != NULL) *rc = piorc;
   }

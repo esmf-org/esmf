@@ -62,10 +62,10 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 ############################################################
 # OpenMP compiler and linker flags
 #
-ESMF_F90COMPILEOPTS += -homp
-ESMF_CXXCOMPILEOPTS += -fopenmp
-ESMF_F90LINKOPTS    += -homp
-ESMF_CXXLINKOPTS    += -fopenmp
+ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
+ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
+ESMF_OPENMP_F90LINKOPTS    += -fopenmp
+ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 
 ############################################################
 # OpenACC compiler and linker flags
