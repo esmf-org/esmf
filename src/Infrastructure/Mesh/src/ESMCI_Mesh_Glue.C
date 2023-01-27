@@ -204,12 +204,9 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
 
      } else { // automatically figure out node owners
 
-       // If parts of the mesh exist on this PET, then allocate nodeOwner array
-       if (num_nodes > 0) {
-         // Create local version of owners array
-         nodeOwner=new int[num_nodes];
-         nodeOwner_allocated=true;
-       }
+       // Create local version of owners array
+       nodeOwner=new int[num_nodes];
+       nodeOwner_allocated=true;
        
        // Autofill
        set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);        
@@ -6326,16 +6323,10 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
      int num_nodes=num_elemCorners; // one node per corner
 
      // Allocate node id array
-     int *node_ids=NULL;
-     if (num_nodes > 0) {
-       node_ids=new int[num_nodes];
-     }
+     int *node_ids=new int[num_nodes];
 
      // Allocate node owners array
-     int *node_owners=NULL;
-     if (num_nodes > 0) {
-       node_owners=new int[num_nodes];
-     }
+     int *node_owners=new int[num_nodes];
 
      // For now the node coord array is the same as the corner coord array
      double *node_coords=NULL;
@@ -6373,8 +6364,8 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
        throw localrc;  // bail out with exception
 
      // Deallocate node info
-     if (node_ids != NULL) delete [] node_ids;
-     if (node_owners != NULL) delete [] node_owners;
+     delete [] node_ids;
+     delete [] node_owners;
 
 
      ////// Create elements //////
