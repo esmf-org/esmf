@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "esmpy"
 description = "ESMF Python interface"
 # readme = "README.md"
-maintainers = [ { author = "ESMF Core Team", email = "esmf_support@ucar.edu" } ]
+maintainers = [ { name = "ESMF Core Team", email = "esmf_support@ucar.edu" } ]
 requires-python = ">=3.7"
 license = { text = "University of Illinois-NCSA" }
 dependencies = [
