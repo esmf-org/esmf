@@ -1,4 +1,4 @@
-Settings for MinGW/MSYS, using gfortran 4.3 or later.
+Settings for MinGW/MSYS using the GNU gfortran compiler.
 
 Supports the following environment settings:
 
@@ -11,4 +11,3 @@ using MinGW 6.1 and MSYS 1.0.11.  MinGW and MSYS are available
 from http://www.mingw.org.
 
 2.) The MinGW version of gcc is required for preprocessing.
-

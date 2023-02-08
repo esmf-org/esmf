@@ -9,8 +9,6 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMCI_ArrayBundle.C"
-//==============================================================================
 #define AB_REDISTSTORE_LOG_off
 #define ABSMM_EXEC_INFO_off
 //==============================================================================
@@ -42,6 +40,11 @@
 #include "ESMCI_Container.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_IO.h"
+
+//==============================================================================
+#undef  ESMC_FILENAME
+#define ESMC_FILENAME "ESMCI_ArrayBundle.C"
+//==============================================================================
 
 using namespace std;
 
@@ -318,7 +321,7 @@ int ArrayBundle::read(
 // !DESCRIPTION:
 //   Read Array data to an ArrayBundle object from file(s).
 //   For this API to be functional, the environment variable {\tt ESMF\_PIO} 
-//   should be set to "internal" when the ESMF library is built.
+//   should be set to either "internal" or "external" when the ESMF library is built.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -426,7 +429,7 @@ int ArrayBundle::write(
 //
 // !DESCRIPTION:
 //   Write the Arrays into a file. For this API to be functional,
-//   the environment variable {\tt ESMF\_PIO} should be set to "internal"
+//   the environment variable {\tt ESMF\_PIO} should be set to either "internal" or "external"
 //   when the ESMF library is built.
 //
 //EOPI

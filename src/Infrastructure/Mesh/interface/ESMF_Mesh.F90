@@ -3759,7 +3759,10 @@ end function ESMF_MeshCreateDual
 !   a bit easier.
 !   After this call the Mesh is usable, for
 !   example, a Field may be built on the created Mesh object and
-!   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
+!   this Field may be used in {\tt ESMF\_FieldRegridStore()}. However, the Mesh created by this
+!   call consists of a set of disconnected elements, and so shouldn't be used in a situation where
+!   connections between elements are necessary (e.g. bilinear regridding on element centers, patch regridding,
+!   or second-order conservative regridding). 
 !
 !   This call sets the dimension of the elements in the Mesh
 !   via {\tt parametricDim} and the number of coordinate dimensions in the mesh
@@ -3902,7 +3905,10 @@ end function ESMF_MeshCreateDual
 !   Internally these corners are turned into nodes forming the outside edges of the elements.
 !   After this call the Mesh is usable, for
 !   example, a Field may be built on the created Mesh object and
-!   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
+!   this Field may be used in {\tt ESMF\_FieldRegridStore()}. However, the Mesh created by this
+!   call consists of a set of disconnected elements, and so shouldn't be used in a situation where
+!   connections between elements are necessary (e.g. bilinear regridding on element centers, patch regridding,
+!   or second-order conservative regridding). 
 !
 !   This call sets the dimension of the elements in the Mesh
 !   via {\tt parametricDim} and the number of coordinate dimensions in the mesh
@@ -4193,12 +4199,10 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, name, rc)
   type(ESMF_VM)         :: vm
   integer               :: PetNo, PetCnt
   integer, parameter    :: f_p = selected_real_kind(15)   ! double precision
-  real,  parameter      :: pi = 3.1415926
-  real , parameter      :: todeg = 180.0/pi          ! convert to degrees
-  real(ESMF_KIND_R4), allocatable :: lonEdge(:,:), latEdge(:,:)
-  real(ESMF_KIND_R8), allocatable :: lonEdgeR8(:), latEdgeR8(:)
+  real(ESMF_KIND_R8), allocatable :: lonEdge(:,:), latEdge(:,:)
+  real(ESMF_KIND_R8), allocatable :: lonEdge1D(:), latEdge1D(:)
   real(ESMF_KIND_R8), allocatable :: NodeCoords(:), CenterCoords(:)
-  real(ESMF_KIND_R4), allocatable :: lonCenter(:,:), latCenter(:,:)
+  real(ESMF_KIND_R8), allocatable :: lonCenter(:,:), latCenter(:,:)
   integer, allocatable  :: ElemIds(:), NodeIds(:)
   integer, allocatable  :: ElemType(:)
   integer, allocatable  :: ElemConn(:)
@@ -4333,8 +4337,8 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, name, rc)
                  tile=tileno(i), lonCenter=lonCenter, latCenter=latCenter)
         endif
         !call ESMF_VMWtime(endtime, rc=rc)
-        lonCenter = lonCenter * todeg
-        latCenter = latCenter * todeg
+        lonCenter = lonCenter * ESMF_COORDSYS_RAD2DEG
+        latCenter = latCenter * ESMF_COORDSYS_RAD2DEG
         do j=1,count(2,i)
           do l=1,count(1,i)
              ElemIds(k) = (tileno(i)-1)*tilesize*tilesize+(j+start(2,i)-2)*(tileSize)+start(1,i)+l-1
@@ -4348,21 +4352,21 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, name, rc)
 
      totalnodes = (tileSize+1)*(tileSize+1)*6
      ! convert radius to degrees
-     lonEdge = lonEdge * todeg
-     latEdge = latEdge * todeg
+     lonEdge = lonEdge * ESMF_COORDSYS_RAD2DEG
+     latEdge = latEdge * ESMF_COORDSYS_RAD2DEG
      !Find unique set of node coordinates
      allocate(map(totalnodes))
      TOL=0.0000000001
      start_lat=-91.0
      end_lat = 91.0
-     allocate(lonEdgeR8(totalnodes), latEdgeR8(totalnodes))
-     lonEdgeR8 = reshape(lonEdge, (/totalnodes/))
-     latEdgeR8 = reshape(latEdge, (/totalnodes/))
-     call c_ESMC_ClumpPntsLL(totalNodes, lonEdgeR8, latEdgeR8, &
+     allocate(lonEdge1D(totalnodes), latEdge1D(totalnodes))
+     lonEdge1D = reshape(lonEdge, (/totalnodes/))
+     latEdge1D = reshape(latEdge, (/totalnodes/))
+     call c_ESMC_ClumpPntsLL(totalNodes, lonEdge1D, latEdge1D, &
                       TOL, map, uniquenodes, &
                       maxDuplicate, start_lat, end_lat, rc)
 
-     deallocate(lonEdgeR8, latEdgeR8)
+     deallocate(lonEdge1D, latEdge1D)
 
      ! Create a new array to point the new index back to the original index
      allocate(origIds(uniquenodes))

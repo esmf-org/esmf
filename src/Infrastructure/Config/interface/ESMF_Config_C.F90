@@ -361,6 +361,29 @@
    end subroutine f_esmf_configvalidatenooptions
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+   subroutine f_esmf_configsetstring(config, value, label, rc)
+     use ESMF_UtilTypesMod    ! ESMF base class
+     use ESMF_BaseMod    ! ESMF base class
+     use ESMF_ConfigMod
+
+     implicit none
+
+     type(ESMF_Config), intent(inout)       :: config
+     character(len=*), intent(in)           :: value
+     character(len=*), intent(in)           :: label
+     integer, intent(out)                   :: rc
+
+     ! Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL
+
+     ESMF_INIT_SET_CREATED(config)
+     call ESMF_ConfigSetAttribute(config, value, label=label, rc=rc)
+
+   end subroutine f_esmf_configsetstring
+!------------------------------------------------------------------------------
+
+
 !======================================================================
 !  Subroutines with (more than 1) optional arguments are commented out.
 !  "Glue" f77 code must not contain optional arguments.

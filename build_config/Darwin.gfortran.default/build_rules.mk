@@ -22,9 +22,7 @@ endif
 #
 ifeq ($(ESMF_COMM),mpiuni)
 # MPI stub library -----------------------------------------
-ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
-ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
+ESMF_CPPFLAGS          += -DESMF_MPIUNI -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpich1)
@@ -114,14 +112,15 @@ ESMF_CCOMPILER_VERSION      = ${ESMF_CCOMPILER} --version
 # See if g++ is really clang
 #
 ESMF_CLANGSTR := $(findstring clang, $(shell $(ESMF_CXXCOMPILER) --version))
+ifeq ($(ESMF_CLANGSTR), clang)
+$(error "The detected C++ compiler is actually clang. Set ESMF_COMPILER=gfortranclang.")
+endif
 
 ############################################################
 # Special debug flags
 #
 ESMF_F90OPTFLAG_G       += -Wall -Wextra -Wconversion -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fimplicit-none -fcheck=all,no-pointer
-ifneq ($(ESMF_CLANGSTR), clang)
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
-endif
 
 ############################################################
 # Fortran symbol convention
@@ -129,17 +128,17 @@ endif
 ifeq ($(ESMF_FORTRANSYMBOLS),default)
 ESMF_F90COMPILEOPTS       +=
 ESMF_F90LINKOPTS          +=
-ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+ESMF_CPPFLAGS             += -DESMF_LOWERCASE_SINGLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
 ESMF_F90COMPILEOPTS       += -fno-second-underscore
 ESMF_F90LINKOPTS          += -fno-second-underscore
-ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
+ESMF_CPPFLAGS             += -DESMF_LOWERCASE_SINGLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
 ESMF_F90COMPILEOPTS       += -fsecond-underscore
 ESMF_F90LINKOPTS          += -fsecond-underscore
-ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
+ESMF_CPPFLAGS             += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
 else
 $(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
 endif
@@ -193,14 +192,19 @@ endif
 ############################################################
 # OpenMP compiler and linker flags
 #
-ifneq ($(ESMF_CLANGSTR), clang)
 ESMF_OPENMP_F90COMPILEOPTS += -fopenmp
 ESMF_OPENMP_CXXCOMPILEOPTS += -fopenmp
 ESMF_OPENMP_F90LINKOPTS    += -fopenmp
 ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
-else
-ESMF_OPENMP=OFF
-endif
+
+############################################################
+# OpenACC compiler and linker flags
+#
+ESMF_OPENACCDEFAULT = OFF
+ESMF_OPENACC_F90COMPILEOPTS += -fopenacc
+ESMF_OPENACC_CXXCOMPILEOPTS += -fopenacc
+ESMF_OPENACC_F90LINKOPTS    += -fopenacc
+ESMF_OPENACC_CXXLINKOPTS    += -fopenacc
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
@@ -242,9 +246,6 @@ ESMF_CLINKRPATHS        =
 # Link against libesmf.a using the F90 linker front-end
 #
 ESMF_F90LINKLIBS += -lstdc++
-ifeq ($(ESMF_CLANGSTR), clang)
-ESMF_F90LINKLIBS += -lc++
-endif
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
@@ -255,3 +256,11 @@ ESMF_CXXLINKLIBS += -lgfortran
 # Shared library options
 ESMF_SL_LIBOPTS  += -dynamiclib
 ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+
+############################################################
+# Shared object options
+#
+ESMF_SO_F90COMPILEOPTS  = -fPIC
+ESMF_SO_F90LINKOPTS     = -shared
+ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+ESMF_SO_CXXLINKOPTS     = -shared

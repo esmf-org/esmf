@@ -389,18 +389,115 @@
 !BOE
 !\subsubsection{Destruction of a Config}
 
-! The work with the configuration file {\tt cf} is finalized by call to
-! {\tt ESMF\_ConfigDestroy()}:
+! The work with the Config object {\tt cf} is finalized by callling
+! {\tt ESMF\_ConfigDestroy()}.
 !EOE
 
 !BOC
-      call ESMF_ConfigDestroy(cf, rc=rc) ! Destroy the Config
+      call ESMF_ConfigDestroy(cf, rc=rc) ! Destroy the Config object
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         print*, "*****'call ESMF_ConfigDestroy' failed"
       end if
+
+!----------------------------------------------------------------
+! YAML
+!----------------------------------------------------------------
+!BOE
+!\subsubsection{Loading a YAML file}
+
+! The Config class supports loading of YAML files. As before, an empty Config
+! object is created with {\tt ESMF\_ConfigCreate()} and then populated via the
+! {\tt ESMF\_ConfigLoadFile()} method.
+!EOE
+
+!BOC
+      cf = ESMF_ConfigCreate(rc=rc)          ! Create the empty Config object
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_ConfigCreate' failed"
+      endif
+!BOE
+! Files ending in {\tt .yaml}, {\tt .yml}, or any combination of upper and lower
+! case letters that can be mapped to these two options, are interpreted as YAML
+! files. All other names are interpreted as classic Config {\em RFs} as
+! documented earlier.
+!EOE
+
+!BOC
+      call ESMF_ConfigLoadFile(cf, "myResourceFile.yaml", & ! Load the YAML File
+        rc=rc)                                    ! into the empty Config object
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****' call ESMF_ConfigLoadFile' failed"
+      endif
+!BOE
+! Here the {\tt myResourceFile.yaml} contains a YAML version of the previously
+! used {\tt myResourceFile.rc} file contents:
+!
+! \begin{verbatim}
+!# YAML representation of the myResourceFile.rc RF
+!
+!# mapping to sequences
+!
+!my_file_names:      [jan87.dat, jan88.dat, jan89.dat]  # all strings
+!constants:          [3.1415, 25]                       # float and integer
+!my_favorite_colors: [green, blue, 022]
+!
+!# mapping to scalars
+!
+!radius_of_the_earth:   6.37E6
+!parameter_1:           89
+!parameter_2:           78.2
+!input_file_name:       dummy_input.nc
+!
+!# represent table as mapping to sequence of sequences
+!
+!my_table_name:
+!- [1000,    3000,    263.0]
+!- [ 925,    3000,    263.0]
+!- [ 850,    3000,    263.0]
+!- [ 700,    3000,    269.0]
+!- [ 500,    3000,    287.0]
+!- [ 400,    3000,    295.8]
+!- [ 300,    3000,    295.8]
+! \end{verbatim}
+!
+! Notice that YAML support is limited to a small subset of the full YAML
+! language specification, allowing access through the classic Config API.
+! Specifically, the top level in the YAML file is expected to be a mapping
+! (dictionary) of scalar keys to any of the following three value options:
+!  \begin{itemize}
+!  \item Scalars
+!  \item List of scalars
+!  \item List of lists of scalars
+!  \end{itemize}
+! All other YAML constructs are silently ignored when loaded through this
+! interface. Constructs successfully ingested become available in the
+! {\tt cf} object, and can be accessed via the regular {\tt ESMF\_Config}
+! methods as outlined in the previous sections.
+!
+! When done, the resources held by the Config object are released by calling
+! the {\tt ESMF\_ConfigDestroy()} method.
+!EOE
+
+!BOC
+      call ESMF_ConfigDestroy(cf, rc=rc) ! Destroy the Config object
+!EOC
+
+      if (rc .ne. ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+        print*, "*****'call ESMF_ConfigDestroy' failed"
+      end if
+
+!----------------------------------------------------------------
+!----------------------------------------------------------------
 
       print*, "Final Word"
       print*,"---------------------------------------------------"

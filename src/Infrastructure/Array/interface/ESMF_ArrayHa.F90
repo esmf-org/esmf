@@ -639,12 +639,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Read Array data from file and put it into an {\tt ESMF\_Array} object.
 !   For this API to be functional, the environment variable {\tt ESMF\_PIO}
-!   should be set to "internal" when the ESMF library is built.
+!   should be set to either "internal" or "external" when the ESMF library is built.
 !   Please see the section on Data I/O,~\ref{io:dataio}.
 ! 
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -654,6 +653,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    The {\tt ESMF\_Array} object in which the read data is returned.
 !   \item[fileName]
 !    The name of the file from which Array data is read.
+!    If this is a multi-tile Array, then fileName must contain
+!    exactly one instance of "\#"; this is a placeholder that will be replaced
+!    by the tile number, with each tile being read from a separate file. (For
+!    example, for a fileName of "myfile\#.nc", tile 1 will be read from
+!    "myfile1.nc", tile 2 from "myfile2.nc", etc.)
+!    (This handling of the fileName for multi-tile I/O is subject to change.)
 !   \item[{[variableName]}]
 !    Variable name in the file; default is the "name" of Array.
 !    Use this argument only in the I/O format (such as NetCDF) that
@@ -1046,7 +1051,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
 ! redistribution, allowing scaling of the data, e.g. for unit transformation.
-!  
+!
 ! Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
 ! order of tiles within the DistGrid or by user-supplied arbitrary sequence
@@ -1056,16 +1061,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source Array, destination Array, and the factor may be of different
 ! <type><kind>. Further, source and destination Arrays may differ in shape,
 ! however, the number of elements must match. 
-!  
-! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
-! to an identity mapping of the sequentialized source Array to the
-! sequentialized destination Array. If the {\tt srcToDstTransposeMap}
-! argument is provided it must be identical on all PETs. The
-! {\tt srcToDstTransposeMap} allows source and destination Array dimensions to
-! be transposed during the redistribution. The number of source and destination
-! Array dimensions must be equal under this condition and the size of mapped
-! dimensions must match.
-!  
+!
+! The default redistribution operation, when {\tt srcToDstTransposeMap} is not
+! specified, corresponds to the identity mapping: each element of the
+! sequentialized source Array is copied to the sequentialized
+! destination Array element in order.
+!
+! \begin{sloppypar}
+! If the {\tt srcToDstTransposeMap} argument is provided it must be identical
+! across all PETs. The {\tt srcToDstTransposeMap} allows source and destination
+! Array dimensions to be transposed during the redistribution. To support this
+! option, the number of source and destination Array dimensions must be equal
+! and the size of the associated dimensions must match.
+! See section \ref{Array:Redist:TransposeMode} for more details about the
+! use of the {\tt srcToDstTransposeMap} argument.
+! \end{sloppypar}
+!
 ! It is erroneous to specify the identical Array object for {\tt srcArray} and
 ! {\tt dstArray} arguments. 
 !
@@ -1100,10 +1111,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Factor by which to multiply source data.
 !
 !   \item [{[srcToDstTransposeMap]}]
-!     List with as many entries as there are dimensions in {\tt srcArray}. Each
-!     entry maps the corresponding {\tt srcArray} dimension against the 
-!     specified {\tt dstArray} dimension. Mixing of distributed and
+!     A list with as many entries as there are dimensions in {\tt srcArray}, or
+!     {\tt tileCount} times this many entries.
+!     Each entry maps the corresponding {\tt srcArray} dimension against the
+!     specified {\tt dstArray} dimension. Mixing distributed and
 !     undistributed dimensions is supported.
+!     Negative entries reverse the order of elements along the specified
+!     dimension when going from source to destination.
+!     When providing $rank \times tileCount$ elements in
+!     {\tt srcToDstTransposeMap},  each block of size {\tt rank} is associated
+!     with the corresponding tile (in order), and interpreted as the
+!     tile-specific transpose map.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when not all elements match
@@ -1477,7 +1495,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
 ! redistribution, allowing scaling of the data, e.g. for unit transformation.
-!  
+!
 ! Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
 ! order of tiles within the DistGrid or by user-supplied arbitrary sequence
@@ -1488,15 +1506,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! <type><kind>. Further, source and destination Arrays may differ in shape,
 ! however, the number of elements must match. 
 !  
-! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
-! to an identity mapping of the sequentialized source Array to the
-! sequentialized destination Array. If the {\tt srcToDstTransposeMap}
-! argument is provided it must be identical on all PETs. The
-! {\tt srcToDstTransposeMap} allows source and destination Array dimensions to
-! be transposed during the redistribution. The number of source and destination
-! Array dimensions must be equal under this condition and the size of mapped
-! dimensions must match.
-!  
+! The default redistribution operation, when {\tt srcToDstTransposeMap} is not
+! specified, corresponds to the identity mapping: each element of the
+! sequentialized source Array is copied to the sequentialized
+! destination Array element in order.
+!
+! \begin{sloppypar}
+! If the {\tt srcToDstTransposeMap} argument is provided it must be identical
+! across all PETs. The {\tt srcToDstTransposeMap} allows source and destination
+! Array dimensions to be transposed during the redistribution. To support this
+! option, the number of source and destination Array dimensions must be equal
+! and the size of the associated dimensions must match.
+! See section \ref{Array:Redist:TransposeMode} for more details about the
+! use of the {\tt srcToDstTransposeMap} argument.
+! \end{sloppypar}
+!
 ! It is erroneous to specify the identical Array object for {\tt srcArray} and
 ! {\tt dstArray} arguments. 
 !
@@ -1536,10 +1560,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Factor by which to multiply source data.
 !
 !   \item [{[srcToDstTransposeMap]}]
-!     List with as many entries as there are dimensions in {\tt srcArray}. Each
-!     entry maps the corresponding {\tt srcArray} dimension against the 
-!     specified {\tt dstArray} dimension. Mixing of distributed and
+!     A list with as many entries as there are dimensions in {\tt srcArray}, or
+!     {\tt tileCount} times this many entries.
+!     Each entry maps the corresponding {\tt srcArray} dimension against the
+!     specified {\tt dstArray} dimension. Mixing distributed and
 !     undistributed dimensions is supported.
+!     Negative entries reverse the order of elements along the specified
+!     dimension when going from source to destination.
+!     When providing $rank \times tileCount$ elements in
+!     {\tt srcToDstTransposeMap},  each block of size {\tt rank} is associated
+!     with the corresponding tile (in order), and interpreted as the
+!     tile-specific transpose map.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when not all elements match
@@ -2064,7 +2095,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
 ! redistribution, allowing scaling of the data, e.g. for unit transformation.
-!  
+!
 ! Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
 ! order of tiles within the DistGrid or by user-supplied arbitrary sequence
@@ -2074,16 +2105,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source Array, destination Array, and the factor may be of different
 ! <type><kind>. Further, source and destination Arrays may differ in shape,
 ! however, the number of elements must match. 
-!  
-! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
-! to an identity mapping of the sequentialized source Array to the
-! sequentialized destination Array. If the {\tt srcToDstTransposeMap}
-! argument is provided it must be identical on all PETs. The
-! {\tt srcToDstTransposeMap} allows source and destination Array dimensions to
-! be transposed during the redistribution. The number of source and destination
-! Array dimensions must be equal under this condition and the size of mapped
-! dimensions must match.
-!  
+!
+! The default redistribution operation, when {\tt srcToDstTransposeMap} is not
+! specified, corresponds to the identity mapping: each element of the
+! sequentialized source Array is copied to the sequentialized
+! destination Array element in order.
+!
+! \begin{sloppypar}
+! If the {\tt srcToDstTransposeMap} argument is provided it must be identical
+! across all PETs. The {\tt srcToDstTransposeMap} allows source and destination
+! Array dimensions to be transposed during the redistribution. To support this
+! option, the number of source and destination Array dimensions must be equal
+! and the size of the associated dimensions must match.
+! See section \ref{Array:Redist:TransposeMode} for more details about the
+! use of the {\tt srcToDstTransposeMap} argument.
+! \end{sloppypar}
+!
 ! It is erroneous to specify the identical Array object for {\tt srcArray} and
 ! {\tt dstArray} arguments. 
 !
@@ -2110,10 +2147,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Handle to the precomputed Route.
 !
 !   \item [{[srcToDstTransposeMap]}]
-!     List with as many entries as there are dimensions in {\tt srcArray}. Each
-!     entry maps the corresponding {\tt srcArray} dimension against the 
-!     specified {\tt dstArray} dimension. Mixing of distributed and
+!     A list with as many entries as there are dimensions in {\tt srcArray}, or
+!     {\tt tileCount} times this many entries.
+!     Each entry maps the corresponding {\tt srcArray} dimension against the
+!     specified {\tt dstArray} dimension. Mixing distributed and
 !     undistributed dimensions is supported.
+!     Negative entries reverse the order of elements along the specified
+!     dimension when going from source to destination.
+!     When providing $rank \times tileCount$ elements in
+!     {\tt srcToDstTransposeMap},  each block of size {\tt rank} is associated
+!     with the corresponding tile (in order), and interpreted as the
+!     tile-specific transpose map.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when not all elements match
@@ -2241,7 +2285,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! of the PETs specify a {\tt factor} argument the default will be a factor of
 ! 1. The resulting factor is applied to all of the source data during
 ! redistribution, allowing scaling of the data, e.g. for unit transformation.
-!  
+!
 ! Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized 
 ! vectors. The sequence is defined by the order of DistGrid dimensions and the
 ! order of tiles within the DistGrid or by user-supplied arbitrary sequence
@@ -2251,16 +2295,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source Array, destination Array, and the factor may be of different
 ! <type><kind>. Further, source and destination Arrays may differ in shape,
 ! however, the number of elements must match. 
-!  
-! If {\tt srcToDstTransposeMap} is not specified the redistribution corresponds
-! to an identity mapping of the sequentialized source Array to the
-! sequentialized destination Array. If the {\tt srcToDstTransposeMap}
-! argument is provided it must be identical on all PETs. The
-! {\tt srcToDstTransposeMap} allows source and destination Array dimensions to
-! be transposed during the redistribution. The number of source and destination
-! Array dimensions must be equal under this condition and the size of mapped
-! dimensions must match.
-!  
+!
+! The default redistribution operation, when {\tt srcToDstTransposeMap} is not
+! specified, corresponds to the identity mapping: each element of the
+! sequentialized source Array is copied to the sequentialized
+! destination Array element in order.
+!
+! \begin{sloppypar}
+! If the {\tt srcToDstTransposeMap} argument is provided it must be identical
+! across all PETs. The {\tt srcToDstTransposeMap} allows source and destination
+! Array dimensions to be transposed during the redistribution. To support this
+! option, the number of source and destination Array dimensions must be equal
+! and the size of the associated dimensions must match.
+! See section \ref{Array:Redist:TransposeMode} for more details about the
+! use of the {\tt srcToDstTransposeMap} argument.
+! \end{sloppypar}
+!
 ! It is erroneous to specify the identical Array object for {\tt srcArray} and
 ! {\tt dstArray} arguments. 
 !
@@ -2292,10 +2342,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     from {\tt dstArray} to {\tt srcArray}.
 !
 !   \item [{[srcToDstTransposeMap]}]
-!     List with as many entries as there are dimensions in {\tt srcArray}. Each
-!     entry maps the corresponding {\tt srcArray} dimension against the 
-!     specified {\tt dstArray} dimension. Mixing of distributed and
+!     A list with as many entries as there are dimensions in {\tt srcArray}, or
+!     {\tt tileCount} times this many entries.
+!     Each entry maps the corresponding {\tt srcArray} dimension against the
+!     specified {\tt dstArray} dimension. Mixing distributed and
 !     undistributed dimensions is supported.
+!     Negative entries reverse the order of elements along the specified
+!     dimension when going from source to destination.
+!     When providing $rank \times tileCount$ elements in
+!     {\tt srcToDstTransposeMap},  each block of size {\tt rank} is associated
+!     with the corresponding tile (in order), and interpreted as the
+!     tile-specific transpose map.
 !
 !   \item [{[ignoreUnmatchedIndices]}]
 !     A logical flag that affects the behavior for when not all elements match

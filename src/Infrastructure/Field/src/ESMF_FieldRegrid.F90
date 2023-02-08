@@ -4323,9 +4323,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
            ! loop and make sure they aren't too small in any dimension
            do i=1,dimCount
-              if (ec(i) .lt. 2) then
+              if (ec(i) .eq. 1) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-              msg="- can't currently regrid a grid that contains a DE of width less than 2", & 
+        msg=" some types of regridding (e.g. bilinear) are not supported on Grids that contain a DE of width 1.", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
               endif

@@ -690,7 +690,6 @@ void ESMC_TimeStamp(
 // Returns time stamp values so that microsecond precision can be used.
 //EOP
 {
-    time_t tm;
     struct tm ti;
 #if !defined (ESMF_OS_MinGW)
     struct timeval tv;  

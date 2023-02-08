@@ -260,6 +260,10 @@ void ESMCI_Mesh_XGrid_calc_wgts_from_side_mesh(Mesh *src_side_mesh, Mesh *dst_xg
       } // for j
     } // for wi
 
+    // If meshes are split, then translate indices and factorss
+    if (src_side_mesh->is_split) translate_split_src_elems_in_wts(src_side_mesh, num_entries, iientries);
+    if (dst_xgrid_mesh->is_split) translate_split_dst_elems_in_wts(dst_xgrid_mesh, num_entries, iientries, factors);
+    
     *nentries = num_entries;
     // Clean up.  If has_iw, then we will use the arrays to
     // fill out the users pointers.  These will be deleted following a copy.
@@ -345,6 +349,10 @@ void ESMCI_Mesh_XGrid_calc_wgts_to_side_mesh(Mesh *src_xgrid_mesh, Mesh *dst_sid
       } // for j
     } // for wi
 
+    // If meshes are split, then translate indices and factorss
+    if (src_xgrid_mesh->is_split) translate_split_src_elems_in_wts(src_xgrid_mesh, num_entries, iientries);
+    if (dst_side_mesh->is_split) translate_split_dst_elems_in_wts(dst_side_mesh, num_entries, iientries, factors);
+    
     *nentries = num_entries;
     // Clean up.  If has_iw, then we will use the arrays to
     // fill out the users pointers.  These will be deleted following a copy.

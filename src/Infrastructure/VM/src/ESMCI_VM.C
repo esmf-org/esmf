@@ -2979,9 +2979,9 @@ void VM::rmFObject(
     FTN_X(f_esmf_fortranudtpointercompare)(fobjectElement, (void *)fobject, &flag);
 
     if (flag){
-      void *cBase = **(void ***)fobject;
       matchTable_FObjects[i].erase(it);  // erase the object entry
 #ifdef GARBAGE_COLLECTION_LOG_on
+      void *cBase = **(void ***)fobject;
       std::stringstream msg;
       msg << "VM::rmFObject() object removed: " << *(void **)fobject << " - " <<
         cBase;

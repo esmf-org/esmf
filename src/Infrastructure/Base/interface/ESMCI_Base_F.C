@@ -456,6 +456,12 @@ extern "C" {
     return;
   }
 
+  if ((*base)->ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "not a valid object", ESMC_CONTEXT, rc);
+    return;
+  }
+
   string copts = string (opts, ESMC_F90lentrim (opts, nlen));
   *rc = (*base)->ESMC_Validate(copts.c_str());
 
@@ -489,6 +495,12 @@ extern "C" {
 
   if (!base) {
     if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  if ((*base)->ESMC_BaseGetStatus()!=ESMF_STATUS_READY){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "not a valid object", ESMC_CONTEXT, rc);
     return;
   }
 

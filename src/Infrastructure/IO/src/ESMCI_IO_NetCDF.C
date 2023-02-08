@@ -503,7 +503,6 @@ namespace ESMCI
                ESMC_LogDefault.MsgFoundError(ESMF_FAILURE,
                    errstr, ESMC_CONTEXT, &localrc);
                delete[] dimensions;
-               delete[] dimLengths;
                nc_close (netCdfFile);
                return localrc;
              }

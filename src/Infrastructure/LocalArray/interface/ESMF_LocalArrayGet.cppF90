@@ -294,7 +294,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayGet()
   subroutine ESMF_LocalArrayGetDefault(localarray, keywordEnforcer, &
-    typekind, rank, totalCount, totalLBound, totalUBound, rc)
+    typekind, rank, totalCount, totalLBound, totalUBound, isESMFAllocated, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray),      intent(in)            :: localarray
@@ -304,11 +304,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out), optional :: totalCount(:)
     integer,                    intent(out), optional :: totalLBound(:)
     integer,                    intent(out), optional :: totalUBound(:)
-    integer,                    intent(out), optional :: rc             
+    logical,                    intent(out), optional :: isESMFAllocated
+    integer,                    intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.5.0] Added argument {\tt isESMFAllocated} to support user query of
+!              whether ESMF or user is responsible for the data allocation
+!              referenced by this object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -328,6 +335,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Lower bound per dimension.
 !   \item[{[totalUBound]}]
 !     Upper bound per dimension.
+!   \item[{[isESMFAllocated]}]
+!     Set to {\tt .true.} for data allocations held by ESMF. Set to
+!     {\tt .false.} otherwise.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -336,6 +346,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc    ! local return code
     integer :: lrank      ! Local use to get rank
+    type(ESMF_Logical) :: dealloc     ! for logical type conversion
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -398,6 +409,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    if (present(isESMFAllocated)) then
+      call c_esmc_localarraygetdealloc(localarray, dealloc, localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      isESMFAllocated = dealloc
+    end if
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS

@@ -18,6 +18,7 @@ SET(GENERATED_SRCS pio_file_simple_tests.F90
   pio_decomp_tests.F90
   pio_decomp_tests_1d.F90
   pio_decomp_tests_2d.F90
+  pio_decomphalo_tests_2d.F90
   pio_decomp_tests_3d.F90
   pio_decomp_frame_tests.F90
   pio_decomp_fillval.F90
@@ -227,14 +228,14 @@ add_dependencies (tests pio_rearr)
 
 if (PIO_USE_MPISERIAL)
     add_test(NAME pio_rearr
-        COMMAND pio_rearr)
+	COMMAND pio_rearr)
     set_tests_properties(pio_rearr
-        PROPERTIES TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+	PROPERTIES TIMEOUT ${DEFAULT_TEST_TIMEOUT})
 else ()
     add_mpi_test(pio_rearr
-        EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_rearr
-        NUMPROCS 4
-        TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+	EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_rearr
+	NUMPROCS 4
+	TIMEOUT ${DEFAULT_TEST_TIMEOUT})
 endif ()
 
 #===== pio_rearr_opts =====
@@ -245,14 +246,14 @@ add_dependencies (tests pio_rearr_opts)
 
 if (PIO_USE_MPISERIAL)
     add_test(NAME pio_rearr_opts
-        COMMAND pio_rearr_opts)
+	COMMAND pio_rearr_opts)
     set_tests_properties(pio_rearr_opts
-        PROPERTIES TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+	PROPERTIES TIMEOUT ${DEFAULT_TEST_TIMEOUT})
 else ()
     add_mpi_test(pio_rearr_opts
-        EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_rearr_opts
-        NUMPROCS 4
-        TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+	EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_rearr_opts
+	NUMPROCS 4
+	TIMEOUT ${DEFAULT_TEST_TIMEOUT})
 endif ()
 
 #===== pio_rearr_opts2 =====
@@ -263,22 +264,22 @@ add_dependencies (tests pio_rearr_opts2)
 
 if (PIO_USE_MPISERIAL)
     add_test(NAME pio_rearr_opts2
-        COMMAND pio_rearr_opts2)
+	COMMAND pio_rearr_opts2)
     set_tests_properties(pio_rearr_opts2
-        PROPERTIES TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+	PROPERTIES TIMEOUT ${DEFAULT_TEST_TIMEOUT})
 else ()
     add_mpi_test(pio_rearr_opts2_1p
-        EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_rearr_opts2
-        NUMPROCS 1
-        TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+	EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_rearr_opts2
+	NUMPROCS 1
+	TIMEOUT ${DEFAULT_TEST_TIMEOUT})
     add_mpi_test(pio_rearr_opts2_3p
-        EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_rearr_opts2
-        NUMPROCS 3
-        TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+	EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_rearr_opts2
+	NUMPROCS 3
+	TIMEOUT ${DEFAULT_TEST_TIMEOUT})
     add_mpi_test(pio_rearr_opts2_4p
-        EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_rearr_opts2
-        NUMPROCS 4
-        TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+	EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_rearr_opts2
+	NUMPROCS 4
+	TIMEOUT ${DEFAULT_TEST_TIMEOUT})
 endif ()
 
 #===== pio_decomp_tests =====
@@ -511,6 +512,12 @@ add_executable (pio_decomp_tests_2d EXCLUDE_FROM_ALL
 target_link_libraries (pio_decomp_tests_2d pio_tutil)
 add_dependencies (tests pio_decomp_tests_2d)
 
+#===== pio_decomphalo_tests_2d =====
+add_executable (pio_decomphalo_tests_2d EXCLUDE_FROM_ALL
+  pio_decomphalo_tests_2d.F90)
+target_link_libraries (pio_decomphalo_tests_2d pio_tutil)
+add_dependencies (tests pio_decomphalo_tests_2d)
+
 if (PIO_USE_MPISERIAL)
   add_test(NAME pio_decomp_tests_2d_1p
     COMMAND pio_decomp_tests_2d)
@@ -613,6 +620,18 @@ else ()
   add_mpi_test(pio_decomp_tests_2d_4p_2iop_1agg
     EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_decomp_tests_2d
     ARGUMENTS --pio-tf-num-io-tasks=2 --pio-tf-num-aggregators=1
+    NUMPROCS 4
+    TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+
+  add_mpi_test(pio_decomphalo_tests_2d1
+    EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_decomphalo_tests_2d
+    ARGUMENTS --pio-tf-num-io-tasks=1
+    NUMPROCS 4
+    TIMEOUT ${DEFAULT_TEST_TIMEOUT})
+
+  add_mpi_test(pio_decomphalo_tests_2d2
+    EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/pio_decomphalo_tests_2d
+    ARGUMENTS --pio-tf-num-io-tasks=2
     NUMPROCS 4
     TIMEOUT ${DEFAULT_TEST_TIMEOUT})
 endif ()

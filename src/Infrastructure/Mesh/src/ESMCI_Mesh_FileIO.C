@@ -168,13 +168,14 @@ void ESMCI_mesh_create_from_file(char *filename,
     int local_pet = vm->getLocalPet();  
     MPI_Comm mpi_comm = vm->getMpi_c();  
     int pet_count = vm->getPetCount();
-    int pets_per_Ssi = vm->getSsiLocalPetCount();
+    int pets_per_Ssi = vm->getSsiMaxPetCount();
 
     // Initialize IO system
     int num_iotasks = pet_count/pets_per_Ssi;
     int stride = pets_per_Ssi;
     int pioSystemDesc;
     int piorc;
+
     piorc = PIOc_Init_Intracomm(mpi_comm, num_iotasks, stride, 0, PIO_REARR_SUBSET, &pioSystemDesc);
     if (!CHECKPIOERROR(piorc, std::string("Unable to init PIO Intracomm for file: ") + filename,
                        ESMF_RC_FILE_OPEN, localrc)) throw localrc;
@@ -420,7 +421,7 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
     int mode = 0;
     piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
     // if the file was created with netcdf4, it cannot be opened with pnetcdf
-    if (piorc == PIO_EINVAL){
+    if (piorc == PIO_EINVAL || piorc == PIO_ENOTBUILT){
         pio_type = PIO_IOTYPE_NETCDF;
         piorc = PIOc_openfile(pioSystemDesc, &pioFileDesc, &pio_type, filename, mode);
     }

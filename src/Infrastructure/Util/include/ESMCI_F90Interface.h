@@ -42,9 +42,12 @@
 namespace ESMCI {
 
   class F90ClassHolder{
-    void *memoryHolder[16]; // Reserves 16 times the space of a void pointer.
+    void *memoryHolder[48]; // Reserves 48 times the space of a void pointer.
                             // This value has been determined empirically to
                             // work on all the supported platforms.
+                            // Increased this from the previous value of 16
+                            // when ESMF_INIT_DECLARE_NAMED_ALIAS was
+                            // introduced. This now depends on ESMF_MAXSTR.
     friend std::ostream& operator<<(std::ostream& out,
       const F90ClassHolder& f90p){
       out << f90p.memoryHolder[0];

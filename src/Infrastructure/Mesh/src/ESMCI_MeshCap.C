@@ -1763,7 +1763,7 @@ void MeshCap::meshcreatenodedistgrid(int *rc) {
         "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
     }
-dg->validate(); //TODO: remove this validate() once all is working!!!
+
     // Set member 
     this->node_distgrid = dg;
     this->node_distgrid_set = true;
@@ -1771,6 +1771,9 @@ dg->validate(); //TODO: remove this validate() once all is working!!!
   } else {
       ESMC_LogDefault.Write("Node DistGrid has already been set", ESMC_LOGMSG_WARN);
   }
+
+  // Set to success
+  if (rc != NULL) *rc=ESMF_SUCCESS;
 }
 
 
@@ -1801,7 +1804,7 @@ void MeshCap::meshcreateelemdistgrid(int *rc) {
         "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
 #endif
     }
-dg->validate(); //TODO: remove this validate() once all is working!!!
+
     // Set member variables
     this->elem_distgrid = dg;
     this->elem_distgrid_set = true;
@@ -1809,6 +1812,9 @@ dg->validate(); //TODO: remove this validate() once all is working!!!
   } else {
     ESMC_LogDefault.Write("Elem DistGrid has already been set", ESMC_LOGMSG_WARN);
   }
+
+  // Set to success
+  if (rc != NULL) *rc=ESMF_SUCCESS;
 }
 
 DistGrid *MeshCap::meshgetnodedistgrid() {

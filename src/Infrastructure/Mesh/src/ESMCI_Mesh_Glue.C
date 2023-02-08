@@ -185,7 +185,7 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
      // Get nodeOwner
      int *nodeOwner=NULL;
      bool nodeOwner_allocated=false;
-     if (present(nodeOwnerII)) { // if masks exist
+     if (present(nodeOwnerII)) { // if node owners exist
        // Error checking
        if (nodeOwnerII->dimCount !=1) {
          int localrc;
@@ -201,17 +201,15 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
        
        // Get array
        nodeOwner=nodeOwnerII->array;
-     } else {
 
-       // If parts of the mesh exist on this PET, then autofill owner info
-       if (num_nodes >0) {
-         // Create local version of owners array
-         nodeOwner=new int[num_nodes];
-         nodeOwner_allocated=true;
+     } else { // automatically figure out node owners
 
-         // Autofill
-         set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);         
-       }
+       // Create local version of owners array
+       nodeOwner=new int[num_nodes];
+       nodeOwner_allocated=true;
+       
+       // Autofill
+       set_node_owners_wo_list(num_nodes, nodeId, nodeOwner);        
      }
 
 
@@ -6325,16 +6323,10 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
      int num_nodes=num_elemCorners; // one node per corner
 
      // Allocate node id array
-     int *node_ids=NULL;
-     if (num_nodes > 0) {
-       node_ids=new int[num_nodes];
-     }
+     int *node_ids=new int[num_nodes];
 
      // Allocate node owners array
-     int *node_owners=NULL;
-     if (num_nodes > 0) {
-       node_owners=new int[num_nodes];
-     }
+     int *node_owners=new int[num_nodes];
 
      // For now the node coord array is the same as the corner coord array
      double *node_coords=NULL;
@@ -6372,8 +6364,8 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
        throw localrc;  // bail out with exception
 
      // Deallocate node info
-     if (node_ids != NULL) delete [] node_ids;
-     if (node_owners != NULL) delete [] node_owners;
+     delete [] node_ids;
+     delete [] node_owners;
 
 
      ////// Create elements //////
@@ -6525,7 +6517,7 @@ void set_node_owners_wo_list(int num_nodes, int *node_ids, int *node_owners) {
   UInt curr_proc_best=0;
   bool first_time=true;
   std::vector<DDir<>::dentry>::iterator ri = lookups.begin(), re = lookups.end();
-     for (; ri != re; ++ri) {
+  for (; ri != re; ++ri) {
        DDir<>::dentry &dent = *ri;
 
        // Get info for this entry gid

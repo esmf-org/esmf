@@ -5378,7 +5378,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             rh=is%wrap%cplSet(i)%rh, &
             zeroRegions=is%wrap%cplSet(i)%zeroRegions, &
             termOrders=is%wrap%cplSet(i)%termOrders, &
-            name=name, rc=rc)
+            name=name, verbosity=verbosity, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
@@ -5387,7 +5387,7 @@ if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           cplList=cplListTemp(1:j-1), rh=is%wrap%rh, &
           zeroRegions=is%wrap%zeroRegions, &
           termOrders=is%wrap%termOrders, &
-          name=name, rc=rc)
+          name=name, verbosity=verbosity, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       endif
@@ -6984,7 +6984,7 @@ print *, "found match:"// &
   !-----------------------------------------------------------------------------
 
   subroutine FieldBundleCplStore(srcFB, dstFB, cplList, rh, zeroRegions, &
-    termOrders, name, rc)
+    termOrders, name, verbosity, rc)
     ! This method will destroy srcFB/dstFB, and replace with newly created FBs.
     ! Order of fields in outgoing srcFB/dstFB may be different from incoming.
     ! Order of elements in termOrders matches those in outgoing srcFB/dstFB.
@@ -6995,8 +6995,9 @@ print *, "found match:"// &
     type(ESMF_Region_Flag),    pointer               :: zeroRegions(:)
     type(ESMF_TermOrder_Flag), pointer               :: termOrders(:)
     character(*),              intent(in)            :: name
+    integer,                   intent(in)            :: verbosity
     integer,                   intent(out), optional :: rc
-    
+
     ! local variables
     integer                         :: localrc
     integer                         :: i, j, k, count, stat, localDeCount
@@ -7043,8 +7044,8 @@ print *, "found match:"// &
     integer, pointer                :: dstUngriddedLBound(:)
     integer, pointer                :: dstUngriddedUBound(:)
     integer                         :: fieldDimCount, gridDimCount
-    logical                         :: gridPair
-    
+    logical                         :: gridPair, verbosityFlag
+
     type RHL
       type(ESMF_Grid)                   :: srcGrid, dstGrid
       ! field specific items, TODO: push into a FieldMatch() method
@@ -7074,10 +7075,21 @@ print *, "found match:"// &
       type(ESMF_UnmappedAction_Flag)    :: unmappedaction
       type(RHL), pointer                :: prev
     end type
-    
+
+#define USE_ESMF_RHL
+!TODO: Remove code that is under all the USE_ESMF_RHL-else branches after
+!TODO: plenty of testing across systems, and no issues with the ESMF level
+!TODO: implementation have been found or reported. I estimate this should happen
+!TODO: right before the ESMF 8.6.0 release.
+#ifdef USE_ESMF_RHL
+    type(ESMF_RHL), pointer         :: rhList, rhListE
+#else
     type(RHL), pointer              :: rhList, rhListE
+#endif
     logical                         :: rhListMatch
-    
+
+    verbosityFlag = btest(verbosity,12)
+
 #if 0
 call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
 #endif
@@ -7145,7 +7157,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       msg="Allocation of termOrdersRedist.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    
+
     ! prepare "ignoreUnmatchedIndicesFlag" list
     allocate(ignoreUnmatchedIndicesFlag(count), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
@@ -7167,7 +7179,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
-    
+
     ! destroy the incoming FieldBundles and create replacement FieldBundles
     call ESMF_FieldBundleDestroy(srcFB, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -7285,7 +7297,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
           exit ! skip the rest of the loop after first hit
         endif
       enddo
-      
+
       ! determine "srcMaskValues"
       allocate(srcMaskValues(0))  ! default
       do j=2, size(chopStringList)
@@ -7312,7 +7324,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
           exit ! skip the rest of the loop after first hit
         endif
       enddo
-      
+
       ! determine "dstMaskValues"
       allocate(dstMaskValues(0))  ! default
       do j=2, size(chopStringList)
@@ -7339,7 +7351,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
           exit ! skip the rest of the loop after first hit
         endif
       enddo
-      
+
       ! determine "redistflag" and "regridmethod"
       redistflag = .false. ! default to regridding
       regridmethod = ESMF_REGRIDMETHOD_BILINEAR ! default
@@ -7374,7 +7386,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
           exit ! skip the rest of the loop after first hit
         endif
       enddo
-      
+
       ! decide whether this is a Redist field pair, or to proceed with Regrid
       if (redistflag) then
         call ESMF_FieldBundleAdd(srcFBRedist, (/srcFields(i)/), &
@@ -7605,7 +7617,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
           exit ! skip the rest of the loop after first hit
         endif
       enddo
-      
+
       ! determine "unmappedaction"
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE ! default
       do j=2, size(chopStringList)
@@ -7631,7 +7643,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
           exit ! skip the rest of the loop after first hit
         endif
       enddo
-      
+
       ! determine "srcTermProcessing"
       srcTermProcessing = -1  ! default -> force auto-tuning
       do j=2, size(chopStringList)
@@ -7647,7 +7659,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
           exit ! skip the rest of the loop after first hit
         endif
       enddo
-      
+
       ! determine "pipelineDepth"
       pipelineDepth = -1  ! default -> force auto-tuning
       do j=2, size(chopStringList)
@@ -7663,7 +7675,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
           exit ! skip the rest of the loop after first hit
         endif
       enddo
-      
+
       ! determine "dumpWeightsFlag"
       dumpWeightsFlag = .false. ! default
       do j=2, size(chopStringList)
@@ -7697,6 +7709,22 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
           exit ! skip the rest of the loop after first hit
         endif
       enddo
+
+#ifdef USE_ESMF_RHL
+      call ESMF_FieldBundleRegridStorePair(srcFields(i), dstFields(i), &
+        srcMaskValues, dstMaskValues, regridmethod, polemethod, &
+        regridPoleNPnts, &
+        extrapMethod=extrapMethod, extrapNumSrcPnts=extrapNumSrcPnts, &
+        extrapDistExponent=extrapDistExponent, extrapNumLevels=extrapNumLevels, &
+        unmappedaction=unmappedaction, ignoreDegenerate=ignoreDegenerate, &
+        srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+        rhList=rhList, routehandle=rh, rraShift=rraShift, &
+        vectorLengthShift=vectorLengthShift, verbosityFlag=verbosityFlag, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+
+#else
 
       ! for now reuse of Regrid RouteHandle is only implemented for Grids
       
@@ -8013,6 +8041,8 @@ call ESMF_LogWrite(trim(name)//&
         if (associated(factorIndexList)) deallocate(factorIndexList)
         if (associated(factorList)) deallocate(factorList)
       endif
+#endif
+
       if (associated(chopStringList)) deallocate(chopStringList)
 
     enddo ! loop over all field pairs
@@ -8024,8 +8054,15 @@ call ESMF_LogWrite(trim(name)//&
       call ESMF_RouteHandleDestroy(rhListE%rh, noGarbage=.true., rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+#ifdef USE_ESMF_RHL
+      if (rhListE%factorAllocFlag) then
+        deallocate(rhListE%factorIndexList)
+        deallocate(rhListE%factorList)
+      endif
+#else
       if (associated(rhListE%factorIndexList)) deallocate(rhListE%factorIndexList)
       if (associated(rhListE%factorList)) deallocate(rhListE%factorList)
+#endif
       deallocate(rhListE%srcGridToFieldMap, rhListE%dstGridToFieldMap)
       deallocate(rhListE%srcUngriddedLBound, rhListE%srcUngriddedUBound)
       deallocate(rhListE%dstUngriddedLBound, rhListE%dstUngriddedUBound)

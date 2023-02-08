@@ -2389,7 +2389,7 @@ module NUOPC_Base
       blockCount = blockCount + tokenCount
     enddo
 
-    allocate(lb(tokenCount),ub(tokenCount))
+    allocate(lb(blockCount),ub(blockCount))
     petCount = 0
     k = 1
 

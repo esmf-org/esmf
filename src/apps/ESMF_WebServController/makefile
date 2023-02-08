@@ -6,7 +6,7 @@ LOCDIR	  = src/apps/ESMF_WebServController
 
 
 APPS_BUILD        = $(ESMF_APPSDIR)/ESMF_WebServController
-APPS_MAINLANGUAGE = C
+APPS_MAINLANGUAGE = C++
 
 APPS_OBJ      = ESMF_WebServController.o
 

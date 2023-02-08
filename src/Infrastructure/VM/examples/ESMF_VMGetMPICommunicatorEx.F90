@@ -17,7 +17,7 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{Getting the MPI Communicator from an VM object}
+! \subsubsection{Accessing the MPI Communicator from an VM object}
 !
 ! Sometimes user code requires access to the MPI communicator, e.g. to support
 ! legacy code that contains explict MPI communication calls. The correct way of
@@ -37,7 +37,6 @@ program ESMF_VMGetMPICommunicatorEx
   use ESMF_TestMod
   
   implicit none
-  !include 'mpif.h'
   
   ! local variables
   integer:: rc

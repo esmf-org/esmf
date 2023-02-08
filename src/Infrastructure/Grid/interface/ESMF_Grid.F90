@@ -14655,11 +14655,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          By default every tile is decomposed in the same way.  If the total
 !          PET count is less than 6, one tile will be assigned to one DE and the DEs
 !          will be assigned to PETs sequentially, therefore, some PETs may have
-!          more than one DEs.  If the total PET count is greater than 6, the total
+!          more than one DE.  If the total PET count is greater than 6, the total
 !          number of DEs will be a multiple of 6 and less than or equal to the total
 !          PET count.  For instance, if the total PET count is 16, the total DE count
 !          will be 12 with each tile decomposed into 1x2 blocks.  The 12 DEs are mapped
-!          to the first 12 PETs and the remainding 4 PETs have no DEs locally, unless
+!          to the first 12 PETs and the remaining 4 PETs have no DEs locally, unless
 !          an optional {\tt delayout} is provided.
 !     \item[{[decompflagPTile]}]
 !          List of decomposition flags indicating how each dimension of each
@@ -14719,8 +14719,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer                           :: minIndexPTile(:,:)
     integer, pointer                           :: maxIndexPTile(:,:)
     type(ESMF_DistGridConnection), pointer     :: connectionList(:)
-    real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
-    real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtr(:,:), latCornerPtr(:,:)
+    real(kind=ESMF_KIND_R8),  pointer          :: lonPtrR8(:,:), latPtrR8(:,:)
+    real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtrR8(:,:), latCornerPtrR8(:,:)
     real(kind=ESMF_KIND_R4),  pointer          :: lonPtrR4(:,:), latPtrR4(:,:)
     real(kind=ESMF_KIND_R4),  pointer          :: lonCornerPtrR4(:,:), latCornerPtrR4(:,:)
     integer                                    :: tileCount
@@ -14737,9 +14737,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                                    :: s
     logical                                    :: docenter, docorner
     !real(ESMF_KIND_R8)                        :: starttime, endtime
-
-    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
-    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
 
     if (present(rc)) rc=ESMF_SUCCESS
   !------------------------------------------------------------------------
@@ -14934,29 +14931,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (coordTypeKindLocal .eq. ESMF_TYPEKIND_R8) then
            if (docenter) then
              call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-                farrayPtr=lonPtr, rc=localrc)
+                farrayPtr=lonPtrR8, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
              call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-                farrayPtr=latPtr, rc=localrc)
+                farrayPtr=latPtrR8, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rcToReturn=rc)) return
-             allocate(lonPtrR4(count(1), count(2)), latPtrR4(count(1), count(2)))
            endif
            if (docorner) then
              call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtrR8, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
              call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtrR8, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-             shapLon=shape(lonCornerPtr)  ! make sure lhs and rhs is same shape
-             shapLat=shape(latCornerPtr)  ! make sure lhs and rhs is same shape
-             allocate(lonCornerPtrR4(shapLon(1), shapLon(2)), &
-                latCornerPtrR4(shapLat(1),shapLat(2)))
-           endif
+            endif
          else ! ESMF_TYPEKIND_R4
            if (docenter) then
              call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
@@ -14967,6 +14959,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 farrayPtr=latPtrR4, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rcToReturn=rc)) return
+             allocate(lonPtrR8(count(1), count(2)), latPtrR8(count(1), count(2)))
            endif
            if (docorner) then
              call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
@@ -14976,25 +14969,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
                 staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtrR4, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+             shapLon=shape(lonCornerPtrR4)  ! make sure lhs and rhs is same shape
+             shapLat=shape(latCornerPtrR4)  ! make sure lhs and rhs is same shape
+             allocate(lonCornerPtrR8(shapLon(1), shapLon(2)), &
+                  latCornerPtrR8(shapLat(1),shapLat(2)))
            endif
          endif  
          !call ESMF_VMWtime(starttime, rc=localrc)
          ! Generate glocal edge coordinates and local center coordinates
 
          if (docenter .and. docorner) then
-            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
-               latEdge=latCornerPtrR4, start=start, count=count, &
-               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR8, &
+               latEdge=latCornerPtrR8, start=start, count=count, &
+               tile=tile, lonCenter=lonPtrR8, latCenter=latPtrR8, &
                schmidtTransform=transformArgs)
          elseif (docorner) then
-            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
-              latEdge=latCornerPtrR4, start=start, count=count, tile=tile, &
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR8, &
+              latEdge=latCornerPtrR8, start=start, count=count, tile=tile, &
               schmidtTransform=transformArgs)
          else
             call ESMF_UtilCreateCSCoordsPar(tileSize, &
                start=start, count=count, &
-               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
+               tile=tile, lonCenter=lonPtrR8, latCenter=latPtrR8, &
                schmidtTransform=transformArgs)
          endif
 
@@ -15003,38 +15000,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (coordTypeKindLocal .eq. ESMF_TYPEKIND_R8) then
            if (docenter) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonPtr = lonPtrR4 * ESMF_COORDSYS_RAD2DEG
-               latPtr = latPtrR4 * ESMF_COORDSYS_RAD2DEG
-             else
-               ! extra copy, can be optimized
-               lonPtr = lonPtrR4
-               latPtr = latPtrR4
+                lonPtrR8 = lonPtrR8 * ESMF_COORDSYS_RAD2DEG
+                latPtrR8 = latPtrR8 * ESMF_COORDSYS_RAD2DEG
              endif
-             deallocate(lonPtrR4, latPtrR4)
            endif
            if (docorner) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-              lonCornerPtr = lonCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
-              latCornerPtr = latCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
-             else
-              lonCornerPtr = lonCornerPtrR4
-              latCornerPtr = latCornerPtrR4
+                lonCornerPtrR8 = lonCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
+                latCornerPtrR8 = latCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
              endif
-             deallocate(lonCornerPtrR4, latCornerPtrR4)
            endif  
          else ! ESMF_TYPE_KIND_R4
            if (docenter) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonPtrR4 = lonPtrR4 * todeg
-               latPtrR4 = latPtrR4 * todeg
-             endif
-           endif      
+               lonPtrR4 = lonPtrR8 * ESMF_COORDSYS_RAD2DEG
+               latPtrR4 = latPtrR8 * ESMF_COORDSYS_RAD2DEG
+            else
+               lonPtrR4 = lonPtrR8
+               latPtrR4 = latPtrR8
+            endif
+            deallocate(lonPtrR8, latPtrR8)
+          endif
            if (docorner) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonCornerPtrR4 = lonCornerPtrR4 * todeg
-               latCornerPtrR4 = latCornerPtrR4 * todeg
-             endif
-           endif
+               lonCornerPtrR4 = lonCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
+               latCornerPtrR4 = latCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
+            else
+               lonCornerPtrR4 = lonCornerPtrR8
+               latCornerPtrR4 = latCornerPtrR8
+            endif
+            deallocate(lonCornerPtrR8, latCornerPtrR8)
+          endif
          endif
 
       !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
@@ -15182,8 +15178,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer                           :: minIndexPTile(:,:)
     integer, pointer                           :: maxIndexPTile(:,:)
     type(ESMF_DistGridConnection), pointer     :: connectionList(:)
-    real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
-    real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtr(:,:), latCornerPtr(:,:)
+    real(kind=ESMF_KIND_R8),  pointer          :: lonPtrR8(:,:), latPtrR8(:,:)
+    real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtrR8(:,:), latCornerPtrR8(:,:)
     real(kind=ESMF_KIND_R4),  pointer          :: lonPtrR4(:,:), latPtrR4(:,:)
     real(kind=ESMF_KIND_R4),  pointer          :: lonCornerPtrR4(:,:), latCornerPtrR4(:,:)
     integer                                    :: tileCount
@@ -15201,9 +15197,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                                    :: myde, startde, endde
     integer                                    :: tiles, totalelmt
     !real(ESMF_KIND_R8)                        :: starttime, endtime
-
-    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
-    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
 
     if (present(rc)) rc=ESMF_SUCCESS
   !------------------------------------------------------------------------
@@ -15419,28 +15412,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (coordTypeKindLocal .eq. ESMF_TYPEKIND_R8) then
            if (docenter) then
              call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-                farrayPtr=lonPtr, rc=localrc)
+                farrayPtr=lonPtrR8, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
              call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-                farrayPtr=latPtr, rc=localrc)
+                farrayPtr=latPtrR8, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rcToReturn=rc)) return
-             allocate(lonPtrR4(count(1), count(2)), latPtrR4(count(1), count(2)))
            endif
            if (docorner) then
              call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtrR8, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
              call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtrR8, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-             shapLon=shape(lonCornerPtr)  ! make sure lhs and rhs is same shape
-             shapLat=shape(latCornerPtr)  ! make sure lhs and rhs is same shape
-             allocate(lonCornerPtrR4(shapLon(1), shapLon(2)), &
-                latCornerPtrR4(shapLat(1),shapLat(2)))
            endif
          else ! ESMF_TYPEKIND_R4
            if (docenter) then
@@ -15451,7 +15439,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
                 farrayPtr=latPtrR4, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+             allocate(lonPtrR8(count(1), count(2)), latPtrR8(count(1), count(2)))
            endif
            if (docorner) then
              call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
@@ -15461,25 +15450,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
                 staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtrR4, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+             shapLon=shape(lonCornerPtrR4)  ! make sure lhs and rhs is same shape
+             shapLat=shape(latCornerPtrR4)  ! make sure lhs and rhs is same shape
+             allocate(lonCornerPtrR8(shapLon(1), shapLon(2)), &
+                  latCornerPtrR8(shapLat(1),shapLat(2)))
            endif
          endif  
          !call ESMF_VMWtime(starttime, rc=localrc)
          ! Generate glocal edge coordinates and local center coordinates
 
          if (docenter .and. docorner) then
-            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
-               latEdge=latCornerPtrR4, start=start, count=count, &
-               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR8, &
+               latEdge=latCornerPtrR8, start=start, count=count, &
+               tile=tile, lonCenter=lonPtrR8, latCenter=latPtrR8, &
                schmidtTransform=transformArgs)
          elseif (docorner) then
-            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
-              latEdge=latCornerPtrR4, start=start, count=count, tile=tile, &
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR8, &
+              latEdge=latCornerPtrR8, start=start, count=count, tile=tile, &
               schmidtTransform=transformArgs)
          else
             call ESMF_UtilCreateCSCoordsPar(tileSize, &
                start=start, count=count, &
-               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4, &
+               tile=tile, lonCenter=lonPtrR8, latCenter=latPtrR8, &
                schmidtTransform=transformArgs)
          endif
 
@@ -15488,37 +15481,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (coordTypeKindLocal .eq. ESMF_TYPEKIND_R8) then
            if (docenter) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonPtr = lonPtrR4 * ESMF_COORDSYS_RAD2DEG
-               latPtr = latPtrR4 * ESMF_COORDSYS_RAD2DEG
-             else
-               ! extra copy, can be optimized
-               lonPtr = lonPtrR4
-               latPtr = latPtrR4
+               lonPtrR8 = lonPtrR8 * ESMF_COORDSYS_RAD2DEG
+               latPtrR8 = latPtrR8 * ESMF_COORDSYS_RAD2DEG
              endif
-             deallocate(lonPtrR4, latPtrR4)
            endif
            if (docorner) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-              lonCornerPtr = lonCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
-              latCornerPtr = latCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
-             else
-              lonCornerPtr = lonCornerPtrR4
-              latCornerPtr = latCornerPtrR4
+              lonCornerPtrR8 = lonCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
+              latCornerPtrR8 = latCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
              endif
-             deallocate(lonCornerPtrR4, latCornerPtrR4)
            endif  
          else ! ESMF_TYPE_KIND_R4
            if (docenter) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonPtrR4 = lonPtrR4 * todeg
-               latPtrR4 = latPtrR4 * todeg
-             endif
-           endif      
+               lonPtrR4 = lonPtrR8 * ESMF_COORDSYS_RAD2DEG
+               latPtrR4 = latPtrR8 * ESMF_COORDSYS_RAD2DEG
+            else
+               lonPtrR4 = lonPtrR8
+               latPtrR4 = latPtrR8
+            endif
+            deallocate(lonPtrR8, latPtrR8)
+          endif
            if (docorner) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonCornerPtrR4 = lonCornerPtrR4 * todeg
-               latCornerPtrR4 = latCornerPtrR4 * todeg
-             endif
+               lonCornerPtrR4 = lonCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
+               latCornerPtrR4 = latCornerPtrR8 * ESMF_COORDSYS_RAD2DEG
+            else
+               lonCornerPtrR4 = lonCornerPtrR8
+               latCornerPtrR4 = latCornerPtrR8
+            endif
+            deallocate(lonCornerPtrR8, latCornerPtrR8)
            endif
          endif
 
@@ -15790,16 +15782,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The name of the GRIDSPEC Mosaic file.
 !     \item[{[regDecompPTile]}]
 !          List of DE counts for each dimension. The second index steps through
-!          the tiles. The total {\tt deCount} is determined as th sum over
+!          the tiles. The total {\tt deCount} is determined as the sum over
 !          the products of {\tt regDecompPTile} elements for each tile.
 !          By default every tile is decomposed in the same way.  If the total
-!          PET count is less than 6, one tile will be assigned to one DE and the DEs
+!          PET count is less than the tile count, one tile will be assigned to one DE and the DEs
 !          will be assigned to PETs sequentially, therefore, some PETs may have
-!          more than one DEs.  If the total PET count is greater than 6, the total
-!          number of DEs will be multiple of 6 and less than or equal to the total
-!          PET count.  For instance, if the total PET count is 16, the total DE count
+!          more than one DE.  If the total PET count is greater than the tile count, the total
+!          number of DEs will be a multiple of the tile count and less than or equal to the total
+!          PET count.  For instance, if the total PET count is 16 and the tile count is 6, the total DE count
 !          will be 12 with each tile decomposed into 1x2 blocks.  The 12 DEs are mapped
-!          to the first 12 PETs and the remainding 4 PETs have no DEs locally, unless
+!          to the first 12 PETs and the remaining 4 PETs have no DEs locally, unless
 !          an optional {\tt delayout} is provided.
 !     \item[{[decompflagPTile]}]
 !          List of decomposition flags indicating how each dimension of each
@@ -15876,8 +15868,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Mosaic)                          :: mosaic
     integer                                    :: totallen
     integer                                    :: posVec(2), orientVec(2)
-    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
-    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
     integer                                    :: regDecomp(2)
     type(ESMF_Decomp_Flag)                     :: decompflag(2)
     type(ESMF_Index_Flag)                      :: localIndexFlag
@@ -15956,8 +15946,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     enddo
 
   !------------------------------------------------------------------------
-  ! default decomposition. The number of DEs has to be multiple of 6.
-  ! If the total PET count is less than 6, some PETs will get more than one DE.
+  ! default decomposition. The number of DEs has to be multiple of the tile count.
+  ! If the total PET count is less than the tile count, some PETs will get more than one DE.
   ! Otherwise, total DEs is always less than or equal to total PETs.
 
     if (PetCnt < tileCount) then
@@ -16416,8 +16406,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Mosaic)                          :: mosaic
     integer                                    :: totallen
     integer                                    :: posVec(2), orientVec(2)
-    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
-    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
     type(ESMF_Index_Flag)                      :: localIndexFlag
     logical                                    :: isGlobal
     integer, pointer                           :: deBlockList(:,:,:), deToTileMap(:)

@@ -91,32 +91,82 @@ the internal consistency of a Field object.
 \subsection{Deep and Shallow Classes}
 \label{sec:deepshallow}
 
-The ESMF contains two types of classes.
+ESMF contains two types of classes.
 
 {\bf Deep} classes require
 {\tt ESMF\_<Class>Create()} and {\tt ESMF\_<Class>Destroy()} calls.
 They involve memory allocation, take significant time to set up (due to
 memory management) and should not be created in a time-critical portion of code.
 Deep objects persist even after the method in which they were created has
-returned. Most classes in ESMF, including GridComp, CplComp, State, Fields, FieldBundles, Arrays, ArrayBundles, Grids, and Clocks, fall into this category.
+returned. Most classes in ESMF, including GridComp, CplComp, State, Fields,
+FieldBundles, Arrays, ArrayBundles, Grids, and Clocks, fall into this category.
 
 {\bf Shallow} classes do not possess {\tt ESMF\_<Class>Create()}
 and {\tt ESMF\_<Class>Destroy()} calls.  They are simply declared
 and their values set using an {\tt ESMF\_<Class>Set()} call.  
-Examples of shallow classes are Time, TimeInterval, and ArraySpec.  Shallow classes do not take long to set up and can be declared and set within
-a time-critical code segment.  Shallow objects stop existing when
-the method in which they were declared has returned.  
+Examples of shallow classes are Time, TimeInterval, and ArraySpec.
+Shallow classes do not take long to set up and can be declared and set within
+a time-critical code segment.  Shallow objects stop existing when execution
+goes out of the declaring scope.
 
 An exception to this is when a shallow object, such as a Time, 
-is stored in a deep object such as a Clock.  The Clock then
-carries a copy of the Time in persistent memory.  The Time is
-deallocated with the {\tt ESMF\_ClockDestroy()} call.
+is stored in a deep object such as a Clock.  The deep Clock object then
+becomes the declaring scope of the Time object, persisting in memory.
+The Time object is deallocated with the {\tt ESMF\_ClockDestroy()} call.
 
 See Section \ref{sec:overallimpl}, Overall Design and Implementation 
 Notes, for a brief discussion of deep and shallow classes from 
 an implementation perspective.  For an in-depth look at the design 
 and inter-language issues related to deep and shallow classes,
 see the \htmladdnormallink{{\it ESMF Implementation Report}}{http://www.earthsystemmodeling.org/documents/IMPL\_repdoc/}.
+
+\subsection{Aliases and Named Aliases}
+\label{sec:aliases}
+
+Deep objects, i.e. instances of ESMF deep classes created by the appropriate
+{\tt ESMF\_<Class>Create()}, can be used with the standard assignment (=),
+equality (==), and not equal (/=) operators.
+
+The assignment
+\begin{verbatim}
+deep2 = deep1
+\end{verbatim}
+makes {\tt deep2} an {\bf alias} of {\tt deep1}, meaning that both variables
+reference the same deep allocation in memory. Many aliases of the same deep
+object can be created.
+
+All the aliases of a deep object are equivalent. In particular, there is no
+distinction between the variable on the left hand side of the actual
+{\tt ESMF\_<Class>Create()} call, and any aliases created from it. All actions
+taken on any of the aliases of a deep object affect the deep object, and thus
+all other aliases.
+
+The equality and not equal operators for deep objects are implemented as simple
+alias checks. For a more general comparison of two distinct deep objects, a
+deep class might provide the {\tt ESMF\_<Class>Match()} method.
+
+ESMF provides the concept of a {\bf named alias}. A named alias behaves just
+like an alias in all aspects, except when it comes to setting and getting the
+{\em name} of the deep object it is associated with. While regular aliases
+all access the same name string in the actual deep object, a named alias keeps
+its private name string. This allows the same deep object to be known under a
+different name in different contexts.
+
+The assignment
+\begin{verbatim}
+deep2 = ESMF_NamedAlias(deep1)
+\end{verbatim}
+makes {\tt deep2} a {\bf named alias} of {\tt deep1}. Any {\em name} changes on
+{\tt deep2} only affect {\tt deep2}. However, the {\em name} retrieved from
+{\tt deep1}, or from any regular aliases created from {\tt deep1}, is
+unaffected.
+
+Notice that aliases generated from a named alias are again named aliases. This
+is true even when using the regular assignment operator with a named alias on
+the right hand side. Named aliases own their unique name string that cannot
+be accessed or altered through any other alias.
+
+\input{../Superstructure/NamedAlias/doc/ESMF_NamedAlias_fapi}
 
 \subsection{Special Methods}
 

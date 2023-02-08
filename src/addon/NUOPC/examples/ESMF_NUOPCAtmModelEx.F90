@@ -23,16 +23,16 @@
 ! \textbf{Finding More NUOPC Code Examples}
 ! \\
 ! In addition to the example code in this section, the
-! \htmladdnormallink{NUOPC Prototypes Subversion}{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/}
+! \htmladdnormallink{NUOPC Prototypes}{https://github.com/esmf-org/nuopc-app-prototypes}
 ! repository contains many small example applications that are helpful
 ! for understanding the architecture of NUOPC applications and showing
 ! example uses of the NUOPC API.  These example applications can be
 ! compiled and executed on your system.
 !
 ! A good starting point is the
-! \htmladdnormallink{SingleModelProto application}{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/SingleModelProto},
+! \htmladdnormallink{SingleModelProto application}{https://github.com/esmf-org/nuopc-app-prototypes/tree/develop/SingleModelProto},
 ! which includes a single Model with a Driver and the
-! \htmladdnormallink{AtmOcnProto application}{https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/tags/ESMF\_7\_0\_0/AtmOcnProto}
+! \htmladdnormallink{AtmOcnProto application}{https://github.com/esmf-org/nuopc-app-prototypes/tree/develop/AtmOcnProto}
 ! which includes two Models, a Connector, and a Driver.
 !
 ! \subsection{Module Imports}
