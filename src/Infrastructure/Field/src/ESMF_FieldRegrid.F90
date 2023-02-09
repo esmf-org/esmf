@@ -1168,6 +1168,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   dstMesh, dstArray, dstPointList, dstUsingPointList, &
                                   lregridmethod, &
                                   localLineType,localNormType, &
+                                  localVectorRegrid, &
                                   localpolemethod, localRegridPoleNPnts, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
@@ -1199,6 +1200,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   dstMesh, dstArray, dstPointList, dstUsingPointList, &
                                   lregridmethod, &
                                   localLineType, localNormType, &
+                                  localVectorRegrid, &
                                   localpolemethod, localRegridPoleNPnts, &
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &

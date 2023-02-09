@@ -88,8 +88,9 @@ void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
                      Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
                      int *regridMethod,
-                      int *map_type,
+                     int *map_type,
                      int *norm_type,
+                     int *_vectorRegrid, 
                      int *regridPoleType, int *regridPoleNPnts,
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
@@ -141,7 +142,13 @@ void ESMCI_regrid_create(
     ESMCI::Par::Init("MESHLOG", false, VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;  // bail out with exception
     
+    // transalate vectorRegrid to C++ bool
+    bool vectorRegrid=false;
+    if (*_vectorRegrid == 1) vectorRegrid=true;
 
+    if (vectorRegrid) printf("vectorRegrid is on!!!\n");
+
+    
     // transalate ignoreDegenerate to C++ bool
     bool ignoreDegenerate=false;
     if (*_ignoreDegenerate == 1) ignoreDegenerate=true;
@@ -150,6 +157,7 @@ void ESMCI_regrid_create(
     bool checkFlag=false;
     if (*_checkFlag == 1) checkFlag=true;
 
+    
     // Output Warning message about checkFlag
     if (checkFlag){
       ESMC_LogDefault.Write("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",

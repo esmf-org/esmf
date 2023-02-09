@@ -44824,6 +44824,7 @@ end subroutine test_regridSMMArbGrid
   call ESMF_FieldRegridStore( &
           srcField, &
           dstField=dstField, &
+          vectorRegrid=.true., & 
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
