@@ -3066,8 +3066,10 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
     logical,                  pointer :: zapFlag(:)
     character(len=ESMF_MAXSTR)        :: thisname
     character(len=ESMF_MAXSTR)        :: name
-    type(ESMF_Field)                  :: tempField, tempFieldAlloc
-    type(ESMF_FieldBundle)            :: tempFB, tempFBAlloc
+    type(ESMF_Field)                  :: tempField
+    type(ESMF_FieldType)              :: tempFieldType
+    type(ESMF_FieldBundle)            :: tempFB
+    type(ESMF_FieldBundleType)        :: tempFBType
     character(len=80)                 :: msgString
 
     ! Initialize return code; assume routine not implemented
@@ -3085,9 +3087,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    allocate(tempFieldAlloc%ftypep)
-    allocate(tempFBAlloc%this)
-
 #ifdef RECONCILE_ZAP_LOG_on
     call ESMF_VMLogGarbageInfo(prefix="ZappedProxies bef: ", &
       logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
@@ -3098,6 +3097,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_DEBUG, rc=localrc)
       call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): have lists", &
         ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
+
       do i=1, size(itemList)
         if (itemList(i)%si%proxyFlag .and. &
           (itemList(i)%si%otype==ESMF_STATEITEM_FIELD .or. &
@@ -3152,10 +3152,10 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found Field: "//trim(name), &
                   ! re-reconciled, and the same proxies are needed. Basically
                   ! a user should be able to hang on to a proxy.
                   tempField%ftypep => itemList(i)%si%datap%fp%ftypep
-                  tempFieldAlloc%ftypep = zapList(k)%si%datap%fp%ftypep
+                  tempFieldType = zapList(k)%si%datap%fp%ftypep
                   zapList(k)%si%datap%fp%ftypep = itemList(i)%si%datap%fp%ftypep
                   itemList(i)%si%datap%fp%ftypep => zapList(k)%si%datap%fp%ftypep
-                  tempField%ftypep = tempFieldAlloc%ftypep
+                  tempField%ftypep = tempFieldType
                   ! Finally destroy the old Field internals
                   ESMF_INIT_SET_CREATED(tempField)
                   call ESMF_FieldDestroy(tempField, noGarbage=.true., rc=localrc)
@@ -3188,10 +3188,10 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
                   ! re-reconciled, and the same proxies are needed. Basically
                   ! a user should be able to hang on to a proxy.
                   tempFB%this => itemList(i)%si%datap%fbp%this
-                  tempFBAlloc%this = zapList(k)%si%datap%fbp%this
-                  zapList(k)%si%datap%fbp%this = itemList(i)%si%datap%fbp%this
+                  call ESMF_FieldBundleTypeDeepCopy(zapList(k)%si%datap%fbp%this, tempFBType)
+                  call ESMF_FieldBundleTypeDeepCopy(itemList(i)%si%datap%fbp%this, zapList(k)%si%datap%fbp%this)
                   itemList(i)%si%datap%fbp%this => zapList(k)%si%datap%fbp%this
-                  tempFB%this = tempFBAlloc%this
+                  call ESMF_FieldBundleTypeDeepCopy(tempFBType, tempFB%this)
                   ! Finally destroy the old FieldBundle internals
                   ESMF_INIT_SET_CREATED(tempFB)
                   call ESMF_FieldBundleDestroy(tempFB, noGarbage=.true., &
@@ -3203,6 +3203,7 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
                   ! deallocate the associated StateItem
                   deallocate(zapList(k)%si)
                 end if
+
               end if
             end if
           end do ! k
@@ -3240,9 +3241,6 @@ call ESMF_LogWrite("ESMF_ReconcileZappedProxies(): found FieldBundle: "//trim(na
     call ESMF_VMLogGarbageInfo(prefix="ZappedProxies aft: ", &
       logMsgFlag=ESMF_LOGMSG_DEBUG, rc=localrc)
 #endif
-
-    deallocate(tempFieldAlloc%ftypep)
-    deallocate(tempFBAlloc%this)
 
     if (associated (itemList)) then
       deallocate(itemList, stat=memstat)
