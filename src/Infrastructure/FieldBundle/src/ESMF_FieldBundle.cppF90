@@ -219,7 +219,7 @@ module ESMF_FieldBundleMod
 ! - ESMF-internal methods:
   public ESMF_FieldBundleGetInit
   public ESMF_FieldBundleDestruct
-
+  public ESMF_FieldBundleTypeDeepCopy
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -7826,5 +7826,18 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_DEBUG, rc=rc)
       concatName(len(str)+1:len(str)+len(delim)) = delim
       concatName(len(str)+len(delim)+1:) = append
     end function
+
+!------------------------------------------------------------------------------
+
+  subroutine ESMF_FieldBundleTypeDeepCopy(in, out)
+    type(ESMF_FieldBundleType)        :: in, out
+    out%base       = in%base
+    out%geombase   = in%geombase
+    out%container  = in%container
+    out%status     = in%status
+    out%is_proxy   = in%is_proxy
+    out%is_packed  = in%is_packed
+    call move_alloc(in%encodeName, out%encodeName)  ! this seems critical for Intel 21.7.1 and up!
+  end subroutine
 
 end module ESMF_FieldBundleMod
