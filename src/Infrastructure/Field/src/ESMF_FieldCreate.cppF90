@@ -1890,7 +1890,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_GeomBase) :: geombase
-    type(ESMF_StaggerLoc)  :: localStaggerLoc
     type(ESMF_Index_Flag)   :: g_indexflag
     type(ESMF_GridDecompType) :: decompType
 
@@ -1934,23 +1933,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    ! Set default values.
+    ! Error check staggerloc
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-          (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-           return
-         else
-            localStaggerloc=staggerloc
-         endif
-    else
-       localStaggerLoc = ESMF_STAGGERLOC_CENTER
+            (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+               msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
     endif
-
+       
     ! Create GeomBase from Grid
-    geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)
+    geombase=ESMF_GeomBaseCreate(grid, staggerloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2101,7 +2096,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc                       !  Local error code
     type(ESMF_GeomBase) :: geombase
-    type(ESMF_StaggerLoc) :: localStaggerloc
     type(ESMF_GridDecompType) :: decompType
     type(ESMF_Pointer)                    :: vmThis
     logical                               :: actualFlag
@@ -2144,27 +2138,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
       endif
 
-      ! Set default values.
+      ! Error check staggerloc
       if (present(staggerloc)) then
          if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-            (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-                   msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &
-                   ESMF_CONTEXT, rcToReturn=rc)
-             return
-           else
-              localStaggerloc=staggerloc
-           endif
-      else
-         localStaggerLoc = ESMF_STAGGERLOC_CENTER
+              (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return
+         endif
       endif
-
+          
       ! Create GeomBase from Grid
-      geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)
+      geombase=ESMF_GeomBaseCreate(grid, staggerloc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-    endif ! - actualFlag
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      
+   endif ! - actualFlag
 
     ! Create Field from GeomBase
     ESMF_FieldCreateGridArray=ESMF_FieldCreateGBArray(geombase, array, datacopyflag, &
@@ -2351,7 +2341,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
-    type(ESMF_StaggerLoc) :: localStaggerloc@\
     type(ESMF_GridDecompType)      :: decompType @\
 @\
     ! Initialize @\
@@ -2379,7 +2368,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            return @\
         endif @\
     endif @\
-    ! Set default values.  @\
+    ! Error check staggerloc  @\
     if (present(staggerloc)) then @\
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
           (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
@@ -2387,15 +2376,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
                  ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
-         else @\
-            localStaggerloc=staggerloc @\
          endif @\
-    else   @\
-       localStaggerLoc = ESMF_STAGGERLOC_CENTER   @\
     endif   @\
 @\
     ! Create GeomBase from Grid@\
-    geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)@\
+    geombase=ESMF_GeomBaseCreate(grid, staggerloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
       ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
@@ -2558,7 +2543,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
-    type(ESMF_StaggerLoc) :: localStaggerloc@\
     type(ESMF_GridDecompType)      :: decompType @\
 @\
     ! Initialize @\
@@ -2585,8 +2569,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
         endif @\
-    endif @\
-    ! Set default values.  @\
+     endif@\
+    ! Error check staggerloc  @\     
     if (present(staggerloc)) then @\
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
           (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
@@ -2594,15 +2578,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
              ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
-         else @\
-            localStaggerloc=staggerloc @\
          endif @\
-    else   @\
-       localStaggerLoc = ESMF_STAGGERLOC_CENTER   @\
     endif   @\
 @\
     ! Create GeomBase from Grid@\
-    geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)@\
+    geombase=ESMF_GeomBaseCreate(grid, staggerloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
       ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\

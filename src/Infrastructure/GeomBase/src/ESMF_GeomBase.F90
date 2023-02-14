@@ -432,9 +432,9 @@ end interface
       type(ESMF_GeomBase) :: ESMF_GeomBaseCreateGrid
 !
 ! !ARGUMENTS:
-       type(ESMF_Grid),       intent(in)              :: grid
-       type(ESMF_StaggerLoc), intent(in)              :: staggerloc
-       integer,               intent(out),  optional  :: rc
+       type(ESMF_Grid),       intent(in)             :: grid
+       type(ESMF_StaggerLoc), intent(in), optional   :: staggerloc
+       integer,               intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_GeomBase} object from an {\tt ESMF\_Grid} object.
@@ -444,26 +444,37 @@ end interface
 ! \begin{description}
 ! \item[grid]
 !      {\tt ESMF\_Grid} object to create the Grid Base from.
-! \item[staggerloc]
-!       StaggerLoc on the Grid to create the Grid Base object on.
+! \item [{[staggerloc]}]
+!       Stagger location of data in grid cells.  For valid
+!       predefined values see section \ref{const:staggerloc}.
+!       If not specified, defaults to {\tt ESMF\_STAGGERLOC\_CENTER}.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-  !
+!
 !EOPI
     type(ESMF_GeomBaseClass),pointer :: gbcp
+    type(ESMF_StaggerLoc)  :: localStaggerLoc
     integer :: localrc ! local error status
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
+       
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
 
+    ! Set default staggerloc
+    if (present(staggerloc)) then   
+       localStaggerloc=staggerloc
+    else
+       localStaggerLoc = ESMF_STAGGERLOC_CENTER
+    endif
+
+
     ! initialize pointers
     nullify(gbcp)
-    nullify( ESMF_GeomBaseCreateGrid%gbcp)
+    nullify(ESMF_GeomBaseCreateGrid%gbcp)
 
     ! allocate GeomBase type
     allocate(gbcp, stat=localrc)
@@ -473,7 +484,7 @@ end interface
     ! Set values in GeomBase
     gbcp%type = ESMF_GEOMTYPE_GRID
     gbcp%grid = grid
-    gbcp%staggerloc = staggerloc
+    gbcp%staggerloc = localStaggerloc
 
     ! Set GeomBase Type into GeomBase
      ESMF_GeomBaseCreateGrid%gbcp=>gbcp
