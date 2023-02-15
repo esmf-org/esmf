@@ -91,7 +91,11 @@ To use ESMPy in an external program, import it with:
 
     import esmpy
 
-The environment variable ``ESMFMKFILE`` must be set when to use ESMPy.
+The environment variable ``ESMFMKFILE`` must be set when using ESMPy.
+
+.. Note::
+
+   The Python module name for ESMPy was changed in v8.4.0 from "ESMF" to "esmpy". If you are using a version older than v8.4.0, the import command is ``import ESMF``. See the `ESMF Release Notes <http://earthsystemmodeling.org/static/releases.html>`_ for more details and links to previous versions of the ESMPy documentation.
 
 ----------
 Validation
