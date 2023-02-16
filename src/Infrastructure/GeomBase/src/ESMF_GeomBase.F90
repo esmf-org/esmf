@@ -505,15 +505,14 @@ end interface
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GeomBaseCreate()
-      function ESMF_GeomBaseCreateMesh(mesh, indexflag, loc, rc)
+      function ESMF_GeomBaseCreateMesh(mesh, meshLoc, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GeomBase) :: ESMF_GeomBaseCreateMesh
 !
 ! !ARGUMENTS:
        type(ESMF_Mesh),       intent(in)              :: mesh
-       type(ESMF_Index_Flag), intent(in),  optional   :: indexflag
-       type(ESMF_MeshLoc),    intent(in),  optional   :: loc
+       type(ESMF_MeshLoc),    intent(in),  optional   :: meshLoc
        integer,               intent(out), optional   :: rc
 !
 ! !DESCRIPTION:
@@ -531,8 +530,7 @@ end interface
 !EOPI
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer                          :: localrc ! local error status
-    type(ESMF_MeshLoc)               :: localLoc
-    type(ESMF_Index_Flag)            :: loc_indexflag
+    type(ESMF_MeshLoc)               :: localMeshLoc
     type(ESMF_DistGrid)              :: distgrid
     logical                          :: isPresent
     type(ESMF_Pointer)               :: dgThis
@@ -554,81 +552,18 @@ end interface
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default
-    if (present(loc)) then
-       localLoc=loc
+    if (present(meshLoc)) then
+       localMeshLoc=meshLoc
     else
-       localLoc=ESMF_MESHLOC_NODE
+       localMeshLoc=ESMF_MESHLOC_NODE
     endif
 
-!TODO: The following block for checking the indexflag is commented out for two
-!TODO: reasons:
-!TODO: (1) During the NUOPC Mesh transfer protocol, the acceptor side is allowed
-!TODO:     to use MeshEmptyCreate() for the new (redistributed) Mesh on either
-!TODO:     the nodal, element, or both DistGrids. Eventually the 
-!TODO:     MeshEmptyComplete() will autogenerate "the other" DistGrid as needed,
-!TODO:     but it won't be available for the immediate FieldEmptySet() that is
-!TODO:     used for the tranfer protocol.
-!TODO: (2) Fundamentally, passing the indexflag from the field down into the
-!TODO:     GeomBaseCreate() seems problematic. It is not required that the 
-!TODO:     GeomBase have the same indexflag as the Field. Just that it can
-!TODO:     support the Field indexflag. E.g. a GeomObject with ESMF_INDEX_GLOBAL
-!TODO:     supports Fields with any indexflag.
-#if 0
-    if(localLoc == ESMF_MESHLOC_NODE) then
-      call ESMF_MeshGet(mesh, nodalDistgridIsPresent=isPresent, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if(.not. isPresent) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-          msg="- mesh does not have a distgrid for user supplied nodal meshloc", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-      call ESMF_MeshGet(mesh, nodalDistgrid=distgrid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else if(localLoc == ESMF_MESHLOC_ELEMENT) then
-      call ESMF_MeshGet(mesh, elementDistgridIsPresent=isPresent, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if(.not. isPresent) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-          msg="- mesh does not have a distgrid for user supplied element meshloc", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-      call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! See if there is a valid DistGrid object on this PET - might not be during
-    ! transfer.
-    call ESMF_DistGridGetThis(distgrid, dgThis, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (dgThis/=ESMF_NULL_POINTER) then
-      ! for valid DistGrid object ensure that indexflag matches
-      call ESMF_DistGridGet(distgrid, indexflag=loc_indexflag, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      if(present(indexflag)) then
-        if(indexflag /= loc_indexflag) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-            msg="- user supplied indexflag does not match indexflag in Mesh/Distgrid ", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
-      endif
-    endif
-#endif
 
     ! TODO: properly handle the indexflag information for Mesh
     ! Set values in GeomBase
     gbcp%type = ESMF_GEOMTYPE_MESH
     gbcp%mesh = mesh
-    gbcp%meshloc = localLoc
+    gbcp%meshloc = localMeshLoc
 
     ! Set GeomBase Type into GeomBase
      ESMF_GeomBaseCreateMesh%gbcp=>gbcp
