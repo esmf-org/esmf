@@ -13,7 +13,7 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 LIBBASE	  = libesmf
-LOCDIR	  = src/Infrastructure/GeomBase/interface
+LOCDIR	  = src/Infrastructure/Geom/interface
 
 CLEANDIRS   =
 CLEANFILES  =

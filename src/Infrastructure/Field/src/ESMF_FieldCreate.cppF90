@@ -3597,7 +3597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
     ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh, indexflag=indexflag, loc=meshloc,  rc=localrc)
+    geombase=ESMF_GeomBaseCreate(mesh, meshLoc=meshloc,  rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3735,7 +3735,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
     ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh, loc=meshloc, rc=localrc)
+    geombase=ESMF_GeomBaseCreate(mesh, meshLoc=meshloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3898,7 +3898,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
 @\
     ! Create GeomBase from Mesh@\
-    geombase=ESMF_GeomBaseCreate(mesh, indexflag=indexflag, loc=meshloc, rc=localrc)@\
+    geombase=ESMF_GeomBaseCreate(mesh, meshLoc=meshloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
       ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
@@ -4041,7 +4041,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
 @\
     ! Create GeomBase from Mesh@\
-    geombase=ESMF_GeomBaseCreate(mesh, loc=meshloc, rc=localrc)@\
+    geombase=ESMF_GeomBaseCreate(mesh, meshLoc=meshloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
       ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\

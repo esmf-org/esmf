@@ -501,7 +501,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
 
      ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh, loc=meshloc, rc=localrc)
+    geombase=ESMF_GeomBaseCreate(mesh, meshLoc=meshloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
