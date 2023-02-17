@@ -82,12 +82,20 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray);
 void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
+// Get information about vector dimensions for vectorRegrid capability
+// TODO: move below
+static void _get_vector_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vector_dims, int *vector_dims) {
 
-static void _get_tensor_dims_for_vectorRegrid(ESMCI::Array *array, int *tensor_dims) {
+  // Get undisributed dimension sizes
+  const int *undistLBound=array.getUndistLBound();
+  const int *undistUBound=array.getUndistUBound();
 
-  
-  
-  
+  // We error checked earlier that there is only one undist bound, but double check here that these aren't NULL
+  ThrowRequire(undistLBound != NULL);
+  ThrowRequire(undistUBound != NULL);
+
+  // Calculate size of vector dims
+  num_vector_dims=undistUBound[0]-undistLBound[0]+1;
 }
 
 
@@ -266,6 +274,39 @@ void ESMCI_regrid_create(
     }
 
 
+
+
+    // Get vectorRegrid dims
+    // TODO: Move to a better place
+    if (vectorRegrid) {
+
+      // Get src info
+      int src_num_vector_dims;
+      int src_vector_dims[ESMF_MAXDIM];
+      _get_vector_dims_for_vectorRegrid(srcarray, src_num_vector_dims, src_vector_dims);
+      printf("src_num_vector_dims=%d\n",src_num_vector_dims);      
+
+      // Get dst info
+      int dst_num_vector_dims;
+      int dst_vector_dims[ESMF_MAXDIM];
+      _get_vector_dims_for_vectorRegrid(dstarray, dst_num_vector_dims, dst_vector_dims);
+      printf("dst_num_vector_dims=%d\n",dst_num_vector_dims);      
+
+      // The size of the dimensions must match
+      if (src_num_vector_dims != dst_num_vector_dims) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                  "The srcField and the dstField must have the same size ungridded dimension to use vector regridding.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+      
+    }
+
+
+
+
+
+
+    
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
 #endif
@@ -402,6 +443,7 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate4.0"));
 #endif
 
+    
     /////// We have the weights, now set up the sparsemm object /////
 
     // Firstly, the index list
