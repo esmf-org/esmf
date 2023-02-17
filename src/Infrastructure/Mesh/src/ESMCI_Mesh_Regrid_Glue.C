@@ -83,6 +83,14 @@ void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI:
 void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array);
 
 
+static void _get_tensor_dims_for_vectorRegrid(ESMCI::Array *array, int *tensor_dims) {
+
+  
+  
+  
+}
+
+
 
 void ESMCI_regrid_create(
                      Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
@@ -202,6 +210,24 @@ void ESMCI_regrid_create(
       }
     }
 
+    /// vectorRegrid currently only supported with 1 ungridded dim
+    if (vectorRegrid) {
+
+      // Check src
+      if (srcarray.getTensorCount() != 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "srcField must have exactly 1 ungridded dimension to use vector regridding.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+
+      // Check dst
+      if (dstarray.getTensorCount() != 1) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                         "dstField must have exactly 1 ungridded dimension to use vector regridding.",
+                                         ESMC_CONTEXT, &localrc)) throw localrc;
+      }
+    }
+    
     
      //// Precheck Meshes for errors
     bool degenerate=false;
