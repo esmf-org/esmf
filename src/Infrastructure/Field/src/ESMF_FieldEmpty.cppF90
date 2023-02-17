@@ -38,7 +38,7 @@ module ESMF_FieldEmptyMod
   use ESMF_XGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_ArrayMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
@@ -65,7 +65,7 @@ module ESMF_FieldEmptyMod
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldEmptySet - Set a Geombase object in an empty Field
+! !IROUTINE: ESMF_FieldEmptySet - Set a Geom object in an empty Field
 !
 ! !INTERFACE:
   interface ESMF_FieldEmptySet
@@ -78,8 +78,8 @@ module ESMF_FieldEmptyMod
     module procedure ESMF_FieldEmptySetXGrid
 
 ! !DESCRIPTION:
-!   This interface sets a {\tt ESMF\_GeomBase} object in an empty {\tt ESMF\_Field}.
-!   The geombase object can take {\tt ESMF\_Grid}, or {\tt ESMF\_LocStream}, or {\tt ESMF\_Mesh},
+!   This interface sets a {\tt ESMF\_Geom} object in an empty {\tt ESMF\_Field}.
+!   The geom object can take {\tt ESMF\_Grid}, or {\tt ESMF\_LocStream}, or {\tt ESMF\_Mesh},
 !   or {\tt ESMF\_XGrid}.
   end interface
 !EOPI
@@ -241,7 +241,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
-    type(ESMF_GeomBase)       :: geombase
+    type(ESMF_Geom)       :: geom
     type(ESMF_Index_Flag)      :: g_indexflag
     type(ESMF_GridDecompType) :: decompType
     type(ESMF_GeomType_Flag)       :: geomtype
@@ -265,13 +265,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(status /= ESMF_FIELDSTATUS_GRIDSET) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-        msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", &
+        msg="- can only use ESMF_FieldEmptyComplete with Fields having geom set", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
-    geombase=field%ftypep%geombase
-    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc)
+    geom=field%ftypep%geom
+    call ESMF_GeomGet(geom, geomtype=geomtype, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -279,7 +279,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Here is where different handling of geomtype class branches off
     if(geomtype == ESMF_GEOMTYPE_GRID) then
 
-      call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
+      call ESMF_GeomGet(geom, grid=grid, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -312,8 +312,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       endif
 
-      ! Create Field from GeomBase
-      call ESMF_FieldEmptyGBArraySpec(field, geombase, &
+      ! Create Field from Geom
+      call ESMF_FieldEmptyGBArraySpec(field, geom, &
           arrayspec, gridToFieldMap=gridToFieldMap, &
           ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
           totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -334,7 +334,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       endif
 
-      call ESMF_FieldConstructIANew(field%ftypep, geombase, arrayspec, &
+      call ESMF_FieldConstructIANew(field%ftypep, geom, arrayspec, &
                             gridToFieldMap=gridToFieldMap, &
                             ungriddedLBound=ungriddedLBound, &
                             ungriddedUBound=ungriddedUBound, &
@@ -486,7 +486,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec) :: arrayspec
     integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
     integer :: memDimCount
-    type(ESMF_GeomBase)       :: geombase
+    type(ESMF_Geom)       :: geom
     type(ESMF_GeomType_Flag)       :: geomtype
     type(ESMF_Grid)           :: grid
     type(ESMF_FieldStatus_Flag)    :: status
@@ -507,13 +507,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(status /= ESMF_FIELDSTATUS_GRIDSET) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-        msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", &
+        msg="- can only use ESMF_FieldEmptyComplete with Fields having geom set", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
-    geombase=field%ftypep%geombase
-    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc)
+    geom=field%ftypep%geom
+    call ESMF_GeomGet(geom, geomtype=geomtype, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -541,7 +541,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rank = ungridded_dimcount + 1
     if(geomtype == ESMF_GEOMTYPE_GRID) then
 
-      call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
+      call ESMF_GeomGet(geom, grid=grid, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -576,16 +576,16 @@ end subroutine ESMF_FieldEmptyCompTK
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldEmptyGBArraySpec"
 !BOPI
-! !IROUTINE:   ESMF_FieldEmptyGBArraySpec - Complete a Field from Geombase and ArraySpec.
+! !IROUTINE:   ESMF_FieldEmptyGBArraySpec - Complete a Field from Geom and ArraySpec.
 
 ! !INTERFACE:
-  subroutine ESMF_FieldEmptyGBArraySpec(field, geombase, arrayspec, &
+  subroutine ESMF_FieldEmptyGBArraySpec(field, geom, arrayspec, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, pinflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout)    :: field
-    type(ESMF_GeomBase), intent(in)    :: geombase
+    type(ESMF_Geom), intent(in)    :: geom
     type(ESMF_ArraySpec), intent(in)   :: arrayspec
     integer, intent(in), optional :: gridToFieldMap(:)
     integer, intent(in), optional :: ungriddedLBound(:)
@@ -602,8 +602,8 @@ end subroutine ESMF_FieldEmptyCompTK
 ! \begin{description}
 ! \item [field]
 !       {\tt ESMF\_Field} object.
-! \item [geombase]
-!       {\tt ESMF\_GeomBase} object.
+! \item [geom]
+!       {\tt ESMF\_Geom} object.
 ! \item [arrayspec]
 !       Data type and kind specification.
 ! \item [{[gridToFieldMap]}]
@@ -696,7 +696,7 @@ end subroutine ESMF_FieldEmptyCompTK
 
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GeomGetInit,geom,rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
     call ESMF_FieldGet(field, name=fieldName, rc=localrc)
@@ -704,15 +704,15 @@ end subroutine ESMF_FieldEmptyCompTK
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Check if geombase is a grid, if so, check if it is arbitrary
+    ! Check if geom is a grid, if so, check if it is arbitrary
     decompType = ESMF_GRID_NONARBITRARY
-    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc)
+    call ESMF_GeomGet(geom, geomtype=geomtype, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
-       call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
+       call ESMF_GeomGet(geom, grid=grid, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -732,7 +732,7 @@ end subroutine ESMF_FieldEmptyCompTK
     ! of distributed grid dimensions, distgrid,
     ! number of ungridded Field dimensions,
     ! and number of undistributed Field Dimensions
-    call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, rc=localrc)
+    call ESMF_GeomGet(geom, dimCount=gridDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -910,7 +910,7 @@ end subroutine ESMF_FieldEmptyCompTK
 
     ! Call construction method to allocate and initialize field internals.
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then
-       call ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
+       call ESMF_FieldConstructIANew(ftype, geom, arrayspec, &
                                 localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                                 ungriddedUBound, localMaxHaloLWidth(1:gridDimCount_norep), &
                                 localMaxHaloUWidth(1:gridDimCount_norep), &
@@ -920,7 +920,7 @@ end subroutine ESMF_FieldEmptyCompTK
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
     else
-       call ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
+       call ESMF_FieldConstructIANew(ftype, geom, arrayspec, &
                               localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                               ungriddedUBound, &
                               hasBase=.true., name=fieldName, &
@@ -949,13 +949,13 @@ end subroutine ESMF_FieldEmptyCompTK
 ! !IROUTINE: ESMF_FieldConstructIANew - Construct the internals of a Field.
 
 ! !INTERFACE:
-  subroutine ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
+  subroutine ESMF_FieldConstructIANew(ftype, geom, arrayspec, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, hasBase, pinflag, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldType), pointer            :: ftype
-    type(ESMF_GeomBase)                      :: geombase
+    type(ESMF_Geom)                      :: geom
     type(ESMF_ArraySpec), intent(in)         :: arrayspec
     integer, intent(in), optional            :: gridToFieldMap(:)
     integer, intent(in), optional            :: ungriddedLBound(:)
@@ -978,8 +978,8 @@ end subroutine ESMF_FieldEmptyCompTK
 ! \begin{description}
 ! \item [ftype]
 !       Pointer to an {\tt ESMF\_Field} object.
-! \item [geombase]
-!       {\tt ESMF\_GeomBase} object.
+! \item [geom]
+!       {\tt ESMF\_Geom} object.
 ! \item [arrayspec]
 !       Data specification.
 ! \item [{[gridToFieldMap]}]
@@ -1080,7 +1080,7 @@ end subroutine ESMF_FieldEmptyCompTK
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-    call ESMF_GeomBaseGet(geombase, distgrid=distgrid, dimCount=gridDimCount, &
+    call ESMF_GeomGet(geom, distgrid=distgrid, dimCount=gridDimCount, &
                  indexflag=indexflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -1118,7 +1118,7 @@ end subroutine ESMF_FieldEmptyCompTK
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Get dimmap and undistibuted bounds
-      call ESMF_GeomBaseGetArrayInfo(geombase,                                            &
+      call ESMF_GeomGetArrayInfo(geom,                                            &
                               gridToFieldMap=gridToFieldMap, &
                               ungriddedLBound=ungriddedLBound, &
                               ungriddedUBound=ungriddedUBound, &
@@ -1147,7 +1147,7 @@ end subroutine ESMF_FieldEmptyCompTK
       nullify (arrayLBound)
       nullify (arrayUBound)
       ! Get dimmap and undistibuted bounds
-      call ESMF_GeomBaseGetArrayInfo(geombase,                                            &
+      call ESMF_GeomGetArrayInfo(geom,                                            &
                               gridToFieldMap=gridToFieldMap, &
                               ungriddedLBound=ungriddedLBound, &
                               ungriddedUBound=ungriddedUBound, &
@@ -1191,7 +1191,7 @@ end subroutine ESMF_FieldEmptyCompTK
 
     ftype%array = array
     ftype%array_internal = .true.
-    ftype%geombase  = geombase
+    ftype%geom  = geom
     ftype%status = ESMF_FIELDSTATUS_COMPLETE
     ftype%dimCount = gridDimCount_norep + ungriddedDimCount
     if(.not. l_hasBase) then
@@ -1221,13 +1221,13 @@ end subroutine ESMF_FieldEmptyCompTK
 ! !IROUTINE: ESMF_FieldConstructIANewArray - Construct the internals of a Field.
 
 ! !INTERFACE:
-  subroutine ESMF_FieldConstructIANewArray(ftype, geombase, array, datacopyflag, &
+  subroutine ESMF_FieldConstructIANewArray(ftype, geom, array, datacopyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, name, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldType), pointer :: ftype
-    type(ESMF_GeomBase) :: geombase
+    type(ESMF_Geom) :: geom
     type(ESMF_Array), intent(in) :: array
     type(ESMF_DataCopy_Flag), intent(in) :: datacopyflag
     integer, intent(in) :: gridToFieldMap(:)
@@ -1247,8 +1247,8 @@ end subroutine ESMF_FieldEmptyCompTK
 ! \begin{description}
 ! \item [ftype]
 !       Pointer to an {\tt ESMF\_Field} object.
-! \item [geombase]
-!       {\tt ESMF\_GeomBase} object.
+! \item [geom]
+!       {\tt ESMF\_Geom} object.
 ! \item [array]
 !       Data.
 ! \item [datacopyflag]
@@ -1342,7 +1342,7 @@ end subroutine ESMF_FieldEmptyCompTK
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, &
+    call ESMF_GeomGet(geom, dimCount=gridDimCount, &
                       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
@@ -1430,7 +1430,7 @@ end subroutine ESMF_FieldEmptyCompTK
         ftype%array_internal = .true.
     endif
 
-    ftype%geombase  = geombase
+    ftype%geom  = geom
     ftype%status = ESMF_FIELDSTATUS_COMPLETE
     call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_READY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1590,7 +1590,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     integer                        :: localrc  @\
-    type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_Geom)   :: geom @\
     type(ESMF_GeomType_Flag)   :: geomtype @\
     type(ESMF_Grid)       :: grid @\
     type(ESMF_FieldStatus_Flag):: status @\
@@ -1611,20 +1611,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     if(status /= ESMF_FIELDSTATUS_GRIDSET) then @\
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
-        msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", & @\
+        msg="- can only use ESMF_FieldEmptyComplete with Fields having geom set", & @\
         ESMF_CONTEXT, rcToReturn=rc)  @\
       return @\
     endif @\
 @\
-    geombase=field%ftypep%geombase @\
-    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) @\
+    geom=field%ftypep%geom @\
+    call ESMF_GeomGet(geom, geomtype=geomtype, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, &   @\
         ESMF_ERR_PASSTHRU, &   @\
         ESMF_CONTEXT, rcToReturn=rc)) return   @\
 @\
     if(geomtype == ESMF_GEOMTYPE_GRID) then @\
 @\
-      call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc) @\
+      call ESMF_GeomGet(geom, grid=grid, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, &   @\
           ESMF_ERR_PASSTHRU, &   @\
           ESMF_CONTEXT, rcToReturn=rc)) return   @\
@@ -1651,8 +1651,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
     endif @\
 @\
-  ! Do General GeomBase EmptyComplete @\
-  call ESMF_FieldEmptyComplete(field, geombase, farray, & @\
+  ! Do General Geom EmptyComplete @\
+  call ESMF_FieldEmptyComplete(field, geom, farray, & @\
     indexflag, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, totalLWidth, totalUWidth, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -1781,7 +1781,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     integer                        :: localrc  @\
-    type(ESMF_GeomBase)            :: geombase @\
+    type(ESMF_Geom)            :: geom @\
     type(ESMF_GeomType_Flag)            :: geomtype @\
     type(ESMF_Grid)                :: grid @\
     type(ESMF_FieldStatus_Flag)         :: status @\
@@ -1802,20 +1802,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     if(status /= ESMF_FIELDSTATUS_GRIDSET) then @\
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
-        msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", & @\
+        msg="- can only use ESMF_FieldEmptyComplete with Fields having geom set", & @\
         ESMF_CONTEXT, rcToReturn=rc)  @\
       return @\
     endif @\
 @\
-    geombase=field%ftypep%geombase @\
-    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) @\
+    geom=field%ftypep%geom @\
+    call ESMF_GeomGet(geom, geomtype=geomtype, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, &   @\
         ESMF_ERR_PASSTHRU, &   @\
         ESMF_CONTEXT, rcToReturn=rc)) return   @\
 @\
     if(geomtype == ESMF_GEOMTYPE_GRID) then @\
 @\
-      call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc) @\
+      call ESMF_GeomGet(geom, grid=grid, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, &   @\
           ESMF_ERR_PASSTHRU, &   @\
           ESMF_CONTEXT, rcToReturn=rc)) return   @\
@@ -1842,8 +1842,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
     endif @\
 @\
-  ! Do General GeomBase EmptyComplete @\
-  call ESMF_FieldEmptyComplete(field, geombase, farrayPtr, & @\
+  ! Do General Geom EmptyComplete @\
+  call ESMF_FieldEmptyComplete(field, geom, farrayPtr, & @\
     datacopyflag, gridToFieldMap, & @\
     totalLWidth, totalUWidth, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2005,7 +2005,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     type(ESMF_StaggerLoc)          :: localStaggerLoc  @\
     integer                        :: localrc  @\
-    type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_Geom)   :: geom @\
     type(ESMF_GridDecompType) :: decompType @\
     type(ESMF_FieldStatus_Flag)         :: status @\
 @\
@@ -2059,13 +2059,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        localStaggerLoc = ESMF_STAGGERLOC_CENTER   @\
     endif   @\
 @\
-    geombase=ESMF_GeomBaseCreate(grid, localStaggerloc, rc=localrc) @\
+    geom=ESMF_GeomCreate(grid, localStaggerloc, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-  ! Do General GeomBase EmptyComp @\
-  call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, & @\
+  ! Do General Geom EmptyComp @\
+  call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geom, farray, & @\
     indexflag, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, totalLWidth, totalUWidth, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2203,7 +2203,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     type(ESMF_StaggerLoc)          :: localStaggerLoc  @\
     integer                        :: localrc  @\
-    type(ESMF_GeomBase)            :: geombase @\
+    type(ESMF_Geom)            :: geom @\
     type(ESMF_GridDecompType)      :: decompType @\
     type(ESMF_FieldStatus_Flag)    :: status @\
 @\
@@ -2257,13 +2257,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        localStaggerLoc = ESMF_STAGGERLOC_CENTER   @\
     endif   @\
 @\
-    geombase=ESMF_GeomBaseCreate(grid,localStaggerloc, rc=localrc) @\
+    geom=ESMF_GeomCreate(grid,localStaggerloc, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-  ! Do General GeomBase EmptyComp @\
-  call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
+  ! Do General Geom EmptyComp @\
+  call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geom, farrayPtr, & @\
     datacopyflag, gridToFieldMap, & @\
     totalLWidth, totalUWidth, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2390,7 +2390,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     integer                        :: localrc  @\
-    type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_Geom)   :: geom @\
     type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
@@ -2414,13 +2414,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return @\
     endif @\
 @\
-    geombase=ESMF_GeomBaseCreate(locstream,rc=localrc) @\
+    geom=ESMF_GeomCreate(locstream,rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-  ! Do General GeomBase EmptyComp @\
-  call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, & @\
+  ! Do General Geom EmptyComp @\
+  call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geom, farray, & @\
     indexflag=indexflag, datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     ungriddedLBound=ungriddedLBound, & @\
     ungriddedUBound=ungriddedUBound, rc=localrc) @\
@@ -2522,7 +2522,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     integer                        :: localrc  @\
-    type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_Geom)   :: geom @\
     type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
@@ -2546,13 +2546,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return @\
     endif @\
 @\
-    geombase=ESMF_GeomBaseCreate(locstream,rc=localrc) @\
+    geom=ESMF_GeomCreate(locstream,rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-  ! Do General GeomBase EmptyComp @\
-  call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
+  ! Do General Geom EmptyComp @\
+  call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geom, farrayPtr, & @\
     datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2687,7 +2687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     integer                        :: localrc  @\
-    type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_Geom)   :: geom @\
     type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
@@ -2711,13 +2711,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return @\
     endif @\
 @\
-    geombase=ESMF_GeomBaseCreate(mesh, meshLoc=meshloc, rc=localrc) @\
+    geom=ESMF_GeomCreate(mesh, meshLoc=meshloc, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-  ! Do General GeomBase EmptyComp @\
-  call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, & @\
+  ! Do General Geom EmptyComp @\
+  call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geom, farray, & @\
     indexflag=indexflag, datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     ungriddedLBound=ungriddedLBound, & @\
     ungriddedUBound=ungriddedUBound, rc=localrc) @\
@@ -2828,7 +2828,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     integer                        :: localrc  @\
-    type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_Geom)   :: geom @\
     type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
@@ -2852,13 +2852,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return @\
     endif @\
 @\
-    geombase=ESMF_GeomBaseCreate(mesh, meshLoc=meshloc, rc=localrc) @\
+    geom=ESMF_GeomCreate(mesh, meshLoc=meshloc, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-  ! Do General GeomBase EmptyComp @\
-  call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
+  ! Do General Geom EmptyComp @\
+  call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geom, farrayPtr, & @\
     datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2998,7 +2998,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     integer                        :: localrc  @\
-    type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_Geom)   :: geom @\
     type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
@@ -3022,13 +3022,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return @\
     endif @\
 @\
-    geombase=ESMF_GeomBaseCreate(xgrid,xgridSide, gridIndex, rc=localrc) @\
+    geom=ESMF_GeomCreate(xgrid,xgridSide, gridIndex, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-  ! Do General GeomBase EmptyComp @\
-  call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, & @\
+  ! Do General Geom EmptyComp @\
+  call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geom, farray, & @\
     indexflag=indexflag, datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     ungriddedLBound=ungriddedLBound, & @\
     ungriddedUBound=ungriddedUBound, rc=localrc) @\
@@ -3144,7 +3144,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional :: rc                @\
   ! local variables @\
   integer                        :: localrc  @\
-  type(ESMF_GeomBase)   :: geombase @\
+  type(ESMF_Geom)   :: geom @\
   type(ESMF_FieldStatus_Flag)    :: status @\
 @\
   if (present(rc)) then @\
@@ -3168,13 +3168,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     return @\
   endif @\
 @\
-  geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc) @\
+  geom=ESMF_GeomCreate(xgrid, xgridSide, gridIndex, rc=localrc) @\
   if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-! Do General GeomBase EmptyComp @\
-call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
+! Do General Geom EmptyComp @\
+call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geom, farrayPtr, & @\
   datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
   rc=localrc) @\
   if (ESMF_LogFoundError(localrc, & @\
@@ -3195,13 +3195,13 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
-! subroutine ESMF_FieldEmptyCompGB<rank><type><kind>(field, geombase, & @\
+! subroutine ESMF_FieldEmptyCompGB<rank><type><kind>(field, geom, & @\
 !   farray, indexflag, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)        :: field @\
-!   type(ESMF_GeomBase),   intent(in)           :: geombase @\
+!   type(ESMF_Geom),   intent(in)           :: geom @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
 !   type(ESMF_Index_Flag),  intent(in)           :: indexflag @\
 !   type(ESMF_DataCopy_Flag),   intent(in), optional :: datacopyflag @\
@@ -3227,8 +3227,8 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 !       The {\tt ESMF\_Field} object to be completed and @\
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
-! \item [geombase]  @\
-!       The {\tt ESMF\_GeomBase} object to complete the Field. @\
+! \item [geom]  @\
+!       The {\tt ESMF\_Geom} object to complete the Field. @\
 ! \item [farray] @\
 !       Native Fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
@@ -3242,10 +3242,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
-!       {\tt geombase}|s dimCount.  The list elements map each dimension @\
-!       of the {\tt geombase} to a dimension in the {\tt farray} by @\
+!       {\tt geom}|s dimCount.  The list elements map each dimension @\
+!       of the {\tt geom} to a dimension in the {\tt farray} by @\
 !       specifying the appropriate {\tt farray} dimension index. The @\
-!       default is to map all of the {\tt geombase}|s dimensions against the @\
+!       default is to map all of the {\tt geom}|s dimensions against the @\
 !       lowest dimensions of the {\tt farray} in sequence, i.e. @\
 !       {\tt gridToFieldMap} = (/1,2,3,.../). @\
 !       Unmapped {\tt farray} dimensions are undistributed Field @\
@@ -3303,13 +3303,13 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompGB" @\
-subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, & @\
+subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geom, farray, & @\
   indexflag, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
   ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 @\
   ! input arguments @\
   type(ESMF_Field), intent(inout) :: field @\
-  type(ESMF_GeomBase), intent(in) :: geombase            @\
+  type(ESMF_Geom), intent(in) :: geom            @\
   mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
   type(ESMF_Index_Flag),   intent(in)           :: indexflag @\
   type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag @\
@@ -3356,7 +3356,7 @@ subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, &
 @\
   ! make sure field, grid, farray are properly initialized @\
   ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
-  ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc) @\
+  ESMF_INIT_CHECK_DEEP(ESMF_GeomGetInit,geom,rc) @\
 @\
   ! get the fieldName @\
   call ESMF_FieldGet(field, name=fieldName, rc=localrc) @\
@@ -3368,7 +3368,7 @@ subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, &
   ! of distributed grid dimensions, distgrid, @\
   ! number of ungridded Field dimensions, @\
   ! and number of undistributed Field Dimensions @\
-  call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, & @\
+  call ESMF_GeomGet(geom, dimCount=gridDimCount, & @\
         distgridToGridMap=distgridToGridMap, localDeCount=localDeCount, & @\
         distgrid=distgrid, indexflag=g_indexflag, rc=localrc) @\
   if (ESMF_LogFoundError(localrc, & @\
@@ -3415,15 +3415,15 @@ subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, &
     endif @\
   endif @\
 @\
-  ! Check if geombase is a grid, if so, check if it is arbitrary @\
+  ! Check if geom is a grid, if so, check if it is arbitrary @\
   decompType = ESMF_GRID_NONARBITRARY @\
-  call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) @\
+  call ESMF_GeomGet(geom, geomtype=geomtype, rc=localrc) @\
   if (ESMF_LogFoundError(localrc, &   @\
       ESMF_ERR_PASSTHRU, &   @\
       ESMF_CONTEXT, rcToReturn=rc)) return   @\
 @\
   if (geomtype .eq. ESMF_GEOMTYPE_GRID) then @\
-     call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc) @\
+     call ESMF_GeomGet(geom, grid=grid, rc=localrc) @\
      if (ESMF_LogFoundError(localrc, &   @\
          ESMF_ERR_PASSTHRU, &   @\
          ESMF_CONTEXT, rcToReturn=rc)) return   @\
@@ -3673,7 +3673,7 @@ endif @\
   ! The undistributed info from the Grid needs to be @\
   ! combined with the ungridded info from the Field in order @\
   ! to create the Array for the Field. @\
-  call ESMF_GeomBaseGetArrayInfo(geombase, & @\
+  call ESMF_GeomGetArrayInfo(geom, & @\
        gridToFieldMap=localGridToFieldMap, & @\
        ungriddedLBound=localUngriddedLBound (1:fieldUngriddedDimCount), & @\
        ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
@@ -3727,7 +3727,7 @@ endif @\
      localUngriddedLBound(1:fieldUngriddedDimCount) @\
   field%ftypep%ungriddedUBound(1:fieldUngriddedDimCount) = & @\
      localUngriddedUBound(1:fieldUngriddedDimCount) @\
-  field%ftypep%geombase  = geombase @\
+  field%ftypep%geom  = geom @\
   field%ftypep%status = ESMF_FIELDSTATUS_COMPLETE @\
   call ESMF_BaseSetStatus(field%ftypep%base, ESMF_STATUS_READY, rc=localrc) @\
   if (ESMF_LogFoundError(localrc, & @\
@@ -3754,13 +3754,13 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
-! subroutine ESMF_FieldEmptyCompGBPtr<rank><type><kind>(field, geombase, & @\
+! subroutine ESMF_FieldEmptyCompGBPtr<rank><type><kind>(field, geom, & @\
 !   farrayPtr, datacopyflag, gridToFieldMap, & @\
 !   totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inou)         :: field @\
-!   type(ESMF_GeomBase),   intent(in)           :: geombase @\
+!   type(ESMF_Geom),   intent(in)           :: geom @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
 !   type(ESMF_DataCopy_Flag),   intent(in), optional :: datacopyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
@@ -3784,9 +3784,9 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 !       The {\tt ESMF\_Field} object to be completed and @\
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
-! \item [geombase]  @\
-!       The {\tt ESMF\_GeomBase} object to complete the Field.  The dimCount of the @\
-!       GeomBase must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
+! \item [geom]  @\
+!       The {\tt ESMF\_Geom} object to complete the Field.  The dimCount of the @\
+!       Geom must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
 ! \item [farrayPtr] @\
 !       Native Fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
@@ -3797,10 +3797,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
-!       {\tt geombase}|s dimCount.  The list elements map each dimension @\
-!       of the {\tt geombase} to a dimension in the {\tt farrayPtr} by @\
+!       {\tt geom}|s dimCount.  The list elements map each dimension @\
+!       of the {\tt geom} to a dimension in the {\tt farrayPtr} by @\
 !       specifying the appropriate {\tt farrayPtr} dimension index. The @\
-!       default is to map all of the {\tt geombase}|s dimensions against the @\
+!       default is to map all of the {\tt geom}|s dimensions against the @\
 !       lowest dimensions of the {\tt farrayPtr} in sequence, i.e. @\
 !       {\tt gridToFieldMap} = (/1,2,3,.../). @\
 !       Unmapped {\tt farrayPtr} dimensions are undistributed Field @\
@@ -3840,13 +3840,13 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompGBPtr" @\
-subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
+subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geom, farrayPtr, & @\
   datacopyflag, gridToFieldMap, & @\
   totalLWidth, totalUWidth, rc) @\
 @\
   ! input arguments @\
   type(ESMF_Field), intent(inout) :: field @\
-  type(ESMF_GeomBase), intent(in) :: geombase            @\
+  type(ESMF_Geom), intent(in) :: geom            @\
   mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
   type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
   integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -3890,7 +3890,7 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
 @\
   ! make sure field, grid, farrayPtr are properly initialized @\
   ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit,field,rc) @\
-  ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit,geombase,rc) @\
+  ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomGetInit,geom,rc) @\
 @\
   ! get the fieldName @\
   call ESMF_FieldGet(field, name=fieldName, rc=localrc) @\
@@ -3902,7 +3902,7 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
   ! of distributed grid dimensions, distgrid, @\
   ! number of ungridded Field dimensions, @\
   ! and number of undistributed Field Dimensions @\
-  call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, & @\
+  call ESMF_GeomGet(geom, dimCount=gridDimCount, & @\
         distgridToGridMap=distgridToGridMap, localDeCount=localDeCount, & @\
         distgrid=distgrid, indexflag=indexflag, rc=localrc) @\
   if (ESMF_LogFoundError(localrc, & @\
@@ -3941,15 +3941,15 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
       return @\
     endif @\
   endif @\
-  ! Check if geombase is a grid, if so, check if it is arbitrary @\
+  ! Check if geom is a grid, if so, check if it is arbitrary @\
   decompType = ESMF_GRID_NONARBITRARY @\
-  call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) @\
+  call ESMF_GeomGet(geom, geomtype=geomtype, rc=localrc) @\
   if (ESMF_LogFoundError(localrc, &   @\
       ESMF_ERR_PASSTHRU, &   @\
       ESMF_CONTEXT, rcToReturn=rc)) return   @\
 @\
   if (geomtype .eq. ESMF_GEOMTYPE_GRID) then @\
-     call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc) @\
+     call ESMF_GeomGet(geom, grid=grid, rc=localrc) @\
      if (ESMF_LogFoundError(localrc, &   @\
          ESMF_ERR_PASSTHRU, &   @\
          ESMF_CONTEXT, rcToReturn=rc)) return   @\
@@ -4135,7 +4135,7 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
   ! The undistributed info from the Grid needs to be @\
   ! combined with the ungridded info from the Field in order @\
   ! to create the Array for the Field. @\
-  call ESMF_GeomBaseGetArrayInfo(geombase, & @\
+  call ESMF_GeomGetArrayInfo(geom, & @\
        gridToFieldMap=localGridToFieldMap, & @\
        ungriddedLBound=localUngriddedLBound (1:fieldUngriddedDimCount), & @\
        ungriddedUBound=localUngriddedUBound (1:fieldUngriddedDimCount), & @\
@@ -4183,7 +4183,7 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
      localUngriddedLBound(1:fieldUngriddedDimCount) @\
   field%ftypep%ungriddedUBound(1:fieldUngriddedDimCount) = & @\
      localUngriddedUBound(1:fieldUngriddedDimCount) @\
-  field%ftypep%geombase  = geombase @\
+  field%ftypep%geom  = geom @\
   field%ftypep%status = ESMF_FIELDSTATUS_COMPLETE @\
   call ESMF_BaseSetStatus(field%ftypep%base, ESMF_STATUS_READY, rc=localrc) @\
   if (ESMF_LogFoundError(localrc, & @\
@@ -4389,7 +4389,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
   type(ESMF_STAGGERLOC)                 :: l_staggerloc
-  type(ESMF_GEOMBASE)                   :: geombase
+  type(ESMF_GEOM)                   :: geom
   type(ESMF_FieldStatus_Flag)           :: status
   integer                               :: localrc
   type(ESMF_Pointer)                    :: vmThis
@@ -4425,11 +4425,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   if(present(staggerloc)) l_staggerloc = staggerloc
 
   if (actualFlag) then
-    geombase=ESMF_GeomBaseCreate(grid,l_staggerloc, rc=localrc)
+    geom=ESMF_GeomCreate(grid,l_staggerloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    field%ftypep%geombase = geombase
+    field%ftypep%geom = geom
     field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
   endif
 
@@ -4497,7 +4497,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
 
-  type(ESMF_GEOMBASE)                   :: geombase
+  type(ESMF_GEOM)                   :: geom
   type(ESMF_FieldStatus_Flag)           :: status
   integer                               :: localrc
 
@@ -4517,11 +4517,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     return
   endif
 
-  geombase=ESMF_GeomBaseCreate(mesh, meshLoc=meshloc, rc=localrc)
+  geom=ESMF_GeomCreate(mesh, meshLoc=meshloc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
-  field%ftypep%geombase = geombase
+  field%ftypep%geom = geom
   field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
 
   if(present(rc)) rc = ESMF_SUCCESS
@@ -4584,7 +4584,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
 
-  type(ESMF_GEOMBASE)                   :: geombase
+  type(ESMF_GEOM)                   :: geom
   type(ESMF_FieldStatus_Flag)           :: status
   integer                               :: localrc
   type(ESMF_Pointer)                    :: vmThis
@@ -4616,11 +4616,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   endif
 
   if (actualFlag) then
-    geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
+    geom=ESMF_GeomCreate(locstream, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    field%ftypep%geombase = geombase
+    field%ftypep%geom = geom
     field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
   endif
 
@@ -4690,7 +4690,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
   type(ESMF_XGridSide_Flag)                  :: l_xgridside
-  type(ESMF_GEOMBASE)                   :: geombase
+  type(ESMF_GEOM)                   :: geom
   type(ESMF_FieldStatus_Flag)                :: status
   integer                               :: localrc, l_gridindex
 
@@ -4715,11 +4715,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   l_gridindex = 1
   if(present(gridindex)) l_gridindex = gridindex
 
-  geombase=ESMF_GeomBaseCreate(xgrid, l_xgridside, l_gridindex, rc=localrc)
+  geom=ESMF_GeomCreate(xgrid, l_xgridside, l_gridindex, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
-  field%ftypep%geombase = geombase
+  field%ftypep%geom = geom
   field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
 
   if(present(rc)) rc = ESMF_SUCCESS
@@ -4731,7 +4731,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldConstructEmpty"
 !BOPI
-! !IROUTINE: ESMF_FieldConstructEmpty - Construct a Field with no GeomBase or Array
+! !IROUTINE: ESMF_FieldConstructEmpty - Construct a Field with no Geom or Array
 !
 ! !INTERFACE:
   subroutine ESMF_FieldConstructEmpty(ftypep, name, vm, rc)

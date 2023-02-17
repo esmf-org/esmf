@@ -3,7 +3,7 @@
 ALL: build_here 
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_GeomBase.F90
+SOURCEF	  = ESMF_Geom.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir

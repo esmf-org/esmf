@@ -39,7 +39,7 @@ module ESMF_FieldWrMod
   use ESMF_GridMod
   use ESMF_GridUtilMod
   use ESMF_MeshMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_InitMacrosMod
   use ESMF_IOMod
 

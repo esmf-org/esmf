@@ -1183,7 +1183,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     use ESMF_FieldCreateMod
     use ESMF_FieldGetMod
     use ESMF_IOScripMod
-    use ESMF_GeomBaseMod
+    use ESMF_GeomMod
     use ESMF_GridMod
     use ESMF_MeshMod
     use ESMF_LocStreamMod

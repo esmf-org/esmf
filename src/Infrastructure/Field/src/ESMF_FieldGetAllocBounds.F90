@@ -45,7 +45,7 @@ module ESMF_FieldGetAllocBoundsMod
   use ESMF_XGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_StaggerLocMod
   use ESMF_InitMacrosMod
   
@@ -216,7 +216,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  !Local Variables
     integer :: localrc
     type(ESMF_STAGGERLOC)                  :: l_staggerloc
-    type(ESMF_GeomBase) :: geombase
+    type(ESMF_Geom) :: geom
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -231,14 +231,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         l_staggerloc = ESMF_STAGGERLOC_CENTER
     endif
 
-     ! Create GeomBase from Grid
-    geombase=ESMF_GeomBaseCreate(grid,l_staggerloc, rc=localrc)
+     ! Create Geom from Grid
+    geom=ESMF_GeomCreate(grid,l_staggerloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, localDe=localDe, &
+    call ESMF_FieldGetGBAllocBounds(geom, localDe=localDe, &
         gridToFieldMap=gridToFieldMap, &
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -248,8 +248,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Destroy GeomBase
-    call ESMF_GeomBaseDestroy(geombase, rc=localrc)
+    ! Destroy Geom
+    call ESMF_GeomDestroy(geom, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -353,7 +353,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !  !Local Variables
     integer :: localrc
-    type(ESMF_GeomBase) :: geombase
+    type(ESMF_Geom) :: geom
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -361,14 +361,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
-     ! Create GeomBase from LocStream
-    geombase=ESMF_GeomBaseCreate(locstream,rc=localrc)
+     ! Create Geom from LocStream
+    geom=ESMF_GeomCreate(locstream,rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, localDe=localDe, &
+    call ESMF_FieldGetGBAllocBounds(geom, localDe=localDe, &
         gridToFieldMap=gridToFieldMap, &
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         totalLBound=totalLBound, totalUBound=totalUBound, &
@@ -377,8 +377,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Destroy GeomBase
-    call ESMF_GeomBaseDestroy(geombase, rc=localrc)
+    ! Destroy Geom
+    call ESMF_GeomDestroy(geom, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -492,7 +492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !  !Local Variables
     integer :: localrc
-    type(ESMF_GeomBase) :: geombase
+    type(ESMF_Geom) :: geom
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -500,14 +500,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
 
-     ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh, meshLoc=meshloc, rc=localrc)
+     ! Create Geom from Mesh
+    geom=ESMF_GeomCreate(mesh, meshLoc=meshloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, localDe=localDe, &
+    call ESMF_FieldGetGBAllocBounds(geom, localDe=localDe, &
         gridToFieldMap=gridToFieldMap, &
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         totalLBound=totalLBound, totalUBound=totalUBound, &
@@ -516,8 +516,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Destroy GeomBase
-    call ESMF_GeomBaseDestroy(geombase, rc=localrc)
+    ! Destroy Geom
+    call ESMF_GeomDestroy(geom, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -630,7 +630,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !  !Local Variables
     integer :: localrc
-    type(ESMF_GeomBase) :: geombase
+    type(ESMF_Geom) :: geom
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -638,14 +638,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit, xgrid, rc)
 
-     ! Create GeomBase from LocStream
-    geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
+     ! Create Geom from LocStream
+    geom=ESMF_GeomCreate(xgrid, xgridSide, gridIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, localDe=localDe, &
+    call ESMF_FieldGetGBAllocBounds(geom, localDe=localDe, &
         gridToFieldMap=gridToFieldMap, &
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         totalLBound=totalLBound, totalUBound=totalUBound, &
@@ -654,8 +654,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Destroy GeomBase
-    call ESMF_GeomBaseDestroy(geombase, rc=localrc)
+    ! Destroy Geom
+    call ESMF_GeomDestroy(geom, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -671,14 +671,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetGBAllocBounds(geombase, &
+    subroutine ESMF_FieldGetGBAllocBounds(geom, &
         localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLWidth, totalUWidth, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_GeomBase), intent(inout)         :: geombase     
+    type(ESMF_Geom), intent(inout)         :: geom     
     integer,             intent(in),  optional :: localDe
     integer,             intent(in),  optional :: gridToFieldMap(:)    
     integer,             intent(in),  optional :: ungriddedLBound(:)
@@ -700,8 +700,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item [geombase]
-!       {\tt ESMF\_GeomBase}.
+! \item [geom]
+!       {\tt ESMF\_Geom}.
 ! \item [localDe]
 !       The local DE number in its PET context to compute the bounds and counts
 !       information based on the computational and exclusive bounds and counts 
@@ -796,9 +796,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GeomGetInit,geom,rc)
 
-    call ESMF_GeomBaseGet(geombase, localDeCount=localDeCount, &
+    call ESMF_GeomGet(geom, localDeCount=localDeCount, &
       dimCount=gridrank, distgridToGridMap=dg2gm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -817,7 +817,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         l_localDe = 0
     endif
 
-    call ESMF_GeomBaseGetPLocalDE(geombase, localDe=l_localDe, &
+    call ESMF_GeomGetPLocalDE(geom, localDe=l_localDe, &
        exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &

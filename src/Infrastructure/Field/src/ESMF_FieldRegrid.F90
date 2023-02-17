@@ -36,7 +36,7 @@ module ESMF_FieldRegridMod
   use ESMF_StaggerLocMod
   use ESMF_MeshMod
   use ESMF_RHandleMod
-  use ESMF_GeomBaseMod
+  use ESMF_GeomMod
   use ESMF_XGridGeomBaseMod
   use ESMF_RegridMod
   use ESMF_FieldMod

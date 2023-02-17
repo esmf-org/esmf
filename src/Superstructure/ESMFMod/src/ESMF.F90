@@ -67,7 +67,7 @@ module ESMF
 
     use ESMF_LocStreamMod
 
-    use ESMF_GeomBaseMod
+    use ESMF_GeomMod
 
     use ESMF_RHandleMod
 

@@ -43,13 +43,13 @@ extern "C" {
 //
 
 // non-method functions
-  void FTN_X(c_esmc_geombaseserialize)(int *geomtype, int * staggerloc,
+  void FTN_X(c_esmc_geomserialize)(int *geomtype, int * staggerloc,
                                      int *meshloc, int *xgridside, int *xgridindex,
                                      char *buffer, int *length, int *offset,
                                      ESMC_InquireFlag *inquireflag, int *rc,
                                      ESMCI_FortranStrLenArg buffer_l){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_geombaseserialize()"
+#define ESMC_METHOD "c_esmc_geomserialize()"
     int *ip;
 
     // Initialize return code; assume routine not implemented
@@ -60,7 +60,7 @@ extern "C" {
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < fixedpart) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to add a GeomBase object", ESMC_CONTEXT, rc);
+          "Buffer too short to add a Geom object", ESMC_CONTEXT, rc);
         return;
       }
     }
@@ -86,7 +86,7 @@ extern "C" {
 }
 
 
-  void FTN_X(c_esmc_geombasedeserialize)(int *geomtype, int * staggerloc,
+  void FTN_X(c_esmc_geomdeserialize)(int *geomtype, int * staggerloc,
                                        int *meshloc, int *xgridside, int *xgridindex,
                                        const char *buffer, int *offset, int *rc,
                                        ESMCI_FortranStrLenArg buffer_l){

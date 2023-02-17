@@ -2,7 +2,7 @@
 
 ALL: build_here 
 
-SOURCEC	  = ESMCI_GeomBase_F.C
+SOURCEC	  = ESMCI_Geom_F.C
 SOURCEF	  = 
 SOURCEH	  = 
 

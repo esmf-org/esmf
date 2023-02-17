@@ -48,7 +48,7 @@ use ESMF_ArrayMod
 use ESMF_ArrayBundleMod
 use ESMF_InfoMod
 use ESMF_UtilTypesMod
-use ESMF_GeomBaseMod
+use ESMF_GeomMod
 use ESMF_MeshMod
 use ESMF_GridMod
 use ESMF_XGridMod
