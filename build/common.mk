@@ -1944,6 +1944,7 @@ ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/ESMFMod/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/State/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Util/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Base/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Base/include/nlohmann/json
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/VM/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Array/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/ArrayBundle/include
@@ -1957,13 +1958,18 @@ ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/PointList/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/TimeMgr/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Trace/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Grid/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/GridUtil/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Route/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Field/include
+ifeq ($(ESMF_PIO),internal)
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/IO/PIO/ParallelIO/src/clib
+endif
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/epilogue/include
 export ESMF_AUTO_LIB_BUILD=OFF
 ifeq ($(ESMF_TESTEXHAUSTIVE),ON)
 ESMF_F90COMPILEOPTS   += -DESMF_TESTEXHAUSTIVE
 ESMF_CXXCOMPILEOPTS   += -DESMF_TESTEXHAUSTIVE
+ESMF_CCOMPILEOPTS     += -DESMF_TESTEXHAUSTIVE
 endif
 
 endif
