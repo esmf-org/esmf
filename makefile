@@ -407,7 +407,8 @@ endif
 	-@echo " "
 #
 #
-MKINFO = $(ESMF_LIBDIR)/esmf.mk
+MKINFO  = $(ESMF_LIBDIR)/esmf.mk
+TMPINFO = $(ESMF_LIBDIR)/tmp.info
 info_mk: chkdir_lib
 	-@$(ESMF_RM) $(MKINFO)
 	-@echo "# ESMF application makefile fragment" > $(MKINFO)
@@ -656,7 +657,13 @@ endif
 	    echo "# ESMF_PROJ4_LIBPATH:       $(ESMF_PROJ4_LIBPATH)" >> $(MKINFO) ; \
 	  fi; \
 	 fi
-
+	-@echo "#" >> $(MKINFO)
+	-@echo "# !!! ----- Complete "make info" output to follow... ----- !!!" >> $(MKINFO)
+	-@echo "#" >> $(MKINFO)
+	-@$(MAKE) info > $(TMPINFO)
+	-@awk '{ print "# ", $$0 }' $(TMPINFO) >> $(MKINFO)
+	-@$(ESMF_RM) $(TMPINFO)
+        
 # Rewrite esmf.mk during installation to ensure correct installation paths are encoded
 install_info_mk:
 	$(MAKE) info_mk ESMF_APPSDIR=$(ESMF_INSTALL_BINDIR_ABSPATH) ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_ESMXDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)/ESMX ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
