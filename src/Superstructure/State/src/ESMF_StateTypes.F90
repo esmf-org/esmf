@@ -82,6 +82,7 @@
       public ESMF_StateItemWrap
       public ESMF_StateItemConstruct
       public ESMF_StateIntent_Flag, ESMF_STATEINTENT_IMPORT, ESMF_STATEINTENT_EXPORT, &
+                                   ESMF_STATEINTENT_INTERNAL, &
                                    ESMF_STATEINTENT_UNSPECIFIED
 #if ESMF_ENABLE_NEEDED
       public ESMF_NeededFlag, ESMF_NEEDED, &

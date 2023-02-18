@@ -881,7 +881,8 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
 !   \item[{[stateintent]}]
 !    Import or Export {\tt ESMF\_State}.  Valid values are
 !    {\tt ESMF\_STATEINTENT\_IMPORT}, {\tt ESMF\_STATEINTENT\_EXPORT},
-!    or {\tt ESMF\_STATEINTENT\_UNSPECIFIED} The default
+!    {\tt ESMF\_STATEINTENT\_INTERNAL},
+!    or {\tt ESMF\_STATEINTENT\_UNSPECIFIED}. The default
 !    is {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.
 !   \item[{[arrayList]}]
 !    A list (Fortran array) of {\tt ESMF\_Array}s.
@@ -1970,6 +1971,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          msgbuf = "Import State"
        case (ESMF_STATEINTENT_EXPORT%state)
          msgbuf = "Export State"
+       case (ESMF_STATEINTENT_INTERNAL)
+         msgbuf = "Internal State"
        case (ESMF_STATEINTENT_UNSPECIFIED%state)
          msgbuf = "Unspecified intent direction"
        case (ESMF_STATEINTENT_INVALID%state)
