@@ -84,7 +84,7 @@ void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::
 
 // Get information about vector dimensions for vectorRegrid capability
 // TODO: move below
-static void _get_vector_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vector_dims, int *vector_dims) {
+static void _get_vec_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vec_dims, int *vec_dims_undist_seqind) {
 
   // Get undisributed dimension sizes
   const int *undistLBound=array.getUndistLBound();
@@ -95,7 +95,13 @@ static void _get_vector_dims_for_vectorRegrid(ESMCI::Array &array, int &num_vect
   ThrowRequire(undistUBound != NULL);
 
   // Calculate size of vector dims
-  num_vector_dims=undistUBound[0]-undistLBound[0]+1;
+  num_vec_dims=undistUBound[0]-undistLBound[0]+1;
+
+  // Fill undistibuted seqinds for vector dims
+  // (This is easy now, but will be harder as the number of undist. dims gets larger than 1.)
+  for (int i=0; i<num_vec_dims; i++) {
+    vec_dims_undist_seqind[i]=i+1;
+  }
 }
 
 
@@ -281,19 +287,19 @@ void ESMCI_regrid_create(
     if (vectorRegrid) {
 
       // Get src info
-      int src_num_vector_dims;
-      int src_vector_dims[ESMF_MAXDIM];
-      _get_vector_dims_for_vectorRegrid(srcarray, src_num_vector_dims, src_vector_dims);
-      printf("src_num_vector_dims=%d\n",src_num_vector_dims);      
+      int src_num_vec_dims;
+      int src_vec_dims_undist_seqind[ESMF_MAXDIM];
+      _get_vec_dims_for_vectorRegrid(srcarray, src_num_vec_dims, src_vec_dims_undist_seqind);
+      printf("src_num_vec_dims=%d\n",src_num_vec_dims);      
 
       // Get dst info
-      int dst_num_vector_dims;
-      int dst_vector_dims[ESMF_MAXDIM];
-      _get_vector_dims_for_vectorRegrid(dstarray, dst_num_vector_dims, dst_vector_dims);
-      printf("dst_num_vector_dims=%d\n",dst_num_vector_dims);      
+      int dst_num_vec_dims;
+      int dst_vec_dims_undist_seqind[ESMF_MAXDIM];
+      _get_vec_dims_for_vectorRegrid(dstarray, dst_num_vec_dims, dst_vec_dims_undist_seqind);
+      printf("dst_num_vec_dims=%d\n",dst_num_vec_dims);      
 
       // The size of the dimensions must match
-      if (src_num_vector_dims != dst_num_vector_dims) {
+      if (src_num_vec_dims != dst_num_vec_dims) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                   "The srcField and the dstField must have the same size ungridded dimension to use vector regridding.",
                                          ESMC_CONTEXT, &localrc)) throw localrc;
