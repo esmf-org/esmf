@@ -27,23 +27,51 @@ endif()
 # Include compList.txt which in turn includes component libraries
 include(${CMAKE_CURRENT_BINARY_DIR}/compList.txt)
 include(ExternalProject)
+include(FetchContent)
 
+# Set -Dvar=value and execute add_subdirectory
+function(esmx_add_subdirectory CMP_SOURCE_DIR CMP CMP_BUILD_ARGS)
+  foreach(ARG IN ITEMS ${CMP_BUILD_ARGS})
+    string(REGEX REPLACE "^-D" "" ARG ${ARG})
+    string(FIND ${ARG} "=" EQPOS)
+    string(SUBSTRING ${ARG} 0 ${EQPOS}-1 LARG)
+    math(EXPR EQPOS "${EQPOS}+1")
+    string(SUBSTRING ${ARG} ${EQPOS} -1 RARG)
+    set(${LARG} ${RARG} CACHE STRING "${CMP} setting for ${LARG}" FORCE)
+  endforeach()
+  add_subdirectory(${CMP_SOURCE_DIR} ${CMP})
+endfunction()
+
+# Add components using build type
 foreach(CMP IN ITEMS ${COMPS})
   # get component options
-  set(CMP_BUILD_TYPE         "${${CMP}-BUILD_TYPE}")
-  set(CMP_SOURCE_DIR         "${${CMP}-SOURCE_DIR}")
-  set(CMP_CMAKE_CONFIG       "${${CMP}-CMAKE_CONFIG}")
-  set(CMP_INSTALL_PREFIX     "${${CMP}-INSTALL_PREFIX}")
-  set(CMP_INSTALL_LIBDIR     "${${CMP}-INSTALL_LIBDIR}")
-  set(CMP_INSTALL_CONFDIR    "${${CMP}-INSTALL_CONFDIR}")
-  set(CMP_INSTALL_INCLUDEDIR "${${CMP}-INSTALL_INCLUDEDIR}")
-  set(CMP_FORT_MODULE        "${${CMP}-FORT_MODULE}")
-  set(CMP_LIBRARIES          "${${CMP}-LIBRARIES}")
-  string(REPLACE "," ";" CMP_LIBRARIES "${CMP_LIBRARIES}")
-  set(CMP_BUILD_ARGS         "${${CMP}-BUILD_ARGS}")
-  string(TOLOWER "${CMP_BUILD_TYPE}" CMP_BUILD_TYPE)
-  if(${CMP_BUILD_TYPE} STREQUAL "external_project")
-    message(STATUS "Building ExternalProject ... ${CMP}")
+  set(CMP_BUILD_TYPE     "${${CMP}-BUILD_TYPE}")
+  string(TOLOWER         "${CMP_BUILD_TYPE}" CMP_BUILD_TYPE)
+  set(CMP_SOURCE_DIR     "${${CMP}-SOURCE_DIR}")
+  set(CMP_GIT_REPOSITORY "${${CMP}-GIT_REPOSITORY}")
+  set(CMP_GIT_TAG        "${${CMP}-GIT_TAG}")
+  set(CMP_CMAKE_CONFIG   "${${CMP}-CMAKE_CONFIG}")
+  set(CMP_INSTALL_PREFIX "${${CMP}-INSTALL_PREFIX}")
+  set(CMP_LIBRARY_DIR    "${${CMP}-LIBRARY_DIR}")
+  set(CMP_CONFIG_DIR     "${${CMP}-CONFIG_DIR}")
+  set(CMP_INCLUDE_DIR    "${${CMP}-INCLUDE_DIR}")
+  set(CMP_LIBRARIES      "${${CMP}-LIBRARIES}")
+  string(REPLACE "," ";" "${${CMP}-LIBRARIES}" CMP_LIBRARIES)
+  set(CMP_BUILD_ARGS     "${${CMP}-BUILD_ARGS}")
+  if(NOT CMP_GIT_REPOSITORY STREQUAL "")
+    message(STATUS "Fetching content ... ${CMP}")
+    if(EXISTS ${CMP_SOURCE_DIR})
+      message(FATAL_ERROR "Source directory already exists for ${CMP}")
+    endif()
+    FetchContent_Declare(${CMP}
+      GIT_REPOSITORY ${CMP_GIT_REPOSITORY}
+      GIT_TAG ${CMP_GIT_TAG}
+      SOURCE_DIR ${CMP_SOURCE_DIR}
+    )
+    FetchContent_Populate(${CMP})
+  endif()
+  if(${CMP_BUILD_TYPE} STREQUAL "externalproject")
+    message(STATUS "Adding ExternalProject ... ${CMP}")
     find_file(FND_CMAKE_LISTS CMakeLists.txt
       PATHS ${CMP_SOURCE_DIR}
       NO_CACHE NO_DEFAULT_PATH
@@ -66,10 +94,13 @@ foreach(CMP IN ITEMS ${COMPS})
     )
     add_dependencies(esmx_driver ${CMP})
     target_include_directories(esmx_driver PUBLIC
-      ${CMP_INSTALL_PREFIX}/${CMP_INSTALL_INCLUDEDIR})
+      ${CMP_INSTALL_PREFIX}/${CMP_INCLUDE_DIR})
     foreach (CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
+      string(CONCAT CMP_LIBRARY "${CMAKE_STATIC_LIBRARY_PREFIX}"
+                                "${CMP_LIBRARY}"
+                                "${CMAKE_STATIC_LIBRARY_SUFFIX}")
       target_link_libraries(esmx_driver PUBLIC
-        ${CMP_INSTALL_PREFIX}/${CMP_INSTALL_LIBDIR}/lib${CMP_LIBRARY}.a)
+        ${CMP_INSTALL_PREFIX}/${CMP_LIBRARY_DIR}/${CMP_LIBRARY})
     endforeach()
   elseif(${CMP_BUILD_TYPE} STREQUAL "subdirectory")
     message(STATUS "Adding Subdirectory ... ${CMP}")
@@ -84,18 +115,18 @@ foreach(CMP IN ITEMS ${COMPS})
       )
     endif()
     unset(FND_CMAKE_LISTS)
-    add_subdirectory(${CMP_SOURCE_DIR} ${CMP})
+    esmx_add_subdirectory(${CMP_SOURCE_DIR} ${CMP} "${CMP_BUILD_ARGS}")
     target_include_directories(esmx_driver PUBLIC
-      ${CMAKE_CURRENT_BINARY_DIR}/${CMP}/${CMP_INSTALL_INCLUDEDIR})
+      ${CMAKE_BINARY_DIR}/${CMP_INCLUDE_DIR})
     foreach (CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
       add_dependencies(esmx_driver ${CMP_LIBRARY})
       target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
     endforeach()
   elseif(${CMP_BUILD_TYPE} STREQUAL "preinstalled")
-    message(STATUS "Linking Preinstalled ... ${CMP}")
+    message(STATUS "Adding Preinstalled ... ${CMP}")
     find_file(FND_CMAKE_CONFIG NAMES ${CMP_CMAKE_CONFIG}
       HINTS ${CMP_INSTALL_PREFIX}
-      PATH_SUFFIXES ${CMP_INSTALL_CONFDIR} "." "cmake"
+      PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
       NO_CACHE NO_DEFAULT_PATH
     )
     if(NOT FND_CMAKE_CONFIG)
@@ -106,33 +137,8 @@ foreach(CMP IN ITEMS ${COMPS})
     endif()
     include(${FND_CMAKE_CONFIG})
     unset(FND_CMAKE_CONFIG)
-    find_path(FND_FORT_MODULE NAMES ${CMP_FORT_MODULE}
-      HINTS ${CMP_INSTALL_PREFIX}
-      PATH_SUFFIXES ${CMP_INSTALL_INCLUDEDIR} "." "include" "mod"
-      NO_CACHE NO_DEFAULT_PATH
-    )
-    if(NOT FND_FORT_MODULE)
-      message(FATAL_ERROR "Could not find ${CMP_FORT_MODULE}"
-        " in ${CMP_INSTALL_PREFIX}."
-        " Check installation or set install_prefix in build configuration"
-      )
-    endif()
-    target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
-    unset(FND_FORT_MODULE)
     foreach (CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
-      find_library(FND_LIBRARY NAMES ${CMP_LIBRARY}
-        HINTS ${CMP_INSTALL_PREFIX}
-        PATH_SUFFIXES ${CMP_INSTALL_LIBDIR} "." "lib" "lib64"
-        NO_CACHE NO_DEFAULT_PATH
-      )
-      if(NOT FND_LIBRARY)
-        message(FATAL_ERROR "Could not find lib${CMP_LIBRARY}.a"
-          " in ${CMP_INSTALL_PREFIX}."
-          " Check installation or set install_prefix in build configuration"
-        )
-      endif()
-      target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
-      unset(FND_LIBRARY)
+      target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
     endforeach()
   else()
     message(FATAL_ERROR "Invalid BUILD_TYPE: ${CMP_BUILD_TYPE} for ${CMP}")
@@ -141,10 +147,10 @@ foreach(CMP IN ITEMS ${COMPS})
   unset(CMP_SOURCE_DIR)
   unset(CMP_CMAKE_CONFIG)
   unset(CMP_INSTALL_PREFIX)
-  unset(CMP_INSTALL_LIBDIR)
-  unset(CMP_INSTALL_CONFDIR)
-  unset(CMP_INSTALL_INCLUDEDIR)
-  unset(CMP_FORT_MODULE)
+  unset(CMP_LIBRARY_DIR)
+  unset(CMP_CONFIG_DIR)
+  unset(CMP_INCLUDE_DIR)
   unset(CMP_LIBRARIES)
   unset(CMP_BUILD_ARGS)
 endforeach()
+

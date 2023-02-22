@@ -21,19 +21,54 @@ One of the main pieces provided by ESMX is the *unified driver executable*. A go
 
 The name of the unified driver executable created by ESMX is all lower case `esmx`. This name will be used for the remainder of this section to refer to the unfied driver executable.
 
-ESMX is CMake based. The following two commands, executed from anywhere in your terminal, will build the `esmx` executable under a local `build` sub-drirectory and install the `esmx` executable under a local `install` sub-drirectory:
+### ESMX\_Builder
 
-	cmake -S$ESMF_ESMXDIR -Bbuild -DCMAKE_INSTALL_PREFIX="install"
-	cmake --build ./build -v
-	cmake --install build
+The ESMX\_Builder is a shell script included with ESMF installations that facilitates building ESMX. The script is installed into the ESMF binary directory within an ESMF installation. For more information on installing ESMF see the [ESMF User's Guide](https://earthsystemmodeling.org/doc/).
 
-Here shell variable `ESMF_ESMXDIR` is assumed to be set according to your ESMF installation. The correct value for `ESMF_ESMXDIR` can be looked up in the `esmf.mk` file, which should be accessible via shell variable `ESMFMKFILE`. (E.g. `cat $ESMFMKFILE`.)
-	
-For a successful build, the ESMX build system expects to find a configuration file called `esmxBuild.yaml` in the directory from which the above commands are executed. Details of this file are discussed next.
+If the ESMF binary directory is included in the PATH environment variable then ESMX\_Builder can be called from any directory as follows:
 
-### esmxBuild.yaml
+```
+ESMX_Builder [OPTIONS]... ESMX_BUILD_FILE
 
-The ESMX build system depends on file `esmxBuild.yaml`. This is a [YAML](https://yaml.org/) file with a very simple format. An example is given here:
+options:
+  [--esmx-dir=ESMF_ESMXDIR]
+  [--esmfmkfile=ESMFMKFILE]
+  [--build-dir=BUILD_DIR]
+  [--prefix=INSTALL_PREFIX]
+  [--build-type=BUILD_TYPE]
+  [--build-args=BUILD_ARGS]
+  [--verbose]
+  [-v]
+
+where:
+  ESMX_BUILD_FILE          ESMX build configuration file
+                           (default: esmxBuild.yaml)
+
+  --esmx-dir=ESMF_ESMXDIR  ESMX source directory
+                           (default: use ESMF_ESMXDIR in ESMFMKFILE)
+
+  --esmfmkfile=ESMFMKFILE  ESMF makefile fragment
+                           (default: use environment)
+
+  --build-dir=BUILD_DIR    build directory
+                           (default: build)
+
+  --prefix=INSTALL_PREFIX  installation prefix
+                           (default: install)
+
+  --build-type=BUILD_TYPE  build type; valid options are 'debug', 'release', 'relWithDebInfo'
+                           (default: release)
+
+  --build-args=BUILD_ARGS  global cmake arguments (e.g. -DVAR=val)
+
+  --verbose or -v          build with verbose output
+```
+
+This script installs `esmx` into INSTALL\_PREFIX/bin.
+
+### ESMX\_BUILD\_FILE (e.g. esmxBuild.yaml)
+
+The ESMX build system depends on a build file, for example `esmxBuild.yaml`. This is a [YAML](https://yaml.org/) file with a very simple format. An example is given here:
 
     components:
 
@@ -49,18 +84,22 @@ In this example two components are built into `esmx` explicitly. (Read about dyn
 Each component is given a name, here `tawas` and `lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.config) discussed below. Component names are case-sensitive.
 
 Build options for each component are defined usin [YAML](https://yaml.org/) syntax. Build options are defined as follows:
-| Option              | Description                                   | Default                |
-| ------------------- | --------------------------------------------- | ---------------------- |
-| build\_type         | preinstalled, external\_project, subdirectory | preinstalled           |
-| source\_dir         | source directory for build                    | *component-name*       |
-| cmake\_config       | CMake configuration file                      | *component-name*.cmake |
-| install\_prefix     | root directory for installation               | install                |
-| install\_confdir    | subdirectory for cmake configuration file     | cmake                  |
-| install\_libdir     | subdirectory for library file                 | lib                    |
-| install\_includedir | subdirectory for fortran module file          | *None*                 |
-| fort\_module        | fortran module filename for NUOPC SetServices | *component-name*.mod   |
-| libraries           | component libraries, linked to esmx           | *component-name*       |
-| build\_args         | build arguments passed to external\_project   | *None*                 |
+| Option          | Description                                   | Default                |
+| --------------- | --------------------------------------------- | ---------------------- |
+| build\_type     | preinstalled, ExternalProject                 | preinstalled           |
+| git\_repository | URL for downloading git repository            | *None*                 |
+| git\_tag        | tag for downloading git repository            | *None*                 |
+| source\_dir     | source directory for build                    | *component-name*       |
+| cmake\_config   | CMake configuration file                      | *component-name*.cmake |
+| install\_prefix | root directory for installation               | install                |
+| config\_dir     | subdirectory for cmake configuration file     | cmake                  |
+| library\_dir    | subdirectory for library file                 | lib                    |
+| include\_dir    | subdirectory for fortran module file          | include                |
+| fort\_module    | fortran module filename for NUOPC SetServices | *component-name*.mod   |
+| libraries       | component libraries, linked to esmx           | *component-name*       |
+| build\_args     | build arguments passed to ExternalProject     | *None*                 |
+
+Downloading component using git\_repository will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git\_repository fails if the source\_dir already exists.
 
 A component CMake configuration file provided by a previous installation includes target information needed for linking dependencies. A manually generated CMake configuration file includes the following standard CMake elements:
 - `add_library(library-name ... )`

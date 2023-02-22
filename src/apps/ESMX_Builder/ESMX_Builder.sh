@@ -8,19 +8,27 @@ usage () {
   printf "ARGUMENTS\n"
   printf "  ESMX_BUILD_FILE\n"
   printf "      ESMX build configuration file\n"
+  printf "      (default: esmxBuild.yaml)\n"
   printf "\n"
   printf "OPTIONS\n"
   printf "  --esmx-dir=ESMF_ESMXDIR\n"
   printf "      ESMX source directory\n"
+  printf "      (default: use ESMF_ESMXDIR in ESMFMKFILE)\n"
   printf "  --esmfmkfile=ESMFMKFILE\n"
   printf "      ESMF makefile fragment\n"
+  printf "      (default: use environment)\n"
   printf "  --build-dir=BUILD_DIR\n"
   printf "      build directory\n"
+  printf "      (default: build)\n"
   printf "  --prefix=INSTALL_PREFIX\n"
   printf "      installation prefix\n"
+  printf "      (default: install)\n"
   printf "  --build-type=BUILD_TYPE\n"
   printf "      build type; valid options are 'debug', 'release',\n"
   printf "      'relWithDebInfo'\n"
+  printf "      (default: release)\n"
+  printf "  --build-args=BUILD_ARGS\n"
+  printf "      cmake arguments (e.g. -DARG=VAL)\n"
   printf "  --verbose, -v\n"
   printf "      build with verbose output\n"
   printf "\n"
@@ -36,6 +44,7 @@ settings () {
   printf "  BUILD_DIR=${BUILD_DIR}\n"
   printf "  INSTALL_PREFIX=${INSTALL_PREFIX}\n"
   printf "  BUILD_TYPE=${BUILD_TYPE}\n"
+  printf "  BUILD_ARGS=${BUILD_ARGS}\n"
   printf "  VERBOSE=${VERBOSE}\n"
   printf "\n"
 }
@@ -46,6 +55,7 @@ ESMFMKFILE="${ESMFMKFILE:-esmf.mk}"
 ESMX_BUILD_FILE="esmxBuild.yaml"
 ESMF_ESMXDIR=""
 BUILD_TYPE="release"
+BUILD_ARGS=""
 BUILD_DIR="${CWD}/build"
 INSTALL_PREFIX="${CWD}/install"
 VERBOSE=false
@@ -76,6 +86,9 @@ while [[ $# -gt 0 ]]; do
     --build-type=?*) BUILD_TYPE=${1#*=} ;;
     --build-type) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --build-type=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --build-args=?*) BUILD_ARGS=${1#*=} ;;
+    --build-args) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --build-args) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --verbose|-v) VERBOSE=true ;;
     --verbose=?*) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
     --verbose=) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
@@ -132,6 +145,9 @@ if [ ! -z "${INSTALL_PREFIX}" ]; then
 fi
 if [ ! -z "${BUILD_TYPE}" ]; then
   CMAKE_SETTINGS+=("-DCMAKE_BUILD_TYPE=${BUILD_TYPE}")
+fi
+if [ ! -z "${BUILD_ARGS}" ]; then
+  CMAKE_SETTINGS+=("${BUILD_ARGS}")
 fi
 
 # make settings

@@ -40,29 +40,33 @@ def create_compList(_dict, odir):
             install_prefix = v1.get('install_prefix', os.path.dirname(cmake_config))
           cmake_config = os.path.basename(cmake_config)
           install_prefix = os.path.abspath(install_prefix)
-          install_confdir = v1.get('install_confdir', 'cmake')
-          if (os.path.isabs(install_confdir)):
-            install_confdir = os.path.basename(install_confdir)
-          install_libdir = v1.get('install_libdir', 'lib')
-          if (os.path.isabs(install_libdir)):
-            install_libdir = os.path.basename(install_libdir)
-          install_includedir = v1.get('install_includedir', '')
-          if (os.path.isabs(install_includedir)):
-            install_includedir = os.path.basename(install_includedir)
-          fort_module = v1.get('fort_module', (k1+'.mod').lower())
+          config_dir = v1.get('config_dir', 'cmake')
+          if (os.path.isabs(config_dir)):
+            config_dir = os.path.basename(config_dir)
+          library_dir = v1.get('library_dir', 'lib')
+          if (os.path.isabs(library_dir)):
+            library_dir = os.path.basename(library_dir)
+          include_dir = v1.get('include_dir', 'include')
+          if (os.path.isabs(include_dir)):
+            include_dir = os.path.basename(include_dir)
           libraries = v1.get('libraries', k1)
           build_args = v1.get('build_args', None)
-          f.write('set({}-BUILD_TYPE   {})\n'.format(k1, build_type))
-          f.write('set({}-SOURCE_DIR   {})\n'.format(k1, source_dir))
-          f.write('set({}-CMAKE_CONFIG {})\n'.format(k1, cmake_config))
+          git_repository = v1.get('git_repository', None)
+          git_tag = v1.get('git_tag', None)
+          f.write('set({}-BUILD_TYPE     {})\n'.format(k1, build_type))
+          f.write('set({}-SOURCE_DIR     {})\n'.format(k1, source_dir))
+          f.write('set({}-CMAKE_CONFIG   {})\n'.format(k1, cmake_config))
           f.write('set({}-INSTALL_PREFIX {})\n'.format(k1, install_prefix))
-          f.write('set({}-INSTALL_LIBDIR     {})\n'.format(k1, install_libdir))
-          f.write('set({}-INSTALL_CONFDIR    {})\n'.format(k1, install_confdir))
-          f.write('set({}-INSTALL_INCLUDEDIR {})\n'.format(k1, install_includedir))
-          f.write('set({}-FORT_MODULE  {})\n'.format(k1, fort_module))
-          f.write('set({}-LIBRARIES    {})\n'.format(k1, libraries))
+          f.write('set({}-LIBRARY_DIR    {})\n'.format(k1, library_dir))
+          f.write('set({}-CONFIG_DIR     {})\n'.format(k1, config_dir))
+          f.write('set({}-INCLUDE_DIR    {})\n'.format(k1, include_dir))
+          f.write('set({}-LIBRARIES      {})\n'.format(k1, libraries))
           if (build_args):
-            f.write('set({}-BUILD_ARGS   {})\n'.format(k1, build_args))
+            f.write('set({}-BUILD_ARGS         {})\n'.format(k1, build_args))
+          if (git_repository):
+            f.write('set({}-GIT_REPOSITORY     {})\n'.format(k1, git_repository))
+          if (git_tag):
+            f.write('set({}-GIT_TAG            {})\n'.format(k1, git_tag))
 
 def create_compUse(_dict, odir):
     # open file
