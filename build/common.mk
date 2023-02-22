@@ -390,13 +390,7 @@ ifeq ($(ESMF_OS),Cygwin)
 export ESMF_COMPILER = gfortran
 endif
 ifeq ($(ESMF_OS),Darwin)
-export ESMF_COMPILER = absoft
-ifeq ($(ESMF_MACHINE),i386)
-export ESMF_COMPILER = gfortran
-endif
-ifeq ($(ESMF_MACHINE),x86_64)
-export ESMF_COMPILER = gfortran
-endif
+export ESMF_COMPILER = gfortranclang
 endif
 ifeq ($(ESMF_OS),Linux)
 export ESMF_COMPILER = gfortran
