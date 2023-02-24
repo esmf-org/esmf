@@ -61,7 +61,7 @@ namespace ESMCI {
 // !IROUTINE:  ESMCI::HConfig::create - Create a new HConfig
 //
 // !INTERFACE:
-HConfig *HConfig::create(
+HConfig HConfig::create(
 //
 // !RETURN VALUE:
 //  pointer to newly allocated HConfig
@@ -77,22 +77,24 @@ HConfig *HConfig::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
-  HConfig *hconfig = NULL;
+
+  HConfig hconfig;
+  hconfig.node = NULL;
+
   try{
 
     // new object
-    hconfig = new HConfig;
-    hconfig->node = new YAML::Node;
+    hconfig.node = new YAML::Node;
+    hconfig.isIter = false;
 
   }catch(int catchrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return NULL;
+    return hconfig;
   }catch(...){
     // allocation error
     ESMC_LogDefault.MsgAllocError("for new ESMCI::HConfig.", ESMC_CONTEXT, rc);
-    return NULL;
+    return hconfig;
   }
 
   // return successfully
@@ -115,7 +117,7 @@ int HConfig::destroy(
 //  int error return code
 //
 // !ARGUMENTS:
-    HConfig **hconfig){   // in - HConfig object to destroy
+    HConfig *hconfig){   // in - HConfig object to destroy
 //
 // !DESCRIPTION:
 //  ESMF routine which destroys a HConfig object.
@@ -127,17 +129,18 @@ int HConfig::destroy(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // return with errors for NULL pointer
-  if (hconfig == ESMC_NULL_POINTER || *hconfig == ESMC_NULL_POINTER){
+  if (hconfig == ESMC_NULL_POINTER){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to HConfig", ESMC_CONTEXT, &rc);
     return rc;
   }
 
-  // delete the YAML::Node
-  delete (*hconfig)->node;
-  // delete the HConfig object
-  delete (*hconfig);            // completely delete the object, free heap
-  *hconfig = ESMC_NULL_POINTER; // mark as invalid
+  // protect node from delete in case this is an iterator but user calls
+  // the destroy call on it
+  if (!hconfig->isIter){
+    // delete the YAML::Node
+    delete (hconfig->node);
+  }
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -217,7 +220,7 @@ int HConfig::loadFile(
     std::stringstream debugmsg;
     debugmsg << "node.Type: " << node->Type();
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
-    
+
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception loading content from file", ESMC_CONTEXT, &rc);
@@ -258,10 +261,16 @@ int HConfig::isNull(
 
 #ifdef ESMF_YAMLCPP
   try {
-    *flag = node->IsNull();
+    if (isIter)
+      if (node->IsMap())
+        *flag = iter->second.IsNull();
+      else
+        *flag = iter->IsNull();
+    else
+      *flag = node->IsNull();
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -299,10 +308,16 @@ int HConfig::isScalar(
 
 #ifdef ESMF_YAMLCPP
   try {
-    *flag = node->IsScalar();
+    if (isIter)
+      if (node->IsMap())
+        *flag = iter->second.IsScalar();
+      else
+        *flag = iter->IsScalar();
+    else
+      *flag = node->IsScalar();
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -340,10 +355,16 @@ int HConfig::isSequence(
 
 #ifdef ESMF_YAMLCPP
   try {
-    *flag = node->IsSequence();
+    if (isIter)
+      if (node->IsMap())
+        *flag = iter->second.IsSequence();
+      else
+        *flag = iter->IsSequence();
+    else
+      *flag = node->IsSequence();
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -381,10 +402,16 @@ int HConfig::isMap(
 
 #ifdef ESMF_YAMLCPP
   try {
-    *flag = node->IsMap();
+    if (isIter)
+      if (node->IsMap())
+        *flag = iter->second.IsMap();
+      else
+        *flag = iter->IsMap();
+    else
+      *flag = node->IsMap();
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -422,10 +449,172 @@ int HConfig::isDefined(
 
 #ifdef ESMF_YAMLCPP
   try {
-    *flag = node->IsDefined();
+    if (isIter)
+      if (node->IsMap())
+        *flag = iter->second.IsDefined();
+      else
+        *flag = iter->IsDefined();
+    else
+      *flag = node->IsDefined();
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::iterBegin()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::iterBegin - Iterator pointing to first item
+//
+// !INTERFACE:
+HConfig HConfig::iterBegin(
+//
+// !RETURN VALUE:
+//  pointer to iterator
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return iterator pointing to first item.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+#ifdef ESMF_YAMLCPP
+  HConfig hconfig;
+  hconfig.node = NULL;
+
+  try{
+
+    // iterator
+    hconfig.node = node;
+    hconfig.isIter = true;
+    hconfig.iter = node->begin();
+
+  }catch(int catchrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return hconfig;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::HConfig.", ESMC_CONTEXT, rc);
+    return hconfig;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return hconfig;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::iterEnd()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::iterEnd - Iterator pointing to one past the last item
+//
+// !INTERFACE:
+HConfig HConfig::iterEnd(
+//
+// !RETURN VALUE:
+//  pointer to iterator
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return iterator pointing to one past the last item.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+#ifdef ESMF_YAMLCPP
+  HConfig hconfig;
+  hconfig.node = NULL;
+
+  try{
+
+    // iterator
+    hconfig.node = node;
+    hconfig.isIter = true;
+    hconfig.iter = node->end();
+
+  }catch(int catchrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return hconfig;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::HConfig.", ESMC_CONTEXT, rc);
+    return hconfig;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return hconfig;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::iterNext()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::iterNext - one step forward iterator
+//
+// !INTERFACE:
+int HConfig::iterNext(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    ){
+// 
+// !DESCRIPTION: 
+//  Steps the iterator forward by one step.
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+
+  try {
+    // make sure this is an iterator, or else error out
+    if (!isIter){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+    ++iter;
+  } catch(...) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;
   }
 

@@ -53,12 +53,14 @@ namespace ESMCI {
     private:
 #ifdef ESMF_YAMLCPP
       YAML::Node *node;
+      YAML::iterator iter;
+      bool isIter;
 #endif
 
     public:
       // depend on default constructor and destructor
-      static HConfig *create(int *rc=NULL);
-      static int destroy(HConfig **hconfig);
+      static HConfig create(int *rc=NULL);
+      static int destroy(HConfig *hconfig);
       int load(const std::string& content);
       int loadFile(const std::string& filename);
       int isNull(bool *flag);
@@ -66,8 +68,9 @@ namespace ESMCI {
       int isSequence(bool *flag);
       int isMap(bool *flag);
       int isDefined(bool *flag);
-//      HConfig *iterBegin(int *rc=NULL);
-//      HConfig *iterEnd(int *rc=NULL);
+      HConfig iterBegin(int *rc=NULL);
+      HConfig iterEnd(int *rc=NULL);
+      int iterNext();
       int toConfig(ESMCI_Config **config);
   };   // class HConfig
 
