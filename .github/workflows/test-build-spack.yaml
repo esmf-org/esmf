@@ -12,11 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        #compiler: [gcc, intel]
-        #compiler: [gcc]
         compiler: [intel@2023.0.0]
-        #pio: [internal, external]
-        #mpi: [openmpi]
+        esmf: [esmf@develop+parallelio~xerces~pnetcdf]
 
     env:
       INTEL_INSTALL_DIR: /opt/intel/oneapi 
@@ -39,7 +36,7 @@ jobs:
       run: |
         ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
           -a ${{ inputs.architecture }} \
-          -d ${{ matrix.compiler }}, 
+          -d ${{ matrix.compiler }},${{ matrix.esmf }}
           -i ~/.spack-ci
           -r ${{ github.workspace }} 
 
