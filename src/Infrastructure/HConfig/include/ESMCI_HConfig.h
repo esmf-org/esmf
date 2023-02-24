@@ -52,7 +52,7 @@ namespace ESMCI {
 
     private:
 #ifdef ESMF_YAMLCPP
-      YAML::Node doc;
+      YAML::Node *node;
 #endif
 
     public:
@@ -61,6 +61,13 @@ namespace ESMCI {
       static int destroy(HConfig **hconfig);
       int load(const std::string& content);
       int loadFile(const std::string& filename);
+      int isNull(bool *flag);
+      int isScalar(bool *flag);
+      int isSequence(bool *flag);
+      int isMap(bool *flag);
+      int isDefined(bool *flag);
+//      HConfig *iterBegin(int *rc=NULL);
+//      HConfig *iterEnd(int *rc=NULL);
       int toConfig(ESMCI_Config **config);
   };   // class HConfig
 

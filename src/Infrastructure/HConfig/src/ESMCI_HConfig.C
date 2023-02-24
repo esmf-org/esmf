@@ -83,6 +83,7 @@ HConfig *HConfig::create(
 
     // new object
     hconfig = new HConfig;
+    hconfig->node = new YAML::Node;
 
   }catch(int catchrc){
     // catch standard ESMF return code
@@ -115,7 +116,6 @@ int HConfig::destroy(
 //
 // !ARGUMENTS:
     HConfig **hconfig){   // in - HConfig object to destroy
-    
 //
 // !DESCRIPTION:
 //  ESMF routine which destroys a HConfig object.
@@ -125,14 +125,16 @@ int HConfig::destroy(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // return with errors for NULL pointer
   if (hconfig == ESMC_NULL_POINTER || *hconfig == ESMC_NULL_POINTER){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to HConfig", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
+  // delete the YAML::Node
+  delete (*hconfig)->node;
   // delete the HConfig object
   delete (*hconfig);            // completely delete the object, free heap
   *hconfig = ESMC_NULL_POINTER; // mark as invalid
@@ -169,7 +171,7 @@ int HConfig::load(
 
 #ifdef ESMF_YAMLCPP
   try {
-    this->doc = YAML::Load(content);
+    *node = YAML::Load(content);
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception loading content from string", ESMC_CONTEXT, &rc);
@@ -210,7 +212,217 @@ int HConfig::loadFile(
 
 #ifdef ESMF_YAMLCPP
   try {
-    this->doc = YAML::LoadFile(filename);
+    *node = YAML::LoadFile(filename);
+
+    std::stringstream debugmsg;
+    debugmsg << "node.Type: " << node->Type();
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
+    
+  } catch(...) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isNull()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isNull - access node type
+//
+// !INTERFACE:
+int HConfig::isNull(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try {
+    *flag = node->IsNull();
+  } catch(...) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isScalar()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isScalar - access node type
+//
+// !INTERFACE:
+int HConfig::isScalar(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try {
+    *flag = node->IsScalar();
+  } catch(...) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isSequence()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isSequence - access node type
+//
+// !INTERFACE:
+int HConfig::isSequence(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try {
+    *flag = node->IsSequence();
+  } catch(...) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMap()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMap - access node type
+//
+// !INTERFACE:
+int HConfig::isMap(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try {
+    *flag = node->IsMap();
+  } catch(...) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isDefined()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isDefined - access node type
+//
+// !INTERFACE:
+int HConfig::isDefined(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try {
+    *flag = node->IsDefined();
   } catch(...) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception loading content from file", ESMC_CONTEXT, &rc);
@@ -258,9 +470,9 @@ int HConfig::toConfig(
 #ifdef ESMF_YAMLCPP
   try{
 
-    if (doc.IsMap()){
+    if (node->IsMap()){
       // only support map on the doc level
-      for (auto it=doc.begin(); it!=doc.end(); ++it){
+      for (auto it=node->begin(); it!=node->end(); ++it){
         if (it->first.IsScalar()){
           // support scalar keys
           string label = it->first.as<string>() + ":";  // use colon separator

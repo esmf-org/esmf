@@ -95,6 +95,11 @@ program ESMF_HConfigUTest
   write(name, *) "HConfigLoad()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_HConfigLoad(hconfig, content="[1, 2, 3]", rc=rc)
+print *, "IsNull(): ", ESMF_HConfigIsNull(hconfig, rc=rc)
+print *, "IsScalar(): ", ESMF_HConfigIsScalar(hconfig, rc=rc)
+print *, "IsSequence(): ", ESMF_HConfigIsSequence(hconfig, rc=rc)
+print *, "IsMap(): ", ESMF_HConfigIsMap(hconfig, rc=rc)
+print *, "IsDefined(): ", ESMF_HConfigIsDefined(hconfig, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
