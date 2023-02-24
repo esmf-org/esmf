@@ -37,7 +37,7 @@ jobs:
     # concretize dependencies
     - name: Concretize Spack Environment Using YAML Specification
       run: |
-        ${{ github.workspace }}/.github/workflows/scripts/concretize_deps.sh \
+        ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
           -a ${{ inputs.architecture }} \
           -d ${{ matrix.compiler }}, 
           -i ~/.spack-ci
