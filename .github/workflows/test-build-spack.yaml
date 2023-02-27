@@ -12,8 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        compiler: [intel@2023.0.0]
-        esmf: [esmf@develop+parallelio~xerces~pnetcdf%intel]
+        compiler: [intel-oneapi-compilers@2023.0.0]
+        esmf: [esmf@develop+parallelio~xerces~pnetcdf]
 
     env:
       INTEL_INSTALL_DIR: /opt/intel/oneapi 
