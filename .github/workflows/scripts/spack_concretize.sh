@@ -55,6 +55,14 @@ echo "::group::Checkout Spack"
 git clone https://github.com/spack/spack.git
 echo "::endgroup::"
 
+# install compiler
+. spack/share/spack/setup-env.sh
+spack install $comp target=$arch
+spack compiler add $(spack location -i $comp)
+spack compilers 
+
+exit
+
 # create spack environment 
 #. spack/share/spack/setup-env.sh
 #spack env create esmf_test
