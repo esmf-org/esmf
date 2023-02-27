@@ -908,8 +908,9 @@
         ESMF_FILEFORMAT_CFGRID = ESMF_FileFormat_Flag(6), &
         ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6), &
         ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(7), &
-        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(8)
-
+        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(8), &
+        ESMF_FILEFORMAT_SHAPEFILE = ESMF_FileFormat_Flag(9)
+        
 
 !------------------------------------------------------------------------------
 !
@@ -1227,7 +1228,8 @@
              ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
              ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC, &
              ESMF_FILEFORMAT_CFGRID, ESMF_FILEFORMAT_MOSAIC, &
-             ESMF_FILEFORMAT_UNKNOWN, ESMF_FILEFORMAT_TILE
+             ESMF_FILEFORMAT_UNKNOWN, ESMF_FILEFORMAT_TILE, &
+             ESMF_FILEFORMAT_SHAPEFILE
 
       public ESMF_FileMode_Flag, ESMF_FILEMODE_BASIC, ESMF_FILEMODE_WITHAUX
 

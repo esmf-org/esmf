@@ -65,10 +65,17 @@ enum ESMC_ExtrapMethod_Flag {ESMC_EXTRAPMETHOD_NONE=0,
                              ESMC_EXTRAPMETHOD_CREEP,
                              ESMC_EXTRAPMETHOD_CREEP_NRST_D};
 
-enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
-                           ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,
-                           ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
-                           ESMC_FILEFORMAT_GRIDSPEC};
+enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED=0,
+                           ESMC_FILEFORMAT_VTK,
+                           ESMC_FILEFORMAT_SCRIP,
+                           ESMC_FILEFORMAT_ESMFMESH,
+                           ESMC_FILEFORMAT_ESMFGRID,
+                           ESMC_FILEFORMAT_UGRID,
+                           ESMC_FILEFORMAT_CFGRID,
+                           ESMC_FILEFORMAT_GRIDSPEC,
+                           ESMC_FILEFORMAT_MOSAIC,
+                           ESMC_FILEFORMAT_TILE,
+                           ESMC_FILEFORMAT_SHAPEFILE};
 
 typedef enum ESMC_FileMode_Flag {ESMC_FILEMODE_BASIC, ESMC_FILEMODE_WITHAUX} ESMC_FileMode_Flag;
 
