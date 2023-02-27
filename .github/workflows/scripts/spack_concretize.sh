@@ -55,9 +55,6 @@ echo "::group::Checkout Spack"
 git clone https://github.com/spack/spack.git
 echo "::endgroup::"
 
-
-exit
-
 # create spack.yaml
 echo "::group::Create spack.yaml"
 echo "spack:" > spack.yaml
@@ -75,7 +72,7 @@ done
 echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
 echo "      target: ['$arch']" >> spack.yaml
-#echo "      compiler: [$comp]" >> spack.yaml
+echo "      compiler: [$comp]" >> spack.yaml
 echo "  view: $install_dir/view" >> spack.yaml
 echo "  config:" >> spack.yaml
 echo "    source_cache: $install_dir/source_cache" >> spack.yaml
