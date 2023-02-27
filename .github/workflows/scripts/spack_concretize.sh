@@ -55,13 +55,17 @@ echo "::group::Checkout Spack"
 git clone https://github.com/spack/spack.git
 echo "::endgroup::"
 
+# activate spack
+#. spack/share/spack/setup-env.sh
+#
 # install compiler
-. spack/share/spack/setup-env.sh
-spack install $comp target=$arch
-spack compiler add $(spack location -i $comp)
-spack compilers 
+#echo "::group::Install Compiler"
+#spack install $comp target=$arch
 
-exit
+#spack compiler add $(spack location -i $comp)
+#spack compilers 
+#echo "::endgroup::"
+#exit
 
 # create spack environment 
 #. spack/share/spack/setup-env.sh
@@ -103,6 +107,7 @@ echo "    misc_cache: $install_dir/misc_cache" >> spack.yaml
 echo "    test_cache: $install_dir/test_cache" >> spack.yaml
 echo "    install_tree:" >> spack.yaml
 echo "      root: $install_dir/opt" >> spack.yaml
+echo "    install_missing_compilers: true"
 cat spack.yaml
 echo "::endgroup::"
 
