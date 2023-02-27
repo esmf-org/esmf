@@ -65,7 +65,7 @@ for d in "${array[@]}"
 do
   spack add $d target=$arch
 done
-spack --color always concretize -f
+spack install
 
 exit
 
