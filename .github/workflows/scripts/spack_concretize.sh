@@ -60,8 +60,12 @@ echo "::endgroup::"
 spack env create esmf_test
 spack env activate -p esmf_test
 
-# install compiler
-spack install --add $comp arch=$arch
+# install dependencies
+for d in "${array[@]}"
+do
+  spack add $d target=$arch
+done
+spack --color always concretize -f
 
 exit
 
