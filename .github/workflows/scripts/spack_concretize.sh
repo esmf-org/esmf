@@ -1,15 +1,18 @@
 #!/bin/bash
 
 # get arguments
-while getopts a:d:i:r: flag
+while getopts a:c:d:i:r: flag
 do
   case "${flag}" in
     a) arch=${OPTARG};;
+    c) comp=${OPTARG};;
     d) deps=${OPTARG};;
     i) install_dir=${OPTARG};;
     r) run_dir=${OPTARG};;
   esac
 done
+
+echo $deps
 
 # check for default values
 if [ -z "$deps" ]; then
@@ -33,8 +36,13 @@ if [[ -z "$arch" || ! -z `echo $arch | grep '^-'` ]]; then
   arch="x86_64_v4"
 fi
 
+if [[ -z "$comp" || ! -z `echo $comp | grep '^-'` ]]; then
+  comp="intel"
+fi
+
 # print out arguments
 echo "Target Architecture: $arch"
+echo "Compiler: $comp"
 echo "Dependencies: $deps";
 echo "Install Directory: $install_dir";
 echo "Run Directory: $run_dir";
@@ -44,8 +52,11 @@ cd $run_dir
 
 # checkout spack
 echo "::group::Checkout Spack"
-git clone -b jcsda_emc_spack_stack https://github.com/NOAA-EMC/spack.git
+git clone https://github.com/spack/spack.git
 echo "::endgroup::"
+
+
+exit
 
 # create spack.yaml
 echo "::group::Create spack.yaml"
@@ -63,11 +74,8 @@ do
 done
 echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
-# following is required to build same optimized spack for different github action runners
-# spack arch --known-targets command can be used to list known targets
 echo "      target: ['$arch']" >> spack.yaml
-# following fixes compiler version
-#echo "      compiler: [gcc@11.3.0]" >> spack.yaml
+#echo "      compiler: [$comp]" >> spack.yaml
 echo "  view: $install_dir/view" >> spack.yaml
 echo "  config:" >> spack.yaml
 echo "    source_cache: $install_dir/source_cache" >> spack.yaml

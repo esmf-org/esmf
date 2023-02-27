@@ -32,13 +32,16 @@ jobs:
         sudo apt-get -qq install python3-dev
 
     # concretize dependencies
-    - name: Concretize Spack Environment Using YAML Specification
-      run: |
-        ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
-          -a ${{ inputs.architecture }} \
-          -d ${{ matrix.compiler }},${{ matrix.esmf }}
-          -i ~/.spack-ci
-          -r ${{ github.workspace }} 
+    #- name: Concretize Spack Environment Using YAML Specification
+    #  run: |
+    #    echo ${{ matrix.compiler }}
+    #    echo ${{ matrix.esmf }}
+    #    ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
+    #      -a x86_64_v4 \
+    #      -c ${{ matrix.compiler }} \
+    #      -d ${{ matrix.compiler }},${{ matrix.esmf }} \
+    #      -i ~/.spack-ci \
+    #      -r ${{ github.workspace }} 
 
 
     #- name: Checkout Base Repository
