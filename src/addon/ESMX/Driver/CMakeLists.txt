@@ -16,8 +16,8 @@ target_include_directories(esmx_driver PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(esmx_driver PUBLIC ESMF)
 
 # Generate comp*.* files from esmxBuild.yaml
-find_package(PythonInterp 3.5 REQUIRED)
-execute_process(COMMAND ${PYTHON_EXECUTABLE}
+find_package(Python3 3.5 Interpreter REQUIRED)
+execute_process(COMMAND ${Python3_EXECUTABLE}
   ${CMAKE_CURRENT_LIST_DIR}/esmxGen.py --ifile ${ESMX_BUILD_FILE} --odir ${CMAKE_CURRENT_BINARY_DIR}
   RESULT_VARIABLE ret)
 if(NOT ret EQUAL "0")
@@ -50,6 +50,7 @@ foreach(CMP IN ITEMS ${COMPS})
   set(CMP_SOURCE_DIR     "${${CMP}-SOURCE_DIR}")
   set(CMP_GIT_REPOSITORY "${${CMP}-GIT_REPOSITORY}")
   set(CMP_GIT_TAG        "${${CMP}-GIT_TAG}")
+  set(CMP_GIT_DIR        "${${CMP}-GIT_DIR}")
   set(CMP_CMAKE_CONFIG   "${${CMP}-CMAKE_CONFIG}")
   set(CMP_INSTALL_PREFIX "${${CMP}-INSTALL_PREFIX}")
   set(CMP_LIBRARY_DIR    "${${CMP}-LIBRARY_DIR}")
@@ -63,10 +64,13 @@ foreach(CMP IN ITEMS ${COMPS})
     if(EXISTS ${CMP_SOURCE_DIR})
       message(FATAL_ERROR "Source directory already exists for ${CMP}")
     endif()
+    if(CMP_GIT_TAG STREQUAL "")
+      message(FATAL_ERROR "Git tag required for ${CMP}")
+    endif()
     FetchContent_Declare(${CMP}
       GIT_REPOSITORY ${CMP_GIT_REPOSITORY}
       GIT_TAG ${CMP_GIT_TAG}
-      SOURCE_DIR ${CMP_SOURCE_DIR}
+      SOURCE_DIR ${CMP_GIT_DIR}
     )
     FetchContent_Populate(${CMP})
   endif()
@@ -145,6 +149,9 @@ foreach(CMP IN ITEMS ${COMPS})
   endif()
   unset(CMP_BUILD_TYPE)
   unset(CMP_SOURCE_DIR)
+  unset(CMP_GIT_REPOSITORY)
+  unset(CMP_GIT_TAG)
+  unset(CMP_GIT_DIR)
   unset(CMP_CMAKE_CONFIG)
   unset(CMP_INSTALL_PREFIX)
   unset(CMP_LIBRARY_DIR)

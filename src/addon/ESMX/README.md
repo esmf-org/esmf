@@ -89,6 +89,7 @@ Build options for each component are defined usin [YAML](https://yaml.org/) synt
 | build\_type     | preinstalled, ExternalProject                 | preinstalled           |
 | git\_repository | URL for downloading git repository            | *None*                 |
 | git\_tag        | tag for downloading git repository            | *None*                 |
+| git\_dir        | download directory for git repository         | *None*                 |
 | source\_dir     | source directory for build                    | *component-name*       |
 | cmake\_config   | CMake configuration file                      | *component-name*.cmake |
 | install\_prefix | root directory for installation               | install                |

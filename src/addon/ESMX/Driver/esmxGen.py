@@ -51,8 +51,9 @@ def create_compList(_dict, odir):
             include_dir = os.path.basename(include_dir)
           libraries = v1.get('libraries', k1)
           build_args = v1.get('build_args', None)
-          git_repository = v1.get('git_repository', None)
-          git_tag = v1.get('git_tag', None)
+          git_repository = v1.get('git_repository', "")
+          git_tag = v1.get('git_tag', "")
+          git_dir = v1.get('git_dir', source_dir)
           f.write('set({}-BUILD_TYPE     {})\n'.format(k1, build_type))
           f.write('set({}-SOURCE_DIR     {})\n'.format(k1, source_dir))
           f.write('set({}-CMAKE_CONFIG   {})\n'.format(k1, cmake_config))
@@ -62,11 +63,10 @@ def create_compList(_dict, odir):
           f.write('set({}-INCLUDE_DIR    {})\n'.format(k1, include_dir))
           f.write('set({}-LIBRARIES      {})\n'.format(k1, libraries))
           if (build_args):
-            f.write('set({}-BUILD_ARGS         {})\n'.format(k1, build_args))
-          if (git_repository):
-            f.write('set({}-GIT_REPOSITORY     {})\n'.format(k1, git_repository))
-          if (git_tag):
-            f.write('set({}-GIT_TAG            {})\n'.format(k1, git_tag))
+            f.write('set({}-BUILD_ARGS     {})\n'.format(k1, build_args))
+          f.write('set({}-GIT_REPOSITORY {})\n'.format(k1, git_repository))
+          f.write('set({}-GIT_TAG        {})\n'.format(k1, git_tag))
+          f.write('set({}-GIT_DIR        {})\n'.format(k1, git_dir))
 
 def create_compUse(_dict, odir):
     # open file
