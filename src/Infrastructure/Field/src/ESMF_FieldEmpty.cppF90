@@ -3190,7 +3190,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 
 #define FieldEmptyCompGBDoc() \
 !---------------------------------------------------------------------------- @\
-!BOPI @\
+!BOP @\
 ! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field started with FieldEmptyCreate @\
 ! @\
 ! !INTERFACE: @\
@@ -3296,7 +3296,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOPI @\
+!EOP @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldEmptyCompGBMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -3749,7 +3749,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 
 #define FieldEmptyCompGBPtrDoc() \
 !---------------------------------------------------------------------------- @\
-!BOPI @\
+!BOP @\
 ! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field started with FieldEmptyCreate @\
 ! @\
 ! !INTERFACE: @\
@@ -3833,7 +3833,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOPI @\
+!EOP @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldEmptyCompGBPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
