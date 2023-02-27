@@ -107,7 +107,7 @@ echo "    misc_cache: $install_dir/misc_cache" >> spack.yaml
 echo "    test_cache: $install_dir/test_cache" >> spack.yaml
 echo "    install_tree:" >> spack.yaml
 echo "      root: $install_dir/opt" >> spack.yaml
-echo "    install_missing_compilers: true"
+echo "    install_missing_compilers: true" >> spack.yaml
 cat spack.yaml
 echo "::endgroup::"
 
