@@ -56,18 +56,18 @@ git clone https://github.com/spack/spack.git
 echo "::endgroup::"
 
 # create spack environment 
-. spack/share/spack/setup-env.sh
-spack env create esmf_test
-spack env activate -p esmf_test
+#. spack/share/spack/setup-env.sh
+#spack env create esmf_test
+#spack env activate -p esmf_test
 
 # install dependencies
-for d in "${array[@]}"
-do
-  spack add $d target=$arch
-done
-spack install
-
-exit
+#for d in "${array[@]}"
+#do
+#  spack add $d target=$arch
+#done
+#spack install
+#
+#exit
 
 # create spack.yaml
 echo "::group::Create spack.yaml"
@@ -81,12 +81,12 @@ echo "  specs:" >> spack.yaml
 IFS=', ' read -r -a array <<< "$deps"
 for d in "${array[@]}"
 do
-  echo "  - $d target=$arch" >> spack.yaml
+  echo "  - $d %$comp target=$arch" >> spack.yaml
 done
 echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
 echo "      target: ['$arch']" >> spack.yaml
-echo "      compiler: [$comp]" >> spack.yaml
+#echo "      compiler: [$comp]" >> spack.yaml
 echo "  view: $install_dir/view" >> spack.yaml
 echo "  config:" >> spack.yaml
 echo "    source_cache: $install_dir/source_cache" >> spack.yaml

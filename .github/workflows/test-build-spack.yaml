@@ -39,7 +39,7 @@ jobs:
         ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
           -a x86_64_v4 \
           -c ${{ matrix.compiler }} \
-          -d "${{ matrix.compiler }},${{ matrix.esmf }}" \
+          -d ${{ matrix.esmf }} \
           -i ~/.spack-ci \
           -r ${{ github.workspace }} 
 
