@@ -788,7 +788,7 @@ end interface
 
 ! !INTERFACE:
       subroutine ESMF_GeomGet(geom, &
-           dimCount, localDECount, distgrid, &
+          dimCount, rank, localDECount, distgrid, &
           distgridToGridMap, indexFlag, geomtype, &
           grid, staggerloc, mesh, meshloc, locstream, &
           xgrid, xgridside, gridIndex,rc)
@@ -796,6 +796,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_Geom),   intent(in)            :: geom
       integer,               intent(out), optional :: dimCount
+      integer,               intent(out), optional :: rank
       integer,               intent(out), optional :: localDECount
       type(ESMF_DistGrid),   intent(out), optional :: distgrid
       integer,               intent(out), optional :: distgridToGridMap(:)
@@ -822,6 +823,9 @@ end interface
 !\item[{[dimCount]}]
 !   DimCount of the Geom object (e.g. the number of dimensions in the Array
 !   it will be mapped to (e.g. Mesh=1)).
+! \item[{[rank]}]
+!   The count of the memory dimensions in this geom. Typically it's the same as dimCount.
+!   However, in some cases (e.g. arbitrarily distributed grids) it can be different. 
 !\item[{[localDECount]}]
 !   The number of DEs in this grid on this PET.
 !\item[{[distgrid]}]
@@ -953,7 +957,7 @@ end interface
               call ESMF_GridGet(grid=gbcp%grid,  &
                         dimCount=dimCount,  localDECount=localDECount, &
                         distgridToGridMap=distgridToGridMap, &
-                        indexflag=indexFlag, rc=localrc)
+                        indexflag=indexFlag, rank=rank, rc=localrc)
               if (ESMF_LogFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -993,6 +997,16 @@ end interface
                     ESMF_CONTEXT, rcToReturn=rc)) return
             endif
 
+
+            if (present(rank)) then
+               call ESMF_DistGridGet(localDistgrid, &
+                    dimCount=rank, rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+
+            
             if (present(localDECount)) then
                call ESMF_DistGridGet(localDistgrid, &
                     delayout=localDeLayout, rc=localrc)
@@ -1038,7 +1052,9 @@ end interface
 
 
          case (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
-              if (present(dimCount)) dimCount = 1
+            if (present(dimCount)) dimCount = 1
+            if (present(rank)) rank = 1
+            
               if (present(distgridToGridMap)) distgridToGridMap = 1
               call ESMF_LocStreamGet(gbcp%locstream, distgrid=distgrid, &
                      localDECount=localDECount, indexflag=indexflag, rc=localrc)
@@ -1049,9 +1065,10 @@ end interface
          case (ESMF_GEOMTYPE_XGRID%type) ! XGrid
 
            if(gbcp%xgridside == ESMF_XGRIDSIDE_BALANCED) then
-             if (present(dimCount)) dimCount = 1
-             if (present(distgridToGridMap)) distgridToGridMap = 1
-             if (present(localDECount)) then
+              if (present(dimCount)) dimCount = 1
+              if (present(rank)) rank = 1
+              if (present(distgridToGridMap)) distgridToGridMap = 1
+              if (present(localDECount)) then
                  call ESMF_DistGridGet(gbcp%xgrid%xgtypep%distgridM, delayout=localdelayout, rc=localrc)
                  if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1075,6 +1092,15 @@ end interface
              if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! For XGrid rank=dimCount, but we need to call in separately because
+             ! dimCount keyword is used above
+             if (present(rank)) then
+                call ESMF_XGridGeomBaseGet(xgrid_geom, dimCount=rank, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                     ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+             endif             
            endif
 
            ! Get distgrid

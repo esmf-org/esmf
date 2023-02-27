@@ -93,6 +93,13 @@ module ESMF_FieldCreateMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
+
+    module procedure ESMF_FieldCreateGBTKR
+    module procedure ESMF_FieldCreateGBArraySpec
+    module procedure ESMF_FieldCreateGBArray
+    TypeKindRankInterfaceMacro(FieldCreateGBData)
+    TypeKindRankInterfaceMacro(FieldCreateGBDataPtr)
+     
     module procedure ESMF_FieldCreateGridTKR
     module procedure ESMF_FieldCreateGridArraySpec
     module procedure ESMF_FieldCreateGridArray
@@ -405,11 +412,202 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 ! ESMF_FieldCreateGe
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateGBTKR"
+!BOP
+! !IROUTINE:   ESMF_FieldCreate - Create a Field from Geom and typekind
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldCreate()
+function ESMF_FieldCreateGBTKR(geom, typekind, keywordEnforcer, &
+     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+     totalLWidth, totalUWidth, pinflag, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_FieldCreateGBTKR
+!
+! !ARGUMENTS:
+    type(ESMF_Geom),         intent(in)            :: geom
+    type(ESMF_TypeKind_Flag),intent(in)            :: typekind
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                 intent(in),  optional :: gridToFieldMap(:)
+    integer,                 intent(in),  optional :: ungriddedLBound(:)
+    integer,                 intent(in),  optional :: ungriddedUBound(:)
+    integer,                 intent(in),  optional :: totalLWidth(:)
+    integer,                 intent(in),  optional :: totalUWidth(:)
+    type(ESMF_Pin_Flag),     intent(in),  optional :: pinflag
+    character (len=*),       intent(in),  optional :: name
+    integer,                 intent(out), optional :: rc
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.1.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
+! \end{itemize}
+!
+! !DESCRIPTION:
+! Create an {\tt ESMF\_Field} and allocate space internally for an
+! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}. For an example and
+! associated documentation using this method see section
+! \ref{sec:field:usage:create_grid_tkr}.
+!
+! The arguments are:
+! \begin{description}
+! \item [geom]
+!       {\tt ESMF\_Geom} object.
+! \item[typekind]
+!      The typekind of the Field. See section \ref{const:typekind}
+!      for a list of valid typekind options.
+! \item [{[gridToFieldMap]}]
+!       List with number of elements equal to the
+!       {\tt grid}|s dimCount.  The list elements map each dimension
+!       of the {\tt grid} to a dimension in the {\tt field} by
+!       specifying the appropriate {\tt field} dimension index. The default is to
+!       map all of the {\tt grid}|s dimensions against the lowest dimensions of
+!       the {\tt field} in sequence, i.e. {\tt gridToFieldMap} = (/1,2,3,.../).
+!       The values of all {\tt gridToFieldMap} entries must be greater than or equal
+!       to one and smaller than or equal to the {\tt field} rank.
+!       It is erroneous to specify the same {\tt gridToFieldMap} entry
+!       multiple times. The total ungridded dimensions in the {\tt field}
+!       are the total {\tt field} dimensions less
+!       the dimensions in
+!       the {\tt grid}.  Ungridded dimensions must be in the same order they are
+!       stored in the {\t field}.
+!       If the Field dimCount is less than the Grid dimCount then the default
+!       gridToFieldMap will contain zeros for the rightmost entries. A zero
+!       entry in the {\tt gridToFieldMap} indicates that the particular
+!       Grid dimension will be replicating the Field across the DEs along
+!       this direction.
+! \item [{[ungriddedLBound]}]
+!       Lower bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[ungriddedUBound]}]
+!       Upper bounds of the ungridded dimensions of the {\tt field}.
+!       The number of elements in the {\tt ungriddedUBound} is equal to the number of ungridded
+!       dimensions in the {\tt field}.  All ungridded dimensions of the
+!       {\tt field} are also undistributed. When field dimension count is
+!       greater than grid dimension count, both ungriddedLBound and ungriddedUBound
+!       must be specified. When both are specified the values are checked
+!       for consistency.  Note that the the ordering of
+!       these ungridded dimensions is the same as their order in the {\tt field}.
+! \item [{[totalLWidth]}]
+!       Lower bound of halo region.  The size of this array is the number
+!       of gridded dimensions in the Field.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt field}.  Values default
+!       to 0.  If values for totalLWidth are specified they must be reflected in
+!       the size of the {\tt field}.  That is, for each gridded dimension the
+!       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
+! \item [{[totalUWidth]}]
+!       Upper bound of halo region.  The size of this array is the number
+!       of gridded dimensions in the Field.  However, ordering of the elements
+!       needs to be the same as they appear in the {\tt field}.  Values default
+!       to 0.  If values for totalUWidth are specified they must be reflected in
+!       the size of the {\tt field}.  That is, for each gridded dimension the
+!       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created considers the DE as local.
+! \item [{[name]}]
+!       Field name.
+! \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                          !  Local error code
+    type(ESMF_ArraySpec) :: arrayspec
+    integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
+    integer :: memDimCount, grid_repdimcount, i
+    character(320)  :: msgString
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return code
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Get ungridded dim information
+    ungridded_dimcount = 0
+    if(present(ungriddedLBound)) then
+      ungridded_ldimcount = size(ungriddedLBound)
+      ungridded_dimcount = ungridded_ldimcount
+    endif
+    if(present(ungriddedUBound)) then
+      ungridded_udimcount = size(ungriddedUBound)
+      ungridded_dimcount = ungridded_udimcount
+    endif
+
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
+      if(ungridded_ldimcount /= ungridded_udimcount) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="- ungriddedLBound size must equal to ungriddedUBound size", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+
+    ! Get number of replicated dims
+    grid_repdimcount = 0
+    if (present(gridToFieldMap)) then
+       do i = 1, size(gridToFieldMap)
+           if(gridToFieldMap(i) == 0) grid_repdimcount = grid_repdimcount + 1
+       enddo
+    endif
+
+    ! Get rank of geom
+    call ESMF_GeomGet(geom, rank=memDimCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Calculate rank from dimension information
+    rank = ungridded_dimcount + memDimCount - grid_repdimcount
+
+#ifdef DEBUGGING
+    write(msgString,*) "ESMF_FieldCreateGBTKR(): rank=", rank, &
+      "ungridded_dimcount=", ungridded_dimcount, "memDimCount=", memDimCount, &
+      "grid_repdimcount=", grid_repdimcount
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+#endif
+
+    ! Set ArraySpec from rank and typekind input
+    call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_FieldCreateGBTKR = ESMF_FieldCreate(geom, arrayspec, &
+      gridToFieldMap=gridToFieldMap, ungriddedLBound=ungriddedLBound, &
+      ungriddedUBound=ungriddedUBound, totalLWidth=totalLWidth, &
+      totalUWidth=totalUWidth, pinflag=pinflag, name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+end function ESMF_FieldCreateGBTKR
+
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGBArraySpec"
-!BOPI
-! !IROUTINE:   ESMF_FieldCreate - Create a Field from Grid and ArraySpec
+!BOP
+! !IROUTINE:   ESMF_FieldCreate - Create a Field from Geom and ArraySpec
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
@@ -503,7 +701,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
     integer :: localrc                          !  Local error code
@@ -805,7 +1003,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGBArray"
 !BOPI
-! !IROUTINE: ESMF_FieldCreate - Create a Field from Grid and Array
+! !IROUTINE: ESMF_FieldCreate - Create a Field from Geom and Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
@@ -1226,7 +1424,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 #define FieldCreateGBDataDoc() \
 !---------------------------------------------------------------------------- @\
-!BOPI @\
+!BOP @\
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from Fortran array @\
 ! @\
 ! !INTERFACE: @\
@@ -1329,7 +1527,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOPI @\
+!EOP @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldCreateGBDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -1401,7 +1599,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 
 #define FieldCreateGBDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
-!BOPI @\
+!BOP @\
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from Fortran array pointer @\
 ! @\
 ! !INTERFACE: @\
@@ -1483,7 +1681,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOPI @\
+!EOP @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldCreateGBDataPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
