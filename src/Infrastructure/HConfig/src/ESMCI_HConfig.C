@@ -473,6 +473,129 @@ int HConfig::isDefined(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isIterator()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isIterator - access node type
+//
+// !INTERFACE:
+int HConfig::isIterator(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    *flag = isIter;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isSequenceIterator()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isSequenceIterator - access node type
+//
+// !INTERFACE:
+int HConfig::isSequenceIterator(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    *flag = (isIter & (type==YAML::NodeType::Sequence));
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapIterator()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapIterator - access node type
+//
+// !INTERFACE:
+int HConfig::isMapIterator(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    *flag = (isIter & (type==YAML::NodeType::Map));
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::asString()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::asString - Interpret value as string

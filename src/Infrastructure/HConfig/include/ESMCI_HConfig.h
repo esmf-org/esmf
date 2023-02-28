@@ -55,8 +55,8 @@ namespace ESMCI {
 #ifdef ESMF_YAMLCPP
       YAML::iterator iter;
       YAML::Node *node;
-      YAML::NodeType::value type;
-      bool isIter;
+      YAML::NodeType::value type; // either map or squence iterating over
+      bool isIter = false;
 #endif
 
     public:
@@ -70,6 +70,9 @@ namespace ESMCI {
       int isSequence(bool *flag);
       int isMap(bool *flag);
       int isDefined(bool *flag);
+      int isIterator(bool *flag);
+      int isSequenceIterator(bool *flag);
+      int isMapIterator(bool *flag);
       std::string asString(int *rc=NULL);
       HConfig iterBegin(int *rc=NULL);
       HConfig iterEnd(int *rc=NULL);

@@ -116,6 +116,9 @@ print *, "hconfig: IsSequence(): ", ESMF_HConfigIsSequence(hconfig, rc=rc)
 print *, "hconfig: IsMap(): ", ESMF_HConfigIsMap(hconfig, rc=rc)
 print *, "hconfig: IsDefined(): ", ESMF_HConfigIsDefined(hconfig, rc=rc)
 #endif
+print *, "hconfig: IsIterator(): ", ESMF_HConfigIsIterator(hconfig, rc=rc)
+print *, "hconfig: IsSequenceIterator(): ", ESMF_HConfigIsSequenceIterator(hconfig, rc=rc)
+print *, "hconfig: IsMapIterator(): ", ESMF_HConfigIsMapIterator(hconfig, rc=rc)
 
   hconfig2 = ESMF_HConfigIterBegin(hconfig, rc=rc)
   hconfig2End = ESMF_HConfigIterEnd(hconfig, rc=rc)
@@ -128,6 +131,9 @@ print *, "hconfig2: IsSequence(): ", ESMF_HConfigIsSequence(hconfig2, rc=rc)
 print *, "hconfig2: IsMap(): ", ESMF_HConfigIsMap(hconfig2, rc=rc)
 print *, "hconfig2: IsDefined(): ", ESMF_HConfigIsDefined(hconfig2, rc=rc)
 #endif
+print *, "hconfig2: IsIterator(): ", ESMF_HConfigIsIterator(hconfig2, rc=rc)
+print *, "hconfig2: IsSequenceIterator(): ", ESMF_HConfigIsSequenceIterator(hconfig2, rc=rc)
+print *, "hconfig2: IsMapIterator(): ", ESMF_HConfigIsMapIterator(hconfig2, rc=rc)
 
     if (ESMF_HConfigIsScalar(hconfig2, rc=rc)) then
       call ESMF_LogWrite("Value: "//ESMF_HConfigAsString(hconfig2, rc=rc), &
