@@ -64,8 +64,6 @@ program ESMF_HConfigUTest
   real              :: realTable1(7,3), realTable2(7,3)
 
   logical :: raw = .false. ! switch ConfigLog() into "raw" mode or not
-  
-  logical:: match
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -122,6 +120,7 @@ print *, "hconfig: IsMapIterator(): ", ESMF_HConfigIsMapIterator(hconfig, rc=rc)
 
   hconfig2 = ESMF_HConfigIterBegin(hconfig, rc=rc)
   hconfig2End = ESMF_HConfigIterEnd(hconfig, rc=rc)
+
   do while(hconfig2 /= hconfig2End)
 
 #if 1
@@ -142,10 +141,7 @@ print *, "hconfig2: IsMapIterator(): ", ESMF_HConfigIsMapIterator(hconfig2, rc=r
       hconfig3 = ESMF_HConfigIterBegin(hconfig2, rc=rc)
       hconfig3End = ESMF_HConfigIterEnd(hconfig2, rc=rc)
 
-match =  (hconfig3 == hconfig3End)
-print *, "hconfig3 == hconfig3End: ", match
       do while(hconfig3 /= hconfig3End)
-print *, "another inner loop iter"
         if (ESMF_HConfigIsScalar(hconfig3, rc=rc)) then
           call ESMF_LogWrite("Value: "//ESMF_HConfigAsString(hconfig3, rc=rc), &
             ESMF_LOGMSG_DEBUG, rc=rc)
@@ -154,10 +150,7 @@ print *, "another inner loop iter"
           hconfig4 = ESMF_HConfigIterBegin(hconfig3, rc=rc)
           hconfig4End = ESMF_HConfigIterEnd(hconfig3, rc=rc)
 
-match =  (hconfig4 == hconfig4End)
-print *, "hconfig4 == hconfig4End: ", match
           do while(hconfig4 /= hconfig4End)
-print *, "another inner loop iter level 4"
             if (ESMF_HConfigIsScalar(hconfig4, rc=rc)) then
               call ESMF_LogWrite("Value: "//ESMF_HConfigAsString(hconfig4, rc=rc), &
                 ESMF_LOGMSG_DEBUG, rc=rc)

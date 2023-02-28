@@ -173,7 +173,14 @@ int HConfig::load(
 
 #ifdef ESMF_YAMLCPP
   try{
-    *node = YAML::Load(content);
+    if (node)
+      *node = YAML::Load(content);
+    else{
+      // iterator cannot be used here
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must NOT be iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception loading content from string", ESMC_CONTEXT, &rc);
@@ -214,12 +221,14 @@ int HConfig::loadFile(
 
 #ifdef ESMF_YAMLCPP
   try{
-    *node = YAML::LoadFile(filename);
-
-    std::stringstream debugmsg;
-    debugmsg << "node.Type: " << node->Type();
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
-
+    if (node)
+      *node = YAML::LoadFile(filename);
+    else{
+      // iterator cannot be used here
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must NOT be iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception loading content from file", ESMC_CONTEXT, &rc);

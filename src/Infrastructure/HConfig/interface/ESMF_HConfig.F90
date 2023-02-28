@@ -254,10 +254,7 @@ contains
     ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
     if (init1 .eq. ESMF_INIT_CREATED .and. &
       init2 .eq. ESMF_INIT_CREATED) then
- print *, "HConfig1%shallowMemory: ", HConfig1%shallowMemory
- print *, "HConfig2%shallowMemory: ", HConfig2%shallowMemory
       ESMF_HConfigEQ = all(HConfig1%shallowMemory .eq. HConfig2%shallowMemory)
-print *, " ESMF_HConfigEQ = ", ESMF_HConfigEQ
     else
       ESMF_HConfigEQ = .false.
     endif
