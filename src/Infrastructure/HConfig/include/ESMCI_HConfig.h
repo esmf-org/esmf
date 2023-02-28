@@ -37,6 +37,7 @@ namespace ESMCI {
 }
 
 #include "ESMCI_Config.h"
+#include <string>
 
 #ifdef ESMF_YAMLCPP
 #include "yaml-cpp/yaml.h"
@@ -52,8 +53,9 @@ namespace ESMCI {
 
     private:
 #ifdef ESMF_YAMLCPP
-      YAML::Node *node;
       YAML::iterator iter;
+      YAML::Node *node;
+      YAML::NodeType::value type;
       bool isIter;
 #endif
 
@@ -68,6 +70,7 @@ namespace ESMCI {
       int isSequence(bool *flag);
       int isMap(bool *flag);
       int isDefined(bool *flag);
+      std::string asString(int *rc=NULL);
       HConfig iterBegin(int *rc=NULL);
       HConfig iterEnd(int *rc=NULL);
       int iterNext();

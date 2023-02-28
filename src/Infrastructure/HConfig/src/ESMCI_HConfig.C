@@ -173,9 +173,9 @@ int HConfig::load(
   int rc = ESMC_RC_NOT_IMPL;
 
 #ifdef ESMF_YAMLCPP
-  try {
+  try{
     *node = YAML::Load(content);
-  } catch(...) {
+  }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception loading content from string", ESMC_CONTEXT, &rc);
     return rc;
@@ -214,14 +214,14 @@ int HConfig::loadFile(
   int rc = ESMC_RC_NOT_IMPL;
 
 #ifdef ESMF_YAMLCPP
-  try {
+  try{
     *node = YAML::LoadFile(filename);
 
     std::stringstream debugmsg;
     debugmsg << "node.Type: " << node->Type();
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_DEBUG);
 
-  } catch(...) {
+  }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception loading content from file", ESMC_CONTEXT, &rc);
     return rc;
@@ -260,15 +260,15 @@ int HConfig::isNull(
   int rc = ESMC_RC_NOT_IMPL;
 
 #ifdef ESMF_YAMLCPP
-  try {
+  try{
     if (isIter)
-      if (node->IsMap())
+      if (type==YAML::NodeType::Map)
         *flag = iter->second.IsNull();
       else
         *flag = iter->IsNull();
     else
       *flag = node->IsNull();
-  } catch(...) {
+  }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;
@@ -307,15 +307,15 @@ int HConfig::isScalar(
   int rc = ESMC_RC_NOT_IMPL;
 
 #ifdef ESMF_YAMLCPP
-  try {
+  try{
     if (isIter)
-      if (node->IsMap())
+      if (type==YAML::NodeType::Map)
         *flag = iter->second.IsScalar();
       else
         *flag = iter->IsScalar();
     else
       *flag = node->IsScalar();
-  } catch(...) {
+  }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;
@@ -354,15 +354,15 @@ int HConfig::isSequence(
   int rc = ESMC_RC_NOT_IMPL;
 
 #ifdef ESMF_YAMLCPP
-  try {
+  try{
     if (isIter)
-      if (node->IsMap())
+      if (type==YAML::NodeType::Map)
         *flag = iter->second.IsSequence();
       else
         *flag = iter->IsSequence();
     else
       *flag = node->IsSequence();
-  } catch(...) {
+  }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;
@@ -401,15 +401,15 @@ int HConfig::isMap(
   int rc = ESMC_RC_NOT_IMPL;
 
 #ifdef ESMF_YAMLCPP
-  try {
+  try{
     if (isIter)
-      if (node->IsMap())
+      if (type==YAML::NodeType::Map)
         *flag = iter->second.IsMap();
       else
         *flag = iter->IsMap();
     else
       *flag = node->IsMap();
-  } catch(...) {
+  }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;
@@ -448,15 +448,15 @@ int HConfig::isDefined(
   int rc = ESMC_RC_NOT_IMPL;
 
 #ifdef ESMF_YAMLCPP
-  try {
+  try{
     if (isIter)
-      if (node->IsMap())
+      if (type==YAML::NodeType::Map)
         *flag = iter->second.IsDefined();
       else
         *flag = iter->IsDefined();
     else
       *flag = node->IsDefined();
-  } catch(...) {
+  }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;
@@ -472,6 +472,56 @@ int HConfig::isDefined(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::asString()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::asString - Interpret value as string
+//
+// !INTERFACE:
+string HConfig::asString(
+//
+// !RETURN VALUE:
+//  string
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return value interpreted as string
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  string value;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if (isIter)
+      if (type==YAML::NodeType::Map)
+        value = iter->second.as<string>();
+      else
+        value = iter->as<string>();
+    else
+      value = node->as<string>();
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return value;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return value;
+}
+//-----------------------------------------------------------------------------
+
+  
+  //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::iterBegin()"
 //BOP
@@ -495,24 +545,31 @@ HConfig HConfig::iterBegin(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-#ifdef ESMF_YAMLCPP
   HConfig hconfig;
+
+#ifdef ESMF_YAMLCPP
   hconfig.node = NULL;
 
   try{
 
-    // iterator
-    hconfig.node = node;
-    hconfig.isIter = true;
-    hconfig.iter = node->begin();
+    if (isIter){
+      hconfig.isIter = true;
+      if (type==YAML::NodeType::Map){
+        hconfig.type = iter->second.Type();
+        hconfig.iter = iter->second.begin();
+      }else{
+        hconfig.type = iter->Type();
+        hconfig.iter = iter->begin();
+      }
+    }else{
+      hconfig.isIter = true;
+      hconfig.type = node->Type();
+      hconfig.iter = node->begin();
+    }
 
-  }catch(int catchrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return hconfig;
   }catch(...){
-    // allocation error
-    ESMC_LogDefault.MsgAllocError("for new ESMCI::HConfig.", ESMC_CONTEXT, rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
     return hconfig;
   }
 
@@ -549,24 +606,31 @@ HConfig HConfig::iterEnd(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-#ifdef ESMF_YAMLCPP
   HConfig hconfig;
+
+#ifdef ESMF_YAMLCPP
   hconfig.node = NULL;
 
   try{
 
-    // iterator
-    hconfig.node = node;
-    hconfig.isIter = true;
-    hconfig.iter = node->end();
+    if (isIter){
+      hconfig.isIter = true;
+      if (type==YAML::NodeType::Map){
+        hconfig.type = iter->second.Type();
+        hconfig.iter = iter->second.end();
+      }else{
+        hconfig.type = iter->Type();
+        hconfig.iter = iter->end();
+      }
+    }else{
+      hconfig.isIter = true;
+      hconfig.type = node->Type();
+      hconfig.iter = node->end();
+    }
 
-  }catch(int catchrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return hconfig;
   }catch(...){
-    // allocation error
-    ESMC_LogDefault.MsgAllocError("for new ESMCI::HConfig.", ESMC_CONTEXT, rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
     return hconfig;
   }
 
@@ -604,7 +668,7 @@ int HConfig::iterNext(
 
 #ifdef ESMF_YAMLCPP
 
-  try {
+  try{
     // make sure this is an iterator, or else error out
     if (!isIter){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -612,7 +676,7 @@ int HConfig::iterNext(
       return rc;
     }
     ++iter;
-  } catch(...) {
+  }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
     return rc;

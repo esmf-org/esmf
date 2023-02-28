@@ -18,13 +18,13 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include <cstring>
+#include <string>
+#include <iostream>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_HConfig.h"
 #include "ESMCI_LogErr.h"
-
-using namespace std;
 
 //------------------------------------------------------------------------------
 //BOP
@@ -198,6 +198,41 @@ extern "C" {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_hconfigasstringlen)(ESMCI::HConfig *ptr, int *len, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_hconfigasstring()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // call into C++
+    std::string value = ptr->asString(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    *len = value.size();
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_hconfigasstring)(ESMCI::HConfig *ptr,
+    char *string, int *rc, ESMCI_FortranStrLenArg string_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_hconfigasstring()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // call into C++
+    std::string value = ptr->asString(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    strncpy(string, value.c_str(), string_l);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

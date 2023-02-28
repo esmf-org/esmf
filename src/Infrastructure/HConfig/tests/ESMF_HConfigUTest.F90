@@ -49,7 +49,10 @@ program ESMF_HConfigUTest
   !LOCAL VARIABLES:
   type(ESMF_VM)     :: vm
   integer           :: i, j, petCount, localPet
-  type(ESMF_HConfig):: hconfig, hconfig2, hconfigEnd
+  type(ESMF_HConfig):: hconfig
+  type(ESMF_HConfig):: hconfig2, hconfig2End
+  type(ESMF_HConfig):: hconfig3, hconfig3End
+  type(ESMF_HConfig):: hconfig4, hconfig4End
   type(ESMF_Config) :: config1, config2
   logical           :: compareOK
   integer           :: intVar1, intVar2, count1, count2
@@ -61,6 +64,8 @@ program ESMF_HConfigUTest
   real              :: realTable1(7,3), realTable2(7,3)
 
   logical :: raw = .false. ! switch ConfigLog() into "raw" mode or not
+  
+  logical:: match
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -97,8 +102,6 @@ program ESMF_HConfigUTest
   call ESMF_HConfigLoad(hconfig, content="[1, 2, 3]", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "HConfigLoadFile()"
@@ -106,22 +109,64 @@ program ESMF_HConfigUTest
   call ESMF_HConfigLoadFile(hconfig, fileName="sample.yaml", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#if 1
 print *, "hconfig: IsNull(): ", ESMF_HConfigIsNull(hconfig, rc=rc)
 print *, "hconfig: IsScalar(): ", ESMF_HConfigIsScalar(hconfig, rc=rc)
 print *, "hconfig: IsSequence(): ", ESMF_HConfigIsSequence(hconfig, rc=rc)
 print *, "hconfig: IsMap(): ", ESMF_HConfigIsMap(hconfig, rc=rc)
 print *, "hconfig: IsDefined(): ", ESMF_HConfigIsDefined(hconfig, rc=rc)
+#endif
 
   hconfig2 = ESMF_HConfigIterBegin(hconfig, rc=rc)
-  hconfigEnd = ESMF_HConfigIterEnd(hconfig, rc=rc)
-  do while(hconfig2 /= hconfigEnd)
+  hconfig2End = ESMF_HConfigIterEnd(hconfig, rc=rc)
+  do while(hconfig2 /= hconfig2End)
+
+#if 1
 print *, "hconfig2: IsNull(): ", ESMF_HConfigIsNull(hconfig2, rc=rc)
 print *, "hconfig2: IsScalar(): ", ESMF_HConfigIsScalar(hconfig2, rc=rc)
 print *, "hconfig2: IsSequence(): ", ESMF_HConfigIsSequence(hconfig2, rc=rc)
 print *, "hconfig2: IsMap(): ", ESMF_HConfigIsMap(hconfig2, rc=rc)
 print *, "hconfig2: IsDefined(): ", ESMF_HConfigIsDefined(hconfig2, rc=rc)
+#endif
+
+    if (ESMF_HConfigIsScalar(hconfig2, rc=rc)) then
+      call ESMF_LogWrite("Value: "//ESMF_HConfigAsString(hconfig2, rc=rc), &
+        ESMF_LOGMSG_DEBUG, rc=rc)
+    else
+      hconfig3 = ESMF_HConfigIterBegin(hconfig2, rc=rc)
+      hconfig3End = ESMF_HConfigIterEnd(hconfig2, rc=rc)
+
+match =  (hconfig3 == hconfig3End)
+print *, "hconfig3 == hconfig3End: ", match
+      do while(hconfig3 /= hconfig3End)
+print *, "another inner loop iter"
+        if (ESMF_HConfigIsScalar(hconfig3, rc=rc)) then
+          call ESMF_LogWrite("Value: "//ESMF_HConfigAsString(hconfig3, rc=rc), &
+            ESMF_LOGMSG_DEBUG, rc=rc)
+        else
+        
+          hconfig4 = ESMF_HConfigIterBegin(hconfig3, rc=rc)
+          hconfig4End = ESMF_HConfigIterEnd(hconfig3, rc=rc)
+
+match =  (hconfig4 == hconfig4End)
+print *, "hconfig4 == hconfig4End: ", match
+          do while(hconfig4 /= hconfig4End)
+print *, "another inner loop iter level 4"
+            if (ESMF_HConfigIsScalar(hconfig4, rc=rc)) then
+              call ESMF_LogWrite("Value: "//ESMF_HConfigAsString(hconfig4, rc=rc), &
+                ESMF_LOGMSG_DEBUG, rc=rc)
+            endif
+            call ESMF_HConfigIterNext(hconfig4, rc=rc)
+          enddo
+        endif
+        call ESMF_HConfigIterNext(hconfig3, rc=rc)
+      enddo
+    endif
+
     call ESMF_HConfigIterNext(hconfig2, rc=rc)
   enddo
+
+
 
   !------------------------------------------------------------------------
   !NEX_UTest

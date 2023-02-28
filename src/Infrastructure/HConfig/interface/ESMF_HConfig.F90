@@ -57,15 +57,15 @@ module ESMF_HConfigMod
   sequence
 #endif
   private
-    ! 8 x 8-byte to safely store a few items on the C++ side. This size has
+    ! 20 x 4-byte to safely store a few items on the C++ side. This size has
     ! been emperically determined, and might need to increase if the C++ side
     ! changes!
     ! Keeping this memory as shallow on the stack eliminates the need for
     ! complicated garbage collection around heap memory.
 #ifndef ESMF_NO_INITIALIZERS
-    integer(ESMF_KIND_I8), dimension(8) :: shallowMemory = 0
+    integer(ESMF_KIND_I4), dimension(20) :: shallowMemory = 0
 #else
-    integer(ESMF_KIND_I8), dimension(8) :: shallowMemory
+    integer(ESMF_KIND_I4), dimension(20) :: shallowMemory
 #endif
     ESMF_INIT_DECLARE
   end type
@@ -95,6 +95,8 @@ module ESMF_HConfigMod
   public ESMF_HConfigIsSequence
   public ESMF_HConfigIsMap
   public ESMF_HConfigIsDefined
+
+  public ESMF_HConfigAsString
 
   public ESMF_HConfigIterBegin
   public ESMF_HConfigIterEnd
@@ -248,7 +250,10 @@ contains
     ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
     if (init1 .eq. ESMF_INIT_CREATED .and. &
       init2 .eq. ESMF_INIT_CREATED) then
+ print *, "HConfig1%shallowMemory: ", HConfig1%shallowMemory
+ print *, "HConfig2%shallowMemory: ", HConfig2%shallowMemory
       ESMF_HConfigEQ = all(HConfig1%shallowMemory .eq. HConfig2%shallowMemory)
+print *, " ESMF_HConfigEQ = ", ESMF_HConfigEQ
     else
       ESMF_HConfigEQ = .false.
     endif
@@ -785,6 +790,65 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsString()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsString - Return value as string
+
+! !INTERFACE:
+  function ESMF_HConfigAsString(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    character(len=:), allocatable :: ESMF_HConfigAsString
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as string.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get length
+    call c_ESMC_HConfigAsStringLen(hconfig, len, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! correctly size the character allocation
+    allocate(character(len=len)::ESMF_HConfigAsString)
+
+    ! Call into the C++ interface to get the string
+    call c_ESMC_HConfigAsString(hconfig, ESMF_HConfigAsString, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIterBegin()"
 !BOP
 ! !IROUTINE: ESMF_HConfigIterBegin - Iterator at the beginning
@@ -817,6 +881,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value
+    ESMF_HConfigIterBegin%shallowMemory = 0
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -870,6 +937,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value
+    ESMF_HConfigIterEnd%shallowMemory = 0
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
