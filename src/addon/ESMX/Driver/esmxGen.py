@@ -1,9 +1,3 @@
-try:
-    from yaml import CDumper as Dumper
-    from yaml import CLoader as Loader
-except ImportError:
-    from yaml import Loader, Dumper
-
 from pathlib import Path
 import os
 import sys
@@ -16,7 +10,7 @@ def read_drv_yaml_file(file_path):
     if not os.path.exists(file_path):
         sys.exit('File not found: {}'.format(file_path))
     with open(file_path) as _file:
-        data = yaml.load(_file, Loader=Loader)
+        data = yaml.safe_load(_file)
         return dict({k.replace("-", "_"): v for k, v in data.items()})
 
 def create_compList(_dict, odir):
@@ -54,6 +48,7 @@ def create_compList(_dict, odir):
           git_repository = v1.get('git_repository', "")
           git_tag = v1.get('git_tag', "")
           git_dir = v1.get('git_dir', source_dir)
+          git_dir = os.path.abspath(git_dir)
           f.write('set({}-BUILD_TYPE     {})\n'.format(k1, build_type))
           f.write('set({}-SOURCE_DIR     {})\n'.format(k1, source_dir))
           f.write('set({}-CMAKE_CONFIG   {})\n'.format(k1, cmake_config))

@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.12)
 # Where to look for Find<Package>.cmake files
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
@@ -16,8 +17,8 @@ target_include_directories(esmx_driver PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(esmx_driver PUBLIC ESMF)
 
 # Generate comp*.* files from esmxBuild.yaml
-find_package(Python3 3.5 Interpreter REQUIRED)
-execute_process(COMMAND ${Python3_EXECUTABLE}
+find_package(Python 3.5 REQUIRED COMPONENTS Interpreter)
+execute_process(COMMAND ${Python_EXECUTABLE}
   ${CMAKE_CURRENT_LIST_DIR}/esmxGen.py --ifile ${ESMX_BUILD_FILE} --odir ${CMAKE_CURRENT_BINARY_DIR}
   RESULT_VARIABLE ret)
 if(NOT ret EQUAL "0")
