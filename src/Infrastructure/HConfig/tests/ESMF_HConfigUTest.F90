@@ -357,8 +357,15 @@ program ESMF_HConfigUTest
     integer(ESMF_KIND_I8)         :: valueI8
     real(ESMF_KIND_R4)            :: valueR4
     real(ESMF_KIND_R8)            :: valueR8
+    integer                       :: size
 
     rc = ESMF_SUCCESS
+
+    size = ESMF_HConfigGetSize(hconfig, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    write(msgString, *), "Size: ", size
+    call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
 
     hconfig2 = ESMF_HConfigIterBegin(hconfig, rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -372,6 +379,12 @@ program ESMF_HConfigUTest
 
       if (flag) then
         ! sequence iteration
+        size = ESMF_HConfigGetSize(hconfig2, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        write(msgString, *), "Size: ", size
+        call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+
         flag = ESMF_HConfigIsScalar(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
         if (flag) then
@@ -407,6 +420,11 @@ program ESMF_HConfigUTest
         endif
       else
         ! map iteration
+        size = ESMF_HConfigGetMapKeySize(hconfig2, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        write(msgString, *), "Size: ", size
+        call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
 
         flag = ESMF_HConfigIsMapKeyScalar(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
@@ -416,6 +434,12 @@ program ESMF_HConfigUTest
           call ESMF_LogWrite("MapKeyString: "//string, ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
         endif
+
+        size = ESMF_HConfigGetMapValSize(hconfig2, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        write(msgString, *), "Size: ", size
+        call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
 
         flag = ESMF_HConfigIsMapValScalar(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return

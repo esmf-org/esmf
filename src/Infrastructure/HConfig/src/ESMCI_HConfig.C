@@ -246,6 +246,161 @@ int HConfig::loadFile(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::getSize()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::getSize - Get size of the node
+//
+// !INTERFACE:
+int HConfig::getSize(
+//
+// !RETURN VALUE:
+//  int
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return the size of the node.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  int size = 0;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if (node)
+      size = node->size();
+    else
+      // iterator
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
+        return size;
+      }else
+        size = iter->size();
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return size;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return size;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::getMapKeySize()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::getMapKeySize - Get size of the node
+//
+// !INTERFACE:
+int HConfig::getMapKeySize(
+//
+// !RETURN VALUE:
+//  int
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return the size of the node.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  int size = 0;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      size = iter->first.size();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
+      return size;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return size;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return size;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::getMapValSize()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::getMapValSize - Get size of the node
+//
+// !INTERFACE:
+int HConfig::getMapValSize(
+//
+// !RETURN VALUE:
+//  int
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return the size of the node.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  int size = 0;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      size = iter->second.size();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
+      return size;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return size;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return size;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::isNull()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::isNull - access node type
@@ -1670,7 +1825,7 @@ ESMC_I4 HConfig::asI4(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_I4 value = 0;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -1723,7 +1878,7 @@ ESMC_I4 HConfig::asMapKeyI4(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_I4 value = 0;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -1774,7 +1929,7 @@ ESMC_I4 HConfig::asMapValI4(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_I4 value = 0;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -1825,7 +1980,7 @@ ESMC_I8 HConfig::asI8(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_I8 value = 0;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -1878,7 +2033,7 @@ ESMC_I8 HConfig::asMapKeyI8(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_I8 value = 0;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -1929,7 +2084,7 @@ ESMC_I8 HConfig::asMapValI8(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_I8 value = 0;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -1980,7 +2135,7 @@ ESMC_R4 HConfig::asR4(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_R4 value = 0.;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -2033,7 +2188,7 @@ ESMC_R4 HConfig::asMapKeyR4(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_R4 value = 0.;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -2084,7 +2239,7 @@ ESMC_R4 HConfig::asMapValR4(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_R4 value = 0.;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -2135,7 +2290,7 @@ ESMC_R8 HConfig::asR8(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_R8 value = 0.;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -2188,7 +2343,7 @@ ESMC_R8 HConfig::asMapKeyR8(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_R8 value = 0.;
 
 #ifdef ESMF_YAMLCPP
   try{
@@ -2239,7 +2394,7 @@ ESMC_R8 HConfig::asMapValR8(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  int value = 0;
+  ESMC_R8 value = 0.;
 
 #ifdef ESMF_YAMLCPP
   try{

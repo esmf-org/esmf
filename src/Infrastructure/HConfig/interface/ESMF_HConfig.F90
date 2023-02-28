@@ -90,6 +90,10 @@ module ESMF_HConfigMod
   public ESMF_HConfigLoad
   public ESMF_HConfigLoadFile
 
+  public ESMF_HConfigGetSize
+  public ESMF_HConfigGetMapKeySize
+  public ESMF_HConfigGetMapValSize
+
   public ESMF_HConfigIsNull
   public ESMF_HConfigIsScalar
   public ESMF_HConfigIsSequence
@@ -540,6 +544,165 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_HConfigLoadFile
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigGetSize()"
+!BOP
+! !IROUTINE: ESMF_HConfigGetSize - Get size of HConfig node
+
+! !INTERFACE:
+  function ESMF_HConfigGetSize(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    integer :: ESMF_HConfigGetSize
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return sise of the {\tt hconfig} node.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigGetSize = 0   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigGetSize(hconfig, ESMF_HConfigGetSize, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigGetMapKeySize()"
+!BOP
+! !IROUTINE: ESMF_HConfigGetMapKeySize - Get size of HConfig node
+
+! !INTERFACE:
+  function ESMF_HConfigGetMapKeySize(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    integer :: ESMF_HConfigGetMapKeySize
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return sise of the {\tt hconfig} node.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigGetMapKeySize = 0   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigGetMapKeySize(hconfig, ESMF_HConfigGetMapKeySize, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigGetMapValSize()"
+!BOP
+! !IROUTINE: ESMF_HConfigGetMapValSize - Get size of HConfig node
+
+! !INTERFACE:
+  function ESMF_HConfigGetMapValSize(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    integer :: ESMF_HConfigGetMapValSize
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return sise of the {\tt hconfig} node.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: size
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigGetMapValSize = 0   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigGetMapValSize(hconfig, ESMF_HConfigGetMapValSize, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
 !------------------------------------------------------------------------------
 
 

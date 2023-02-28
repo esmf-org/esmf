@@ -67,6 +67,10 @@ namespace ESMCI {
       int load(const std::string& content);
       int loadFile(const std::string& filename);
 
+      int getSize(int *rc=NULL);
+      int getMapKeySize(int *rc=NULL);
+      int getMapValSize(int *rc=NULL);
+
       int isNull(bool *flag);
       int isScalar(bool *flag);
       int isSequence(bool *flag);
