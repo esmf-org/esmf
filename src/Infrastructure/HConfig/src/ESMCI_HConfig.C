@@ -85,7 +85,6 @@ HConfig HConfig::create(
 
     // new object
     hconfig.node = new YAML::Node;
-    hconfig.isIter = false;
 
   }catch(int catchrc){
     // catch standard ESMF return code
@@ -137,7 +136,7 @@ int HConfig::destroy(
 
   // protect node from delete in case this is an iterator but user calls
   // the destroy call on it
-  if (!hconfig->isIter){
+  if (hconfig->node){
     // delete the YAML::Node
     delete (hconfig->node);
   }
@@ -261,13 +260,14 @@ int HConfig::isNull(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (isIter)
+    if (node)
+      *flag = node->IsNull();
+    else
+      // iterator
       if (type==YAML::NodeType::Map)
         *flag = iter->second.IsNull();
       else
         *flag = iter->IsNull();
-    else
-      *flag = node->IsNull();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -308,13 +308,14 @@ int HConfig::isScalar(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (isIter)
+    if (node)
+      *flag = node->IsScalar();
+    else
+      // iterator
       if (type==YAML::NodeType::Map)
         *flag = iter->second.IsScalar();
       else
         *flag = iter->IsScalar();
-    else
-      *flag = node->IsScalar();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -355,13 +356,14 @@ int HConfig::isSequence(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (isIter)
+    if (node)
+      *flag = node->IsSequence();
+    else
+      // iterator
       if (type==YAML::NodeType::Map)
         *flag = iter->second.IsSequence();
       else
         *flag = iter->IsSequence();
-    else
-      *flag = node->IsSequence();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -402,13 +404,14 @@ int HConfig::isMap(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (isIter)
+    if (node)
+      *flag = node->IsMap();
+    else
+      // iterator
       if (type==YAML::NodeType::Map)
         *flag = iter->second.IsMap();
       else
         *flag = iter->IsMap();
-    else
-      *flag = node->IsMap();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -449,13 +452,14 @@ int HConfig::isDefined(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (isIter)
+    if (node)
+      *flag = node->IsDefined();
+    else
+      // iterator
       if (type==YAML::NodeType::Map)
         *flag = iter->second.IsDefined();
       else
         *flag = iter->IsDefined();
-    else
-      *flag = node->IsDefined();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -496,7 +500,7 @@ int HConfig::isIterator(
 
 #ifdef ESMF_YAMLCPP
   try{
-    *flag = isIter;
+    *flag = (node==NULL);
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -537,7 +541,7 @@ int HConfig::isSequenceIterator(
 
 #ifdef ESMF_YAMLCPP
   try{
-    *flag = (isIter & (type==YAML::NodeType::Sequence));
+    *flag = ((node==NULL) & (type==YAML::NodeType::Sequence));
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -578,7 +582,7 @@ int HConfig::isMapIterator(
 
 #ifdef ESMF_YAMLCPP
   try{
-    *flag = (isIter & (type==YAML::NodeType::Map));
+    *flag = ((node==NULL) & (type==YAML::NodeType::Map));
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -622,13 +626,14 @@ string HConfig::asString(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (isIter)
+    if (node)
+      value = node->as<string>();
+    else
+      // iterator
       if (type==YAML::NodeType::Map)
         value = iter->second.as<string>();
       else
         value = iter->as<string>();
-    else
-      value = node->as<string>();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, rc);
@@ -675,8 +680,11 @@ HConfig HConfig::iterBegin(
 
   try{
 
-    if (isIter){
-      hconfig.isIter = true;
+    if (node){
+      hconfig.type = node->Type();
+      hconfig.iter = node->begin();
+    }else{
+      // iterator
       if (type==YAML::NodeType::Map){
         hconfig.type = iter->second.Type();
         hconfig.iter = iter->second.begin();
@@ -684,11 +692,8 @@ HConfig HConfig::iterBegin(
         hconfig.type = iter->Type();
         hconfig.iter = iter->begin();
       }
-    }else{
-      hconfig.isIter = true;
-      hconfig.type = node->Type();
-      hconfig.iter = node->begin();
     }
+    hconfig.node = NULL;
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -736,8 +741,11 @@ HConfig HConfig::iterEnd(
 
   try{
 
-    if (isIter){
-      hconfig.isIter = true;
+    if (node){
+      hconfig.type = node->Type();
+      hconfig.iter = node->end();
+    }else{
+      // iterator
       if (type==YAML::NodeType::Map){
         hconfig.type = iter->second.Type();
         hconfig.iter = iter->second.end();
@@ -745,11 +753,8 @@ HConfig HConfig::iterEnd(
         hconfig.type = iter->Type();
         hconfig.iter = iter->end();
       }
-    }else{
-      hconfig.isIter = true;
-      hconfig.type = node->Type();
-      hconfig.iter = node->end();
     }
+    hconfig.node = NULL;
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -793,7 +798,7 @@ int HConfig::iterNext(
 
   try{
     // make sure this is an iterator, or else error out
-    if (!isIter){
+    if (node){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must be iterator", ESMC_CONTEXT, &rc);
       return rc;

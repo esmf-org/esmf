@@ -53,10 +53,10 @@ namespace ESMCI {
 
     private:
 #ifdef ESMF_YAMLCPP
-      YAML::iterator iter;
-      YAML::Node *node;
-      YAML::NodeType::value type; // either map or squence iterating over
-      bool isIter = false;
+      YAML::Node *node = NULL;    // the document node has a non-NULL value here
+                                  // a NULL indicates that this is an iterator
+      YAML::iterator iter;        // if iterator, then this member is iterator
+      YAML::NodeType::value type; // what is being iterated over: map / sequence
 #endif
 
     public:
