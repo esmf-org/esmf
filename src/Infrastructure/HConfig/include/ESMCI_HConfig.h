@@ -60,23 +60,47 @@ namespace ESMCI {
 #endif
 
     public:
-      // depend on default constructor and destructor
+
       static HConfig create(int *rc=NULL);
       static int destroy(HConfig *hconfig);
+
       int load(const std::string& content);
       int loadFile(const std::string& filename);
+
       int isNull(bool *flag);
       int isScalar(bool *flag);
       int isSequence(bool *flag);
       int isMap(bool *flag);
       int isDefined(bool *flag);
+
+      int isMapKeyNull(bool *flag);
+      int isMapKeyScalar(bool *flag);
+      int isMapKeySequence(bool *flag);
+      int isMapKeyMap(bool *flag);
+      int isMapKeyDefined(bool *flag);
+
+      int isMapValNull(bool *flag);
+      int isMapValScalar(bool *flag);
+      int isMapValSequence(bool *flag);
+      int isMapValMap(bool *flag);
+      int isMapValDefined(bool *flag);
+
       int isIterator(bool *flag);
       int isSequenceIterator(bool *flag);
       int isMapIterator(bool *flag);
-      std::string asString(int *rc=NULL);
+
       HConfig iterBegin(int *rc=NULL);
       HConfig iterEnd(int *rc=NULL);
+      HConfig iterMapKeyBegin(int *rc=NULL);
+      HConfig iterMapKeyEnd(int *rc=NULL);
+      HConfig iterMapValBegin(int *rc=NULL);
+      HConfig iterMapValEnd(int *rc=NULL);
       int iterNext();
+
+      std::string asString(int *rc=NULL);
+      std::string asMapKeyString(int *rc=NULL);
+      std::string asMapValString(int *rc=NULL);
+
       int toConfig(ESMCI_Config **config);
   };   // class HConfig
 

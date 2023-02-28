@@ -102,70 +102,26 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "HConfig Iterator test after HConfigLoad()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call HConfigIterationTest(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "HConfigLoadFile()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_HConfigLoadFile(hconfig, fileName="sample.yaml", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#if 1
-print *, "hconfig: IsNull(): ", ESMF_HConfigIsNull(hconfig, rc=rc)
-print *, "hconfig: IsScalar(): ", ESMF_HConfigIsScalar(hconfig, rc=rc)
-print *, "hconfig: IsSequence(): ", ESMF_HConfigIsSequence(hconfig, rc=rc)
-print *, "hconfig: IsMap(): ", ESMF_HConfigIsMap(hconfig, rc=rc)
-print *, "hconfig: IsDefined(): ", ESMF_HConfigIsDefined(hconfig, rc=rc)
-#endif
-print *, "hconfig: IsIterator(): ", ESMF_HConfigIsIterator(hconfig, rc=rc)
-print *, "hconfig: IsSequenceIterator(): ", ESMF_HConfigIsSequenceIterator(hconfig, rc=rc)
-print *, "hconfig: IsMapIterator(): ", ESMF_HConfigIsMapIterator(hconfig, rc=rc)
-
-  hconfig2 = ESMF_HConfigIterBegin(hconfig, rc=rc)
-  hconfig2End = ESMF_HConfigIterEnd(hconfig, rc=rc)
-
-  do while(hconfig2 /= hconfig2End)
-
-#if 1
-print *, "hconfig2: IsNull(): ", ESMF_HConfigIsNull(hconfig2, rc=rc)
-print *, "hconfig2: IsScalar(): ", ESMF_HConfigIsScalar(hconfig2, rc=rc)
-print *, "hconfig2: IsSequence(): ", ESMF_HConfigIsSequence(hconfig2, rc=rc)
-print *, "hconfig2: IsMap(): ", ESMF_HConfigIsMap(hconfig2, rc=rc)
-print *, "hconfig2: IsDefined(): ", ESMF_HConfigIsDefined(hconfig2, rc=rc)
-#endif
-print *, "hconfig2: IsIterator(): ", ESMF_HConfigIsIterator(hconfig2, rc=rc)
-print *, "hconfig2: IsSequenceIterator(): ", ESMF_HConfigIsSequenceIterator(hconfig2, rc=rc)
-print *, "hconfig2: IsMapIterator(): ", ESMF_HConfigIsMapIterator(hconfig2, rc=rc)
-
-    if (ESMF_HConfigIsScalar(hconfig2, rc=rc)) then
-      call ESMF_LogWrite("Value: "//ESMF_HConfigAsString(hconfig2, rc=rc), &
-        ESMF_LOGMSG_DEBUG, rc=rc)
-    else
-      hconfig3 = ESMF_HConfigIterBegin(hconfig2, rc=rc)
-      hconfig3End = ESMF_HConfigIterEnd(hconfig2, rc=rc)
-
-      do while(hconfig3 /= hconfig3End)
-        if (ESMF_HConfigIsScalar(hconfig3, rc=rc)) then
-          call ESMF_LogWrite("Value: "//ESMF_HConfigAsString(hconfig3, rc=rc), &
-            ESMF_LOGMSG_DEBUG, rc=rc)
-        else
-        
-          hconfig4 = ESMF_HConfigIterBegin(hconfig3, rc=rc)
-          hconfig4End = ESMF_HConfigIterEnd(hconfig3, rc=rc)
-
-          do while(hconfig4 /= hconfig4End)
-            if (ESMF_HConfigIsScalar(hconfig4, rc=rc)) then
-              call ESMF_LogWrite("Value: "//ESMF_HConfigAsString(hconfig4, rc=rc), &
-                ESMF_LOGMSG_DEBUG, rc=rc)
-            endif
-            call ESMF_HConfigIterNext(hconfig4, rc=rc)
-          enddo
-        endif
-        call ESMF_HConfigIterNext(hconfig3, rc=rc)
-      enddo
-    endif
-
-    call ESMF_HConfigIterNext(hconfig2, rc=rc)
-  enddo
-
-
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "HConfig Iterator test after HConfigLoadFile()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call HConfigIterationTest(hconfig, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -387,5 +343,101 @@ print *, "hconfig2: IsMapIterator(): ", ESMF_HConfigIsMapIterator(hconfig2, rc=r
   !------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
+
+ contains
+ 
+  subroutine HConfigIterationTest(hconfig, rc)
+    type(ESMF_HConfig)    :: hconfig
+    integer, intent(out)  :: rc
+
+    logical                       :: flag
+    character(len=:), allocatable :: string
+
+    rc = ESMF_SUCCESS
+
+    hconfig2 = ESMF_HConfigIterBegin(hconfig, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    hconfig2End = ESMF_HConfigIterEnd(hconfig, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    do while(hconfig2 /= hconfig2End)
+
+      flag = ESMF_HConfigIsSequenceIterator(hconfig2, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+
+      if (flag) then
+        ! sequence iteration
+        flag = ESMF_HConfigIsScalar(hconfig2, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        if (flag) then
+          string = ESMF_HConfigAsString(hconfig2, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          call ESMF_LogWrite("String: "//string, ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+        endif
+      else
+        ! map iteration
+
+        flag = ESMF_HConfigIsMapKeyScalar(hconfig2, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        if (flag) then
+          string = ESMF_HConfigAsMapKeyString(hconfig2, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          call ESMF_LogWrite("MapKeyString: "//string, ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+        endif
+
+        flag = ESMF_HConfigIsMapValScalar(hconfig2, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        if (flag) then
+          string = ESMF_HConfigAsMapValString(hconfig2, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          call ESMF_LogWrite("MapValString: "//string, ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+        else
+          hconfig3 = ESMF_HConfigIterMapValBegin(hconfig2, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          hconfig3End = ESMF_HConfigIterMapValEnd(hconfig2, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+
+          do while(hconfig3 /= hconfig3End)
+            flag = ESMF_HConfigIsScalar(hconfig3, rc=rc)
+            if (rc /= ESMF_SUCCESS) return
+            if (flag) then
+              string = ESMF_HConfigAsString(hconfig3, rc=rc)
+              if (rc /= ESMF_SUCCESS) return
+              call ESMF_LogWrite("String: "//string, ESMF_LOGMSG_INFO, rc=rc)
+              if (rc /= ESMF_SUCCESS) return
+            else
+            
+              hconfig4 = ESMF_HConfigIterBegin(hconfig3, rc=rc)
+              if (rc /= ESMF_SUCCESS) return
+              hconfig4End = ESMF_HConfigIterEnd(hconfig3, rc=rc)
+              if (rc /= ESMF_SUCCESS) return
+
+              do while(hconfig4 /= hconfig4End)
+                flag = ESMF_HConfigIsScalar(hconfig4, rc=rc)
+                if (rc /= ESMF_SUCCESS) return
+                if (flag) then
+                  string = ESMF_HConfigAsString(hconfig4, rc=rc)
+                  if (rc /= ESMF_SUCCESS) return
+                  call ESMF_LogWrite("String: "//string, ESMF_LOGMSG_INFO, rc=rc)
+                  if (rc /= ESMF_SUCCESS) return
+                endif
+                call ESMF_HConfigIterNext(hconfig4, rc=rc)
+                if (rc /= ESMF_SUCCESS) return
+              enddo
+            endif
+            call ESMF_HConfigIterNext(hconfig3, rc=rc)
+            if (rc /= ESMF_SUCCESS) return
+          enddo
+        endif
+      endif
+
+      call ESMF_HConfigIterNext(hconfig2, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+    enddo
+
+  end subroutine
 
 end program ESMF_HConfigUTest

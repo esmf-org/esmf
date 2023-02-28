@@ -273,9 +273,11 @@ int HConfig::isNull(
       *flag = node->IsNull();
     else
       // iterator
-      if (type==YAML::NodeType::Map)
-        *flag = iter->second.IsNull();
-      else
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        return rc;
+      }else
         *flag = iter->IsNull();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -321,9 +323,11 @@ int HConfig::isScalar(
       *flag = node->IsScalar();
     else
       // iterator
-      if (type==YAML::NodeType::Map)
-        *flag = iter->second.IsScalar();
-      else
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        return rc;
+      }else
         *flag = iter->IsScalar();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -369,9 +373,11 @@ int HConfig::isSequence(
       *flag = node->IsSequence();
     else
       // iterator
-      if (type==YAML::NodeType::Map)
-        *flag = iter->second.IsSequence();
-      else
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        return rc;
+      }else
         *flag = iter->IsSequence();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -417,9 +423,11 @@ int HConfig::isMap(
       *flag = node->IsMap();
     else
       // iterator
-      if (type==YAML::NodeType::Map)
-        *flag = iter->second.IsMap();
-      else
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        return rc;
+      }else
         *flag = iter->IsMap();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -465,10 +473,492 @@ int HConfig::isDefined(
       *flag = node->IsDefined();
     else
       // iterator
-      if (type==YAML::NodeType::Map)
-        *flag = iter->second.IsDefined();
-      else
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        return rc;
+      }else
         *flag = iter->IsDefined();
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapKeyNull()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapKeyNull - access node type
+//
+// !INTERFACE:
+int HConfig::isMapKeyNull(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      *flag = iter->first.IsNull();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapKeyScalar()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapKeyScalar - access node type
+//
+// !INTERFACE:
+int HConfig::isMapKeyScalar(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      *flag = iter->first.IsScalar();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapKeySequence()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapKeySequence - access node type
+//
+// !INTERFACE:
+int HConfig::isMapKeySequence(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      *flag = iter->first.IsSequence();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapKeyMap()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapKeyMap - access node type
+//
+// !INTERFACE:
+int HConfig::isMapKeyMap(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      *flag = iter->first.IsMap();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapKeyDefined()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapKeyDefined - access node type
+//
+// !INTERFACE:
+int HConfig::isMapKeyDefined(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      *flag = iter->first.IsDefined();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapValNull()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapValNull - access node type
+//
+// !INTERFACE:
+int HConfig::isMapValNull(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      *flag = iter->second.IsNull();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapValScalar()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapValScalar - access node type
+//
+// !INTERFACE:
+int HConfig::isMapValScalar(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      *flag = iter->second.IsScalar();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapValSequence()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapValSequence - access node type
+//
+// !INTERFACE:
+int HConfig::isMapValSequence(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      *flag = iter->second.IsSequence();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapValMap()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapValMap - access node type
+//
+// !INTERFACE:
+int HConfig::isMapValMap(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      *flag = iter->second.IsMap();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::isMapValDefined()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::isMapValDefined - access node type
+//
+// !INTERFACE:
+int HConfig::isMapValDefined(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    bool *flag){      // out
+// 
+// !DESCRIPTION: 
+//  ESMF routine to access node type
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      *flag = iter->second.IsDefined();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -609,57 +1099,6 @@ int HConfig::isMapIterator(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asString()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asString - Interpret value as string
-//
-// !INTERFACE:
-string HConfig::asString(
-//
-// !RETURN VALUE:
-//  string
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as string
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  string value;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if (node)
-      value = node->as<string>();
-    else
-      // iterator
-      if (type==YAML::NodeType::Map)
-        value = iter->second.as<string>();
-      else
-        value = iter->as<string>();
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-  
-  //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::iterBegin()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::iterBegin - Iterator pointing to first item
@@ -695,14 +1134,14 @@ HConfig HConfig::iterBegin(
     }else{
       // iterator
       if (type==YAML::NodeType::Map){
-        hconfig.type = iter->second.Type();
-        hconfig.iter = iter->second.begin();
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
+        return hconfig;
       }else{
         hconfig.type = iter->Type();
         hconfig.iter = iter->begin();
       }
     }
-    hconfig.node = NULL;
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -756,14 +1195,238 @@ HConfig HConfig::iterEnd(
     }else{
       // iterator
       if (type==YAML::NodeType::Map){
-        hconfig.type = iter->second.Type();
-        hconfig.iter = iter->second.end();
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
+        return hconfig;
       }else{
         hconfig.type = iter->Type();
         hconfig.iter = iter->end();
       }
     }
-    hconfig.node = NULL;
+
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return hconfig;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return hconfig;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::iterMapKeyBegin()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::iterMapKeyBegin - Iterator pointing to first item
+//
+// !INTERFACE:
+HConfig HConfig::iterMapKeyBegin(
+//
+// !RETURN VALUE:
+//  pointer to iterator
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return iterator pointing to first item.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  HConfig hconfig;
+
+#ifdef ESMF_YAMLCPP
+  hconfig.node = NULL;
+
+  try{
+
+    if ((node==NULL) && (type==YAML::NodeType::Map)){
+      hconfig.type = iter->first.Type();
+      hconfig.iter = iter->first.begin();
+    }else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
+      return hconfig;
+    }
+
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return hconfig;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return hconfig;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::iterMapKeyEnd()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::iterMapKeyEnd - Iterator pointing to one past the last item
+//
+// !INTERFACE:
+HConfig HConfig::iterMapKeyEnd(
+//
+// !RETURN VALUE:
+//  pointer to iterator
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return iterator pointing to one past the last item.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  HConfig hconfig;
+
+#ifdef ESMF_YAMLCPP
+  hconfig.node = NULL;
+
+  try{
+
+    if ((node==NULL) && (type==YAML::NodeType::Map)){
+      hconfig.type = iter->first.Type();
+      hconfig.iter = iter->first.end();
+    }else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
+      return hconfig;
+    }
+
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return hconfig;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return hconfig;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::iterMapValBegin()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::iterMapValBegin - Iterator pointing to first item
+//
+// !INTERFACE:
+HConfig HConfig::iterMapValBegin(
+//
+// !RETURN VALUE:
+//  pointer to iterator
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return iterator pointing to first item.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  HConfig hconfig;
+
+#ifdef ESMF_YAMLCPP
+  hconfig.node = NULL;
+
+  try{
+
+    if ((node==NULL) && (type==YAML::NodeType::Map)){
+      hconfig.type = iter->second.Type();
+      hconfig.iter = iter->second.begin();
+    }else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
+      return hconfig;
+    }
+
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return hconfig;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return hconfig;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::iterMapValEnd()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::iterMapValEnd - Iterator pointing to one past the last item
+//
+// !INTERFACE:
+HConfig HConfig::iterMapValEnd(
+//
+// !RETURN VALUE:
+//  pointer to iterator
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return iterator pointing to one past the last item.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  HConfig hconfig;
+
+#ifdef ESMF_YAMLCPP
+  hconfig.node = NULL;
+
+  try{
+
+    if ((node==NULL) && (type==YAML::NodeType::Map)){
+      hconfig.type = iter->second.Type();
+      hconfig.iter = iter->second.end();
+    }else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
+      return hconfig;
+    }
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -824,6 +1487,161 @@ int HConfig::iterNext(
 #endif
 
   return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::asString()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::asString - Interpret value as string
+//
+// !INTERFACE:
+string HConfig::asString(
+//
+// !RETURN VALUE:
+//  string
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return value interpreted as string
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  string value = "";
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if (node)
+      value = node->as<string>();
+    else
+      // iterator
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
+        return value;
+      }else
+        value = iter->as<string>();
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return value;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return value;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::asMapKeyString()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::asMapKeyString - Interpret value as string
+//
+// !INTERFACE:
+string HConfig::asMapKeyString(
+//
+// !RETURN VALUE:
+//  string
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return value interpreted as string
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  string value = "";
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      value = iter->first.as<string>();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
+      return value;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return value;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return value;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::asMapValString()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::asMapValString - Interpret value as string
+//
+// !INTERFACE:
+string HConfig::asMapValString(
+//
+// !RETURN VALUE:
+//  string
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return value interpreted as string
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  string value = "";
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      value = iter->second.as<string>();
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
+      return value;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return value;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return value;
 }
 //-----------------------------------------------------------------------------
 
