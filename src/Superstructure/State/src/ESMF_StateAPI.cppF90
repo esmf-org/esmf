@@ -1181,7 +1181,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !       When set to {\tt .true.}, additionally returns information from
 !       nested States
 !     \item[{[stateintent]}]
-!       Returns the type, e.g., Import or Export, of this {\tt ESMF\_State}.
+!       Returns the type, e.g., Import, Export, or Internal, of this {\tt ESMF\_State}.
 !       Possible values are listed in Section~\ref{const:stateintent}.
 !     \item[{[itemCount]}]
 !       Count of items in this {\tt ESMF\_State}.
@@ -1971,7 +1971,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          msgbuf = "Import State"
        case (ESMF_STATEINTENT_EXPORT%state)
          msgbuf = "Export State"
-       case (ESMF_STATEINTENT_INTERNAL)
+       case (ESMF_STATEINTENT_INTERNAL%state)
          msgbuf = "Internal State"
        case (ESMF_STATEINTENT_UNSPECIFIED%state)
          msgbuf = "Unspecified intent direction"
