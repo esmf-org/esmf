@@ -101,6 +101,22 @@ namespace ESMCI {
       std::string asMapKeyString(int *rc=NULL);
       std::string asMapValString(int *rc=NULL);
 
+      ESMC_I4 asI4(int *rc=NULL);
+      ESMC_I4 asMapKeyI4(int *rc=NULL);
+      ESMC_I4 asMapValI4(int *rc=NULL);
+
+      ESMC_I8 asI8(int *rc=NULL);
+      ESMC_I8 asMapKeyI8(int *rc=NULL);
+      ESMC_I8 asMapValI8(int *rc=NULL);
+
+      ESMC_R4 asR4(int *rc=NULL);
+      ESMC_R4 asMapKeyR4(int *rc=NULL);
+      ESMC_R4 asMapValR4(int *rc=NULL);
+
+      ESMC_R8 asR8(int *rc=NULL);
+      ESMC_R8 asMapKeyR8(int *rc=NULL);
+      ESMC_R8 asMapValR8(int *rc=NULL);
+
       int toConfig(ESMCI_Config **config);
   };   // class HConfig
 

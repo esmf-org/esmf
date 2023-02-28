@@ -124,6 +124,22 @@ module ESMF_HConfigMod
   public ESMF_HConfigAsMapKeyString
   public ESMF_HConfigAsMapValString
 
+  public ESMF_HConfigAsI4
+  public ESMF_HConfigAsMapKeyI4
+  public ESMF_HConfigAsMapValI4
+
+  public ESMF_HConfigAsI8
+  public ESMF_HConfigAsMapKeyI8
+  public ESMF_HConfigAsMapValI8
+
+  public ESMF_HConfigAsR4
+  public ESMF_HConfigAsMapKeyR4
+  public ESMF_HConfigAsMapValR4
+
+  public ESMF_HConfigAsR8
+  public ESMF_HConfigAsMapKeyR8
+  public ESMF_HConfigAsMapValR8
+
 ! - ESMF-internal methods:
   public ESMF_HConfigGetInit
 !EOPI
@@ -2092,6 +2108,618 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface to get the string
     call c_ESMC_HConfigAsMapValString(hconfig, ESMF_HConfigAsMapValString, &
       localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI4()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsI4 - Return value as I4
+
+! !INTERFACE:
+  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as I4.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the I4
+    call c_ESMC_HConfigAsI4(hconfig, ESMF_HConfigAsI4, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsMapKeyI4()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsMapKeyI4 - Return value as I4
+
+! !INTERFACE:
+  function ESMF_HConfigAsMapKeyI4(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    integer(ESMF_KIND_I4) :: ESMF_HConfigAsMapKeyI4
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as I4.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the I4
+    call c_ESMC_HConfigAsMapKeyI4(hconfig, ESMF_HConfigAsMapKeyI4, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsMapValI4()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsMapValI4 - Return value as I4
+
+! !INTERFACE:
+  function ESMF_HConfigAsMapValI4(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    integer(ESMF_KIND_I4) :: ESMF_HConfigAsMapValI4
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as I4.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the I4
+    call c_ESMC_HConfigAsMapValI4(hconfig, ESMF_HConfigAsMapValI4, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsI8()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsI8 - Return value as I8
+
+! !INTERFACE:
+  function ESMF_HConfigAsI8(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as I8.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the I8
+    call c_ESMC_HConfigAsI8(hconfig, ESMF_HConfigAsI8, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsMapKeyI8()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsMapKeyI8 - Return value as I8
+
+! !INTERFACE:
+  function ESMF_HConfigAsMapKeyI8(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    integer(ESMF_KIND_I8) :: ESMF_HConfigAsMapKeyI8
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as I8.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the I8
+    call c_ESMC_HConfigAsMapKeyI8(hconfig, ESMF_HConfigAsMapKeyI8, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsMapValI8()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsMapValI8 - Return value as I8
+
+! !INTERFACE:
+  function ESMF_HConfigAsMapValI8(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    integer(ESMF_KIND_I8) :: ESMF_HConfigAsMapValI8
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as I8.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the I8
+    call c_ESMC_HConfigAsMapValI8(hconfig, ESMF_HConfigAsMapValI8, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR4()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsR4 - Return value as R4
+
+! !INTERFACE:
+  function ESMF_HConfigAsR4(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    real(ESMF_KIND_R4) :: ESMF_HConfigAsR4
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as R4.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the R4
+    call c_ESMC_HConfigAsR4(hconfig, ESMF_HConfigAsR4, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsMapKeyR4()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsMapKeyR4 - Return value as R4
+
+! !INTERFACE:
+  function ESMF_HConfigAsMapKeyR4(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    real(ESMF_KIND_R4) :: ESMF_HConfigAsMapKeyR4
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as R4.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the R4
+    call c_ESMC_HConfigAsMapKeyR4(hconfig, ESMF_HConfigAsMapKeyR4, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsMapValR4()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsMapValR4 - Return value as R4
+
+! !INTERFACE:
+  function ESMF_HConfigAsMapValR4(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    real(ESMF_KIND_R4) :: ESMF_HConfigAsMapValR4
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as R4.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the R4
+    call c_ESMC_HConfigAsMapValR4(hconfig, ESMF_HConfigAsMapValR4, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsR8()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsR8 - Return value as R8
+
+! !INTERFACE:
+  function ESMF_HConfigAsR8(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    real(ESMF_KIND_R8) :: ESMF_HConfigAsR8
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as R8.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the R8
+    call c_ESMC_HConfigAsR8(hconfig, ESMF_HConfigAsR8, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsMapKeyR8()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsMapKeyR8 - Return value as R8
+
+! !INTERFACE:
+  function ESMF_HConfigAsMapKeyR8(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    real(ESMF_KIND_R8) :: ESMF_HConfigAsMapKeyR8
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as R8.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the R8
+    call c_ESMC_HConfigAsMapKeyR8(hconfig, ESMF_HConfigAsMapKeyR8, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsMapValR8()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsMapValR8 - Return value as R8
+
+! !INTERFACE:
+  function ESMF_HConfigAsMapValR8(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    real(ESMF_KIND_R8) :: ESMF_HConfigAsMapValR8
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value interpreted as R8.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    integer               :: len
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface to get the R8
+    call c_ESMC_HConfigAsMapValR8(hconfig, ESMF_HConfigAsMapValR8, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

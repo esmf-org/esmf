@@ -352,6 +352,11 @@ program ESMF_HConfigUTest
 
     logical                       :: flag
     character(len=:), allocatable :: string
+    character(80)                 :: msgString
+    integer(ESMF_KIND_I4)         :: valueI4
+    integer(ESMF_KIND_I8)         :: valueI8
+    real(ESMF_KIND_R4)            :: valueR4
+    real(ESMF_KIND_R8)            :: valueR8
 
     rc = ESMF_SUCCESS
 
@@ -370,9 +375,34 @@ program ESMF_HConfigUTest
         flag = ESMF_HConfigIsScalar(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
         if (flag) then
+          ! as string
           string = ESMF_HConfigAsString(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           call ESMF_LogWrite("String: "//string, ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          ! as I4
+          valueI4 = ESMF_HConfigAsI4(hconfig2, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          write(msgString, *), "I4: ", valueI4
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          ! as I8
+          valueI8 = ESMF_HConfigAsI8(hconfig2, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          write(msgString, *), "I8: ", valueI8
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          ! as R4
+          valueR4 = ESMF_HConfigAsR4(hconfig2, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          write(msgString, *), "R4: ", valueR4
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          ! as R8
+          valueR8 = ESMF_HConfigAsR8(hconfig2, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          write(msgString, *), "R8: ", valueR8
+          call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
         endif
       else
