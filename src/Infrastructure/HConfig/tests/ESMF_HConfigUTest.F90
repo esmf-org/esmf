@@ -369,8 +369,8 @@ program ESMF_HConfigUTest
 
     flag = ESMF_HConfigIsSequence(hconfig, rc=rc)
     if (rc /= ESMF_SUCCESS) return
-    do i=1, size
-      if (flag) then
+    if (flag) then
+      do i=1, size
         ! sequence element as I4
         valueI4 = ESMF_HConfigAsI4(hconfig, index=i, rc=rc)
         if (rc /= ESMF_SUCCESS) return
@@ -387,8 +387,19 @@ program ESMF_HConfigUTest
         if (rc /= ESMF_SUCCESS) return
         call ESMF_HConfigDestroy(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
-      endif
-    enddo
+      enddo
+    else
+      ! direct access via map
+      hconfig2 = ESMF_HConfigCreateAt(hconfig, key="radius_of_the_earth", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueR4 = ESMF_HConfigAsR4(hconfig2, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "R4 through CreateAt(): ", valueR4
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      call ESMF_HConfigDestroy(hconfig2, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+    endif
 
     hconfig2 = ESMF_HConfigIterBegin(hconfig, rc=rc)
     if (rc /= ESMF_SUCCESS) return

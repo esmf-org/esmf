@@ -321,6 +321,71 @@ HConfig HConfig::createAt(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::createAtKey()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::createAtKey - node at location
+//
+// !INTERFACE:
+HConfig HConfig::createAtKey(
+//
+// !RETURN VALUE:
+//  node
+//
+// !ARGUMENTS:
+    std::string key,      // in  - if present, access by index, Fortran base 1
+    int *rc) {            // out - return code
+//
+// !DESCRIPTION:
+//  Return node.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  HConfig hconfig;
+
+#ifdef ESMF_YAMLCPP
+  hconfig.node = NULL;
+
+  try{
+
+    // new object
+    hconfig.node = new YAML::Node;
+
+    if (node){
+      *hconfig.node = (*node)[key.c_str()];
+      hconfig.type = (*node)[key.c_str()].Type();
+    }else{
+      // iterator
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
+        return hconfig;
+      }else{
+        *hconfig.node = (*iter)[key.c_str()];
+        hconfig.type = (*iter)[key.c_str()].Type();
+      }
+    }
+
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return hconfig;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return hconfig;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::getSize()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::getSize - Get size of the node

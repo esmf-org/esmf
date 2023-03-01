@@ -556,7 +556,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigCreateAt - Return HConfig object at location
 
 ! !INTERFACE:
-  function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, rc)
+  function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, key, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_HConfig) :: ESMF_HConfigCreateAt
@@ -565,6 +565,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: key
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -575,7 +576,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig] 
 !     {\tt ESMF\_HConfig} object.
 !   \item[{[index]}]
-!     Access by index if specified.
+!     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
+!   \item[{[key]}]
+!     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -594,10 +597,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigCreateAt(hconfig, ESMF_HConfigCreateAt, index, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Check mutual exclusion of index and key
+    if (present(index) .and. present(key)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The 'index' and 'key' arguments are mutual exclusive", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    if (present(key)) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigCreateAtKey(hconfig, ESMF_HConfigCreateAt, key, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigCreateAt(hconfig, ESMF_HConfigCreateAt, index, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_HConfigCreateAt)
