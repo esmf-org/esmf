@@ -363,7 +363,7 @@ program ESMF_HConfigUTest
 
     size = ESMF_HConfigGetSize(hconfig, rc=rc)
     if (rc /= ESMF_SUCCESS) return
-    write(msgString, *), "Size: ", size
+    write(msgString, *) "Size: ", size
     call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
     if (rc /= ESMF_SUCCESS) return
 
@@ -374,16 +374,18 @@ program ESMF_HConfigUTest
         ! sequence element as I4
         valueI4 = ESMF_HConfigAsI4(hconfig, index=i, rc=rc)
         if (rc /= ESMF_SUCCESS) return
-        write(msgString, *), "I4: ", valueI4
+        write(msgString, *) "I4: ", valueI4
         call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
         if (rc /= ESMF_SUCCESS) return
-        ! sequence element as I4 through At()
-        hconfig2 = ESMF_HConfigAt(hconfig, index=i, rc=rc)
+        ! sequence element as I4 through CreateAt()
+        hconfig2 = ESMF_HConfigCreateAt(hconfig, index=i, rc=rc)
         if (rc /= ESMF_SUCCESS) return
         valueI4 = ESMF_HConfigAsI4(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
-        write(msgString, *), "I4: ", valueI4
+        write(msgString, *) "I4 through CreateAt(): ", valueI4
         call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        call ESMF_HConfigDestroy(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
       endif
     enddo
@@ -402,7 +404,7 @@ program ESMF_HConfigUTest
         ! sequence iteration
         size = ESMF_HConfigGetSize(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
-        write(msgString, *), "Size: ", size
+        write(msgString, *) "Size: ", size
         call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
         if (rc /= ESMF_SUCCESS) return
 
@@ -414,28 +416,37 @@ program ESMF_HConfigUTest
           if (rc /= ESMF_SUCCESS) return
           call ESMF_LogWrite("String: "//string, ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
+          ! as string through CreateAt()
+          hconfig3 = ESMF_HConfigCreateAt(hconfig2, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          string = ESMF_HConfigAsString(hconfig3, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          call ESMF_LogWrite("String through CreateAt(): "//string, ESMF_LOGMSG_INFO, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
+          call ESMF_HConfigDestroy(hconfig3, rc=rc)
+          if (rc /= ESMF_SUCCESS) return
           ! as I4
           valueI4 = ESMF_HConfigAsI4(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
-          write(msgString, *), "I4: ", valueI4
+          write(msgString, *) "I4: ", valueI4
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           ! as I8
           valueI8 = ESMF_HConfigAsI8(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
-          write(msgString, *), "I8: ", valueI8
+          write(msgString, *) "I8: ", valueI8
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           ! as R4
           valueR4 = ESMF_HConfigAsR4(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
-          write(msgString, *), "R4: ", valueR4
+          write(msgString, *) "R4: ", valueR4
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
           ! as R8
           valueR8 = ESMF_HConfigAsR8(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
-          write(msgString, *), "R8: ", valueR8
+          write(msgString, *) "R8: ", valueR8
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
         endif
@@ -443,7 +454,7 @@ program ESMF_HConfigUTest
         ! map iteration
         size = ESMF_HConfigGetMapKeySize(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
-        write(msgString, *), "Size: ", size
+        write(msgString, *) "Size: ", size
         call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
         if (rc /= ESMF_SUCCESS) return
 
@@ -458,7 +469,7 @@ program ESMF_HConfigUTest
 
         size = ESMF_HConfigGetMapValSize(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
-        write(msgString, *), "Size: ", size
+        write(msgString, *) "Size: ", size
         call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
         if (rc /= ESMF_SUCCESS) return
 

@@ -90,7 +90,7 @@ module ESMF_HConfigMod
   public ESMF_HConfigLoad
   public ESMF_HConfigLoadFile
 
-  public ESMF_HConfigAt
+  public ESMF_HConfigCreateAt
 
   public ESMF_HConfigGetSize
   public ESMF_HConfigGetMapKeySize
@@ -551,15 +551,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAt()"
+#define ESMF_METHOD "ESMF_HConfigCreateAt()"
 !BOP
-! !IROUTINE: ESMF_HConfigAt - Return HConfig object at location
+! !IROUTINE: ESMF_HConfigCreateAt - Return HConfig object at location
 
 ! !INTERFACE:
-  function ESMF_HConfigAt(hconfig, keywordEnforcer, index, rc)
+  function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigAt
+    type(ESMF_HConfig) :: ESMF_HConfigCreateAt
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -589,18 +589,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! invalidate return value
-    ESMF_HConfigAt%shallowMemory = 0
+    ESMF_HConfigCreateAt%shallowMemory = 0
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigAt(hconfig, ESMF_HConfigAt, index, localrc)
+    call c_ESMC_HConfigCreateAt(hconfig, ESMF_HConfigCreateAt, index, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_HConfigAt)
+    ESMF_INIT_SET_CREATED(ESMF_HConfigCreateAt)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2376,6 +2376,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2384,10 +2385,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    ! Call into the C++ interface to get the I4
-    call c_ESMC_HConfigAsI4(hconfig, ESMF_HConfigAsI4, index, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(index)) then
+      hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the I4
+      call c_ESMC_HConfigAsI4(hconfigTemp, ESMF_HConfigAsI4, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the I4
+      call c_ESMC_HConfigAsI4(hconfig, ESMF_HConfigAsI4, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

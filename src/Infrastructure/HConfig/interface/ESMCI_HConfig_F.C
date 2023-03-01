@@ -102,7 +102,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigat)(ESMCI::HConfig *ptr, ESMCI::HConfig *iter,
+  void FTN_X(c_esmc_hconfigcreateat)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
     int *index, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigat()"
@@ -111,9 +111,9 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
-    ESMCI_NULL_CHECK_PRC(iter, rc)
+    ESMCI_NULL_CHECK_PRC(at, rc)
     // call into C++
-    *iter = ptr->at(index, &localrc);
+    *at = ptr->createAt(index, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -757,8 +757,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasi4)(ESMCI::HConfig *ptr, ESMC_I4 *value,
-    int *index, int *rc){
+  void FTN_X(c_esmc_hconfigasi4)(ESMCI::HConfig *ptr, ESMC_I4 *value, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigi4()"
     // Initialize return code; assume routine not implemented
@@ -767,7 +766,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asI4(index, &localrc);
+    *value = ptr->asI4(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully

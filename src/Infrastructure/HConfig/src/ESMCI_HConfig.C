@@ -246,12 +246,12 @@ int HConfig::loadFile(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::at()"
+#define ESMC_METHOD "ESMCI::HConfig::createAt()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::at - node at location
+// !IROUTINE:  ESMCI::HConfig::createAt - node at location
 //
 // !INTERFACE:
-HConfig HConfig::at(
+HConfig HConfig::createAt(
 //
 // !RETURN VALUE:
 //  node
@@ -276,15 +276,16 @@ HConfig HConfig::at(
 
   try{
 
+    // new object
+    hconfig.node = new YAML::Node;
+
     if (node){
       if (index){
+        *hconfig.node = (*node)[*index-1];
         hconfig.type = (*node)[*index-1].Type();
-        hconfig.iter = node->begin();
-        for (int i=0; i<(*index-1); i++)
-          ++(hconfig.iter);
       }else{
-        hconfig.type = type;
-        hconfig.iter = node->begin();
+        *hconfig.node = (*node);
+        hconfig.type = (*node).Type();
       }
     }else{
       // iterator
@@ -294,13 +295,11 @@ HConfig HConfig::at(
         return hconfig;
       }else{
         if (index){
+          *hconfig.node = (*iter)[*index-1];
           hconfig.type = (*iter)[*index-1].Type();
-          hconfig.iter = iter->begin();
-          for (int i=0; i<(*index-1); i++)
-            ++(hconfig.iter);
         }else{
-          hconfig.type = type;
-          hconfig.iter = iter;
+          *hconfig.node = ((YAML::Node)(*iter));
+          hconfig.type = (*iter).Type();
         }
       }
     }
@@ -1890,7 +1889,6 @@ ESMC_I4 HConfig::asI4(
 //  ESMC_I4
 //
 // !ARGUMENTS:
-    int *index,           // in  - if present, access by index, Fortran base 1
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -1907,10 +1905,7 @@ ESMC_I4 HConfig::asI4(
 #ifdef ESMF_YAMLCPP
   try{
     if (node)
-      if (index)
-        value = (*node)[*index-1].as<ESMC_I4>();
-      else
-        value = node->as<ESMC_I4>();
+      value = node->as<ESMC_I4>();
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -1918,10 +1913,7 @@ ESMC_I4 HConfig::asI4(
           "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
         return value;
       }else
-        if (index)
-          value = (*iter)[*index-1].as<int>();
-        else
-          value = iter->as<int>();
+        value = iter->as<int>();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, rc);
