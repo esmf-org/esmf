@@ -357,7 +357,7 @@ program ESMF_HConfigUTest
     integer(ESMF_KIND_I8)         :: valueI8
     real(ESMF_KIND_R4)            :: valueR4
     real(ESMF_KIND_R8)            :: valueR8
-    integer                       :: size
+    integer                       :: i, size
 
     rc = ESMF_SUCCESS
 
@@ -366,6 +366,27 @@ program ESMF_HConfigUTest
     write(msgString, *), "Size: ", size
     call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
     if (rc /= ESMF_SUCCESS) return
+
+    flag = ESMF_HConfigIsSequence(hconfig, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    do i=1, size
+      if (flag) then
+        ! sequence element as I4
+        valueI4 = ESMF_HConfigAsI4(hconfig, index=i, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        write(msgString, *), "I4: ", valueI4
+        call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        ! sequence element as I4 through At()
+        hconfig2 = ESMF_HConfigAt(hconfig, index=i, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        valueI4 = ESMF_HConfigAsI4(hconfig2, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+        write(msgString, *), "I4: ", valueI4
+        call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+        if (rc /= ESMF_SUCCESS) return
+      endif
+    enddo
 
     hconfig2 = ESMF_HConfigIterBegin(hconfig, rc=rc)
     if (rc /= ESMF_SUCCESS) return

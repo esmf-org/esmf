@@ -90,6 +90,8 @@ module ESMF_HConfigMod
   public ESMF_HConfigLoad
   public ESMF_HConfigLoadFile
 
+  public ESMF_HConfigAt
+
   public ESMF_HConfigGetSize
   public ESMF_HConfigGetMapKeySize
   public ESMF_HConfigGetMapValSize
@@ -544,6 +546,66 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_HConfigLoadFile
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAt()"
+!BOP
+! !IROUTINE: ESMF_HConfigAt - Return HConfig object at location
+
+! !INTERFACE:
+  function ESMF_HConfigAt(hconfig, keywordEnforcer, index, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_HConfig) :: ESMF_HConfigAt
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Create a new HConfig.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[index]}]
+!     Access by index if specified.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value
+    ESMF_HConfigAt%shallowMemory = 0
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigAt(hconfig, ESMF_HConfigAt, index, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_HConfigAt)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
 !------------------------------------------------------------------------------
 
 
@@ -2288,13 +2350,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsI4 - Return value as I4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, rc)
+  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, rc)
 ! !RETURN VALUE:
     integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2304,6 +2367,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[hconfig] 
 !     {\tt ESMF\_HConfig} object.
+!   \item[{[index]}]
+!     Access by index if specified.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2311,7 +2376,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2321,7 +2385,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
     ! Call into the C++ interface to get the I4
-    call c_ESMC_HConfigAsI4(hconfig, ESMF_HConfigAsI4, localrc)
+    call c_ESMC_HConfigAsI4(hconfig, ESMF_HConfigAsI4, index, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2362,7 +2426,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2413,7 +2476,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2464,7 +2526,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2515,7 +2576,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2566,7 +2626,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2617,7 +2676,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2668,7 +2726,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2719,7 +2776,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2770,7 +2826,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2821,7 +2876,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2872,7 +2926,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    integer               :: len
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL

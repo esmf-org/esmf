@@ -67,6 +67,8 @@ namespace ESMCI {
       int load(const std::string& content);
       int loadFile(const std::string& filename);
 
+      HConfig at(int *index=NULL, int *rc=NULL);
+
       int getSize(int *rc=NULL);
       int getMapKeySize(int *rc=NULL);
       int getMapValSize(int *rc=NULL);
@@ -105,7 +107,7 @@ namespace ESMCI {
       std::string asMapKeyString(int *rc=NULL);
       std::string asMapValString(int *rc=NULL);
 
-      ESMC_I4 asI4(int *rc=NULL);
+      ESMC_I4 asI4(int *index=NULL, int *rc=NULL);
       ESMC_I4 asMapKeyI4(int *rc=NULL);
       ESMC_I4 asMapValI4(int *rc=NULL);
 
