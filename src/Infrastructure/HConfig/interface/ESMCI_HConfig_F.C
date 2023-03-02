@@ -139,6 +139,80 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_hconfigcreateatmapkeykey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
+    char *key, int *rc, ESMCI_FortranStrLenArg string_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_hconfigcreateatmapkeykey()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(at, rc)
+    // call into C++
+    std::string keyStr(key, string_l);
+    *at = ptr->createAtMapKeyKey(keyStr, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_hconfigcreateatmapkey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
+    int *index, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_hconfigcreateatmapkey()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(at, rc)
+    // call into C++
+    *at = ptr->createAtMapKey(index, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_hconfigcreateatmapvalkey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
+    char *key, int *rc, ESMCI_FortranStrLenArg string_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_hconfigcreateatmapvalkey()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(at, rc)
+    // call into C++
+    std::string keyStr(key, string_l);
+    *at = ptr->createAtMapValKey(keyStr, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_hconfigcreateatmapval)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
+    int *index, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_hconfigcreateatmapval()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    ESMCI_NULL_CHECK_PRC(at, rc)
+    // call into C++
+    *at = ptr->createAtMapVal(index, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_hconfiggetsize)(ESMCI::HConfig *ptr, int *size, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfiggetsize()"

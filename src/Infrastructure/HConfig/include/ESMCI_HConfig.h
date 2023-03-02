@@ -69,6 +69,10 @@ namespace ESMCI {
 
       HConfig createAt(int *index=NULL, int *rc=NULL);
       HConfig createAtKey(std::string key="", int *rc=NULL);
+      HConfig createAtMapKey(int *index=NULL, int *rc=NULL);
+      HConfig createAtMapKeyKey(std::string key="", int *rc=NULL);
+      HConfig createAtMapVal(int *index=NULL, int *rc=NULL);
+      HConfig createAtMapValKey(std::string key="", int *rc=NULL);
 
       int getSize(int *rc=NULL);
       int getMapKeySize(int *rc=NULL);

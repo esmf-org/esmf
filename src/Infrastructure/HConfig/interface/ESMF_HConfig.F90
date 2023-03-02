@@ -91,6 +91,8 @@ module ESMF_HConfigMod
   public ESMF_HConfigLoadFile
 
   public ESMF_HConfigCreateAt
+  public ESMF_HConfigCreateAtMapKey
+  public ESMF_HConfigCreateAtMapVal
 
   public ESMF_HConfigGetSize
   public ESMF_HConfigGetMapKeySize
@@ -619,6 +621,162 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_HConfigCreateAt)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigCreateAtMapKey()"
+!BOP
+! !IROUTINE: ESMF_HConfigCreateAtMapKey - Return HConfig object at location
+
+! !INTERFACE:
+  function ESMF_HConfigCreateAtMapKey(hconfig, keywordEnforcer, index, key, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_HConfig) :: ESMF_HConfigCreateAtMapKey
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: key
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Create a new HConfig.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[index]}]
+!     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
+!   \item[{[key]}]
+!     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value
+    ESMF_HConfigCreateAtMapKey%shallowMemory = 0
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Check mutual exclusion of index and key
+    if (present(index) .and. present(key)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The 'index' and 'key' arguments are mutual exclusive", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    if (present(key)) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigCreateAtMapKeyKey(hconfig, ESMF_HConfigCreateAtMapKey, key, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigCreateAtMapKey(hconfig, ESMF_HConfigCreateAtMapKey, index, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_HConfigCreateAtMapKey)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigCreateAtMapVal()"
+!BOP
+! !IROUTINE: ESMF_HConfigCreateAtMapVal - Return HConfig object at location
+
+! !INTERFACE:
+  function ESMF_HConfigCreateAtMapVal(hconfig, keywordEnforcer, index, key, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_HConfig) :: ESMF_HConfigCreateAtMapVal
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: key
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Create a new HConfig.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[index]}]
+!     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
+!   \item[{[key]}]
+!     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value
+    ESMF_HConfigCreateAtMapVal%shallowMemory = 0
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Check mutual exclusion of index and key
+    if (present(index) .and. present(key)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The 'index' and 'key' arguments are mutual exclusive", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    if (present(key)) then
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigCreateAtMapValKey(hconfig, ESMF_HConfigCreateAtMapVal, key, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigCreateAtMapVal(hconfig, ESMF_HConfigCreateAtMapVal, index, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_HConfigCreateAtMapVal)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2368,7 +2526,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsI4 - Return value as I4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, rc)
+  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, key, rc)
 ! !RETURN VALUE:
     integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4
 !
@@ -2376,6 +2534,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: key
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2386,7 +2545,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[hconfig] 
 !     {\tt ESMF\_HConfig} object.
 !   \item[{[index]}]
-!     Access by index if specified.
+!     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
+!   \item[{[key]}]
+!     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2403,8 +2564,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index)) then
-      hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, rc=localrc)
+    if (present(index).or.present(key)) then
+      hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, key=key, &
+        rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I4
