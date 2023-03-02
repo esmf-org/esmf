@@ -328,6 +328,27 @@ program ESMF_MeshFileIOUTest
   call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
   !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test creating a mesh from a shape file."
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  call test_create_mesh_from_SH_file(correct, rc)
+
+#ifdef ESMF_PIO
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMC_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMC_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+  !-----------------------------------------------------------------------------
+  
 #endif
 
   !------------------------------------------------------------------------
@@ -6865,6 +6886,51 @@ subroutine  check_mesh_node_redist_from_file(correct, rc)
 
 end subroutine check_mesh_node_redist_from_file
 
+ 
+! Read in a shapefile and make sure that mesh create from file doesn't return errors.
+! This is an initial quick test to use for the start of development just to get things going. 
+! More precise verifications will be done in following tests.
+subroutine   test_create_mesh_from_SH_file(correct, rc)
+  logical :: correct
+  integer :: rc
+  type(ESMF_Mesh) :: mesh
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+  type(ESMF_DistGrid) :: nodeDistgrid, elemDistgrid
+  integer, allocatable :: elemIds(:)
+  integer :: numElems, numPerPet, numThisPet
+  integer :: minId,maxId
+  integer :: i, pos
+
+  ! Init correct
+  correct=.true.
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! Create Mesh from shape file
+  mesh=ESMF_MeshCreate("data/test_shape.shp", &
+       fileformat=ESMF_FILEFORMAT_SHAPEFILE, &
+       rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+
+  !! Write mesh for debugging
+  ! call ESMF_MeshWrite(mesh,"test_mesh",rc=rc)
+  ! if (rc /= ESMF_SUCCESS) return
+
+  ! Get rid of Mesh
+  ! TODO: Uncomment when above is working 
+  !call ESMF_MeshDestroy(mesh, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+   ! Return success
+   rc=ESMF_SUCCESS
+
+end subroutine test_create_mesh_from_SH_file
 
 
 end program ESMF_MeshFileIOUTest
