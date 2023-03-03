@@ -389,15 +389,23 @@ program ESMF_HConfigUTest
         if (rc /= ESMF_SUCCESS) return
       enddo
     else
-      ! direct access via map
+      ! direct access via key, here through CreateAt()
       hconfig2 = ESMF_HConfigCreateAt(hconfig, key="radius_of_the_earth", rc=rc)
       if (rc /= ESMF_SUCCESS) return
       valueR4 = ESMF_HConfigAsR4(hconfig2, rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      write(msgString, *) "R4 through CreateAt(): ", valueR4
+      write(msgString, *) "R4 'radius_of_the_earth' through CreateAt(): ", &
+        valueR4
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
       call ESMF_HConfigDestroy(hconfig2, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      ! direct access via key, here directly through AsR8(key=...)
+      valueR8 = ESMF_HConfigAsR8(hconfig, key="radius_of_the_earth", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "R8 'radius_of_the_earth' through AsR8(key=...): ", &
+        valueR8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
     endif
 
