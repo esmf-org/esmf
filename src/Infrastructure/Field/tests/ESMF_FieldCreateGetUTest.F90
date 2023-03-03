@@ -8663,15 +8663,12 @@ contains
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid
         type(ESMF_Geom)         :: geom
-        real, dimension(:,:), allocatable   :: farray
-        real, dimension(:,:), pointer       :: farray1
-
+        real(ESMF_KIND_R8), dimension(:,:), pointer :: farray
         type(ESMF_VM)                               :: vm
         integer                                     :: lpe
         integer, dimension(2)             :: ec, cc
         integer, dimension(2)             :: gelb, geub, gclb, gcub
         type(ESMF_StaggerLoc)                       :: sloc
-
         integer                                     :: totalCount(1:2)
 
         rc = ESMF_SUCCESS
@@ -8706,7 +8703,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, totalCount=totalCount, &
+        call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, totalCount=totalCount, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

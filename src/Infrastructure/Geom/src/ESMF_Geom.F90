@@ -948,8 +948,9 @@ end interface
        endif
     endif
 
-    if (present(dimCount).or.present(localDECount).or.present(distgrid).or. &
-      present(distgridToGridMap).or.present(indexflag)) then
+    if (present(dimCount).or. present(rank).or. &
+         present(localDECount).or.present(distgrid).or. &
+         present(distgridToGridMap).or.present(indexflag)) then
 
       ! Get info depending on type
       select case(gbcp%type%type)

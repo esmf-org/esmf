@@ -575,10 +575,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_GeomGet(geom, rank=memDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
     
     ! Calculate rank from dimension information
     rank = ungridded_dimcount + memDimCount - grid_repdimcount
-
+    
 #ifdef DEBUGGING
     write(msgString,*) "ESMF_FieldCreateGBTKR(): rank=", rank, &
       "ungridded_dimcount=", ungridded_dimcount, "memDimCount=", memDimCount, &
