@@ -2349,6 +2349,22 @@
         write(name, *) "Testing field create when all entries in map are 0 pointer"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Testing creating a Field from a Geom
+        call test_geom(rc)
+        write(failMsg, *) ""
+        write(name, *) "Testing creating a Field from a Geom object and fortran array"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        ! Testing creating a Field from a Geom
+        call test_geom_tkr(rc)
+        write(failMsg, *) ""
+        write(name, *) "Testing creating a Field from a Geom object and a typekind"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        
     call ESMF_TestEnd(ESMF_SRCLINE)
 
 contains 
@@ -8555,4 +8571,166 @@ contains
       endif
     end subroutine
 
+    subroutine test_geom(rc)
+        integer, intent(out)  :: rc
+        integer                 :: localrc
+        type(ESMF_Field)        :: field
+        type(ESMF_Grid)         :: grid
+        type(ESMF_Geom)         :: geom
+        real, dimension(:,:), allocatable   :: farray
+        real, dimension(:,:), pointer       :: farray1
+
+        type(ESMF_VM)                               :: vm
+        integer                                     :: lpe
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
+        type(ESMF_StaggerLoc)                       :: sloc
+
+        integer                                     :: totalCount(1:2)
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
+                                  regDecomp=(/4,1/), name="testgrid", rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+!        print *, 'localPet = ', lpe
+        sloc = ESMF_STAGGERLOC_CENTER
+        call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
+           exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
+           computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        allocate(farray(ec(1), ec(2)))
+
+        ! Create a geom and use that instead of the Grid
+        geom=ESMF_GeomCreate(grid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        field = ESMF_FieldCreate(geom, farray, &
+             indexflag=ESMF_INDEX_DELOCAL, &
+             datacopyflag=ESMF_DATACOPY_VALUE, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, totalCount=totalCount, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        
+        call ESMF_GeomDestroy(geom, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(farray)
+    end subroutine test_geom
+
+
+        subroutine test_geom_tkr(rc)
+        integer, intent(out)  :: rc
+        integer                 :: localrc
+        type(ESMF_Field)        :: field
+        type(ESMF_Grid)         :: grid
+        type(ESMF_Geom)         :: geom
+        real, dimension(:,:), allocatable   :: farray
+        real, dimension(:,:), pointer       :: farray1
+
+        type(ESMF_VM)                               :: vm
+        integer                                     :: lpe
+        integer, dimension(2)             :: ec, cc
+        integer, dimension(2)             :: gelb, geub, gclb, gcub
+        type(ESMF_StaggerLoc)                       :: sloc
+
+        integer                                     :: totalCount(1:2)
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
+                                  regDecomp=(/4,1/), name="testgrid", rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_VMGetGlobal(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+!        print *, 'localPet = ', lpe
+
+        ! Create a geom and use that instead of the Grid
+        geom=ESMF_GeomCreate(grid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        field = ESMF_FieldCreate(geom, typekind=ESMF_TYPEKIND_R8, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, totalCount=totalCount, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldDestroy(field, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        
+        call ESMF_GeomDestroy(geom, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        
+        call ESMF_GridDestroy(grid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    end subroutine test_geom_tkr
+
+
+    
 end program ESMF_FieldCreateGetUTest
