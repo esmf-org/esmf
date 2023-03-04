@@ -43,23 +43,8 @@ jobs:
           -i ~/.spack-ci \
           -r ${{ github.workspace }} 
 
-
-    #- name: Checkout Base Repository
-    #  uses: actions/checkout@v3
-
-    #- name: Restore Core Development Environment
-    #  uses: actions/cache@v3
-    #  with:
-    #    path: ${{ env.INTEL_INSTALL_DIR }}
-    #    key: cache-${{ runner.os }}-${{ matrix.compiler }}
-    #    restore-keys: |
-    #      spack-${{ runner.os }}-${{ inputs.architecture }}-${{ hashFiles('**/spack.lock') }}
-
-    #- name: Install Core Development Environment
-    #  run: |
-    #    cd ${{ github.workspace }}/.github/workflows
-    #    if [[ "${{ matrix.compiler }}" == "intel" ]]; then
-    #      scripts/install_oneapi.sh -i ${{ env.INTEL_INSTALL_DIR }} \
-    #    else
-    #      scripts/install_gnu.sh
-    #    fi
+    # install test environment
+    - name: Install Dependencies with Spack 
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+          -r ${{ github.workspace }}
