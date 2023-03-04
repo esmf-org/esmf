@@ -2,7 +2,7 @@ name: Build ESMF Docs
 
 on:
   workflow_dispatch:
-  push:
+  #push:
 
 concurrency: 
   group: build-esmf-docs-${{ github.ref_name }}

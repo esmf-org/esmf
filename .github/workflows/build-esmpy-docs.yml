@@ -2,7 +2,7 @@ name: Build ESMPy Docs
 
 on:
   workflow_dispatch:
-  push:
+  #push:
 
 concurrency: 
   group: build-esmpy-docs-${{ github.ref_name }}
