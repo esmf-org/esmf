@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         compiler: [intel-oneapi-compilers@2023.0.0]
-        esmf: [esmf@develop+parallelio^2.5.10~xerces~pnetcdf]
+        esmf: [esmf@develop+parallelio@2.5.10~xerces~pnetcdf]
 
     env:
       INTEL_INSTALL_DIR: /opt/intel/oneapi 
