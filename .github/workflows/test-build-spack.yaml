@@ -9,7 +9,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         compiler: [intel-oneapi-compilers@2023.0.0]

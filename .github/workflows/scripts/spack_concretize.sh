@@ -86,9 +86,9 @@ echo "::group::Create spack.yaml"
 echo "spack:" > spack.yaml
 echo "  concretizer:" >> spack.yaml
 echo "    targets:" >> spack.yaml
-echo "      granularity: generic" >> spack.yaml
+#echo "      granularity: generic" >> spack.yaml
 echo "      host_compatible: false" >> spack.yaml
-echo "    unify: when_possible" >> spack.yaml
+echo "    unify: true" >> spack.yaml
 echo "  specs:" >> spack.yaml
 echo "  - $comp" >> spack.yaml
 IFS=', ' read -r -a array <<< "$deps"
