@@ -1197,10 +1197,6 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
 
   DistGrid *dg_orig = src_array_p->getDistGrid();
 
-  localrc = (dg_orig->getTileCount() == 1) ? ESMF_SUCCESS : ESMF_RC_NOT_IMPL;
-  if (ESMC_LogDefault.MsgFoundError(localrc, "Tile count != 1 is not supported", ESMC_CONTEXT, rc))
-    return;
-
   const int *minIndexTile = dg_orig->getMinIndexPDimPTile();
   const int *maxIndexTile = dg_orig->getMaxIndexPDimPTile();
   const int *distgridToArrayMap = src_array_p->getDistGridToArrayMap();
