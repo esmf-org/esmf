@@ -1197,8 +1197,8 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
 
   DistGrid *dg_orig = src_array_p->getDistGrid();
 
-  const int *minIndexTile = dg_orig->getMinIndexPDimPTile();
-  const int *maxIndexTile = dg_orig->getMaxIndexPDimPTile();
+  const int *minIndexPDimPTile = dg_orig->getMinIndexPDimPTile();
+  const int *maxIndexPDimPTile = dg_orig->getMaxIndexPDimPTile();
   const int *distgridToArrayMap = src_array_p->getDistGridToArrayMap();
 
   int ndims = dg_orig->getDimCount();
@@ -1208,42 +1208,42 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
   for (int i=0; i<ndims; i++)
     if (distgridToArrayMap[i]==0) ++replicatedDims;
 
-  std::vector<int> minIndexTileVec;
-  std::vector<int> maxIndexTileVec;
+  std::vector<int> minIndexPDimPTileVec;
+  std::vector<int> maxIndexPDimPTileVec;
   std::vector<int> distgridToArrayMapVec;
   if (replicatedDims>0){
     // eliminate replicated dimensions from the destination
     for (int i=0; i<ndims; i++){
       if (distgridToArrayMap[i]!=0){
         // not a replicated dim -> keep
-        minIndexTileVec.push_back(minIndexTile[i]);
-        maxIndexTileVec.push_back(maxIndexTile[i]);
+        minIndexPDimPTileVec.push_back(minIndexPDimPTile[i]);
+        maxIndexPDimPTileVec.push_back(maxIndexPDimPTile[i]);
         distgridToArrayMapVec.push_back(distgridToArrayMap[i]);
       }
     }
-    if (minIndexTileVec.size()<1){
+    if (minIndexPDimPTileVec.size()<1){
       ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
         "Not enough distributed dimensions", ESMC_CONTEXT, rc);
       return; // bail out
     }
     // now point to the set of reduced lists
-    minIndexTile = &(minIndexTileVec[0]);
-    maxIndexTile = &(maxIndexTileVec[0]);
+    minIndexPDimPTile = &(minIndexPDimPTileVec[0]);
+    maxIndexPDimPTile = &(maxIndexPDimPTileVec[0]);
     distgridToArrayMap = &(distgridToArrayMapVec[0]);
   }
 
-  if ((maxIndexTile[0]-minIndexTile[0]+1)<petCount){
+  if ((maxIndexPDimPTile[0]-minIndexPDimPTile[0]+1)<petCount){
     ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
       "Index space too small to be distributed across all PETs", ESMC_CONTEXT, rc);
     return; // bail out
   }
 
-  ESMCI::InterArray<int> minIndexInterface((int*)minIndexTile, ndims-replicatedDims);
-  ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexTile, ndims-replicatedDims);
+  ESMCI::InterArray<int> minIndexInterface((int*)minIndexPDimPTile, ndims-replicatedDims);
+  ESMCI::InterArray<int> maxIndexInterface((int*)maxIndexPDimPTile, ndims-replicatedDims);
 #if 0
   std::cout << ESMC_METHOD << "[" << me << "]: setting maxindex to: (";
   for (int i=0; i<ndims; i++)
-    std::cout << " " << maxIndexTile[i];
+    std::cout << " " << maxIndexPDimPTile[i];
   std::cout << " )" << std::endl;
 #endif
   // create default DistGrid, which means 1DE per PET
