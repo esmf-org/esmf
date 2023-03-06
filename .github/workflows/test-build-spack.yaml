@@ -12,7 +12,8 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         #compiler: [intel-oneapi-compilers@2023.0.0]
-        compiler: [intel@20.0.4]
+        #compiler: [intel@20.0.4]
+        compiler: [gcc@12.2.0]
         esmf: [esmf@develop+parallelio~xerces~pnetcdf^parallelio@2.5.10]
 
     env:
