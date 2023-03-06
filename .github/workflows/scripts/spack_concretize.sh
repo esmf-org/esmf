@@ -53,33 +53,13 @@ cd $run_dir
 # checkout spack
 echo "::group::Checkout Spack"
 git clone https://github.com/spack/spack.git
+. spack/share/spack/setup-env.sh
 echo "::endgroup::"
 
 # activate spack
-#. spack/share/spack/setup-env.sh
-#
-# install compiler
-#echo "::group::Install Compiler"
-#spack install $comp target=$arch
-
-#spack compiler add $(spack location -i $comp)
-#spack compilers 
-#echo "::endgroup::"
-#exit
-
-# create spack environment 
-#. spack/share/spack/setup-env.sh
-#spack env create esmf_test
-#spack env activate -p esmf_test
-
-# install dependencies
-#for d in "${array[@]}"
-#do
-#  spack add $d target=$arch
-#done
-#spack install
-#
-#exit
+echo "::group::Find external packages"
+spack external find
+echo "::endgroup::"
 
 # create spack.yaml
 echo "::group::Create spack.yaml"
@@ -113,6 +93,5 @@ echo "::endgroup::"
 
 # concretize spack environment
 echo "::group::Concretize Spack Environment Using YAML Specification"
-. spack/share/spack/setup-env.sh
 spack --color always -e $run_dir/. concretize -f
 echo "::endgroup::"
