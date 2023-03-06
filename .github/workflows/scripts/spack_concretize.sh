@@ -53,12 +53,6 @@ cd $run_dir
 # checkout spack
 echo "::group::Checkout Spack"
 git clone https://github.com/spack/spack.git
-. spack/share/spack/setup-env.sh
-echo "::endgroup::"
-
-# activate spack
-echo "::group::Find external packages"
-spack external find
 echo "::endgroup::"
 
 # create spack.yaml
@@ -74,12 +68,13 @@ echo "  - $comp" >> spack.yaml
 IFS=', ' read -r -a array <<< "$deps"
 for d in "${array[@]}"
 do
-  echo "  - $d %$comp target=$arch" >> spack.yaml
+  #echo "  - $d %$comp target=$arch" >> spack.yaml
+  echo "  - $d target=$arch" >> spack.yaml
 done
 echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
 echo "      target: ['$arch']" >> spack.yaml
-#echo "      compiler: [$comp]" >> spack.yaml
+echo "      compiler: [$comp]" >> spack.yaml
 echo "  view: $install_dir/view" >> spack.yaml
 echo "  config:" >> spack.yaml
 echo "    source_cache: $install_dir/source_cache" >> spack.yaml
@@ -93,5 +88,6 @@ echo "::endgroup::"
 
 # concretize spack environment
 echo "::group::Concretize Spack Environment Using YAML Specification"
+. spack/share/spack/setup-env.sh
 spack --color always -e $run_dir/. concretize -f
 echo "::endgroup::"

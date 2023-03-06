@@ -31,7 +31,6 @@ jobs:
         sudo apt-get -qq install tar unzip file gringo
         sudo apt-get -qq install build-essential binutils-dev gfortran
         sudo apt-get -qq install python3-dev
-        sudo apt-get -qq install cmake perl zlib1g zlib1g-dev
 
     # concretize test environment 
     - name: Concretize Spack Environment Using YAML Specification
@@ -46,7 +45,7 @@ jobs:
           -r ${{ github.workspace }} 
 
     # install test environment
-    - name: Install Dependencies with Spack 
-      run: |
-        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
-          -r ${{ github.workspace }}
+    #- name: Install Dependencies with Spack 
+    #  run: |
+    #    ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+    #      -r ${{ github.workspace }}
