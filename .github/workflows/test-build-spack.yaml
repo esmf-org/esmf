@@ -11,7 +11,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        compiler: [intel-oneapi-compilers@2023.0.0]
+        #compiler: [intel-oneapi-compilers@2023.0.0]
+        compiler: [intel@20.0.4]
         esmf: [esmf@develop+parallelio~xerces~pnetcdf^parallelio@2.5.10]
 
     env:
