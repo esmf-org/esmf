@@ -55,6 +55,14 @@ echo "::group::Checkout Spack"
 git clone https://github.com/spack/spack.git
 echo "::endgroup::"
 
+. spack/share/spack/setup-env.sh
+spack install $comp target=$arch
+ls -al spack/opt/spack
+spack compiler find spack/opt/spack
+cat ~/.spack/compilers.yaml
+
+exit
+
 # create spack.yaml
 echo "::group::Create spack.yaml"
 echo "spack:" > spack.yaml
