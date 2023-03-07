@@ -55,20 +55,11 @@ echo "::group::Checkout Spack"
 git clone https://github.com/spack/spack.git
 echo "::endgroup::"
 
-. spack/share/spack/setup-env.sh
-spack install $comp target=$arch
-ls -al spack/opt/spack
-spack compiler find spack/opt/spack
-cat ~/.spack/compilers.yaml
-
-exit
-
 # create spack.yaml
 echo "::group::Create spack.yaml"
 echo "spack:" > spack.yaml
 echo "  concretizer:" >> spack.yaml
 echo "    targets:" >> spack.yaml
-#echo "      granularity: generic" >> spack.yaml
 echo "      host_compatible: false" >> spack.yaml
 echo "    unify: true" >> spack.yaml
 echo "  specs:" >> spack.yaml
@@ -76,8 +67,7 @@ echo "  - $comp" >> spack.yaml
 IFS=', ' read -r -a array <<< "$deps"
 for d in "${array[@]}"
 do
-  #echo "  - $d %$comp target=$arch" >> spack.yaml
-  echo "  - $d target=$arch" >> spack.yaml
+  echo "  - $d %$comp target=$arch" >> spack.yaml
 done
 echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
