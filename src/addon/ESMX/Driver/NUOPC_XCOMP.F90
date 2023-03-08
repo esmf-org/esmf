@@ -16,19 +16,27 @@ module nuopc_xcomp
   public SetServices, SetVM
 
   ! parameters
-  real, parameter :: filv = -1.0E34
+  real(ESMF_KIND_R8), parameter :: filv = -1.0E34_ESMF_KIND_R8
 
   ! derived types
   type xcomp_field
     character(len=64)           :: stdn        = "dummy"
     integer                     :: fdim        = 2
-    real                        :: dflt        = filv
+    real(ESMF_KIND_R8)          :: dflt        = filv
     logical                     :: rlze        = .false.
-    real(ESMF_KIND_R4)          :: lsum(1)     = filv
-    real(ESMF_KIND_R4)          :: gsum(1)     = filv
+    real(ESMF_KIND_R8)          :: minv        = filv
+    real(ESMF_KIND_R8)          :: maxv        = filv
+    logical                     :: okay        = .true.
+    real(ESMF_KIND_R8)          :: lmin(1)     = filv
+    real(ESMF_KIND_R8)          :: gmin(1)     = filv
+    real(ESMF_KIND_R8)          :: lmax(1)     = filv
+    real(ESMF_KIND_R8)          :: gmax(1)     = filv
+    real(ESMF_KIND_R8)          :: lsum(2)     = filv
+    real(ESMF_KIND_R8)          :: gsum(2)     = filv
+    real(ESMF_KIND_R8)          :: gavg        = filv
     type(ESMF_Field), pointer   :: efld        => null()
-    real(ESMF_KIND_R4), pointer :: ptr2(:,:)   => null()
-    real(ESMF_KIND_R4), pointer :: ptr3(:,:,:) => null()
+    real(ESMF_KIND_R8), pointer :: ptr2(:,:)   => null()
+    real(ESMF_KIND_R8), pointer :: ptr3(:,:,:) => null()
     type(xcomp_field), pointer  :: nfld        => null()
   endtype xcomp_field
 
@@ -48,7 +56,7 @@ module nuopc_xcomp
     real(ESMF_KIND_R8)       :: maxx =  -64.000_ESMF_KIND_R8
     real(ESMF_KIND_R8)       :: miny =   22.000_ESMF_KIND_R8
     real(ESMF_KIND_R8)       :: maxy =   50.000_ESMF_KIND_R8
-    type(ESMF_CoordSys_Flag) :: coordSys = ESMF_COORDSYS_CART
+    type(ESMF_CoordSys_Flag) :: coordSys = ESMF_COORDSYS_SPH_DEG
     type(ESMF_Grid)          :: grid
     ! field information
     character(len=ESMF_MAXSTR) :: field_file    = "esmxRun.config"
@@ -114,6 +122,10 @@ module nuopc_xcomp
       line=__LINE__, file=__FILE__)) return
     call NUOPC_CompSpecialize(xcomp, specLabel=label_RealizeProvided, &
       specRoutine=Realize, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    call NUOPC_CompSpecialize(xcomp, specLabel=label_DataInitialize, &
+      specRoutine=DataInitialize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     call NUOPC_CompSpecialize(xcomp, specLabel=label_CheckImport, &
@@ -280,6 +292,82 @@ module nuopc_xcomp
 
   !-----------------------------------------------------------------------------
 
+  subroutine DataInitialize(xcomp, rc)
+    ! arguments
+    type(ESMF_GridComp)  :: xcomp
+    integer, intent(out) :: rc
+    ! local variables
+    integer                    :: stat
+    type(xstate_wrap)          :: is
+    type(xcomp_state), pointer :: xstate
+    type(xcomp_field), pointer :: xfield
+    type(ESMF_State)           :: importState
+    type(ESMF_State)           :: exportState
+
+    rc = ESMF_SUCCESS
+
+    ! query component for internal state
+    nullify(is%ptr)
+    call ESMF_GridCompGetInternalState(xcomp, is, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    xstate => is%ptr
+    if (.not. associated(xstate)) then
+      call ESMF_LogSetError(ESMF_RC_PTR_NOTALLOC, &
+        msg='XCOMP: xstate has not been associated', &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return
+    endif
+
+    ! query component for information
+    call NUOPC_CompGet(xcomp, name=xstate%cname, &
+      verbosity=xstate%verbosity, diagnostic=xstate%diagnostic, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+
+    ! query component for import and export states
+    call NUOPC_ModelGet(xcomp, importState=importState, &
+      exportState=exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+
+    ! reset import fields
+    xfield => xstate%imp_flds_head
+    do while (associated(xfield))
+      if (xfield%rlze) then
+        call ESMF_FieldFill(xfield%efld, dataFillScheme="const", &
+          const1=xfield%dflt, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+      endif
+      xfield => xfield%nfld
+    enddo
+
+    ! reset export fields
+    xfield => xstate%exp_flds_head
+    do while (associated(xfield))
+      if (xfield%rlze) then
+        call ESMF_FieldFill(xfield%efld, dataFillScheme="const", &
+          const1=xfield%dflt, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        call NUOPC_SetAttribute(xfield%efld, &
+          name="Updated", value="true", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+      endif
+      xfield => xfield%nfld
+    enddo
+
+    call NUOPC_CompAttributeSet(xcomp, &
+      name="InitializeDataComplete", value="true", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+
+  endsubroutine DataInitialize
+
+  !-----------------------------------------------------------------------------
+
   subroutine CheckImport(xcomp, rc)
     ! arguments
     type(ESMF_GridComp) :: xcomp
@@ -349,6 +437,7 @@ module nuopc_xcomp
     type(ESMF_State)           :: importState
     type(ESMF_State)           :: exportState
     character(len=160)         :: clockString
+    integer                    :: errCount
 
     rc = ESMF_SUCCESS
 
@@ -383,41 +472,66 @@ module nuopc_xcomp
 
     ! write to standard out
     if (xstate%myid .eq. xstate%outid) then
-      print *,trim(xstate%cname)//": Model Advance"
-      print *,trim(xstate%cname)//":   clock=",trim(clockString)
+      write(*,'(A,X,A)') trim(xstate%cname)//": Model Advance",trim(clockString)
     endif
 
     ! sum import data from all PETs
     xfield => xstate%imp_flds_head
+    errCount = 0
     if (xstate%myid .eq. xstate%outid) then
-      print *,trim(xstate%cname)//": Import Sums"
+      write(*,'(A)') trim(xstate%cname)//": Import Fields"
+      write(*,'(A,X,A25,X,A9,3(X,A9),X,A4)') &
+        trim(xstate%cname)//":", "FIELD", &
+        "COUNT", "MEAN", &
+        "MIN", "MAX", &
+        "OKAY"
     endif
     do while (associated(xfield))
-      call x_comp_sum_field(xstate, xfield, rc=rc)
+      call x_comp_check_field(xstate, xfield, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
       if (xstate%myid .eq. xstate%outid) then
-        print *,trim(xstate%cname)//":   sum("//trim(xfield%stdn)//")=", &
-                xfield%gsum(1)
+        write(*,'(A,X,A25,X,I9,3(X,E9.2),X,L1)') &
+          trim(xstate%cname)//":", xfield%stdn, &
+          int(xfield%gsum(2)), xfield%gavg, &
+          xfield%gmin(1), xfield%gmax(1), &
+          xfield%okay
       endif
+      if (.not. xfield%okay) errCount = errCount + 1
       xfield => xfield%nfld
     enddo
 
     ! sum export data from all PETs
     xfield => xstate%exp_flds_head
     if (xstate%myid .eq. xstate%outid) then
-      print *,trim(xstate%cname)//": Export Sums"
+      write(*,'(A)') trim(xstate%cname)//": Export Fields"
+      write(*,'(A,X,A25,X,A9,3(X,A9))') &
+        trim(xstate%cname)//":", "FIELD", &
+        "COUNT", "MEAN", &
+        "MIN", "MAX"
     endif
     do while (associated(xfield))
-      call x_comp_sum_field(xstate, xfield, rc=rc)
+      call x_comp_check_field(xstate, xfield, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
       if (xstate%myid .eq. xstate%outid) then
-        print *,trim(xstate%cname)//":   sum("//trim(xfield%stdn)//")=", &
-                xfield%gsum(1)
+        write(*,'(A,X,A25,X,I9,3(X,E9.2))') &
+          trim(xstate%cname)//":", xfield%stdn, &
+          int(xfield%gsum(2)), xfield%gavg, &
+          xfield%gmin(1), xfield%gmax(1)
       endif
       xfield => xfield%nfld
     enddo
+
+    ! check for errors
+    if (errCount .gt. 0) then
+      write(*,'(A)') trim(xstate%cname)//": ERROR - check import fields"
+      call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, &
+        msg=trim(xstate%cname)//": import field error, check output", &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)
+      return
+    endif
+
   endsubroutine ModelAdvance
 
   !-----------------------------------------------------------------------------
@@ -625,6 +739,7 @@ module nuopc_xcomp
     integer                                     :: tokenCount
     character(NUOPC_FreeFormatLen), allocatable :: tokenList(:)
     type(xcomp_field), pointer                  :: xfield
+    real                                        :: tmpReal
 
     rc = ESMF_SUCCESS
 
@@ -657,10 +772,10 @@ module nuopc_xcomp
         tokenCount=tokenCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      if (tokenCount.ne.3) then
+      if (tokenCount.ne.4) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
           msg=trim(xstate%cname)//": Malformed import field "// &
-            " 'STANDARD_NAME' 'DIMENSIONS' 'FILL_VALUE'"// &
+            " 'STANDARD_NAME' 'DIMENSIONS' 'MIN_RANGE' 'MAX_RANGE'"// &
             " in file: "//trim(xstate%field_file), &
           line=__LINE__,file=__FILE__, rcToReturn=rc)
         return
@@ -676,13 +791,27 @@ module nuopc_xcomp
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
         msg=trim(xstate%cname)//': Memory allocation failed.', &
         line=__LINE__, file=__FILE__, rcToReturn=rc)) return
-      xfield%stdn =  tokenList(1)
-      xfield%fdim =  ESMF_UtilString2Int(tokenList(2), rc=rc)
+      xfield%stdn = tokenList(1)
+      xfield%fdim = ESMF_UtilString2Int(tokenList(2), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      xfield%dflt =  ESMF_UtilString2Real(tokenList(3), rc=rc)
+      xfield%okay = .false.
+      xfield%lsum = (/filv, 0.0_ESMF_KIND_R8/)
+      xfield%lmin = filv
+      xfield%lmax = filv
+      xfield%gsum = (/filv, 0.0_ESMF_KIND_R8/)
+      xfield%gmin = filv
+      xfield%gmax = filv
+      xfield%gavg = filv
+      tmpReal = ESMF_UtilString2Real(tokenList(3), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
+      xfield%minv = real(tmpReal, ESMF_KIND_R8)
+      tmpReal = ESMF_UtilString2Real(tokenList(4), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      xfield%maxv = real(tmpReal, ESMF_KIND_R8)
+      xfield%dflt = filv
       xfield%nfld => null()
       deallocate(tokenList)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
@@ -722,7 +851,7 @@ module nuopc_xcomp
           line=__LINE__,file=__FILE__, rcToReturn=rc)
         return
       endif
-      allocate(tokenList(tokenCount))
+      allocate(tokenList(tokenCount), stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
         msg=trim(xstate%cname)//': Memory allocation failed.', &
         line=__LINE__, file=__FILE__, rcToReturn=rc)) return
@@ -731,15 +860,26 @@ module nuopc_xcomp
         line=__LINE__, file=__FILE__)) return
       allocate(xfield, stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-        msg=trim(xstate%cname)//": Memory allocation failed.", &
-        line=__LINE__,file=__FILE__)) return
-      xfield%stdn =  tokenList(1)
-      xfield%fdim =  ESMF_UtilString2Int(tokenList(2), rc=rc)
+        msg=trim(xstate%cname)//': Memory allocation failed.', &
+        line=__LINE__, file=__FILE__, rcToReturn=rc)) return
+      xfield%stdn = tokenList(1)
+      xfield%fdim = ESMF_UtilString2Int(tokenList(2), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      xfield%dflt =  ESMF_UtilString2Real(tokenList(3), rc=rc)
+      xfield%okay = .false.
+      xfield%lsum = (/filv, 0.0_ESMF_KIND_R8/)
+      xfield%lmin = filv
+      xfield%lmax = filv
+      xfield%gsum = (/filv, 0.0_ESMF_KIND_R8/)
+      xfield%gmin = filv
+      xfield%gmax = filv
+      xfield%gavg = filv
+      xfield%minv = 0.0_ESMF_KIND_R8
+      xfield%maxv = 0.0_ESMF_KIND_R8
+      tmpReal = ESMF_UtilString2Real(tokenList(3), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
+      xfield%dflt = real(tmpReal, ESMF_KIND_R8)
       xfield%nfld => null()
       deallocate(tokenList)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
@@ -967,7 +1107,7 @@ module nuopc_xcomp
 
     if (xfield%fdim .eq. 3) then
       xfield%efld = ESMF_FieldCreate(name=trim(xfield%stdn), grid=xstate%grid, &
-        typekind=ESMF_TYPEKIND_R4, gridToFieldMap=(/1,3/), &
+        typekind=ESMF_TYPEKIND_R8, gridToFieldMap=(/1,3/), &
       ungriddedLBound=(/1/), ungriddedUBound=(/xstate%nz/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
@@ -976,7 +1116,7 @@ module nuopc_xcomp
         line=__LINE__, file=__FILE__)) return
     elseif (xfield%fdim .eq. 2) then
       xfield%efld = ESMF_FieldCreate(name=trim(xfield%stdn), grid=xstate%grid, &
-        typekind=ESMF_TYPEKIND_R4, rc=rc)
+        typekind=ESMF_TYPEKIND_R8, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
       call ESMF_FieldGet(xfield%efld, farrayPtr=xfield%ptr2, rc=rc)
@@ -993,7 +1133,7 @@ module nuopc_xcomp
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     call ESMF_FieldFill(xfield%efld, dataFillScheme="const", &
-      const1=real(xfield%dflt,ESMF_KIND_R8), rc=rc)
+      const1=0.0_ESMF_KIND_R8, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     xfield%rlze = .true.
@@ -1001,7 +1141,7 @@ module nuopc_xcomp
 
   !-----------------------------------------------------------------------------
 
-  subroutine x_comp_sum_field(xstate, xfield, rc)
+  subroutine x_comp_check_field(xstate, xfield, rc)
     ! arguments
     type(xcomp_state), pointer, intent(in)    :: xstate
     type(xcomp_field), pointer, intent(inout) :: xfield
@@ -1020,8 +1160,14 @@ module nuopc_xcomp
     if (xfield%rlze) then
       if(xfield%fdim .eq. 3) then
         xfield%lsum(1)=sum(xfield%ptr3,xfield%ptr3.ne.filv)
+        xfield%lsum(2)=count(xfield%ptr3.ne.filv)
+        xfield%lmin(1)=minval(xfield%ptr3,xfield%ptr3.ne.filv)
+        xfield%lmax(1)=maxval(xfield%ptr3,xfield%ptr3.ne.filv)
       elseif(xfield%fdim .eq. 2) then
         xfield%lsum(1)=sum(xfield%ptr2,xfield%ptr2.ne.filv)
+        xfield%lsum(2)=count(xfield%ptr2.ne.filv)
+        xfield%lmin(1)=minval(xfield%ptr2,xfield%ptr2.ne.filv)
+        xfield%lmax(1)=maxval(xfield%ptr2,xfield%ptr2.ne.filv)
       else
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg=trim(xstate%cname)//": field dimension - "//trim(xfield%stdn), &
@@ -1029,14 +1175,42 @@ module nuopc_xcomp
         return
       endif
       call ESMF_VMReduce(vm=xstate%vm, sendData=xfield%lsum, &
-        recvData=xfield%gsum, count=1, &
+        recvData=xfield%gsum, count=2, &
         reduceflag=ESMF_REDUCE_SUM, rootPet=xstate%outid, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
+      call ESMF_VMReduce(vm=xstate%vm, sendData=xfield%lmin, &
+        recvData=xfield%gmin, count=1, &
+        reduceflag=ESMF_REDUCE_MIN, rootPet=xstate%outid, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      call ESMF_VMReduce(vm=xstate%vm, sendData=xfield%lmax, &
+        recvData=xfield%gmax, count=1, &
+        reduceflag=ESMF_REDUCE_MAX, rootPet=xstate%outid, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (xstate%myid .eq. xstate%outid) then
+        ! calculate average
+        if(xfield%gsum(2) .lt. 1) then
+          xfield%gavg = 0.0_ESMF_KIND_R8
+        else
+          xfield%gavg = xfield%gsum(1) / xfield%gsum(2)
+        endif
+        ! check
+        if((xfield%gmin(1) .lt. xfield%minv) .or. &
+           (xfield%gmax(1) .gt. xfield%maxv)) then
+          xfield%okay = .false.
+        else
+          xfield%okay = .true.
+        endif
+      endif
     else
-      xfield%lsum(1)=filv
-      xfield%gsum(1)=filv
+      xfield%gsum = (/filv, 0.0_ESMF_KIND_R8/)
+      xfield%gmin = filv
+      xfield%gmax = filv
+      xfield%gavg = 0.0_ESMF_KIND_R8
+      xfield%okay = .false.
     endif
-  endsubroutine x_comp_sum_field
+  endsubroutine x_comp_check_field
 
 endmodule nuopc_xcomp
