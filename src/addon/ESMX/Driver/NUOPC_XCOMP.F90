@@ -491,8 +491,8 @@ module nuopc_xcomp
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
       if (xstate%myid .eq. xstate%outid) then
-        write(*,'(A,X,A25,X,I9,3(X,E9.2),X,L1)') &
-          trim(xstate%cname)//":", xfield%stdn, &
+        write(*,'(A,X,A25,X,I9,3(X,E9.2),X,L4)') &
+          trim(xstate%cname)//":", trim(xfield%stdn), &
           int(xfield%gsum(2)), xfield%gavg, &
           xfield%gmin(1), xfield%gmax(1), &
           xfield%okay
@@ -516,7 +516,7 @@ module nuopc_xcomp
         line=__LINE__, file=__FILE__)) return
       if (xstate%myid .eq. xstate%outid) then
         write(*,'(A,X,A25,X,I9,3(X,E9.2))') &
-          trim(xstate%cname)//":", xfield%stdn, &
+          trim(xstate%cname)//":", trim(xfield%stdn), &
           int(xfield%gsum(2)), xfield%gavg, &
           xfield%gmin(1), xfield%gmax(1)
       endif
