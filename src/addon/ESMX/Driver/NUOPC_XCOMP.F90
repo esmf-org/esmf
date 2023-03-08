@@ -496,8 +496,8 @@ module nuopc_xcomp
           int(xfield%gsum(2)), xfield%gavg, &
           xfield%gmin(1), xfield%gmax(1), &
           xfield%okay
+        if (.not. xfield%okay) errCount = errCount + 1
       endif
-      if (.not. xfield%okay) errCount = errCount + 1
       xfield => xfield%nfld
     enddo
 
