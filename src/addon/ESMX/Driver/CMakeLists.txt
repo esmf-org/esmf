@@ -75,7 +75,12 @@ foreach(CMP IN ITEMS ${COMPS})
     )
     FetchContent_Populate(${CMP})
   endif()
-  if(${CMP_BUILD_TYPE} STREQUAL "externalproject")
+  if("${CMP}" STREQUAL "NUOPC_XCOMP")
+    add_library(nuopc_xcomp NUOPC_XCOMP.F90)
+    target_link_libraries(nuopc_xcomp PUBLIC ESMF)
+    add_dependencies(esmx_driver nuopc_xcomp)
+    target_link_libraries(esmx_driver PUBLIC nuopc_xcomp)
+  elseif(${CMP_BUILD_TYPE} STREQUAL "externalproject")
     message(STATUS "Adding ExternalProject ... ${CMP}")
     find_file(FND_CMAKE_LISTS CMakeLists.txt
       PATHS ${CMP_SOURCE_DIR}
@@ -161,4 +166,3 @@ foreach(CMP IN ITEMS ${COMPS})
   unset(CMP_LIBRARIES)
   unset(CMP_BUILD_ARGS)
 endforeach()
-
