@@ -351,8 +351,8 @@ program ESMF_HConfigUTest
     integer, intent(out)  :: rc
 
     logical                       :: flag
-    character(len=:), allocatable :: string
-    character(80)                 :: msgString
+    character(len=:), allocatable :: string, tag
+    character(160)                :: msgString
     integer(ESMF_KIND_I4)         :: valueI4
     integer(ESMF_KIND_I8)         :: valueI8
     real(ESMF_KIND_R4)            :: valueR4
@@ -405,6 +405,39 @@ program ESMF_HConfigUTest
       if (rc /= ESMF_SUCCESS) return
       write(msgString, *) "R8 'radius_of_the_earth' through AsR8(key=...): ", &
         valueR8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      ! direct access via key, through AsString(key=...)
+      string = ESMF_HConfigAsString(hconfig, key="value_one", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      tag = ESMF_HConfigGetTag(hconfig, key="value_one", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "String 'value_one' through AsString(key=...): ", &
+        trim(string), "  [", trim(tag), "]"
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      string = ESMF_HConfigAsString(hconfig, key="value_two", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      tag = ESMF_HConfigGetTag(hconfig, key="value_two", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "String 'value_two' through AsString(key=...): ", &
+        trim(string), "  [", trim(tag), "]"
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      string = ESMF_HConfigAsString(hconfig, key="value_three", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      tag = ESMF_HConfigGetTag(hconfig, key="value_three", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "String 'value_three' through AsString(key=...): ", &
+        trim(string), "  [", trim(tag), "]"
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      string = ESMF_HConfigAsString(hconfig, key="value_four", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      tag = ESMF_HConfigGetTag(hconfig, key="value_four", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "String 'value_four' through AsString(key=...): ", &
+        trim(string), "  [", trim(tag), "]"
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
     endif
