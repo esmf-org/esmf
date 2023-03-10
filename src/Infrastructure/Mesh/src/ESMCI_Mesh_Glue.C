@@ -182,6 +182,14 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
        throw localrc;  // bail out with exception
 
+     // Error check nodeIds
+     for (int n = 0; n < num_nodes; n++) {
+       if (nodeId[n] < 1) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                          " node ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+       }
+     }
+     
      // Get nodeOwner
      int *nodeOwner=NULL;
      bool nodeOwner_allocated=false;
@@ -222,6 +230,9 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *_num_nodes, int *nodeId,
       }
     }
 
+
+
+    
     // Create new nodes
     for (int n = 0; n < num_nodes; ++n) {
 
@@ -770,7 +781,17 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     // Get parametric dimension
     int parametric_dim=mesh.parametric_dim();
 
-    // Error check input
+    
+    //// Error check input
+
+     // Error check elemIds
+     for (int e = 0; e < num_elems; e++) {
+       if (elemId[e] < 1) {
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                          " element ids must be >= 1 ", ESMC_CONTEXT,&localrc)) throw localrc;
+       }
+     }
+    
     //// Check element type
     ////(DON'T NEED TO CHECK PDIM==2, BECAUSE WE NOW SUPPORT
     //// ANY NUMBER OF CORNERS WITH PDIM=2)
