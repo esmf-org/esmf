@@ -44,7 +44,7 @@ jobs:
           -r ${{ github.workspace }} 
 
     # install test environment
-    #- name: Install Dependencies with Spack 
-    #  run: |
-    #    ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
-    #      -r ${{ github.workspace }}
+    - name: Install Dependencies with Spack 
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+          -r ${{ github.workspace }}
