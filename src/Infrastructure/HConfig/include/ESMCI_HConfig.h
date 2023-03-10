@@ -79,6 +79,8 @@ namespace ESMCI {
       int getMapValSize(int *rc=NULL);
 
       std::string getTag(int *rc=NULL);
+      std::string getMapKeyTag(int *rc=NULL);
+      std::string getMapValTag(int *rc=NULL);
 
       int isNull(bool *flag);
       int isScalar(bool *flag);

@@ -904,6 +904,166 @@ string HConfig::getTag(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::getMapKeyTag()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::getMapKeyTag - Get the tag of the node
+//
+// !INTERFACE:
+string HConfig::getMapKeyTag(
+//
+// !RETURN VALUE:
+//  string
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return value interpreted as string
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  string value = "";
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map)){
+      value = iter->first.Tag();
+      if (value == "?"){
+        // not a valid tag found -> implement implicit tag resolution
+        switch (iter->first.Type()){
+          case YAML::NodeType::Null:
+            iter->first.SetTag("tag:yaml.org,2002:null");
+            break;
+          case YAML::NodeType::Scalar:
+            iter->first.SetTag("tag:yaml.org,2002:str");  // default scalar
+            bool bDummy;
+            long long lDummy;
+            double dDummy;
+            if (YAML::convert<bool>::decode(iter->first, bDummy))
+              iter->first.SetTag("tag:yaml.org,2002:bool");
+            else if (YAML::convert<long long>::decode(iter->first, lDummy))
+              iter->first.SetTag("tag:yaml.org,2002:int");
+            else if (YAML::convert<double>::decode(iter->first, dDummy))
+              iter->first.SetTag("tag:yaml.org,2002:float");
+            break;
+          case YAML::NodeType::Sequence:
+            iter->first.SetTag("tag:yaml.org,2002:seq");
+            break;
+          case YAML::NodeType::Map:
+            iter->first.SetTag("tag:yaml.org,2002:map");
+            break;
+          default:
+            break;
+        }
+        value = iter->first.Tag();  // determine final outcome
+      }
+    }else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
+      return value;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return value;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return value;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::getMapValTag()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::getMapValTag - Get the tag of the node
+//
+// !INTERFACE:
+string HConfig::getMapValTag(
+//
+// !RETURN VALUE:
+//  string
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return value interpreted as string
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  string value = "";
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map)){
+      value = iter->second.Tag();
+      if (value == "?"){
+        // not a valid tag found -> implement implicit tag resolution
+        switch (iter->second.Type()){
+          case YAML::NodeType::Null:
+            iter->second.SetTag("tag:yaml.org,2002:null");
+            break;
+          case YAML::NodeType::Scalar:
+            iter->second.SetTag("tag:yaml.org,2002:str");  // default scalar
+            bool bDummy;
+            long long lDummy;
+            double dDummy;
+            if (YAML::convert<bool>::decode(iter->second, bDummy))
+              iter->second.SetTag("tag:yaml.org,2002:bool");
+            else if (YAML::convert<long long>::decode(iter->second, lDummy))
+              iter->second.SetTag("tag:yaml.org,2002:int");
+            else if (YAML::convert<double>::decode(iter->second, dDummy))
+              iter->second.SetTag("tag:yaml.org,2002:float");
+            break;
+          case YAML::NodeType::Sequence:
+            iter->second.SetTag("tag:yaml.org,2002:seq");
+            break;
+          case YAML::NodeType::Map:
+            iter->second.SetTag("tag:yaml.org,2002:map");
+            break;
+          default:
+            break;
+        }
+        value = iter->second.Tag();  // determine final outcome
+      }
+    }else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
+      return value;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return value;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return value;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::isNull()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::isNull - access node type
