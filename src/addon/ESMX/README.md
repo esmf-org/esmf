@@ -84,21 +84,21 @@ In this example two components are built into `esmx` explicitly. (Read about dyn
 Each component is given a name, here `tawas` and `lumo`, respectively. Components will be referenced by this *component-name* in the run-time configuration (esmxRun.config) discussed below. Component names are case-sensitive.
 
 Build options for each component are defined usin [YAML](https://yaml.org/) syntax. Build options are defined as follows:
-| Option          | Description                                   | Default                |
-| --------------- | --------------------------------------------- | ---------------------- |
-| build\_type     | Config, Find, ExternalProject, Subdirectory   | Config                 |
-| git\_repository | URL for downloading git repository            | *None*                 |
-| git\_tag        | tag for downloading git repository            | *None*                 |
-| git\_dir        | download directory for git repository         | *None*                 |
-| source\_dir     | source directory for build                    | *component-name*       |
-| cmake\_config   | CMake configuration file                      | *component-name*.cmake |
-| install\_prefix | root directory for installation               | install                |
-| config\_dir     | subdirectory for cmake configuration file     | cmake                  |
-| library\_dir    | subdirectory for library file                 | lib                    |
-| include\_dir    | subdirectory for fortran module file          | include                |
-| fort\_module    | fortran module filename for NUOPC SetServices | *component-name*.mod   |
-| libraries       | component libraries, linked to esmx           | *component-name*       |
-| build\_args     | build arguments passed to ExternalProject     | *None*                 |
+| Option          | Description                                       | Default                |
+| --------------- | ------------------------------------------------- | ---------------------- |
+| build\_type     | Config, Find, ExternalProject, Subdirectory, Make | Config                 |
+| git\_repository | URL for downloading git repository                | *None*                 |
+| git\_tag        | tag for downloading git repository                | *None*                 |
+| git\_dir        | download directory for git repository             | *None*                 |
+| source\_dir     | source directory for build                        | *component-name*       |
+| cmake\_config   | CMake configuration file                          | *component-name*.cmake |
+| install\_prefix | root directory for installation                   | install                |
+| config\_dir     | subdirectory for cmake configuration file         | cmake                  |
+| library\_dir    | subdirectory for library file                     | lib                    |
+| include\_dir    | subdirectory for fortran module file              | include                |
+| fort\_module    | fortran module filename for NUOPC SetServices     | *component-name*.mod   |
+| libraries       | component libraries, linked to esmx               | *component-name*       |
+| build\_args     | build arguments passed to ExternalProject         | *None*                 |
 
 Downloading component using git\_repository will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git\_repository fails if the source\_dir already exists.
 
@@ -119,6 +119,9 @@ The ESMX build system builds a component as an External Project and installs lib
 
 **Subdirectory**<br>
 The ESMX build system builds a component as a Subdirectory. The NUOPC cap library listed and all dependency libraries are linked to the ESMX Driver and the include directory is included during ESMX Driver compilation. This option is used for components with properly configured subdirectory references.
+
+**Make**<br>
+The ESMX build system builds a component by calling Make in the component's source directory. Once the component is built then the ESMX build system searches for libraries and fortran modules. Each library is linked to the ESMX Driver and the fortran module directory is included during ESMX Driver compilation.
 
 ### Project integration
 

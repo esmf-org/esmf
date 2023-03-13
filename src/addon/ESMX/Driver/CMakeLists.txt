@@ -143,6 +143,39 @@ foreach(CMP IN ITEMS ${COMPS})
       add_dependencies(esmx_driver ${CMP_LIBRARY})
       target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
     endforeach()
+  elseif(${CMP_BUILD_TYPE} STREQUAL "make")
+    execute_process(
+      COMMAND ${CMAKE_MAKE_PROGRAM} ${CMP_BUILD_ARGS}
+      WORKING_DIRECTORY ${CMP_SOURCE_DIR}
+    )
+    find_path(FND_FORT_MODULE NAMES ${CMP_FORT_MODULE}
+      HINTS ${CMP_INSTALL_PREFIX}
+      PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    if(NOT FND_FORT_MODULE)
+      message(FATAL_ERROR "Could not find ${CMP_FORT_MODULE}"
+        " in ${CMP_INSTALL_PREFIX}."
+        " Check installation or set install_prefix in build configuration"
+      )
+    endif()
+    target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
+    unset(FND_FORT_MODULE)
+    foreach (CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
+      find_library(FND_LIBRARY NAMES ${CMP_LIBRARY}
+        HINTS ${CMP_INSTALL_PREFIX}
+        PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+      if(NOT FND_LIBRARY)
+        message(FATAL_ERROR "Could not find ${CMP_LIBRARY}"
+          " in ${CMP_INSTALL_PREFIX}."
+          " Check installation or set install_prefix in build configuration"
+        )
+      endif()
+      target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
+      unset(FND_LIBRARY)
+    endforeach()
   elseif(${CMP_BUILD_TYPE} STREQUAL "config")
     message(STATUS "Adding - Config ${CMP}")
     find_file(FND_CMAKE_CONFIG NAMES ${CMP_CMAKE_CONFIG}
