@@ -2632,6 +2632,7 @@ ESMC_I4 HConfig::asI4(
 //  ESMC_I4
 //
 // !ARGUMENTS:
+    bool *asOkay,         // out - indicate if as() access okay
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -2648,7 +2649,7 @@ ESMC_I4 HConfig::asI4(
 #ifdef ESMF_YAMLCPP
   try{
     if (node)
-      value = node->as<ESMC_I4>();
+      *asOkay = YAML::convert<ESMC_I4>::decode(*node, value);
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -2656,7 +2657,7 @@ ESMC_I4 HConfig::asI4(
           "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
         return value;
       }else
-        value = iter->as<ESMC_I4>();
+        *asOkay = YAML::convert<ESMC_I4>::decode(*iter, value);
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, rc);

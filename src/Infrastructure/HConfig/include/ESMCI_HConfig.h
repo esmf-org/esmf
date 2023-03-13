@@ -120,7 +120,7 @@ namespace ESMCI {
       bool asMapKeyLogical(int *rc=NULL);
       bool asMapValLogical(int *rc=NULL);
 
-      ESMC_I4 asI4(int *rc=NULL);
+      ESMC_I4 asI4(bool *asOkay, int *rc=NULL);
       ESMC_I4 asMapKeyI4(int *rc=NULL);
       ESMC_I4 asMapValI4(int *rc=NULL);
 

@@ -350,7 +350,7 @@ program ESMF_HConfigUTest
     type(ESMF_HConfig)    :: hconfig
     integer, intent(out)  :: rc
 
-    logical                       :: flag, valueL
+    logical                       :: flag, valueL, asOkay
     character(len=:), allocatable :: string, tag
     character(160)                :: msgString
     integer(ESMF_KIND_I4)         :: valueI4
@@ -408,6 +408,7 @@ program ESMF_HConfigUTest
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
       ! direct access via key, through AsString(key=...)
+      ! value_one
       string = ESMF_HConfigAsString(hconfig, key="value_one", rc=rc)
       if (rc /= ESMF_SUCCESS) return
       tag = ESMF_HConfigGetTag(hconfig, key="value_one", rc=rc)
@@ -417,6 +418,9 @@ program ESMF_HConfigUTest
       write(msgString, *) "String 'value_one' through AsString(key=...): ", &
         string, "  [", tag, "] through AsLogical(key=...):", valueL
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      valueI4 = ESMF_HConfigAsI4(hconfig, key="value_one", asOkay=asOkay, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      ! value_two
       if (rc /= ESMF_SUCCESS) return
       string = ESMF_HConfigAsString(hconfig, key="value_two", rc=rc)
       if (rc /= ESMF_SUCCESS) return
@@ -428,6 +432,7 @@ program ESMF_HConfigUTest
         string, "  [", tag, "] through AsLogical(key=...):", valueL
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
+      ! value_three
       string = ESMF_HConfigAsString(hconfig, key="value_three", rc=rc)
       if (rc /= ESMF_SUCCESS) return
       tag = ESMF_HConfigGetTag(hconfig, key="value_three", rc=rc)
@@ -436,6 +441,7 @@ program ESMF_HConfigUTest
         string, "  [", tag, "]"
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
+      ! value_four
       string = ESMF_HConfigAsString(hconfig, key="value_four", rc=rc)
       if (rc /= ESMF_SUCCESS) return
       tag = ESMF_HConfigGetTag(hconfig, key="value_four", rc=rc)
