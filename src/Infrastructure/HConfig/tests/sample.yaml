@@ -13,7 +13,7 @@ parameter_1:           89
 parameter_2:           78.2
 input_file_name:       dummy_input.nc
 value_one:              True
-value_two:              FalseX
+value_two:              False
 value_three:  !!str     true
 value_four:             0x234
 

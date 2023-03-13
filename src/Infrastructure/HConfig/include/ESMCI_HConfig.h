@@ -116,6 +116,10 @@ namespace ESMCI {
       std::string asMapKeyString(int *rc=NULL);
       std::string asMapValString(int *rc=NULL);
 
+      bool asLogical(int *rc=NULL);
+      bool asMapKeyLogical(int *rc=NULL);
+      bool asMapValLogical(int *rc=NULL);
+
       ESMC_I4 asI4(int *rc=NULL);
       ESMC_I4 asMapKeyI4(int *rc=NULL);
       ESMC_I4 asMapValI4(int *rc=NULL);

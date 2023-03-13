@@ -136,6 +136,10 @@ module ESMF_HConfigMod
   public ESMF_HConfigAsMapKeyString
   public ESMF_HConfigAsMapValString
 
+  public ESMF_HConfigAsLogical
+  public ESMF_HConfigAsMapKeyLogical
+  public ESMF_HConfigAsMapValLogical
+
   public ESMF_HConfigAsI4
   public ESMF_HConfigAsMapKeyI4
   public ESMF_HConfigAsMapValI4
@@ -2966,6 +2970,234 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsLogical()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsLogical - Return value as Logical
+
+! !INTERFACE:
+  function ESMF_HConfigAsLogical(hconfig, keywordEnforcer, index, key, rc)
+! !RETURN VALUE:
+    type(ESMF_Logical) :: ESMF_HConfigAsLogical
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: key
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the value of item {\tt hconfig} interpreted as Logical.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[index]}]
+!     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
+!   \item[{[key]}]
+!     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: value
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    if (present(index).or.present(key)) then
+      hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, key=key, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the Logical
+      call c_ESMC_HConfigAsLogical(hconfigTemp, value, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the Logical
+      call c_ESMC_HConfigAsLogical(hconfig, value, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigAsLogical = value
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsMapKeyLogical()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsMapKeyLogical - Return map key as Logical
+
+! !INTERFACE:
+  function ESMF_HConfigAsMapKeyLogical(hconfig, keywordEnforcer, index, key, rc)
+! !RETURN VALUE:
+    type(ESMF_Logical) :: ESMF_HConfigAsMapKeyLogical
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: key
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the map key of item {\tt hconfig} interpreted as Logical.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[index]}]
+!     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
+!   \item[{[key]}]
+!     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: value
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    if (present(index).or.present(key)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, key=key, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the Logical
+      call c_ESMC_HConfigAsMapKeyLogical(hconfigTemp, value, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the Logical
+      call c_ESMC_HConfigAsMapKeyLogical(hconfig, value, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigAsMapKeyLogical = value
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAsMapValLogical()"
+!BOP
+! !IROUTINE: ESMF_HConfigAsMapValLogical - Return map value as Logical
+
+! !INTERFACE:
+  function ESMF_HConfigAsMapValLogical(hconfig, keywordEnforcer, index, key, rc)
+! !RETURN VALUE:
+    type(ESMF_Logical) :: ESMF_HConfigAsMapValLogical
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: key
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the map value of item {\tt hconfig} interpreted as Logical.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[index]}]
+!     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
+!   \item[{[key]}]
+!     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    if (present(index).or.present(key)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, key=key, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call into the C++ interface to get the Logical
+      call c_ESMC_HConfigAsMapValLogical(hconfigTemp, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface to get the Logical
+      call c_ESMC_HConfigAsMapValLogical(hconfig, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigAsMapValLogical = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
