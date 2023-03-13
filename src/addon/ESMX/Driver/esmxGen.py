@@ -22,9 +22,9 @@ def create_compList(_dict, odir):
         f.write('set(COMPS {})\n\n'.format(' '.join(comp_str)))
         for k1, v1 in od.items():
           if type(v1) is not dict:
-            v1 = {'build_type': 'preinstalled'}
+            v1 = {'build_type': 'config'}
           f.write('# - auto-generated section for component: {}\n'.format(k1))
-          build_type = v1.get('build_type', 'preinstalled')
+          build_type = v1.get('build_type', 'config')
           source_dir = v1.get('source_dir', k1)
           source_dir = os.path.abspath(source_dir)
           cmake_config = v1.get('cmake_config', k1+'.cmake')
@@ -43,6 +43,7 @@ def create_compList(_dict, odir):
           include_dir = v1.get('include_dir', 'include')
           if (os.path.isabs(include_dir)):
             include_dir = os.path.basename(include_dir)
+          fort_module = v1.get('fort_module', (k1+'.mod').lower())
           libraries = v1.get('libraries', k1)
           build_args = v1.get('build_args', None)
           git_repository = v1.get('git_repository', "")
@@ -56,6 +57,7 @@ def create_compList(_dict, odir):
           f.write('set({}-LIBRARY_DIR    {})\n'.format(k1, library_dir))
           f.write('set({}-CONFIG_DIR     {})\n'.format(k1, config_dir))
           f.write('set({}-INCLUDE_DIR    {})\n'.format(k1, include_dir))
+          f.write('set({}-FORT_MODULE    {})\n'.format(k1, fort_module))
           f.write('set({}-LIBRARIES      {})\n'.format(k1, libraries))
           if (build_args):
             f.write('set({}-BUILD_ARGS     {})\n'.format(k1, build_args))
@@ -70,7 +72,7 @@ def create_compUse(_dict, odir):
         od = collections.OrderedDict(_dict['components'].items())
         for k1, v1 in od.items():
           if type(v1) is not dict:
-            v1 = {'build_type': 'preinstalled'}
+            v1 = {'build_type': 'config'}
           fort_module = v1.get('fort_module', (k1+'.mod').lower())
           f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(Path(fort_module).stem, k1, k1))
 

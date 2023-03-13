@@ -11,6 +11,16 @@ find_program(CMAKE_Fortran_COMPILER ${ESMF_F90COMPILER})
 set(CMAKE_CXX_COMPILER ${ESMF_CXXCOMPILER} PARENT_SCOPE)
 set(CMAKE_Fortran_COMPILER ${ESMF_F90COMPILER} PARENT_SCOPE)
 
+if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-O2" PARENT_SCOPE)
+  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -02" PARENT_SCOPE)
+  set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow" PARENT_SCOPE)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-O2" PARENT_SCOPE)
+  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2" PARENT_SCOPE)
+  set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays" PARENT_SCOPE)
+endif()
+
 # Specify driver dependency
 add_library(esmx_driver ESMX_Driver.F90)
 target_include_directories(esmx_driver PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
@@ -57,6 +67,7 @@ foreach(CMP IN ITEMS ${COMPS})
   set(CMP_LIBRARY_DIR    "${${CMP}-LIBRARY_DIR}")
   set(CMP_CONFIG_DIR     "${${CMP}-CONFIG_DIR}")
   set(CMP_INCLUDE_DIR    "${${CMP}-INCLUDE_DIR}")
+  set(CMP_FORT_MODULE    "${${CMP}-FORT_MODULE}")
   set(CMP_LIBRARIES      "${${CMP}-LIBRARIES}")
   string(REPLACE "," ";" "${${CMP}-LIBRARIES}" CMP_LIBRARIES)
   set(CMP_BUILD_ARGS     "${${CMP}-BUILD_ARGS}")
@@ -81,7 +92,7 @@ foreach(CMP IN ITEMS ${COMPS})
     add_dependencies(esmx_driver nuopc_xcomp)
     target_link_libraries(esmx_driver PUBLIC nuopc_xcomp)
   elseif(${CMP_BUILD_TYPE} STREQUAL "externalproject")
-    message(STATUS "Adding ExternalProject ... ${CMP}")
+    message(STATUS "Adding - ExternalProject ${CMP}")
     find_file(FND_CMAKE_LISTS CMakeLists.txt
       PATHS ${CMP_SOURCE_DIR}
       NO_CACHE NO_DEFAULT_PATH
@@ -113,7 +124,7 @@ foreach(CMP IN ITEMS ${COMPS})
         ${CMP_INSTALL_PREFIX}/${CMP_LIBRARY_DIR}/${CMP_LIBRARY})
     endforeach()
   elseif(${CMP_BUILD_TYPE} STREQUAL "subdirectory")
-    message(STATUS "Adding Subdirectory ... ${CMP}")
+    message(STATUS "Adding - Subdirectory ${CMP}")
     find_file(FND_CMAKE_LISTS CMakeLists.txt
       PATHS ${CMP_SOURCE_DIR}
       NO_CACHE NO_DEFAULT_PATH
@@ -132,8 +143,8 @@ foreach(CMP IN ITEMS ${COMPS})
       add_dependencies(esmx_driver ${CMP_LIBRARY})
       target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
     endforeach()
-  elseif(${CMP_BUILD_TYPE} STREQUAL "preinstalled")
-    message(STATUS "Adding Preinstalled ... ${CMP}")
+  elseif(${CMP_BUILD_TYPE} STREQUAL "config")
+    message(STATUS "Adding - Config ${CMP}")
     find_file(FND_CMAKE_CONFIG NAMES ${CMP_CMAKE_CONFIG}
       HINTS ${CMP_INSTALL_PREFIX}
       PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
@@ -150,6 +161,36 @@ foreach(CMP IN ITEMS ${COMPS})
     foreach (CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
       target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
     endforeach()
+  elseif(${CMP_BUILD_TYPE} STREQUAL "find")
+    message(STATUS "Adding - Find ${CMP}")
+    find_path(FND_FORT_MODULE NAMES ${CMP_FORT_MODULE}
+      HINTS ${CMP_INSTALL_PREFIX}
+      PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    if(NOT FND_FORT_MODULE)
+      message(FATAL_ERROR "Could not find ${CMP_FORT_MODULE}"
+        " in ${CMP_INSTALL_PREFIX}."
+        " Check installation or set install_prefix in build configuration"
+      )
+    endif()
+    target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
+    unset(FND_FORT_MODULE)
+    foreach (CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
+      find_library(FND_LIBRARY NAMES ${CMP_LIBRARY}
+        HINTS ${CMP_INSTALL_PREFIX}
+        PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+      if(NOT FND_LIBRARY)
+        message(FATAL_ERROR "Could not find ${CMP_LIBRARY}"
+          " in ${CMP_INSTALL_PREFIX}."
+          " Check installation or set install_prefix in build configuration"
+        )
+      endif()
+      target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
+      unset(FND_LIBRARY)
+    endforeach()
   else()
     message(FATAL_ERROR "Invalid BUILD_TYPE: ${CMP_BUILD_TYPE} for ${CMP}")
   endif()
@@ -163,6 +204,7 @@ foreach(CMP IN ITEMS ${COMPS})
   unset(CMP_LIBRARY_DIR)
   unset(CMP_CONFIG_DIR)
   unset(CMP_INCLUDE_DIR)
+  unset(CMP_FORT_MODULE)
   unset(CMP_LIBRARIES)
   unset(CMP_BUILD_ARGS)
 endforeach()

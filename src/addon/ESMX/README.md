@@ -86,7 +86,7 @@ Each component is given a name, here `tawas` and `lumo`, respectively. Component
 Build options for each component are defined usin [YAML](https://yaml.org/) syntax. Build options are defined as follows:
 | Option          | Description                                   | Default                |
 | --------------- | --------------------------------------------- | ---------------------- |
-| build\_type     | preinstalled, ExternalProject                 | preinstalled           |
+| build\_type     | Config, Find, ExternalProject, Subdirectory   | Config                 |
 | git\_repository | URL for downloading git repository            | *None*                 |
 | git\_tag        | tag for downloading git repository            | *None*                 |
 | git\_dir        | download directory for git repository         | *None*                 |
@@ -102,11 +102,23 @@ Build options for each component are defined usin [YAML](https://yaml.org/) synt
 
 Downloading component using git\_repository will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git\_repository fails if the source\_dir already exists.
 
-A component CMake configuration file provided by a previous installation includes target information needed for linking dependencies. A manually generated CMake configuration file includes the following standard CMake elements:
+### Build Types
+
+**Config**<br>
+The ESMX build system searches for component's CMake configuration file provided by a previous installation. The configuration file includes target information needed for linking dependencies. A manually generated CMake configuration file includes the following standard CMake elements:
 - `add_library(library-name ... )`
 - `set_target_properties(library-name ... )`
 
-Here *library-name* must correspond to the library defined in the `esmxBuild.yaml` file. For the example this would be `tawas` or `lumo`.
+The ESMX build system includes the CMake configuration and links all libraries to the ESMX Driver.
+
+**Find**<br>
+The ESMX build system searches for libraries and fortran modules provided by a previous installation. Each library is linked to the ESMX Driver and the fortran module directory is included during ESMX Driver compilation.
+
+**ExternalProject**<br>
+The ESMX build system builds a component as an External Project and installs libraries, include files, and configuration files into the install\_prefix directory. Each library listed is linked to the ESMX Driver and the include directory is included during ESMX Driver compilation. This option is used for components with a properly configured NUOPC cap installation step in its CMake build.
+
+**Subdirectory**<br>
+The ESMX build system builds a component as a Subdirectory. The NUOPC cap library listed and all dependency libraries are linked to the ESMX Driver and the include directory is included during ESMX Driver compilation. This option is used for components with properly configured subdirectory references.
 
 ### Project integration
 
