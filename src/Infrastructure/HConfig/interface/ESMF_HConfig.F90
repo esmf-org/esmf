@@ -2708,7 +2708,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsString - Return value as string
 
 ! !INTERFACE:
-  function ESMF_HConfigAsString(hconfig, keywordEnforcer, index, key, rc)
+  function ESMF_HConfigAsString(hconfig, keywordEnforcer, index, key, asOkay, rc)
 ! !RETURN VALUE:
     character(len=:), allocatable :: ESMF_HConfigAsString
 !
@@ -2717,10 +2717,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: key
+    logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !   Return the value of item {\tt hconfig} interpreted as string.
+!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
+!   provided, {\tt asOkay == .true.}.
 !
 ! The arguments are:
 !   \begin{description}
@@ -2730,6 +2733,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
 !   \item[{[key]}]
 !     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[asOkay]}]
+!     Set to {\tt .true.} for successful convertion to the requested typekind.
+!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
+!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
+!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
+!     and the validity of the returned converted value is determined by
+!     {\tt asOkay}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2739,6 +2749,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     integer               :: len
     type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2754,7 +2765,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface to get length
-      call c_ESMC_HConfigAsStringLen(hconfigTemp, len, localrc)
+      call c_ESMC_HConfigAsStringLen(hconfigTemp, len, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2762,7 +2773,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       allocate(character(len=len)::ESMF_HConfigAsString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsString(hconfigTemp, ESMF_HConfigAsString, localrc)
+      call c_ESMC_HConfigAsString(hconfigTemp, ESMF_HConfigAsString, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2772,7 +2783,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get length
-      call c_ESMC_HConfigAsStringLen(hconfig, len, localrc)
+      call c_ESMC_HConfigAsStringLen(hconfig, len, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2780,9 +2791,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       allocate(character(len=len)::ESMF_HConfigAsString)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsString(hconfig, ESMF_HConfigAsString, localrc)
+      call c_ESMC_HConfigAsString(hconfig, ESMF_HConfigAsString, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Deal with asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
     endif
 
     ! return successfully
@@ -2985,7 +3006,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsLogical - Return value as Logical
 
 ! !INTERFACE:
-  function ESMF_HConfigAsLogical(hconfig, keywordEnforcer, index, key, rc)
+  function ESMF_HConfigAsLogical(hconfig, keywordEnforcer, index, key, asOkay, rc)
 ! !RETURN VALUE:
     type(ESMF_Logical) :: ESMF_HConfigAsLogical
 !
@@ -2994,10 +3015,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: key
+    logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !   Return the value of item {\tt hconfig} interpreted as Logical.
+!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
+!   provided, {\tt asOkay == .true.}.
 !
 ! The arguments are:
 !   \begin{description}
@@ -3007,6 +3031,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
 !   \item[{[key]}]
 !     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[asOkay]}]
+!     Set to {\tt .true.} for successful convertion to the requested typekind.
+!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
+!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
+!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
+!     and the validity of the returned converted value is determined by
+!     {\tt asOkay}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3016,6 +3047,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
     type(ESMF_Logical)    :: value
+    type(ESMF_Logical)    :: flag
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3030,7 +3062,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the Logical
-      call c_ESMC_HConfigAsLogical(hconfigTemp, value, localrc)
+      call c_ESMC_HConfigAsLogical(hconfigTemp, value, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! clean up
@@ -3039,9 +3071,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the Logical
-      call c_ESMC_HConfigAsLogical(hconfig, value, localrc)
+      call c_ESMC_HConfigAsLogical(hconfig, value, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Deal with asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
     endif
 
     ! convert ESMF_Logical -> logical
@@ -3213,7 +3255,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsI4 - Return value as I4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, key, rc)
+  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, key, asOkay, rc)
 ! !RETURN VALUE:
     integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4
 !
@@ -3222,10 +3264,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: key
+    logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !   Return the value of item {\tt hconfig} interpreted as I4.
+!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
+!   provided, {\tt asOkay == .true.}.
 !
 ! The arguments are:
 !   \begin{description}
@@ -3235,6 +3280,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
 !   \item[{[key]}]
 !     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[asOkay]}]
+!     Set to {\tt .true.} for successful convertion to the requested typekind.
+!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
+!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
+!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
+!     and the validity of the returned converted value is determined by
+!     {\tt asOkay}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3243,6 +3295,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3257,7 +3310,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I4
-      call c_ESMC_HConfigAsI4(hconfigTemp, ESMF_HConfigAsI4, localrc)
+      call c_ESMC_HConfigAsI4(hconfigTemp, ESMF_HConfigAsI4, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! clean up
@@ -3266,9 +3319,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the I4
-      call c_ESMC_HConfigAsI4(hconfig, ESMF_HConfigAsI4, localrc)
+      call c_ESMC_HConfigAsI4(hconfig, ESMF_HConfigAsI4, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Deal with asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
     endif
 
     ! return successfully
@@ -3429,7 +3492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsI8 - Return value as I8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI8(hconfig, keywordEnforcer, index, key, rc)
+  function ESMF_HConfigAsI8(hconfig, keywordEnforcer, index, key, asOkay, rc)
 ! !RETURN VALUE:
     integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8
 !
@@ -3438,10 +3501,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: key
+    logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !   Return the value of item {\tt hconfig} interpreted as I8.
+!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
+!   provided, {\tt asOkay == .true.}.
 !
 ! The arguments are:
 !   \begin{description}
@@ -3451,6 +3517,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
 !   \item[{[key]}]
 !     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[asOkay]}]
+!     Set to {\tt .true.} for successful convertion to the requested typekind.
+!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
+!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
+!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
+!     and the validity of the returned converted value is determined by
+!     {\tt asOkay}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3459,6 +3532,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3473,7 +3547,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I8
-      call c_ESMC_HConfigAsI8(hconfigTemp, ESMF_HConfigAsI8, localrc)
+      call c_ESMC_HConfigAsI8(hconfigTemp, ESMF_HConfigAsI8, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! clean up
@@ -3482,9 +3556,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the I8
-      call c_ESMC_HConfigAsI8(hconfig, ESMF_HConfigAsI8, localrc)
+      call c_ESMC_HConfigAsI8(hconfig, ESMF_HConfigAsI8, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Deal with asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
     endif
 
     ! return successfully
@@ -3645,7 +3729,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsR4 - Return value as R4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsR4(hconfig, keywordEnforcer, index, key, rc)
+  function ESMF_HConfigAsR4(hconfig, keywordEnforcer, index, key, asOkay, rc)
 ! !RETURN VALUE:
     real(ESMF_KIND_R4) :: ESMF_HConfigAsR4
 !
@@ -3654,10 +3738,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: key
+    logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !   Return the value of item {\tt hconfig} interpreted as R4.
+!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
+!   provided, {\tt asOkay == .true.}.
 !
 ! The arguments are:
 !   \begin{description}
@@ -3667,6 +3754,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
 !   \item[{[key]}]
 !     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[asOkay]}]
+!     Set to {\tt .true.} for successful convertion to the requested typekind.
+!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
+!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
+!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
+!     and the validity of the returned converted value is determined by
+!     {\tt asOkay}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3675,6 +3769,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3689,7 +3784,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R4
-      call c_ESMC_HConfigAsR4(hconfigTemp, ESMF_HConfigAsR4, localrc)
+      call c_ESMC_HConfigAsR4(hconfigTemp, ESMF_HConfigAsR4, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! clean up
@@ -3698,9 +3793,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the R4
-      call c_ESMC_HConfigAsR4(hconfig, ESMF_HConfigAsR4, localrc)
+      call c_ESMC_HConfigAsR4(hconfig, ESMF_HConfigAsR4, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Deal with asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
     endif
 
     ! return successfully
@@ -3861,7 +3966,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsR8 - Return value as R8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsR8(hconfig, keywordEnforcer, index, key, rc)
+  function ESMF_HConfigAsR8(hconfig, keywordEnforcer, index, key, asOkay, rc)
 ! !RETURN VALUE:
     real(ESMF_KIND_R8) :: ESMF_HConfigAsR8
 !
@@ -3870,10 +3975,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: key
+    logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !   Return the value of item {\tt hconfig} interpreted as R8.
+!   The returned value is only valid if {\tt rc == ESMF\_SUCCESS}, and, if
+!   provided, {\tt asOkay == .true.}.
 !
 ! The arguments are:
 !   \begin{description}
@@ -3883,6 +3991,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt key}.
 !   \item[{[key]}]
 !     Attempt to access by key if specified. Mutural exclusive with {\tt index}.
+!   \item[{[asOkay]}]
+!     Set to {\tt .true.} for successful convertion to the requested typekind.
+!     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
+!     the latter condition leads to {\tt rc /= ESMF\_SUCCESS}.
+!     Providing {\tt asOkay} returns {\tt rc == ESMF\_SUCCESS} in either case,
+!     and the validity of the returned converted value is determined by
+!     {\tt asOkay}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3891,6 +4006,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+    type(ESMF_Logical)    :: flag
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3905,7 +4021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R8
-      call c_ESMC_HConfigAsR8(hconfigTemp, ESMF_HConfigAsR8, localrc)
+      call c_ESMC_HConfigAsR8(hconfigTemp, ESMF_HConfigAsR8, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! clean up
@@ -3914,9 +4030,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the R8
-      call c_ESMC_HConfigAsR8(hconfig, ESMF_HConfigAsR8, localrc)
+      call c_ESMC_HConfigAsR8(hconfig, ESMF_HConfigAsR8, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Deal with asOkay
+    if (present(asOkay)) then
+      asOkay = flag
+    else if (flag == ESMF_FALSE) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Conversion to the requested typekind is not supported", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
     endif
 
     ! return successfully

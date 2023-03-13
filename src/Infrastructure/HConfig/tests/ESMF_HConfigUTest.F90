@@ -351,6 +351,8 @@ program ESMF_HConfigUTest
     integer, intent(out)  :: rc
 
     logical                       :: flag, valueL
+    logical                       :: asOkayL, asOkayS, asOkayI4, asOkayI8
+    logical                       :: asOkayR4, asOkayR8
     character(len=:), allocatable :: string, tag
     character(160)                :: msgString
     integer(ESMF_KIND_I4)         :: valueI4
@@ -408,6 +410,7 @@ program ESMF_HConfigUTest
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
       ! direct access via key, through AsString(key=...)
+      ! value_one
       string = ESMF_HConfigAsString(hconfig, key="value_one", rc=rc)
       if (rc /= ESMF_SUCCESS) return
       tag = ESMF_HConfigGetTag(hconfig, key="value_one", rc=rc)
@@ -418,6 +421,31 @@ program ESMF_HConfigUTest
         string, "  [", tag, "] through AsLogical(key=...):", valueL
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
+      string = ESMF_HConfigAsString(hconfig, key="value_one", asOkay=asOkayS, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueL = ESMF_HConfigAsLogical(hconfig, key="value_one", asOkay=asOkayL, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueI4 = ESMF_HConfigAsI4(hconfig, key="value_one", asOkay=asOkayI4, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueI8 = ESMF_HConfigAsI8(hconfig, key="value_one", asOkay=asOkayI8, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueR4 = ESMF_HConfigAsR4(hconfig, key="value_one", asOkay=asOkayR4, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      valueR8 = ESMF_HConfigAsR8(hconfig, key="value_one", asOkay=asOkayR8, &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      write(msgString, *) "'value_one'", &
+        " asOkayS: ", asOkayS, " asOkayL: ", asOkayL, &
+        " asOkayI4: ", asOkayI4, " asOkayI8: ", asOkayI8, &
+        " asOkayR4: ", asOkayR4, " asOkayR8: ", asOkayR8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      ! value_two
       string = ESMF_HConfigAsString(hconfig, key="value_two", rc=rc)
       if (rc /= ESMF_SUCCESS) return
       tag = ESMF_HConfigGetTag(hconfig, key="value_two", rc=rc)
@@ -428,6 +456,7 @@ program ESMF_HConfigUTest
         string, "  [", tag, "] through AsLogical(key=...):", valueL
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
+      ! value_three
       string = ESMF_HConfigAsString(hconfig, key="value_three", rc=rc)
       if (rc /= ESMF_SUCCESS) return
       tag = ESMF_HConfigGetTag(hconfig, key="value_three", rc=rc)
@@ -436,6 +465,7 @@ program ESMF_HConfigUTest
         string, "  [", tag, "]"
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
+      ! value_four
       string = ESMF_HConfigAsString(hconfig, key="value_four", rc=rc)
       if (rc /= ESMF_SUCCESS) return
       tag = ESMF_HConfigGetTag(hconfig, key="value_four", rc=rc)

@@ -64,12 +64,12 @@ namespace ESMCI {
 // source file.
 //
 //-----------------------------------------------------------------------------
-template std::string HConfig::as<std::string>(int *rc);
-template bool HConfig::as<bool>(int *rc);
-template ESMC_I4 HConfig::as<ESMC_I4>(int *rc);
-template ESMC_I8 HConfig::as<ESMC_I8>(int *rc);
-template ESMC_R4 HConfig::as<ESMC_R4>(int *rc);
-template ESMC_R8 HConfig::as<ESMC_R8>(int *rc);
+template std::string HConfig::as<std::string>(bool *asOkay, int *rc);
+template bool HConfig::as<bool>(bool *asOkay, int *rc);
+template ESMC_I4 HConfig::as<ESMC_I4>(bool *asOkay, int *rc);
+template ESMC_I8 HConfig::as<ESMC_I8>(bool *asOkay, int *rc);
+template ESMC_R4 HConfig::as<ESMC_R4>(bool *asOkay, int *rc);
+template ESMC_R8 HConfig::as<ESMC_R8>(bool *asOkay, int *rc);
 template std::string HConfig::asMapKey<std::string>(int *rc);
 template bool HConfig::asMapKey<bool>(int *rc);
 template ESMC_I4 HConfig::asMapKey<ESMC_I4>(int *rc);
@@ -2351,7 +2351,8 @@ template<typename T> T HConfig::as(
 //  T
 //
 // !ARGUMENTS:
-    int *rc) {           // out - return code
+    bool *asOkay,       // out - indicate if as() access okay
+    int *rc) {          // out - return code
 //
 // !DESCRIPTION:
 //  Return value interpreted
@@ -2367,7 +2368,7 @@ template<typename T> T HConfig::as(
 #ifdef ESMF_YAMLCPP
   try{
     if (node)
-      value = node->as<T>();
+      *asOkay = YAML::convert<T>::decode(*node, value);
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -2375,7 +2376,7 @@ template<typename T> T HConfig::as(
           "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
         return value;
       }else
-        value = iter->as<T>();
+        *asOkay = YAML::convert<T>::decode(*iter, value);
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, rc);

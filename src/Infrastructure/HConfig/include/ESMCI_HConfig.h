@@ -112,7 +112,7 @@ namespace ESMCI {
       HConfig iterMapValEnd(int *rc=NULL);
       int iterNext();
 
-      template<typename T> T as(int *rc=NULL);
+      template<typename T> T as(bool *asOkay, int *rc=NULL);
       template<typename T> T asMapKey(int *rc=NULL);
       template<typename T> T asMapVal(int *rc=NULL);
 
