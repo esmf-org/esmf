@@ -69,19 +69,15 @@
 //-----------------------------------------------------------------------------
 using namespace ESMCI;
 
-// These internal functions will only be used if PIO is avaiable
-#ifdef ESMF_PIO
 
 // Prototypes of per format mesh creates from below
-void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
-                                          char *filename, 
+void ESMCI_mesh_create_from_ESMFMesh_file(char *filename, 
                                           bool add_user_area, 
                                           ESMC_CoordSys_Flag coord_sys, 
                                           ESMCI::DistGrid *elem_distgrid, 
                                           Mesh **out_mesh);
 
-void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
-                                       char *filename, 
+void ESMCI_mesh_create_from_UGRID_file(char *filename, 
                                        bool add_user_area, 
                                        ESMC_CoordSys_Flag coord_sys, 
                                        ESMC_MeshLoc_Flag maskFlag, 
@@ -89,8 +85,7 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
                                        ESMCI::DistGrid *elem_distgrid, 
                                        Mesh **out_mesh);
 
-void ESMCI_mesh_create_from_SCRIP_file(int pioSystemDesc,
-                                       char *filename, 
+void ESMCI_mesh_create_from_SCRIP_file(char *filename, 
                                        bool add_user_area, 
                                        ESMC_CoordSys_Flag coord_sys, 
                                        ESMCI::DistGrid *elem_distgrid, 
@@ -100,10 +95,6 @@ void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh,
                                    ESMCI::DistGrid *node_distgrid, 
                                    ESMCI::DistGrid *elem_distgrid, 
                                    Mesh **out_mesh);
-#endif // ifdef ESMF_PIO
-
-
-
 
 // INPUTS: 
 //  filename - file name in NULL delimited form
@@ -131,8 +122,6 @@ void ESMCI_mesh_create_from_file(char *filename,
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_file()"
 
-// Will only work if PIO is available
-#ifdef ESMF_PIO
   
   //  printf("in new scalable mesh create from file filename=%s\n",filename);
 
@@ -157,30 +146,6 @@ void ESMCI_mesh_create_from_file(char *filename,
 
 
 
-    //// Set up PIO
-
-    // Get VM 
-    ESMCI::VM *vm=VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                      &localrc)) throw localrc;
-    
-    // Get VM info
-    int local_pet = vm->getLocalPet();  
-    MPI_Comm mpi_comm = vm->getMpi_c();  
-    int pet_count = vm->getPetCount();
-    int pets_per_Ssi = vm->getSsiMaxPetCount();
-
-    // Initialize IO system
-    int num_iotasks = pet_count/pets_per_Ssi;
-    int stride = pets_per_Ssi;
-    int pioSystemDesc;
-    int piorc;
-
-    piorc = PIOc_Init_Intracomm(mpi_comm, num_iotasks, stride, 0, PIO_REARR_SUBSET, &pioSystemDesc);
-    if (!CHECKPIOERROR(piorc, std::string("Unable to init PIO Intracomm for file: ") + filename,
-                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;
-
-
     // Since we are swapping nodes and elems in convert_to_dual, 
     // can't use elem_distgrid to read from file in that case. 
     ESMCI::DistGrid *elem_distgrid_for_file_read=NULL;
@@ -190,20 +155,20 @@ void ESMCI_mesh_create_from_file(char *filename,
     // Create Mesh based on the file format
     Mesh *tmp_mesh;
     if (fileformat == ESMC_FILEFORMAT_ESMFMESH) {
-      ESMCI_mesh_create_from_ESMFMesh_file(pioSystemDesc, filename, 
+      ESMCI_mesh_create_from_ESMFMesh_file(filename, 
                                            add_user_area, coord_sys, 
                                            elem_distgrid_for_file_read, 
                                            &tmp_mesh);
 
     } else if (fileformat == ESMC_FILEFORMAT_UGRID) {
-      ESMCI_mesh_create_from_UGRID_file(pioSystemDesc, filename, 
+      ESMCI_mesh_create_from_UGRID_file(filename, 
                                         add_user_area, coord_sys, 
                                         maskFlag, maskVarName,
                                         elem_distgrid_for_file_read, 
                                         &tmp_mesh);
 
     } else if (fileformat == ESMC_FILEFORMAT_SCRIP) {
-      ESMCI_mesh_create_from_SCRIP_file(pioSystemDesc, filename, 
+      ESMCI_mesh_create_from_SCRIP_file(filename, 
                                         add_user_area, coord_sys, 
                                         elem_distgrid_for_file_read, 
                                         &tmp_mesh);
@@ -212,14 +177,6 @@ void ESMCI_mesh_create_from_file(char *filename,
          " Unrecognized file format.",
            ESMC_CONTEXT, &localrc)) throw localrc;
     }    
-
-
-
-    // Free IO system
-    piorc = PIOc_free_iosystem(pioSystemDesc);
-    if (!CHECKPIOERROR(piorc, std::string("Error freeing pio file system description "),
-                      ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
-
 
 
     // If requested, create dual from read in file
@@ -292,15 +249,56 @@ void ESMCI_mesh_create_from_file(char *filename,
   // We've gotten to bottom successfully, so return success
   if(rc != NULL) *rc = ESMF_SUCCESS;
 
-#else
-     ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the PIO library enabled." ,
-      ESMC_CONTEXT, rc);
-#endif
 }
 
 // These internal functions will only be used if PIO is available
 #ifdef ESMF_PIO
+
+static void _init_pioSystem(int &pioSystemDesc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "_create_pioSystemDesc()"
+  
+  // Local return codes
+  int localrc;
+  int piorc;
+
+  
+  // Get VM 
+  ESMCI::VM *vm=VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &localrc)) throw localrc;
+  
+  // Get VM info
+  int local_pet = vm->getLocalPet();  
+  MPI_Comm mpi_comm = vm->getMpi_c();  
+  int pet_count = vm->getPetCount();
+  int pets_per_Ssi = vm->getSsiMaxPetCount();
+  
+  // Initialize IO system
+  int num_iotasks = pet_count/pets_per_Ssi;
+  int stride = pets_per_Ssi;
+  
+  piorc = PIOc_Init_Intracomm(mpi_comm, num_iotasks, stride, 0, PIO_REARR_SUBSET, &pioSystemDesc);
+  if (!CHECKPIOERROR(piorc, std::string("Unable to init PIO Intracomm"),
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;
+  
+}
+
+static void _free_pioSystem(int pioSystemDesc) {
+
+  // Return codes
+  int localrc;
+  int piorc;
+  
+  // Free IO system
+  piorc = PIOc_free_iosystem(pioSystemDesc);
+  if (!CHECKPIOERROR(piorc, std::string("Error freeing pio file system description "),
+                     ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
+
+}
+
+#endif // ifdef ESMF_PIO
+
 
 
 // This method checks to see if optional pole info is in the file, and
@@ -383,8 +381,7 @@ void ESMCI_mesh_mark_poles_from_ESMFMesh_file(int pioFileDesc, char *filename, M
 // OUTPUTS:
 //   out_mesh - the new mesh created from the file
 //
-void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
-                                          char *filename, 
+void ESMCI_mesh_create_from_ESMFMesh_file(char *filename, 
                                           bool add_user_area, 
                                           ESMC_CoordSys_Flag coord_sys, 
                                           ESMCI::DistGrid *elem_distgrid, 
@@ -392,18 +389,26 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_ESMFMesh_file()"
 
+  // Init output
+  *out_mesh=NULL;
+  
+ // Will only work if PIO is available
+#ifdef ESMF_PIO
+ 
   // Declare some handy variables
   int localrc;
   int rc;
   int piorc;
 
-  // Init output
-  *out_mesh=NULL;
-
 
   // Try-catch block around main part of method
   try {
 
+    //// Set up PIO System
+    int pioSystemDesc;
+    _init_pioSystem(pioSystemDesc);
+
+    
     //// Open file via PIO
 
     // Set pio_type based on what's available
@@ -652,6 +657,9 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
 
+    // Free PIO System
+    _free_pioSystem(pioSystemDesc);
+        
 
   } catch(std::exception &x) {
 
@@ -675,6 +683,15 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
       "Caught unknown exception", ESMC_CONTEXT, &rc);
     throw rc; // To be caught one level up so we know where the error came from
   }
+
+  
+#else
+  int localrc;
+  if (ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+                                "This functionality requires ESMF to be built with the PIO library enabled." ,
+                                    ESMC_CONTEXT, &localrc)) throw localrc;
+#endif
+  
 }
 
 //
@@ -692,8 +709,7 @@ void ESMCI_mesh_create_from_ESMFMesh_file(int pioSystemDesc,
 // OUTPUTS:
 //   out_mesh - the new mesh created from the file
 //
-void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
-                                       char *filename, 
+void ESMCI_mesh_create_from_UGRID_file(char *filename, 
                                        bool add_user_area, 
                                        ESMC_CoordSys_Flag coord_sys, 
                                        ESMC_MeshLoc_Flag maskFlag, 
@@ -703,17 +719,25 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_UGRID_file()"
 
+  // Init output
+  *out_mesh=NULL;
+  
+ // Will only work if PIO is available
+#ifdef ESMF_PIO
+  
   // Declare some handy variables
   int localrc;
   int rc;
   int piorc;
 
-  // Init output
-  *out_mesh=NULL;
-
   // Try-catch block around main part of method
   try {
 
+    //// Set up PIO System
+    int pioSystemDesc;
+    _init_pioSystem(pioSystemDesc);
+
+    
     //// Open file via PIO
 
     // Set pio_type based on what's available
@@ -983,9 +1007,10 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
     if (!CHECKPIOERROR(piorc, std::string("Error closing file ") + filename,
                       ESMF_RC_FILE_OPEN, localrc)) throw localrc;;
 
-    //    Throw() << "Not finished with UGRID yet!";
 
-
+    // Free PIO System
+    _free_pioSystem(pioSystemDesc);
+           
   } catch(std::exception &x) {
 
     // catch Mesh exception return code
@@ -1008,6 +1033,14 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
       "Caught unknown exception", ESMC_CONTEXT, &rc);
     throw rc; // To be caught one level up so we know where the error came from
   }
+
+#else
+  int localrc;
+  if (ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+                                "This functionality requires ESMF to be built with the PIO library enabled." ,
+                                    ESMC_CONTEXT, &localrc)) throw localrc;
+#endif
+  
 }
 
 //
@@ -1023,12 +1056,11 @@ void ESMCI_mesh_create_from_UGRID_file(int pioSystemDesc,
 // OUTPUTS:
 //   out_mesh - the new mesh created from the file
 //
-void ESMCI_mesh_create_from_SCRIP_file(int pioSystemDesc,
-                                      char *filename, 
-                                      bool add_user_area, 
-                                      ESMC_CoordSys_Flag coord_sys, 
-                                      ESMCI::DistGrid *elem_distgrid, 
-                                      Mesh **out_mesh){
+void ESMCI_mesh_create_from_SCRIP_file(char *filename, 
+                                       bool add_user_area, 
+                                       ESMC_CoordSys_Flag coord_sys, 
+                                       ESMCI::DistGrid *elem_distgrid, 
+                                       Mesh **out_mesh){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_mesh_create_from_SCRIP_file()"
 
@@ -1073,8 +1105,7 @@ void ESMCI_mesh_create_from_SCRIP_file(int pioSystemDesc,
     vm->barrier();
 
     // Call into ESMFMesh format read to create mesh from converted file
-    ESMCI_mesh_create_from_ESMFMesh_file(pioSystemDesc,
-                                         esmfmesh_filename, 
+    ESMCI_mesh_create_from_ESMFMesh_file(esmfmesh_filename, 
                                          add_user_area, 
                                          coord_sys, 
                                          elem_distgrid, 
@@ -1235,4 +1266,3 @@ void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh,
 
 }
 
-#endif // ifdef ESMF_PIO
