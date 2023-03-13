@@ -859,7 +859,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    std::string value = ptr->asString(&localrc);
+    std::string value = ptr->as<std::string>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     *len = value.size();
@@ -877,7 +877,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    std::string value = ptr->asString(&localrc);
+    std::string value = ptr->as<std::string>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     strncpy(string, value.c_str(), string_l);
@@ -894,7 +894,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    std::string value = ptr->asMapKeyString(&localrc);
+    std::string value = ptr->asMapKey<std::string>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     *len = value.size();
@@ -912,7 +912,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    std::string value = ptr->asMapKeyString(&localrc);
+    std::string value = ptr->asMapKey<std::string>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     strncpy(string, value.c_str(), string_l);
@@ -929,7 +929,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    std::string value = ptr->asMapValString(&localrc);
+    std::string value = ptr->asMapVal<std::string>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     *len = value.size();
@@ -947,7 +947,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    std::string value = ptr->asMapValString(&localrc);
+    std::string value = ptr->asMapVal<std::string>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     strncpy(string, value.c_str(), string_l);
@@ -966,7 +966,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    bool _value = ptr->asLogical(&localrc);
+    bool _value = ptr->as<bool>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_value) *value = ESMF_TRUE;
@@ -985,7 +985,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    bool _value = ptr->asMapKeyLogical(&localrc);
+    bool _value = ptr->asMapKey<bool>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_value) *value = ESMF_TRUE;
@@ -1004,7 +1004,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    bool _value = ptr->asMapValLogical(&localrc);
+    bool _value = ptr->asMapVal<bool>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_value) *value = ESMF_TRUE;
@@ -1021,7 +1021,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asI4(&localrc);
+    *value = ptr->as<ESMC_I4>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1038,7 +1038,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asMapKeyI4(&localrc);
+    *value = ptr->asMapKey<ESMC_I4>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1055,7 +1055,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asMapValI4(&localrc);
+    *value = ptr->asMapVal<ESMC_I4>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1071,7 +1071,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asI8(&localrc);
+    *value = ptr->as<ESMC_I8>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1088,7 +1088,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asMapKeyI8(&localrc);
+    *value = ptr->asMapKey<ESMC_I8>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1105,7 +1105,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asMapValI8(&localrc);
+    *value = ptr->asMapVal<ESMC_I8>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1121,7 +1121,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asR4(&localrc);
+    *value = ptr->as<ESMC_R4>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1138,7 +1138,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asMapKeyR4(&localrc);
+    *value = ptr->asMapKey<ESMC_R4>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1155,7 +1155,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asMapValR4(&localrc);
+    *value = ptr->asMapVal<ESMC_R4>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1171,7 +1171,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asR8(&localrc);
+    *value = ptr->as<ESMC_R8>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1188,7 +1188,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asMapKeyR8(&localrc);
+    *value = ptr->asMapKey<ESMC_R8>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -1205,7 +1205,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *value = ptr->asMapValR8(&localrc);
+    *value = ptr->asMapVal<ESMC_R8>(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully

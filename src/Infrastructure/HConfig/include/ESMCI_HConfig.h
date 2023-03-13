@@ -112,29 +112,9 @@ namespace ESMCI {
       HConfig iterMapValEnd(int *rc=NULL);
       int iterNext();
 
-      std::string asString(int *rc=NULL);
-      std::string asMapKeyString(int *rc=NULL);
-      std::string asMapValString(int *rc=NULL);
-
-      bool asLogical(int *rc=NULL);
-      bool asMapKeyLogical(int *rc=NULL);
-      bool asMapValLogical(int *rc=NULL);
-
-      ESMC_I4 asI4(int *rc=NULL);
-      ESMC_I4 asMapKeyI4(int *rc=NULL);
-      ESMC_I4 asMapValI4(int *rc=NULL);
-
-      ESMC_I8 asI8(int *rc=NULL);
-      ESMC_I8 asMapKeyI8(int *rc=NULL);
-      ESMC_I8 asMapValI8(int *rc=NULL);
-
-      ESMC_R4 asR4(int *rc=NULL);
-      ESMC_R4 asMapKeyR4(int *rc=NULL);
-      ESMC_R4 asMapValR4(int *rc=NULL);
-
-      ESMC_R8 asR8(int *rc=NULL);
-      ESMC_R8 asMapKeyR8(int *rc=NULL);
-      ESMC_R8 asMapValR8(int *rc=NULL);
+      template<typename T> T as(int *rc=NULL);
+      template<typename T> T asMapKey(int *rc=NULL);
+      template<typename T> T asMapVal(int *rc=NULL);
 
       int toConfig(ESMCI_Config **config);
   };   // class HConfig

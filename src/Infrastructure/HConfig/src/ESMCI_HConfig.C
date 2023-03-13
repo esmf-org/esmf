@@ -55,6 +55,35 @@ extern "C" {
 namespace ESMCI {
 
 //-----------------------------------------------------------------------------
+//
+// Explicit template instantiation (do not confuse with specialization!!!)
+// The reason for explicit instantiation here is that it will tell the compiler
+// explicitly to instantiate the following special instantiations of the
+// template. This way the definition of the templated methods do not have to
+// sit with the declaration in the header file, but can be located in the
+// source file.
+//
+//-----------------------------------------------------------------------------
+template std::string HConfig::as<std::string>(int *rc);
+template bool HConfig::as<bool>(int *rc);
+template ESMC_I4 HConfig::as<ESMC_I4>(int *rc);
+template ESMC_I8 HConfig::as<ESMC_I8>(int *rc);
+template ESMC_R4 HConfig::as<ESMC_R4>(int *rc);
+template ESMC_R8 HConfig::as<ESMC_R8>(int *rc);
+template std::string HConfig::asMapKey<std::string>(int *rc);
+template bool HConfig::asMapKey<bool>(int *rc);
+template ESMC_I4 HConfig::asMapKey<ESMC_I4>(int *rc);
+template ESMC_I8 HConfig::asMapKey<ESMC_I8>(int *rc);
+template ESMC_R4 HConfig::asMapKey<ESMC_R4>(int *rc);
+template ESMC_R8 HConfig::asMapKey<ESMC_R8>(int *rc);
+template std::string HConfig::asMapVal<std::string>(int *rc);
+template bool HConfig::asMapVal<bool>(int *rc);
+template ESMC_I4 HConfig::asMapVal<ESMC_I4>(int *rc);
+template ESMC_I8 HConfig::asMapVal<ESMC_I8>(int *rc);
+template ESMC_R4 HConfig::asMapVal<ESMC_R4>(int *rc);
+template ESMC_R8 HConfig::asMapVal<ESMC_R8>(int *rc);
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::create()"
 //BOP
@@ -828,13 +857,13 @@ string HConfig::getTag(
           case YAML::NodeType::Scalar:
             node->SetTag("tag:yaml.org,2002:str");  // default scalar
             bool bDummy;
-            long long lDummy;
-            double dDummy;
+            ESMC_I8 iDummy;
+            ESMC_R8 fDummy;
             if (YAML::convert<bool>::decode(*node, bDummy))
               node->SetTag("tag:yaml.org,2002:bool");
-            else if (YAML::convert<long long>::decode(*node, lDummy))
+            else if (YAML::convert<ESMC_I8>::decode(*node, iDummy))
               node->SetTag("tag:yaml.org,2002:int");
-            else if (YAML::convert<double>::decode(*node, dDummy))
+            else if (YAML::convert<ESMC_R8>::decode(*node, fDummy))
               node->SetTag("tag:yaml.org,2002:float");
             break;
           case YAML::NodeType::Sequence:
@@ -864,14 +893,14 @@ string HConfig::getTag(
               break;
             case YAML::NodeType::Scalar:
               iter->SetTag("tag:yaml.org,2002:str");  // default scalar
-              bool bDummy;
-              long long lDummy;
-              double dDummy;
+            bool bDummy;
+            ESMC_I8 iDummy;
+            ESMC_R8 fDummy;
               if (YAML::convert<bool>::decode(*iter, bDummy))
                 iter->SetTag("tag:yaml.org,2002:bool");
-              else if (YAML::convert<long long>::decode(*iter, lDummy))
+              else if (YAML::convert<ESMC_I8>::decode(*iter, iDummy))
                 iter->SetTag("tag:yaml.org,2002:int");
-              else if (YAML::convert<double>::decode(*iter, dDummy))
+              else if (YAML::convert<ESMC_R8>::decode(*iter, fDummy))
                 iter->SetTag("tag:yaml.org,2002:float");
               break;
             case YAML::NodeType::Sequence:
@@ -941,13 +970,13 @@ string HConfig::getMapKeyTag(
           case YAML::NodeType::Scalar:
             iter->first.SetTag("tag:yaml.org,2002:str");  // default scalar
             bool bDummy;
-            long long lDummy;
-            double dDummy;
+            ESMC_I8 iDummy;
+            ESMC_R8 fDummy;
             if (YAML::convert<bool>::decode(iter->first, bDummy))
               iter->first.SetTag("tag:yaml.org,2002:bool");
-            else if (YAML::convert<long long>::decode(iter->first, lDummy))
+            else if (YAML::convert<ESMC_I8>::decode(iter->first, iDummy))
               iter->first.SetTag("tag:yaml.org,2002:int");
-            else if (YAML::convert<double>::decode(iter->first, dDummy))
+            else if (YAML::convert<ESMC_R8>::decode(iter->first, fDummy))
               iter->first.SetTag("tag:yaml.org,2002:float");
             break;
           case YAML::NodeType::Sequence:
@@ -1021,13 +1050,13 @@ string HConfig::getMapValTag(
           case YAML::NodeType::Scalar:
             iter->second.SetTag("tag:yaml.org,2002:str");  // default scalar
             bool bDummy;
-            long long lDummy;
-            double dDummy;
+            ESMC_I8 iDummy;
+            ESMC_R8 fDummy;
             if (YAML::convert<bool>::decode(iter->second, bDummy))
               iter->second.SetTag("tag:yaml.org,2002:bool");
-            else if (YAML::convert<long long>::decode(iter->second, lDummy))
+            else if (YAML::convert<ESMC_I8>::decode(iter->second, iDummy))
               iter->second.SetTag("tag:yaml.org,2002:int");
-            else if (YAML::convert<double>::decode(iter->second, dDummy))
+            else if (YAML::convert<ESMC_R8>::decode(iter->second, fDummy))
               iter->second.SetTag("tag:yaml.org,2002:float");
             break;
           case YAML::NodeType::Sequence:
@@ -2311,21 +2340,21 @@ int HConfig::iterNext(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asString()"
+#define ESMC_METHOD "ESMCI::HConfig::as()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::asString - Interpret value as string
+// !IROUTINE:  ESMCI::HConfig::as - Interpret value
 //
 // !INTERFACE:
-string HConfig::asString(
+template<typename T> T HConfig::as(
 //
 // !RETURN VALUE:
-//  string
+//  T
 //
 // !ARGUMENTS:
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
-//  Return value interpreted as string
+//  Return value interpreted
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -2333,12 +2362,12 @@ string HConfig::asString(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  string value = "";
+  T value = T();
 
 #ifdef ESMF_YAMLCPP
   try{
     if (node)
-      value = node->as<string>();
+      value = node->as<T>();
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -2346,7 +2375,7 @@ string HConfig::asString(
           "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
         return value;
       }else
-        value = iter->as<string>();
+        value = iter->as<T>();
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, rc);
@@ -2364,21 +2393,21 @@ string HConfig::asString(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapKeyString()"
+#define ESMC_METHOD "ESMCI::HConfig::asMapKey()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::asMapKeyString - Interpret value as string
+// !IROUTINE:  ESMCI::HConfig::asMapKey - Interpret value
 //
 // !INTERFACE:
-string HConfig::asMapKeyString(
+template<typename T> T HConfig::asMapKey(
 //
 // !RETURN VALUE:
-//  string
+//  T
 //
 // !ARGUMENTS:
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
-//  Return value interpreted as string
+//  Return value interpreted
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -2386,12 +2415,12 @@ string HConfig::asMapKeyString(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  string value = "";
+  T value = T();
 
 #ifdef ESMF_YAMLCPP
   try{
     if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->first.as<string>();
+      value = iter->first.as<T>();
     else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2415,21 +2444,21 @@ string HConfig::asMapKeyString(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapValString()"
+#define ESMC_METHOD "ESMCI::HConfig::asMapVal()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::asMapValString - Interpret value as string
+// !IROUTINE:  ESMCI::HConfig::asMapVal - Interpret value
 //
 // !INTERFACE:
-string HConfig::asMapValString(
+template<typename T> T HConfig::asMapVal(
 //
 // !RETURN VALUE:
-//  string
+//  T
 //
 // !ARGUMENTS:
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
-//  Return value interpreted as string
+//  Return value interpreted
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -2437,787 +2466,12 @@ string HConfig::asMapValString(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  string value = "";
+  T value = T();
 
 #ifdef ESMF_YAMLCPP
   try{
     if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->second.as<string>();
-    else{
-      // error
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
-      return value;
-    }
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asLogical()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asLogical - Interpret value as Logical
-//
-// !INTERFACE:
-bool HConfig::asLogical(
-//
-// !RETURN VALUE:
-//  bool
-//
-// !ARGUMENTS:
-    int *rc) {            // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as Logical
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  bool value = false;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if (node)
-      value = node->as<bool>();
-    else
-      // iterator
-      if (type==YAML::NodeType::Map){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
-        return value;
-      }else
-        value = iter->as<bool>();
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapKeyLogical()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asMapKeyLogical - Interpret value as Logical
-//
-// !INTERFACE:
-bool HConfig::asMapKeyLogical(
-//
-// !RETURN VALUE:
-//  bool
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as Logical
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  bool value = false;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->first.as<bool>();
-    else{
-      // error
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
-      return value;
-    }
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapValLogical()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asMapValLogical - Interpret value as Logical
-//
-// !INTERFACE:
-bool HConfig::asMapValLogical(
-//
-// !RETURN VALUE:
-//  bool
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as Logical
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  bool value = false;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->second.as<bool>();
-    else{
-      // error
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
-      return value;
-    }
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asI4()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asI4 - Interpret value as I4
-//
-// !INTERFACE:
-ESMC_I4 HConfig::asI4(
-//
-// !RETURN VALUE:
-//  ESMC_I4
-//
-// !ARGUMENTS:
-    int *rc) {            // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as I4
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_I4 value = 0;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if (node)
-      value = node->as<ESMC_I4>();
-    else
-      // iterator
-      if (type==YAML::NodeType::Map){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
-        return value;
-      }else
-        value = iter->as<ESMC_I4>();
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapKeyI4()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asMapKeyI4 - Interpret value as I4
-//
-// !INTERFACE:
-ESMC_I4 HConfig::asMapKeyI4(
-//
-// !RETURN VALUE:
-//  ESMC_I4
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as I4
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_I4 value = 0;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->first.as<ESMC_I4>();
-    else{
-      // error
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
-      return value;
-    }
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapValI4()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asMapValI4 - Interpret value as I4
-//
-// !INTERFACE:
-ESMC_I4 HConfig::asMapValI4(
-//
-// !RETURN VALUE:
-//  ESMC_I4
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as I4
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_I4 value = 0;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->second.as<ESMC_I4>();
-    else{
-      // error
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
-      return value;
-    }
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asI8()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asI8 - Interpret value as I8
-//
-// !INTERFACE:
-ESMC_I8 HConfig::asI8(
-//
-// !RETURN VALUE:
-//  ESMC_I8
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as I8
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_I8 value = 0;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if (node)
-      value = node->as<ESMC_I8>();
-    else
-      // iterator
-      if (type==YAML::NodeType::Map){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
-        return value;
-      }else
-        value = iter->as<ESMC_I8>();
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapKeyI8()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asMapKeyI8 - Interpret value as I8
-//
-// !INTERFACE:
-ESMC_I8 HConfig::asMapKeyI8(
-//
-// !RETURN VALUE:
-//  ESMC_I8
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as I8
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_I8 value = 0;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->first.as<ESMC_I8>();
-    else{
-      // error
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
-      return value;
-    }
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapValI8()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asMapValI8 - Interpret value as I8
-//
-// !INTERFACE:
-ESMC_I8 HConfig::asMapValI8(
-//
-// !RETURN VALUE:
-//  ESMC_I8
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as I8
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_I8 value = 0;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->second.as<ESMC_I8>();
-    else{
-      // error
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
-      return value;
-    }
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asR4()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asR4 - Interpret value as R4
-//
-// !INTERFACE:
-ESMC_R4 HConfig::asR4(
-//
-// !RETURN VALUE:
-//  ESMC_R4
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as R4
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_R4 value = 0.;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if (node)
-      value = node->as<ESMC_R4>();
-    else
-      // iterator
-      if (type==YAML::NodeType::Map){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
-        return value;
-      }else
-        value = iter->as<ESMC_R4>();
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapKeyR4()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asMapKeyR4 - Interpret value as R4
-//
-// !INTERFACE:
-ESMC_R4 HConfig::asMapKeyR4(
-//
-// !RETURN VALUE:
-//  ESMC_R4
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as R4
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_R4 value = 0.;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->first.as<ESMC_R4>();
-    else{
-      // error
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
-      return value;
-    }
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapValR4()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asMapValR4 - Interpret value as R4
-//
-// !INTERFACE:
-ESMC_R4 HConfig::asMapValR4(
-//
-// !RETURN VALUE:
-//  ESMC_R4
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as R4
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_R4 value = 0.;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->second.as<ESMC_R4>();
-    else{
-      // error
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
-      return value;
-    }
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asR8()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asR8 - Interpret value as R8
-//
-// !INTERFACE:
-ESMC_R8 HConfig::asR8(
-//
-// !RETURN VALUE:
-//  ESMC_R8
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as R8
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_R8 value = 0.;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if (node)
-      value = node->as<ESMC_R8>();
-    else
-      // iterator
-      if (type==YAML::NodeType::Map){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "HConfig object must NOT be map iterator", ESMC_CONTEXT, rc);
-        return value;
-      }else
-        value = iter->as<ESMC_R8>();
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapKeyR8()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asMapKeyR8 - Interpret value as R8
-//
-// !INTERFACE:
-ESMC_R8 HConfig::asMapKeyR8(
-//
-// !RETURN VALUE:
-//  ESMC_R8
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as R8
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_R8 value = 0.;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->first.as<ESMC_R8>();
-    else{
-      // error
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "HConfig object must be map iterator", ESMC_CONTEXT, rc);
-      return value;
-    }
-  }catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "Caught exception accessing node information", ESMC_CONTEXT, rc);
-    return value;
-  }
-
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-#endif
-
-  return value;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::asMapValR8()"
-//BOP
-// !IROUTINE:  ESMCI::HConfig::asMapValR8 - Interpret value as R8
-//
-// !INTERFACE:
-ESMC_R8 HConfig::asMapValR8(
-//
-// !RETURN VALUE:
-//  ESMC_R8
-//
-// !ARGUMENTS:
-    int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//  Return value interpreted as R8
-//
-//EOP
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
-  ESMC_R8 value = 0.;
-
-#ifdef ESMF_YAMLCPP
-  try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->second.as<ESMC_R8>();
+      value = iter->second.as<T>();
     else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
