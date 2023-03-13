@@ -29,6 +29,10 @@ usage () {
   printf "      (default: release)\n"
   printf "  --build-args=BUILD_ARGS\n"
   printf "      cmake arguments (e.g. -DARG=VAL)\n"
+  printf "  --load-modulefile=MODULEFILE\n"
+  printf "      load modulefile before building\n"
+  printf "  --load-bashenv=BASHENV\n"
+  printf "      load bash environment file before building\n"
   printf "  --verbose, -v\n"
   printf "      build with verbose output\n"
   printf "\n"
@@ -45,6 +49,8 @@ settings () {
   printf "  INSTALL_PREFIX=${INSTALL_PREFIX}\n"
   printf "  BUILD_TYPE=${BUILD_TYPE}\n"
   printf "  BUILD_ARGS=${BUILD_ARGS}\n"
+  printf "  MODULEFILE=${MODULEFILE}\n"
+  printf "  BASHENV=${BASHENV}\n"
   printf "  VERBOSE=${VERBOSE}\n"
   printf "\n"
 }
@@ -58,6 +64,8 @@ BUILD_TYPE="release"
 BUILD_ARGS=""
 BUILD_DIR="${CWD}/build"
 INSTALL_PREFIX="${CWD}/install"
+MODULEFILE=""
+BASHENV=""
 VERBOSE=false
 
 # required arguments
@@ -89,6 +97,12 @@ while [[ $# -gt 0 ]]; do
     --build-args=?*) BUILD_ARGS=${1#*=} ;;
     --build-args) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --build-args) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --load-modulefile=?*) MODULEFILE=${1#*=} ;;
+    --load-modulefile) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --load-modulefile=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --load-bashenv=?*) BASHENV=${1#*=} ;;
+    --load-bashenv) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --load-bashenv=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --verbose|-v) VERBOSE=true ;;
     --verbose=?*) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
     --verbose=) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
@@ -100,6 +114,23 @@ done
 set -- "${POSITIONAL_ARGS[@]}"
 
 set -eu
+
+if [ ! -z "${MODULEFILE}" ] ; then
+  if [ ! -f "${MODULEFILE}" ]; then
+    printf "ERROR: MODULEFILE does not exist.\n"
+    usage; exit 1 ;
+  fi
+  module use $(cd $(dirname ${MODULEFILE}) && pwd)
+  module load $(basename ${MODULEFILE})
+fi
+
+if [ ! -z "${BASHENV}" ] ; then
+  if [ ! -f "${BASHENV}" ]; then
+    printf "ERROR: BASHENV does not exist.\n"
+    usage; exit 1 ;
+  fi
+  source ${BASHENV}
+fi
 
 # read ESMX build file from positional arguments
 if [[ $# -ge 1 ]]; then
@@ -114,7 +145,12 @@ if [ -z ${ESMF_ESMXDIR} ]; then
     echo "ERROR: Cannot locate ESMX directory."
     usage; exit 1
   fi
-  ESMF_ESMXDIR=`grep "ESMF_ESMXDIR" ${ESMFMKFILE}`
+  ESMF_ESMXDIR=`grep "ESMF_ESMXDIR" ${ESMFMKFILE} || true;`
+  if [ -z ${ESMF_ESMXDIR} ]; then
+    echo "ERROR: ESMF_ESMXDIR is not listed in ESMFMKFILE."
+    echo "       Please check ESMF version"
+    usage; exit 1
+  fi
   ESMF_ESMXDIR=${ESMF_ESMXDIR#*=}
 fi
 
