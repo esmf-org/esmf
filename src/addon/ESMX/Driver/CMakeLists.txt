@@ -92,52 +92,47 @@ foreach(CMP IN ITEMS ${COMPS})
     set(CMP_BUILD_TYPE "none")
   endif()
 
-  # find build configuration or libraries
-  find_file(FND_CMAKE_LISTS
-    NAMES CMakeLists.txt cmakelists.txt CMAKELISTS.txt
-    PATHS ${CMP_SOURCE_DIR}
-    NO_CACHE NO_DEFAULT_PATH
-  )
-  find_file(FND_MAKE_FILE
-    NAMES Makefile makefile MAKEFILE
-    PATHS ${CMP_SOURCE_DIR}
-    NO_CACHE NO_DEFAULT_PATH
-  )
-  find_file(FND_CMAKE_CONFIG
-    NAMES ${CMP_CMAKE_CONFIG}
-    HINTS ${CMP_INSTALL_PREFIX}
-    PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
-    NO_CACHE NO_DEFAULT_PATH
-  )
-  find_path(FND_FORT_MODULE
-    NAMES ${CMP_FORT_MODULE}
-    HINTS ${CMP_INSTALL_PREFIX}
-    PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
-    NO_CACHE NO_DEFAULT_PATH
-  )
-  set(FND_LIBRARIES TRUE)
-  foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
-    if(NOT TARGET ${CMP_LIBRARY})
-      find_library(FND_LIBRARY
-        NAMES ${CMP_LIBRARY}
-        HINTS ${CMP_INSTALL_PREFIX}
-        PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
-        NO_CACHE NO_DEFAULT_PATH
-      )
-      if(NOT FND_LIBRARY)
-        set(FND_LIBRARIES FALSE)
-      endif()
-      unset(FND_LIBRARY)
-    endif()
-  endforeach()
-
   # automatically determine build type based on files
   if(${CMP_BUILD_TYPE} STREQUAL "auto")
+    # find build configuration or libraries
+    find_file(FND_CMAKE_LISTS
+      NAMES CMakeLists.txt cmakelists.txt CMAKELISTS.txt
+      PATHS ${CMP_SOURCE_DIR}
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    find_file(FND_MAKE_FILE
+      NAMES Makefile makefile MAKEFILE
+      PATHS ${CMP_SOURCE_DIR}
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    find_file(FND_CMAKE_CONFIG
+      NAMES ${CMP_CMAKE_CONFIG}
+      HINTS ${CMP_INSTALL_PREFIX}
+      PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    set(FND_LIBRARIES TRUE)
+    foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
+      if(NOT TARGET ${CMP_LIBRARY})
+        find_library(FND_LIBRARY
+          NAMES ${CMP_LIBRARY}
+          HINTS ${CMP_INSTALL_PREFIX}
+          PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
+          NO_CACHE NO_DEFAULT_PATH
+        )
+        if(NOT FND_LIBRARY)
+          set(FND_LIBRARIES FALSE)
+        endif()
+        unset(FND_LIBRARY)
+      endif()
+    endforeach()
+
+    # set build type
     if(FND_CMAKE_LISTS)
       set(CMP_BUILD_TYPE "cmake")
     elseif(FND_MAKE_FILE)
       set(CMP_BUILD_TYPE "make")
-    elseif(FND_CMAKE_CONFIG OR (FND_FORT_MODULE AND FND_LIBRARIES))
+    elseif(FND_CMAKE_CONFIG OR FND_LIBRARIES)
       set(CMP_BUILD_TYPE "none")
     else()
       message(FATAL_ERROR "Cannot find build configuration for ${CMP}")
@@ -205,7 +200,7 @@ foreach(CMP IN ITEMS ${COMPS})
   else()
     find_file(FND_CMAKE_CONFIG
       NAMES ${CMP_CMAKE_CONFIG}
-      HINTS ${CMP_INSTALL_PREFIX}
+      HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
       PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
       NO_CACHE NO_DEFAULT_PATH
     )
@@ -214,7 +209,7 @@ foreach(CMP IN ITEMS ${COMPS})
     endif()
     find_path(FND_FORT_MODULE
       NAMES ${CMP_FORT_MODULE}
-      HINTS ${CMP_INSTALL_PREFIX}
+      HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
       PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
       NO_CACHE NO_DEFAULT_PATH
     )
@@ -229,7 +224,7 @@ foreach(CMP IN ITEMS ${COMPS})
       else()
         find_library(FND_LIBRARY
           NAMES ${CMP_LIBRARY}
-          HINTS ${CMP_INSTALL_PREFIX}
+          HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
           PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
           NO_CACHE NO_DEFAULT_PATH
         )
