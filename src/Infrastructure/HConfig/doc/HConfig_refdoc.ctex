@@ -69,10 +69,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{HConfig_usage}
-%\input{ESMF_HConfigEx_fapi}
+\input{ESMF_HConfigEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/HConfig/doc/HConfig_usage}
-%\input{../Infrastructure/HConfig/doc/ESMF_HConfigEx_fapi}
+\input{../Infrastructure/HConfig/doc/ESMF_HConfigEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
