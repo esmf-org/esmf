@@ -906,10 +906,10 @@
         ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormat_Flag(4), &
         ESMF_FILEFORMAT_UGRID = ESMF_FileFormat_Flag(5), &
         ESMF_FILEFORMAT_CFGRID = ESMF_FileFormat_Flag(6), &
-        ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6), &
-        ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(7), &
-        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(8), &
-        ESMF_FILEFORMAT_SHAPEFILE = ESMF_FileFormat_Flag(9)
+        ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(7), &
+        ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(8), &
+        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(9), &
+        ESMF_FILEFORMAT_SHAPEFILE = ESMF_FileFormat_Flag(10)
         
 
 !------------------------------------------------------------------------------

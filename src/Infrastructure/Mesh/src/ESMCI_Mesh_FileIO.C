@@ -91,6 +91,9 @@ void ESMCI_mesh_create_from_SCRIP_file(char *filename,
                                        ESMCI::DistGrid *elem_distgrid, 
                                        Mesh **out_mesh);
 
+void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename, 
+                                       Mesh **out_mesh);
+
 void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh, 
                                    ESMCI::DistGrid *node_distgrid, 
                                    ESMCI::DistGrid *elem_distgrid, 
@@ -172,6 +175,11 @@ void ESMCI_mesh_create_from_file(char *filename,
                                         add_user_area, coord_sys, 
                                         elem_distgrid_for_file_read, 
                                         &tmp_mesh);
+      
+    } else if (fileformat == ESMC_FILEFORMAT_SHAPEFILE) {
+      ESMCI_mesh_create_from_SHAPEFILE_file(filename, 
+                                            &tmp_mesh);
+
     } else {
       if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
          " Unrecognized file format.",
@@ -1265,4 +1273,69 @@ void ESMCI_mesh_create_redist_mesh(Mesh *in_mesh,
   }
 
 }
+
+
+
+//
+// Create a Mesh from a SHAPEFILE format file
+//
+// INPUTS: 
+//  filename - file name in NULL delimited form
+//
+// OUTPUTS:
+//   out_mesh - the new mesh created from the file
+//
+void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename, 
+                                           Mesh **out_mesh){
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI_mesh_create_from_SHAPEFILE_file()"
+
+  // Init output
+  *out_mesh=NULL;
+
+  // Declare some handy variables
+  int localrc;
+  int rc;
+
+
+  // Try-catch block around main part of method
+  try {
+
+
+    
+
+    // Return an error, because this isn't implemented yet
+    if (ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+                                      "Creating a Mesh from a shapefile format file not finished yet.",
+                                      ESMC_CONTEXT, &localrc)) throw localrc; 
+        
+
+  } catch(std::exception &x) {
+
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT,&rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT,&rc);
+    }
+    throw rc; // To be caught one level up so we know where the error came from
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,&rc);
+    throw rc; // To be caught one level up so we know where the error came from
+
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught unknown exception", ESMC_CONTEXT, &rc);
+    throw rc; // To be caught one level up so we know where the error came from
+  }
+
+  
+}
+
+
+
 
