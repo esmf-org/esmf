@@ -223,6 +223,8 @@
 
 #include "../Infrastructure/Config/doc/Config_refdoc.ctex"
 
+#include "../Infrastructure/HConfig/doc/HConfig_refdoc.ctex"
+
 #include "../Infrastructure/LogErr/doc/LogErr_refdoc.ctex"
 
 #include "../Infrastructure/DELayout/doc/DELayout_refdoc.ctex"
