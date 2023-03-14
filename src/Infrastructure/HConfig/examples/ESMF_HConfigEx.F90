@@ -57,6 +57,23 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
+! \subsubsection{Load HConfig from string}
+!
+! An empty HConfig object can be loaded directly from a string.
+!EOE
+!BOC
+  call ESMF_HConfigLoad(hconfig, content="[1, 2, 3, abc, b, TRUE]", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! The syntax used for the {\tt content} argument is YAML. The above case
+! creates a list of six scalar members.
+!EOE
+
+!BOE
+! \subsubsection{Destroy an HConfig object}
+!
 ! When done with {\tt hconfig}, it should be destroyed in the usual manner.
 !EOE
 !BOC
