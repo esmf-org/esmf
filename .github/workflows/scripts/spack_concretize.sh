@@ -64,7 +64,7 @@ echo "    targets:" >> spack.yaml
 echo "      host_compatible: false" >> spack.yaml
 echo "    unify: true" >> spack.yaml
 echo "  specs:" >> spack.yaml
-echo "  - $comp" >> spack.yaml
+#echo "  - $comp" >> spack.yaml
 IFS=', ' read -r -a array <<< "$deps"
 for d in "${array[@]}"
 do
