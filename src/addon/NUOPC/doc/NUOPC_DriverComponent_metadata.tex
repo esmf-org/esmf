@@ -1,14 +1,7 @@
 \label{DriverCompMeta}
-The Driver component metadata is implemented as an ESMF Attribute Package:
-
-\begin{itemize}
-    \item Convention: NUOPC
-    \item Purpose: Instance
-    \item Includes:
-    \begin{itemize}
-      \item CIM Model Component Simulation Description (see for example the \htmladdnormallink{Component Attribute packages}{http://www.earthsystemmodeling.org/esmf\_releases/public/ESMF\_5\_2\_0rp2/ESMF\_refdoc/node6.html\#SECTION06022100000000000000} section in the ESMF v5.2.0rp2 documentation)
-    \end{itemize} 
-\end{itemize}
+The Driver Component metadata is implemented through ESMF\_Info. It can be accessed
+using the JSON Pointer "/NUOPC/Instance/" prefix followed by the "Attribute name"
+as per the table below. E.g. "Verbosity" is accessed using {\tt key="/NUOPC/Instance/Verbosity"}.
 
 {\bf Note} that some of the Attribute names in the following table are longer than the table column width. In these cases the
 Attribute name had to be broken into multiple lines. When that happens, a hyphen shows up to indicate the line break. The hyphen
