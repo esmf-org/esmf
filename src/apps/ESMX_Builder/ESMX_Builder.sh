@@ -182,6 +182,9 @@ fi
 if [ ! -z "${BUILD_TYPE}" ]; then
   CMAKE_SETTINGS+=("-DCMAKE_BUILD_TYPE=${BUILD_TYPE}")
 fi
+if [ "${VERBOSE}" = true ]; then
+  CMAKE_SETTINGS+=("-DVERBOSE=1")
+fi
 if [ ! -z "${BUILD_ARGS}" ]; then
   CMAKE_SETTINGS+=("${BUILD_ARGS}")
 fi

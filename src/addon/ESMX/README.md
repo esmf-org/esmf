@@ -86,7 +86,7 @@ Each component is given a name, here `tawas` and `lumo`, respectively. Component
 Build options for each component are defined usin [YAML](https://yaml.org/) syntax. Build options are defined as follows:
 | Option          | Description                                       | Default                |
 | --------------- | ------------------------------------------------- | ---------------------- |
-| build\_type     | Config, Find, ExternalProject, Subdirectory, Make | Config                 |
+| build\_type     | auto, cmake, make, none                           | auto                   |
 | git\_repository | URL for downloading git repository                | *None*                 |
 | git\_tag        | tag for downloading git repository                | *None*                 |
 | git\_dir        | download directory for git repository             | *None*                 |
@@ -104,24 +104,17 @@ Downloading component using git\_repository will result in a detached head. Deve
 
 ### Build Types
 
-**Config**<br>
-The ESMX build system searches for component's CMake configuration file provided by a previous installation. The configuration file includes target information needed for linking dependencies. A manually generated CMake configuration file includes the following standard CMake elements:
-- `add_library(library-name ... )`
-- `set_target_properties(library-name ... )`
+**Auto**<br>
+The ESMX build system searches for CMakeLists.txt and Makefile in the source\_dir. If CMakeLists.txt is found then ESMX builds the component using CMake. If Makefile is found but CMakeLists.txt is not found then ESMX builds using make. If neither CMakeLists.txt or Makefile are found then the ESMX build system searches for the CMake configuration file, fortran module, and libraries in the install\_prefix directory but does not build the model. If no build configuration, CMake configuration, or libraries are found then the build fails.
 
-The ESMX build system includes the CMake configuration and links all libraries to the ESMX Driver.
-
-**Find**<br>
-The ESMX build system searches for libraries and fortran modules provided by a previous installation. Each library is linked to the ESMX Driver and the fortran module directory is included during ESMX Driver compilation.
-
-**ExternalProject**<br>
-The ESMX build system builds a component as an External Project and installs libraries, include files, and configuration files into the install\_prefix directory. Each library listed is linked to the ESMX Driver and the include directory is included during ESMX Driver compilation. This option is used for components with a properly configured NUOPC cap installation step in its CMake build.
-
-**Subdirectory**<br>
-The ESMX build system builds a component as a Subdirectory. The NUOPC cap library listed and all dependency libraries are linked to the ESMX Driver and the include directory is included during ESMX Driver compilation. This option is used for components with properly configured subdirectory references.
+**CMake**<br>
+The ESMX build system searches for CMakeLists.txt in the source\_dir and builds using CMake. Once built, the ESMX build system searches for the CMake configuration file and libraries in the install\_prefix directory.
 
 **Make**<br>
-The ESMX build system builds a component by calling Make in the component's source directory. Once the component is built then the ESMX build system searches for libraries and fortran modules. Each library is linked to the ESMX Driver and the fortran module directory is included during ESMX Driver compilation.
+The ESMX build system searches for Makefile in the source\_dir and builds using Make. Once built, the ESMX build system searches for libraries and fortran modules in the install\_prefix directory.
+
+**None**<br>
+The ESMX build system will not build the component. The ESMX build system searches for the CMake configuration file, fortran module, and libraries in the install\_prefix directory.
 
 ### Project integration
 

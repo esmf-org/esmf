@@ -22,9 +22,9 @@ def create_compList(_dict, odir):
         f.write('set(COMPS {})\n\n'.format(' '.join(comp_str)))
         for k1, v1 in od.items():
           if type(v1) is not dict:
-            v1 = {'build_type': 'config'}
+            v1 = {'build_type': 'auto'}
           f.write('# - auto-generated section for component: {}\n'.format(k1))
-          build_type = v1.get('build_type', 'config')
+          build_type = v1.get('build_type', 'auto')
           source_dir = v1.get('source_dir', k1)
           source_dir = os.path.abspath(source_dir)
           cmake_config = v1.get('cmake_config', k1+'.cmake')
@@ -72,7 +72,7 @@ def create_compUse(_dict, odir):
         od = collections.OrderedDict(_dict['components'].items())
         for k1, v1 in od.items():
           if type(v1) is not dict:
-            v1 = {'build_type': 'config'}
+            v1 = {'build_type': 'auto'}
           fort_module = v1.get('fort_module', (k1+'.mod').lower())
           f.write('use {}, only: {}SS => SetServices, {}SV => SetVM\n'.format(Path(fort_module).stem, k1, k1))
 
