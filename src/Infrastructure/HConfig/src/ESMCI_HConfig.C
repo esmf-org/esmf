@@ -70,18 +70,18 @@ template ESMC_I4 HConfig::as<ESMC_I4>(bool *asOkay, int *rc);
 template ESMC_I8 HConfig::as<ESMC_I8>(bool *asOkay, int *rc);
 template ESMC_R4 HConfig::as<ESMC_R4>(bool *asOkay, int *rc);
 template ESMC_R8 HConfig::as<ESMC_R8>(bool *asOkay, int *rc);
-template std::string HConfig::asMapKey<std::string>(int *rc);
-template bool HConfig::asMapKey<bool>(int *rc);
-template ESMC_I4 HConfig::asMapKey<ESMC_I4>(int *rc);
-template ESMC_I8 HConfig::asMapKey<ESMC_I8>(int *rc);
-template ESMC_R4 HConfig::asMapKey<ESMC_R4>(int *rc);
-template ESMC_R8 HConfig::asMapKey<ESMC_R8>(int *rc);
-template std::string HConfig::asMapVal<std::string>(int *rc);
-template bool HConfig::asMapVal<bool>(int *rc);
-template ESMC_I4 HConfig::asMapVal<ESMC_I4>(int *rc);
-template ESMC_I8 HConfig::asMapVal<ESMC_I8>(int *rc);
-template ESMC_R4 HConfig::asMapVal<ESMC_R4>(int *rc);
-template ESMC_R8 HConfig::asMapVal<ESMC_R8>(int *rc);
+template std::string HConfig::asMapKey<std::string>(bool *asOkay, int *rc);
+template bool HConfig::asMapKey<bool>(bool *asOkay, int *rc);
+template ESMC_I4 HConfig::asMapKey<ESMC_I4>(bool *asOkay, int *rc);
+template ESMC_I8 HConfig::asMapKey<ESMC_I8>(bool *asOkay, int *rc);
+template ESMC_R4 HConfig::asMapKey<ESMC_R4>(bool *asOkay, int *rc);
+template ESMC_R8 HConfig::asMapKey<ESMC_R8>(bool *asOkay, int *rc);
+template std::string HConfig::asMapVal<std::string>(bool *asOkay, int *rc);
+template bool HConfig::asMapVal<bool>(bool *asOkay, int *rc);
+template ESMC_I4 HConfig::asMapVal<ESMC_I4>(bool *asOkay, int *rc);
+template ESMC_I8 HConfig::asMapVal<ESMC_I8>(bool *asOkay, int *rc);
+template ESMC_R4 HConfig::asMapVal<ESMC_R4>(bool *asOkay, int *rc);
+template ESMC_R8 HConfig::asMapVal<ESMC_R8>(bool *asOkay, int *rc);
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -2405,7 +2405,8 @@ template<typename T> T HConfig::asMapKey(
 //  T
 //
 // !ARGUMENTS:
-    int *rc) {           // out - return code
+    bool *asOkay,       // out - indicate if as() access okay
+    int *rc) {          // out - return code
 //
 // !DESCRIPTION:
 //  Return value interpreted
@@ -2421,7 +2422,7 @@ template<typename T> T HConfig::asMapKey(
 #ifdef ESMF_YAMLCPP
   try{
     if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->first.as<T>();
+      *asOkay = YAML::convert<T>::decode(iter->first, value);
     else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2456,7 +2457,8 @@ template<typename T> T HConfig::asMapVal(
 //  T
 //
 // !ARGUMENTS:
-    int *rc) {           // out - return code
+    bool *asOkay,       // out - indicate if as() access okay
+    int *rc) {          // out - return code
 //
 // !DESCRIPTION:
 //  Return value interpreted
@@ -2472,7 +2474,7 @@ template<typename T> T HConfig::asMapVal(
 #ifdef ESMF_YAMLCPP
   try{
     if ((node==NULL) && (type==YAML::NodeType::Map))
-      value = iter->second.as<T>();
+      *asOkay = YAML::convert<T>::decode(iter->second, value);
     else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
