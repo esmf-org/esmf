@@ -27,7 +27,7 @@ program ESMF_HConfigEx
   type(ESMF_HConfig)              :: hconfig
   type(ESMF_HConfig)              :: hconfigIter, hconfigIterEnd
   logical                         :: isScalar, asOkay, valueL
-  character(len=:), allocatable   :: string, tag
+  character(len=:), allocatable   :: string, stringKey, tag
   integer(ESMF_KIND_I4)           :: valueI4
   integer(ESMF_KIND_I8)           :: valueI8
   real(ESMF_KIND_R4)              :: valueR4
@@ -66,9 +66,10 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! \subsubsection{Load HConfig from string}
+! \subsubsection{Load HConfig from string using YAML syntax}
 !
-! An empty HConfig object can be loaded directly from a string.
+! An empty HConfig object can be loaded directly from a string using YAML
+! syntax.
 !EOE
 !BOC
   call ESMF_HConfigLoad(hconfig, content="[1, 2, 3, abc, b, TRUE]", rc=rc)
@@ -77,11 +78,11 @@ program ESMF_HConfigEx
 
 !BOE
 ! The syntax used for the {\tt content} argument is YAML. The above case
-! creates a list of six scalar members.
+! creates a {\em list} of six scalar members.
 !EOE
 
 !BOE
-! \subsubsection{Iterator based HConfig parsing}
+! \subsubsection{Iterator based HConfig list parsing}
 !
 ! An easy way to parse the elements contained in {\tt hconfig} is to iterate
 ! through them. Two additional HConfig objects, acting as iterators, are needed.
@@ -284,6 +285,149 @@ program ESMF_HConfigEx
   call ESMF_HConfigDestroy(hconfig, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! \subsubsection{Create an HConfig object directly loading from YAML string}
+!
+! The {\tt ESMF\_HConfigCreate()} method supports loading contents from
+! string using YAML syntax directly via the optional {\tt content} argument.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(content="{car: red, bike: 2, plane: TRUE}", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Here a map is created. In this case, all of the keys are scalars (car,
+! bike, plane), as are all of the associated values (red, 2, TRUE).
+!EOE
+
+!BOE
+! \subsubsection{Iterator based HConfig map parsing}
+!
+! The elements of the {\em map} contained in {\tt hconfig} can be iterated over
+! similar to the the {\em list} case demonstrated earlier. Again two iterator
+! variables are employed.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigIter, hconfigIterEnd
+  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  hconfigIterEnd = ESMF_HConfigIterEnd(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+!
+! Then iterate over {\tt hconfig} using the iterator variables as before.
+! Notice, however, in the code below, compared to the {\em list} case, all 
+! of the {\tt As} access methods now are either of the form {\tt AsMapKey} or
+! {\tt AsMapVal} to selectively access the {\em map key} or {\em map value},
+! respectively.
+!EOE
+!BOC
+  do while (hconfigIter /= hconfigIterEnd)
+
+    ! Check whether the current element is a scalar both for the map key
+    ! and the map value.
+    ! logical :: isScalar
+    isScalar = ESMF_HConfigIsMapKeyScalar(hconfigIter, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    isScalar = isScalar .and. ESMF_HConfigIsMapValScalar(hconfigIter, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    if (isScalar) then
+
+      ! Any scalar can be accessed as a string. Use this for the {\em map key}.
+      ! character(len=:), allocatable :: stringKey
+      stringKey = ESMF_HConfigAsMapKeyString(hconfigIter, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! Now access the {\em map value}. Again first access as a string, which
+      ! always works.
+      ! character(len=:), allocatable :: string
+      string = ESMF_HConfigAsMapValString(hconfigIter, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_LogWrite("map key="//stringKey//" map value: AsString: "// &
+        string, ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! The attempt can be made to interpret the scalar as any of the other
+      ! supported data types. By default, if the scalar cannot be interpreted
+      ! as the requested data type, rc /= ESMF_SUCCESS is returned. To prevent
+      ! such error condition, the optional, intent(out) argument "asOkay" can
+      ! be provided. If asOkay == .true. is returned, the interpretation was
+      ! successful. Otherwise asOkay == .false. is returned.
+      ! logical :: asOkay
+
+      ! integer(ESMF_KIND_I4) :: valueI4
+      valueI4 = ESMF_HConfigAsMapValI4(hconfigIter, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, &
+        '("map key=", A10, " map value: asOkay: ", l2, " valueI4: ", i10)') &
+        stringKey, asOkay, valueI4
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! integer(ESMF_KIND_I8) :: valueI8
+      valueI8 = ESMF_HConfigAsMapValI8(hconfigIter, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, &
+        '("map key=", A10, " map value: asOkay: ", l2, " valueI8: ", i10)') &
+        stringKey, asOkay, valueI8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! real(ESMF_KIND_R4) :: valueR4
+      valueR4 = ESMF_HConfigAsMapValR4(hconfigIter, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, &
+        '("map key=", A10, " map value: asOkay: ", l2, " valueR4: ", f10.6)') &
+        stringKey, asOkay, valueR4
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! real(ESMF_KIND_R8) :: valueR8
+      valueR8 = ESMF_HConfigAsMapValR8(hconfigIter, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, &
+        '("map key=", A10, " map value: asOkay: ", l2, " valueR8: ", f10.6)') &
+        stringKey, asOkay, valueR8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! logical :: valueL
+      valueL = ESMF_HConfigAsMapValLogical(hconfigIter, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, &
+        '("map key=", A10, " map value: asOkay: ", l2, " valueL: ", l10)') &
+        stringKey, asOkay, valueL
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    else
+      ! Deal with case where either key or value are not scalars themselves.
+    endif
+
+    ! Next iteration step.
+    call ESMF_HConfigIterNext(hconfigIter, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  enddo
+!EOC
+
 
 10 continue
 
