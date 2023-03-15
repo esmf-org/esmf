@@ -254,6 +254,18 @@ endif
 	    echo "ESMF_PIO_LIBPATH:        $(ESMF_PIO_LIBPATH)" ; \
 	  fi; \
 	 fi
+	-@if [ -n "$(ESMF_SHAPEFILE)" ] ; then \
+	  echo "ESMF_SHAPEFILE:            $(ESMF_SHAPEFILE)" ; \
+	  if [ -n "$(ESMF_SHAPEFILE_INCLUDE)" ] ; then \
+	    echo "ESMF_SHAPEFILE_INCLUDE:    $(ESMF_SHAPEFILE_INCLUDE)" ; \
+	  fi; \
+	  if [ -n "$(ESMF_SHAPEFILE_LIBS)" ] ; then \
+	    echo "ESMF_SHAPEFILE_LIBS:       $(ESMF_SHAPEFILE_LIBS)" ; \
+	  fi; \
+	  if [ -n "$(ESMF_SHAPEFILE_LIBPATH)" ] ; then \
+	    echo "ESMF_SHAPEFILE_LIBPATH:    $(ESMF_SHAPEFILE_LIBPATH)" ; \
+	  fi; \
+	 fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \
 	  echo "ESMF_XERCES:            $(ESMF_XERCES)" ; \
 	  if [ -n "$(ESMF_XERCES_INCLUDE)" ] ; then \
@@ -637,6 +649,18 @@ endif
 	  fi; \
 	  if [ -n "$(ESMF_PIO_LIBPATH)" ] ; then \
 	    echo "# ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" >> $(MKINFO) ; \
+	  fi; \
+	 fi
+	-@if [ -n "$(ESMF_SHAPEFILE)" ] ; then \
+	  echo "# ESMF_SHAPEFILE:           $(ESMF_SHAPEFILE)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_SHAPEFILE_INCLUDE)" ] ; then \
+	    echo "# ESMF_SHAPEFILE_INCLUDE:   $(ESMF_SHAPEFILE_INCLUDE)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_SHAPEFILE_LIBS)" ] ; then \
+	    echo "# ESMF_SHAPEFILE_LIBS:      $(ESMF_SHAPEFILE_LIBS)" >> $(MKINFO) ; \
+	  fi; \
+	  if [ -n "$(ESMF_SHAPEFILE_LIBPATH)" ] ; then \
+	    echo "# ESMF_SHAPEFILE_LIBPATH:   $(ESMF_SHAPEFILE_LIBPATH)" >> $(MKINFO) ; \
 	  fi; \
 	 fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \

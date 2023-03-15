@@ -46,7 +46,7 @@
 #include "Mesh/include/ESMCI_FileIO_Util.h"
 
 // These internal functions can only be used if PIO is available
-//#ifdef ESMF_PIO
+#ifdef ESMF_SHAPEFILE
 
 // TODO: SWITCH THIS TO SHAPELIB, WHEN WE KNOW WHAT IT'S CALLED
 //#include <pio.h>
@@ -59,7 +59,7 @@
 using namespace ESMCI;
 
 
-void get_example_from_SHAPEFILE_file(char *filename, int &example) {
+void get_example_from_SHAPEFILE_file(int &example) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "get_coordDim_from_ESMFMesh_file()"
 
@@ -70,5 +70,5 @@ void get_example_from_SHAPEFILE_file(char *filename, int &example) {
 }
 
 
-//#endif // ifdef ESMF_PIO
+#endif // ifdef ESMF_SHAPEFILE
 

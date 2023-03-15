@@ -33,10 +33,8 @@
 #include "ESMCI_Array.h"
 #include "ESMCI_DistGrid.h"
 
-#include "Mesh/include/ESMCI_Mesh.h"
-
 // These internal functions can only be used if SHAPEFILE is available
-//#ifdef ESMF_PIO
+#ifdef ESMF_SHAPEFILE
 
 // TODO: Change when we know name of shapefile include file
 //#include <pio.h>
@@ -50,9 +48,9 @@
 
 using namespace ESMCI;
 
-void get_example_from_SHAPEFILE_file(char *filename, int &example);
+void get_example_from_SHAPEFILE_file(int &example);
 
 
-//#endif // ifdef ESMF_PIO
+#endif // ifdef ESMF_SHAPEFILE
 
 #endif // ESMCI_SHAPEFILE_UTIL_H

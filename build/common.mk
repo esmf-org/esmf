@@ -1613,6 +1613,38 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# SHAPEFILE C++ API
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_SHAPEFILE),standard)
+ifneq ($(origin ESMF_SHAPEFILE_LIBS), environment)
+# BOB: LEAVE BLANK UNTIL I KNOW NAME OF SHAPEFILE LIB
+#ESMF_SHAPEFILE_LIBS = -lxerces-c
+ESMF_SHAPEFILE_LIBS = 
+endif
+endif
+
+ifdef ESMF_SHAPEFILE
+ESMF_CPPFLAGS                += -DESMF_SHAPEFILE=1
+ifdef ESMF_SHAPEFILE_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_SHAPEFILE_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_SHAPEFILE_INCLUDE)
+endif
+ifdef ESMF_SHAPEFILE_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_SHAPEFILE_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_SHAPEFILE_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_SHAPEFILE_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_SHAPEFILE_LIBS))))
+endif
+ifdef ESMF_SHAPEFILE_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_SHAPEFILE_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_SHAPEFILE_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_SHAPEFILE_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_SHAPEFILE_LIBPATH)
+endif
+endif
+
+
+#-------------------------------------------------------------------------------
 # XERCES C++ XML API
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_XERCES),standard)

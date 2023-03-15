@@ -1295,6 +1295,9 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
   // Init output
   *out_mesh=NULL;
 
+ // Will only work if SHAPEFILE is available
+#ifdef ESMF_SHAPEFILE
+  
   // Declare some handy variables
   int localrc;
   int rc;
@@ -1303,9 +1306,13 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
   // Try-catch block around main part of method
   try {
 
+    // DEBUG OUTPUT filename
+    printf("In shapefile method filename=%s\n",filename);
+
+    
     // Example just to make sure everything is compiling correctly
     int example;
-    get_example_from_SHAPEFILE_file(filename, example);
+    get_example_from_SHAPEFILE_file(example);
     if (example == 3) {
       printf("Example subroutine is working (example=%d)!\n",example);      
     }
@@ -1342,6 +1349,13 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
       "Caught unknown exception", ESMC_CONTEXT, &rc);
     throw rc; // To be caught one level up so we know where the error came from
   }
+
+#else // ifdef ESMF_SHAPEFILE
+  int localrc;
+  if (ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+                                "This functionality requires ESMF to be built with a shapefile library." ,
+                                    ESMC_CONTEXT, &localrc)) throw localrc;
+#endif // ifdef ESMF_SHAPEFILE
 
   
 }
