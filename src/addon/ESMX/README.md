@@ -37,6 +37,9 @@ options:
   [--prefix=INSTALL_PREFIX]
   [--build-type=BUILD_TYPE]
   [--build-args=BUILD_ARGS]
+  [--build-jobs=JOBS]
+  [--load-modulefile=MODULEFILE]
+  [--load-bashenv=BASHENV]
   [--verbose]
   [-v]
 
@@ -60,6 +63,12 @@ where:
                            (default: release)
 
   --build-args=BUILD_ARGS  global cmake arguments (e.g. -DVAR=val)
+
+  --build-jobs=JOBS        number of jobs used for building esmx and components
+
+  --load-module=MODULEFILE load modulefile before building
+
+  --load-bashenv=BASHENV   load bash environment file before building
 
   --verbose or -v          build with verbose output
 ```
@@ -86,34 +95,38 @@ Each component is given a name, here `tawas` and `lumo`, respectively. Component
 Build options for each component are defined usin [YAML](https://yaml.org/) syntax. Build options are defined as follows:
 | Option          | Description                                       | Default                |
 | --------------- | ------------------------------------------------- | ---------------------- |
-| build\_type     | auto, cmake, make, none                           | auto                   |
-| git\_repository | URL for downloading git repository                | *None*                 |
-| git\_tag        | tag for downloading git repository                | *None*                 |
-| git\_dir        | download directory for git repository             | *None*                 |
+| build\_type     | auto, cmake, make, script, none                   | auto                   |
+| build\_script   | build script                                      | compile                |
+| build\_args     | build arguments passed to ExternalProject         | *None*                 |
 | source\_dir     | source directory for build                        | *component-name*       |
 | cmake\_config   | CMake configuration file                          | *component-name*.cmake |
+| libraries       | component libraries, linked to esmx               | *component-name*       |
+| fort\_module    | fortran module filename for NUOPC SetServices     | *component-name*.mod   |
 | install\_prefix | root directory for installation                   | install                |
 | config\_dir     | subdirectory for cmake configuration file         | cmake                  |
 | library\_dir    | subdirectory for library file                     | lib                    |
 | include\_dir    | subdirectory for fortran module file              | include                |
-| fort\_module    | fortran module filename for NUOPC SetServices     | *component-name*.mod   |
-| libraries       | component libraries, linked to esmx               | *component-name*       |
-| build\_args     | build arguments passed to ExternalProject         | *None*                 |
 | link\_libraries | external libraries, linked to esmx                | *None*                 |
 | link\_paths     | search path or environment var for link libraries | *None*                 |
+| git\_repository | URL for downloading git repository                | *None*                 |
+| git\_tag        | tag for downloading git repository                | *None*                 |
+| git\_dir        | download directory for git repository             | *None*                 |
 
 Downloading component using git\_repository will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git\_repository fails if the source\_dir already exists.
 
 ### Build Types
 
 **Auto**<br>
-The ESMX build system searches for CMakeLists.txt and Makefile in the source\_dir. If CMakeLists.txt is found then ESMX builds the component using CMake. If Makefile is found but CMakeLists.txt is not found then ESMX builds using make. If neither CMakeLists.txt or Makefile are found then the ESMX build system searches for the CMake configuration file, fortran module, and libraries in the install\_prefix directory but does not build the model. If no build configuration, CMake configuration, or libraries are found then the build fails.
+The ESMX build system searches for CMakeLists.txt, Makefile, and a build\_script in order in the source\_dir and uses the first build option it finds. If no build files are found then the ESMX build system searches for the CMake configuration file, fortran module, and libraries in the install\_prefix directory but does not build the model. If no build option, CMake configuration, or libraries are found then the build fails.
 
 **CMake**<br>
 The ESMX build system searches for CMakeLists.txt in the source\_dir and builds using CMake. Once built, the ESMX build system searches for the CMake configuration file and libraries in the install\_prefix directory.
 
 **Make**<br>
 The ESMX build system searches for Makefile in the source\_dir and builds using Make. Once built, the ESMX build system searches for libraries and fortran modules in the install\_prefix directory.
+
+**Script**<br>
+The ESMX build system searches for a build\_script in the source\_dir and builds using this script. Once built, the ESMX build system searches for libraries and fortran modules in the install\_prefix directory.
 
 **None**<br>
 The ESMX build system will not build the component. The ESMX build system searches for the CMake configuration file, fortran module, and libraries in the install\_prefix directory.

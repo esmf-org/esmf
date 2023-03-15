@@ -29,9 +29,9 @@ usage () {
   printf "      (default: release)\n"
   printf "  --build-args=BUILD_ARGS\n"
   printf "      cmake arguments (e.g. -DARG=VAL)\n"
-  printf "  --jobs=JOBS\n"
+  printf "  --build-jobs=JOBS\n"
   printf "      number of jobs used for building esmx and components\n"
-  printf "  --load-modulefile=MODULEFILE\n"
+  printf "  --load-module=MODULEFILE\n"
   printf "      load modulefile before building\n"
   printf "  --load-bashenv=BASHENV\n"
   printf "      load bash environment file before building\n"
@@ -101,12 +101,12 @@ while [[ $# -gt 0 ]]; do
     --build-args=?*) BUILD_ARGS=${1#*=} ;;
     --build-args) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --build-args=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --jobs=?*) JOBS=${1#*=} ;;
-    --jobs) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --jobs=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --load-modulefile=?*) MODULEFILE=${1#*=} ;;
-    --load-modulefile) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --load-modulefile=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --build-jobs=?*) JOBS=${1#*=} ;;
+    --build-jobs) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --build-jobs=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --load-module=?*) MODULEFILE=${1#*=} ;;
+    --load-module) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --load-module=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --load-bashenv=?*) BASHENV=${1#*=} ;;
     --load-bashenv) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --load-bashenv=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;

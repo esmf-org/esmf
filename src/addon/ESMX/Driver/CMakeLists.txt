@@ -90,6 +90,7 @@ foreach(CMP IN ITEMS ${COMPS})
   string(REPLACE "," ";" "${${CMP}-LINK_LIBRARIES}" CMP_LINK_LIBRARIES)
   set(CMP_LINK_PATHS     "${${CMP}-LINK_PATHS}")
   string(REPLACE "," ";" "${${CMP}-LINK_PATHS}" CMP_LINK_PATHS)
+  set(CMP_BUILD_SCRIPT   "${${CMP}-BUILD_SCRIPT}")
   set(CMP_BUILD_ARGS     "${${CMP}-BUILD_ARGS}")
 
   # download git repository
@@ -127,6 +128,11 @@ foreach(CMP IN ITEMS ${COMPS})
       PATHS ${CMP_SOURCE_DIR}
       NO_CACHE NO_DEFAULT_PATH
     )
+    find_file(FND_BUILD_SCRIPT
+      NAMES ${CMP_BUILD_SCRIPT}
+      PATHS ${CMP_SOURCE_DIR}
+      NO_CACHE NO_DEFAULT_PATH
+    )
     find_file(FND_CMAKE_CONFIG
       NAMES ${CMP_CMAKE_CONFIG}
       HINTS ${CMP_INSTALL_PREFIX}
@@ -154,6 +160,8 @@ foreach(CMP IN ITEMS ${COMPS})
       set(CMP_BUILD_TYPE "cmake")
     elseif(FND_MAKE_FILE)
       set(CMP_BUILD_TYPE "make")
+    elseif(FND_BUILD_SCRIPT)
+      set(CMP_BUILD_TYPE "script")
     elseif(FND_CMAKE_CONFIG OR FND_LIBRARIES)
       set(CMP_BUILD_TYPE "none")
     else()
@@ -218,6 +226,27 @@ foreach(CMP IN ITEMS ${COMPS})
     )
     if(NOT ret EQUAL "0")
       message(FATAL_ERROR "make build failed for ${CMP}")
+    endif()
+  elseif(${CMP_BUILD_TYPE} STREQUAL "script")
+    message(STATUS "Building (SCRIPT) - ${CMP}")
+    find_file(FND_BUILD_SCRIPT
+      NAMES ${CMP_BUILD_SCRIPT}
+      PATHS ${CMP_SOURCE_DIR}
+      NO_CACHE NO_DEFAULT_PATH
+    )
+    if(NOT FND_BUILD_SCRIPT)
+      message(FATAL_ERROR "Could not find ${CMP_BUILD_SCRIPT}"
+        " in ${CMP_SOURCE_DIR}."
+        " Check source_dir in build configuration."
+      )
+    endif()
+    execute_process(
+      COMMAND ${FND_BUILD_SCRIPT} ${CMP_BUILD_ARGS}
+      WORKING_DIRECTORY ${CMP_SOURCE_DIR}
+      RESULT_VARIABLE ret
+    )
+    if(NOT ret EQUAL "0")
+      message(FATAL_ERROR "script build failed for ${CMP}")
     endif()
   elseif(${CMP_BUILD_TYPE} STREQUAL "none")
     # No Op
@@ -318,8 +347,10 @@ foreach(CMP IN ITEMS ${COMPS})
   unset(CMP_LINK_LIBRARIES)
   unset(CMP_LINK_PATHS)
   unset(CMP_BUILD_ARGS)
+  unset(CMP_BUILD_SCRIPT)
   unset(FND_CMAKE_LISTS)
   unset(FND_MAKE_FILE)
+  unset(FND_BUILD_SCRIPT)
   unset(FND_CMAKE_CONFIG)
   unset(FND_FORT_MODULE)
   unset(FND_LIBRARIES)

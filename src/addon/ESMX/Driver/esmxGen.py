@@ -45,6 +45,7 @@ def create_compList(_dict, odir):
             include_dir = os.path.basename(include_dir)
           fort_module = v1.get('fort_module', (k1+'.mod').lower())
           libraries = v1.get('libraries', k1)
+          build_script = v1.get('build_script', "compile")
           build_args = v1.get('build_args', None)
           link_libraries = v1.get('link_libraries', "")
           link_paths = v1.get('link_paths', "")
@@ -61,6 +62,7 @@ def create_compList(_dict, odir):
           f.write('set({}-INCLUDE_DIR    {})\n'.format(k1, include_dir))
           f.write('set({}-FORT_MODULE    {})\n'.format(k1, fort_module))
           f.write('set({}-LIBRARIES      {})\n'.format(k1, libraries))
+          f.write('set({}-BUILD_SCRIPT   {})\n'.format(k1, build_script))
           if (build_args):
             f.write('set({}-BUILD_ARGS     {})\n'.format(k1, build_args))
           f.write('set({}-GIT_REPOSITORY {})\n'.format(k1, git_repository))
