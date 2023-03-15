@@ -38,8 +38,8 @@ jobs:
     - name: Install Intel Compiler
       run: |
         cd ${{ github.workspace }}/.github/workflows
-        if [[ "${{ matrix.compiler }}" == *"intel"* ]]; then
-          scripts/install_oneapi.sh 
+        if [[ "${{ matrix.compiler }}" == *"intel"* || "${{ matrix.compiler }}" == *"oneapi"* ]]; then
+          scripts/install_oneapi.sh
         fi
 
     # concretize test environment 

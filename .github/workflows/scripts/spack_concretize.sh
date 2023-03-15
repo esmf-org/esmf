@@ -59,7 +59,7 @@ echo "::endgroup::"
 # find available compilers
 echo "::group::Find Available Compilers"
 . spack/share/spack/setup-env.sh
-if [[ "$comp" == *"intel"* ]]; then
+if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
   . /opt/intel/oneapi/setvars.sh
 fi
 spack compiler find
@@ -96,6 +96,6 @@ cat spack.yaml
 echo "::endgroup::"
 
 # concretize spack environment
-#echo "::group::Concretize Spack Environment Using YAML Specification"
-#spack --color always -e $run_dir/. concretize -f
-#echo "::endgroup::"
+echo "::group::Concretize Spack Environment Using YAML Specification"
+spack --color always -e $run_dir/. concretize -f
+echo "::endgroup::"
