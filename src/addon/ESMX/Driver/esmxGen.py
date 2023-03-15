@@ -46,6 +46,8 @@ def create_compList(_dict, odir):
           fort_module = v1.get('fort_module', (k1+'.mod').lower())
           libraries = v1.get('libraries', k1)
           build_args = v1.get('build_args', None)
+          link_libraries = v1.get('link_libraries', "")
+          link_paths = v1.get('link_paths', "")
           git_repository = v1.get('git_repository', "")
           git_tag = v1.get('git_tag', "")
           git_dir = v1.get('git_dir', source_dir)
@@ -64,6 +66,8 @@ def create_compList(_dict, odir):
           f.write('set({}-GIT_REPOSITORY {})\n'.format(k1, git_repository))
           f.write('set({}-GIT_TAG        {})\n'.format(k1, git_tag))
           f.write('set({}-GIT_DIR        {})\n'.format(k1, git_dir))
+          f.write('set({}-LINK_LIBRARIES {})\n'.format(k1, link_libraries))
+          f.write('set({}-LINK_PATHS     {})\n'.format(k1, link_paths))
 
 def create_compUse(_dict, odir):
     # open file

@@ -70,7 +70,13 @@ foreach(CMP IN ITEMS ${COMPS})
   set(CMP_FORT_MODULE    "${${CMP}-FORT_MODULE}")
   set(CMP_LIBRARIES      "${${CMP}-LIBRARIES}")
   string(REPLACE "," ";" "${${CMP}-LIBRARIES}" CMP_LIBRARIES)
+  set(CMP_LINK_LIBRARIES "${${CMP}-LINK_LIBRARIES}")
+  string(REPLACE "," ";" "${${CMP}-LINK_LIBRARIES}" CMP_LINK_LIBRARIES)
+  set(CMP_LINK_PATHS     "${${CMP}-LINK_PATHS}")
+  string(REPLACE "," ";" "${${CMP}-LINK_PATHS}" CMP_LINK_PATHS)
   set(CMP_BUILD_ARGS     "${${CMP}-BUILD_ARGS}")
+
+  # download git repository
   if(NOT CMP_GIT_REPOSITORY STREQUAL "")
     message(STATUS "Fetching content ... ${CMP}")
     if(EXISTS ${CMP_SOURCE_DIR})
@@ -216,7 +222,7 @@ foreach(CMP IN ITEMS ${COMPS})
     if(FND_FORT_MODULE)
       target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
     elseif(NOT FND_CMAKE_CONFIG)
-      message(FATAL_ERROR "Cannot find fortran module for ${CMP}")
+      message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE}")
     endif()
     foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
       if(TARGET ${CMP_LIBRARY})
@@ -229,12 +235,43 @@ foreach(CMP IN ITEMS ${COMPS})
           NO_CACHE NO_DEFAULT_PATH
         )
         if(NOT FND_LIBRARY)
-          message(FATAL_ERROR "Cannot find libraries for ${CMP}")
+          message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY}")
         endif()
         target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
         unset(FND_LIBRARY)
       endif()
     endforeach()
+
+    # change environment variable to path in variable
+    set(TMP_LINK_PATHS "")
+    foreach(CMP_LINK_PATH IN ITEMS ${CMP_LINK_PATHS})
+      if(DEFINED ENV{${CMP_LINK_PATH}})
+        set(CMP_LINK_PATH $ENV{${CMP_LINK_PATH}})
+      endif()
+      list(APPEND TMP_LINK_PATHS ${CMP_LINK_PATH})
+    endforeach()
+    set(CMP_LINK_PATHS ${TMP_LINK_PATHS})
+    unset(TMP_LINK_PATHS)
+
+    # link external libraries
+    foreach(CMP_LINK_LIBRARY IN ITEMS ${CMP_LINK_LIBRARIES})
+      if(TARGET ${CMP_LINK_LIBRARY})
+        target_link_libraries(esmx_driver PUBLIC ${CMP_LINK_LIBRARY})
+      else()
+        find_library(FND_LINK_LIBRARY
+          NAMES ${CMP_LINK_LIBRARY}
+          HINTS ${CMP_LINK_PATHS}
+          PATH_SUFFIXES "." "lib" "lib64"
+          NO_CACHE
+        )
+        if(NOT FND_LINK_LIBRARY)
+          message(FATAL_ERROR "Cannot find link_libraries ${CMP_LINK_LIBRARY}")
+        endif()
+        target_link_libraries(esmx_driver PUBLIC ${FND_LINK_LIBRARY})
+        unset(FND_LINK_LIBRARY)
+      endif()
+    endforeach()
+
   endif()
 
   # unset variables used for component
@@ -250,6 +287,8 @@ foreach(CMP IN ITEMS ${COMPS})
   unset(CMP_INCLUDE_DIR)
   unset(CMP_FORT_MODULE)
   unset(CMP_LIBRARIES)
+  unset(CMP_LINK_LIBRARIES)
+  unset(CMP_LINK_PATHS)
   unset(CMP_BUILD_ARGS)
   unset(FND_CMAKE_LISTS)
   unset(FND_MAKE_FILE)

@@ -99,6 +99,8 @@ Build options for each component are defined usin [YAML](https://yaml.org/) synt
 | fort\_module    | fortran module filename for NUOPC SetServices     | *component-name*.mod   |
 | libraries       | component libraries, linked to esmx               | *component-name*       |
 | build\_args     | build arguments passed to ExternalProject         | *None*                 |
+| link\_libraries | external libraries, linked to esmx                | *None*                 |
+| link\_paths     | search path or environment var for link libraries | *None*                 |
 
 Downloading component using git\_repository will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git\_repository fails if the source\_dir already exists.
 
