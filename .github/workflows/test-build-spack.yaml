@@ -40,18 +40,17 @@ jobs:
         cd ${{ github.workspace }}/.github/workflows
         if [[ "${{ matrix.compiler }}" == *"intel"* ]]; then
           scripts/install_oneapi.sh 
-          #-i ${{ env.INTEL_INSTALL_DIR }} \
         fi
 
     # concretize test environment 
-    #- name: Concretize Spack Environment Using YAML Specification
-    #  run: |
-    #    ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
-    #      -a x86_64 \
-    #      -c ${{ matrix.compiler }} \
-    #      -d ${{ matrix.esmf }} \
-    #      -i ~/.spack-ci \
-    #      -r ${{ github.workspace }} 
+    - name: Concretize Spack Environment Using YAML Specification
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
+          -a x86_64 \
+          -c ${{ matrix.compiler }} \
+          -d ${{ matrix.esmf }} \
+          -i ~/.spack-ci \
+          -r ${{ github.workspace }} 
 
     # install test environment
     #- name: Install Dependencies with Spack 

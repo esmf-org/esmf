@@ -56,6 +56,13 @@ echo "::group::Checkout Spack"
 git clone -b esmf-update https://github.com/theurich/spack.git
 echo "::endgroup::"
 
+# find available compilers
+echo "::group::Find Available Compilers"
+. spack/share/spack/setup-env.sh
+spack compiler find
+cat ~/.spack/linux/compilers.yaml
+echo "::endgroup::"
+
 # create spack.yaml
 echo "::group::Create spack.yaml"
 echo "spack:" > spack.yaml
@@ -86,7 +93,6 @@ cat spack.yaml
 echo "::endgroup::"
 
 # concretize spack environment
-echo "::group::Concretize Spack Environment Using YAML Specification"
-. spack/share/spack/setup-env.sh
-spack --color always -e $run_dir/. concretize -f
-echo "::endgroup::"
+#echo "::group::Concretize Spack Environment Using YAML Specification"
+#spack --color always -e $run_dir/. concretize -f
+#echo "::endgroup::"
