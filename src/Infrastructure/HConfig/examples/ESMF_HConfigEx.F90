@@ -23,8 +23,16 @@ program ESMF_HConfigEx
   implicit none
 
   ! local variables
-  integer                     :: rc
-  type(ESMF_HConfig)          :: hconfig
+  integer                         :: rc
+  type(ESMF_HConfig)              :: hconfig
+  type(ESMF_HConfig)              :: hconfigIter, hconfigIterEnd
+  logical                         :: isScalar, asOkay, valueL
+  character(len=:), allocatable   :: string, tag
+  integer(ESMF_KIND_I4)           :: valueI4
+  integer(ESMF_KIND_I8)           :: valueI8
+  real(ESMF_KIND_R4)              :: valueR4
+  real(ESMF_KIND_R8)              :: valueR8
+  character(160)                  :: msgString
   ! result code
   integer                     :: finalrc, result
   character(ESMF_MAXSTR)      :: testname
@@ -52,6 +60,7 @@ program ESMF_HConfigEx
 ! By default, {\tt ESMF\_HConfigCreate()} creates an empty HConfig object.
 !EOE
 !BOC
+  ! type(ESMF_HConfig) :: hconfig
   hconfig = ESMF_HConfigCreate(rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -70,6 +79,109 @@ program ESMF_HConfigEx
 ! The syntax used for the {\tt content} argument is YAML. The above case
 ! creates a list of six scalar members.
 !EOE
+
+!BOE
+! \subsubsection{Iterator based HConfig parsing}
+!
+! An easy way to parse the elements contained in {\tt hconfig} is to iterate
+! through them. Two additional HConfig objects, acting as iterators, are needed.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigIter, hconfigIterEnd
+  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  hconfigIterEnd = ESMF_HConfigIterEnd(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Both {\tt hconfigIter} and {\tt hconfigIterEnd} are merely references, not
+! associated with their own deep allocation. In other words, neither was
+! created by an assignment that had a {\tt Create()} call on the righ hand side.
+! As such, neither {\tt hconfigIter} nor {\tt hconfigIterEnd} need to be
+! explicitly destroyed when done.
+!
+! Iterating over {\tt hconfig} is straight forward:
+!EOE
+!BOC
+  do while (hconfigIter /= hconfigIterEnd)
+
+    ! Check whether the current element is a scalar.
+    ! logical :: isScalar
+    isScalar = ESMF_HConfigIsScalar(hconfigIter, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    if (isScalar) then
+
+      ! Any scalar can be accessed as a string.
+      ! character(len=:), allocatable :: string
+      string = ESMF_HConfigAsString(hconfigIter, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_LogWrite("AsString: "//string, ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! The attempt can be made to interpret the scalar as any of the other
+      ! supported data types. By default, if the scalar cannot be interpreted
+      ! as the requested data type, rc /= ESMF_SUCCESS is returned. To prevent
+      ! such error condition, the optional, intent(out) argument "asOkay" can
+      ! be provided. If asOkay == .true. is returned, the interpretation was
+      ! successful. Otherwise asOkay == .false. is returned.
+      ! logical :: asOkay
+
+      ! integer(ESMF_KIND_I4) :: valueI4
+      valueI4 = ESMF_HConfigAsI4(hconfigIter, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, '("asOkay: ", l2, " valueI4: ", i10)') asOkay, valueI4
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! integer(ESMF_KIND_I8) :: valueI8
+      valueI8 = ESMF_HConfigAsI8(hconfigIter, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, '("asOkay: ", l2, " valueI8: ", i10)') asOkay, valueI8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! real(ESMF_KIND_R4) :: valueR4
+      valueR4 = ESMF_HConfigAsR4(hconfigIter, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, '("asOkay: ", l2, " valueR4: ", f10.6)') asOkay, valueR4
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! real(ESMF_KIND_R8) :: valueR8
+      valueR8 = ESMF_HConfigAsR8(hconfigIter, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, '("asOkay: ", l2, " valueR8: ", f10.6)') asOkay, valueR8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! logical :: valueL
+      valueL = ESMF_HConfigAsLogical(hconfigIter, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, '("asOkay: ", l2, " valueL:  ", l10)') asOkay, valueL
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    else
+      ! Possible recursive iteration over the current hconfigIter element.
+    endif
+
+    ! Next iteration step.
+    call ESMF_HConfigIterNext(hconfigIter, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  enddo
+!EOC
 
 !BOE
 ! \subsubsection{Destroy an HConfig object}
