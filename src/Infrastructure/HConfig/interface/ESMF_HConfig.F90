@@ -349,23 +349,32 @@ contains
 ! !IROUTINE: ESMF_HConfigCreate - Create HConfig object
 
 ! !INTERFACE:
-  function ESMF_HConfigCreate(keywordEnforcer, rc)
+  function ESMF_HConfigCreate(keywordEnforcer, content, filename, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_HConfig) :: ESMF_HConfigCreate
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),   intent(in),  optional :: content
+    character(len=*),   intent(in),  optional :: filename
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create a new HConfig.
+!   Create a new HConfig object. The object is empty unless either the
+!   {\tt content} or {\tt filename} argument is specified.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[{[content]}]
+!     String containing the YAML text. Mutually exclusive with {\tt filename}
+!     argument.
+!   \item[{[filename]}]
+!     Name of the YAML file to be loaded. Mutually exclusive with
+!     {\tt content} argument.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -380,6 +389,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     hconfig%shallowMemory = 0
     ESMF_HConfigCreate = hconfig
 
+    if (present(content) .and. present(filename)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="The 'content' and 'filename' arguments are mutual exclusive", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_HConfigCreate(hconfig, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -390,6 +406,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_HConfigCreate)
+
+    ! handle content and filename
+    if (present(content)) then
+      ! load content
+      call ESMF_HConfigLoad(ESMF_HConfigCreate, content=content, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else if (present(filename)) then
+      ! load filename
+      call ESMF_HConfigLoadFile(ESMF_HConfigCreate, filename=filename, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -479,7 +509,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[hconfig] 
 !     {\tt ESMF\_HConfig} object.
-!   \item[{[content]}]
+!   \item[content]
 !     String containing the YAML text.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -530,7 +560,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[hconfig] 
 !     {\tt ESMF\_HConfig} object.
-!   \item[{[filename]}]
+!   \item[filename]
 !     Name of the YAML file to be loaded.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -609,7 +639,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check mutual exclusion of index and key
     if (present(index) .and. present(key)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="The 'index' and 'key' arguments are mutual exclusive", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -687,7 +717,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check mutual exclusion of index and key
     if (present(index) .and. present(key)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="The 'index' and 'key' arguments are mutual exclusive", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -765,7 +795,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check mutual exclusion of index and key
     if (present(index) .and. present(key)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="The 'index' and 'key' arguments are mutual exclusive", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
