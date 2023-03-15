@@ -76,7 +76,7 @@ if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
   echo "    - one_of: [intel-oneapi-mpi%$comp]" >> ~/.spack/packages.yaml
   echo "  intel-oneapi-mpi:" >> ~/.spack/packages.yaml
   echo "    externals:" >> ~/.spack/packages.yaml
-  echo "    - spec: intel-oneapi-mpi-2021.8.0%$comp" >> ~/.spack/packages.yaml
+  echo "    - spec: intel-oneapi-mpi@2021.8.0%$comp" >> ~/.spack/packages.yaml
   echo "      prefix: /opt/intel/oneapi/mpi/2021.8.0" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
   cat ~/.spack/packages.yaml
@@ -103,7 +103,7 @@ echo "      target: ['$arch']" >> spack.yaml
 echo "      compiler: [$comp]" >> spack.yaml
 echo "      providers:" >> spack.yaml
 if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
-echo "        mpi: [intel-oneapi-mpi]" >> spack.yaml
+echo "        mpi: [intel-oneapi-mpi@2021.8.0]" >> spack.yaml
 else
 echo "        mpi: [openmpi]" >> spack.yaml
 fi
