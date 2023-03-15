@@ -184,7 +184,7 @@ program ESMF_HConfigEx
 !EOC
 
 !BOE
-! \subsubsection{Index based HConfig parsing}
+! \subsubsection{Index based random access HConfig parsing}
 !
 ! An alternative way to loop over the elements contained in {\tt hconfig},
 ! and parsing them, is to use an {\tt index} variable. For this approach the
