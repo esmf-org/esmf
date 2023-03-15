@@ -39,7 +39,8 @@ jobs:
       run: |
         cd ${{ github.workspace }}/.github/workflows
         if [[ "${{ matrix.compiler }}" == *"intel"* ]]; then
-          scripts/install_oneapi.sh -i ${{ env.INTEL_INSTALL_DIR }} \
+          scripts/install_oneapi.sh 
+          #-i ${{ env.INTEL_INSTALL_DIR }} \
         fi
 
     # concretize test environment 
