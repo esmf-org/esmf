@@ -68,6 +68,7 @@ echo "::endgroup::"
 
 # add intel mpi to spack
 if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
+  echo "::group::Create packages.yaml"
   echo "packages:" > ~/.spack/packages.yaml 
   echo "  mpi:" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
@@ -78,7 +79,8 @@ if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
   echo "    - spec: intel-oneapi-mpi-2021.8.0%$comp" >> ~/.spack/packages.yaml
   echo "      prefix: /opt/intel/oneapi/mpi/2021.8.0" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
-  echo ~/.spack/packages.yaml
+  cat ~/.spack/packages.yaml
+  echo "::endgroup::"
 fi
 
 # create spack.yaml
