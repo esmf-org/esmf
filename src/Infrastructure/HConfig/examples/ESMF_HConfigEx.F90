@@ -23,7 +23,7 @@ program ESMF_HConfigEx
   implicit none
 
   ! local variables
-  integer                         :: rc
+  integer                         :: rc, size, i
   type(ESMF_HConfig)              :: hconfig
   type(ESMF_HConfig)              :: hconfigIter, hconfigIterEnd
   logical                         :: isScalar, asOkay, valueL
@@ -180,6 +180,98 @@ program ESMF_HConfigEx
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
+  enddo
+!EOC
+
+!BOE
+! \subsubsection{Index based HConfig parsing}
+!
+! An alternative way to loop over the elements contained in {\tt hconfig},
+! and parsing them, is to use an {\tt index} variable. For this approach the
+! size of {\tt hconfig} is queried.
+!EOE
+!BOC
+  ! integer :: size
+  size = ESMF_HConfigGetSize(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Then looping over the elements is done with a simple do loop. Index based
+! access allows random order of access, versus the iterator approach that
+! only supports begin to end iteration. This is demonstrated here by writing
+! the do loop in reverse order.
+!EOE
+!BOC
+  ! integer :: i
+  do i=size, 1, -1
+
+    ! Check whether the current element is a scalar.
+    ! logical :: isScalar
+    isScalar = ESMF_HConfigIsScalar(hconfig, index=i, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    if (isScalar) then
+
+      ! Any scalar can be accessed as a string.
+      ! character(len=:), allocatable :: string
+      string = ESMF_HConfigAsString(hconfig, index=i, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_LogWrite("AsString: "//string, ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! The attempt can be made to interpret the scalar as any of the other
+      ! supported data types. By default, if the scalar cannot be interpreted
+      ! as the requested data type, rc /= ESMF_SUCCESS is returned. To prevent
+      ! such error condition, the optional, intent(out) argument "asOkay" can
+      ! be provided. If asOkay == .true. is returned, the interpretation was
+      ! successful. Otherwise asOkay == .false. is returned.
+      ! logical :: asOkay
+
+      ! integer(ESMF_KIND_I4) :: valueI4
+      valueI4 = ESMF_HConfigAsI4(hconfig, index=i, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, '("asOkay: ", l2, " valueI4: ", i10)') asOkay, valueI4
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! integer(ESMF_KIND_I8) :: valueI8
+      valueI8 = ESMF_HConfigAsI8(hconfig, index=i, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, '("asOkay: ", l2, " valueI8: ", i10)') asOkay, valueI8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! real(ESMF_KIND_R4) :: valueR4
+      valueR4 = ESMF_HConfigAsR4(hconfig, index=i, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, '("asOkay: ", l2, " valueR4: ", f10.6)') asOkay, valueR4
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! real(ESMF_KIND_R8) :: valueR8
+      valueR8 = ESMF_HConfigAsR8(hconfig, index=i, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, '("asOkay: ", l2, " valueR8: ", f10.6)') asOkay, valueR8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! logical :: valueL
+      valueL = ESMF_HConfigAsLogical(hconfig, index=i, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, '("asOkay: ", l2, " valueL:  ", l10)') asOkay, valueL
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    else
+      ! Possible recursive iteration over the current index=i element.
+    endif
   enddo
 !EOC
 
