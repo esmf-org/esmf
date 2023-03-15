@@ -30,13 +30,22 @@ jobs:
         sudo apt-get -qq install build-essential binutils-dev gfortran
         sudo apt-get -qq install python3-dev
 
+    # restore dependencies from cache
+    - name: Restore Dependencies
+      uses: actions/cache@v3
+      if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
+      with:
+        path: /opt/intel/oneapi
+        key: intel 
+        restore-keys: |
+          intel-${{ runner.os }}-${{ matrix.compiler }}
+
     # install compiler
     - name: Install Intel Compiler
+      if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
       run: |
         cd ${{ github.workspace }}/.github/workflows
-        if [[ "${{ matrix.compiler }}" == *"intel"* || "${{ matrix.compiler }}" == *"oneapi"* ]]; then
-          scripts/install_oneapi.sh
-        fi
+        scripts/install_oneapi.sh
 
     # concretize test environment 
     - name: Concretize Spack Environment Using YAML Specification
@@ -49,7 +58,7 @@ jobs:
           -r ${{ github.workspace }} 
 
     # install test environment
-    #- name: Install Dependencies with Spack 
-    #  run: |
-    #    ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
-    #      -r ${{ github.workspace }}
+    - name: Install Dependencies with Spack 
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+          -r ${{ github.workspace }}
