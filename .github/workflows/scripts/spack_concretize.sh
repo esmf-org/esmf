@@ -59,6 +59,9 @@ echo "::endgroup::"
 # find available compilers
 echo "::group::Find Available Compilers"
 . spack/share/spack/setup-env.sh
+if [[ "$comp" == *"intel"* ]]; then
+  . /opt/intel/oneapi/setvars.sh
+fi
 spack compiler find
 cat ~/.spack/linux/compilers.yaml
 echo "::endgroup::"
