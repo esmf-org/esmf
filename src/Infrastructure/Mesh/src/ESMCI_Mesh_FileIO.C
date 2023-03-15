@@ -43,10 +43,12 @@
 #include "Mesh/include/ESMCI_MeshRedist.h"
 #include "Mesh/include/ESMCI_MeshDual.h"
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
+#include "IO/include/ESMC_IOScrip2ESMF.h"
 #include "Mesh/include/ESMCI_FileIO_Util.h"
 #include "Mesh/include/ESMCI_ESMFMesh_Util.h"
 #include "Mesh/include/ESMCI_UGRID_Util.h"
-#include "IO/include/ESMC_IOScrip2ESMF.h"
+#include "Mesh/include/ESMCI_SHAPEFILE_Util.h"
+
 
 #ifdef ESMF_PNETCDF
 # define _PNETCDF
@@ -1301,10 +1303,18 @@ void ESMCI_mesh_create_from_SHAPEFILE_file(char *filename,
   // Try-catch block around main part of method
   try {
 
-
+    // Example just to make sure everything is compiling correctly
+    int example;
+    get_example_from_SHAPEFILE_file(filename, example);
+    if (example == 3) {
+      printf("Example subroutine is working (example=%d)!\n",example);      
+    }
+    
+    //// Fill in code getting things from shapefile and creating parts of the Mesh here 
     
 
     // Return an error, because this isn't implemented yet
+    // TODO: GET RID OF THE FOLLOWING LINE WHEN THIS SUBROUTINE IS CREATING A VALID MESH
     if (ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
                                       "Creating a Mesh from a shapefile format file not finished yet.",
                                       ESMC_CONTEXT, &localrc)) throw localrc; 
