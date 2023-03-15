@@ -29,6 +29,8 @@ usage () {
   printf "      (default: release)\n"
   printf "  --build-args=BUILD_ARGS\n"
   printf "      cmake arguments (e.g. -DARG=VAL)\n"
+  printf "  --jobs=JOBS\n"
+  printf "      number of jobs used for building esmx and components\n"
   printf "  --load-modulefile=MODULEFILE\n"
   printf "      load modulefile before building\n"
   printf "  --load-bashenv=BASHENV\n"
@@ -49,6 +51,7 @@ settings () {
   printf "  INSTALL_PREFIX=${INSTALL_PREFIX}\n"
   printf "  BUILD_TYPE=${BUILD_TYPE}\n"
   printf "  BUILD_ARGS=${BUILD_ARGS}\n"
+  printf "  JOBS=${JOBS}\n"
   printf "  MODULEFILE=${MODULEFILE}\n"
   printf "  BASHENV=${BASHENV}\n"
   printf "  VERBOSE=${VERBOSE}\n"
@@ -62,6 +65,7 @@ ESMX_BUILD_FILE="esmxBuild.yaml"
 ESMF_ESMXDIR=""
 BUILD_TYPE="release"
 BUILD_ARGS=""
+JOBS=""
 BUILD_DIR="${CWD}/build"
 INSTALL_PREFIX="${CWD}/install"
 MODULEFILE=""
@@ -96,7 +100,10 @@ while [[ $# -gt 0 ]]; do
     --build-type=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --build-args=?*) BUILD_ARGS=${1#*=} ;;
     --build-args) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --build-args) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --build-args=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --jobs=?*) JOBS=${1#*=} ;;
+    --jobs) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --jobs=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --load-modulefile=?*) MODULEFILE=${1#*=} ;;
     --load-modulefile) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --load-modulefile=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
@@ -185,6 +192,9 @@ fi
 if [ "${VERBOSE}" = true ]; then
   CMAKE_SETTINGS+=("-DVERBOSE=1")
 fi
+if [ ! -z "${JOBS}" ]; then
+  CMAKE_SETTINGS+=("-DJOBS=${JOBS}")
+fi
 if [ ! -z "${BUILD_ARGS}" ]; then
   CMAKE_SETTINGS+=("${BUILD_ARGS}")
 fi
@@ -193,6 +203,9 @@ fi
 BUILD_SETTINGS=("")
 if [ "${VERBOSE}" = true ]; then
   BUILD_SETTINGS+=("-v")
+fi
+if [ ! -z "${JOBS}" ]; then
+  BUILD_SETTINGS+=("-j ${JOBS}")
 fi
 
 # install settings

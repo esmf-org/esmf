@@ -40,6 +40,22 @@ include(${CMAKE_CURRENT_BINARY_DIR}/compList.txt)
 include(ExternalProject)
 include(FetchContent)
 
+if(VERBOSE)
+  set(CMAKE_VERBOSE "-v")
+else()
+  set(CMAKE_VERBOSE "")
+endif()
+unset(VERBOSE CACHE)
+
+if(DEFINED JOBS)
+  set(MAKE_JOBS "--jobs=${JOBS}")
+  set(CMAKE_JOBS "-j ${JOBS}")
+else()
+  set(MAKE_JOBS "")
+  set(CMAKE_JOBS "")
+endif()
+unset(JOBS CACHE)
+
 # Set -Dvar=value and execute add_subdirectory
 function(esmx_add_subdirectory CMP_SOURCE_DIR CMP CMP_BUILD_ARGS)
   foreach(ARG IN ITEMS ${CMP_BUILD_ARGS})
@@ -159,21 +175,29 @@ foreach(CMP IN ITEMS ${COMPS})
         " Check source_dir in build configuration."
       )
     endif()
-    if(VERBOSE)
-      set(BUILD_SETTINGS "-v")
-    endif()
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP})
     execute_process(
       COMMAND ${CMAKE_COMMAND} -S${CMP_SOURCE_DIR} -B${CMAKE_BINARY_DIR}/${CMP}
         ${CMP_BUILD_ARGS} -DCMAKE_INSTALL_PREFIX=${CMP_INSTALL_PREFIX}
-        -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+      RESULT_VARIABLE ret
     )
+    if(NOT ret EQUAL "0")
+      message(FATAL_ERROR "cmake generate failed for ${CMP}")
+    endif()
     execute_process(
-      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/${CMP} ${BUILD_SETTINGS}
+      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/${CMP} ${CMAKE_VERBOSE} ${CMAKE_JOBS}
+      RESULT_VARIABLE ret
     )
+    if(NOT ret EQUAL "0")
+      message(FATAL_ERROR "cmake build failed for ${CMP}")
+    endif()
     execute_process(
       COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}/${CMP}
+      RESULT_VARIABLE ret
     )
+    if(NOT ret EQUAL "0")
+      message(FATAL_ERROR "cmake install failed for ${CMP}")
+    endif()
   elseif(${CMP_BUILD_TYPE} STREQUAL "make")
     message(STATUS "Building (MAKE) - ${CMP}")
     find_file(FND_MAKE_FILE
@@ -188,9 +212,13 @@ foreach(CMP IN ITEMS ${COMPS})
       )
     endif()
     execute_process(
-      COMMAND ${CMAKE_MAKE_PROGRAM} ${CMP_BUILD_ARGS}
+      COMMAND ${CMAKE_MAKE_PROGRAM} ${MAKE_JOBS} ${CMP_BUILD_ARGS}
       WORKING_DIRECTORY ${CMP_SOURCE_DIR}
+      RESULT_VARIABLE ret
     )
+    if(NOT ret EQUAL "0")
+      message(FATAL_ERROR "make build failed for ${CMP}")
+    endif()
   elseif(${CMP_BUILD_TYPE} STREQUAL "none")
     # No Op
   else()
