@@ -32,6 +32,7 @@ program ESMF_HConfigEx
   integer(ESMF_KIND_I8)           :: valueI8
   real(ESMF_KIND_R4)              :: valueR4
   real(ESMF_KIND_R8)              :: valueR8
+  character(5)                    :: keyList(3)
   character(160)                  :: msgString
   ! result code
   integer                     :: finalrc, result
@@ -319,7 +320,6 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-!
 ! Then iterate over {\tt hconfig} using the iterator variables as before.
 ! Notice, however, in the code below, compared to the {\em list} case, all 
 ! of the {\tt As} access methods now are either of the form {\tt AsMapKey} or
@@ -428,6 +428,118 @@ program ESMF_HConfigEx
   enddo
 !EOC
 
+!BOE
+! \subsubsection{Key based random access HConfig map parsing}
+!
+! The {\em map values} stored in {\tt hconfig} can be accessed
+! in random order providing the {\em map key}.
+! 
+! To demonstrate this, an array holding keys in random order is defined.
+!EOE
+!BOC
+  ! character(5) :: keyList(3)
+  keyList = ["bike ", "plane", "car  "]
+!EOC
+!BOE
+! Then loop over the elements of {\tt keyList} and use them as {\em map key}
+! to access the {\em map values} in {\tt hconfig}.
+!EOE
+!BOC
+  ! integer :: i
+  do i=1,3
+
+    ! Ensure that all white space padding is removed.
+    ! character :: stringKey
+    stringKey = trim(keyList(i))
+
+    ! Check whether the accessed map value is a scalar.
+    ! logical :: isScalar
+    isScalar = ESMF_HConfigIsScalar(hconfig, key=stringKey, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    if (isScalar) then
+
+      ! Access as a string always works.
+      ! character(len=:), allocatable :: string
+      string = ESMF_HConfigAsString(hconfig, key=stringKey, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_LogWrite("map key="//stringKey//" map value: AsString: "// &
+        string, ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! The attempt can be made to interpret the scalar as any of the other
+      ! supported data types. By default, if the scalar cannot be interpreted
+      ! as the requested data type, rc /= ESMF_SUCCESS is returned. To prevent
+      ! such error condition, the optional, intent(out) argument "asOkay" can
+      ! be provided. If asOkay == .true. is returned, the interpretation was
+      ! successful. Otherwise asOkay == .false. is returned.
+      ! logical :: asOkay
+
+      ! integer(ESMF_KIND_I4) :: valueI4
+      valueI4 = ESMF_HConfigAsI4(hconfig, key=stringKey, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, &
+        '("map key=", A10, " map value: asOkay: ", l2, " valueI4: ", i10)') &
+        stringKey, asOkay, valueI4
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! integer(ESMF_KIND_I8) :: valueI8
+      valueI8 = ESMF_HConfigAsI8(hconfig, key=stringKey, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, &
+        '("map key=", A10, " map value: asOkay: ", l2, " valueI8: ", i10)') &
+        stringKey, asOkay, valueI8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! real(ESMF_KIND_R4) :: valueR4
+      valueR4 = ESMF_HConfigAsR4(hconfig, key=stringKey, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, &
+        '("map key=", A10, " map value: asOkay: ", l2, " valueR4: ", f10.6)') &
+        stringKey, asOkay, valueR4
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! real(ESMF_KIND_R8) :: valueR8
+      valueR8 = ESMF_HConfigAsR8(hconfig, key=stringKey, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, &
+        '("map key=", A10, " map value: asOkay: ", l2, " valueR8: ", f10.6)') &
+        stringKey, asOkay, valueR8
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+      ! logical :: valueL
+      valueL = ESMF_HConfigAsLogical(hconfig, key=stringKey, asOkay=asOkay, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      write (msgString, &
+        '("map key=", A10, " map value: asOkay: ", l2, " valueL: ", l10)') &
+        stringKey, asOkay, valueL
+      call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+    else
+      ! Deal with case where either key or value are not scalars themselves.
+    endif
+
+  enddo
+!EOC
+!BOE
+! Finally destroy {\tt hconfig} when done.
+!EOE
+!BOC
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 10 continue
 
