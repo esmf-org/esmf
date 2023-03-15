@@ -66,6 +66,21 @@ spack compiler find
 cat ~/.spack/linux/compilers.yaml
 echo "::endgroup::"
 
+# add intel mpi to spack
+if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
+  echo "packages:" > ~/.spack/packages.yaml 
+  echo "  mpi:" >> ~/.spack/packages.yaml
+  echo "    buildable: false" >> ~/.spack/packages.yaml
+  echo "    require:" >> ~/.spack/packages.yaml
+  echo "    - one_of: [intel-oneapi-mpi%$comp]" >> ~/.spack/packages.yaml
+  echo "  intel-oneapi-mpi:" >> ~/.spack/packages.yaml
+  echo "    externals:" >> ~/.spack/packages.yaml
+  echo "    - spec: intel-oneapi-mpi-2021.8.0%$comp" >> ~/.spack/packages.yaml
+  echo "      prefix: /opt/intel/oneapi/mpi/2021.8.0" >> ~/.spack/packages.yaml
+  echo "    buildable: false" >> ~/.spack/packages.yaml
+  echo ~/.spack/packages.yaml
+fi
+
 # create spack.yaml
 echo "::group::Create spack.yaml"
 echo "spack:" > spack.yaml
@@ -84,6 +99,12 @@ echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
 echo "      target: ['$arch']" >> spack.yaml
 echo "      compiler: [$comp]" >> spack.yaml
+echo "      providers:" >> spack.yaml
+if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
+echo "        mpi: [intel-oneapi-mpi]" >> spack.yaml
+else
+echo "        mpi: [openmpi]" >> spack.yaml
+fi
 echo "  view: $install_dir/view" >> spack.yaml
 echo "  config:" >> spack.yaml
 echo "    source_cache: $install_dir/source_cache" >> spack.yaml

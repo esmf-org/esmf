@@ -11,12 +11,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        compiler: [oneapi@2023.0.0]
-        #compiler: [intel@20.0.4]
-        #compiler: [gcc@12.2.0]
-        #esmf: [esmf@develop+parallelio~xerces~pnetcdf^parallelio@2.5.10, esmf@develop+pio~parallelio~xerces~pnetcdf]
-        #compiler: [gcc@11.3.0]
-        esmf: [esmf@8.4.1~pnetcdf, esmf@8.4.1~external-parallelio esmf_pio=internal]
+        compiler: [gcc@11.3.0, oneapi@2023.0.0]
+        esmf: [esmf@8.4.1~pnetcdf, esmf@8.4.1~external-parallelio]
 
     env:
       INTEL_INSTALL_DIR: /opt/intel/oneapi 
