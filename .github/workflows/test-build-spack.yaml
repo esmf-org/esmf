@@ -11,11 +11,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        #compiler: [intel-oneapi-compilers@2023.0.0]
+        compiler: [intel-oneapi-compilers@2023.0.0]
         #compiler: [intel@20.0.4]
         #compiler: [gcc@12.2.0]
         #esmf: [esmf@develop+parallelio~xerces~pnetcdf^parallelio@2.5.10, esmf@develop+pio~parallelio~xerces~pnetcdf]
-        compiler: [gcc@11.3.0]
+        #compiler: [gcc@11.3.0]
         esmf: [esmf@8.4.1~pnetcdf, esmf@8.4.1~external-parallelio esmf_pio=internal]
 
     env:
@@ -29,23 +29,31 @@ jobs:
     # prepare core environment
     - name: Install Core Development Tools
       run: |
-        sudo apt-get -qq update
-        sudo apt-get -qq install tar unzip file gringo
-        sudo apt-get -qq install build-essential binutils-dev gfortran
-        sudo apt-get -qq install python3-dev
+        apt-get -qq update
+        apt-get -qq install tar unzip file gringo
+        apt-get -qq install build-essential binutils-dev gfortran
+        apt-get -qq install python3-dev
+
+    # install compiler
+    - name: Install Intel Compiler
+      run: |
+        cd ${{ github.workspace }}/.github/workflows
+        if [[ "${{ matrix.compiler }}" == *"intel"* ]]; then
+          scripts/install_oneapi.sh -i ${{ env.INTEL_INSTALL_DIR }} \
+        fi
 
     # concretize test environment 
-    - name: Concretize Spack Environment Using YAML Specification
-      run: |
-        ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
-          -a x86_64 \
-          -c ${{ matrix.compiler }} \
-          -d ${{ matrix.esmf }} \
-          -i ~/.spack-ci \
-          -r ${{ github.workspace }} 
+    #- name: Concretize Spack Environment Using YAML Specification
+    #  run: |
+    #    ${{ github.workspace }}/.github/workflows/scripts/spack_concretize.sh \
+    #      -a x86_64 \
+    #      -c ${{ matrix.compiler }} \
+    #      -d ${{ matrix.esmf }} \
+    #      -i ~/.spack-ci \
+    #      -r ${{ github.workspace }} 
 
     # install test environment
-    - name: Install Dependencies with Spack 
-      run: |
-        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
-          -r ${{ github.workspace }}
+    #- name: Install Dependencies with Spack 
+    #  run: |
+    #    ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+    #      -r ${{ github.workspace }}
