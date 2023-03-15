@@ -42,9 +42,10 @@ echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] \
 
 # update packages list and repository index
 sudo apt-get update
+sudo apt-get install apt-show-versions
 
 # install
-#apt-get install intel-basekit
-#apt-get install intel-hpckit
-sudo apt-get list -a intel-basekit
-sudo apt-get list -a intel-hpckit
+sudo apt-get install intel-basekit
+sudo apt-get install intel-hpckit
+apt-show-versions -b -a -p intel-basekit
+apt-show-versions -b -a -p intel-hpckit
