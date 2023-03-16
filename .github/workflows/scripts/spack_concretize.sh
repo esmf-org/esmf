@@ -69,15 +69,17 @@ echo "::endgroup::"
 # add intel mpi to spack
 if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
   echo "::group::Create packages.yaml"
+  mpi_version=`ls -ald /opt/intel/oneapi/mpi/* | tail -n 1 | awk -F\> '{print $2}' | tr -d " "`
+  echo "Intel MPI Version: ${mpi_version}"
   echo "packages:" > ~/.spack/packages.yaml 
   echo "  mpi:" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
   echo "    require:" >> ~/.spack/packages.yaml
-  echo "    - one_of: [intel-oneapi-mpi%$comp]" >> ~/.spack/packages.yaml
+  echo "    - one_of: [intel-oneapi-mpi%${comp}]" >> ~/.spack/packages.yaml
   echo "  intel-oneapi-mpi:" >> ~/.spack/packages.yaml
   echo "    externals:" >> ~/.spack/packages.yaml
-  echo "    - spec: intel-oneapi-mpi@2021.8.0%$comp" >> ~/.spack/packages.yaml
-  echo "      prefix: /opt/intel/oneapi/mpi/2021.8.0" >> ~/.spack/packages.yaml
+  echo "    - spec: intel-oneapi-mpi@${mpi_version}%${comp}" >> ~/.spack/packages.yaml
+  echo "      prefix: /opt/intel/oneapi/mpi/${mpi_version}" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
   cat ~/.spack/packages.yaml
   echo "::endgroup::"
@@ -103,7 +105,7 @@ echo "      target: ['$arch']" >> spack.yaml
 echo "      compiler: [$comp]" >> spack.yaml
 echo "      providers:" >> spack.yaml
 if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
-echo "        mpi: [intel-oneapi-mpi@2021.8.0]" >> spack.yaml
+echo "        mpi: [intel-oneapi-mpi@${mpi_version}]" >> spack.yaml
 else
 echo "        mpi: [openmpi]" >> spack.yaml
 fi

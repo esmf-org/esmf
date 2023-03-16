@@ -14,9 +14,6 @@ jobs:
         compiler: [gcc@11.3.0, oneapi@2023.0.0]
         esmf: [esmf@8.4.1~pnetcdf, esmf@8.4.1~external-parallelio]
 
-    env:
-      INTEL_INSTALL_DIR: /opt/intel/oneapi 
-
     steps:
     # check out base repo
     - name: Checkout Base Repository
@@ -36,7 +33,7 @@ jobs:
       if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
       with:
         path: /opt/intel/oneapi
-        key: intel 
+        key: intel- 
         restore-keys: |
           intel-${{ runner.os }}-${{ matrix.compiler }}
 
