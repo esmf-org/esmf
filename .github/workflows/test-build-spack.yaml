@@ -3,6 +3,9 @@ name: Build ESMF Using Spack
 on:
   workflow_dispatch:
   push:
+  schedule:
+    - cron: '0 0 * * MON'
+    - cron: '0 0 * * FRI'
 
 jobs:
   latest-stable:
@@ -31,8 +34,8 @@ jobs:
         sudo apt-get -qq install build-essential binutils-dev gfortran
         sudo apt-get -qq install python3-dev
 
-    # restore dependencies from cache
-    - name: Restore Dependencies
+    # restore intel compiler installation from cache
+    - name: Restore Intel oneAPI Compiler Installation
       uses: actions/cache@v3
       if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
       with:
@@ -42,7 +45,7 @@ jobs:
           intel-${{ runner.os }}-${{ matrix.compiler }}
 
     # install compiler
-    - name: Install Intel Compiler
+    - name: Install Intel oneAPI Compiler
       if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
       run: |
         cd ${{ github.workspace }}/.github/workflows
@@ -59,7 +62,8 @@ jobs:
           -r ${{ github.workspace }} 
 
     # install test environment
-    - name: Install Dependencies with Spack 
+    - name: Install ESMF with Spack 
       run: |
         ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
           -r ${{ github.workspace }}
+
