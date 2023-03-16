@@ -59,8 +59,8 @@ echo "::endgroup::"
 
 # install
 echo "::group::Install Intel oneAPI Base and HPC Kits"
-sudo apt-get install -qq intel-basekit-$compiler_version
-sudo apt-get install -qq intel-hpckit-$compiler_version
+apt-get install -qq intel-basekit-$compiler_version
+apt-get install -qq intel-hpckit-$compiler_version
 echo "::endgroup::"
 
 # list content of the installation folders (for debugging)
