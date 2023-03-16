@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# get arguments
+while getopts c: flag
+do
+  case "${flag}" in
+    c) comp=${OPTARG};;
+  esac
+done
+
+# print out arguments
+echo "Compiler: $comp"
+
 # download the key to system keyring
 wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | \
   gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
@@ -10,18 +21,27 @@ echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] \
 
 # update packages list and repository index
 sudo apt-get update
-sudo apt-get install apt-show-versions
 
-# get list of available mpi versions
-apt list | grep "intel-oneapi-mpi-" | grep -v devel | awk -F\/ '{print $1}' >& mpi_versions.txt
+# get compiler version
+compiler_version=`echo "$comp" | awk -F\@ '{print $2}'`
 
-# get list of available fortran compilers
-apt list | grep "intel-oneapi-compiler-fortran-" | grep -v devel | grep -v common | grep -v runtime | awk -F\/ '{print $1}' >& fc_versions.txt
+# check the version is available or not
+suffix=""
+if [ ! -z "$compiler_version" ]; then
+  list_compiler_versions=`apt list 2>&1 | grep "intel-basekit-[1-9]" | awk -F\- '{print $3}' | awk -F\/ '{printf $1" "}'`
+  in_the_list=0
+  for i in $list_compiler_versions
+  do
+    if [[ "$i" == "$compiler_version" ]]; then
+      in_the_list=1
+      break
+    fi
+  done
+  if [ $in_the_list == 1 ]; then
+    suffix="-$compiler_version"
+  fi
+fi
 
 # install
-#sudo apt-get install intel-basekit
-#sudo apt-get install intel-hpckit
-#sudo apt-get 
-#sudo apt-get intel-oneapi-mpi-2021.8.0
-sudo apt-get install `tail -n 1 fc_versions.txt`
-sudo apt-get install `tail -n 1 mpi_versions.txt`
+sudo apt-get install intel-basekit${suffix}
+sudo apt-get install intel-hpckit${suffix}
