@@ -24,11 +24,15 @@ sudo apt-get update
 
 # get compiler version
 compiler_version=`echo "$comp" | awk -F\@ '{print $2}'`
+echo "Compiler Version: $compiler_version"
 
 # check the version is available or not
-suffix=""
-if [ ! -z "$compiler_version" ]; then
+if [ -z "$compiler_version" ]; then
+  echo "Compiler version needs to be specified! Exiting"
+  exit
+else
   list_compiler_versions=`apt list 2>&1 | grep "intel-basekit-[1-9]" | awk -F\- '{print $3}' | awk -F\/ '{printf $1" "}'`
+  echo "List of available compiler versions: $list_compiler_versions"
   in_the_list=0
   for i in $list_compiler_versions
   do
@@ -37,11 +41,12 @@ if [ ! -z "$compiler_version" ]; then
       break
     fi
   done
-  if [ $in_the_list == 1 ]; then
-    suffix="-$compiler_version"
+  if [ $in_the_list == 0 ]; then
+    echo "Specified compiler version ($compiler_version) is not available! Exiting
+    exit
   fi
 fi
 
 # install
-sudo apt-get install intel-basekit${suffix}
-sudo apt-get install intel-hpckit${suffix}
+sudo apt-get install intel-basekit-$compiler_version
+sudo apt-get install intel-hpckit-$compiler_version

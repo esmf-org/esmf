@@ -11,9 +11,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        # Available compiler versions
-        # Intel: 2021.1.1, 2021.1.2, 2021.2.0, 2021.3.0, 2021.4.0, 2022.0.1, 2022.0.2, 2022.1.0, 2022.2.0, 2022.2.1, 2023.0.0
-        # GNU  : 11.3.0
+        # available compiler versions, as of 15-March-2023
+        # intel: 2021.1.1, 2021.1.2, 2021.2.0, 2021.3.0, 2021.4.0, 2022.0.1, 2022.0.2, 2022.1.0, 2022.2.0, 2022.2.1, 2023.0.0
+        # gnu  : 11.3.0
         #compiler: [gcc@11.3.0, oneapi@2022.0.2]
         compiler: [oneapi@2022.0.2]
         esmf: [esmf@8.4.1~pnetcdf, esmf@8.4.1~external-parallelio]
