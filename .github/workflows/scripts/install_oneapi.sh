@@ -27,7 +27,7 @@ echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] \
   https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
 
 # update packages list and repository index
-sudo apt-get -qq update
+apt-get -qq update
 echo "::endgroup::"
 
 # get compiler version
