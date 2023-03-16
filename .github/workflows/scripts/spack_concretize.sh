@@ -66,19 +66,26 @@ spack compiler find
 cat ~/.spack/linux/compilers.yaml
 echo "::endgroup::"
 
+# if it is Intel oneAPI Compiler the basekit version might not be same with compiler version
+if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
+  cmp_version=`cat ~/.spack/linux/compilers.yaml  | grep "spec: oneapi" | awk -F: '{print $2}' | tr -d " "`
+else
+  cmp_version=$comp
+fi
+
 # add intel mpi to spack
 if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
   echo "::group::Create packages.yaml"
-  mpi_version=`ls -ald /opt/intel/oneapi/mpi/* | tail -n 1 | awk -F\> '{print $2}' | tr -d " "`
+  mpi_version=`ls -ald /opt/intel/oneapi/mpi/* | grep "latest" | awk -F\> '{print $2}' | tr -d " "`
   echo "Intel MPI Version: ${mpi_version}"
   echo "packages:" > ~/.spack/packages.yaml 
   echo "  mpi:" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
   echo "    require:" >> ~/.spack/packages.yaml
-  echo "    - one_of: [intel-oneapi-mpi%${comp}]" >> ~/.spack/packages.yaml
+  echo "    - one_of: [intel-oneapi-mpi%${cmp_version}]" >> ~/.spack/packages.yaml
   echo "  intel-oneapi-mpi:" >> ~/.spack/packages.yaml
   echo "    externals:" >> ~/.spack/packages.yaml
-  echo "    - spec: intel-oneapi-mpi@${mpi_version}%${comp}" >> ~/.spack/packages.yaml
+  echo "    - spec: intel-oneapi-mpi@${mpi_version}%${cmp_version}" >> ~/.spack/packages.yaml
   echo "      prefix: /opt/intel/oneapi/mpi/${mpi_version}" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
   cat ~/.spack/packages.yaml
@@ -97,12 +104,12 @@ echo "  specs:" >> spack.yaml
 IFS=', ' read -r -a array <<< "$deps"
 for d in "${array[@]}"
 do
-  echo "  - $d %$comp target=$arch" >> spack.yaml
+  echo "  - $d %$cmp_version target=$arch" >> spack.yaml
 done
 echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
 echo "      target: ['$arch']" >> spack.yaml
-echo "      compiler: [$comp]" >> spack.yaml
+echo "      compiler: [$cmp_version]" >> spack.yaml
 echo "      providers:" >> spack.yaml
 if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
 echo "        mpi: [intel-oneapi-mpi@${mpi_version}]" >> spack.yaml
