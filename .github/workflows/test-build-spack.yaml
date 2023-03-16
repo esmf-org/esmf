@@ -37,7 +37,7 @@ jobs:
       if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
       with:
         path: /opt/intel/oneapi
-        key: intel- 
+        key: intel-${{ runner.os }}-${{ matrix.compiler }}
         restore-keys: |
           intel-${{ runner.os }}-${{ matrix.compiler }}
 
