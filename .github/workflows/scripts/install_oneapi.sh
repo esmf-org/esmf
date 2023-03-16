@@ -27,7 +27,7 @@ echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] \
   https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
 
 # update packages list and repository index
-apt-get -qq update
+sudo apt-get -qq update
 echo "::endgroup::"
 
 # get compiler version
@@ -59,8 +59,9 @@ echo "::endgroup::"
 
 # install
 echo "::group::Install Intel oneAPI Base and HPC Kits"
-apt-get install -qq intel-basekit-$compiler_version
-apt-get install -qq intel-hpckit-$compiler_version
+sudo apt-get install -qq intel-basekit-$compiler_version
+sudo apt-get install -qq intel-hpckit-$compiler_version
+setfacl -R -m u:`whoami`:rwx /opt/intel
 echo "::endgroup::"
 
 # list content of the installation folders (for debugging)
