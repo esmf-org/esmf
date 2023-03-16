@@ -5,17 +5,28 @@ import yaml
 import argparse
 import collections
 
-def read_drv_yaml_file(file_path):
+def read_drv_yaml_file(file_path, esmx_comps):
     # open yaml file and read it
     if not os.path.exists(file_path):
         sys.exit('File not found: {}'.format(file_path))
     with open(file_path) as _file:
-        data = yaml.safe_load(_file)
-        return dict({k.replace("-", "_"): v for k, v in data.items()})
+      data = yaml.safe_load(_file)
+      if data is not None:
+        _dict = dict({k.replace("-", "_"): v for k, v in data.items()})
+      else:
+        _dict = {}
+      if _dict.get("components") is None:
+        _dict['components'] = {}
+      if _dict.get('tests') is None:
+        _dict['tests'] = {}
+      for comp in esmx_comps:
+        _dict['components'].update({comp:''})
+      return _dict
 
 def create_compList(_dict, odir):
     # open file
     with open(os.path.join(odir, 'compList.txt'), 'w') as f:
+      if _dict['components'] is not None:
         # loop through components and create use statements
         od = collections.OrderedDict(_dict['components'].items())
         comp_str = [comp for comp in od.keys()]
@@ -74,6 +85,7 @@ def create_compList(_dict, odir):
 def create_compUse(_dict, odir):
     # open file
     with open(os.path.join(odir, 'compUse.inc'), 'w') as f:
+      if _dict['components'] is not None:
         # loop through components and create use statements
         od = collections.OrderedDict(_dict['components'].items())
         for k1, v1 in od.items():
@@ -85,6 +97,7 @@ def create_compUse(_dict, odir):
 def create_compDef(_dict, odir):
     # open file
     with open(os.path.join(odir, 'compDef.inc'), 'w') as f:
+      if _dict['components'] is not None:
         # loop through components and create use statements
         i = 1
         od = collections.OrderedDict(_dict['components'].items())
@@ -98,20 +111,28 @@ def main(argv):
 
     # default value
     odir = '.'
+    disable_esmx_comps = []
+    esmx_comps = []
 
     # read input arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--ifile' , help='Input driver yaml file', required=True)
     parser.add_argument('--odir'  , help='Output directory for generated code')
+    parser.add_argument('--disable_esmx_comps' , help='List of ESMX components to disable')
     args = parser.parse_args()
 
     if args.ifile:
         ifile = args.ifile
     if args.odir:
         odir = args.odir
+    if args.disable_esmx_comps:
+        disable_esmx_comps = list(args.disable_esmx_comps.lower().split(","))
+
+    if 'esmx_data' not in disable_esmx_comps:
+        esmx_comps.append('ESMX_Data')
 
     # read driver configuration yaml file
-    dict_drv = read_drv_yaml_file(ifile)
+    dict_drv = read_drv_yaml_file(ifile, esmx_comps)
 
     # create compList.txt for CMake
     create_compList(dict_drv, odir)

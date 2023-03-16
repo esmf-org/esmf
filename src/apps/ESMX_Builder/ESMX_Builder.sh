@@ -29,6 +29,8 @@ usage () {
   printf "      (default: release)\n"
   printf "  --build-args=BUILD_ARGS\n"
   printf "      cmake arguments (e.g. -DARG=VAL)\n"
+  printf "  --disable-esmx-comps=DISABLE_ESMX_COMPS\n"
+  printf "      disable built in ESMX components\n"
   printf "  --build-jobs=JOBS\n"
   printf "      number of jobs used for building esmx and components\n"
   printf "  --load-module=MODULEFILE\n"
@@ -45,6 +47,13 @@ usage () {
   printf "\n"
 }
 
+# usage error
+usage_error () {
+  printf "ERROR: $1 $2\n"
+  usage
+  exit 1
+}
+
 # print settings
 settings () {
   printf "Settings:\n"
@@ -56,6 +65,7 @@ settings () {
   printf "  INSTALL_PREFIX=${INSTALL_PREFIX}\n"
   printf "  BUILD_TYPE=${BUILD_TYPE}\n"
   printf "  BUILD_ARGS=${BUILD_ARGS}\n"
+  printf "  DISABLE_ESMX_COMPS=${DISABLE_ESMX_COMPS}\n"
   printf "  JOBS=${JOBS}\n"
   printf "  MODULEFILE=${MODULEFILE}\n"
   printf "  BASHENV=${BASHENV}\n"
@@ -72,6 +82,7 @@ ESMX_BUILD_FILE="esmxBuild.yaml"
 ESMF_ESMXDIR=""
 BUILD_TYPE="release"
 BUILD_ARGS=""
+DISABLE_ESMX_COMPS=""
 JOBS=""
 BUILD_DIR="${CWD}/build"
 INSTALL_PREFIX="${CWD}/install"
@@ -93,41 +104,46 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --help|-h) usage; exit 0 ;;
     --esmx-dir=?*) ESMF_ESMXDIR=${1#*=} ;;
-    --esmx-dir) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --esmx-dir=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --esmx-dir)  usage_error "$1" "requires an argument" ;;
+    --esmx-dir=) usage_error "$1" "requires an argument" ;;
     --esmfmkfile=?*) ESMFMKFILE=${1#*=} ;;
-    --esmfmkfile) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --esmfmkfile=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --esmfmkfile)  usage_error "$1" "requires an argument" ;;
+    --esmfmkfile=) usage_error "$1" "requires an argument" ;;
     --build-dir=?*) BUILD_DIR=${1#*=} ;;
-    --build-dir) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --build-dir=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --build-dir)  usage_error "$1" "requires an argument" ;;
+    --build-dir=) usage_error "$1" "requires an argument" ;;
     --prefix=?*) INSTALL_PREFIX=${1#*=} ;;
-    --prefix) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --prefix=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --prefix)  usage_error "$1" "requires an argument" ;;
+    --prefix=) usage_error "$1" "requires an argument" ;;
     --build-type=?*) BUILD_TYPE=${1#*=} ;;
-    --build-type) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --build-type=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --build-type)  usage_error "$1" "requires an argument" ;;
+    --build-type=) usage_error "$1" "requires an argument" ;;
     --build-args=?*) BUILD_ARGS=${1#*=} ;;
-    --build-args) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --build-args=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --build-args)  usage_error "$1" "requires an argument" ;;
+    --build-args=) usage_error "$1" "requires an argument" ;;
     --build-jobs=?*) JOBS=${1#*=} ;;
-    --build-jobs) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --build-jobs=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --build-jobs)  usage_error "$1" "requires an argument" ;;
+    --build-jobs=) usage_error "$1" "requires an argument" ;;
+    --disable-esmx-comps=?*) DISABLE_ESMX_COMPS=${1#*=} 
+      DISABLE_ESMX_COMPS=${DISABLE_ESMX_COMPS/' '/','} 
+      DISABLE_ESMX_COMPS=${DISABLE_ESMX_COMPS/';'/','} ;;
+    --disable-esmx-comps)  usage_error  "$1" "requires an argument" ;;
+    --disable-esmx-comps=) usage_error "$1" "requires an argument" ;;
     --load-module=?*) MODULEFILE=${1#*=} ;;
-    --load-module) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --load-module=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --load-module)  usage_error "$1" "requires an argument" ;;
+    --load-module=) usage_error "$1" "requires an argument" ;;
     --load-bashenv=?*) BASHENV=${1#*=} ;;
-    --load-bashenv) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --load-bashenv=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --load-bashenv)  usage_error "$1" "requires an argument" ;;
+    --load-bashenv=) usage_error "$1" "requires an argument" ;;
     --test) TEST=true ;;
-    --test=?*) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
-    --test=) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
+    --test=?*) usage_error "$1" "argument ignored" ;;
+    --test=)   usage_error "$1" "argument ignored" ;;
     --test-dir=?*) TEST_DIR=${1#*=} ;;
-    --test-dir) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
-    --test-dir=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --test-dir)  usage_error "$1" "requires an argument" ;;
+    --test-dir=) usage_error "$1" "requires an argument" ;;
     --verbose|-v) VERBOSE=true ;;
-    --verbose=?*) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
-    --verbose=) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
+    --verbose=?*) usage_error "$1" "argument ignored" ;;
+    --verbose=)   usage_error "$1" "argument ignored" ;;
     -?*) printf "ERROR: Unknown option $1\n"; usage; exit 1 ;;
     *) POSITIONAL_ARGS+=("${1}") ;;
   esac
@@ -197,6 +213,9 @@ fi
 CMAKE_SETTINGS=("")
 if [ ! -z "${ESMX_BUILD_FILE}" ]; then
   CMAKE_SETTINGS+=("-DESMX_BUILD_FILE=${ESMX_BUILD_FILE}")
+fi
+if [ ! -z "${DISABLE_ESMX_COMPS}" ]; then
+  CMAKE_SETTINGS+=("-DDISABLE_ESMX_COMPS=${DISABLE_ESMX_COMPS}")
 fi
 if [ ! -z "${INSTALL_PREFIX}" ]; then
   CMAKE_SETTINGS+=("-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}")

@@ -26,10 +26,15 @@ add_library(esmx_driver ESMX_Driver.F90)
 target_include_directories(esmx_driver PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(esmx_driver PUBLIC ESMF)
 
+if(DEFINED DISABLE_ESMX_COMPS)
+  set(DISABLE_ESMX_COMPS --disable_esmx_comps ${DISABLE_ESMX_COMPS})
+endif()
+unset(DISABLE_ESMX_COMPS CACHE)
+
 # Generate comp*.* files from esmxBuild.yaml
 find_package(Python 3.5 REQUIRED COMPONENTS Interpreter)
 execute_process(COMMAND ${Python_EXECUTABLE}
-  ${CMAKE_CURRENT_LIST_DIR}/esmxGen.py --ifile ${ESMX_BUILD_FILE} --odir ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_LIST_DIR}/esmxGen.py --ifile ${ESMX_BUILD_FILE} --odir ${CMAKE_CURRENT_BINARY_DIR} ${DISABLE_ESMX_COMPS}
   RESULT_VARIABLE ret)
 if(NOT ret EQUAL "0")
   message(FATAL_ERROR "esmxGen.py failed processing esmxBuild.yaml")
