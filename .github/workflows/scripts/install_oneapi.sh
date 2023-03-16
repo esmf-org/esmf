@@ -29,7 +29,7 @@ echo "Compiler Version: $compiler_version"
 # check the version is available or not
 if [ -z "$compiler_version" ]; then
   echo "Compiler version needs to be specified! Exiting ..."
-  exit
+  exit 1
 else
   list_compiler_versions=`apt list 2>&1 | grep "intel-basekit-[1-9]" | awk -F\- '{print $3}' | awk -F\/ '{printf $1" "}'`
   echo "List of available compiler versions: $list_compiler_versions"
@@ -43,7 +43,7 @@ else
   done
   if [ $in_the_list == 0 ]; then
     echo "Specified compiler version ($compiler_version) is not available! Exiting ..."
-    exit
+    exit 1
   fi
 fi
 
