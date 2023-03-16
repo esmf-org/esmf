@@ -26,7 +26,7 @@ program ESMF_HConfigEx
   integer                         :: rc, size, i
   type(ESMF_HConfig)              :: hconfig
   type(ESMF_HConfig)              :: hconfigIter, hconfigIterEnd
-  logical                         :: isScalar, asOkay, valueL
+  logical                         :: isScalar, asOkay, valueL, isDefined
   character(len=:), allocatable   :: string, stringKey, tag
   integer(ESMF_KIND_I4)           :: valueI4
   integer(ESMF_KIND_I8)           :: valueI8
@@ -276,6 +276,27 @@ program ESMF_HConfigEx
     endif
   enddo
 !EOC
+!BOE
+! The above loop is safe with respect to {\tt index} potentially being specified
+! with an out-of-range value. This is because {\tt ESMF\_HConfigIsScalar()}
+! returns {\tt .false.} in this case. There are only four valid options of what
+! a valid HConfig element can be. Each has an associated {\tt Is} method:
+! \begin{itemize}
+! \item Null: {\tt ESMF\_HConfigIsNull()}
+! \item Scalar: {\tt ESMF\_HConfigIsScalar()}
+! \item Sequence: {\tt ESMF\_HConfigIsSequence()}
+! \item Map: {\tt ESMF\_HConfigIsMap()}
+! \end{itemize}
+! The general check to see whether an index points to a valid element is
+! provided by {\tt ESMF\_HConfigIsDefined()}.
+!EOE
+!BOC
+  ! logical :: isDefined
+  isDefined = ESMF_HConfigIsDefined(hconfig, index=10, rc=rc)
+!BOE
+! This returns {\tt isDefined == .false.} because for {\tt hconfig} a value of
+! {\tt index=10} is out of range.
+!EOE
 
 !BOE
 ! \subsubsection{Destroy an HConfig object}
@@ -534,6 +555,20 @@ program ESMF_HConfigEx
   enddo
 !EOC
 !BOE
+! The above loop is safe with respect to {\tt stringKey} potentially
+! specifying a value that is not a valid {\em map key}. This is because
+! {\tt ESMF\_HConfigIsScalar()} returns {\tt .false.} in this case.
+!
+! The general check to see whether a {\em map key} refers to a valid element
+! is provided by {\tt ESMF\_HConfigIsDefined()}.
+!EOE
+!BOC
+  ! logical :: isDefined
+  isDefined = ESMF_HConfigIsDefined(hconfig, key="bad-key", rc=rc)
+!BOE
+! This returns {\tt isDefined == .false.} because {\tt hconfig} does not
+! contain {\tt "bad-key"} as one of its valid {\em map keys}.
+!
 ! Finally destroy {\tt hconfig} when done.
 !EOE
 !BOC
