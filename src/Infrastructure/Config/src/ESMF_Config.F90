@@ -1112,6 +1112,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       hconfig = config%cptr%hconfig
     endif
 
+    if ( present (rc )) rc = ESMF_SUCCESS
+
   end subroutine ESMF_ConfigGet
 !------------------------------------------------------------------------------
 

@@ -26,7 +26,9 @@ CLOBBERDIRS =
 #  Run targets
 #
 run_ESMF_HConfigEx:
+	cp -f example.yaml $(ESMF_EXDIR)
 	$(MAKE) EXNAME=HConfig NP=4 exfrun
 
 run_ESMF_HConfigEx_uni:
+	cp -f example.yaml $(ESMF_EXDIR)
 	$(MAKE) EXNAME=HConfig NP=1 exfrun

@@ -26,7 +26,9 @@ program ESMF_HConfigEx
   integer                         :: rc, size, i
   type(ESMF_HConfig)              :: hconfig
   type(ESMF_HConfig)              :: hconfigIter, hconfigIterEnd
-  logical                         :: isScalar, asOkay, valueL, isDefined
+  type(ESMF_Config)               :: config
+  logical                         :: asOkay, valueL, isDefined
+  logical                         :: isNull, isScalar, isSequence, isMap
   character(len=:), allocatable   :: string, stringKey, tag
   integer(ESMF_KIND_I4)           :: valueI4
   integer(ESMF_KIND_I8)           :: valueI8
@@ -280,7 +282,8 @@ program ESMF_HConfigEx
 ! The above loop is safe with respect to {\tt index} potentially being specified
 ! with an out-of-range value. This is because {\tt ESMF\_HConfigIsScalar()}
 ! returns {\tt .false.} in this case. There are only four valid options of what
-! a valid HConfig element can be. Each has an associated {\tt Is} method:
+! {\tt type} a valid HConfig element can be. Each has an associated {\tt Is}
+! method:
 ! \begin{itemize}
 ! \item Null: {\tt ESMF\_HConfigIsNull()}
 ! \item Scalar: {\tt ESMF\_HConfigIsScalar()}
@@ -576,8 +579,106 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-10 continue
+!BOE
+! \subsubsection{Load HConfig from YAML file}
+!
+! One option is to first create an empty HConfig object, followed by calling
+! {\tt ESMF\_HConfigLoadFile()} to load the content of the specified YAML file.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigLoadFile(hconfig, filename="example.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! When done destroy as usual.
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The alternative option is to create and load the HConfig object in a single
+! call to {\tt ESMF\_HConfigCreate()} using the optional {\tt filename}
+! argument to specify the YAML file.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(filename="example.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! And again destroy hconfig when done with it.
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOE
+! \subsubsection{Access HConfig from Config}
+!
+! The {\tt ESMF\_Config} class can be queried for an HConfig object. This allows
+! the use of the HConfig API to access information contained in a Config object.
+!EOE
+  config = ESMF_ConfigCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_ConfigLoadFile(config, filename="example.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! type(ESMF_Config) :: config
+  ! type(ESMF_HConfig) :: hconfig
+  call ESMF_ConfigGet(config, hconfig=hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The {\tt hconfig} obtained this way is indistinguishable from an explicitly
+! created HConfig instance. E.g. it can be queried for its {\em type} using the
+! {\tt Is} methods:
+!BOC
+  ! logical :: isDefined
+  isDefined = ESMF_HConfigIsDefined(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("HConfig from Config IsDefined: ", l2)') isDefined
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! logical :: isNull
+  isNull = ESMF_HConfigIsNull(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("HConfig from Config IsNull: ", l2)') isNull
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! logical :: isSequence
+  isSequence = ESMF_HConfigIsSequence(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("HConfig from Config IsSequence: ", l2)') isSequence
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! logical :: isMap
+  isMap = ESMF_HConfigIsMap(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("HConfig from Config IsMap: ", l2)') isMap
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Once done with {\tt hconfig} it must {\em not} be destroyed explicitly by
+! the user. The {\tt hconfig} is still owned by the {\tt config} object, and
+! will be destroyed automatically when the {\tt config} object is destroyed.
+! This follows the simple rule that a user only owns those objects created
+! explicitly by calling a {\tt Create()} method.
+!EOE
+  call ESMF_ConfigDestroy(config, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
   call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
