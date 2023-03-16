@@ -37,8 +37,27 @@ endif()
 
 # Include compList.txt which in turn includes component libraries
 include(${CMAKE_CURRENT_BINARY_DIR}/compList.txt)
-include(ExternalProject)
 include(FetchContent)
+
+if(TEST)
+  set(CMAKE_TEST TRUE)
+  enable_testing()
+  if(NOT DEFINED TEST_DIR)
+    set(CMAKE_TEST_DIR "tests")
+  else()
+    set(CMAKE_TEST_DIR ${TEST_DIR})
+  endif()
+  string(REPLACE "\"" "" ESMF_INTERNAL_MPIRUN ${ESMF_INTERNAL_MPIRUN})
+  string(STRIP ${ESMF_INTERNAL_MPIRUN} ESMF_INTERNAL_MPIRUN)
+  find_program(CMAKE_TEST_EXE
+    NAMES ${ESMF_INTERNAL_MPIRUN}
+    NO_CACHE
+  )
+  file(MAKE_DIRECTORY ${CMAKE_TEST_DIR})
+  set(CMAKE_TEST_TASKS -np 4)
+endif()
+unset(TEST CACHE)
+unset(TEST_DIR CACHE)
 
 if(VERBOSE)
   set(CMAKE_VERBOSE "-v")
@@ -55,19 +74,6 @@ else()
   set(CMAKE_JOBS "")
 endif()
 unset(JOBS CACHE)
-
-# Set -Dvar=value and execute add_subdirectory
-function(esmx_add_subdirectory CMP_SOURCE_DIR CMP CMP_BUILD_ARGS)
-  foreach(ARG IN ITEMS ${CMP_BUILD_ARGS})
-    string(REGEX REPLACE "^-D" "" ARG ${ARG})
-    string(FIND ${ARG} "=" EQPOS)
-    string(SUBSTRING ${ARG} 0 ${EQPOS}-1 LARG)
-    math(EXPR EQPOS "${EQPOS}+1")
-    string(SUBSTRING ${ARG} ${EQPOS} -1 RARG)
-    set(${LARG} ${RARG} CACHE STRING "${CMP} setting for ${LARG}" FORCE)
-  endforeach()
-  add_subdirectory(${CMP_SOURCE_DIR} ${CMP})
-endfunction()
 
 # Add components using build type
 foreach(CMP IN ITEMS ${COMPS})
@@ -110,8 +116,8 @@ foreach(CMP IN ITEMS ${COMPS})
     FetchContent_Populate(${CMP})
   endif()
 
-  # NUOPC_XCOMP is built internally
-  if("${CMP}" STREQUAL "NUOPC_XCOMP")
+  # ESMX_Data component is built internally
+  if("${CMP}" STREQUAL "ESMX_Data")
     set(CMP_BUILD_TYPE "none")
   endif()
 
@@ -169,7 +175,7 @@ foreach(CMP IN ITEMS ${COMPS})
     endif()
   endif()
 
-  # build external component
+  # build component with cmake
   if(${CMP_BUILD_TYPE} STREQUAL "cmake")
     message(STATUS "Building (CMAKE) - ${CMP}")
     find_file(FND_CMAKE_LISTS
@@ -206,6 +212,7 @@ foreach(CMP IN ITEMS ${COMPS})
     if(NOT ret EQUAL "0")
       message(FATAL_ERROR "cmake install failed for ${CMP}")
     endif()
+  # build component with make
   elseif(${CMP_BUILD_TYPE} STREQUAL "make")
     message(STATUS "Building (MAKE) - ${CMP}")
     find_file(FND_MAKE_FILE
@@ -227,6 +234,7 @@ foreach(CMP IN ITEMS ${COMPS})
     if(NOT ret EQUAL "0")
       message(FATAL_ERROR "make build failed for ${CMP}")
     endif()
+  # build component with script
   elseif(${CMP_BUILD_TYPE} STREQUAL "script")
     message(STATUS "Building (SCRIPT) - ${CMP}")
     find_file(FND_BUILD_SCRIPT
@@ -248,6 +256,7 @@ foreach(CMP IN ITEMS ${COMPS})
     if(NOT ret EQUAL "0")
       message(FATAL_ERROR "script build failed for ${CMP}")
     endif()
+  # skip build step
   elseif(${CMP_BUILD_TYPE} STREQUAL "none")
     # No Op
   else()
@@ -255,11 +264,21 @@ foreach(CMP IN ITEMS ${COMPS})
   endif()
 
   # include modules and link libraries
-  if("${CMP}" STREQUAL "NUOPC_XCOMP")
-    add_library(nuopc_xcomp NUOPC_XCOMP.F90)
-    target_link_libraries(nuopc_xcomp PUBLIC ESMF)
-    add_dependencies(esmx_driver nuopc_xcomp)
-    target_link_libraries(esmx_driver PUBLIC nuopc_xcomp)
+  if("${CMP}" STREQUAL "ESMX_Data")
+    add_library(esmx_data ${ESMF_ESMXDIR}/Comps/ESMX_Data.F90)
+    target_link_libraries(esmx_data PUBLIC ESMF)
+    add_dependencies(esmx_driver esmx_data)
+    target_link_libraries(esmx_driver PUBLIC esmx_data)
+    if(CMAKE_TEST)
+      file(COPY ${ESMF_ESMXDIR}/Tests/esmx-data DESTINATION ${CMAKE_TEST_DIR})
+      file(CREATE_LINK ${CMAKE_BINARY_DIR}/esmx
+        ${CMAKE_TEST_DIR}/esmx-data/esmx
+        SYMBOLIC
+      )
+      add_test(NAME comp-esmx-data
+        COMMAND ${CMAKE_TEST_EXE} ${CMAKE_TEST_TASKS} ./esmx
+        WORKING_DIRECTORY ${CMAKE_TEST_DIR}/esmx-data)
+    endif()
   else()
     find_file(FND_CMAKE_CONFIG
       NAMES ${CMP_CMAKE_CONFIG}

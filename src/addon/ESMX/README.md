@@ -40,6 +40,8 @@ options:
   [--build-jobs=JOBS]
   [--load-modulefile=MODULEFILE]
   [--load-bashenv=BASHENV]
+  [--test]
+  [--test-dir=TEST_DIR]
   [--verbose]
   [-v]
 
@@ -69,6 +71,11 @@ where:
   --load-module=MODULEFILE load modulefile before building
 
   --load-bashenv=BASHENV   load bash environment file before building
+
+  --test                   run ctest suite for ESMX Driver
+
+  --test-dir               test directory
+                           (default: tests)
 
   --verbose or -v          build with verbose output
 ```

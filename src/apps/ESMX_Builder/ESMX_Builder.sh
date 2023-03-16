@@ -35,6 +35,11 @@ usage () {
   printf "      load modulefile before building\n"
   printf "  --load-bashenv=BASHENV\n"
   printf "      load bash environment file before building\n"
+  printf "  --test\n"
+  printf "      add testing\n"
+  printf "  --test-dir=TEST_DIR\n"
+  printf "      test directory\n"
+  printf "      (default: tests)\n"
   printf "  --verbose, -v\n"
   printf "      build with verbose output\n"
   printf "\n"
@@ -54,6 +59,8 @@ settings () {
   printf "  JOBS=${JOBS}\n"
   printf "  MODULEFILE=${MODULEFILE}\n"
   printf "  BASHENV=${BASHENV}\n"
+  printf "  TEST=${TEST}\n"
+  printf "  TEST_DIR=${TEST_DIR}\n"
   printf "  VERBOSE=${VERBOSE}\n"
   printf "\n"
 }
@@ -70,6 +77,8 @@ BUILD_DIR="${CWD}/build"
 INSTALL_PREFIX="${CWD}/install"
 MODULEFILE=""
 BASHENV=""
+TEST=false
+TEST_DIR="${CWD}/tests"
 VERBOSE=false
 
 # required arguments
@@ -110,6 +119,12 @@ while [[ $# -gt 0 ]]; do
     --load-bashenv=?*) BASHENV=${1#*=} ;;
     --load-bashenv) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --load-bashenv=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --test) TEST=true ;;
+    --test=?*) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
+    --test=) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
+    --test-dir=?*) TEST_DIR=${1#*=} ;;
+    --test-dir) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
+    --test-dir=) printf "ERROR: $1 requires an argument.\n"; usage; exit 1 ;;
     --verbose|-v) VERBOSE=true ;;
     --verbose=?*) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
     --verbose=) printf "ERROR: $1 argument ignored.\n"; usage; exit 1 ;;
@@ -156,7 +171,7 @@ if [ -z ${ESMF_ESMXDIR} ]; then
   if [ -z ${ESMF_ESMXDIR} ]; then
     echo "ERROR: ESMF_ESMXDIR is not listed in ESMFMKFILE."
     echo "       Please check ESMF version"
-    usage; exit 1
+    exit 1
   fi
   ESMF_ESMXDIR=${ESMF_ESMXDIR#*=}
 fi
@@ -189,6 +204,10 @@ fi
 if [ ! -z "${BUILD_TYPE}" ]; then
   CMAKE_SETTINGS+=("-DCMAKE_BUILD_TYPE=${BUILD_TYPE}")
 fi
+if [ "${TEST}" = true ]; then
+  CMAKE_SETTINGS+=("-DTEST=1")
+  CMAKE_SETTINGS+=("-DTEST_DIR=${TEST_DIR}")
+fi
 if [ "${VERBOSE}" = true ]; then
   CMAKE_SETTINGS+=("-DVERBOSE=1")
 fi
@@ -215,3 +234,6 @@ INSTALL_SETTINGS=("")
 cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}
 cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}
 cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}
+if [ "${TEST}" = true ]; then
+  (cd ${BUILD_DIR}/Driver; ctest)
+fi
