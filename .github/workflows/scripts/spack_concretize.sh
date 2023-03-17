@@ -65,14 +65,14 @@ if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
 
   # find compiler package and version from hpckit specification
   comp_pkg=`apt-cache depends intel-hpckit-$hpckit_pkg_version | grep "intel-oneapi-compiler-fortran-" | awk '{print $2}'`
-  comp_version=`echo "comp_pkg" | awk -F- '{print $5}'`
+  comp_version=`echo "comp_pkg" | awk -F\- '{print $5}'`
   echo "comp_pkg           = $comp_pkg"
   echo "comp_version       = $comp_version"
 
   # find MPI package and version from hpckit specification
   mpi_devel_pkg=`apt-cache depends intel-hpckit-$hpckit_pkg_version | grep "intel-oneapi-mpi-devel-" | awk '{print $2}'`
   mpi_pkg=`apt-cache depends $mpi_devel_pkg | grep "intel-oneapi-mpi-[1-9]" | awk '{print $2}'`
-  mpi_version=`echo "mpi_pkg" | awk -F- '{print $4}'`
+  mpi_version=`echo "mpi_pkg" | awk -F\- '{print $4}'`
   echo "mpi_devel_pkg      = $mpi_devel_pkg"
   echo "mpi_pkg            = $mpi_pkg"
   echo "mpi_version        = $mpi_version"
