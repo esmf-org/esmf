@@ -49,7 +49,8 @@ jobs:
 
     # install compiler
     - name: Install Intel oneAPI Compiler
-      if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
+      #if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
+      if: contains('["intel", "oneapi"]', ${{ matrix.compiler }})
       run: |
         cd ${{ github.workspace }}/.github/workflows
         scripts/install_oneapi.sh -c ${{ matrix.compiler }}
