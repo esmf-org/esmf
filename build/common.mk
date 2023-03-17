@@ -1955,6 +1955,9 @@ ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Grid/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/GridUtil/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Route/include
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Field/include
+ifeq ($(ESMF_COMM),mpiuni)
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/stubs/mpiuni
+endif
 ifeq ($(ESMF_PIO),internal)
 ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/IO/PIO/ParallelIO/src/clib
 endif
