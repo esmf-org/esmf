@@ -12,13 +12,15 @@ set(CMAKE_CXX_COMPILER ${ESMF_CXXCOMPILER} PARENT_SCOPE)
 set(CMAKE_Fortran_COMPILER ${ESMF_F90COMPILER} PARENT_SCOPE)
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-O2" PARENT_SCOPE)
-  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -02" PARENT_SCOPE)
-  set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow" PARENT_SCOPE)
+  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
+  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -fbacktrace -02")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbacktrace -O0 -fcheck=all -ffpe-trap=invalid,zero,overflow,underflow")
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-  set(CMAKE_Fortran_FLAGS_RELEASE "-O2" PARENT_SCOPE)
-  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2" PARENT_SCOPE)
-  set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays" PARENT_SCOPE)
+  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
+  set(CMAKE_Fortran_FLAGS_RELWITHDEBINFO "-g -traceback -O2")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-g -traceback -O0 -check all -fpe0 -ftrapuv -init=snan,arrays")
+else()
+  message(WARNING "${CMAKE_Fortran_COMPILER_ID} Fortran compiler will be used with default options")
 endif()
 
 # Specify driver dependency
@@ -30,6 +32,13 @@ if(DEFINED DISABLE_ESMX_COMPS)
   set(DISABLE_ESMX_COMPS --disable_esmx_comps ${DISABLE_ESMX_COMPS})
 endif()
 unset(DISABLE_ESMX_COMPS CACHE)
+
+if(NOT DEFINED ESMX_BUILD_FILE)
+  set(ESMX_BUILD_FILE "esmxBuild.yaml")
+else()
+  set(ESMX_BUILD_FILE ${ESMX_BUILD_FILE})
+endif()
+unset(ESMX_BUILD_FILE CACHE)
 
 # Generate comp*.* files from esmxBuild.yaml
 find_package(Python 3.5 REQUIRED COMPONENTS Interpreter)
@@ -50,6 +59,7 @@ if(TEST)
   set(CMAKE_TEST_DIR "${CMAKE_BINARY_DIR}/esmx-tests")
   string(REPLACE "\"" "" ESMF_INTERNAL_MPIRUN ${ESMF_INTERNAL_MPIRUN})
   string(STRIP ${ESMF_INTERNAL_MPIRUN} ESMF_INTERNAL_MPIRUN)
+  string(REGEX REPLACE " .*" "" ESMF_INTERNAL_MPIRUN ${ESMF_INTERNAL_MPIRUN})
   find_program(CMAKE_TEST_EXE
     NAMES ${ESMF_INTERNAL_MPIRUN}
     NO_CACHE
