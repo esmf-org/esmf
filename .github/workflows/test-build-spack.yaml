@@ -21,9 +21,7 @@ jobs:
         #compiler: [gcc@11.3.0, oneapi@2022.0.2]
         #compiler: [oneapi@2022.2.0]
         compiler: [gcc@11.3.0]
-        #esmf: [esmf@8.4.1~pnetcdf, esmf@8.4.1~external-parallelio]
-        #esmf: [esmf@8.4.1~external-parallelio]
-        esmf: [esmf@8.4.1~pnetcdf]
+        esmf: [esmf@8.4.1, esmf@8.4.1~external-parallelio]
 
     steps:
     # check out base repo
