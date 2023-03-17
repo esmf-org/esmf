@@ -15,14 +15,15 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         # available Intel oneAPI basekit, hpckit versions (as of 15-March-2023)
-        # intel: 2021.1.0, 2021.2.0, 2021.3.0, 2021.4.0, 2022.1.1, 2022.1.2, 2022.2.0, 2022.3.0, 2022.3.1, 2023.0.0 
+        # oneAPI: 2021.1.0, 2021.2.0, 2021.3.0, 2021.4.0, 2022.1.1, 2022.1.2, 2022.2.0, 2022.3.0, 2022.3.1, 2023.0.0 
         # available system provided GNU compiler versions
         # gnu  : 11.3.0
         #compiler: [gcc@11.3.0, oneapi@2022.0.2]
         #compiler: [oneapi@2022.2.0]
         compiler: [gcc@11.3.0]
         #esmf: [esmf@8.4.1~pnetcdf, esmf@8.4.1~external-parallelio]
-        esmf: [esmf@8.4.1~external-parallelio]
+        #esmf: [esmf@8.4.1~external-parallelio]
+        esmf: [esmf@8.4.1~pnetcdf]
 
     steps:
     # check out base repo
@@ -37,10 +38,9 @@ jobs:
         sudo apt-get -qq install build-essential binutils-dev gfortran
         sudo apt-get -qq install python3-dev
 
-    # restore intel compiler installation from cache
+    # restore Intel oneAPI compiler installation from cache
     - name: Restore Intel oneAPI Compiler Installation
       uses: actions/cache@v3
-      #if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
       if: ${{ startsWith(matrix.compiler, 'oneapi') }}
       with:
         path: /opt/intel/oneapi
@@ -50,7 +50,6 @@ jobs:
 
     # install compiler
     - name: Install Intel oneAPI Compiler
-      #if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
       if: ${{ startsWith(matrix.compiler, 'oneapi') }}
       run: |
         cd ${{ github.workspace }}/.github/workflows

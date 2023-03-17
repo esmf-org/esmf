@@ -37,7 +37,7 @@ if [[ -z "$arch" || ! -z `echo $arch | grep '^-'` ]]; then
 fi
 
 if [[ -z "$comp" || ! -z `echo $comp | grep '^-'` ]]; then
-  comp="intel"
+  comp="gcc@11.3.0"
 fi
 
 # print out arguments
@@ -58,7 +58,7 @@ echo "::endgroup::"
 
 # find available compilers
 echo "::group::Find Available Compilers and MPIs"
-if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
+if [[ "$comp" == *"oneapi"* ]]; then
   # find hpckit version (same with basekit)
   hpckit_pkg_version=`echo "$comp" | awk -F\@ '{print $2}'`
   echo "hpckit_pkg_version = $hpckit_pkg_version"
@@ -94,7 +94,7 @@ cat ~/.spack/linux/compilers.yaml
 echo "::endgroup::"
 
 # add Intel MPI to spack
-if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
+if [[ "$comp" == *"oneapi"* ]]; then
   echo "::group::Create packages.yaml"
   echo "packages:" > ~/.spack/packages.yaml 
   echo "  mpi:" >> ~/.spack/packages.yaml
@@ -128,7 +128,7 @@ echo "    all:" >> spack.yaml
 echo "      target: ['$arch']" >> spack.yaml
 echo "      compiler: [$comp]" >> spack.yaml
 echo "      providers:" >> spack.yaml
-if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
+if [[ "$comp" == *"oneapi"* ]]; then
 echo "        mpi: [$mpi]" >> spack.yaml
 else
 echo "        mpi: [openmpi]" >> spack.yaml
