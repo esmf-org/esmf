@@ -19,8 +19,10 @@ jobs:
         # available system provided GNU compiler versions
         # gnu  : 11.3.0
         #compiler: [gcc@11.3.0, oneapi@2022.0.2]
-        compiler: [oneapi@2022.2.0]
-        esmf: [esmf@8.4.1~pnetcdf, esmf@8.4.1~external-parallelio]
+        #compiler: [oneapi@2022.2.0]
+        compiler: [gcc@11.3.0]
+        #esmf: [esmf@8.4.1~pnetcdf, esmf@8.4.1~external-parallelio]
+        esmf: [esmf@8.4.1~external-parallelio]
 
     steps:
     # check out base repo
@@ -69,16 +71,16 @@ jobs:
           -r ${{ github.workspace }}
 
    # checkout NUOPC app prototypes
-   #- name: Checkout NUOPC app prototypes
-   #  uses: actions/checkout@v3
-   #  with:
-   #    repository: esmf-org/nuopc-app-prototypes
-   #    path: ${{ github.workspace }}/../nuopc-app-prototypes
-   #    ref: develop
+   - name: Checkout NUOPC app prototypes
+     uses: actions/checkout@v3
+     with:
+       repository: esmf-org/nuopc-app-prototypes
+       path: ${{ github.workspace }}/../nuopc-app-prototypes
+       ref: develop
 
    # test installation using NUOPC app prototypes
-   # - name: Run NUOPC app prototypes
-   #   run: |
-   #     ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
-   #       -r ${{ github.workspace }}/../nuopc-app-prototypes
-   #       -s ~/.spack-ci
+    - name: Run NUOPC app prototypes
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
+          -r ${{ github.workspace }}/../nuopc-app-prototypes
+          -s ~/.spack-ci
