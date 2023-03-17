@@ -65,25 +65,26 @@ if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
 
   # find compiler package and version from hpckit specification
   comp_pkg=`apt-cache depends intel-hpckit-$hpckit_pkg_version | grep "intel-oneapi-compiler-fortran-" | awk '{print $2}'`
+  comp_version=`echo "comp_pkg" | awk -F- '{print $5}'`
   echo "comp_pkg           = $comp_pkg"
+  echo "comp_version       = $comp_version"
 
   # find MPI package and version from hpckit specification
   mpi_devel_pkg=`apt-cache depends intel-hpckit-$hpckit_pkg_version | grep "intel-oneapi-mpi-devel-" | awk '{print $2}'`
-  mpi_pkg=`apt-cache depends $mpi_devel_version | grep "intel-oneapi-mpi-[1-9]" | awk '{print $2}'`
-  mpi_version=`echo "mpi_pkg" | awk -F\@ '{print $2}'`
+  mpi_pkg=`apt-cache depends $mpi_devel_pkg | grep "intel-oneapi-mpi-[1-9]" | awk '{print $2}'`
+  mpi_version=`echo "mpi_pkg" | awk -F- '{print $4}'`
   echo "mpi_devel_pkg      = $mpi_devel_pkg"
   echo "mpi_pkg            = $mpi_pkg"
   echo "mpi_version        = $mpi_version"
 
   # create config file
-  echo "compiler=`echo "comp_pkg" | awk -F\@ '{print $2}'`" > config.txt
+  echo "compiler=$comp_version" > config.txt
   echo "mpi=$mpi_version" >> config.txt
 
   # load compiler
   . /opt/intel/oneapi/setvars.sh --config=config.txt --force
-  comp_version=$comp_pkg
-else
-  comp_version=$comp
+  comp="oneapi@$comp_version"
+  mpi="oneapi-mpi@$mpi_version"
 fi
 
 # find compilers
@@ -95,15 +96,14 @@ echo "::endgroup::"
 # add Intel MPI to spack
 if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
   echo "::group::Create packages.yaml"
-  mpi_version=
   echo "packages:" > ~/.spack/packages.yaml 
   echo "  mpi:" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
   echo "    require:" >> ~/.spack/packages.yaml
-  echo "    - one_of: [intel-oneapi-mpi%${comp_version}]" >> ~/.spack/packages.yaml
-  echo "  intel-oneapi-mpi:" >> ~/.spack/packages.yaml
+  echo "    - one_of: [oneapi-mpi%${comp}]" >> ~/.spack/packages.yaml
+  echo "  oneapi-mpi:" >> ~/.spack/packages.yaml
   echo "    externals:" >> ~/.spack/packages.yaml
-  echo "    - spec: ${mpi_pkg}%${comp_version}" >> ~/.spack/packages.yaml
+  echo "    - spec: ${mpi}%${comp}" >> ~/.spack/packages.yaml
   echo "      prefix: /opt/intel/oneapi/mpi/$mpi_version" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
   cat ~/.spack/packages.yaml
@@ -118,19 +118,18 @@ echo "    targets:" >> spack.yaml
 echo "      host_compatible: false" >> spack.yaml
 echo "    unify: true" >> spack.yaml
 echo "  specs:" >> spack.yaml
-#echo "  - $comp" >> spack.yaml
 IFS=', ' read -r -a array <<< "$deps"
 for d in "${array[@]}"
 do
-  echo "  - $d %$cmp_version target=$arch" >> spack.yaml
+  echo "  - $d %$comp target=$arch" >> spack.yaml
 done
 echo "  packages:" >> spack.yaml
 echo "    all:" >> spack.yaml
 echo "      target: ['$arch']" >> spack.yaml
-echo "      compiler: [$comp_version]" >> spack.yaml
+echo "      compiler: [$comp]" >> spack.yaml
 echo "      providers:" >> spack.yaml
 if [[ "$comp" == *"intel"* || "$comp" == *"oneapi"* ]]; then
-echo "        mpi: [${mpi_pkg}]" >> spack.yaml
+echo "        mpi: [$mpi]" >> spack.yaml
 else
 echo "        mpi: [openmpi]" >> spack.yaml
 fi

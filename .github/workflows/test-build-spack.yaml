@@ -14,8 +14,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        # available compiler versions, as of 15-March-2023
+        # available Intel oneAPI basekit, hpckit versions (as of 15-March-2023)
         # intel: 2021.1.0, 2021.2.0, 2021.3.0, 2021.4.0, 2022.1.1, 2022.1.2, 2022.2.0, 2022.3.0, 2022.3.1, 2023.0.0 
+        # available system provided GNU compiler versions
         # gnu  : 11.3.0
         #compiler: [gcc@11.3.0, oneapi@2022.0.2]
         compiler: [oneapi@2022.2.0]
@@ -67,3 +68,17 @@ jobs:
         ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
           -r ${{ github.workspace }}
 
+   # checkout NUOPC app prototypes
+   - name: Checkout NUOPC app prototypes
+     uses: actions/checkout@v3
+     with:
+       repository: esmf-org/nuopc-app-prototypes
+       path: ${{ github.workspace }}/../nuopc-app-prototypes
+       ref: develop
+
+   # test installation using NUOPC app prototypes
+   # - name: Run NUOPC app prototypes
+   #   run: |
+   #     ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
+   #       -r ${{ github.workspace }}/../nuopc-app-prototypes
+   #       -s ~/.spack-ci
