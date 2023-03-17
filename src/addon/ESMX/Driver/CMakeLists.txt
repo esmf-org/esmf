@@ -84,8 +84,14 @@ foreach(CMP IN ITEMS ${COMPS})
   set(CMP_GIT_REPOSITORY "${${CMP}-GIT_REPOSITORY}")
   set(CMP_GIT_TAG        "${${CMP}-GIT_TAG}")
   set(CMP_GIT_DIR        "${${CMP}-GIT_DIR}")
+  if(CMP_GIT_DIR STREQUAL "")
+    set(CMP_GIT_DIR ${CMP_SOURCE_DIR})
+  endif()
   set(CMP_CMAKE_CONFIG   "${${CMP}-CMAKE_CONFIG}")
   set(CMP_INSTALL_PREFIX "${${CMP}-INSTALL_PREFIX}")
+  if(CMP_INSTALL_PREFIX STREQUAL "")
+    set(CMP_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+  endif()
   set(CMP_LIBRARY_DIR    "${${CMP}-LIBRARY_DIR}")
   set(CMP_CONFIG_DIR     "${${CMP}-CONFIG_DIR}")
   set(CMP_INCLUDE_DIR    "${${CMP}-INCLUDE_DIR}")
@@ -186,7 +192,7 @@ foreach(CMP IN ITEMS ${COMPS})
 
   # build component with cmake
   if(${CMP_BUILD_TYPE} STREQUAL "cmake")
-    message(STATUS "Building (CMAKE) - ${CMP}")
+    message(STATUS "Building (CMAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
     find_file(FND_CMAKE_LISTS
       NAMES CMakeLists.txt cmakelists.txt CMAKELISTS.txt
       PATHS ${CMP_SOURCE_DIR}
@@ -224,7 +230,7 @@ foreach(CMP IN ITEMS ${COMPS})
     endif()
   # build component with make
   elseif(${CMP_BUILD_TYPE} STREQUAL "make")
-    message(STATUS "Building (MAKE) - ${CMP}")
+    message(STATUS "Building (MAKE) - ${CMP} - ${CMP_SOURCE_DIR}")
     find_file(FND_MAKE_FILE
       NAMES Makefile makefile MAKEFILE
       PATHS ${CMP_SOURCE_DIR}
@@ -246,7 +252,7 @@ foreach(CMP IN ITEMS ${COMPS})
     endif()
   # build component with script
   elseif(${CMP_BUILD_TYPE} STREQUAL "script")
-    message(STATUS "Building (SCRIPT) - ${CMP}")
+    message(STATUS "Building (SCRIPT) - ${CMP} - ${CMP_SOURCE_DIR}")
     find_file(FND_BUILD_SCRIPT
       NAMES ${CMP_BUILD_SCRIPT}
       PATHS ${CMP_SOURCE_DIR}
