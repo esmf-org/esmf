@@ -69,12 +69,12 @@ jobs:
           -r ${{ github.workspace }}
 
    # checkout NUOPC app prototypes
-   - name: Checkout NUOPC app prototypes
-     uses: actions/checkout@v3
-     with:
-       repository: esmf-org/nuopc-app-prototypes
-       path: ${{ github.workspace }}/../nuopc-app-prototypes
-       ref: develop
+   #- name: Checkout NUOPC app prototypes
+   #  uses: actions/checkout@v3
+   #  with:
+   #    repository: esmf-org/nuopc-app-prototypes
+   #    path: ${{ github.workspace }}/../nuopc-app-prototypes
+   #    ref: develop
 
    # test installation using NUOPC app prototypes
    # - name: Run NUOPC app prototypes
