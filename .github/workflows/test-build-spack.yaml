@@ -40,7 +40,8 @@ jobs:
     # restore intel compiler installation from cache
     - name: Restore Intel oneAPI Compiler Installation
       uses: actions/cache@v3
-      if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
+      #if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
+      if: ${{ startsWith(matrix.compiler, 'oneapi') }}
       with:
         path: /opt/intel/oneapi
         key: intel-${{ runner.os }}-${{ matrix.compiler }}
@@ -50,7 +51,7 @@ jobs:
     # install compiler
     - name: Install Intel oneAPI Compiler
       #if: contains(${{ matrix.compiler }}, 'intel') || contains(${{ matrix.compiler }}, 'oneapi')
-      if: contains('["intel", "oneapi"]', ${{ matrix.compiler }})
+      if: ${{ startsWith(matrix.compiler, 'oneapi') }}
       run: |
         cd ${{ github.workspace }}/.github/workflows
         scripts/install_oneapi.sh -c ${{ matrix.compiler }}
