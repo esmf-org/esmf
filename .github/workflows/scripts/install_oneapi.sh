@@ -41,7 +41,7 @@ if [ -z "$compiler_version" ]; then
   exit 1
 else
   list_compiler_versions=`apt list 2>&1 | grep "intel-basekit-[1-9]" | awk -F\- '{print $3}' | awk -F\/ '{printf $1" "}'`
-  echo "List of available compiler versions: $list_compiler_versions"
+  echo "List of available Intel oneAPI basekit, hpckit versions: $list_compiler_versions"
   in_the_list=0
   for i in $list_compiler_versions
   do
@@ -59,15 +59,15 @@ echo "::endgroup::"
 
 # install
 echo "::group::Install Intel oneAPI Base and HPC Kits"
-#sudo apt-get install -qq intel-basekit-$compiler_version
-#sudo apt-get install -qq intel-hpckit-$compiler_version
-#sudo setfacl -R -m u:`whoami`:rwx /opt/intel
+sudo apt-get install -qq intel-basekit-$compiler_version
+sudo apt-get install -qq intel-hpckit-$compiler_version
+sudo setfacl -R -m u:`whoami`:rwx /opt/intel
 echo "::endgroup::"
 
 # list content of the installation folders (for debugging)
 echo "::group::List Files in Installation Folder"
 echo "> ls -al /opt/intel/oneapi/compiler/"
-#ls -al /opt/intel/oneapi/compiler/
+ls -al /opt/intel/oneapi/compiler/
 echo "> ls -al /opt/intel/oneapi/mpi/"
-#ls -al /opt/intel/oneapi/mpi/
+ls -al /opt/intel/oneapi/mpi/
 echo "::endgroup::"
