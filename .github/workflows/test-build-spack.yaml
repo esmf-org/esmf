@@ -70,17 +70,17 @@ jobs:
         ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
           -r ${{ github.workspace }}
 
-   # checkout NUOPC app prototypes
-   - name: Checkout NUOPC app prototypes
-     uses: actions/checkout@v3
-     with:
-       repository: esmf-org/nuopc-app-prototypes
-       path: ${{ github.workspace }}/../nuopc-app-prototypes
-       ref: develop
+    # checkout NUOPC app prototypes
+    - name: Checkout NUOPC app prototypes
+      uses: actions/checkout@v3
+      with:
+        repository: esmf-org/nuopc-app-prototypes
+        path: ${{ github.workspace }}/../nuopc-app-prototypes
+        ref: develop
 
-   # test installation using NUOPC app prototypes
-    - name: Run NUOPC app prototypes
-      run: |
-        ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
-          -r ${{ github.workspace }}/../nuopc-app-prototypes
-          -s ~/.spack-ci
+    # test installation using NUOPC app prototypes
+     - name: Run NUOPC app prototypes
+       run: |
+         ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
+           -r ${{ github.workspace }}/../nuopc-app-prototypes
+           -s ~/.spack-ci
