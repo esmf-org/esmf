@@ -5,7 +5,7 @@ import yaml
 import argparse
 import collections
 
-def read_drv_yaml_file(file_path, esmx_comps):
+def read_drv_yaml_file(file_path):
     # open yaml file and read it
     if not os.path.exists(file_path):
         sys.exit('File not found: {}'.format(file_path))
@@ -19,8 +19,6 @@ def read_drv_yaml_file(file_path, esmx_comps):
         _dict['components'] = {}
       if _dict.get('tests') is None:
         _dict['tests'] = {}
-      for comp in esmx_comps:
-        _dict['components'].update({comp:''})
       return _dict
 
 def create_compList(_dict, odir):
@@ -37,7 +35,8 @@ def create_compList(_dict, odir):
           f.write('# - auto-generated section for component: {}\n'.format(k1))
           build_type = v1.get('build_type', 'auto')
           source_dir = v1.get('source_dir', k1)
-          source_dir = os.path.abspath(source_dir)
+          if not source_dir.startswith('$'):
+            source_dir = os.path.abspath(source_dir)
           cmake_config = v1.get('cmake_config', k1+'.cmake')
           if (cmake_config == os.path.basename(cmake_config)):
             install_prefix = v1.get('install_prefix', 'install')
@@ -63,7 +62,12 @@ def create_compList(_dict, odir):
           git_repository = v1.get('git_repository', "")
           git_tag = v1.get('git_tag', "")
           git_dir = v1.get('git_dir', source_dir)
-          git_dir = os.path.abspath(git_dir)
+          if not git_dir.startswith('$'):
+            git_dir = os.path.abspath(git_dir)
+          test_dir = v1.get('test_dir', "")
+          if test_dir:
+            if not test_dir.startswith('$'):
+              test_dir = os.path.abspath(test_dir)
           f.write('set({}-BUILD_TYPE     {})\n'.format(k1, build_type))
           f.write('set({}-SOURCE_DIR     {})\n'.format(k1, source_dir))
           f.write('set({}-CMAKE_CONFIG   {})\n'.format(k1, cmake_config))
@@ -81,6 +85,7 @@ def create_compList(_dict, odir):
           f.write('set({}-GIT_DIR        {})\n'.format(k1, git_dir))
           f.write('set({}-LINK_LIBRARIES {})\n'.format(k1, link_libraries))
           f.write('set({}-LINK_PATHS     {})\n'.format(k1, link_paths))
+          f.write('set({}-TEST_DIR       {})\n'.format(k1, test_dir))
 
 def create_compUse(_dict, odir):
     # open file
@@ -128,11 +133,17 @@ def main(argv):
     if args.disable_esmx_comps:
         disable_esmx_comps = list(args.disable_esmx_comps.lower().split(","))
 
-    if 'esmx_data' not in disable_esmx_comps:
-        esmx_comps.append('ESMX_Data')
-
     # read driver configuration yaml file
-    dict_drv = read_drv_yaml_file(ifile, esmx_comps)
+    dict_drv = read_drv_yaml_file(ifile)
+
+    # add default components
+    if ('ESMX_Data' not in dict_drv['components'] and
+        'esmx_data' not in disable_esmx_comps):
+      dict_drv['components'].update({'ESMX_Data':{}})
+      dict_drv['components'].get('ESMX_Data').update(
+        {'source_dir':'${ESMF_ESMXDIR}/Comps/ESMX_Data'})
+      dict_drv['components'].get('ESMX_Data').update(
+        {'test_dir':'${ESMF_ESMXDIR}/Tests/esmx-data'})
 
     # create compList.txt for CMake
     create_compList(dict_drv, odir)

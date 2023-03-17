@@ -47,11 +47,7 @@ include(FetchContent)
 if(TEST)
   set(CMAKE_TEST TRUE)
   enable_testing()
-  if(NOT DEFINED TEST_DIR)
-    set(CMAKE_TEST_DIR "tests")
-  else()
-    set(CMAKE_TEST_DIR ${TEST_DIR})
-  endif()
+  set(CMAKE_TEST_DIR "${CMAKE_BINARY_DIR}/esmx-tests")
   string(REPLACE "\"" "" ESMF_INTERNAL_MPIRUN ${ESMF_INTERNAL_MPIRUN})
   string(STRIP ${ESMF_INTERNAL_MPIRUN} ESMF_INTERNAL_MPIRUN)
   find_program(CMAKE_TEST_EXE
@@ -62,7 +58,6 @@ if(TEST)
   set(CMAKE_TEST_TASKS -np 4)
 endif()
 unset(TEST CACHE)
-unset(TEST_DIR CACHE)
 
 if(VERBOSE)
   set(CMAKE_VERBOSE "-v")
@@ -103,27 +98,36 @@ foreach(CMP IN ITEMS ${COMPS})
   string(REPLACE "," ";" "${${CMP}-LINK_PATHS}" CMP_LINK_PATHS)
   set(CMP_BUILD_SCRIPT   "${${CMP}-BUILD_SCRIPT}")
   set(CMP_BUILD_ARGS     "${${CMP}-BUILD_ARGS}")
+  set(CMP_TEST_DIR       "${${CMP}-TEST_DIR}")
 
-  # download git repository
+  # download or update git repository
   if(NOT CMP_GIT_REPOSITORY STREQUAL "")
     message(STATUS "Fetching content ... ${CMP}")
-    if(EXISTS ${CMP_SOURCE_DIR})
-      message(FATAL_ERROR "Source directory already exists for ${CMP}")
-    endif()
     if(CMP_GIT_TAG STREQUAL "")
       message(FATAL_ERROR "Git tag required for ${CMP}")
     endif()
-    FetchContent_Declare(${CMP}
-      GIT_REPOSITORY ${CMP_GIT_REPOSITORY}
-      GIT_TAG ${CMP_GIT_TAG}
-      SOURCE_DIR ${CMP_GIT_DIR}
-    )
-    FetchContent_Populate(${CMP})
-  endif()
-
-  # ESMX_Data component is built internally
-  if("${CMP}" STREQUAL "ESMX_Data")
-    set(CMP_BUILD_TYPE "none")
+    if(NOT EXISTS ${CMP_SOURCE_DIR})
+      set(CMP_GIT_TAG -b ${CMP_GIT_TAG})
+      execute_process(
+        COMMAND git clone ${CMP_GIT_TAG} ${CMP_GIT_REPOSITORY} ${CMP_GIT_DIR}
+        RESULT_VARIABLE ret
+      )
+      if(NOT ret EQUAL "0")
+        message(FATAL_ERROR "git clone failed for ${CMP}")
+      endif()
+    else()
+      execute_process(
+        COMMAND git remote set-url origin ${CMP_GIT_REPOSITORY}
+        COMMAND git fetch origin --prune
+        COMMAND git checkout ${CMP_GIT_TAG}
+        WORKING_DIRECTORY ${CMP_GIT_DIR}
+        RESULTS_VARIABLE ret
+      )
+      list(FILTER ret EXCLUDE REGEX "[0]")
+      if(NOT ret MATCHES "")
+        message(FATAL_ERROR "git update failed for ${CMP}")
+      endif()
+    endif()
   endif()
 
   # automatically determine build type based on files
@@ -198,6 +202,7 @@ foreach(CMP IN ITEMS ${COMPS})
     execute_process(
       COMMAND ${CMAKE_COMMAND} -S${CMP_SOURCE_DIR} -B${CMAKE_BINARY_DIR}/${CMP}
         ${CMP_BUILD_ARGS} -DCMAKE_INSTALL_PREFIX=${CMP_INSTALL_PREFIX}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
       RESULT_VARIABLE ret
     )
     if(NOT ret EQUAL "0")
@@ -269,90 +274,90 @@ foreach(CMP IN ITEMS ${COMPS})
   endif()
 
   # include modules and link libraries
-  if("${CMP}" STREQUAL "ESMX_Data")
-    add_library(esmx_data ${ESMF_ESMXDIR}/Comps/ESMX_Data.F90)
-    target_link_libraries(esmx_data PUBLIC ESMF)
-    add_dependencies(esmx_driver esmx_data)
-    target_link_libraries(esmx_driver PUBLIC esmx_data)
-    if(CMAKE_TEST)
-      file(COPY ${ESMF_ESMXDIR}/Tests/esmx-data DESTINATION ${CMAKE_TEST_DIR})
+  find_file(FND_CMAKE_CONFIG
+    NAMES ${CMP_CMAKE_CONFIG}
+    HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+    PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
+    NO_CACHE NO_DEFAULT_PATH
+  )
+  if(FND_CMAKE_CONFIG)
+    include(${FND_CMAKE_CONFIG})
+  endif()
+  find_path(FND_FORT_MODULE
+    NAMES ${CMP_FORT_MODULE}
+    HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+    PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
+    NO_CACHE NO_DEFAULT_PATH
+  )
+  if(FND_FORT_MODULE)
+    target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
+  elseif(NOT FND_CMAKE_CONFIG)
+    message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE}")
+  endif()
+  foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
+    if(TARGET ${CMP_LIBRARY})
+      target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
+    else()
+      find_library(FND_LIBRARY
+        NAMES ${CMP_LIBRARY}
+        HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
+        PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
+        NO_CACHE NO_DEFAULT_PATH
+      )
+      if(NOT FND_LIBRARY)
+        message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY}")
+      endif()
+      target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
+      unset(FND_LIBRARY)
+    endif()
+  endforeach()
+
+  # change environment variable to path in variable
+  set(TMP_LINK_PATHS "")
+  foreach(CMP_LINK_PATH IN ITEMS ${CMP_LINK_PATHS})
+    if(DEFINED ENV{${CMP_LINK_PATH}})
+      set(CMP_LINK_PATH $ENV{${CMP_LINK_PATH}})
+    endif()
+    list(APPEND TMP_LINK_PATHS ${CMP_LINK_PATH})
+  endforeach()
+  set(CMP_LINK_PATHS ${TMP_LINK_PATHS})
+  unset(TMP_LINK_PATHS)
+
+  # link external libraries
+  foreach(CMP_LINK_LIBRARY IN ITEMS ${CMP_LINK_LIBRARIES})
+    if(TARGET ${CMP_LINK_LIBRARY})
+      target_link_libraries(esmx_driver PUBLIC ${CMP_LINK_LIBRARY})
+    else()
+      find_library(FND_LINK_LIBRARY
+        NAMES ${CMP_LINK_LIBRARY}
+        HINTS ${CMP_LINK_PATHS}
+        PATH_SUFFIXES "." "lib" "lib64"
+        NO_CACHE
+      )
+      if(NOT FND_LINK_LIBRARY)
+        message(FATAL_ERROR "Cannot find link_libraries ${CMP_LINK_LIBRARY}")
+      endif()
+      target_link_libraries(esmx_driver PUBLIC ${FND_LINK_LIBRARY})
+      unset(FND_LINK_LIBRARY)
+    endif()
+  endforeach()
+
+  if(CMAKE_TEST)
+    if(CMP_TEST_DIR STREQUAL "")
+      message(WARNING "No test directory provided for ${CMP}")
+    elseif(NOT EXISTS ${CMP_TEST_DIR})
+      message(FATAL_ERROR "Cannot find test directory ${CMP_TEST_DIR}")
+    else()
+      set(CMP_TEST_NAME esmx-cmp-${CMP})
+      file(COPY ${CMP_TEST_DIR}/ DESTINATION ${CMAKE_TEST_DIR}/${CMP_TEST_NAME})
       file(CREATE_LINK ${CMAKE_BINARY_DIR}/esmx
-        ${CMAKE_TEST_DIR}/esmx-data/esmx
+        ${CMAKE_TEST_DIR}/${CMP_TEST_NAME}/esmx
         SYMBOLIC
       )
-      add_test(NAME comp-esmx-data
+      add_test(NAME ${CMP_TEST_NAME}
         COMMAND ${CMAKE_TEST_EXE} ${CMAKE_TEST_TASKS} ./esmx
-        WORKING_DIRECTORY ${CMAKE_TEST_DIR}/esmx-data)
+        WORKING_DIRECTORY ${CMAKE_TEST_DIR}/${CMP_TEST_NAME})
     endif()
-  else()
-    find_file(FND_CMAKE_CONFIG
-      NAMES ${CMP_CMAKE_CONFIG}
-      HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-      PATH_SUFFIXES ${CMP_CONFIG_DIR} "." "cmake" "config"
-      NO_CACHE NO_DEFAULT_PATH
-    )
-    if(FND_CMAKE_CONFIG)
-      include(${FND_CMAKE_CONFIG})
-    endif()
-    find_path(FND_FORT_MODULE
-      NAMES ${CMP_FORT_MODULE}
-      HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-      PATH_SUFFIXES ${CMP_INCLUDE_DIR} "." "include" "mod"
-      NO_CACHE NO_DEFAULT_PATH
-    )
-    if(FND_FORT_MODULE)
-      target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
-    elseif(NOT FND_CMAKE_CONFIG)
-      message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE}")
-    endif()
-    foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
-      if(TARGET ${CMP_LIBRARY})
-        target_link_libraries(esmx_driver PUBLIC ${CMP_LIBRARY})
-      else()
-        find_library(FND_LIBRARY
-          NAMES ${CMP_LIBRARY}
-          HINTS ${CMP_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}/${CMP}
-          PATH_SUFFIXES ${CMP_LIBRARY_DIR} "." "lib" "lib64"
-          NO_CACHE NO_DEFAULT_PATH
-        )
-        if(NOT FND_LIBRARY)
-          message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY}")
-        endif()
-        target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
-        unset(FND_LIBRARY)
-      endif()
-    endforeach()
-
-    # change environment variable to path in variable
-    set(TMP_LINK_PATHS "")
-    foreach(CMP_LINK_PATH IN ITEMS ${CMP_LINK_PATHS})
-      if(DEFINED ENV{${CMP_LINK_PATH}})
-        set(CMP_LINK_PATH $ENV{${CMP_LINK_PATH}})
-      endif()
-      list(APPEND TMP_LINK_PATHS ${CMP_LINK_PATH})
-    endforeach()
-    set(CMP_LINK_PATHS ${TMP_LINK_PATHS})
-    unset(TMP_LINK_PATHS)
-
-    # link external libraries
-    foreach(CMP_LINK_LIBRARY IN ITEMS ${CMP_LINK_LIBRARIES})
-      if(TARGET ${CMP_LINK_LIBRARY})
-        target_link_libraries(esmx_driver PUBLIC ${CMP_LINK_LIBRARY})
-      else()
-        find_library(FND_LINK_LIBRARY
-          NAMES ${CMP_LINK_LIBRARY}
-          HINTS ${CMP_LINK_PATHS}
-          PATH_SUFFIXES "." "lib" "lib64"
-          NO_CACHE
-        )
-        if(NOT FND_LINK_LIBRARY)
-          message(FATAL_ERROR "Cannot find link_libraries ${CMP_LINK_LIBRARY}")
-        endif()
-        target_link_libraries(esmx_driver PUBLIC ${FND_LINK_LIBRARY})
-        unset(FND_LINK_LIBRARY)
-      endif()
-    endforeach()
-
   endif()
 
   # unset variables used for component
@@ -372,6 +377,7 @@ foreach(CMP IN ITEMS ${COMPS})
   unset(CMP_LINK_PATHS)
   unset(CMP_BUILD_ARGS)
   unset(CMP_BUILD_SCRIPT)
+  unset(CMP_TEST_DIR)
   unset(FND_CMAKE_LISTS)
   unset(FND_MAKE_FILE)
   unset(FND_BUILD_SCRIPT)

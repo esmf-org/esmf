@@ -39,9 +39,6 @@ usage () {
   printf "      load bash environment file before building\n"
   printf "  --test\n"
   printf "      add testing\n"
-  printf "  --test-dir=TEST_DIR\n"
-  printf "      test directory\n"
-  printf "      (default: tests)\n"
   printf "  --verbose, -v\n"
   printf "      build with verbose output\n"
   printf "\n"
@@ -70,7 +67,6 @@ settings () {
   printf "  MODULEFILE=${MODULEFILE}\n"
   printf "  BASHENV=${BASHENV}\n"
   printf "  TEST=${TEST}\n"
-  printf "  TEST_DIR=${TEST_DIR}\n"
   printf "  VERBOSE=${VERBOSE}\n"
   printf "\n"
 }
@@ -89,7 +85,6 @@ INSTALL_PREFIX="${CWD}/install"
 MODULEFILE=""
 BASHENV=""
 TEST=false
-TEST_DIR="${CWD}/tests"
 VERBOSE=false
 
 # required arguments
@@ -138,9 +133,6 @@ while [[ $# -gt 0 ]]; do
     --test) TEST=true ;;
     --test=?*) usage_error "$1" "argument ignored" ;;
     --test=)   usage_error "$1" "argument ignored" ;;
-    --test-dir=?*) TEST_DIR=${1#*=} ;;
-    --test-dir)  usage_error "$1" "requires an argument" ;;
-    --test-dir=) usage_error "$1" "requires an argument" ;;
     --verbose|-v) VERBOSE=true ;;
     --verbose=?*) usage_error "$1" "argument ignored" ;;
     --verbose=)   usage_error "$1" "argument ignored" ;;
@@ -225,7 +217,6 @@ if [ ! -z "${BUILD_TYPE}" ]; then
 fi
 if [ "${TEST}" = true ]; then
   CMAKE_SETTINGS+=("-DTEST=1")
-  CMAKE_SETTINGS+=("-DTEST_DIR=${TEST_DIR}")
 fi
 if [ "${VERBOSE}" = true ]; then
   CMAKE_SETTINGS+=("-DVERBOSE=1")
