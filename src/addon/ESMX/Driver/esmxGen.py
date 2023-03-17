@@ -130,6 +130,12 @@ def create_compDef(_dict, odir):
           f.write('CompDef({})%name = "{}"\n'.format(i, k1))
           i = i+1
 
+def create_compCnt(_dict, odir):
+    # open file
+    with open(os.path.join(odir, 'compCnt.inc'), 'w') as f:
+      if _dict['components'] is not None:
+        f.write('integer, parameter :: componentDefCount = {}\n'.format(len(_dict['components'])))
+
 def main(argv):
 
     # default value
@@ -170,6 +176,9 @@ def main(argv):
 
     # create compUse.inc
     create_compUse(dict_drv, odir)
+
+    # create compCnt.inc
+    create_compCnt(dict_drv, odir)
 
     # create compDef.inc
     create_compDef(dict_drv, odir)

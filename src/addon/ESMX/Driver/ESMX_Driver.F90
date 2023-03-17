@@ -25,6 +25,8 @@ module ESMX_Driver
     character(ESMF_MAXSTR)                  :: name = "__uninitialized__"
   end type
 
+  include "compCnt.inc"
+
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
@@ -165,7 +167,7 @@ module ESMX_Driver
       return  ! bail out
 
     ! setup CompDef structure
-    allocate(CompDef(componentCount))
+    allocate(CompDef(componentDefCount))
     include "compDef.inc"
 
     ! determine information for each component and add to the driver
@@ -211,7 +213,7 @@ module ESMX_Driver
 
       ! see whether there is an entry for this component inside CompDef
       inCompDef = .false.
-      do j=1, componentCount
+      do j=1, componentDefCount
         if (trim(CompDef(j)%name)=="__uninitialized__") exit
         if (trim(CompDef(j)%name)==trim(model)) then
           inCompDef = .true.
