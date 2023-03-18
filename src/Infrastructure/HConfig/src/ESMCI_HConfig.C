@@ -275,6 +275,59 @@ int HConfig::loadFile(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::saveFile()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::saveFile - save a HConfig to file
+//
+// !INTERFACE:
+int HConfig::saveFile(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    const std::string& filename){       // in
+// 
+// !DESCRIPTION: 
+//  ESMF routine which saves HConfig to file. Only localPet==0 does the writing.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if (VM::getCurrent()->getLocalPet() == 0){
+      std::ofstream fout(filename);
+      if (node)
+        fout << *node;
+      else
+        // iterator
+        if (type==YAML::NodeType::Map){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+          return rc;
+        }else
+          fout << (YAML::Node)(*iter);
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception loading content from file", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::createAt()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::createAt - node at location

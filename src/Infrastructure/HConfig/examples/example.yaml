@@ -1,4 +1,4 @@
 # An example of YAML configuration file
 
 simple_list: [1, 2, 3, abc, b, TRUE]
-simple_map:  {car: red, bike: 2, plane: TRUE}
+simple_map:  {car: red, bike: 22, plane: TRUE}

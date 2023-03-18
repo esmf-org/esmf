@@ -24,7 +24,7 @@ program ESMF_HConfigEx
 
   ! local variables
   integer                         :: rc, size, i
-  type(ESMF_HConfig)              :: hconfig
+  type(ESMF_HConfig)              :: hconfig, hconfigNode
   type(ESMF_HConfig)              :: hconfigIter, hconfigIterEnd
   type(ESMF_Config)               :: config
   logical                         :: asOkay, valueL, isDefined
@@ -35,7 +35,7 @@ program ESMF_HConfigEx
   real(ESMF_KIND_R4)              :: valueR4
   real(ESMF_KIND_R8)              :: valueR8
   character(5)                    :: keyList(3)
-  character(160)                  :: msgString
+  character(160)                  :: msgString, filename
   ! result code
   integer                     :: finalrc, result
   character(ESMF_MAXSTR)      :: testname
@@ -319,12 +319,12 @@ program ESMF_HConfigEx
 !EOE
 !BOC
   ! type(ESMF_HConfig) :: hconfig
-  hconfig = ESMF_HConfigCreate(content="{car: red, bike: 2, plane: TRUE}", rc=rc)
+  hconfig = ESMF_HConfigCreate(content="{car: red, bike: 22, plane: TRUE}", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Here a map is created. In this case, all of the keys are scalars (car,
-! bike, plane), as are all of the associated values (red, 2, TRUE).
+! bike, plane), as are all of the associated values (red, 22, TRUE).
 !EOE
 
 !BOE
@@ -351,6 +351,7 @@ program ESMF_HConfigEx
 ! respectively.
 !EOE
 !BOC
+
   do while (hconfigIter /= hconfigIterEnd)
 
     ! Check whether the current element is a scalar both for the map key
@@ -676,6 +677,66 @@ program ESMF_HConfigEx
 !EOE
   call ESMF_ConfigDestroy(config, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! \subsubsection{Saving HConfig to YAML file}
+!
+! An HConfig object can be saved to a YAML file by calling the
+! {\tt ESMF\_HConfigSaveFile()} method.
+!EOE
+  hconfig = ESMF_HConfigCreate(filename="example.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigSaveFile(hconfig, filename="saveMe.yml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The resulting contents of {\tt saveMe.yml} here is:
+! \begin{verbatim}
+! simple_list: [1, 2, 3, abc, b, TRUE]
+! simple_map: {car: red, bike: 22, plane: TRUE}
+! \end{verbatim}
+!
+! Here {\tt hconfig} can be a regular node, or a {\em sequence} iterator. In
+! either case the file is written as YAML hierarchy starting at {\tt hconfig}
+! as the root node.
+!
+! If, however, {\tt hconfig} is a {\em map} iterator, it cannot be saved to
+! file directly. In this case it is first necessary to prepare a root node
+! utilizing the appropriate {\tt CreateAt} method, of either the {\em map key}
+! or {\em map value} part of the iterator.
+!
+! In the current example, {\tt hconfig} is a map with two elements. Both keys
+! are scalars: {\tt simple\_list} and {\tt simple\_map}. The associated map
+! values are a list of scalars (1, 2, 3, abc, b, TRUE), and a map of scalars
+! to scalars \{car: red, bike: 22, plane: TRUE\}, respectively. In order to save
+! the map value of the second element of {\tt hconfig} to file, a root node
+! needs to prepared for it. To this end first an iterator is obtained and
+! a root node created using the desired index.
+!
+! TODO: something does not work correctly yet for the following code!!!!!
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigIter
+  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! type(ESMF_HConfig) :: hconfigNode
+  hconfigNode = ESMF_HConfigCreateAtMapVal(hconfigIter, key="simple_list", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Now {\tt hconfigNode} points to the desired root node, and can be saved to
+! file.
+!EOE
+!BOC
+  call ESMF_HConfigSaveFile(hconfigNode, filename="mapAtIndex2.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

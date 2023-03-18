@@ -102,6 +102,23 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_hconfigsavefile)(ESMCI::HConfig *ptr,
+    const char *filename, int *rc, ESMCI_FortranStrLenArg strLen){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_hconfigsave()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // test for NULL pointer via macro before calling any class methods
+    ESMCI_NULL_CHECK_PRC(ptr, rc)
+    // call into C++
+    localrc = ptr->saveFile(std::string(filename,strLen));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_hconfigcreateatkey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
     char *key, int *rc, ESMCI_FortranStrLenArg string_l){
 #undef  ESMC_METHOD

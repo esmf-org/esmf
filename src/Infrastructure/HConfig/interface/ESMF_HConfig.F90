@@ -90,6 +90,8 @@ module ESMF_HConfigMod
   public ESMF_HConfigLoad
   public ESMF_HConfigLoadFile
 
+  public ESMF_HConfigSaveFile
+
   public ESMF_HConfigCreateAt
   public ESMF_HConfigCreateAtMapKey
   public ESMF_HConfigCreateAtMapVal
@@ -503,7 +505,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Load string into HConfig.
+!   Load YAML syntax string into HConfig.
 !
 !   The arguments are:
 !   \begin{description}
@@ -554,7 +556,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Load string into HConfig.
+!   Load YAML file into {\tt hconfig}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -591,6 +593,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigSaveFile()"
+!BOP
+! !IROUTINE: ESMF_HConfigSaveFile - Save HConfig to file
+
+! !INTERFACE:
+  subroutine ESMF_HConfigSaveFile(hconfig, filename, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+    character(len=*),   intent(in)            :: filename
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Save HConfig into YAML file. Only {\tt localPet == 0} does the writing.
+!   The {\tt hconfig} must {\em not} be a map iterator.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[hconfig] 
+!     {\tt ESMF\_HConfig} object.
+!   \item[filename]
+!     Name of the YAML file into which to save.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigSaveFile(hconfig, filename, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_HConfigSaveFile
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateAt()"
 !BOP
 ! !IROUTINE: ESMF_HConfigCreateAt - Return HConfig object at location
@@ -609,9 +663,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create a new HConfig.
+!   Create a new HConfig object at the current iteration, or
+!   as specified by {\tt index} or {\tt key}.
+!   The {\tt hconfig} must {\em not} be a map iterator.
 !
-! The arguments are:
+!   The arguments are:
 !   \begin{description}
 !   \item[hconfig] 
 !     {\tt ESMF\_HConfig} object.
@@ -687,9 +743,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create a new HConfig.
+!   Create a new HConfig object for a map key at the current iteration, or
+!   as specified by {\tt index} or {\tt key}.
+!   The {\tt hconfig} {\em must} be a map iterator.
 !
-! The arguments are:
+!   The arguments are:
 !   \begin{description}
 !   \item[hconfig] 
 !     {\tt ESMF\_HConfig} object.
@@ -765,9 +823,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create a new HConfig.
+!   Create a new HConfig object for a map value at the current iteration, or
+!   as specified by {\tt index} or {\tt key}.
+!   The {\tt hconfig} {\em must} be a map iterator.
 !
-! The arguments are:
+!   The arguments are:
 !   \begin{description}
 !   \item[hconfig] 
 !     {\tt ESMF\_HConfig} object.
