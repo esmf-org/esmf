@@ -81,5 +81,5 @@ jobs:
     - name: Run NUOPC app prototypes
       run: |
         ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
-          -r ${{ github.workspace }}/nuopc-app-prototypes
+          -r ${{ github.workspace }}/nuopc-app-prototypes \
           -s ~/.spack-ci
