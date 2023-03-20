@@ -43,9 +43,9 @@ fi
 # print out arguments
 echo "Target Architecture: $arch"
 echo "Compiler: $comp"
-echo "Dependencies: $deps";
-echo "Install Directory: $install_dir";
-echo "Run Directory: $run_dir";
+echo "Dependencies: $deps"
+echo "Install Directory: $install_dir"
+echo "Run Directory: $run_dir"
 
 # go to directory
 cd $run_dir
