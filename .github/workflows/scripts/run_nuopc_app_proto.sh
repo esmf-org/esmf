@@ -39,6 +39,8 @@ if [[ "$comp" == *"oneapi"* ]]; then
   . /opt/intel/oneapi/setvars.sh
 else
   export PATH=$spack_install_dir/view/bin:$PATH
+  # set it for OpenMPI to fix not enough slots issue
+  export TOOLRUN="--oversubscribe"
 fi
 which mpirun
 chmod 755 testProtos.sh
