@@ -81,13 +81,6 @@ jobs:
     - name: Run NUOPC app prototypes
       run: |
         ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
+          -c ${{ matrix.compiler }} \
           -r ${{ github.workspace }}/nuopc-app-prototypes \
           -s ~/.spack-ci
-        lineFrom=`cat -n testProtos.log | grep "== TEST SUMMARY START ==" | awk '{print $1}'`
-        lineTo=`cat -n testProtos.log | grep "== TEST SUMMARY STOP ==" | awk '{print $1}'`
-        result=`sed -n '${lineFrom},${lineTo}p' testProtos.log | grep "FAIL"`
-        if [[ ! -z "$result" ]]; then
-          echo "Failed NUOPC app prototypes ..."
-          echo $result
-          exit 1
-        fi

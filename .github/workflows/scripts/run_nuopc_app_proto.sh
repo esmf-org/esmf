@@ -40,7 +40,20 @@ if [[ "$comp" == *"oneapi"* ]]; then
 else
   export PATH=$spack_install_dir/view/bin:$PATH
 fi
+which mpirun
 chmod 755 testProtos.sh
 ./testProtos.sh >& testProtos.log
 cat testProtos.log
+echo "::endgroup::"
+
+# process output
+echo "::group:: Process Output of NUOPC Application Prototypes
+lineFrom=`cat -n testProtos.log | grep "== TEST SUMMARY START ==" | awk '{print $1}'`
+lineTo=`cat -n testProtos.log | grep "== TEST SUMMARY STOP ==" | awk '{print $1}'`
+result=`sed -n '${lineFrom},${lineTo}p' testProtos.log | grep "FAIL"`
+if [[ ! -z "$result" ]]; then
+  echo "Failed NUOPC app prototypes ..."
+  echo $result
+  exit 1
+fi
 echo "::endgroup::"
