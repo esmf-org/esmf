@@ -93,6 +93,11 @@ spack compiler find
 cat ~/.spack/linux/compilers.yaml
 echo "::endgroup::"
 
+# find external tools
+echo "::group::Find Externals"
+spack external find
+echo "::endgroup::"
+
 # add Intel MPI to spack
 if [[ "$comp" == *"oneapi"* ]]; then
   echo "::group::Create packages.yaml"
