@@ -46,6 +46,8 @@ module ESMF_FieldGatherMod
     use ESMF_FieldMod
     use ESMF_FieldGetMod
     use ESMF_ArrayMod
+    use, intrinsic :: ieee_arithmetic, only: ieee_value, ieee_quiet_nan, &
+                                             ieee_signaling_nan
     implicit none
     private
 !------------------------------------------------------------------------------
@@ -114,8 +116,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[field]
 !     The {\tt ESMF\_Field} object to fill with data.
 !   \item[{[dataFillScheme]}]
-!     The fill scheme. The available options are "sincos", "one", "const", and
-!     "random". Defaults to "sincos".
+!     The fill scheme. The available options are "sincos", "one", "const",
+!     "random", "nan", and "snan". Defaults to "sincos".
 !   \item[{[const1]}]
 !     Constant of real type. Defaults to 0.
 !   \item[{[member]}]
@@ -210,7 +212,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(param3I4)) l_member = param3I4
     l_dataFillScheme = "sincos" ! default
     if(present(dataFillScheme)) l_dataFillScheme = dataFillScheme
-      
+    if (trim(l_dataFillScheme)=="nan") then
+      if (ieee_support_nan(l_const1)) then
+        l_const1 = ieee_value(l_const1, ieee_quiet_nan)
+        l_dataFillScheme = "const"
+      else()
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Quiet NaN is not supported on this machine.", &
+          ESMF_CONTEXT, &
+          rcToReturn=rc)
+        return ! bail out
+      endif()
+    elseif (trim(l_dataFillScheme)=="snan") then
+      if (ieee_support_nan(l_const1)) then
+        l_const1 = ieee_value(l_const1, ieee_signaling_nan)
+        l_dataFillScheme = "const"
+      else()
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Signaling NaN is not supported on this machine.", &
+          ESMF_CONTEXT, &
+          rcToReturn=rc)
+        return ! bail out
+      endif()
+    endif()
+
     allocate(coordDimCount(rank))
 
     if (geomtype==ESMF_GEOMTYPE_GRID) then
