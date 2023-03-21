@@ -33,7 +33,6 @@ def create_compList(_dict, odir):
           if type(v1) is not dict:
             v1 = {'build_type': 'auto'}
           f.write('# - auto-generated section for component: {}\n'.format(k1))
-
           # determine component settings
           build_type = v1.get('build_type', 'auto')
           source_dir = v1.get('source_dir', k1)
@@ -68,7 +67,6 @@ def create_compList(_dict, odir):
             test_dir = test_dir.strip()
             if not test_dir.startswith('$'):
               test_dir = os.path.abspath(test_dir)
-
           # write component settings to file
           if (build_type):
             f.write('set({}-BUILD_TYPE     {})\n'.format(k1, build_type))
@@ -102,6 +100,26 @@ def create_compList(_dict, odir):
             f.write('set({}-LINK_LIBRARIES {})\n'.format(k1, link_libraries))
           if (link_paths):
             f.write('set({}-LINK_PATHS     {})\n'.format(k1, link_paths))
+          if (test_dir):
+            f.write('set({}-TEST_DIR       {})\n'.format(k1, test_dir))
+
+def create_testList(_dict, odir):
+    # open file
+    with open(os.path.join(odir, 'testList.txt'), 'w') as f:
+      if _dict['tests'] is not None:
+        # loop through tests and create use statements
+        od = collections.OrderedDict(_dict['tests'].items())
+        test_str = [test for test in od.keys()]
+        f.write('set(TESTS {})\n\n'.format(' '.join(test_str)))
+        for k1, v1 in od.items():
+          f.write('# - auto-generated section for test: {}\n'.format(k1))
+          # determine test settings
+          test_dir = v1.get('dir', '')
+          if test_dir:
+            test_dir = test_dir.strip()
+            if not test_dir.startswith('$'):
+              test_dir = os.path.abspath(test_dir)
+          # write test settings to file
           if (test_dir):
             f.write('set({}-TEST_DIR       {})\n'.format(k1, test_dir))
 
@@ -173,6 +191,9 @@ def main(argv):
 
     # create compList.txt for CMake
     create_compList(dict_drv, odir)
+
+    # create testList.txt for CMake
+    create_testList(dict_drv, odir)
 
     # create compUse.inc
     create_compUse(dict_drv, odir)

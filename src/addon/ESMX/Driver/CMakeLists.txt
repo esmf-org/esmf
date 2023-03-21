@@ -49,14 +49,12 @@ if(NOT ret EQUAL "0")
   message(FATAL_ERROR "esmxGen.py failed processing esmxBuild.yaml")
 endif()
 
-# Include compList.txt which in turn includes component libraries
-include(${CMAKE_CURRENT_BINARY_DIR}/compList.txt)
 include(FetchContent)
 
 if(TEST)
   set(CMAKE_TEST TRUE)
   enable_testing()
-  set(CMAKE_TEST_DIR "${CMAKE_BINARY_DIR}/esmx-tests")
+  set(CMAKE_TEST_DIR "${CMAKE_BINARY_DIR}-tests")
   string(REPLACE "\"" "" ESMF_INTERNAL_MPIRUN ${ESMF_INTERNAL_MPIRUN})
   string(STRIP ${ESMF_INTERNAL_MPIRUN} ESMF_INTERNAL_MPIRUN)
   string(REGEX REPLACE " .*" "" ESMF_INTERNAL_MPIRUN ${ESMF_INTERNAL_MPIRUN})
@@ -85,7 +83,8 @@ else()
 endif()
 unset(JOBS CACHE)
 
-# Add components using build type
+# Add components using compList.txt
+include(${CMAKE_CURRENT_BINARY_DIR}/compList.txt)
 foreach(CMP IN ITEMS ${COMPS})
   # get component options
   set(CMP_BUILD_TYPE     "${${CMP}-BUILD_TYPE}")
@@ -364,15 +363,14 @@ foreach(CMP IN ITEMS ${COMPS})
     elseif(NOT EXISTS ${CMP_TEST_DIR})
       message(FATAL_ERROR "Cannot find test directory ${CMP_TEST_DIR}")
     else()
-      set(CMP_TEST_NAME esmx-cmp-${CMP})
-      file(COPY ${CMP_TEST_DIR}/ DESTINATION ${CMAKE_TEST_DIR}/${CMP_TEST_NAME})
+      file(COPY ${CMP_TEST_DIR}/ DESTINATION ${CMAKE_TEST_DIR}/cmp/${CMP})
       file(CREATE_LINK ${CMAKE_BINARY_DIR}/esmx
-        ${CMAKE_TEST_DIR}/${CMP_TEST_NAME}/esmx
+        ${CMAKE_TEST_DIR}/cmp/${CMP}/esmx
         SYMBOLIC
       )
-      add_test(NAME ${CMP_TEST_NAME}
+      add_test(NAME esmx-cmp-${CMP}
         COMMAND ${CMAKE_TEST_EXE} ${CMAKE_TEST_TASKS} ./esmx
-        WORKING_DIRECTORY ${CMAKE_TEST_DIR}/${CMP_TEST_NAME})
+        WORKING_DIRECTORY ${CMAKE_TEST_DIR}/cmp/${CMP})
     endif()
   endif()
 
@@ -401,3 +399,30 @@ foreach(CMP IN ITEMS ${COMPS})
   unset(FND_FORT_MODULE)
   unset(FND_LIBRARIES)
 endforeach()
+
+# Add tests using testList.txt
+if(CMAKE_TEST)
+  include(${CMAKE_CURRENT_BINARY_DIR}/testList.txt)
+  foreach(TST IN ITEMS ${TESTS})
+    # get test options
+    set(TST_TEST_DIR       "${${TST}-TEST_DIR}")
+
+    if(TST_TEST_DIR STREQUAL "")
+      message(WARNING "No test directory provided for ${TST}")
+    elseif(NOT EXISTS ${TST_TEST_DIR})
+      message(FATAL_ERROR "Cannot find test directory ${TST_TEST_DIR}")
+    else()
+      file(COPY ${TST_TEST_DIR}/ DESTINATION ${CMAKE_TEST_DIR}/sys/${TST})
+      file(CREATE_LINK ${CMAKE_BINARY_DIR}/esmx
+        ${CMAKE_TEST_DIR}/sys/${TST}/esmx
+        SYMBOLIC
+      )
+      add_test(NAME esmx-sys-${TST}
+        COMMAND ${CMAKE_TEST_EXE} ${CMAKE_TEST_TASKS} ./esmx
+        WORKING_DIRECTORY ${CMAKE_TEST_DIR}/sys/${TST})
+    endif()
+
+    # unset variables used for test
+    unset(TST_TEST_DIR)
+  endforeach()
+endif()

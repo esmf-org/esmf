@@ -35,15 +35,14 @@ options:
   [--esmfmkfile=ESMFMKFILE]
   [--build-dir=BUILD_DIR]
   [--prefix=INSTALL_PREFIX]
-  [--build-type=BUILD_TYPE]
+  [--build-type=BUILD_TYPE] or [-g]
   [--build-args=BUILD_ARGS]
   [--build-jobs=JOBS]
   [--load-modulefile=MODULEFILE]
   [--load-bashenv=BASHENV]
-  [--test]
+  [--test[=TEST_ARGS]] or [-t[=TEST_ARGS]]
   [--test-dir=TEST_DIR]
-  [--verbose]
-  [-v]
+  [--verbose] or [-v]
 
 where:
   ESMX_BUILD_FILE          ESMX build configuration file
@@ -62,8 +61,8 @@ where:
                            (default: install)
 
   --build-type=BUILD_TYPE  build type; valid options are 'debug', 'release', 'relWithDebInfo'
-                           (default: release)
-
+  -g                       (default: release) (-g sets BUILD_TYPE to debug)
+  
   --build-args=BUILD_ARGS  global cmake arguments (e.g. -DVAR=val)
 
   --build-jobs=JOBS        number of jobs used for building esmx and components
@@ -72,10 +71,8 @@ where:
 
   --load-bashenv=BASHENV   load bash environment file before building
 
-  --test                   run ctest suite for ESMX Driver
-
-  --test-dir               test directory
-                           (default: tests)
+  --test[=TEST_ARGS] or    run ctest suite for ESMX Driver, pass TEST_ARGS to ctest
+  -t[=TEST_ARGS]
 
   --verbose or -v          build with verbose output
 ```
@@ -118,6 +115,7 @@ Build options for each component are defined usin [YAML](https://yaml.org/) synt
 | git\_repository | URL for downloading git repository                | *None*                 |
 | git\_tag        | tag for downloading git repository                | *None*                 |
 | git\_dir        | download directory for git repository             | *None*                 |
+| test\_dir       | execute component test in test\_dir               | *None*                 |
 
 Downloading component using git\_repository will result in a detached head. Developers making changing to component code must create or checkout a branch before making code changes. Downloading component using git\_repository fails if the source\_dir already exists.
 

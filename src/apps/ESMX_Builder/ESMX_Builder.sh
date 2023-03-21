@@ -27,6 +27,8 @@ usage () {
   printf "      build type; valid options are 'debug', 'release',\n"
   printf "      'relWithDebInfo'\n"
   printf "      (default: release)\n"
+  printf "  -g\n"
+  printf "      set --build-type=debug\n"
   printf "  --build-args=BUILD_ARGS\n"
   printf "      cmake arguments (e.g. -DARG=VAL)\n"
   printf "  --disable-esmx-comps=DISABLE_ESMX_COMPS\n"
@@ -37,8 +39,8 @@ usage () {
   printf "      load modulefile before building\n"
   printf "  --load-bashenv=BASHENV\n"
   printf "      load bash environment file before building\n"
-  printf "  --test\n"
-  printf "      add testing\n"
+  printf "  --test[=TEST_ARGS], -t[=TEST_ARGS]\n"
+  printf "      enable testing, add TEST_ARGS as needed.\n"
   printf "  --verbose, -v\n"
   printf "      build with verbose output\n"
   printf "\n"
@@ -67,6 +69,7 @@ settings () {
   printf "  MODULEFILE=${MODULEFILE}\n"
   printf "  BASHENV=${BASHENV}\n"
   printf "  TEST=${TEST}\n"
+  printf "  TEST_ARGS=${TEST_ARGS}\n"
   printf "  VERBOSE=${VERBOSE}\n"
   printf "\n"
 }
@@ -85,6 +88,7 @@ INSTALL_PREFIX="${CWD}/install"
 MODULEFILE=""
 BASHENV=""
 TEST=false
+TEST_ARGS=""
 VERBOSE=false
 
 # required arguments
@@ -113,6 +117,9 @@ while [[ $# -gt 0 ]]; do
     --build-type=?*) BUILD_TYPE=${1#*=} ;;
     --build-type)  usage_error "$1" "requires an argument" ;;
     --build-type=) usage_error "$1" "requires an argument" ;;
+    -g) BUILD_TYPE="Debug" ;;
+    -g=?*) usage_error "$1" "argument ignored" ;;
+    -g=)   usage_error "$1" "argument ignored" ;;
     --build-args=?*) BUILD_ARGS=${1#*=} ;;
     --build-args)  usage_error "$1" "requires an argument" ;;
     --build-args=) usage_error "$1" "requires an argument" ;;
@@ -130,8 +137,8 @@ while [[ $# -gt 0 ]]; do
     --load-bashenv=?*) BASHENV=${1#*=} ;;
     --load-bashenv)  usage_error "$1" "requires an argument" ;;
     --load-bashenv=) usage_error "$1" "requires an argument" ;;
-    --test) TEST=true ;;
-    --test=?*) usage_error "$1" "argument ignored" ;;
+    --test|-t) TEST=true ;;
+    --test=?*|-t=?*) TEST=true; TEST_ARGS=${1#*=} ;;
     --test=)   usage_error "$1" "argument ignored" ;;
     --verbose|-v) VERBOSE=true ;;
     --verbose=?*) usage_error "$1" "argument ignored" ;;
@@ -237,6 +244,12 @@ if [ ! -z "${JOBS}" ]; then
   BUILD_SETTINGS+=("-j ${JOBS}")
 fi
 
+# test settings
+TEST_SETTINGS=("")
+if [ ! -z "${TEST_ARGS}" ]; then
+  TEST_SETTINGS+=("${TEST_ARGS}")
+fi
+
 # install settings
 INSTALL_SETTINGS=("")
 
@@ -245,5 +258,5 @@ cmake -S${ESMF_ESMXDIR} -B${BUILD_DIR} ${CMAKE_SETTINGS[@]}
 cmake --build ${BUILD_DIR} ${BUILD_SETTINGS[@]}
 cmake --install ${BUILD_DIR} ${INSTALL_SETTINGS[@]}
 if [ "${TEST}" = true ]; then
-  (cd ${BUILD_DIR}/Driver; ctest)
+  (cd ${BUILD_DIR}/Driver; ctest ${TEST_SETTINGS[@]})
 fi
