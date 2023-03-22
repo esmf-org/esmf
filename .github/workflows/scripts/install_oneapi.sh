@@ -61,7 +61,8 @@ echo "::endgroup::"
 echo "::group::Install Intel oneAPI Base and HPC Kits"
 sudo apt-get install -qq intel-basekit-$compiler_version
 sudo apt-get install -qq intel-hpckit-$compiler_version
-sudo setfacl -R -m u:`whoami`:rwx /opt/intel
+#sudo setfacl -R -m u:`whoami`:rwx /opt/intel
+sudo chmod -R o+r /opt/intel
 echo "::endgroup::"
 
 # list content of the installation folders (for debugging)
