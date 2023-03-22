@@ -112,6 +112,9 @@ foreach(CMP IN ITEMS ${COMPS})
   set(CMP_LINK_PATHS     "${${CMP}-LINK_PATHS}")
   string(REPLACE "," ";" "${${CMP}-LINK_PATHS}" CMP_LINK_PATHS)
   set(CMP_BUILD_SCRIPT   "${${CMP}-BUILD_SCRIPT}")
+  if(CMP_BUILD_SCRIPT STREQUAL "")
+    set(CMP_BUILD_SCRIPT compile.sh;compile;build.sh;build)
+  endif()
   set(CMP_BUILD_ARGS     "${${CMP}-BUILD_ARGS}")
   set(CMP_TEST_DIR       "${${CMP}-TEST_DIR}")
 
@@ -124,7 +127,8 @@ foreach(CMP IN ITEMS ${COMPS})
     if(NOT EXISTS ${CMP_SOURCE_DIR})
       set(CMP_GIT_TAG -b ${CMP_GIT_TAG})
       execute_process(
-        COMMAND git clone ${CMP_GIT_TAG} ${CMP_GIT_REPOSITORY} ${CMP_GIT_DIR}
+        COMMAND git clone -o esmxApp ${CMP_GIT_TAG}
+          ${CMP_GIT_REPOSITORY} ${CMP_GIT_DIR}
         RESULT_VARIABLE ret
       )
       if(NOT ret EQUAL "0")
@@ -132,15 +136,36 @@ foreach(CMP IN ITEMS ${COMPS})
       endif()
     else()
       execute_process(
-        COMMAND git remote set-url origin ${CMP_GIT_REPOSITORY}
-        COMMAND git fetch origin --prune
+        COMMAND git remote set-url esmxApp ${CMP_GIT_REPOSITORY}
+        WORKING_DIRECTORY ${CMP_GIT_DIR}
+        RESULT_VARIABLE ret
+      )
+      if(NOT ret EQUAL "0")
+        message(FATAL_ERROR "git set-url failed for ${CMP}")
+      endif()
+      execute_process(
+        COMMAND git fetch esmxApp
+        WORKING_DIRECTORY ${CMP_GIT_DIR}
+        RESULT_VARIABLE ret
+      )
+      if(NOT ret EQUAL "0")
+        message(FATAL_ERROR "git fetch failed for ${CMP}")
+      endif()
+      execute_process(
         COMMAND git checkout ${CMP_GIT_TAG}
         WORKING_DIRECTORY ${CMP_GIT_DIR}
-        RESULTS_VARIABLE ret
+        RESULT_VARIABLE ret
       )
-      list(FILTER ret EXCLUDE REGEX "[0]")
-      if(NOT ret MATCHES "")
-        message(FATAL_ERROR "git update failed for ${CMP}")
+      if(NOT ret EQUAL "0")
+        message(FATAL_ERROR "git checkout failed for ${CMP}")
+      endif()
+      execute_process(
+        COMMAND git pull esmxApp ${CMP_GIT_TAG}
+        WORKING_DIRECTORY ${CMP_GIT_DIR}
+        RESULT_VARIABLE ret
+      )
+      if(NOT ret EQUAL "0")
+        message(FATAL_ERROR "git pull failed for ${CMP}")
       endif()
     endif()
   endif()
@@ -215,23 +240,24 @@ foreach(CMP IN ITEMS ${COMPS})
     endif()
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP})
     execute_process(
-      COMMAND ${CMAKE_COMMAND} -S${CMP_SOURCE_DIR} -B${CMAKE_BINARY_DIR}/${CMP}
-        ${CMP_BUILD_ARGS} -DCMAKE_INSTALL_PREFIX=${CMP_INSTALL_PREFIX}
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      COMMAND ${CMAKE_COMMAND} -S${CMP_SOURCE_DIR} ${CMP_BUILD_ARGS} -DCMAKE_INSTALL_PREFIX=${CMP_INSTALL_PREFIX} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP}
       RESULT_VARIABLE ret
     )
     if(NOT ret EQUAL "0")
       message(FATAL_ERROR "cmake generate failed for ${CMP}")
     endif()
     execute_process(
-      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}/${CMP} ${CMAKE_VERBOSE} ${CMAKE_JOBS}
+      COMMAND ${CMAKE_COMMAND} --build . ${CMAKE_VERBOSE} ${CMAKE_JOBS}
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP}
       RESULT_VARIABLE ret
     )
     if(NOT ret EQUAL "0")
       message(FATAL_ERROR "cmake build failed for ${CMP}")
     endif()
     execute_process(
-      COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}/${CMP}
+      COMMAND ${CMAKE_COMMAND} --install .
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${CMP}
       RESULT_VARIABLE ret
     )
     if(NOT ret EQUAL "0")
@@ -307,7 +333,7 @@ foreach(CMP IN ITEMS ${COMPS})
   if(FND_FORT_MODULE)
     target_include_directories(esmx_driver PUBLIC ${FND_FORT_MODULE})
   elseif(NOT FND_CMAKE_CONFIG)
-    message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE}")
+    message(FATAL_ERROR "Cannot find fort_module ${CMP_FORT_MODULE} in ${CMP_INSTALL_PREFIX}")
   endif()
   foreach(CMP_LIBRARY IN ITEMS ${CMP_LIBRARIES})
     if(TARGET ${CMP_LIBRARY})
@@ -320,23 +346,12 @@ foreach(CMP IN ITEMS ${COMPS})
         NO_CACHE NO_DEFAULT_PATH
       )
       if(NOT FND_LIBRARY)
-        message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY}")
+        message(FATAL_ERROR "Cannot find libraries ${CMP_LIBRARY} in ${CMP_INSTALL_PREFIX}")
       endif()
       target_link_libraries(esmx_driver PUBLIC ${FND_LIBRARY})
       unset(FND_LIBRARY)
     endif()
   endforeach()
-
-  # change environment variable to path in variable
-  set(TMP_LINK_PATHS "")
-  foreach(CMP_LINK_PATH IN ITEMS ${CMP_LINK_PATHS})
-    if(DEFINED ENV{${CMP_LINK_PATH}})
-      set(CMP_LINK_PATH $ENV{${CMP_LINK_PATH}})
-    endif()
-    list(APPEND TMP_LINK_PATHS ${CMP_LINK_PATH})
-  endforeach()
-  set(CMP_LINK_PATHS ${TMP_LINK_PATHS})
-  unset(TMP_LINK_PATHS)
 
   # link external libraries
   foreach(CMP_LINK_LIBRARY IN ITEMS ${CMP_LINK_LIBRARIES})

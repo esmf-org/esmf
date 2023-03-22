@@ -51,7 +51,7 @@ def create_compList(_dict, odir):
           include_dir = v1.get('include_dir', 'include')
           fort_module = v1.get('fort_module', (k1+'.mod').lower())
           libraries = v1.get('libraries', k1)
-          build_script = v1.get('build_script', 'build.sh')
+          build_script = v1.get('build_script', '')
           build_args = v1.get('build_args', '')
           link_libraries = v1.get('link_libraries', '')
           link_paths = v1.get('link_paths', '')
