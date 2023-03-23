@@ -103,7 +103,7 @@ if [[ "$comp" == *"oneapi"* ]]; then
   echo "  print*, 'Hello from ', id, ' of ', p" >> test_mpi.F90
   echo "end program test_mpi" >> test_mpi.F90
 
-  mpifort -o test_mpi.x test_mpi.F90
+  mpiifort -o test_mpi.x test_mpi.F90
   mpirun -np 2 ./test_mpi.x
   echo "::endgroup::"
 fi

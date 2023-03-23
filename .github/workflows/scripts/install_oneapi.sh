@@ -11,12 +11,6 @@ done
 # print out arguments
 echo "Compiler: $comp"
 
-# exit if it is already installed
-if [ -d "/opt/intel/oneapi" ]; then
-  echo "/opt/intel/oneapi directory exists. Skip installing Intel oneAPI Compiler ..."
-  exit
-fi
-
 # download the key to system keyring
 echo "::group::Setup Intel oneAPI Repository"
 wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | \
@@ -29,6 +23,13 @@ echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] \
 # update packages list and repository index
 sudo apt-get -qq update
 echo "::endgroup::"
+
+# exit if it is already installed
+if [ -d "/opt/intel/oneapi" ]; then
+  echo "/opt/intel/oneapi directory exists. Skip installing Intel oneAPI Compiler ..."
+  sudo apt-get --fix-missing update
+  exit
+fi
 
 # get compiler version
 echo "::group::Check Specified Versiion"
