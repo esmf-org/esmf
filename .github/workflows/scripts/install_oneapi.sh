@@ -61,8 +61,15 @@ echo "::endgroup::"
 echo "::group::Install Intel oneAPI Base and HPC Kits"
 sudo apt-get install -qq intel-basekit-$compiler_version
 sudo apt-get install -qq intel-hpckit-$compiler_version
+# remove vtune since it is creating issue in cache due to permission issue in the installation files
+list_vtune_pkgs=`apt-cache search intel-oneapi-vtune | awk '{print $1}'`
+for i in $list_vtune_pkgs
+do
+  echo "Removing package - $i"
+  sudo apt-get purge $i
+done
 #sudo setfacl -R -m u:`whoami`:rwx /opt/intel
-sudo chmod -R o+r /opt/intel
+#sudo chmod -R o+r /opt/intel
 echo "::endgroup::"
 
 # list content of the installation folders (for debugging)
