@@ -68,8 +68,6 @@ do
   echo "Removing package - $i"
   sudo apt-get purge $i
 done
-#sudo setfacl -R -m u:`whoami`:rwx /opt/intel
-#sudo chmod -R o+r /opt/intel
 echo "::endgroup::"
 
 # list content of the installation folders (for debugging)

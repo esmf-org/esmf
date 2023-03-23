@@ -57,8 +57,8 @@ git clone -b esmf-update https://github.com/theurich/spack.git
 echo "::endgroup::"
 
 # find available compilers
-echo "::group::Find Available Compilers and MPIs"
 if [[ "$comp" == *"oneapi"* ]]; then
+  echo "::group::Find Available Compilers and MPIs"
   # find hpckit version (same with basekit)
   hpckit_pkg_version=`echo "$comp" | awk -F\@ '{print $2}'`
   echo "hpckit_pkg_version = $hpckit_pkg_version"
@@ -76,16 +76,39 @@ if [[ "$comp" == *"oneapi"* ]]; then
   echo "mpi_devel_pkg      = $mpi_devel_pkg"
   echo "mpi_pkg            = $mpi_pkg"
   echo "mpi_version        = $mpi_version"
+  echo "::endgroup::"
 
   # create config file
+  echo "::group::Create Config file to Load Compiler"
   echo "compiler=$comp_version" > config.txt
   echo "mpi=$mpi_version" >> config.txt
+  cat config.txt
+  echo "::endgroup::"
 
   # load compiler
+  echo "::group::Load Intel One API Compiler" 
   . /opt/intel/oneapi/setvars.sh --config=config.txt --force
   comp="oneapi@$comp_version"
   mpi="oneapi-mpi@$mpi_version"
+  echo "::endgroup::"
+
+  # test installation by building and running simple MPI job
+  echo "::group::Test Installation"
+  echo "program test_mpi" > test_mpi.F90
+  echo "  use mpi" >> test_mpi.F90
+  echo "  integer :: err, p, id" >> test_mpi.F90
+  echo "  call MPI_Init(err)" >> test_mpi.F90
+  echo "  call MPI_Comm_size(MPI_COMM_WORLD, p, err)" >> test_mpi.F90
+  echo "  call MPI_Comm_rank(MPI_COMM_WORLD, id, err)" >> test_mpi.F90
+  echo "  print*, 'Hello from ', id, ' of ', p" >> test_mpi.F90
+  echo "end program test_mpi" >> test_mpi.F90
+
+  mpifort -o test_mpi.x test_mpi.F90
+  mpirun -np 2 ./test_mpi.x
+  echo "::endgroup::"
 fi
+
+exit
 
 # find compilers
 . spack/share/spack/setup-env.sh
