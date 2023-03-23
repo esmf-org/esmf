@@ -101,6 +101,7 @@ if [[ "$comp" == *"oneapi"* ]]; then
   echo "  call MPI_Comm_size(MPI_COMM_WORLD, p, err)" >> test_mpi.F90
   echo "  call MPI_Comm_rank(MPI_COMM_WORLD, id, err)" >> test_mpi.F90
   echo "  print*, 'Hello from ', id, ' of ', p" >> test_mpi.F90
+  echo "  call MPI_Finalize(err)" >> test_mpi.F90
   echo "end program test_mpi" >> test_mpi.F90
 
   mpiifort -o test_mpi.x test_mpi.F90
