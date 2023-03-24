@@ -64,24 +64,24 @@ jobs:
           -r ${{ github.workspace }} 
 
     # install test environment
-    #- name: Install ESMF with Spack 
-    #  run: |
-    #    ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
-    #      -r ${{ github.workspace }}
+    - name: Install ESMF with Spack 
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+          -r ${{ github.workspace }}
 
     # checkout NUOPC app prototypes
-    #- name: Checkout NUOPC app prototypes
-    #  uses: actions/checkout@v3
-    #  with:
-    #    #repository: esmf-org/nuopc-app-prototypes
-    #    repository: uturuncoglu/nuopc-app-prototypes
-    #    path: ${{ github.workspace }}/nuopc-app-prototypes
-    #    ref: develop
+    - name: Checkout NUOPC app prototypes
+      uses: actions/checkout@v3
+      with:
+        #repository: esmf-org/nuopc-app-prototypes
+        repository: uturuncoglu/nuopc-app-prototypes
+        path: ${{ github.workspace }}/nuopc-app-prototypes
+        ref: develop
 
     # test installation using NUOPC app prototypes
-    #- name: Run NUOPC app prototypes
-    #  run: |
-    #    ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
-    #      -c ${{ matrix.compiler }} \
-    #      -r ${{ github.workspace }}/nuopc-app-prototypes \
-    #      -s ~/.spack-ci
+    - name: Run NUOPC app prototypes
+      run: |
+        ${{ github.workspace }}/.github/workflows/scripts/run_nuopc_app_proto.sh \
+          -c ${{ matrix.compiler }} \
+          -r ${{ github.workspace }}/nuopc-app-prototypes \
+          -s ~/.spack-ci

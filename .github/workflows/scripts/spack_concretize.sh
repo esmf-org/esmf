@@ -109,8 +109,6 @@ if [[ "$comp" == *"oneapi"* ]]; then
   echo "::endgroup::"
 fi
 
-exit
-
 # find compilers
 . spack/share/spack/setup-env.sh
 spack compiler find
