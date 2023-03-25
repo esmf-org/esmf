@@ -127,7 +127,7 @@ if [[ "$comp" == *"oneapi"* ]]; then
   echo "  mpi:" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
   echo "    require:" >> ~/.spack/packages.yaml
-  echo "    - one_of: [oneapi-mpi%${comp}]" >> ~/.spack/packages.yaml
+  echo "    - one_of: [${mpi}%${comp}]" >> ~/.spack/packages.yaml
   echo "  oneapi-mpi:" >> ~/.spack/packages.yaml
   echo "    externals:" >> ~/.spack/packages.yaml
   echo "    - spec: ${mpi}%${comp}" >> ~/.spack/packages.yaml
@@ -156,7 +156,7 @@ echo "      target: ['$arch']" >> spack.yaml
 echo "      compiler: [$comp]" >> spack.yaml
 echo "      providers:" >> spack.yaml
 if [[ "$comp" == *"oneapi"* ]]; then
-echo "        mpi: [$mpi]" >> spack.yaml
+echo "        mpi: [${mpi}]" >> spack.yaml
 else
 echo "        mpi: [openmpi]" >> spack.yaml
 fi
