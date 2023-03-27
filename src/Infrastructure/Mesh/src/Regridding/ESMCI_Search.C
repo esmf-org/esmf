@@ -1158,7 +1158,7 @@ BBox bbox_from_pl(PointList &dst_pl) {
 
   // Set some parameters to control search
   const double normexp = 0.15;
-  const double dstint = 1e-8;
+  const double dstint = 2e-6; // Keep larger than tol. in found_func() and larger than final stol
 
 
   // If using great circle edges, set flag to treat as on a spherical surface when generating seach boxes
