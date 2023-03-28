@@ -123,15 +123,21 @@ echo "::endgroup::"
 # add Intel MPI to spack
 if [[ "$comp" == *"oneapi"* ]]; then
   echo "::group::Create packages.yaml"
-  echo "packages:" > ~/.spack/packages.yaml 
-  echo "  mpi:" >> ~/.spack/packages.yaml
-  echo "    buildable: false" >> ~/.spack/packages.yaml
-  echo "    require:" >> ~/.spack/packages.yaml
-  echo "    - one_of: [${mpi}%${comp}]" >> ~/.spack/packages.yaml
-  echo "  oneapi-mpi:" >> ~/.spack/packages.yaml
+  #echo "packages:" > ~/.spack/packages.yaml 
+  #echo "  mpi:" >> ~/.spack/packages.yaml
+  #echo "    buildable: false" >> ~/.spack/packages.yaml
+  #echo "    require:" >> ~/.spack/packages.yaml
+  #echo "    - one_of: [${mpi}%${comp}]" >> ~/.spack/packages.yaml
+  #echo "  oneapi-mpi:" >> ~/.spack/packages.yaml
+  #echo "    externals:" >> ~/.spack/packages.yaml
+  #echo "    - spec: ${mpi}%${comp}" >> ~/.spack/packages.yaml
+  #echo "      prefix: /opt/intel/oneapi/mpi/$mpi_version" >> ~/.spack/packages.yaml
+  #echo "    buildable: false" >> ~/.spack/packages.yaml
+  echo "packages:" > ~/.spack/packages.yaml
+  echo "  intel-oneapi-mpi:" >> ~/.spack/packages.yaml
   echo "    externals:" >> ~/.spack/packages.yaml
-  echo "    - spec: ${mpi}%${comp}" >> ~/.spack/packages.yaml
-  echo "      prefix: /opt/intel/oneapi/mpi/$mpi_version" >> ~/.spack/packages.yaml
+  echo "    - spec: intel-${mpi}" >> ~/.spack/packages.yaml
+  echo "      prefix: /opt/intel/oneapi/" >> ~/.spack/packages.yaml
   echo "    buildable: false" >> ~/.spack/packages.yaml
   cat ~/.spack/packages.yaml
   echo "::endgroup::"
@@ -156,7 +162,7 @@ echo "      target: ['$arch']" >> spack.yaml
 echo "      compiler: [$comp]" >> spack.yaml
 echo "      providers:" >> spack.yaml
 if [[ "$comp" == *"oneapi"* ]]; then
-echo "        mpi: [${mpi}]" >> spack.yaml
+echo "        mpi: [intel-${mpi}]" >> spack.yaml
 else
 echo "        mpi: [openmpi]" >> spack.yaml
 fi
