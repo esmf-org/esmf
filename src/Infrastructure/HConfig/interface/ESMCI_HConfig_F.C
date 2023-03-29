@@ -120,7 +120,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigcreateatkey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
-    char *key, int *rc, ESMCI_FortranStrLenArg string_l){
+    ESMCI::HConfig *key, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigatkey()"
     // Initialize return code; assume routine not implemented
@@ -129,9 +129,9 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(at, rc)
+    ESMCI_NULL_CHECK_PRC(key, rc)
     // call into C++
-    std::string keyStr(key, string_l);
-    *at = ptr->createAtKey(keyStr, &localrc);
+    *at = ptr->createAtKey(key, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -157,7 +157,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigcreateatmapkeykey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
-    char *key, int *rc, ESMCI_FortranStrLenArg string_l){
+    ESMCI::HConfig *key, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigcreateatmapkeykey()"
     // Initialize return code; assume routine not implemented
@@ -166,9 +166,9 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(at, rc)
+    ESMCI_NULL_CHECK_PRC(key, rc)
     // call into C++
-    std::string keyStr(key, string_l);
-    *at = ptr->createAtMapKeyKey(keyStr, &localrc);
+    *at = ptr->createAtMapKeyKey(key, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -194,7 +194,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigcreateatmapvalkey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
-    char *key, int *rc, ESMCI_FortranStrLenArg string_l){
+    ESMCI::HConfig *key, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigcreateatmapvalkey()"
     // Initialize return code; assume routine not implemented
@@ -203,9 +203,9 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(at, rc)
+    ESMCI_NULL_CHECK_PRC(key, rc)
     // call into C++
-    std::string keyStr(key, string_l);
-    *at = ptr->createAtMapValKey(keyStr, &localrc);
+    *at = ptr->createAtMapValKey(key, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully

@@ -479,7 +479,7 @@ program ESMF_HConfigEx
 
     ! Check whether the accessed map value is a scalar.
     ! logical :: isScalar
-    isScalar = ESMF_HConfigIsScalar(hconfig, key=stringKey, rc=rc)
+    isScalar = ESMF_HConfigIsScalar(hconfig, keyString=stringKey, rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -487,7 +487,7 @@ program ESMF_HConfigEx
 
       ! Access as a string always works.
       ! character(len=:), allocatable :: string
-      string = ESMF_HConfigAsString(hconfig, key=stringKey, rc=rc)
+      string = ESMF_HConfigAsString(hconfig, keyString=stringKey, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_LogWrite("map key="//stringKey//" map value: AsString: "// &
@@ -503,7 +503,7 @@ program ESMF_HConfigEx
       ! logical :: asOkay
 
       ! integer(ESMF_KIND_I4) :: valueI4
-      valueI4 = ESMF_HConfigAsI4(hconfig, key=stringKey, asOkay=asOkay, rc=rc)
+      valueI4 = ESMF_HConfigAsI4(hconfig, keyString=stringKey, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, &
@@ -513,7 +513,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! integer(ESMF_KIND_I8) :: valueI8
-      valueI8 = ESMF_HConfigAsI8(hconfig, key=stringKey, asOkay=asOkay, rc=rc)
+      valueI8 = ESMF_HConfigAsI8(hconfig, keyString=stringKey, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, &
@@ -523,7 +523,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! real(ESMF_KIND_R4) :: valueR4
-      valueR4 = ESMF_HConfigAsR4(hconfig, key=stringKey, asOkay=asOkay, rc=rc)
+      valueR4 = ESMF_HConfigAsR4(hconfig, keyString=stringKey, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, &
@@ -533,7 +533,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! real(ESMF_KIND_R8) :: valueR8
-      valueR8 = ESMF_HConfigAsR8(hconfig, key=stringKey, asOkay=asOkay, rc=rc)
+      valueR8 = ESMF_HConfigAsR8(hconfig, keyString=stringKey, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, &
@@ -543,7 +543,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! logical :: valueL
-      valueL = ESMF_HConfigAsLogical(hconfig, key=stringKey, asOkay=asOkay, rc=rc)
+      valueL = ESMF_HConfigAsLogical(hconfig, keyString=stringKey, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, &
@@ -568,7 +568,7 @@ program ESMF_HConfigEx
 !EOE
 !BOC
   ! logical :: isDefined
-  isDefined = ESMF_HConfigIsDefined(hconfig, key="bad-key", rc=rc)
+  isDefined = ESMF_HConfigIsDefined(hconfig, keyString="bad-key", rc=rc)
 !BOE
 ! This returns {\tt isDefined == .false.} because {\tt hconfig} does not
 ! contain {\tt "bad-key"} as one of its valid {\em map keys}.
@@ -688,7 +688,7 @@ program ESMF_HConfigEx
 ! # An example of YAML configuration file
 !
 ! simple_list: [1, 2, 3, abc, b, TRUE]
-! simple_map:  {car: red, bike: [bmx, mountain, street], plane: TRUE}
+! simple_map: {car: red, [bike, {p1: 10, p2: 20}]: [bmx, mountain, street], plane: [TRUE, FALSE]}
 ! \end{verbatim}
 !
 ! is loaded to create the {\tt hconfig} object:
@@ -710,7 +710,7 @@ program ESMF_HConfigEx
 ! contain the comments of the original file. The YAML structure is saved.
 ! \begin{verbatim}
 ! simple_list: [1, 2, 3, abc, b, TRUE]
-! simple_map: {car: red, bike: [bmx, mountain, street], plane: TRUE}
+! simple_map: {car: red, [bike, {p1: 10, p2: 20}]: [bmx, mountain, street], plane: [TRUE, FALSE]}
 ! \end{verbatim}
 !
 ! The object specified in {\tt ESMF\_HConfigSaveFile()} can be a regular node
@@ -784,14 +784,14 @@ program ESMF_HConfigEx
 !EOE
 !BOC
   ! type(ESMF_HConfig) :: hconfigNode
-  hconfigNode = ESMF_HConfigCreateAt(hconfig, key="simple_map", rc=rc)
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString="simple_map", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Now {\tt hconfigNode} points to the {\em value} node, that is
 ! associated with the "simple\_map" key, which is in turn a map:
 ! \begin{verbatim}
-! {car: red, bike: [bmx, mountain, street], plane: TRUE}
+! {car: red, [bike, {p1: 10, p2: 20}]: [bmx, mountain, street], plane: [TRUE, FALSE]}
 ! \end{verbatim}
 ! It can be saved to file as usual.
 !EOE
@@ -803,11 +803,15 @@ program ESMF_HConfigEx
 ! Any of the {\em value} nodes of {\tt hconfigNode} can be accessed through
 ! recursive usage of the {\tt ESMF\_HConfigCreateAt()} method.
 ! For example, the following call accesses the {\em value} node that is
-! associated with {\tt key="bike"}.
+! associated with {\tt keyString="[bike, {p1: 10, p2: 20}]"}. Here the
+! {\tt keyString} is interpreted as YAML syntax, for which an internal HConfig
+! representation is created, and finally the map held by {\tt hconfigNode} is
+! searched for a matching key.
 !EOE
 !BOC
   ! type(ESMF_HConfig) :: hconfigNode2
-  hconfigNode2 = ESMF_HConfigCreateAt(hconfigNode, key="bike", rc=rc)
+  hconfigNode2 = ESMF_HConfigCreateAt(hconfigNode, &
+    keyString="[bike, {p1: 10, p2: 20}]", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE

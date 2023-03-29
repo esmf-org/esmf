@@ -64,17 +64,20 @@ namespace ESMCI {
       static HConfig create(int *rc=NULL);
       static int destroy(HConfig *hconfig);
 
+      template <typename T> inline 
+      static YAML::Node find(T self, HConfig *key);
+
       int load(const std::string& content);
       int loadFile(const std::string& filename);
 
       int saveFile(const std::string& filename);
 
       HConfig createAt(int *index=NULL, int *rc=NULL);
-      HConfig createAtKey(std::string key="", int *rc=NULL);
+      HConfig createAtKey(HConfig *key, int *rc=NULL);
       HConfig createAtMapKey(int *index=NULL, int *rc=NULL);
-      HConfig createAtMapKeyKey(std::string key="", int *rc=NULL);
+      HConfig createAtMapKeyKey(HConfig *key, int *rc=NULL);
       HConfig createAtMapVal(int *index=NULL, int *rc=NULL);
-      HConfig createAtMapValKey(std::string key="", int *rc=NULL);
+      HConfig createAtMapValKey(HConfig *key, int *rc=NULL);
 
       int getSize(int *rc=NULL);
       int getMapKeySize(int *rc=NULL);

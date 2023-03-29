@@ -422,7 +422,8 @@ program ESMF_HConfigUTest
       enddo
     else
       ! direct access via key, here through CreateAt()
-      hconfig2 = ESMF_HConfigCreateAt(hconfig, key="radius_of_the_earth", rc=rc)
+      hconfig2 = ESMF_HConfigCreateAt(hconfig, keyString="radius_of_the_earth", &
+        rc=rc)
       if (rc /= ESMF_SUCCESS) return
       valueR4 = ESMF_HConfigAsR4(hconfig2, rc=rc)
       if (rc /= ESMF_SUCCESS) return
@@ -432,41 +433,41 @@ program ESMF_HConfigUTest
       if (rc /= ESMF_SUCCESS) return
       call ESMF_HConfigDestroy(hconfig2, rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      ! direct access via key, here directly through AsR8(key=...)
-      valueR8 = ESMF_HConfigAsR8(hconfig, key="radius_of_the_earth", rc=rc)
+      ! direct access via key, here directly through AsR8(keyString=...)
+      valueR8 = ESMF_HConfigAsR8(hconfig, keyString="radius_of_the_earth", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      write(msgString, *) "R8 'radius_of_the_earth' through AsR8(key=...): ", &
+      write(msgString, *) "R8 'radius_of_the_earth' through AsR8(keyString=...): ", &
         valueR8
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      ! direct access via key, through AsString(key=...)
+      ! direct access via key, through AsString(keyString=...)
       ! value_one
-      string = ESMF_HConfigAsString(hconfig, key="value_one", rc=rc)
+      string = ESMF_HConfigAsString(hconfig, keyString="value_one", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      tag = ESMF_HConfigGetTag(hconfig, key="value_one", rc=rc)
+      tag = ESMF_HConfigGetTag(hconfig, keyString="value_one", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      valueL = ESMF_HConfigAsLogical(hconfig, key="value_one", rc=rc)
+      valueL = ESMF_HConfigAsLogical(hconfig, keyString="value_one", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      write(msgString, *) "String 'value_one' through AsString(key=...): ", &
-        string, "  [", tag, "] through AsLogical(key=...):", valueL
+      write(msgString, *) "String 'value_one' through AsString(keyString=...): ", &
+        string, "  [", tag, "] through AsLogical(keyString=...):", valueL
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      string = ESMF_HConfigAsString(hconfig, key="value_one", asOkay=asOkayS, &
+      string = ESMF_HConfigAsString(hconfig, keyString="value_one", asOkay=asOkayS, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      valueL = ESMF_HConfigAsLogical(hconfig, key="value_one", asOkay=asOkayL, &
+      valueL = ESMF_HConfigAsLogical(hconfig, keyString="value_one", asOkay=asOkayL, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      valueI4 = ESMF_HConfigAsI4(hconfig, key="value_one", asOkay=asOkayI4, &
+      valueI4 = ESMF_HConfigAsI4(hconfig, keyString="value_one", asOkay=asOkayI4, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      valueI8 = ESMF_HConfigAsI8(hconfig, key="value_one", asOkay=asOkayI8, &
+      valueI8 = ESMF_HConfigAsI8(hconfig, keyString="value_one", asOkay=asOkayI8, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      valueR4 = ESMF_HConfigAsR4(hconfig, key="value_one", asOkay=asOkayR4, &
+      valueR4 = ESMF_HConfigAsR4(hconfig, keyString="value_one", asOkay=asOkayR4, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      valueR8 = ESMF_HConfigAsR8(hconfig, key="value_one", asOkay=asOkayR8, &
+      valueR8 = ESMF_HConfigAsR8(hconfig, keyString="value_one", asOkay=asOkayR8, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) return
       write(msgString, *) "'value_one'", &
@@ -476,31 +477,31 @@ program ESMF_HConfigUTest
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
       ! value_two
-      string = ESMF_HConfigAsString(hconfig, key="value_two", rc=rc)
+      string = ESMF_HConfigAsString(hconfig, keyString="value_two", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      tag = ESMF_HConfigGetTag(hconfig, key="value_two", rc=rc)
+      tag = ESMF_HConfigGetTag(hconfig, keyString="value_two", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      valueL = ESMF_HConfigAsLogical(hconfig, key="value_two", rc=rc)
+      valueL = ESMF_HConfigAsLogical(hconfig, keyString="value_two", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      write(msgString, *) "String 'value_two' through AsString(key=...): ", &
-        string, "  [", tag, "] through AsLogical(key=...):", valueL
+      write(msgString, *) "String 'value_two' through AsString(keyString=...): ", &
+        string, "  [", tag, "] through AsLogical(keyString=...):", valueL
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
       ! value_three
-      string = ESMF_HConfigAsString(hconfig, key="value_three", rc=rc)
+      string = ESMF_HConfigAsString(hconfig, keyString="value_three", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      tag = ESMF_HConfigGetTag(hconfig, key="value_three", rc=rc)
+      tag = ESMF_HConfigGetTag(hconfig, keyString="value_three", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      write(msgString, *) "String 'value_three' through AsString(key=...): ", &
+      write(msgString, *) "String 'value_three' through AsString(keyString=...): ", &
         string, "  [", tag, "]"
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return
       ! value_four
-      string = ESMF_HConfigAsString(hconfig, key="value_four", rc=rc)
+      string = ESMF_HConfigAsString(hconfig, keyString="value_four", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      tag = ESMF_HConfigGetTag(hconfig, key="value_four", rc=rc)
+      tag = ESMF_HConfigGetTag(hconfig, keyString="value_four", rc=rc)
       if (rc /= ESMF_SUCCESS) return
-      write(msgString, *) "String 'value_four' through AsString(key=...): ", &
+      write(msgString, *) "String 'value_four' through AsString(keyString=...): ", &
         string, "  [", tag, "]"
       call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
       if (rc /= ESMF_SUCCESS) return

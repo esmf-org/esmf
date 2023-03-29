@@ -414,6 +414,27 @@ HConfig HConfig::createAt(
 
 
 //-----------------------------------------------------------------------------
+template <typename T> inline YAML::Node HConfig::find(T self, HConfig *key){
+  if (key->node->IsScalar()){
+    // handle scalar key as simple string direct indexing
+    return (self)[key->node->as<std::string>()];
+  }else{
+    // handle complex key by iteration and comparing serialized node
+    std::stringstream ss_key;
+    ss_key << *(key->node);
+    for (auto it=self.begin(); it!=self.end(); ++it){
+      std::stringstream ss_self;
+      ss_self << it->first;
+      if (ss_self.str() == ss_key.str())
+        return it->second;
+    }
+  }
+  return YAML::Node();
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::createAtKey()"
 //BOP
@@ -426,7 +447,7 @@ HConfig HConfig::createAtKey(
 //  node
 //
 // !ARGUMENTS:
-    std::string key,      // in  - if present, access by index, Fortran base 1
+    HConfig *key,         // in  - access by key
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -456,7 +477,7 @@ HConfig HConfig::createAtKey(
           ESMC_CONTEXT, rc);
         return hconfig;
       }else
-        *hconfig.node = (*node)[key.c_str()];
+        *hconfig.node = HConfig::find(*node, key);
     }else{
       // iterator
       if (type==YAML::NodeType::Map){
@@ -470,7 +491,7 @@ HConfig HConfig::createAtKey(
             ESMC_CONTEXT, rc);
           return hconfig;
         }else
-          *hconfig.node = (*iter)[key.c_str()];
+          *hconfig.node = HConfig::find(*iter, key);
       }
     }
     hconfig.type = hconfig.node->Type();
@@ -574,7 +595,7 @@ HConfig HConfig::createAtMapKeyKey(
 //  node
 //
 // !ARGUMENTS:
-    std::string key,      // in  - if present, access by index, Fortran base 1
+    HConfig *key,         // in  - access by key
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -604,14 +625,14 @@ HConfig HConfig::createAtMapKeyKey(
           ESMC_CONTEXT, rc);
         return hconfig;
       }else
-        *hconfig.node = (iter->first)[key.c_str()];
+        *hconfig.node = HConfig::find(iter->first, key);
     }else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must be map iterator", ESMC_CONTEXT, rc);
       return hconfig;
     }
-    hconfig.type = (iter->first)[key.c_str()].Type();
+    hconfig.type = hconfig.node->Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -712,7 +733,7 @@ HConfig HConfig::createAtMapValKey(
 //  node
 //
 // !ARGUMENTS:
-    std::string key,      // in  - if present, access by index, Fortran base 1
+    HConfig *key,         // in  - access by key
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -742,14 +763,14 @@ HConfig HConfig::createAtMapValKey(
           ESMC_CONTEXT, rc);
         return hconfig;
       }else
-        *hconfig.node = (iter->second)[key.c_str()];
+        *hconfig.node = HConfig::find(iter->second, key);
     }else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must be map iterator", ESMC_CONTEXT, rc);
       return hconfig;
     }
-    hconfig.type = (iter->second)[key.c_str()].Type();
+    hconfig.type = hconfig.node->Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
