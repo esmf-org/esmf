@@ -52,8 +52,7 @@ cd $run_dir
 
 # checkout spack
 echo "::group::Checkout Spack"
-#git clone https://github.com/spack/spack.git
-git clone -b esmf-update https://github.com/theurich/spack.git
+git clone https://github.com/spack/spack.git
 echo "::endgroup::"
 
 # find available compilers
