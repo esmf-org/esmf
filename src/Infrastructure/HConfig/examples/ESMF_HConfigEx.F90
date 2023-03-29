@@ -24,7 +24,7 @@ program ESMF_HConfigEx
 
   ! local variables
   integer                         :: rc, size, i
-  type(ESMF_HConfig)              :: hconfig, hconfigNode
+  type(ESMF_HConfig)              :: hconfig, hconfigNode, hconfigNode2
   type(ESMF_HConfig)              :: hconfigIter, hconfigIterEnd
   type(ESMF_Config)               :: config
   logical                         :: asOkay, valueL, isDefined
@@ -188,7 +188,7 @@ program ESMF_HConfigEx
 !EOC
 
 !BOE
-! \subsubsection{Index based random access HConfig parsing}
+! \subsubsection{Index based random access HConfig list parsing}
 !
 ! An alternative way to loop over the elements contained in {\tt hconfig},
 ! and parsing them, is to use an {\tt index} variable. For this approach the
@@ -679,7 +679,7 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! \subsubsection{Saving HConfig to YAML file}
+! \subsubsection{Save HConfig to YAML file}
 !
 ! An HConfig object can be saved to a YAML file by calling the
 ! {\tt ESMF\_HConfigSaveFile()} method. To demonstrate this, a YAML file
@@ -688,7 +688,7 @@ program ESMF_HConfigEx
 ! # An example of YAML configuration file
 !
 ! simple_list: [1, 2, 3, abc, b, TRUE]
-! simple_map:  {car: red, bike: 22, plane: TRUE}
+! simple_map:  {car: red, bike: [bmx, mountain, street], plane: TRUE}
 ! \end{verbatim}
 !
 ! is loaded to create the {\tt hconfig} object:
@@ -710,7 +710,7 @@ program ESMF_HConfigEx
 ! contain the comments of the original file. The YAML structure is saved.
 ! \begin{verbatim}
 ! simple_list: [1, 2, 3, abc, b, TRUE]
-! simple_map: {car: red, bike: 22, plane: TRUE}
+! simple_map: {car: red, bike: [bmx, mountain, street], plane: TRUE}
 ! \end{verbatim}
 !
 ! The object specified in {\tt ESMF\_HConfigSaveFile()} can be a regular node
@@ -789,15 +789,42 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Now {\tt hconfigNode} points to the {\em value} node, that is
-! associated with the "simple\_map" key. It can be saved to file as usual.
+! associated with the "simple\_map" key, which is in turn a map:
+! \begin{verbatim}
+! {car: red, bike: [bmx, mountain, street], plane: TRUE}
+! \end{verbatim}
+! It can be saved to file as usual.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfigNode, filename="mapKeyAtIndex2.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfigNode, filename="mapValAtKey.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Finally {\tt hconfigNode} and {\tt hconfig} should be destroyed.
+! Any of the {\em value} nodes of {\tt hconfigNode} can be accessed through
+! recursive usage of the {\tt ESMF\_HConfigCreateAt()} method.
+! For example, the following call accesses the {\em value} node that is
+! associated with {\tt key="bike"}.
 !EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigNode2
+  hconfigNode2 = ESMF_HConfigCreateAt(hconfigNode, key="bike", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Now {\tt hconfigNode2} points to the {\em list node} with contents
+! {\tt [bmx, mountain, street]}. It, too, can be saved to file.
+!EOE
+!BOC
+  call ESMF_HConfigSaveFile(hconfigNode2, filename="mapValRecursive.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Finally {\tt hconfigNode2}, {\tt hconfigNode} and {\tt hconfig} should be destroyed.
+!EOE
+!BOC
+  call ESMF_HConfigDestroy(hconfigNode2, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_HConfigDestroy(hconfigNode, rc=rc)
 !EOC
