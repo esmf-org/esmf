@@ -1496,7 +1496,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
+!   Return {\tt .true.} if the {\tt hconfig} node is Scalar. Otherwise return
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !
@@ -1578,7 +1578,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
+!   Return {\tt .true.} if the {\tt hconfig} node is Sequence. Otherwise return
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !
@@ -1660,7 +1660,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
+!   Return {\tt .true.} if the {\tt hconfig} node is Map. Otherwise return
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !
@@ -1742,7 +1742,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
+!   Return {\tt .true.} if the {\tt hconfig} node is Defined. Otherwise return
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !

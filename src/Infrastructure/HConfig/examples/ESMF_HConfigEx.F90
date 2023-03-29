@@ -367,13 +367,13 @@ program ESMF_HConfigEx
 !BOC
     if (isScalar) then
 
-      ! Any scalar can be accessed as a string. Use this for the {\em map key}.
+      ! Any scalar can be accessed as a string. Use this for the map key.
       ! character(len=:), allocatable :: stringKey
       stringKey = ESMF_HConfigAsMapKeyString(hconfigIter, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-      ! Now access the {\em map value}. Again first access as a string, which
+      ! Now access the map value. Again first access as a string, which
       ! always works.
       ! character(len=:), allocatable :: string
       string = ESMF_HConfigAsMapValString(hconfigIter, rc=rc)
@@ -459,7 +459,7 @@ program ESMF_HConfigEx
 ! The {\em map values} stored in {\tt hconfig} can be accessed
 ! in random order providing the {\em map key}.
 ! 
-! To demonstrate this, an array holding keys in random order is defined.
+! To demonstrate this, a temporary array holding keys in random order is defined.
 !EOE
 !BOC
   ! character(5) :: keyList(3)
@@ -583,8 +583,8 @@ program ESMF_HConfigEx
 !BOE
 ! \subsubsection{Load HConfig from YAML file}
 !
-! One option is to first create an empty HConfig object, followed by calling
-! {\tt ESMF\_HConfigLoadFile()} to load the content of the specified YAML file.
+! One option to load a YAML file is to first create an empty HConfig object,
+! followed by calling {\tt ESMF\_HConfigLoadFile()}.
 !EOE
 !BOC
   ! type(ESMF_HConfig) :: hconfig
@@ -682,61 +682,130 @@ program ESMF_HConfigEx
 ! \subsubsection{Saving HConfig to YAML file}
 !
 ! An HConfig object can be saved to a YAML file by calling the
+! {\tt ESMF\_HConfigSaveFile()} method. To demonstrate this, a YAML file
+! containing:
+! \begin{verbatim}
+! # An example of YAML configuration file
+!
+! simple_list: [1, 2, 3, abc, b, TRUE]
+! simple_map:  {car: red, bike: 22, plane: TRUE}
+! \end{verbatim}
+!
+! is loaded to create the {\tt hconfig} object:
+!EOE
+!BOC
+  hconfig = ESMF_HConfigCreate(filename="example.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Now the {\tt hconfig} object can be saved to file using the
 ! {\tt ESMF\_HConfigSaveFile()} method.
 !EOE
-  hconfig = ESMF_HConfigCreate(filename="example.yaml", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_HConfigSaveFile(hconfig, filename="saveMe.yml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The resulting contents of {\tt saveMe.yml} here is:
+! Notice that the resulting contents of file {\tt saveMe.yml} does {\em not}
+! contain the comments of the original file. The YAML structure is saved.
 ! \begin{verbatim}
 ! simple_list: [1, 2, 3, abc, b, TRUE]
 ! simple_map: {car: red, bike: 22, plane: TRUE}
 ! \end{verbatim}
 !
-! Here {\tt hconfig} can be a regular node, or a {\em sequence} iterator. In
-! either case the file is written as YAML hierarchy starting at {\tt hconfig}
-! as the root node.
+! The object specified in {\tt ESMF\_HConfigSaveFile()} can be a regular node
+! (of any type) or a {\em sequence} iterator. In either case the file written
+! represents the YAML hierarchy with the specified object as the root node.
 !
-! If, however, {\tt hconfig} is a {\em map} iterator, it cannot be saved to
-! file directly. In this case it is first necessary to prepare a root node
-! utilizing the appropriate {\tt CreateAt} method, of either the {\em map key}
-! or {\em map value} part of the iterator.
+! In the case of a {\em map} iterator, it is necessary to first create an
+! appropriate root node utilizing the appropriate {\tt CreateAt} method. This
+! allows to either save the {\em map key} or {\em map value} node at the
+! current iterator. This is demonstrated below.
 !
-! In the current example, {\tt hconfig} is a map with two elements. Both keys
-! are scalars: {\tt simple\_list} and {\tt simple\_map}. The associated map
-! values are a list of scalars (1, 2, 3, abc, b, TRUE), and a map of scalars
-! to scalars \{car: red, bike: 22, plane: TRUE\}, respectively. In order to save
-! the map value of the second element of {\tt hconfig} to file, a root node
-! needs to prepared for it. To this end first an iterator is obtained and
-! a root node created using the desired index.
-!
-! TODO: something does not work correctly yet for the following code!!!!!
+! In the current example, where {\tt hconfig} is a map with two elements, a
+! map iterator can be set to the beginning using the following call.
 !EOE
 !BOC
   ! type(ESMF_HConfig) :: hconfigIter
   hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Here {\tt hconfigIter} cannot be be saved to file directly. To write the
+! {\em key} node, first create a HConfig object for it using method
+! {\tt ESMF\_HConfigCreateAtMapKey()}.
+!EOE
 !BOC
   ! type(ESMF_HConfig) :: hconfigNode
-  hconfigNode = ESMF_HConfigCreateAtMapVal(hconfigIter, key="simple_list", rc=rc)
+  hconfigNode = ESMF_HConfigCreateAtMapKey(hconfigIter, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Now {\tt hconfigNode} points to the desired root node, and can be saved to
-! file.
+! Then save it.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfigNode, filename="mapAtIndex2.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfigNode, filename="mapKeyBegin.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!BOE
+! And finally destroy {\tt hconfigNode} again.
+!EOE
+!BOC
+  call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
+!BOE
+! Similarily, to write the {\em value} node to file, first create a HConfig
+! object for it using method {\tt ESMF\_HConfigCreateAtMapVal()}.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigNode
+  hconfigNode = ESMF_HConfigCreateAtMapVal(hconfigIter, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Then save it.
+!EOE
+!BOC
+  call ESMF_HConfigSaveFile(hconfigNode, filename="mapValBegin.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! And destroy it.
+!EOE
+!BOC
+  call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Since {\tt hconfig} is a {\em map} node, it is also possible to directly
+! create a {\em value} node by calling {\tt ESMF\_HConfigCreateAt()}
+! on it, using the desired {\em key}.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigNode
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, key="simple_map", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Now {\tt hconfigNode} points to the {\em value} node, that is
+! associated with the "simple\_map" key. It can be saved to file as usual.
+!EOE
+!BOC
+  call ESMF_HConfigSaveFile(hconfigNode, filename="mapKeyAtIndex2.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Finally {\tt hconfigNode} and {\tt hconfig} should be destroyed.
+!EOE
+!BOC
+  call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
