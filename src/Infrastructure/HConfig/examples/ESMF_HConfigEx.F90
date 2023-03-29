@@ -581,42 +581,6 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! \subsubsection{Load HConfig from YAML file}
-!
-! One option to load a YAML file is to first create an empty HConfig object,
-! followed by calling {\tt ESMF\_HConfigLoadFile()}.
-!EOE
-!BOC
-  ! type(ESMF_HConfig) :: hconfig
-  hconfig = ESMF_HConfigCreate(rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-  call ESMF_HConfigLoadFile(hconfig, filename="example.yaml", rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-  ! When done destroy as usual.
-  call ESMF_HConfigDestroy(hconfig, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
-! The alternative option is to create and load the HConfig object in a single
-! call to {\tt ESMF\_HConfigCreate()} using the optional {\tt filename}
-! argument to specify the YAML file.
-!EOE
-!BOC
-  ! type(ESMF_HConfig) :: hconfig
-  hconfig = ESMF_HConfigCreate(filename="example.yaml", rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-  ! And again destroy hconfig when done with it.
-  call ESMF_HConfigDestroy(hconfig, rc=rc)
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-!BOE
 ! \subsubsection{Access HConfig from Config}
 !
 ! The {\tt ESMF\_Config} class can be queried for an HConfig object. This allows
@@ -676,6 +640,42 @@ program ESMF_HConfigEx
 ! explicitly by calling a {\tt Create()} method.
 !EOE
   call ESMF_ConfigDestroy(config, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! \subsubsection{Load HConfig from YAML file}
+!
+! One option to load a YAML file is to first create an empty HConfig object,
+! followed by calling {\tt ESMF\_HConfigLoadFile()}.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigLoadFile(hconfig, filename="example.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! When done destroy as usual.
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The alternative option is to create and load the HConfig object in a single
+! call to {\tt ESMF\_HConfigCreate()} using the optional {\tt filename}
+! argument to specify the YAML file.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(filename="example.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! And again destroy hconfig when done with it.
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
