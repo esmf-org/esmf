@@ -49,7 +49,7 @@ echo "::endgroup::"
 # run app prototypes 
 echo "::group::Build and Run NUOPC Application Prototypes"
 chmod 755 testProtos.sh
-./testProtos.sh >& testProtos.log
+./testProtos.sh 2>&1 | tee testProtos.log
 cat testProtos.log
 echo "::endgroup::"
 
