@@ -31,8 +31,8 @@ echo "Spack Install Directory: $spack_install_dir";
 # go to directory
 cd $run_dir
 
-# run app prototypes 
-echo "::group::Build and Run NUOPC Application Prototypes"
+# debug
+echo "::group::Prepare Environment and Debug Output for NUOPC Application Prototypes"
 export ESMFMKFILE=$spack_install_dir/view/lib/esmf.mk
 if [[ "$comp" == *"oneapi"* ]]; then
   # this is not correct, need to be changed later
@@ -43,6 +43,11 @@ else
   export TOOLRUN="--oversubscribe"
 fi
 which mpirun
+cat testProtos.sh | grep "^Test"
+echo "::endgroup::"
+
+# run app prototypes 
+echo "::group::Build and Run NUOPC Application Prototypes"
 chmod 755 testProtos.sh
 ./testProtos.sh >& testProtos.log
 cat testProtos.log
