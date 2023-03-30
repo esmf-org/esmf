@@ -64,10 +64,10 @@ jobs:
           -r ${{ github.workspace }} 
 
     # install test environment
-    - name: Install ESMF with Spack 
-      run: |
-        ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
-          -r ${{ github.workspace }}
+    #- name: Install ESMF with Spack 
+    #  run: |
+    #    ${{ github.workspace }}/.github/workflows/scripts/spack_install.sh \
+    #      -r ${{ github.workspace }}
 
     # checkout NUOPC app prototypes
     - name: Checkout NUOPC app prototypes
