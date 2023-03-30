@@ -346,8 +346,8 @@ program ESMF_HConfigEx
 !BOE
 ! Then iterate over {\tt hconfig} using the iterator variables as before.
 ! Notice, however, in the code below, compared to the {\em list} case, all 
-! of the {\tt As} access methods now are either of the form {\tt AsMapKey} or
-! {\tt AsMapVal} to selectively access the {\em map key} or {\em map value},
+! of the {\tt As} access methods now are either of the form {\tt As*MapKey} or
+! {\tt As*MapVal} to selectively access the {\em map key} or {\em map value},
 ! respectively.
 !EOE
 !BOC
@@ -357,11 +357,11 @@ program ESMF_HConfigEx
     ! Check whether the current element is a scalar both for the map key
     ! and the map value.
     ! logical :: isScalar
-    isScalar = ESMF_HConfigIsMapKeyScalar(hconfigIter, rc=rc)
+    isScalar = ESMF_HConfigIsScalarMapKey(hconfigIter, rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-    isScalar = isScalar .and. ESMF_HConfigIsMapValScalar(hconfigIter, rc=rc)
+    isScalar = isScalar .and. ESMF_HConfigIsScalarMapVal(hconfigIter, rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -369,14 +369,14 @@ program ESMF_HConfigEx
 
       ! Any scalar can be accessed as a string. Use this for the map key.
       ! character(len=:), allocatable :: stringKey
-      stringKey = ESMF_HConfigAsMapKeyString(hconfigIter, rc=rc)
+      stringKey = ESMF_HConfigAsStringMapKey(hconfigIter, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! Now access the map value. Again first access as a string, which
       ! always works.
       ! character(len=:), allocatable :: string
-      string = ESMF_HConfigAsMapValString(hconfigIter, rc=rc)
+      string = ESMF_HConfigAsStringMapVal(hconfigIter, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_LogWrite("map key="//stringKey//" map value: AsString: "// &
@@ -392,7 +392,7 @@ program ESMF_HConfigEx
       ! logical :: asOkay
 
       ! integer(ESMF_KIND_I4) :: valueI4
-      valueI4 = ESMF_HConfigAsMapValI4(hconfigIter, asOkay=asOkay, rc=rc)
+      valueI4 = ESMF_HConfigAsI4MapVal(hconfigIter, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, &
@@ -402,7 +402,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! integer(ESMF_KIND_I8) :: valueI8
-      valueI8 = ESMF_HConfigAsMapValI8(hconfigIter, asOkay=asOkay, rc=rc)
+      valueI8 = ESMF_HConfigAsI8MapVal(hconfigIter, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, &
@@ -412,7 +412,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! real(ESMF_KIND_R4) :: valueR4
-      valueR4 = ESMF_HConfigAsMapValR4(hconfigIter, asOkay=asOkay, rc=rc)
+      valueR4 = ESMF_HConfigAsR4MapVal(hconfigIter, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, &
@@ -422,7 +422,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! real(ESMF_KIND_R8) :: valueR8
-      valueR8 = ESMF_HConfigAsMapValR8(hconfigIter, asOkay=asOkay, rc=rc)
+      valueR8 = ESMF_HConfigAsR8MapVal(hconfigIter, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, &
@@ -432,7 +432,7 @@ program ESMF_HConfigEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       ! logical :: valueL
-      valueL = ESMF_HConfigAsMapValLogical(hconfigIter, asOkay=asOkay, rc=rc)
+      valueL = ESMF_HConfigAsLogicalMapVal(hconfigIter, asOkay=asOkay, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       write (msgString, &

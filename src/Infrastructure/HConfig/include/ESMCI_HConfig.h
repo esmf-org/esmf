@@ -80,12 +80,12 @@ namespace ESMCI {
       HConfig createAtMapValKey(HConfig *key, int *rc=NULL);
 
       int getSize(int *rc=NULL);
-      int getMapKeySize(int *rc=NULL);
-      int getMapValSize(int *rc=NULL);
+      int getSizeMapKey(int *rc=NULL);
+      int getSizeMapVal(int *rc=NULL);
 
       std::string getTag(int *rc=NULL);
-      std::string getMapKeyTag(int *rc=NULL);
-      std::string getMapValTag(int *rc=NULL);
+      std::string getTagMapKey(int *rc=NULL);
+      std::string getTagMapVal(int *rc=NULL);
 
       int isNull(bool *flag);
       int isScalar(bool *flag);
@@ -93,17 +93,17 @@ namespace ESMCI {
       int isMap(bool *flag);
       int isDefined(bool *flag);
 
-      int isMapKeyNull(bool *flag);
-      int isMapKeyScalar(bool *flag);
-      int isMapKeySequence(bool *flag);
-      int isMapKeyMap(bool *flag);
-      int isMapKeyDefined(bool *flag);
+      int isNullMapKey(bool *flag);
+      int isScalarMapKey(bool *flag);
+      int isSequenceMapKey(bool *flag);
+      int isMapMapKey(bool *flag);
+      int isDefinedMapKey(bool *flag);
 
-      int isMapValNull(bool *flag);
-      int isMapValScalar(bool *flag);
-      int isMapValSequence(bool *flag);
-      int isMapValMap(bool *flag);
-      int isMapValDefined(bool *flag);
+      int isNullMapVal(bool *flag);
+      int isScalarMapVal(bool *flag);
+      int isSequenceMapVal(bool *flag);
+      int isMapMapVal(bool *flag);
+      int isDefinedMapVal(bool *flag);
 
       int isIterator(bool *flag);
       int isSequenceIterator(bool *flag);
@@ -111,10 +111,10 @@ namespace ESMCI {
 
       HConfig iterBegin(int *rc=NULL);
       HConfig iterEnd(int *rc=NULL);
-      HConfig iterMapKeyBegin(int *rc=NULL);
-      HConfig iterMapKeyEnd(int *rc=NULL);
-      HConfig iterMapValBegin(int *rc=NULL);
-      HConfig iterMapValEnd(int *rc=NULL);
+      HConfig iterBeginMapKey(int *rc=NULL);
+      HConfig iterEndMapKey(int *rc=NULL);
+      HConfig iterBeginMapVal(int *rc=NULL);
+      HConfig iterEndMapVal(int *rc=NULL);
       int iterNext();
 
       template<typename T> T as(bool *asOkay, int *rc=NULL);

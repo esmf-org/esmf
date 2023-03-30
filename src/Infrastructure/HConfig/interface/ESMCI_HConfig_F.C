@@ -246,32 +246,32 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfiggetmapkeysize)(ESMCI::HConfig *ptr, int *size, int *rc){
+  void FTN_X(c_esmc_hconfiggetsizemapkey)(ESMCI::HConfig *ptr, int *size, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfiggetmapkeysize()"
+#define ESMC_METHOD "c_esmc_hconfiggetsizemapkeys()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *size = ptr->getMapKeySize(&localrc);
+    *size = ptr->getSizeMapKey(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfiggetmapvalsize)(ESMCI::HConfig *ptr, int *size, int *rc){
+  void FTN_X(c_esmc_hconfiggetsizemapval)(ESMCI::HConfig *ptr, int *size, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfiggetmapvalsize()"
+#define ESMC_METHOD "c_esmc_hconfiggetsizemapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    *size = ptr->getMapValSize(&localrc);
+    *size = ptr->getSizeMapVal(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -313,16 +313,16 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfiggetmapkeytaglen)(ESMCI::HConfig *ptr, int *len, int *rc){
+  void FTN_X(c_esmc_hconfiggettagmapkeylen)(ESMCI::HConfig *ptr, int *len, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfiggetmapkeytaglen()"
+#define ESMC_METHOD "c_esmc_hconfiggettagmapkeylen()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    std::string value = ptr->getMapKeyTag(&localrc);
+    std::string value = ptr->getTagMapKey(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     *len = value.size();
@@ -330,17 +330,17 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfiggetmapkeytag)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfiggettagmapkey)(ESMCI::HConfig *ptr,
     char *string, int *rc, ESMCI_FortranStrLenArg string_l){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfiggetmapkeytag()"
+#define ESMC_METHOD "c_esmc_hconfiggettagmapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    std::string value = ptr->getMapKeyTag(&localrc);
+    std::string value = ptr->getTagMapKey(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     strncpy(string, value.c_str(), string_l);
@@ -348,16 +348,16 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfiggetmapvaltaglen)(ESMCI::HConfig *ptr, int *len, int *rc){
+  void FTN_X(c_esmc_hconfiggettagmapvallen)(ESMCI::HConfig *ptr, int *len, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfiggetmapvaltaglen()"
+#define ESMC_METHOD "c_esmc_hconfiggettagmapvallen()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    std::string value = ptr->getMapValTag(&localrc);
+    std::string value = ptr->getTagMapVal(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     *len = value.size();
@@ -365,17 +365,17 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfiggetmapvaltag)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfiggettagmapval)(ESMCI::HConfig *ptr,
     char *string, int *rc, ESMCI_FortranStrLenArg string_l){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfiggetmapvaltag()"
+#define ESMC_METHOD "c_esmc_hconfiggettagmapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    std::string value = ptr->getMapValTag(&localrc);
+    std::string value = ptr->getTagMapVal(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     strncpy(string, value.c_str(), string_l);
@@ -483,10 +483,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigismapkeynull)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigisnullmapkey)(ESMCI::HConfig *ptr,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigismapkeynull()"
+#define ESMC_METHOD "c_esmc_hconfigisnullmapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -495,7 +495,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
     bool _flag;
-    localrc = ptr->isMapKeyNull(&_flag);
+    localrc = ptr->isNullMapKey(&_flag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
@@ -503,10 +503,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigismapkeyscalar)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigisscalarmapkey)(ESMCI::HConfig *ptr,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigismapkeyscalar()"
+#define ESMC_METHOD "c_esmc_hconfigisscalarmapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -515,7 +515,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
     bool _flag;
-    localrc = ptr->isMapKeyScalar(&_flag);
+    localrc = ptr->isScalarMapKey(&_flag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
@@ -523,10 +523,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigismapkeysequence)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigissequencemapkey)(ESMCI::HConfig *ptr,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigismapkeysequence()"
+#define ESMC_METHOD "c_esmc_hconfigissequencemapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -535,7 +535,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
     bool _flag;
-    localrc = ptr->isMapKeySequence(&_flag);
+    localrc = ptr->isSequenceMapKey(&_flag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
@@ -543,10 +543,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigismapkeymap)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigismapmapkey)(ESMCI::HConfig *ptr,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigismapkeymap()"
+#define ESMC_METHOD "c_esmc_hconfigismapmapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -555,7 +555,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
     bool _flag;
-    localrc = ptr->isMapKeyMap(&_flag);
+    localrc = ptr->isMapMapKey(&_flag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
@@ -563,10 +563,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigismapkeydefined)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigisdefinedmapkey)(ESMCI::HConfig *ptr,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigismapkeydefined()"
+#define ESMC_METHOD "c_esmc_hconfigisdefinedmapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -575,7 +575,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
     bool _flag;
-    localrc = ptr->isMapKeyDefined(&_flag);
+    localrc = ptr->isDefinedMapKey(&_flag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
@@ -583,10 +583,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigismapvalnull)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigisnullmapval)(ESMCI::HConfig *ptr,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigismapvalnull()"
+#define ESMC_METHOD "c_esmc_hconfigisnullmapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -595,7 +595,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
     bool _flag;
-    localrc = ptr->isMapValNull(&_flag);
+    localrc = ptr->isNullMapVal(&_flag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
@@ -603,10 +603,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigismapvalscalar)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigisscalarmapval)(ESMCI::HConfig *ptr,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigismapvalscalar()"
+#define ESMC_METHOD "c_esmc_hconfigisscalarmapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -615,7 +615,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
     bool _flag;
-    localrc = ptr->isMapValScalar(&_flag);
+    localrc = ptr->isScalarMapVal(&_flag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
@@ -623,10 +623,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigismapvalsequence)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigissequencemapval)(ESMCI::HConfig *ptr,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigismapvalsequence()"
+#define ESMC_METHOD "c_esmc_hconfigissequencemapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -635,7 +635,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
     bool _flag;
-    localrc = ptr->isMapValSequence(&_flag);
+    localrc = ptr->isSequenceMapVal(&_flag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
@@ -643,10 +643,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigismapvalmap)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigismapmapval)(ESMCI::HConfig *ptr,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigismapvalmap()"
+#define ESMC_METHOD "c_esmc_hconfigismapmapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -655,7 +655,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
     bool _flag;
-    localrc = ptr->isMapValMap(&_flag);
+    localrc = ptr->isMapMapVal(&_flag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
@@ -663,10 +663,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigismapvaldefined)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigisdefinedmapval)(ESMCI::HConfig *ptr,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigismapvaldefined()"
+#define ESMC_METHOD "c_esmc_hconfigisdefinedmapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -675,7 +675,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
     bool _flag;
-    localrc = ptr->isMapValDefined(&_flag);
+    localrc = ptr->isDefinedMapVal(&_flag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (_flag) *flag = ESMF_TRUE;
@@ -779,10 +779,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigitermapkeybegin)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigiterbeginmapkey)(ESMCI::HConfig *ptr,
     ESMCI::HConfig *iter, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigitermapkeybegin()"
+#define ESMC_METHOD "c_esmc_hconfigiterbeginmapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -790,17 +790,17 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(iter, rc)
     // call into C++
-    *iter = ptr->iterMapKeyBegin(&localrc);
+    *iter = ptr->iterBeginMapKey(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigitermapkeyend)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigiterendmapkey)(ESMCI::HConfig *ptr,
     ESMCI::HConfig *iter, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigitermapkeyend()"
+#define ESMC_METHOD "c_esmc_hconfigiterendmapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -808,17 +808,17 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(iter, rc)
     // call into C++
-    *iter = ptr->iterMapKeyEnd(&localrc);
+    *iter = ptr->iterEndMapKey(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigitermapvalbegin)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigiterbeginmapval)(ESMCI::HConfig *ptr,
     ESMCI::HConfig *iter, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigitermapvalbegin()"
+#define ESMC_METHOD "c_esmc_hconfigiterbeginmapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -826,17 +826,17 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(iter, rc)
     // call into C++
-    *iter = ptr->iterMapValBegin(&localrc);
+    *iter = ptr->iterBeginMapVal(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigitermapvalend)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigiterendmapval)(ESMCI::HConfig *ptr,
     ESMCI::HConfig *iter, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigitermapvalend()"
+#define ESMC_METHOD "c_esmc_hconfigiterendmapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -844,7 +844,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(iter, rc)
     // call into C++
-    *iter = ptr->iterMapValEnd(&localrc);
+    *iter = ptr->iterEndMapVal(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -909,10 +909,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapkeystringlen)(ESMCI::HConfig *ptr, int *len,
+  void FTN_X(c_esmc_hconfigasstringmapkeylen)(ESMCI::HConfig *ptr, int *len,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapkeystring()"
+#define ESMC_METHOD "c_esmc_hconfigasstringmapkeylen()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -930,10 +930,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapkeystring)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigasstringmapkey)(ESMCI::HConfig *ptr,
     char *string, ESMC_Logical *flag, int *rc, ESMCI_FortranStrLenArg string_l){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapkeystring()"
+#define ESMC_METHOD "c_esmc_hconfigasstringmapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -951,10 +951,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapvalstringlen)(ESMCI::HConfig *ptr, int *len,
+  void FTN_X(c_esmc_hconfigasstringmapvallen)(ESMCI::HConfig *ptr, int *len,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapvalstring()"
+#define ESMC_METHOD "c_esmc_hconfigasstringmapvallen()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -972,10 +972,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapvalstring)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigasstringmapval)(ESMCI::HConfig *ptr,
     char *string, ESMC_Logical *flag, int *rc, ESMCI_FortranStrLenArg string_l){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapvalstring()"
+#define ESMC_METHOD "c_esmc_hconfigasstringmapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -996,7 +996,7 @@ extern "C" {
   void FTN_X(c_esmc_hconfigaslogical)(ESMCI::HConfig *ptr, ESMC_Logical *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfiglogical()"
+#define ESMC_METHOD "c_esmc_hconfigaslogical()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1015,10 +1015,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapkeylogical)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigaslogicalmapkey)(ESMCI::HConfig *ptr,
     ESMC_Logical *value, ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapkeylogical()"
+#define ESMC_METHOD "c_esmc_hconfigaslogicalmapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1037,10 +1037,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapvallogical)(ESMCI::HConfig *ptr,
+  void FTN_X(c_esmc_hconfigaslogicalmapval)(ESMCI::HConfig *ptr,
     ESMC_Logical *value, ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapvallogical()"
+#define ESMC_METHOD "c_esmc_hconfigaslogicalmapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1062,7 +1062,7 @@ extern "C" {
   void FTN_X(c_esmc_hconfigasi4)(ESMCI::HConfig *ptr, ESMC_I4 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigi4()"
+#define ESMC_METHOD "c_esmc_hconfigasi4()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1079,10 +1079,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapkeyi4)(ESMCI::HConfig *ptr, ESMC_I4 *value,
+  void FTN_X(c_esmc_hconfigasi4mapkey)(ESMCI::HConfig *ptr, ESMC_I4 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapkeyi4()"
+#define ESMC_METHOD "c_esmc_hconfigasi4mapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1099,10 +1099,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapvali4)(ESMCI::HConfig *ptr, ESMC_I4 *value,
+  void FTN_X(c_esmc_hconfigasi4mapval)(ESMCI::HConfig *ptr, ESMC_I4 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapvali4()"
+#define ESMC_METHOD "c_esmc_hconfigasi4mapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1122,7 +1122,7 @@ extern "C" {
   void FTN_X(c_esmc_hconfigasi8)(ESMCI::HConfig *ptr, ESMC_I8 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigi8()"
+#define ESMC_METHOD "c_esmc_hconfigasi8()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1139,10 +1139,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapkeyi8)(ESMCI::HConfig *ptr, ESMC_I8 *value,
+  void FTN_X(c_esmc_hconfigasi8mapkey)(ESMCI::HConfig *ptr, ESMC_I8 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapkeyi8()"
+#define ESMC_METHOD "c_esmc_hconfigasi8mapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1159,10 +1159,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapvali8)(ESMCI::HConfig *ptr, ESMC_I8 *value,
+  void FTN_X(c_esmc_hconfigasi8mapval)(ESMCI::HConfig *ptr, ESMC_I8 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapvali8()"
+#define ESMC_METHOD "c_esmc_hconfigasi8mapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1182,7 +1182,7 @@ extern "C" {
   void FTN_X(c_esmc_hconfigasr4)(ESMCI::HConfig *ptr, ESMC_R4 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigr4()"
+#define ESMC_METHOD "c_esmc_hconfigasr4()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1199,10 +1199,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapkeyr4)(ESMCI::HConfig *ptr, ESMC_R4 *value,
+  void FTN_X(c_esmc_hconfigasr4mapkey)(ESMCI::HConfig *ptr, ESMC_R4 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapkeyr4()"
+#define ESMC_METHOD "c_esmc_hconfigasr4mapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1219,10 +1219,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapvalr4)(ESMCI::HConfig *ptr, ESMC_R4 *value,
+  void FTN_X(c_esmc_hconfigasr4mapval)(ESMCI::HConfig *ptr, ESMC_R4 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapvalr4()"
+#define ESMC_METHOD "c_esmc_hconfigasr4mapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1242,7 +1242,7 @@ extern "C" {
   void FTN_X(c_esmc_hconfigasr8)(ESMCI::HConfig *ptr, ESMC_R8 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigr8()"
+#define ESMC_METHOD "c_esmc_hconfigasr8()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1259,10 +1259,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapkeyr8)(ESMCI::HConfig *ptr, ESMC_R8 *value,
+  void FTN_X(c_esmc_hconfigasr8mapkey)(ESMCI::HConfig *ptr, ESMC_R8 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapkeyr8()"
+#define ESMC_METHOD "c_esmc_hconfigasr8mapkey()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -1279,10 +1279,10 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_hconfigasmapvalr8)(ESMCI::HConfig *ptr, ESMC_R8 *value,
+  void FTN_X(c_esmc_hconfigasr8mapval)(ESMCI::HConfig *ptr, ESMC_R8 *value,
     ESMC_Logical *flag, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_hconfigasmapvalr8()"
+#define ESMC_METHOD "c_esmc_hconfigasr8mapval()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;

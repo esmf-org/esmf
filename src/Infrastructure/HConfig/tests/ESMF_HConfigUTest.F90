@@ -569,44 +569,44 @@ program ESMF_HConfigUTest
         endif
       else
         ! map iteration
-        size = ESMF_HConfigGetMapKeySize(hconfig2, rc=rc)
+        size = ESMF_HConfigGetSizeMapKey(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
         write(msgString, *) "Size: ", size
         call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
         if (rc /= ESMF_SUCCESS) return
 
-        flag = ESMF_HConfigIsMapKeyScalar(hconfig2, rc=rc)
+        flag = ESMF_HConfigIsScalarMapKey(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
         if (flag) then
-          string = ESMF_HConfigAsMapKeyString(hconfig2, rc=rc)
+          string = ESMF_HConfigAsStringMapKey(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
-          tag = ESMF_HConfigGetMapKeyTag(hconfig2, rc=rc)
+          tag = ESMF_HConfigGetTagMapKey(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
-          write(msgString, *) "MapKeyString: ", string, "  [", tag, "]"
+          write(msgString, *) "MapKey string: ", string, "  [", tag, "]"
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
         endif
 
-        size = ESMF_HConfigGetMapValSize(hconfig2, rc=rc)
+        size = ESMF_HConfigGetSizeMapVal(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
         write(msgString, *) "Size: ", size
         call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
         if (rc /= ESMF_SUCCESS) return
 
-        flag = ESMF_HConfigIsMapValScalar(hconfig2, rc=rc)
+        flag = ESMF_HConfigIsScalarMapVal(hconfig2, rc=rc)
         if (rc /= ESMF_SUCCESS) return
         if (flag) then
-          string = ESMF_HConfigAsMapValString(hconfig2, rc=rc)
+          string = ESMF_HConfigAsStringMapVal(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
-          tag = ESMF_HConfigGetMapValTag(hconfig2, rc=rc)
+          tag = ESMF_HConfigGetTagMapVal(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
-          write(msgString, *) "MapValString: ", string, "  [", tag, "]"
+          write(msgString, *) "MapVal string: ", string, "  [", tag, "]"
           call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
           if (rc /= ESMF_SUCCESS) return
         else
-          hconfig3 = ESMF_HConfigIterMapValBegin(hconfig2, rc=rc)
+          hconfig3 = ESMF_HConfigIterBeginMapVal(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
-          hconfig3End = ESMF_HConfigIterMapValEnd(hconfig2, rc=rc)
+          hconfig3End = ESMF_HConfigIterEndMapVal(hconfig2, rc=rc)
           if (rc /= ESMF_SUCCESS) return
 
           do while(hconfig3 /= hconfig3End)

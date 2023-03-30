@@ -97,12 +97,12 @@ module ESMF_HConfigMod
   public ESMF_HConfigCreateAtMapVal
 
   public ESMF_HConfigGetSize
-  public ESMF_HConfigGetMapKeySize
-  public ESMF_HConfigGetMapValSize
+  public ESMF_HConfigGetSizeMapKey
+  public ESMF_HConfigGetSizeMapVal
 
   public ESMF_HConfigGetTag
-  public ESMF_HConfigGetMapKeyTag
-  public ESMF_HConfigGetMapValTag
+  public ESMF_HConfigGetTagMapKey
+  public ESMF_HConfigGetTagMapVal
 
   public ESMF_HConfigIsNull
   public ESMF_HConfigIsScalar
@@ -110,17 +110,17 @@ module ESMF_HConfigMod
   public ESMF_HConfigIsMap
   public ESMF_HConfigIsDefined
 
-  public ESMF_HConfigIsMapKeyNull
-  public ESMF_HConfigIsMapKeyScalar
-  public ESMF_HConfigIsMapKeySequence
-  public ESMF_HConfigIsMapKeyMap
-  public ESMF_HConfigIsMapKeyDefined
+  public ESMF_HConfigIsNullMapKey
+  public ESMF_HConfigIsScalarMapKey
+  public ESMF_HConfigIsSequenceMapKey
+  public ESMF_HConfigIsMapMapKey
+  public ESMF_HConfigIsDefinedMapKey
 
-  public ESMF_HConfigIsMapValNull
-  public ESMF_HConfigIsMapValScalar
-  public ESMF_HConfigIsMapValSequence
-  public ESMF_HConfigIsMapValMap
-  public ESMF_HConfigIsMapValDefined
+  public ESMF_HConfigIsNullMapVal
+  public ESMF_HConfigIsScalarMapVal
+  public ESMF_HConfigIsSequenceMapVal
+  public ESMF_HConfigIsMapMapVal
+  public ESMF_HConfigIsDefinedMapVal
 
   public ESMF_HConfigIsIterator
   public ESMF_HConfigIsSequenceIterator
@@ -128,35 +128,35 @@ module ESMF_HConfigMod
 
   public ESMF_HConfigIterBegin
   public ESMF_HConfigIterEnd
-  public ESMF_HConfigIterMapKeyBegin
-  public ESMF_HConfigIterMapKeyEnd
-  public ESMF_HConfigIterMapValBegin
-  public ESMF_HConfigIterMapValEnd
+  public ESMF_HConfigIterBeginMapKey
+  public ESMF_HConfigIterEndMapKey
+  public ESMF_HConfigIterBeginMapVal
+  public ESMF_HConfigIterEndMapVal
   public ESMF_HConfigIterNext
 
   public ESMF_HConfigAsString
-  public ESMF_HConfigAsMapKeyString
-  public ESMF_HConfigAsMapValString
+  public ESMF_HConfigAsStringMapKey
+  public ESMF_HConfigAsStringMapVal
 
   public ESMF_HConfigAsLogical
-  public ESMF_HConfigAsMapKeyLogical
-  public ESMF_HConfigAsMapValLogical
+  public ESMF_HConfigAsLogicalMapKey
+  public ESMF_HConfigAsLogicalMapVal
 
   public ESMF_HConfigAsI4
-  public ESMF_HConfigAsMapKeyI4
-  public ESMF_HConfigAsMapValI4
+  public ESMF_HConfigAsI4MapKey
+  public ESMF_HConfigAsI4MapVal
 
   public ESMF_HConfigAsI8
-  public ESMF_HConfigAsMapKeyI8
-  public ESMF_HConfigAsMapValI8
+  public ESMF_HConfigAsI8MapKey
+  public ESMF_HConfigAsI8MapVal
 
   public ESMF_HConfigAsR4
-  public ESMF_HConfigAsMapKeyR4
-  public ESMF_HConfigAsMapValR4
+  public ESMF_HConfigAsR4MapKey
+  public ESMF_HConfigAsR4MapVal
 
   public ESMF_HConfigAsR8
-  public ESMF_HConfigAsMapKeyR8
-  public ESMF_HConfigAsMapValR8
+  public ESMF_HConfigAsR8MapKey
+  public ESMF_HConfigAsR8MapVal
 
 ! - ESMF-internal methods:
   public ESMF_HConfigGetInit
@@ -1033,14 +1033,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigGetMapKeySize()"
+#define ESMF_METHOD "ESMF_HConfigGetSizeMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigGetMapKeySize - Get size of HConfig node
+! !IROUTINE: ESMF_HConfigGetSizeMapKey - Get size of HConfig node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetMapKeySize(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigGetSizeMapKey(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    integer :: ESMF_HConfigGetMapKeySize
+    integer :: ESMF_HConfigGetSizeMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -1074,7 +1074,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigGetMapKeySize = 0   ! initialize
+    ESMF_HConfigGetSizeMapKey = 0   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -1086,7 +1086,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigGetMapKeySize(hconfigTemp, ESMF_HConfigGetMapKeySize, &
+      call c_ESMC_HConfigGetSizeMapKey(hconfigTemp, ESMF_HConfigGetSizeMapKey, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1097,7 +1097,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigGetMapKeySize(hconfig, ESMF_HConfigGetMapKeySize, &
+      call c_ESMC_HConfigGetSizeMapKey(hconfig, ESMF_HConfigGetSizeMapKey, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1112,14 +1112,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigGetMapValSize()"
+#define ESMF_METHOD "ESMF_HConfigGetSizeMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigGetMapValSize - Get size of HConfig node
+! !IROUTINE: ESMF_HConfigGetSizeMapVal - Get size of HConfig node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetMapValSize(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigGetSizeMapVal(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    integer :: ESMF_HConfigGetMapValSize
+    integer :: ESMF_HConfigGetSizeMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -1153,7 +1153,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigGetMapValSize = 0   ! initialize
+    ESMF_HConfigGetSizeMapVal = 0   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -1165,7 +1165,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigGetMapValSize(hconfigTemp, ESMF_HConfigGetMapValSize, &
+      call c_ESMC_HConfigGetSizeMapVal(hconfigTemp, ESMF_HConfigGetSizeMapVal, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1176,7 +1176,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigGetMapValSize(hconfig, ESMF_HConfigGetMapValSize, &
+      call c_ESMC_HConfigGetSizeMapVal(hconfig, ESMF_HConfigGetSizeMapVal, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1282,14 +1282,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigGetMapKeyTag()"
+#define ESMF_METHOD "ESMF_HConfigGetTagMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigGetMapKeyTag - Get tag of map key node
+! !IROUTINE: ESMF_HConfigGetTagMapKey - Get tag of map key node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetMapKeyTag(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigGetTagMapKey(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    character(len=:), allocatable :: ESMF_HConfigGetMapKeyTag
+    character(len=:), allocatable :: ESMF_HConfigGetTagMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -1333,15 +1333,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface to get length
-      call c_ESMC_HConfigGetMapKeyTagLen(hconfigTemp, len, localrc)
+      call c_ESMC_HConfigGetTagMapKeyLen(hconfigTemp, len, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigGetMapKeyTag)
+      allocate(character(len=len)::ESMF_HConfigGetTagMapKey)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigGetMapKeyTag(hconfigTemp, ESMF_HConfigGetMapKeyTag, &
+      call c_ESMC_HConfigGetTagMapKey(hconfigTemp, ESMF_HConfigGetTagMapKey, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1352,15 +1352,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get length
-      call c_ESMC_HConfigGetMapKeyTagLen(hconfig, len, localrc)
+      call c_ESMC_HConfigGetTagMapKeyLen(hconfig, len, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigGetMapKeyTag)
+      allocate(character(len=len)::ESMF_HConfigGetTagMapKey)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigGetMapKeyTag(hconfig, ESMF_HConfigGetMapKeyTag, &
+      call c_ESMC_HConfigGetTagMapKey(hconfig, ESMF_HConfigGetTagMapKey, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1375,14 +1375,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigGetMapValTag()"
+#define ESMF_METHOD "ESMF_HConfigGetTagMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigGetMapValTag - Get tag of map key node
+! !IROUTINE: ESMF_HConfigGetTagMapVal - Get tag of map key node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetMapValTag(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigGetTagMapVal(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    character(len=:), allocatable :: ESMF_HConfigGetMapValTag
+    character(len=:), allocatable :: ESMF_HConfigGetTagMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -1426,15 +1426,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface to get length
-      call c_ESMC_HConfigGetMapValTagLen(hconfigTemp, len, localrc)
+      call c_ESMC_HConfigGetTagMapValLen(hconfigTemp, len, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigGetMapValTag)
+      allocate(character(len=len)::ESMF_HConfigGetTagMapVal)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigGetMapValTag(hconfigTemp, ESMF_HConfigGetMapValTag, &
+      call c_ESMC_HConfigGetTagMapVal(hconfigTemp, ESMF_HConfigGetTagMapVal, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1445,15 +1445,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get length
-      call c_ESMC_HConfigGetMapValTagLen(hconfig, len, localrc)
+      call c_ESMC_HConfigGetTagMapValLen(hconfig, len, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigGetMapValTag)
+      allocate(character(len=len)::ESMF_HConfigGetTagMapVal)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigGetMapValTag(hconfig, ESMF_HConfigGetMapValTag, &
+      call c_ESMC_HConfigGetTagMapVal(hconfig, ESMF_HConfigGetTagMapVal, &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1878,14 +1878,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapKeyNull()"
+#define ESMF_METHOD "ESMF_HConfigIsNullMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsMapKeyNull - Check whether HConfig node is Null
+! !IROUTINE: ESMF_HConfigIsNullMapKey - Check whether HConfig node is Null
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapKeyNull(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsNullMapKey(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapKeyNull
+    logical :: ESMF_HConfigIsNullMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -1921,7 +1921,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapKeyNull = .false.   ! initialize
+    ESMF_HConfigIsNullMapKey = .false.   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -1933,7 +1933,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapKeyNull(hconfigTemp, flag, localrc)
+      call c_ESMC_HConfigIsNullMapKey(hconfigTemp, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1943,13 +1943,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapKeyNull(hconfig, flag, localrc)
+      call c_ESMC_HConfigIsNullMapKey(hconfig, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapKeyNull = flag
+    ESMF_HConfigIsNullMapKey = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1960,14 +1960,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapKeyScalar()"
+#define ESMF_METHOD "ESMF_HConfigIsScalarMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsMapKeyScalar - Check whether HConfig node is Scalar
+! !IROUTINE: ESMF_HConfigIsScalarMapKey - Check whether HConfig node is Scalar
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapKeyScalar(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsScalarMapKey(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapKeyScalar
+    logical :: ESMF_HConfigIsScalarMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2003,7 +2003,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapKeyScalar = .false.   ! initialize
+    ESMF_HConfigIsScalarMapKey = .false.   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -2015,7 +2015,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapKeyScalar(hconfigTemp, flag, localrc)
+      call c_ESMC_HConfigIsScalarMapKey(hconfigTemp, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2025,13 +2025,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapKeyScalar(hconfig, flag, localrc)
+      call c_ESMC_HConfigIsScalarMapKey(hconfig, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapKeyScalar = flag
+    ESMF_HConfigIsScalarMapKey = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2042,14 +2042,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapKeySequence()"
+#define ESMF_METHOD "ESMF_HConfigIsSequenceMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsMapKeySequence - Check whether HConfig node is Sequence
+! !IROUTINE: ESMF_HConfigIsSequenceMapKey - Check whether HConfig node is Sequence
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapKeySequence(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsSequenceMapKey(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapKeySequence
+    logical :: ESMF_HConfigIsSequenceMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2085,7 +2085,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapKeySequence = .false.   ! initialize
+    ESMF_HConfigIsSequenceMapKey = .false.   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -2097,7 +2097,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapKeySequence(hconfigTemp, flag, localrc)
+      call c_ESMC_HConfigIsSequenceMapKey(hconfigTemp, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2107,13 +2107,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapKeySequence(hconfig, flag, localrc)
+      call c_ESMC_HConfigIsSequenceMapKey(hconfig, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapKeySequence = flag
+    ESMF_HConfigIsSequenceMapKey = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2124,14 +2124,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapKeyMap()"
+#define ESMF_METHOD "ESMF_HConfigIsMapMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsMapKeyMap - Check whether HConfig node is Map
+! !IROUTINE: ESMF_HConfigIsMapMapKey - Check whether HConfig node is Map
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapKeyMap(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsMapMapKey(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapKeyMap
+    logical :: ESMF_HConfigIsMapMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2167,7 +2167,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapKeyMap = .false.   ! initialize
+    ESMF_HConfigIsMapMapKey = .false.   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -2179,7 +2179,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapKeyMap(hconfigTemp, flag, localrc)
+      call c_ESMC_HConfigIsMapMapKey(hconfigTemp, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2189,13 +2189,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapKeyMap(hconfig, flag, localrc)
+      call c_ESMC_HConfigIsMapMapKey(hconfig, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapKeyMap = flag
+    ESMF_HConfigIsMapMapKey = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2206,14 +2206,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapKeyDefined()"
+#define ESMF_METHOD "ESMF_HConfigIsDefinedMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsMapKeyDefined - Check whether HConfig node is Defined
+! !IROUTINE: ESMF_HConfigIsDefinedMapKey - Check whether HConfig node is Defined
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapKeyDefined(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsDefinedMapKey(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapKeyDefined
+    logical :: ESMF_HConfigIsDefinedMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2249,7 +2249,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapKeyDefined = .false.   ! initialize
+    ESMF_HConfigIsDefinedMapKey = .false.   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -2261,7 +2261,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapKeyDefined(hconfigTemp, flag, localrc)
+      call c_ESMC_HConfigIsDefinedMapKey(hconfigTemp, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2271,13 +2271,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapKeyDefined(hconfig, flag, localrc)
+      call c_ESMC_HConfigIsDefinedMapKey(hconfig, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapKeyDefined = flag
+    ESMF_HConfigIsDefinedMapKey = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2288,14 +2288,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapValNull()"
+#define ESMF_METHOD "ESMF_HConfigIsNullMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsMapValNull - Check whether HConfig node is Null
+! !IROUTINE: ESMF_HConfigIsNullMapVal - Check whether HConfig node is Null
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapValNull(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsNullMapVal(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapValNull
+    logical :: ESMF_HConfigIsNullMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2331,7 +2331,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapValNull = .false.   ! initialize
+    ESMF_HConfigIsNullMapVal = .false.   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -2343,7 +2343,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapValNull(hconfigTemp, flag, localrc)
+      call c_ESMC_HConfigIsNullMapVal(hconfigTemp, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2353,13 +2353,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapValNull(hconfig, flag, localrc)
+      call c_ESMC_HConfigIsNullMapVal(hconfig, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapValNull = flag
+    ESMF_HConfigIsNullMapVal = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2370,14 +2370,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapValScalar()"
+#define ESMF_METHOD "ESMF_HConfigIsScalarMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsMapValScalar - Check whether HConfig node is Scalar
+! !IROUTINE: ESMF_HConfigIsScalarMapVal - Check whether HConfig node is Scalar
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapValScalar(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsScalarMapVal(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapValScalar
+    logical :: ESMF_HConfigIsScalarMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2413,7 +2413,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapValScalar = .false.   ! initialize
+    ESMF_HConfigIsScalarMapVal = .false.   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -2425,7 +2425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapValScalar(hconfigTemp, flag, localrc)
+      call c_ESMC_HConfigIsScalarMapVal(hconfigTemp, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2435,13 +2435,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapValScalar(hconfig, flag, localrc)
+      call c_ESMC_HConfigIsScalarMapVal(hconfig, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapValScalar = flag
+    ESMF_HConfigIsScalarMapVal = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2452,14 +2452,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapValSequence()"
+#define ESMF_METHOD "ESMF_HConfigIsSequenceMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsMapValSequence - Check whether HConfig node is Sequence
+! !IROUTINE: ESMF_HConfigIsSequenceMapVal - Check whether HConfig node is Sequence
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapValSequence(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsSequenceMapVal(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapValSequence
+    logical :: ESMF_HConfigIsSequenceMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2495,7 +2495,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapValSequence = .false.   ! initialize
+    ESMF_HConfigIsSequenceMapVal = .false.   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -2507,7 +2507,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapValSequence(hconfigTemp, flag, localrc)
+      call c_ESMC_HConfigIsSequenceMapVal(hconfigTemp, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2517,13 +2517,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapValSequence(hconfig, flag, localrc)
+      call c_ESMC_HConfigIsSequenceMapVal(hconfig, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapValSequence = flag
+    ESMF_HConfigIsSequenceMapVal = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2534,14 +2534,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapValMap()"
+#define ESMF_METHOD "ESMF_HConfigIsMapMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsMapValMap - Check whether HConfig node is Map
+! !IROUTINE: ESMF_HConfigIsMapMapVal - Check whether HConfig node is Map
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapValMap(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsMapMapVal(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapValMap
+    logical :: ESMF_HConfigIsMapMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2577,7 +2577,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapValMap = .false.   ! initialize
+    ESMF_HConfigIsMapMapVal = .false.   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -2589,7 +2589,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapValMap(hconfigTemp, flag, localrc)
+      call c_ESMC_HConfigIsMapMapVal(hconfigTemp, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2599,13 +2599,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapValMap(hconfig, flag, localrc)
+      call c_ESMC_HConfigIsMapMapVal(hconfig, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapValMap = flag
+    ESMF_HConfigIsMapMapVal = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2616,14 +2616,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapValDefined()"
+#define ESMF_METHOD "ESMF_HConfigIsDefinedMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsMapValDefined - Check whether HConfig node is Defined
+! !IROUTINE: ESMF_HConfigIsDefinedMapVal - Check whether HConfig node is Defined
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapValDefined(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsDefinedMapVal(hconfig, keywordEnforcer, index, keyString, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapValDefined
+    logical :: ESMF_HConfigIsDefinedMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2659,7 +2659,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapValDefined = .false.   ! initialize
+    ESMF_HConfigIsDefinedMapVal = .false.   ! initialize
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
@@ -2671,7 +2671,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapValDefined(hconfigTemp, flag, localrc)
+      call c_ESMC_HConfigIsDefinedMapVal(hconfigTemp, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2681,13 +2681,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapValDefined(hconfig, flag, localrc)
+      call c_ESMC_HConfigIsDefinedMapVal(hconfig, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapValDefined = flag
+    ESMF_HConfigIsDefinedMapVal = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2978,14 +2978,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIterMapKeyBegin()"
+#define ESMF_METHOD "ESMF_HConfigIterBeginMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigIterMapKeyBegin - Iterator at the beginning
+! !IROUTINE: ESMF_HConfigIterBeginMapKey - Iterator at the beginning
 
 ! !INTERFACE:
-  function ESMF_HConfigIterMapKeyBegin(hconfig, keywordEnforcer, rc)
+  function ESMF_HConfigIterBeginMapKey(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigIterMapKeyBegin
+    type(ESMF_HConfig) :: ESMF_HConfigIterBeginMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -3012,19 +3012,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! invalidate return value
-    ESMF_HConfigIterMapKeyBegin%shallowMemory = 0
+    ESMF_HConfigIterBeginMapKey%shallowMemory = 0
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigIterMapKeyBegin(hconfig, ESMF_HConfigIterMapKeyBegin, &
+    call c_ESMC_HConfigIterBeginMapKey(hconfig, ESMF_HConfigIterBeginMapKey, &
       localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_HConfigIterMapKeyBegin)
+    ESMF_INIT_SET_CREATED(ESMF_HConfigIterBeginMapKey)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3035,14 +3035,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIterMapKeyEnd()"
+#define ESMF_METHOD "ESMF_HConfigIterEndMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigIterMapKeyEnd - Iterator at the end
+! !IROUTINE: ESMF_HConfigIterEndMapKey - Iterator at the end
 
 ! !INTERFACE:
-  function ESMF_HConfigIterMapKeyEnd(hconfig, keywordEnforcer, rc)
+  function ESMF_HConfigIterEndMapKey(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigIterMapKeyEnd
+    type(ESMF_HConfig) :: ESMF_HConfigIterEndMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -3069,19 +3069,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! invalidate return value
-    ESMF_HConfigIterMapKeyEnd%shallowMemory = 0
+    ESMF_HConfigIterEndMapKey%shallowMemory = 0
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigIterMapKeyEnd(hconfig, ESMF_HConfigIterMapKeyEnd, &
+    call c_ESMC_HConfigIterEndMapKey(hconfig, ESMF_HConfigIterEndMapKey, &
       localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_HConfigIterMapKeyEnd)
+    ESMF_INIT_SET_CREATED(ESMF_HConfigIterEndMapKey)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3092,14 +3092,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIterMapValBegin()"
+#define ESMF_METHOD "ESMF_HConfigIterBeginMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigIterMapValBegin - Iterator at the beginning
+! !IROUTINE: ESMF_HConfigIterBeginMapVal - Iterator at the beginning
 
 ! !INTERFACE:
-  function ESMF_HConfigIterMapValBegin(hconfig, keywordEnforcer, rc)
+  function ESMF_HConfigIterBeginMapVal(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigIterMapValBegin
+    type(ESMF_HConfig) :: ESMF_HConfigIterBeginMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -3126,19 +3126,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! invalidate return value
-    ESMF_HConfigIterMapValBegin%shallowMemory = 0
+    ESMF_HConfigIterBeginMapVal%shallowMemory = 0
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigIterMapValBegin(hconfig, ESMF_HConfigIterMapValBegin, &
+    call c_ESMC_HConfigIterBeginMapVal(hconfig, ESMF_HConfigIterBeginMapVal, &
       localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_HConfigIterMapValBegin)
+    ESMF_INIT_SET_CREATED(ESMF_HConfigIterBeginMapVal)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3149,14 +3149,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIterMapValEnd()"
+#define ESMF_METHOD "ESMF_HConfigIterEndMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigIterMapValEnd - Iterator at the end
+! !IROUTINE: ESMF_HConfigIterEndMapVal - Iterator at the end
 
 ! !INTERFACE:
-  function ESMF_HConfigIterMapValEnd(hconfig, keywordEnforcer, rc)
+  function ESMF_HConfigIterEndMapVal(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigIterMapValEnd
+    type(ESMF_HConfig) :: ESMF_HConfigIterEndMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -3183,19 +3183,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! invalidate return value
-    ESMF_HConfigIterMapValEnd%shallowMemory = 0
+    ESMF_HConfigIterEndMapVal%shallowMemory = 0
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigIterMapValEnd(hconfig, ESMF_HConfigIterMapValEnd, &
+    call c_ESMC_HConfigIterEndMapVal(hconfig, ESMF_HConfigIterEndMapVal, &
       localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_HConfigIterMapValEnd)
+    ESMF_INIT_SET_CREATED(ESMF_HConfigIterEndMapVal)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3368,14 +3368,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapKeyString()"
+#define ESMF_METHOD "ESMF_HConfigAsStringMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapKeyString - Return map key as string
+! !IROUTINE: ESMF_HConfigAsStringMapKey - Return map key as string
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapKeyString(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsStringMapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    character(len=:), allocatable :: ESMF_HConfigAsMapKeyString
+    character(len=:), allocatable :: ESMF_HConfigAsStringMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -3430,15 +3430,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface to get length
-      call c_ESMC_HConfigAsMapKeyStringLen(hconfigTemp, len, flag, localrc)
+      call c_ESMC_HConfigAsStringMapKeyLen(hconfigTemp, len, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigAsMapKeyString)
+      allocate(character(len=len)::ESMF_HConfigAsStringMapKey)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsMapKeyString(hconfigTemp, ESMF_HConfigAsMapKeyString, &
+      call c_ESMC_HConfigAsStringMapKey(hconfigTemp, ESMF_HConfigAsStringMapKey, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3449,15 +3449,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get length
-      call c_ESMC_HConfigAsMapKeyStringLen(hconfig, len, flag, localrc)
+      call c_ESMC_HConfigAsStringMapKeyLen(hconfig, len, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigAsMapKeyString)
+      allocate(character(len=len)::ESMF_HConfigAsStringMapKey)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsMapKeyString(hconfig, ESMF_HConfigAsMapKeyString, &
+      call c_ESMC_HConfigAsStringMapKey(hconfig, ESMF_HConfigAsStringMapKey, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3482,14 +3482,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapValString()"
+#define ESMF_METHOD "ESMF_HConfigAsStringMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapValString - Return map value as string
+! !IROUTINE: ESMF_HConfigAsStringMapVal - Return map value as string
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapValString(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsStringMapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    character(len=:), allocatable :: ESMF_HConfigAsMapValString
+    character(len=:), allocatable :: ESMF_HConfigAsStringMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -3544,15 +3544,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call into the C++ interface to get length
-      call c_ESMC_HConfigAsMapValStringLen(hconfigTemp, len, flag, localrc)
+      call c_ESMC_HConfigAsStringMapValLen(hconfigTemp, len, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigAsMapValString)
+      allocate(character(len=len)::ESMF_HConfigAsStringMapVal)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsMapValString(hconfigTemp, ESMF_HConfigAsMapValString, &
+      call c_ESMC_HConfigAsStringMapVal(hconfigTemp, ESMF_HConfigAsStringMapVal, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3563,15 +3563,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get length
-      call c_ESMC_HConfigAsMapValStringLen(hconfig, len, flag, localrc)
+      call c_ESMC_HConfigAsStringMapValLen(hconfig, len, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! correctly size the character allocation
-      allocate(character(len=len)::ESMF_HConfigAsMapValString)
+      allocate(character(len=len)::ESMF_HConfigAsStringMapVal)
 
       ! Call into the C++ interface to get the string
-      call c_ESMC_HConfigAsMapValString(hconfig, ESMF_HConfigAsMapValString, &
+      call c_ESMC_HConfigAsStringMapVal(hconfig, ESMF_HConfigAsStringMapVal, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3693,14 +3693,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapKeyLogical()"
+#define ESMF_METHOD "ESMF_HConfigAsLogicalMapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapKeyLogical - Return map key as Logical
+! !IROUTINE: ESMF_HConfigAsLogicalMapKey - Return map key as Logical
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapKeyLogical(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsLogicalMapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    type(ESMF_Logical) :: ESMF_HConfigAsMapKeyLogical
+    type(ESMF_Logical) :: ESMF_HConfigAsLogicalMapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -3754,7 +3754,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the Logical
-      call c_ESMC_HConfigAsMapKeyLogical(hconfigTemp, value, flag, localrc)
+      call c_ESMC_HConfigAsLogicalMapKey(hconfigTemp, value, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! clean up
@@ -3763,7 +3763,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the Logical
-      call c_ESMC_HConfigAsMapKeyLogical(hconfig, value, flag, localrc)
+      call c_ESMC_HConfigAsLogicalMapKey(hconfig, value, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -3779,7 +3779,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigAsMapKeyLogical = value
+    ESMF_HConfigAsLogicalMapKey = value
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3790,14 +3790,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapValLogical()"
+#define ESMF_METHOD "ESMF_HConfigAsLogicalMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapValLogical - Return map value as Logical
+! !IROUTINE: ESMF_HConfigAsLogicalMapVal - Return map value as Logical
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapValLogical(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsLogicalMapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    type(ESMF_Logical) :: ESMF_HConfigAsMapValLogical
+    type(ESMF_Logical) :: ESMF_HConfigAsLogicalMapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -3851,7 +3851,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the Logical
-      call c_ESMC_HConfigAsMapValLogical(hconfigTemp, value, flag, localrc)
+      call c_ESMC_HConfigAsLogicalMapVal(hconfigTemp, value, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! clean up
@@ -3860,7 +3860,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the Logical
-      call c_ESMC_HConfigAsMapValLogical(hconfig, value, flag, localrc)
+      call c_ESMC_HConfigAsLogicalMapVal(hconfig, value, flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -3876,7 +3876,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! convert ESMF_Logical -> logical
-    ESMF_HConfigAsMapValLogical = value
+    ESMF_HConfigAsLogicalMapVal = value
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3980,14 +3980,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapKeyI4()"
+#define ESMF_METHOD "ESMF_HConfigAsI4MapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapKeyI4 - Return map key as I4
+! !IROUTINE: ESMF_HConfigAsI4MapKey - Return map key as I4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapKeyI4(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsI4MapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    integer(ESMF_KIND_I4) :: ESMF_HConfigAsMapKeyI4
+    integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4MapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -4040,7 +4040,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I4
-      call c_ESMC_HConfigAsMapKeyI4(hconfigTemp, ESMF_HConfigAsMapKeyI4, &
+      call c_ESMC_HConfigAsI4MapKey(hconfigTemp, ESMF_HConfigAsI4MapKey, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4050,7 +4050,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the I4
-      call c_ESMC_HConfigAsMapKeyI4(hconfig, ESMF_HConfigAsMapKeyI4, &
+      call c_ESMC_HConfigAsI4MapKey(hconfig, ESMF_HConfigAsI4MapKey, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4075,14 +4075,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapValI4()"
+#define ESMF_METHOD "ESMF_HConfigAsI4MapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapValI4 - Return map value as I4
+! !IROUTINE: ESMF_HConfigAsI4MapVal - Return map value as I4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapValI4(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsI4MapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    integer(ESMF_KIND_I4) :: ESMF_HConfigAsMapValI4
+    integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4MapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -4135,7 +4135,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I4
-      call c_ESMC_HConfigAsMapValI4(hconfigTemp, ESMF_HConfigAsMapValI4, &
+      call c_ESMC_HConfigAsI4MapVal(hconfigTemp, ESMF_HConfigAsI4MapVal, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4145,7 +4145,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the I4
-      call c_ESMC_HConfigAsMapValI4(hconfig, ESMF_HConfigAsMapValI4, &
+      call c_ESMC_HConfigAsI4MapVal(hconfig, ESMF_HConfigAsI4MapVal, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4263,14 +4263,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapKeyI8()"
+#define ESMF_METHOD "ESMF_HConfigAsI8MapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapKeyI8 - Return map key as I8
+! !IROUTINE: ESMF_HConfigAsI8MapKey - Return map key as I8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapKeyI8(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsI8MapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    integer(ESMF_KIND_I8) :: ESMF_HConfigAsMapKeyI8
+    integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8MapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -4323,7 +4323,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I8
-      call c_ESMC_HConfigAsMapKeyI8(hconfigTemp, ESMF_HConfigAsMapKeyI8, &
+      call c_ESMC_HConfigAsI8MapKey(hconfigTemp, ESMF_HConfigAsI8MapKey, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4333,7 +4333,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the I8
-      call c_ESMC_HConfigAsMapKeyI8(hconfig, ESMF_HConfigAsMapKeyI8, &
+      call c_ESMC_HConfigAsI8MapKey(hconfig, ESMF_HConfigAsI8MapKey, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4358,14 +4358,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapValI8()"
+#define ESMF_METHOD "ESMF_HConfigAsI8MapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapValI8 - Return map value as I8
+! !IROUTINE: ESMF_HConfigAsI8MapVal - Return map value as I8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapValI8(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsI8MapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    integer(ESMF_KIND_I8) :: ESMF_HConfigAsMapValI8
+    integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8MapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -4418,7 +4418,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I8
-      call c_ESMC_HConfigAsMapValI8(hconfigTemp, ESMF_HConfigAsMapValI8, &
+      call c_ESMC_HConfigAsI8MapVal(hconfigTemp, ESMF_HConfigAsI8MapVal, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4428,7 +4428,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the I8
-      call c_ESMC_HConfigAsMapValI8(hconfig, ESMF_HConfigAsMapValI8, &
+      call c_ESMC_HConfigAsI8MapVal(hconfig, ESMF_HConfigAsI8MapVal, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4546,14 +4546,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapKeyR4()"
+#define ESMF_METHOD "ESMF_HConfigAsR4MapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapKeyR4 - Return map key as R4
+! !IROUTINE: ESMF_HConfigAsR4MapKey - Return map key as R4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapKeyR4(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsR4MapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    real(ESMF_KIND_R4) :: ESMF_HConfigAsMapKeyR4
+    real(ESMF_KIND_R4) :: ESMF_HConfigAsR4MapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -4606,7 +4606,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R4
-      call c_ESMC_HConfigAsMapKeyR4(hconfigTemp, ESMF_HConfigAsMapKeyR4, &
+      call c_ESMC_HConfigAsR4MapKey(hconfigTemp, ESMF_HConfigAsR4MapKey, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4616,7 +4616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the R4
-      call c_ESMC_HConfigAsMapKeyR4(hconfig, ESMF_HConfigAsMapKeyR4, &
+      call c_ESMC_HConfigAsR4MapKey(hconfig, ESMF_HConfigAsR4MapKey, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4641,14 +4641,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapValR4()"
+#define ESMF_METHOD "ESMF_HConfigAsR4MapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapValR4 - Return map value as R4
+! !IROUTINE: ESMF_HConfigAsR4MapVal - Return map value as R4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapValR4(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsR4MapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    real(ESMF_KIND_R4) :: ESMF_HConfigAsMapValR4
+    real(ESMF_KIND_R4) :: ESMF_HConfigAsR4MapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -4701,7 +4701,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R4
-      call c_ESMC_HConfigAsMapValR4(hconfigTemp, ESMF_HConfigAsMapValR4, &
+      call c_ESMC_HConfigAsR4MapVal(hconfigTemp, ESMF_HConfigAsR4MapVal, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4711,7 +4711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the R4
-      call c_ESMC_HConfigAsMapValR4(hconfig, ESMF_HConfigAsMapValR4, &
+      call c_ESMC_HConfigAsR4MapVal(hconfig, ESMF_HConfigAsR4MapVal, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4829,14 +4829,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapKeyR8()"
+#define ESMF_METHOD "ESMF_HConfigAsR8MapKey()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapKeyR8 - Return map key as R8
+! !IROUTINE: ESMF_HConfigAsR8MapKey - Return map key as R8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapKeyR8(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsR8MapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    real(ESMF_KIND_R8) :: ESMF_HConfigAsMapKeyR8
+    real(ESMF_KIND_R8) :: ESMF_HConfigAsR8MapKey
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -4889,7 +4889,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R8
-      call c_ESMC_HConfigAsMapKeyR8(hconfigTemp, ESMF_HConfigAsMapKeyR8, &
+      call c_ESMC_HConfigAsR8MapKey(hconfigTemp, ESMF_HConfigAsR8MapKey, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4899,7 +4899,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the R8
-      call c_ESMC_HConfigAsMapKeyR8(hconfig, ESMF_HConfigAsMapKeyR8, &
+      call c_ESMC_HConfigAsR8MapKey(hconfig, ESMF_HConfigAsR8MapKey, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4924,14 +4924,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAsMapValR8()"
+#define ESMF_METHOD "ESMF_HConfigAsR8MapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigAsMapValR8 - Return map value as R8
+! !IROUTINE: ESMF_HConfigAsR8MapVal - Return map value as R8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsMapValR8(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsR8MapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
 ! !RETURN VALUE:
-    real(ESMF_KIND_R8) :: ESMF_HConfigAsMapValR8
+    real(ESMF_KIND_R8) :: ESMF_HConfigAsR8MapVal
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -4984,7 +4984,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R8
-      call c_ESMC_HConfigAsMapValR8(hconfigTemp, ESMF_HConfigAsMapValR8, &
+      call c_ESMC_HConfigAsR8MapVal(hconfigTemp, ESMF_HConfigAsR8MapVal, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4994,7 +4994,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       ! Call into the C++ interface to get the R8
-      call c_ESMC_HConfigAsMapValR8(hconfig, ESMF_HConfigAsMapValR8, &
+      call c_ESMC_HConfigAsR8MapVal(hconfig, ESMF_HConfigAsR8MapVal, &
         flag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

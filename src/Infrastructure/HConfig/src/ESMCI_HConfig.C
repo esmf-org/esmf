@@ -843,12 +843,12 @@ int HConfig::getSize(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::getMapKeySize()"
+#define ESMC_METHOD "ESMCI::HConfig::getSizeMapKey()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::getMapKeySize - Get size of the node
+// !IROUTINE:  ESMCI::HConfig::getSizeMapKey - Get size of the node
 //
 // !INTERFACE:
-int HConfig::getMapKeySize(
+int HConfig::getSizeMapKey(
 //
 // !RETURN VALUE:
 //  int
@@ -895,12 +895,12 @@ int HConfig::getMapKeySize(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::getMapValSize()"
+#define ESMC_METHOD "ESMCI::HConfig::getSizeMapVal()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::getMapValSize - Get size of the node
+// !IROUTINE:  ESMCI::HConfig::getSizeMapVal - Get size of the node
 //
 // !INTERFACE:
-int HConfig::getMapValSize(
+int HConfig::getSizeMapVal(
 //
 // !RETURN VALUE:
 //  int
@@ -1061,12 +1061,12 @@ string HConfig::getTag(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::getMapKeyTag()"
+#define ESMC_METHOD "ESMCI::HConfig::getTagMapKey()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::getMapKeyTag - Get the tag of the node
+// !IROUTINE:  ESMCI::HConfig::getTagMapKey - Get the tag of the node
 //
 // !INTERFACE:
-string HConfig::getMapKeyTag(
+string HConfig::getTagMapKey(
 //
 // !RETURN VALUE:
 //  string
@@ -1142,12 +1142,12 @@ string HConfig::getMapKeyTag(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::getMapValTag()"
+#define ESMC_METHOD "ESMCI::HConfig::getTagMapVal()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::getMapValTag - Get the tag of the node
+// !IROUTINE:  ESMCI::HConfig::getTagMapVal - Get the tag of the node
 //
 // !INTERFACE:
-string HConfig::getMapValTag(
+string HConfig::getTagMapVal(
 //
 // !RETURN VALUE:
 //  string
@@ -1478,12 +1478,12 @@ int HConfig::isDefined(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::isMapKeyNull()"
+#define ESMC_METHOD "ESMCI::HConfig::isNullMapKey()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::isMapKeyNull - access node type
+// !IROUTINE:  ESMCI::HConfig::isNullMapKey - access node type
 //
 // !INTERFACE:
-int HConfig::isMapKeyNull(
+int HConfig::isNullMapKey(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -1527,12 +1527,12 @@ int HConfig::isMapKeyNull(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::isMapKeyScalar()"
+#define ESMC_METHOD "ESMCI::HConfig::isScalarMapKey()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::isMapKeyScalar - access node type
+// !IROUTINE:  ESMCI::HConfig::isScalarMapKey - access node type
 //
 // !INTERFACE:
-int HConfig::isMapKeyScalar(
+int HConfig::isScalarMapKey(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -1576,12 +1576,12 @@ int HConfig::isMapKeyScalar(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::isMapKeySequence()"
+#define ESMC_METHOD "ESMCI::HConfig::isSequenceMapKey()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::isMapKeySequence - access node type
+// !IROUTINE:  ESMCI::HConfig::isSequenceMapKey - access node type
 //
 // !INTERFACE:
-int HConfig::isMapKeySequence(
+int HConfig::isSequenceMapKey(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -1625,12 +1625,12 @@ int HConfig::isMapKeySequence(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::isMapKeyMap()"
+#define ESMC_METHOD "ESMCI::HConfig::isMapMapKey()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::isMapKeyMap - access node type
+// !IROUTINE:  ESMCI::HConfig::isMapMapKey - access node type
 //
 // !INTERFACE:
-int HConfig::isMapKeyMap(
+int HConfig::isMapMapKey(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -1674,12 +1674,12 @@ int HConfig::isMapKeyMap(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::isMapKeyDefined()"
+#define ESMC_METHOD "ESMCI::HConfig::isDefinedMapKey()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::isMapKeyDefined - access node type
+// !IROUTINE:  ESMCI::HConfig::isDefinedMapKey - access node type
 //
 // !INTERFACE:
-int HConfig::isMapKeyDefined(
+int HConfig::isDefinedMapKey(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -1723,12 +1723,12 @@ int HConfig::isMapKeyDefined(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::isMapValNull()"
+#define ESMC_METHOD "ESMCI::HConfig::isNullMapVal()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::isMapValNull - access node type
+// !IROUTINE:  ESMCI::HConfig::isNullMapVal - access node type
 //
 // !INTERFACE:
-int HConfig::isMapValNull(
+int HConfig::isNullMapVal(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -1772,12 +1772,12 @@ int HConfig::isMapValNull(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::isMapValScalar()"
+#define ESMC_METHOD "ESMCI::HConfig::isScalarMapVal()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::isMapValScalar - access node type
+// !IROUTINE:  ESMCI::HConfig::isScalarMapVal - access node type
 //
 // !INTERFACE:
-int HConfig::isMapValScalar(
+int HConfig::isScalarMapVal(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -1821,12 +1821,12 @@ int HConfig::isMapValScalar(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::isMapValSequence()"
+#define ESMC_METHOD "ESMCI::HConfig::isSequenceMapVal()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::isMapValSequence - access node type
+// !IROUTINE:  ESMCI::HConfig::isSequenceMapVal - access node type
 //
 // !INTERFACE:
-int HConfig::isMapValSequence(
+int HConfig::isSequenceMapVal(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -1870,12 +1870,12 @@ int HConfig::isMapValSequence(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::isMapValMap()"
+#define ESMC_METHOD "ESMCI::HConfig::isMapMapVal()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::isMapValMap - access node type
+// !IROUTINE:  ESMCI::HConfig::isMapMapVal - access node type
 //
 // !INTERFACE:
-int HConfig::isMapValMap(
+int HConfig::isMapMapVal(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -1919,12 +1919,12 @@ int HConfig::isMapValMap(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::isMapValDefined()"
+#define ESMC_METHOD "ESMCI::HConfig::isDefinedMapVal()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::isMapValDefined - access node type
+// !IROUTINE:  ESMCI::HConfig::isDefinedMapVal - access node type
 //
 // !INTERFACE:
-int HConfig::isMapValDefined(
+int HConfig::isDefinedMapVal(
 //
 // !RETURN VALUE:
 //  int error return code
@@ -2215,12 +2215,12 @@ HConfig HConfig::iterEnd(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::iterMapKeyBegin()"
+#define ESMC_METHOD "ESMCI::HConfig::iterBeginMapKey()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::iterMapKeyBegin - Iterator pointing to first item
+// !IROUTINE:  ESMCI::HConfig::iterBeginMapKey - Iterator pointing to first item
 //
 // !INTERFACE:
-HConfig HConfig::iterMapKeyBegin(
+HConfig HConfig::iterBeginMapKey(
 //
 // !RETURN VALUE:
 //  pointer to iterator
@@ -2272,12 +2272,12 @@ HConfig HConfig::iterMapKeyBegin(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::iterMapKeyEnd()"
+#define ESMC_METHOD "ESMCI::HConfig::iterEndMapKey()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::iterMapKeyEnd - Iterator pointing to one past the last item
+// !IROUTINE:  ESMCI::HConfig::iterEndMapKey - Iterator pointing to one past the last item
 //
 // !INTERFACE:
-HConfig HConfig::iterMapKeyEnd(
+HConfig HConfig::iterEndMapKey(
 //
 // !RETURN VALUE:
 //  pointer to iterator
@@ -2329,12 +2329,12 @@ HConfig HConfig::iterMapKeyEnd(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::iterMapValBegin()"
+#define ESMC_METHOD "ESMCI::HConfig::iterBeginMapVal()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::iterMapValBegin - Iterator pointing to first item
+// !IROUTINE:  ESMCI::HConfig::iterBeginMapVal - Iterator pointing to first item
 //
 // !INTERFACE:
-HConfig HConfig::iterMapValBegin(
+HConfig HConfig::iterBeginMapVal(
 //
 // !RETURN VALUE:
 //  pointer to iterator
@@ -2386,12 +2386,12 @@ HConfig HConfig::iterMapValBegin(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::HConfig::iterMapValEnd()"
+#define ESMC_METHOD "ESMCI::HConfig::iterEndMapVal()"
 //BOP
-// !IROUTINE:  ESMCI::HConfig::iterMapValEnd - Iterator pointing to one past the last item
+// !IROUTINE:  ESMCI::HConfig::iterEndMapVal - Iterator pointing to one past the last item
 //
 // !INTERFACE:
-HConfig HConfig::iterMapValEnd(
+HConfig HConfig::iterEndMapVal(
 //
 // !RETURN VALUE:
 //  pointer to iterator
