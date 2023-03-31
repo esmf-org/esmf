@@ -2604,6 +2604,153 @@ template<typename T> T HConfig::asMapVal(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::set()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::set - set value in node
+//
+// !INTERFACE:
+int HConfig::set(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    HConfig *value){  // in  - value to be set
+// 
+// !DESCRIPTION: 
+//  ESMF routine to set node value
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if (node)
+      // node
+      *node = *(value->node);
+    else
+      // iterator
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        return rc;
+      }else
+        *node = *(value->node);
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::setMapKey()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::setMapKey - set map key value in node
+//
+// !INTERFACE:
+int HConfig::setMapKey(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    HConfig *value){  // in  - value to be set
+// 
+// !DESCRIPTION: 
+//  ESMF routine to set node map key value
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      iter->first = *(value->node);
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::setMapVal()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::setMapVal - set map val value in node
+//
+// !INTERFACE:
+int HConfig::setMapVal(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    HConfig *value){  // in  - value to be set
+// 
+// !DESCRIPTION: 
+//  ESMF routine to set node map val value
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if ((node==NULL) && (type==YAML::NodeType::Map))
+      iter->second = *(value->node);
+    else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::toConfig()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::toConfig - fill a Config from HConfig

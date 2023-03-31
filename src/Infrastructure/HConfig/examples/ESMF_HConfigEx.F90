@@ -917,11 +917,11 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The resolved JSON schema tag is again {\tt{\bf tag:yaml.org,2002:null}}. The
-! three special values that resolve to this tag are {\tt null}, {\tt Null},
-! and {\tt NULL}. In addition to those special values, an {\em empty} value,
-! as demonstrated by {\em key} "value\_eleven", also automatically resolves to
-! {\tt{\bf tag:yaml.org,2002:null}}.
+! The resolved JSON schema tag is again {\tt{\bf tag:yaml.org,2002:null}}. There
+! are four special values that resolve to this tag: {\tt null}, {\tt Null},
+! {\tt NULL}, and {\tt $\sim$}. In addition to those special values, an {\em empty}
+! value, as demonstrated by {\em key} "value\_eleven", also automatically
+! resolves to {\tt{\bf tag:yaml.org,2002:null}}.
 !EOE
 !BOC
   tag = ESMF_HConfigGetTag(hconfig, keyString="value_eleven", rc=rc)
@@ -1105,6 +1105,63 @@ program ESMF_HConfigEx
   call ESMF_HConfigDestroy(hconfig, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!-------------------------------------------------------------------------------
+!BOE
+! \subsubsection{Building and Editing Nodes}
+!
+! Here describe how to do it...
+!EOE
+
+  hconfig = ESMF_HConfigCreate(filename="exampleWithTags.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfig, filename="debug1.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString="value_nine", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfigNode, filename="debug2.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!  call ESMF_HConfigLoadFile(hconfigNode, filename="example.yaml", rc=rc)
+!  call ESMF_HConfigSet(hconfigNode, value="test value", rc=rc)
+  call ESMF_HConfigSet(hconfig, value="[testing, value]", keyString="value_nine", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfigNode, filename="debug3.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_HConfigSetMapVal(hconfigIter, value="bla bla bla", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfig, filename="debug4.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigIterNext(hconfigIter, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  hconfigNode = ESMF_HConfigCreateAtMapKey(hconfigIter, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigLoadFile(hconfigNode, filename="example.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfig, filename="debug5.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

@@ -123,6 +123,10 @@ namespace ESMCI {
       template<typename T> T asMapKey(bool *asOkay, int *rc=NULL);
       template<typename T> T asMapVal(bool *asOkay, int *rc=NULL);
 
+      int set(HConfig *value);
+      int setMapKey(HConfig *value);
+      int setMapVal(HConfig *value);
+
       int toConfig(ESMCI_Config **config);
   };   // class HConfig
 
