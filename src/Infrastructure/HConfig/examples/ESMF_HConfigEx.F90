@@ -57,6 +57,7 @@ program ESMF_HConfigEx
     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Create an empty HConfig object}
 !
@@ -68,6 +69,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Load HConfig from string using YAML syntax}
 !
@@ -84,6 +86,7 @@ program ESMF_HConfigEx
 ! creates a {\em list} of six scalar members.
 !EOE
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Iterator based HConfig list parsing}
 !
@@ -187,6 +190,7 @@ program ESMF_HConfigEx
   enddo
 !EOC
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Index based random access HConfig list parsing}
 !
@@ -301,6 +305,7 @@ program ESMF_HConfigEx
 ! {\tt index=10} is out of range.
 !EOE
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Destroy an HConfig object}
 !
@@ -311,6 +316,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Create an HConfig object directly loading from YAML string}
 !
@@ -327,6 +333,7 @@ program ESMF_HConfigEx
 ! bike, plane), as are all of the associated values (red, 22, TRUE).
 !EOE
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Iterator based HConfig map parsing}
 !
@@ -453,6 +460,7 @@ program ESMF_HConfigEx
   enddo
 !EOC
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Key based random access HConfig map parsing}
 !
@@ -580,6 +588,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Access HConfig from Config}
 !
@@ -642,6 +651,7 @@ program ESMF_HConfigEx
   call ESMF_ConfigDestroy(config, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Load HConfig from YAML file}
 !
@@ -678,6 +688,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Save HConfig to YAML file}
 !
@@ -834,6 +845,263 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+
+!-------------------------------------------------------------------------------
+!BOE
+! \subsubsection{Tags and Schemas}
+!
+! The HConfig class implements tags to identify a node's data type according to
+! the YAML standard. The combination of a set of defined tags and a mechansim
+! to resolve non-specific tags is called a schema under YAML. Currently the
+! HConfig class implements the JSON schema. This setting can not be changed.
+!
+! This example starts with an empty HConfig object.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Method {\tt ESMF\_HConfigGetTag()} is used to query the tag.
+!EOE
+!BOC
+  ! character(len=:), allocatable :: tag
+  tag = ESMF_HConfigGetTag(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("Empty HConfig tag:       ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! \paragraph{Null}
+! The {\tt hconfig} is an empty object, in other words it is associated with
+! NULL. The JSON schema tag for this situation is
+! {\tt{\bf tag:yaml.org,2002:null}}.
+!
+! Next, file {\tt exampleWithTags.yaml} is loaded.
+!BOC
+  call ESMF_HConfigLoadFile(hconfig, filename="exampleWithTags.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The file contains the following YAML:
+! \begin{verbatim}
+! value_one:    {word1: this, word2: is, word3: a, word4: map}
+! value_two:    [this, is, a, list]
+! value_three:            123
+! value_four:   !!float   123
+! value_five:             2.5
+! value_six:    !!str     2.5
+! value_seven:            False
+! value_eight:  !!str     true
+! value_nine:             0x234
+! value_ten:              Null
+! value_eleven:
+! value_twelve:  !myStuff xyz
+! \end{verbatim}
+!
+! The value associated with {\em map key} "value\_ten" is explicitly set to
+! {\tt Null}. The associated tag for this node can be obtained
+! directly by supplying the {\tt keyString} argument.
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_ten", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_ten HConfig tag:  ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The resolved JSON schema tag is again {\tt{\bf tag:yaml.org,2002:null}}. The
+! three special values that resolve to this tag are {\tt null}, {\tt Null},
+! and {\tt NULL}. In addition to those special values, an {\em empty} value,
+! as demonstrated by {\em key} "value\_eleven", also automatically resolves to
+! {\tt{\bf tag:yaml.org,2002:null}}.
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_eleven", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_eleven HConfig tag:  ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! \paragraph{Map}
+! On the top level, after loading the YAML file, {\tt hconfig} is a map. 
+! Querying again for the tag of {\tt hconfig},
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("Top level HConfig tag: ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! results in the JSON schema tag of {\tt{\bf tag:yaml.org,2002:map}}.
+!
+! \paragraph{List}
+! The value associated with {\em map key} "value\_two" in the current
+! {\tt hconfig} object is a list. The tag for this node can be obtained
+! directly by supplying the {\tt keyString} argument.
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_two", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_two HConfig tag:  ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The resolved JSON schema tag for a list is {\tt{\bf tag:yaml.org,2002:seq}}.
+!
+! \paragraph{String}
+! All of the {\em keys} of the currently loaded {\tt hconfig} object are
+! strings. To obtain the tag that is associated with the first key node,
+! an iterator is used to access the map nodes individually.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigIter
+  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Now the {\tt ESMF\_HConfigGetTagMapKey()} method can be used to obtain
+! the tag for the first key node.
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTagMapKey(hconfigIter, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("first key HConfig tag:  ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Here the JSON schema tag resolves to {\tt{\bf tag:yaml.org,2002:str}}.
+!
+! \paragraph{Integer}
+! The value associated with {\em map key} "value\_three" in the current
+! {\tt hconfig} object is an integer number. The tag for this node can be
+! obtained as before by directly supplying the {\tt keyString} argument.
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_three", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_three HConfig tag:  ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The JSON schema tag resolves to {\tt{\bf tag:yaml.org,2002:int}}.
+!
+! The value associated with {\em map key} "value\_nine" in the current
+! {\tt hconfig} object is an integer number in hex. The tag for this node can be
+! obtained as before by directly supplying the {\tt keyString} argument.
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_nine", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_nine HConfig tag:  ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The JSON schema tag resolves to {\tt{\bf tag:yaml.org,2002:int}}.
+!
+! \paragraph{Floating Point}
+! The value associated with {\em map key} "value\_five" in the current
+! {\tt hconfig} object is a floating point number. The tag for this node can be
+! obtained as before by directly supplying the {\tt keyString} argument.
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_five", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_five HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The JSON schema tag resolves to {\tt{\bf tag:yaml.org,2002:float}}.
+!
+! \paragraph{Boolean}
+! The value associated with {\em map key} "value\_seven" in the current
+! {\tt hconfig} object is a boolean. The tag for this node can be
+! obtained as before by directly supplying the {\tt keyString} argument.
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_seven", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_seven HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The JSON schema tag resolves to {\tt{\bf tag:yaml.org,2002:bool}}. The
+! supported boolean values are {\tt true}, {\tt True}, {\tt TRUE},
+! {\tt false}, {\tt False}, and {\tt FALSE}.
+!
+! \paragraph{Explicit standard tags}
+! Standard short-hand tags can be specified to change the default resolution.
+! This is demonstrated for {\em map keys} "value\_four", "value\_six", and
+! "value\_eight".
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_four", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_four HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_six", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_six HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_eight", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_eight HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The default resolution of these three keys would be
+! {\tt tag:yaml.org,2002:int}, {\tt tag:yaml.org,2002:float}, and
+! {\tt tag:yaml.org,2002:bool}, respectively. However, with the explict tags
+! in place, they are resolved to {\tt tag:yaml.org,2002:float},
+! {\tt tag:yaml.org,2002:str}, {\tt tag:yaml.org,2002:str}, instead.
+!
+! \paragraph{Explicit custom tags}
+! The HConfig class supports application-specific local tags as per the YAML
+! standard. These are tags that are not known by the JSON schema. If such a
+! tag is encountered on a node, it is preserved and no further automatic
+! tag resolution is performed.
+!
+! The value associated with {\em map key} "value\_twelve" in the current
+! {\tt hconfig} object has a custom tag. The tag for this node can be
+! obtained as before by directly supplying the {\tt keyString} argument.
+!EOE
+!BOC
+  tag = ESMF_HConfigGetTag(hconfig, keyString="value_twelve", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("value_twelve HConfig tag:    ", A30)') tag
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The returned tag is {\tt{\bf !myStuff}}.
+!
+! Finally clean up {\tt hconfig}.
+!EOE
+!BOC
+  ! Destroy hconfig when done with it.
   call ESMF_HConfigDestroy(hconfig, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

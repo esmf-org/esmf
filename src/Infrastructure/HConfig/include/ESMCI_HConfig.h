@@ -64,8 +64,10 @@ namespace ESMCI {
       static HConfig create(int *rc=NULL);
       static int destroy(HConfig *hconfig);
 
-      template <typename T> inline 
-      static YAML::Node find(T self, HConfig *key);
+      template <typename T> inline static YAML::Node find(T self, HConfig *key);
+
+      inline static std::string tagRef(YAML::Node &self);
+      inline static std::string tag(YAML::Node self);
 
       int load(const std::string& content);
       int loadFile(const std::string& filename);
