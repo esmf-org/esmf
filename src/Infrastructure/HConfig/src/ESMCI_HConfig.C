@@ -789,6 +789,154 @@ HConfig HConfig::createAtMapValKey(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::add()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::add - add value in node
+//
+// !INTERFACE:
+int HConfig::add(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    HConfig *value){  // in  - value to be added
+// 
+// !DESCRIPTION: 
+//  ESMF routine to add node value via deep copy
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    std::stringstream ss;
+    if (value->node)
+      ss << *(value->node);
+    else
+      ss << *(value->iter);
+    if (node){
+      // node
+      if (node->Type()!=YAML::NodeType::Sequence
+        && node->Type()!=YAML::NodeType::Null){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object MUST be sequence or NULL when adding item to the end",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }else
+        node->push_back(YAML::Load(ss.str()));
+    }else
+      // iterator
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        return rc;
+      }else{
+        if (iter->Type()!=YAML::NodeType::Sequence
+          && node->Type()!=YAML::NodeType::Null){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "HConfig object MUST be sequence or NULL when adding item to the end",
+            ESMC_CONTEXT, &rc);
+          return rc;
+        }else
+          iter->push_back(YAML::Load(ss.str()));
+      }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::add()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::add - add value in node
+//
+// !INTERFACE:
+int HConfig::add(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    HConfig *key,     // in  - key to be added
+    HConfig *value){  // in  - value to be added
+// 
+// !DESCRIPTION: 
+//  ESMF routine to add node value via deep copy
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    std::stringstream ss;
+    if (value->node)
+      ss << *(value->node);
+    else
+      ss << *(value->iter);
+    YAML::Node keyNode;
+    if (key->node)
+      keyNode = *(key->node);
+    else
+      keyNode = (YAML::Node)*(key->iter);
+    if (node){
+      // node
+      if (node->Type()!=YAML::NodeType::Map
+        && node->Type()!=YAML::NodeType::Null){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object MUST be map or NULL when adding item with key",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }else
+        (*node)[keyNode] = YAML::Load(ss.str());
+    }else
+      // iterator
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        return rc;
+      }else{
+        if (iter->Type()!=YAML::NodeType::Map
+          && node->Type()!=YAML::NodeType::Null){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "HConfig object MUST be map or NULL when adding item with key",
+            ESMC_CONTEXT, &rc);
+          return rc;
+        }else
+          ((YAML::Node)(*iter))[keyNode] = YAML::Load(ss.str());
+      }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::getSize()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::getSize - Get size of the node
