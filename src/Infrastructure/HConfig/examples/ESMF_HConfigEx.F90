@@ -1108,7 +1108,7 @@ program ESMF_HConfigEx
 
 !-------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Building and Editing Nodes}
+! \subsubsection{Building and Editing HConfig structures}
 !
 ! Here describe how to do it...
 !EOE
@@ -1173,6 +1173,12 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_HConfigIterNext(hconfigIter, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigAddMapVal(hconfigIter, "[aa, bb, cc]", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigAddMapVal(hconfigIter, "aaa", index=5, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   hconfigNode = ESMF_HConfigCreateAtMapKey(hconfigIter, rc=rc)

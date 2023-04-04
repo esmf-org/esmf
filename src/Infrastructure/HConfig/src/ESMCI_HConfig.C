@@ -549,7 +549,7 @@ HConfig HConfig::createAtMapKey(
     if ((node==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       if (index){
-        if (node->Type()!=YAML::NodeType::Sequence){
+        if (iter->first.Type()!=YAML::NodeType::Sequence){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "HConfig iterator must be sequence when index specified",
             ESMC_CONTEXT, rc);
@@ -619,7 +619,7 @@ HConfig HConfig::createAtMapKeyKey(
 
     if ((node==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
-      if (iter->Type()!=YAML::NodeType::Map){
+      if (iter->first.Type()!=YAML::NodeType::Map){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "HConfig iterator MUST be map when key specified",
           ESMC_CONTEXT, rc);
@@ -687,7 +687,7 @@ HConfig HConfig::createAtMapVal(
     if ((node==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       if (index){
-        if (node->Type()!=YAML::NodeType::Sequence){
+        if (iter->second.Type()!=YAML::NodeType::Sequence){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "HConfig iterator must be sequence when index specified",
             ESMC_CONTEXT, rc);
@@ -757,7 +757,7 @@ HConfig HConfig::createAtMapValKey(
 
     if ((node==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
-      if (iter->Type()!=YAML::NodeType::Map){
+      if (iter->second.Type()!=YAML::NodeType::Map){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "HConfig iterator MUST be map when key specified",
           ESMC_CONTEXT, rc);
@@ -835,7 +835,7 @@ int HConfig::add(
         return rc;
       }else{
         if (iter->Type()!=YAML::NodeType::Sequence
-          && node->Type()!=YAML::NodeType::Null){
+          && iter->Type()!=YAML::NodeType::Null){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "HConfig object MUST be sequence or NULL when adding item to the end",
             ESMC_CONTEXT, &rc);
@@ -912,7 +912,7 @@ int HConfig::add(
         return rc;
       }else{
         if (iter->Type()!=YAML::NodeType::Map
-          && node->Type()!=YAML::NodeType::Null){
+          && iter->Type()!=YAML::NodeType::Null){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "HConfig object MUST be map or NULL when adding item with key",
             ESMC_CONTEXT, &rc);
@@ -920,6 +920,258 @@ int HConfig::add(
         }else
           ((YAML::Node)(*iter))[keyNode] = YAML::Load(ss.str());
       }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::addMapKey()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::addMapKey - add value in map key node
+//
+// !INTERFACE:
+int HConfig::addMapKey(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    HConfig *value){  // in  - value to be added
+// 
+// !DESCRIPTION: 
+//  ESMF routine to add map key node value via deep copy
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    std::stringstream ss;
+    if (value->node)
+      ss << *(value->node);
+    else
+      ss << *(value->iter);
+    if ((node==NULL) && (type==YAML::NodeType::Map)){
+      if (iter->first.Type()!=YAML::NodeType::Sequence
+        && iter->first.Type()!=YAML::NodeType::Null){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object MUST be sequence or NULL when adding item to the end",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }else
+        iter->first.push_back(YAML::Load(ss.str()));
+    }else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::addMapKey()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::addMapKey - add value in map key node
+//
+// !INTERFACE:
+int HConfig::addMapKey(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    HConfig *key,     // in  - key to be added
+    HConfig *value){  // in  - value to be added
+// 
+// !DESCRIPTION: 
+//  ESMF routine to add map key node value via deep copy
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    std::stringstream ss;
+    if (value->node)
+      ss << *(value->node);
+    else
+      ss << *(value->iter);
+    YAML::Node keyNode;
+    if (key->node)
+      keyNode = *(key->node);
+    else
+      keyNode = (YAML::Node)*(key->iter);
+    if ((node==NULL) && (type==YAML::NodeType::Map)){
+      if (iter->first.Type()!=YAML::NodeType::Sequence
+        && iter->first.Type()!=YAML::NodeType::Null){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object MUST be sequence or NULL when adding item to the end",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }else
+        (iter->first)[keyNode] = YAML::Load(ss.str());
+    }else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::addMapVal()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::addMapVal - add value in map value node
+//
+// !INTERFACE:
+int HConfig::addMapVal(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    HConfig *value){  // in  - value to be added
+// 
+// !DESCRIPTION: 
+//  ESMF routine to add map value node value via deep copy
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    std::stringstream ss;
+    if (value->node)
+      ss << *(value->node);
+    else
+      ss << *(value->iter);
+    if ((node==NULL) && (type==YAML::NodeType::Map)){
+      if (iter->second.Type()!=YAML::NodeType::Sequence
+        && iter->second.Type()!=YAML::NodeType::Null){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object MUST be sequence or NULL when adding item to the end",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }else
+        iter->second.push_back(YAML::Load(ss.str()));
+    }else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::addMapVal()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::addMapVal - add value in map value node
+//
+// !INTERFACE:
+int HConfig::addMapVal(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    HConfig *key,     // in  - key to be added
+    HConfig *value){  // in  - value to be added
+// 
+// !DESCRIPTION: 
+//  ESMF routine to add map value node value via deep copy
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    std::stringstream ss;
+    if (value->node)
+      ss << *(value->node);
+    else
+      ss << *(value->iter);
+    YAML::Node keyNode;
+    if (key->node)
+      keyNode = *(key->node);
+    else
+      keyNode = (YAML::Node)*(key->iter);
+    if ((node==NULL) && (type==YAML::NodeType::Map)){
+      if (iter->second.Type()!=YAML::NodeType::Sequence
+        && iter->second.Type()!=YAML::NodeType::Null){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object MUST be sequence or NULL when adding item to the end",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }else
+        (iter->second)[keyNode] = YAML::Load(ss.str());
+    }else{
+      // error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must be map iterator", ESMC_CONTEXT, &rc);
+      return rc;
+    }
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);

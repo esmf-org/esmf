@@ -82,6 +82,10 @@ namespace ESMCI {
 
       int add(HConfig *value);
       int add(HConfig *key, HConfig *value);
+      int addMapKey(HConfig *value);
+      int addMapKey(HConfig *key, HConfig *value);
+      int addMapVal(HConfig *value);
+      int addMapVal(HConfig *key, HConfig *value);
 
       int getSize(int *rc=NULL);
       int getSizeMapKey(int *rc=NULL);
