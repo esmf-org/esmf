@@ -71,13 +71,13 @@ program ESMF_HConfigEx
 
 !-------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Load HConfig from string using YAML syntax}
+! \subsubsection{Set HConfig from string using YAML syntax}
 !
-! An empty HConfig object can be loaded directly from a string using YAML
+! An empty HConfig object can be set directly from a string using YAML
 ! syntax.
 !EOE
 !BOC
-  call ESMF_HConfigLoad(hconfig, content="[1, 2, 3, abc, b, TRUE]", rc=rc)
+  call ESMF_HConfigSet(hconfig, content="[1, 2, 3, abc, b, TRUE]", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -1126,8 +1126,8 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !  call ESMF_HConfigLoadFile(hconfigNode, filename="example.yaml", rc=rc)
-!  call ESMF_HConfigSet(hconfigNode, value="test value", rc=rc)
-  call ESMF_HConfigSet(hconfig, value="[testing, value]", keyString="value_nine", rc=rc)
+!  call ESMF_HConfigSet(hconfigNode, content="test value", rc=rc)
+  call ESMF_HConfigSet(hconfig, content=9876, keyString="value_nine", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_HConfigSaveFile(hconfigNode, filename="debug3.yaml", rc=rc)
@@ -1138,7 +1138,7 @@ program ESMF_HConfigEx
 
   hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_HConfigSetMapVal(hconfigIter, value="bla bla bla", rc=rc)
+  call ESMF_HConfigSetMapVal(hconfigIter, content=12.d6, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_HConfigSaveFile(hconfig, filename="debug4.yaml", rc=rc)

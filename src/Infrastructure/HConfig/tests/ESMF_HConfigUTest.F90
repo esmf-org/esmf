@@ -95,14 +95,14 @@ program ESMF_HConfigUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "HConfigLoad()"
+  write(name, *) "HConfigSet()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_HConfigLoad(hconfig, content="[1, 2, 3]", rc=rc)
+  call ESMF_HConfigSet(hconfig, content="[1, 2, 3]", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "HConfig Iterator test after HConfigLoad()"
+  write(name, *) "HConfig Iterator test after HConfigSet()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call HConfigIterationTest(hconfig, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
