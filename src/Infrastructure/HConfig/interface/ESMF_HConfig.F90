@@ -175,6 +175,7 @@ module ESMF_HConfigMod
 
   interface ESMF_HConfigCreate
     module procedure ESMF_HConfigCreateDefault
+    module procedure ESMF_HConfigCreateHConfig
     module procedure ESMF_HConfigCreateLogical
     module procedure ESMF_HConfigCreateI4
     module procedure ESMF_HConfigCreateI8
@@ -426,7 +427,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer               :: localrc        ! local return code
     type(ESMF_HConfig)    :: hconfig        ! opaque pointer to new C++ HConfig
-    character(len=:), allocatable ::  sContent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -478,6 +478,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigCreateHConfig()"
+!BOP
+! !IROUTINE: ESMF_HConfigCreateHConfig - Create HConfig object from HConfig
+
+! !INTERFACE:
+  ! Private name; call using ESMF_HConfigCreate()
+  function ESMF_HConfigCreateHConfig(content, keywordEnforcer, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_HConfig) :: ESMF_HConfigCreateHConfig
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create a new HConfig object from existing HConfig object as a deep copy.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[content]
+!     HConfig content.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc        ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigCreateHConfig = ESMF_HConfigCreate(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigSet(ESMF_HConfigCreateHConfig, content, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_HConfigCreateHConfig
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigCreateLogical()"
 !BOP
 ! !IROUTINE: ESMF_HConfigCreateLogical - Create HConfig object from logical
@@ -507,9 +559,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer               :: localrc        ! local return code
-    type(ESMF_HConfig)    :: hconfig        ! opaque pointer to new C++ HConfig
-    character(len=:), allocatable ::  sContent
+    integer                       :: localrc        ! local return code
+    character(len=:), allocatable :: sContent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -561,8 +612,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc        ! local return code
-    type(ESMF_HConfig)    :: hconfig        ! opaque pointer to new C++ HConfig
-    character(len=16)     ::  sContent
+    character(len=16)     :: sContent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -613,8 +663,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc        ! local return code
-    type(ESMF_HConfig)    :: hconfig        ! opaque pointer to new C++ HConfig
-    character(len=16)     ::  sContent
+    character(len=16)     :: sContent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -665,8 +714,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc        ! local return code
-    type(ESMF_HConfig)    :: hconfig        ! opaque pointer to new C++ HConfig
-    character(len=24)     ::  sContent
+    character(len=24)     :: sContent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -717,8 +765,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc        ! local return code
-    type(ESMF_HConfig)    :: hconfig        ! opaque pointer to new C++ HConfig
-    character(len=24)     ::  sContent
+    character(len=24)     :: sContent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL

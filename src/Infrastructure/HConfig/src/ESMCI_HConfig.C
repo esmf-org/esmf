@@ -2618,7 +2618,7 @@ int HConfig::set(
     HConfig *value){  // in  - value to be set
 // 
 // !DESCRIPTION: 
-//  ESMF routine to set node value
+//  ESMF routine to set node value via deep copy
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -2627,17 +2627,22 @@ int HConfig::set(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node)
-      // node
-      *node = *(value->node);
+    std::stringstream ss;
+    if (value->node)
+      ss << *(value->node);
     else
+      ss << *(value->iter);
+    if (node){
+      // node
+      *node = YAML::Load(ss.str());
+    }else
       // iterator
       if (type==YAML::NodeType::Map){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
         return rc;
       }else
-        *node = *(value->node);
+        (YAML::Node)*iter = YAML::Load(ss.str());
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -2669,7 +2674,7 @@ int HConfig::setMapKey(
     HConfig *value){  // in  - value to be set
 // 
 // !DESCRIPTION: 
-//  ESMF routine to set node map key value
+//  ESMF routine to set node map key value via deep copy
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -2678,8 +2683,13 @@ int HConfig::setMapKey(
 
 #ifdef ESMF_YAMLCPP
   try{
+    std::stringstream ss;
+    if (value->node)
+      ss << *(value->node);
+    else
+      ss << *(value->iter);
     if ((node==NULL) && (type==YAML::NodeType::Map))
-      iter->first = *(value->node);
+      iter->first = YAML::Load(ss.str());
     else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2717,7 +2727,7 @@ int HConfig::setMapVal(
     HConfig *value){  // in  - value to be set
 // 
 // !DESCRIPTION: 
-//  ESMF routine to set node map val value
+//  ESMF routine to set node map val value via deep copy
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -2726,8 +2736,13 @@ int HConfig::setMapVal(
 
 #ifdef ESMF_YAMLCPP
   try{
+    std::stringstream ss;
+    if (value->node)
+      ss << *(value->node);
+    else
+      ss << *(value->iter);
     if ((node==NULL) && (type==YAML::NodeType::Map))
-      iter->second = *(value->node);
+      iter->second = YAML::Load(ss.str());
     else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,

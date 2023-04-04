@@ -1159,6 +1159,21 @@ program ESMF_HConfigEx
   call ESMF_HConfigSaveFile(hconfig, filename="debug5.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  hconfigIter = ESMF_HConfigCreate(hconfig, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfigIter, filename="debugIter5.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSet(hconfigIter, content=3344, rc=rc)  ! wipe out all, single scalar
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfig, filename="debug6.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfigIter, filename="debugIter6.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call ESMF_HConfigDestroy(hconfig, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
