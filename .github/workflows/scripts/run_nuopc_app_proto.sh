@@ -37,13 +37,30 @@ export ESMFMKFILE=$spack_install_dir/view/lib/esmf.mk
 if [[ "$comp" == *"oneapi"* ]]; then
   # this is not correct, need to be changed later
   . /opt/intel/oneapi/setvars.sh
+  MPI_FC=mpiifort
 else
   export PATH=$spack_install_dir/view/bin:$PATH
   # set it for OpenMPI to fix not enough slots issue
   export TOOLRUN="--oversubscribe"
+  MPI_FC=mpif90
 fi
 which mpirun
 cat testProtos.sh | grep "^Test"
+echo "::endgroup::"
+
+# test installation by building and running simple MPI job
+echo "::group::Test Installation"
+echo "program test_mpi" > test_mpi.F90
+echo "  use mpi" >> test_mpi.F90
+echo "  integer :: err, p, id" >> test_mpi.F90
+echo "  call MPI_Init(err)" >> test_mpi.F90
+echo "  call MPI_Comm_size(MPI_COMM_WORLD, p, err)" >> test_mpi.F90
+echo "  call MPI_Comm_rank(MPI_COMM_WORLD, id, err)" >> test_mpi.F90
+echo "  print*, 'Hello from ', id, ' of ', p" >> test_mpi.F90
+echo "  call MPI_Finalize(err)" >> test_mpi.F90
+echo "end program test_mpi" >> test_mpi.F90
+$MPI_FC  -o test_mpi.x test_mpi.F90
+mpirun -np 2 ./test_mpi.x
 echo "::endgroup::"
 
 # run app prototypes 
