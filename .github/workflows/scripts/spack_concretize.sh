@@ -90,23 +90,28 @@ if [[ "$comp" == *"oneapi"* ]]; then
   comp="oneapi@$comp_version"
   mpi="oneapi-mpi@$mpi_version"
   echo "::endgroup::"
-
-  # test installation by building and running simple MPI job
-  echo "::group::Test Installation"
-  echo "program test_mpi" > test_mpi.F90
-  echo "  use mpi" >> test_mpi.F90
-  echo "  integer :: err, p, id" >> test_mpi.F90
-  echo "  call MPI_Init(err)" >> test_mpi.F90
-  echo "  call MPI_Comm_size(MPI_COMM_WORLD, p, err)" >> test_mpi.F90
-  echo "  call MPI_Comm_rank(MPI_COMM_WORLD, id, err)" >> test_mpi.F90
-  echo "  print*, 'Hello from ', id, ' of ', p" >> test_mpi.F90
-  echo "  call MPI_Finalize(err)" >> test_mpi.F90
-  echo "end program test_mpi" >> test_mpi.F90
-
-  mpiifort -o test_mpi.x test_mpi.F90
-  mpirun -np 2 ./test_mpi.x
-  echo "::endgroup::"
+  
+  MPI_FC=mpiifort
+else
+  MPI_FC=mpif90
 fi
+
+# test installation by building and running simple MPI job
+echo "::group::Test Installation"
+echo "program test_mpi" > test_mpi.F90
+echo "  use mpi" >> test_mpi.F90
+echo "  integer :: err, p, id" >> test_mpi.F90
+echo "  call MPI_Init(err)" >> test_mpi.F90
+echo "  call MPI_Comm_size(MPI_COMM_WORLD, p, err)" >> test_mpi.F90
+echo "  call MPI_Comm_rank(MPI_COMM_WORLD, id, err)" >> test_mpi.F90
+echo "  print*, 'Hello from ', id, ' of ', p" >> test_mpi.F90
+echo "  call MPI_Finalize(err)" >> test_mpi.F90
+echo "end program test_mpi" >> test_mpi.F90
+$MPI_FC  -o test_mpi.x test_mpi.F90
+mpirun -np 2 ./test_mpi.x
+echo "::endgroup::"
+
+exit
 
 # find compilers
 . spack/share/spack/setup-env.sh
