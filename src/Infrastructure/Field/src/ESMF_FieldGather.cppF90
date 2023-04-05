@@ -46,8 +46,8 @@ module ESMF_FieldGatherMod
     use ESMF_FieldMod
     use ESMF_FieldGetMod
     use ESMF_ArrayMod
-    use, intrinsic :: ieee_arithmetic, only: ieee_value, ieee_quiet_nan, &
-                                             ieee_signaling_nan
+    use, intrinsic :: ieee_arithmetic, only: ieee_value, ieee_support_nan, &
+                                             ieee_quiet_nan, ieee_signaling_nan
     implicit none
     private
 !------------------------------------------------------------------------------
@@ -183,6 +183,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), pointer     :: coord1PtrR8D3(:,:,:)
     real(ESMF_KIND_R8), pointer     :: coord2PtrR8D3(:,:,:)
     real(ESMF_KIND_R8), pointer     :: coord3PtrR8D3(:,:,:)
+    real(ESMF_KIND_R8)              :: nanR8
+    real(ESMF_KIND_R4)              :: nanR4
     integer                         :: i, j, k
     integer                         :: numOwnedPoints
 
@@ -212,30 +214,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(param3I4)) l_member = param3I4
     l_dataFillScheme = "sincos" ! default
     if(present(dataFillScheme)) l_dataFillScheme = dataFillScheme
-    if (trim(l_dataFillScheme)=="nan") then
-      if (ieee_support_nan(l_const1)) then
-        l_const1 = ieee_value(l_const1, ieee_quiet_nan)
-        l_dataFillScheme = "const"
-      else()
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="Quiet NaN is not supported on this machine.", &
-          ESMF_CONTEXT, &
-          rcToReturn=rc)
-        return ! bail out
-      endif()
-    elseif (trim(l_dataFillScheme)=="snan") then
-      if (ieee_support_nan(l_const1)) then
-        l_const1 = ieee_value(l_const1, ieee_signaling_nan)
-        l_dataFillScheme = "const"
-      else()
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="Signaling NaN is not supported on this machine.", &
-          ESMF_CONTEXT, &
-          rcToReturn=rc)
-        return ! bail out
-      endif()
-    endif()
-
+      
     allocate(coordDimCount(rank))
 
     if (geomtype==ESMF_GEOMTYPE_GRID) then
@@ -986,6 +965,132 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
           ! initialize the entire array
           dataPtrR4D3 = 1._ESMF_KIND_R4
+        endif
+      enddo
+    else if (trim(l_dataFillScheme)=="nan") then
+      if (typekind==ESMF_TYPEKIND_R8 .and. ieee_support_nan(nanR8)) then
+        nanR8 = ieee_value(nanR8, ieee_quiet_nan)
+      elseif (typekind==ESMF_TYPEKIND_R4 .and. ieee_support_nan(nanR4)) then
+        nanR4 = ieee_value(nanR4, ieee_quiet_nan)
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Quiet NaN is unsupported.", &
+          ESMF_CONTEXT, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
+      do lde=0, ldeCount-1
+        if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
+          ! 1D all qnan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR8D1 = nanR8
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
+          ! 1D all qnan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR4D1 = nanR4
+        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+          ! 2D all qnan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR8D2 = nanR8
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
+          ! 2D all qnan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR4D2 = nanR4
+        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
+          ! 3D all qnan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D3, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR8D3 = nanR8
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
+          ! 3D all qnan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D3, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR4D3 = nanR4
+        endif
+      enddo
+    else if (trim(l_dataFillScheme)=="snan") then
+      if (typekind==ESMF_TYPEKIND_R8 .and. ieee_support_nan(nanR8)) then
+        nanR8 = ieee_value(nanR8, ieee_signaling_nan)
+      elseif (typekind==ESMF_TYPEKIND_R4 .and. ieee_support_nan(nanR4)) then 
+        nanR4 = ieee_value(nanR4, ieee_signaling_nan)
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Signaling NaN is unsupported", &
+          ESMF_CONTEXT, &
+          rcToReturn=rc)
+        return ! bail out
+      endif
+      do lde=0, ldeCount-1
+        if (typekind==ESMF_TYPEKIND_R8 .and. rank==1) then
+          ! 1D all snan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D1, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR8D1 = nanR8
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==1) then
+          ! 1D all snan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D1, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR4D1 = nanR4
+        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==2) then
+          ! 2D all snan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR8D2 = nanR8
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==2) then
+          ! 2D all snan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D2, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR4D2 = nanR4
+        elseif (typekind==ESMF_TYPEKIND_R8 .and. rank==3) then
+          ! 3D all snan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR8D3, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR8D3 = nanR8
+        elseif (typekind==ESMF_TYPEKIND_R4 .and. rank==3) then
+          ! 3D all snan.
+          call ESMF_FieldGet(field, localDe=lde, farrayPtr=dataPtrR4D3, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT)) &
+            return ! bail out
+          ! initialize the entire array
+          dataPtrR4D3 = nanR4
         endif
       enddo
     else if (trim(l_dataFillScheme)=="const") then
