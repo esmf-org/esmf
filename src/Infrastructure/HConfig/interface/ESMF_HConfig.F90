@@ -165,6 +165,8 @@ module ESMF_HConfigMod
   public ESMF_HConfigSetMapKey
   public ESMF_HConfigSetMapVal
 
+  public ESMF_HConfigRemove
+
 ! - ESMF-internal methods:
   public ESMF_HConfigGetInit
 !EOPI
@@ -8813,6 +8815,85 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigRemove()"
+!BOP
+! !IROUTINE: ESMF_HConfigRemve - Remove element from HConfig object
+
+! !INTERFACE:
+  subroutine ESMF_HConfigRemove(hconfig, keywordEnforcer, index, keyString, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Remove an element from a squence or map HConfig object. Either {\tt index}
+!   (for sequence) or {\tt keyString} (for map) must be provided. An error is
+!   flagged if neither optional argument is specified.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[hconfig]
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[index]}]
+!     Attempt to access by index if specified.
+!     Mutural exclusive with {\tt keyString}.
+!   \item[{[keyString]}]
+!     Attempt to access by key string if specified.
+!     Mutural exclusive with {\tt index}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Check mutual exclusions
+    if (present(index) .and. present(keyString)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="The 'index' and 'keyString' arguments are mutual exclusive", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    if (present(index)) then
+      ! Call into the C++ interface to set remove element by index
+      call c_ESMC_HConfigRemoveIndex(hconfig, index, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else if (present(keyString)) then
+      ! Call into the C++ interface to set remove element by keyString
+      call c_ESMC_HConfigRemoveKeyString(hconfig, keyString, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Either 'index' or 'keyString' MUST be sepcified", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

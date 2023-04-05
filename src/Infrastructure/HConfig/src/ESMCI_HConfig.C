@@ -3166,6 +3166,136 @@ int HConfig::setMapVal(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::remove()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::remove - remove an element
+//
+// !INTERFACE:
+int HConfig::remove(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    int index){  // in  - index to remove
+// 
+// !DESCRIPTION: 
+//  Remove an element from sequence by index.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if (node){
+      // node
+      if (node->Type()!=YAML::NodeType::Sequence){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object MUST be sequence when index specified",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }else
+        node->remove(index-1);
+    }else{
+      // iterator
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        return rc;
+      }else{
+        if (iter->Type()!=YAML::NodeType::Sequence){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "HConfig object MUST be sequence when index specified",
+            ESMC_CONTEXT, &rc);
+          return rc;
+        }else
+          iter->remove(index-1);
+      }
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::remove()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::remove - remove an element
+//
+// !INTERFACE:
+int HConfig::remove(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+    const std::string& keyString){  // in  - keyString to remove
+// 
+// !DESCRIPTION: 
+//  Remove an element from sequence by index.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if (node){
+      // node
+      if (node->Type()!=YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object MUST be map when keyString specified",
+          ESMC_CONTEXT, &rc);
+        return rc;
+      }else
+        node->remove(keyString);
+    }else{
+      // iterator
+      if (type==YAML::NodeType::Map){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "HConfig object must NOT be map iterator", ESMC_CONTEXT, &rc);
+        return rc;
+      }else{
+        if (iter->Type()!=YAML::NodeType::Map){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "HConfig object MUST be map when keyString specified",
+            ESMC_CONTEXT, &rc);
+          return rc;
+        }else
+          iter->remove(keyString);
+      }
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+#endif
+
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::toConfig()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::toConfig - fill a Config from HConfig

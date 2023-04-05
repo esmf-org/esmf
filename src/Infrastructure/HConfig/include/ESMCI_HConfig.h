@@ -133,6 +133,9 @@ namespace ESMCI {
       int setMapKey(HConfig *value);
       int setMapVal(HConfig *value);
 
+      int remove(int index);
+      int remove(const std::string& keyString);
+
       int toConfig(ESMCI_Config **config);
   };   // class HConfig
 

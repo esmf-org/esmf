@@ -1208,13 +1208,31 @@ program ESMF_HConfigEx
   call ESMF_HConfigDestroy(hconfig, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigAdd(hconfigIter, "(5, 3)", addKeyString="myKey1", rc=rc)
+  call ESMF_HConfigAdd(hconfigIter, "[5, 3]", addKeyString="myKey1", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_HConfigAdd(hconfigIter, "here a string", addKeyString="myKey2", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_HConfigSaveFile(hconfigIter, filename="debugIter7.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigRemove(hconfigIter, keyString="myKey1", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfigIter, filename="debugIter8.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  hconfig = ESMF_HConfigCreate(content="[[5, 3], here a string]", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfig, filename="debug-new1.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigRemove(hconfig, index=1, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_HConfigSaveFile(hconfig, filename="debug-new2.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------------
