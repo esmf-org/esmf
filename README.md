@@ -1,8 +1,3 @@
-[![Scc Count Badge](https://sloc.xyz/github/esmf-org/esmf/?category=code)](https://github.com/esmf-org/esmf)
-[![Scc Count Badge](https://sloc.xyz/github/esmf-org/esmf/?category=comments)](https://github.com/esmf-org/esmf)
-[![Scc Count Badge](https://sloc.xyz/github/esmf-org/esmf/?category=blanks)](https://github.com/esmf-org/esmf)
-[![Scc Count Badge](https://sloc.xyz/github/esmf-org/esmf/?category=lines)](https://github.com/esmf-org/esmf)
-
 [![ESMF Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml)
 [![ESMPy Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml)
 
