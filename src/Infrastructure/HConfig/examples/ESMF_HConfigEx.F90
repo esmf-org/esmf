@@ -24,7 +24,7 @@ program ESMF_HConfigEx
 
   ! local variables
   integer                         :: rc, size, i
-  type(ESMF_HConfig)              :: hconfig, hconfigNode, hconfigNode2
+  type(ESMF_HConfig)              :: hconfig, hconfigTemp, hconfigTemp2
   type(ESMF_HConfig)              :: hconfigIter, hconfigIterEnd
   type(ESMF_Config)               :: config
   logical                         :: asOkay, valueL, isDefined
@@ -83,12 +83,12 @@ program ESMF_HConfigEx
 
 !BOE
 ! The syntax used for the {\tt content} argument is YAML. The above case
-! creates a {\em list} of six scalar members.
+! creates a {\em sequence} of six scalar members.
 !EOE
 
 !-------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Iterator based HConfig list parsing}
+! \subsubsection{Iterator based HConfig sequence parsing}
 !
 ! An easy way to parse the elements contained in {\tt hconfig} is to iterate
 ! through them. Two additional HConfig objects, acting as iterators, are needed.
@@ -192,7 +192,7 @@ program ESMF_HConfigEx
 
 !-------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Index based random access HConfig list parsing}
+! \subsubsection{Index based random access HConfig sequence parsing}
 !
 ! An alternative way to loop over the elements contained in {\tt hconfig},
 ! and parsing them, is to use an {\tt index} variable. For this approach the
@@ -338,8 +338,8 @@ program ESMF_HConfigEx
 ! \subsubsection{Iterator based HConfig map parsing}
 !
 ! The elements of the {\em map} contained in {\tt hconfig} can be iterated over
-! similar to the the {\em list} case demonstrated earlier. Again two iterator
-! variables are employed.
+! similar to the the {\em sequence} case demonstrated earlier. Again two
+! iterator variables are employed.
 !EOE
 !BOC
   ! type(ESMF_HConfig) :: hconfigIter, hconfigIterEnd
@@ -352,7 +352,7 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Then iterate over {\tt hconfig} using the iterator variables as before.
-! Notice, however, in the code below, compared to the {\em list} case, all 
+! Notice, however, in the code below, compared to the {\em sequence} case, all 
 ! of the {\tt As} access methods now are either of the form {\tt As*MapKey} or
 ! {\tt As*MapVal} to selectively access the {\em map key} or {\em map value},
 ! respectively.
@@ -699,7 +699,10 @@ program ESMF_HConfigEx
 ! # An example of YAML configuration file
 !
 ! simple_list: [1, 2, 3, abc, b, TRUE]
-! simple_map: {car: red, [bike, {p1: 10, p2: 20}]: [bmx, mountain, street], plane: [TRUE, FALSE]}
+! simple_map:
+!   car: red
+!   [bike, {p1: 10, p2: 20}]: [bmx, mountain, street]
+!   plane: [TRUE, FALSE]
 ! \end{verbatim}
 !
 ! is loaded to create the {\tt hconfig} object:
@@ -721,7 +724,10 @@ program ESMF_HConfigEx
 ! contain the comments of the original file. The YAML structure is saved.
 ! \begin{verbatim}
 ! simple_list: [1, 2, 3, abc, b, TRUE]
-! simple_map: {car: red, [bike, {p1: 10, p2: 20}]: [bmx, mountain, street], plane: [TRUE, FALSE]}
+! simple_map:
+!   car: red
+!   [bike, {p1: 10, p2: 20}]: [bmx, mountain, street]
+!   plane: [TRUE, FALSE]
 ! \end{verbatim}
 !
 ! The object specified in {\tt ESMF\_HConfigSaveFile()} can be a regular node
@@ -747,22 +753,22 @@ program ESMF_HConfigEx
 ! {\tt ESMF\_HConfigCreateAtMapKey()}.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigNode
-  hconfigNode = ESMF_HConfigCreateAtMapKey(hconfigIter, rc=rc)
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfigIter, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Then save it.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfigNode, filename="mapKeyBegin.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfigTemp, filename="mapKeyBegin.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! And finally destroy {\tt hconfigNode} again.
+! And finally destroy {\tt hconfigTemp} again.
 !EOE
 !BOC
-  call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+  call ESMF_HConfigDestroy(hconfigTemp, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -770,22 +776,22 @@ program ESMF_HConfigEx
 ! object for it using method {\tt ESMF\_HConfigCreateAtMapVal()}.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigNode
-  hconfigNode = ESMF_HConfigCreateAtMapVal(hconfigIter, rc=rc)
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfigIter, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Then save it.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfigNode, filename="mapValBegin.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfigTemp, filename="mapValBegin.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! And destroy it.
 !EOE
 !BOC
-  call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+  call ESMF_HConfigDestroy(hconfigTemp, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -794,54 +800,56 @@ program ESMF_HConfigEx
 ! on it, using the desired {\em key}.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigNode
-  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString="simple_map", rc=rc)
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = ESMF_HConfigCreateAt(hconfig, keyString="simple_map", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Now {\tt hconfigNode} points to the {\em value} node, that is
+! Now {\tt hconfigTemp} points to the {\em value} node, that is
 ! associated with the "simple\_map" key, which is in turn a map:
 ! \begin{verbatim}
-! {car: red, [bike, {p1: 10, p2: 20}]: [bmx, mountain, street], plane: [TRUE, FALSE]}
+! car: red
+! [bike, {p1: 10, p2: 20}]: [bmx, mountain, street]
+! plane: [TRUE, FALSE]
 ! \end{verbatim}
 ! It can be saved to file as usual.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfigNode, filename="mapValAtKey.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfigTemp, filename="mapValAtKey.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Any of the {\em value} nodes of {\tt hconfigNode} can be accessed through
+! Any of the {\em value} nodes of {\tt hconfigTemp} can be accessed through
 ! recursive usage of the {\tt ESMF\_HConfigCreateAt()} method.
 ! For example, the following call accesses the {\em value} node that is
 ! associated with {\tt keyString="[bike, {p1: 10, p2: 20}]"}. Here the
 ! {\tt keyString} is interpreted as YAML syntax, for which an internal HConfig
-! representation is created, and finally the map held by {\tt hconfigNode} is
+! representation is created, and finally the map held by {\tt hconfigTemp} is
 ! searched for a matching key.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigNode2
-  hconfigNode2 = ESMF_HConfigCreateAt(hconfigNode, &
+  ! type(ESMF_HConfig) :: hconfigTemp2
+  hconfigTemp2 = ESMF_HConfigCreateAt(hconfigTemp, &
     keyString="[bike, {p1: 10, p2: 20}]", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Now {\tt hconfigNode2} points to the {\em list node} with contents
+! Now {\tt hconfigTemp2} points to the {\em sequence node} with contents
 ! {\tt [bmx, mountain, street]}. It, too, can be saved to file.
 !EOE
 !BOC
-  call ESMF_HConfigSaveFile(hconfigNode2, filename="mapValRecursive.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfigTemp2, filename="mapValRecursive.yaml", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Finally {\tt hconfigNode2}, {\tt hconfigNode} and {\tt hconfig} should be destroyed.
+! Finally {\tt hconfigTemp2}, {\tt hconfigTemp} and {\tt hconfig} should be destroyed.
 !EOE
 !BOC
-  call ESMF_HConfigDestroy(hconfigNode2, rc=rc)
+  call ESMF_HConfigDestroy(hconfigTemp2, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+  call ESMF_HConfigDestroy(hconfigTemp, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -945,9 +953,9 @@ program ESMF_HConfigEx
 !BOE
 ! results in the JSON schema tag of {\tt{\bf tag:yaml.org,2002:map}}.
 !
-! \paragraph{List}
+! \paragraph{Sequence}
 ! The value associated with {\em map key} "value\_two" in the current
-! {\tt hconfig} object is a list. The tag for this node can be obtained
+! {\tt hconfig} object is a sequence. The tag for this node can be obtained
 ! directly by supplying the {\tt keyString} argument.
 !EOE
 !BOC
@@ -958,7 +966,7 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The resolved JSON schema tag for a list is {\tt{\bf tag:yaml.org,2002:seq}}.
+! The resolved JSON schema tag for a sequence is {\tt{\bf tag:yaml.org,2002:seq}}.
 !
 ! \paragraph{String}
 ! All of the {\em keys} of the currently loaded {\tt hconfig} object are
@@ -1108,131 +1116,345 @@ program ESMF_HConfigEx
 
 !-------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Building and Editing HConfig structures}
+! \subsubsection{Adding, Setting, and Removing elements from HConfig objects}
 !
-! Here describe how to do it...
+! After creating an HConfig object without specifying {\tt content} or
+! {\tt filename}, it is empty.
 !EOE
-
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
   hconfig = ESMF_HConfigCreate(rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="debug0.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_00.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
+!BOE
+! Now the {\tt ESMF\_HConfigAdd()} method can be used to add new elements to
+! an existing HConfig object. The {\tt Add()} interfaces are heavily overloaded,
+! each specific entry point featuring a number of optional arguments. The two
+! fundamentally different ways of using {\tt Add()} are: (1) adding an element
+! at the end of a {\em sequence} or (2) adding an element to a {\em map}.
+! Here, where {\tt hconfig} is empty, either option is possible. The way the
+! first element is added determines whether {\tt hconfig} is a sequence or
+! a map.
+!
+! The following call adds an element to {\tt hconfig} without specifying the
+! {\tt addKey} or {\tt addKeyString} argument. This indicates that a sequence
+! element is added to the end, and as a consequence rendering {\tt hconfig}
+! a {\em sequence}.
+!EOE
+!BOC
   call ESMF_HConfigAdd(hconfig, "first added item", rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="debug0.yaml.1", rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_01.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
+!BOE
+! Additional elements can be added at the end of {\tt hconfig}.
+!EOE
+!BOC
   call ESMF_HConfigAdd(hconfig, 12.57_ESMF_KIND_R8, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="debug0.yaml.2", rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_02.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! At this point, the content of {\tt hconfig} is a sequence with two elements.
+! \begin{verbatim}
+! - first added item
+! - 12.5700000000
+! \end{verbatim}
+!
+! It is also possible to add an entire HConfig structure as an item to the
+! existing sequence. One way to do this is to use standar YAML syntax when
+! adding the element. Here a {\em map} is added to the end of {\tt hconfig}.
+!EOE
+!BOC
+  call ESMF_HConfigAdd(hconfig, "{k1: 7, k2: 25}", rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigLoadFile(hconfig, filename="exampleWithTags.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_03.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! This results in the following content, where the third element of the sequence
+! is the map that was just added.
+! \begin{verbatim}
+! - first added item
+! - 12.5700000000
+! - {k1: 7, k2: 25}
+! \end{verbatim}
+!
+! An HConfig structure can even be loaded from file and added to the end of 
+! {\tt hconfig}. This requires a temporary HConfig object.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = ESMF_HConfigCreate(filename="example.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigAdd(hconfig, hconfigTemp, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigDestroy(hconfigTemp, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="debug1.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_04.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The result is the following content for {\tt hconfig}.
+! \begin{verbatim}
+! - first added item
+! - 12.5700000000
+! - {k1: 7, k2: 25}
+! - simple_list: [1, 2, 3, abc, b, TRUE]
+!   simple_map:
+!     car: red
+!     [bike, {p1: 10, p2: 20}]: [bmx, mountain, street]
+!     plane: [TRUE, FALSE]
+! \end{verbatim}
+!
+! Using the {\tt CreateAt()} method, it easy to gain access to any specific
+! element in {\tt hconfig}. Since {\tt hconfig} is a {\em sequence}, the proper
+! access is by {\em index}.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=3, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigAdd(hconfig, "first added item", &
-    addKeyString="[test_key1, test_key2, list]", rc=rc)
+  call ESMF_HConfigSaveFile(hconfigTemp, filename="build_and_edit_05.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! This creates a temporary HConfig object that {\em references} the 3rd element
+! of the sequence stored by {\tt hconfig}. If {\tt hconfigTemp} were to be
+! saved to file, it would have the following content.
+! \begin{verbatim}
+! {k1: 7, k2: 25}
+! \end{verbatim}
+!
+! Using the {\tt Set()} methods, contents in {\tt hconfigTemp}, and thus in
+! the 3rd element of {\tt hconfig} can be modified. The content of
+! {\tt hconfigTemp} is a {\em map}, and the proper access is by {\em map key}.
+! Here key "k2" is being modified.
+!EOE
+!BOC
+  call ESMF_HConfigSet(hconfigTemp, 12.5, keyString="k2", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The {\tt hconfigTemp} is reference to a {\em map}, and new elements can be
+! added using the {\tt addKeyString} argument.
+!EOE
+!BOC
+  call ESMF_HConfigAdd(hconfigTemp, .true., addKeyString="k3", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigDestroy(hconfigTemp, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_06.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! After these operations, the content of {\tt hconfig} has changed to
+! \begin{verbatim}
+! - first added item
+! - 12.5700000000
+! - {k1: 7, k2: 12.5000000000, k3: True}
+! - simple_list: [1, 2, 3, abc, b, TRUE]
+!   simple_map:
+!     car: red
+!     [bike, {p1: 10, p2: 20}]: [bmx, mountain, street]
+!     plane: [TRUE, FALSE]
+! \end{verbatim}
+! Notice that while {\tt hconfigTemp} should be destroyed explicitly, as in the
+! example above, doing so does {\em not} affect the referenced node inside the
+! {\tt hconfig} object. In other words, {\tt hconfigTemp} was a reference, and
+! {\em not} a deep copy of the node! There is some allocated memory associated
+! with the {\tt hconfigTemp} reference that gets cleaned up with the
+! {\tt Destroy()} call, but it does not affect the reference itself.
+!
+! The {\tt Set()} method can also be used to edit the element referenced
+! itself. Here the 4th element in the {\tt hconfig} sequence is set to be a
+! simple scalar string value using this approach.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=4, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigSet(hconfigTemp, "Simple scalar string value", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigDestroy(hconfigTemp, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfig, filename="debug1.yaml.1", rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_07.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The content of {\tt hconfig} has updated as below.
+! \begin{verbatim}
+! - first added item
+! - 12.5700000000
+! - {k1: 7, k2: 12.5000000000, k3: True}
+! - Simple scalar string value
+! \end{verbatim}
+!
+! There is a simpler alternative for {\em direct} element editing in an
+! HConfig object via the {\tt Set()} method. Using the {\tt index} or
+! {\tt keyString} argument, a sequence or map element, respectively, can
+! be edited directly. For instance,
+!EOE
+!BOC
+  call ESMF_HConfigSet(hconfig, "[a, b, c]", index=4, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  hconfigNode = ESMF_HConfigCreateAt(hconfig, keyString="value_nine", rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_08.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! sets the 4th element of {\tt hconfig} directly, without the need of a
+! temporary HConfig variable. This updates the content to:
+! \begin{verbatim}
+! - first added item
+! - 12.5700000000
+! - {k1: 7, k2: 12.5000000000, k3: True}
+! - [a, b, c]
+! \end{verbatim}
+!
+! Elements can be deleted from an HConfig object holding a sequence or map
+! using the {\tt Remove()} method, specifying the {\em index} or
+! {\em map key}, respectively. Here the 2nd element of the sequence held by
+! {\tt hconfig} is removed.
+!EOE
+!BOC
+  call ESMF_HConfigRemove(hconfig, index=2, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfigNode, filename="debug2.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_09.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The result is a sequence with only three remaining elements.
+! \begin{verbatim}
+! - first added item
+! - {k1: 7, k2: 12.5000000000, k3: True}
+! - [a, b, c]
+! \end{verbatim}
+!
+! To demonstrate removal of an element from a {\em map}, the second
+! {\tt hconfig} element is referenced by a temporary HConfig object. The element
+! with key "k2" is then removed using the respective {\tt Remove()} method.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigTemp
+  hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=2, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigRemove(hconfigTemp, keyString="k2", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_HConfigDestroy(hconfigTemp, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!  call ESMF_HConfigLoadFile(hconfigNode, filename="example.yaml", rc=rc)
-!  call ESMF_HConfigSet(hconfigNode, content="test value", rc=rc)
-  call ESMF_HConfigSet(hconfig, content=9876, keyString="value_nine", rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_10.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The resulting {\tt hconfig} content is as expected.
+! \begin{verbatim}
+! - first added item
+! - {k1: 7, k3: True}
+! - [a, b, c]
+! \end{verbatim}
+!
+! Finally the entire contents of {\tt hconfig} can be deleted by setting the
+! node itself to one of the special NULL values.
+!EOE
+!BOC
+  call ESMF_HConfigSet(hconfig, "NULL", rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigSaveFile(hconfigNode, filename="debug3.yaml", rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_11.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! If saved to file, the contents of {\tt hconfig} shows up as a simple tilde
+! character, indicating its NULL value.
+! \begin{verbatim}
+! ~
+! \end{verbatim}
+!
+! At this point {\tt hconfig} is neither a {\em sequence} nor {\em map}. It is
+! NULL. Adding a map element, i.e. an element with {\em key}, turns
+! {\tt hconfig} into a map.
+!EOE
+!BOC
+  call ESMF_HConfigAdd(hconfig, "first added item", addKeyString="item1", rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_HConfigDestroy(hconfigNode, rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_12.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The contents of {\tt hconfig} now is a map with a single entry:
+! character, indicating its NULL value.
+! \begin{verbatim}
+! item1: first added item
+! \end{verbatim}
+!
+! As in other contexts before, the content as well as the specified
+! {\tt addKeyString} can be of any legal YAML syntax. This is demonstrated
+! in the following {\tt Add()} calls.
+!EOE
+!BOC
+  ! Add YAML sequence content with simple scalar key.
+  call ESMF_HConfigAdd(hconfig, "[2, added, item]", addKeyString="item2", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! Add simple scalar content with a YAML map as key.
+  call ESMF_HConfigAdd(hconfig, "third added item", addKeyString="{item: 3}", &
+    rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! Add complex YAML content with YAML sequence as key.
+  call ESMF_HConfigAdd(hconfig, "{4th: item, 5th: [true, false]}", &
+    addKeyString="[1, 2, 3, 4]", rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+  call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_13.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_HConfigSetMapVal(hconfigIter, content=12.d6, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigSaveFile(hconfig, filename="debug4.yaml", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigIterNext(hconfigIter, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigAddMapVal(hconfigIter, "[aa, bb, cc]", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigAddMapVal(hconfigIter, "aaa", index=5, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  hconfigNode = ESMF_HConfigCreateAtMapKey(hconfigIter, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigLoadFile(hconfigNode, filename="example.yaml", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigSaveFile(hconfig, filename="debug5.yaml", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  hconfigIter = ESMF_HConfigCreate(hconfig, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigSaveFile(hconfigIter, filename="debugIter5.yaml", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigSet(hconfigIter, content="NULL", rc=rc)  ! wipe out all, single scalar
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigSaveFile(hconfig, filename="debug6.yaml", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigSaveFile(hconfigIter, filename="debugIter6.yaml", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
+!BOE
+! Resulting in the final contents of {\tt hconfig}:
+! \begin{verbatim}
+! item1: first added item
+! item2: [2, added, item]
+! {item: 3}: third added item
+! [1, 2, 3, 4]: {4th: item, 5th: [true, false]}
+! \end{verbatim}
+!
+! Finally clean up {\tt hconfig}.
+!EOE
+!BOC
+  ! Destroy hconfig when done with it.
   call ESMF_HConfigDestroy(hconfig, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigAdd(hconfigIter, "[5, 3]", addKeyString="myKey1", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigAdd(hconfigIter, "here a string", addKeyString="myKey2", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigSaveFile(hconfigIter, filename="debugIter7.yaml", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigRemove(hconfigIter, keyString="myKey1", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigSaveFile(hconfigIter, filename="debugIter8.yaml", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  hconfig = ESMF_HConfigCreate(content="[[5, 3], here a string]", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigSaveFile(hconfig, filename="debug-new1.yaml", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigRemove(hconfig, index=1, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_HConfigSaveFile(hconfig, filename="debug-new2.yaml", rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------------
