@@ -1116,7 +1116,7 @@ program ESMF_HConfigEx
 
 !-------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Adding, Setting, and Removing elements from HConfig objects}
+! \subsubsection{Adding, Setting, and Removing elements from HConfig object}
 !
 ! After creating an HConfig object without specifying {\tt content} or
 ! {\tt filename}, it is empty.
@@ -1448,8 +1448,112 @@ program ESMF_HConfigEx
 ! {item: 3}: third added item
 ! [1, 2, 3, 4]: {4th: item, 5th: [true, false]}
 ! \end{verbatim}
-!
 ! Finally clean up {\tt hconfig}.
+!EOE
+!BOC
+  ! Destroy hconfig when done with it.
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!-------------------------------------------------------------------------------
+!BOE
+! \subsubsection{Working with multiple YAML documents}
+!
+! The YAML standard supports multiple documents in a single file by separating
+! each document with a line containing three dashes (-{}-{}-). Optionally the
+! end of each document may be indicated by three periods (...). For example,
+! the following YAML file contains three documents (notice the optional usage
+! of the document end marker):
+! \begin{verbatim}
+! ---
+! - This
+! - is
+! - the
+! - first document.
+! ...
+! ---
+! - And
+! - a second document.
+! ---
+! - And
+! - finally a
+! - third document.
+! \end{verbatim}
+! All of the documents contained in a YAML file can be loaded into a single
+! HConfig object all at once.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(filename="multiDoc.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! When saving {\tt hconfig}, a multi-document YAML file will be written.
+!EOE
+!BOC
+  call ESMF_HConfigSaveFile(hconfig, filename="multi_00.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The {\tt ESMF\_HConfigSaveFile()} method implements strict usage of both
+! document markers when saving a multi-document HConfig object.
+! \begin{verbatim}
+! ---
+! - This
+! - is
+! - the
+! - first document.
+! ...
+! ---
+! - And
+! - a second document.
+! ...
+! ---
+! - And
+! - finally a
+! - third document.
+! ...
+! \end{verbatim}
+! The optional {\tt doc} argument can be specified when saving the
+! multi-document {\tt hconfig} to file. Only the specified document, by index,
+! is written to file.
+!EOE
+!BOC
+  call ESMF_HConfigSaveFile(hconfig, filename="multi_01.yaml", doc=2, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! This operation results in a single document file:
+! \begin{verbatim}
+! - And
+! - a second document.
+! \end{verbatim}
+! The {\tt ESMF\_HConfigLoadFile()} method also accepts the optional {\tt doc}
+! argument. When specified, the result is a single-document {\tt hconfig}
+! object, holding the content of the indicated document within the loaded file.
+!EOE
+!BOC
+  call ESMF_HConfigLoadFile(hconfig, filename="multiDoc.yaml", doc=3, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Saving {\tt hconfig} to file shows the expected situation.
+!EOE
+!BOC
+  call ESMF_HConfigSaveFile(hconfig, filename="multi_02.yaml", rc=rc)
+!BOE
+! Resulting in:
+! \begin{verbatim}
+! - And
+! - finally a
+! - third document.
+! \end{verbatim}
+!EOE
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! When done, clean up {\tt hconfig} as usual.
 !EOE
 !BOC
   ! Destroy hconfig when done with it.

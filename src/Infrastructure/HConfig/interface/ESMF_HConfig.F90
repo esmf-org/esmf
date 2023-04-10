@@ -936,12 +936,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigLoadFile - Load file into HConfig
 
 ! !INTERFACE:
-  subroutine ESMF_HConfigLoadFile(hconfig, filename, keywordEnforcer, rc)
+  subroutine ESMF_HConfigLoadFile(hconfig, filename, keywordEnforcer, doc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
     character(len=*),   intent(in)            :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -953,6 +954,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_HConfig} object.
 !   \item[filename]
 !     Name of the YAML file to be loaded.
+!   \item[{[doc]}]
+!     The doc index. If specified, only this single document is loaded from file.
+!     The result is a single document {\tt hconfig} object.
+!     Defaults to {\em all} docs.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -969,7 +974,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigLoadFile(hconfig, filename, localrc)
+    call c_ESMC_HConfigLoadFile(hconfig, filename, doc, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -987,12 +992,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigSaveFile - Save HConfig to file
 
 ! !INTERFACE:
-  subroutine ESMF_HConfigSaveFile(hconfig, filename, keywordEnforcer, rc)
+  subroutine ESMF_HConfigSaveFile(hconfig, filename, keywordEnforcer, doc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
     character(len=*),   intent(in)            :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1005,6 +1011,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_HConfig} object.
 !   \item[filename]
 !     Name of the YAML file into which to save.
+!   \item[{[doc]}]
+!     The doc index. Defaults to {\em all} docs.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1021,7 +1029,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigSaveFile(hconfig, filename, localrc)
+    call c_ESMC_HConfigSaveFile(hconfig, filename, doc, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

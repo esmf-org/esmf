@@ -70,8 +70,8 @@ namespace ESMCI {
       inline static std::string tag(YAML::Node self);
 
       int load(const std::string& content);
-      int loadFile(const std::string& filename);
-      int saveFile(const std::string& filename);
+      int loadFile(const std::string& filename, int *docIndex=NULL);
+      int saveFile(const std::string& filename, int *docIndex=NULL);
 
       HConfig createAt(int *index=NULL, int *rc=NULL);
       HConfig createAtKey(HConfig *key, int *rc=NULL);

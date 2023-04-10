@@ -86,7 +86,8 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigloadfile)(ESMCI::HConfig *ptr,
-    const char *filename, int *rc, ESMCI_FortranStrLenArg strLen){
+    const char *filename, int *doc, int *rc,
+    ESMCI_FortranStrLenArg strLen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigload()"
     // Initialize return code; assume routine not implemented
@@ -95,7 +96,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    localrc = ptr->loadFile(std::string(filename,strLen));
+    localrc = ptr->loadFile(std::string(filename,strLen), doc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -103,7 +104,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigsavefile)(ESMCI::HConfig *ptr,
-    const char *filename, int *rc, ESMCI_FortranStrLenArg strLen){
+    const char *filename, int *doc, int *rc, ESMCI_FortranStrLenArg strLen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigsave()"
     // Initialize return code; assume routine not implemented
@@ -112,7 +113,7 @@ extern "C" {
     // test for NULL pointer via macro before calling any class methods
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     // call into C++
-    localrc = ptr->saveFile(std::string(filename,strLen));
+    localrc = ptr->saveFile(std::string(filename,strLen),doc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully

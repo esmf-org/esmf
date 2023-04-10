@@ -238,7 +238,8 @@ int HConfig::loadFile(
 //  int error return code
 //
 // !ARGUMENTS:
-    const std::string& filename){       // in
+    const std::string& filename,    // in
+    int *docIndex){                 // in
 // 
 // !DESCRIPTION: 
 //  ESMF routine which loads HConfig from file.
@@ -250,9 +251,21 @@ int HConfig::loadFile(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (doc)
-      (*doc)[0] = YAML::LoadFile(filename);
-    else{
+    if (doc){
+      std::vector<YAML::Node> tempDoc = YAML::LoadAllFromFile(filename);
+      if (docIndex){
+        // load specific doc
+        if ((*docIndex < 1) || ((unsigned)*docIndex > tempDoc.size())){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "Doc index out of range", ESMC_CONTEXT, &rc);
+          return rc;
+        }
+        (*doc).resize(1); // drop all of the other docs
+        (*doc)[0] = tempDoc[*docIndex-1];
+      }else{
+        *doc = tempDoc;
+      }
+    }else{
       // iterator cannot be used here
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must NOT be iterator", ESMC_CONTEXT, &rc);
@@ -286,7 +299,8 @@ int HConfig::saveFile(
 //  int error return code
 //
 // !ARGUMENTS:
-    const std::string& filename){       // in
+    const std::string& filename,    // in
+    int *docIndex){                 // in
 // 
 // !DESCRIPTION: 
 //  ESMF routine which saves HConfig to file. Only localPet==0 does the writing.
@@ -302,7 +316,23 @@ int HConfig::saveFile(
       std::ofstream fout(filename);
       if (doc){
         // node
-        fout << (*doc)[0];
+        if (doc->size() == 1){
+          // a single document
+          fout << (*doc)[0];
+        }else{
+          // multiple documents
+          if (docIndex){
+            // only save the specified doc
+            fout << (*doc)[*docIndex-1];
+          }else{
+            // save all of the docs
+            for (auto it=doc->begin(); it!=doc->end(); ++it){
+              fout << "---\n";
+              fout << *it;
+              fout << "\n...\n";
+            }
+          }
+        }
       }else
         // iterator
         if (type==YAML::NodeType::Map){
