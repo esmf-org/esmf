@@ -311,6 +311,9 @@ int HConfig::saveFile(
   int rc = ESMC_RC_NOT_IMPL;
 
 #ifdef ESMF_YAMLCPP
+  int docI = 0; // default
+  if (docIndex) docI = *docIndex - 1;
+
   try{
     if (VM::getCurrent()->getLocalPet() == 0){
       std::ofstream fout(filename);
@@ -323,7 +326,7 @@ int HConfig::saveFile(
           // multiple documents
           if (docIndex){
             // only save the specified doc
-            fout << (*doc)[*docIndex-1];
+            fout << (*doc)[docI];
           }else{
             // save all of the docs
             for (auto it=doc->begin(); it!=doc->end(); ++it){
@@ -371,6 +374,7 @@ HConfig HConfig::createAt(
 //
 // !ARGUMENTS:
     int *index,           // in  - if present, access by index, Fortran base 1
+    int *docIndex,        // in
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -387,6 +391,9 @@ HConfig HConfig::createAt(
 #ifdef ESMF_YAMLCPP
   hconfig.doc = NULL;
 
+  int docI = 0; // default
+  if (docIndex) docI = *docIndex - 1;
+
   try{
 
     // new hconfig with one document in the vector
@@ -395,16 +402,16 @@ HConfig HConfig::createAt(
     if (doc){
       // node
       if (index){
-        if ((*doc)[0].Type()!=YAML::NodeType::Sequence){
+        if ((*doc)[docI].Type()!=YAML::NodeType::Sequence){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "HConfig object MUST be sequence when index specified",
             ESMC_CONTEXT, rc);
           return hconfig;
         }else{
-          (*hconfig.doc)[0] = ((*doc)[0])[*index-1];
+          (*hconfig.doc)[docI] = ((*doc)[docI])[*index-1];
         }
       }else{
-        (*hconfig.doc)[0] = ((*doc)[0]);
+        (*hconfig.doc)[docI] = ((*doc)[docI]);
       }
     }else{
       // iterator
@@ -420,13 +427,13 @@ HConfig HConfig::createAt(
               ESMC_CONTEXT, rc);
             return hconfig;
           }else
-            (*hconfig.doc)[0] = (*iter)[*index-1];
+            (*hconfig.doc)[docI] = (*iter)[*index-1];
         }else{
-          (*hconfig.doc)[0] = ((YAML::Node)(*iter));
+          (*hconfig.doc)[docI] = ((YAML::Node)(*iter));
         }
       }
     }
-    hconfig.type = (*hconfig.doc)[0].Type();
+    hconfig.type = (*hconfig.doc)[docI].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -478,6 +485,7 @@ HConfig HConfig::createAtKey(
 //
 // !ARGUMENTS:
     HConfig *key,         // in  - access by key
+    int *docIndex,        // in
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -494,6 +502,9 @@ HConfig HConfig::createAtKey(
 #ifdef ESMF_YAMLCPP
   hconfig.doc = NULL;
 
+  int docI = 0; // default
+  if (docIndex) docI = *docIndex - 1;
+
   try{
 
     // new hconfig with one document in the vector
@@ -501,13 +512,13 @@ HConfig HConfig::createAtKey(
 
     if (doc){
       // node
-      if ((*doc)[0].Type()!=YAML::NodeType::Map){
+      if ((*doc)[docI].Type()!=YAML::NodeType::Map){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "HConfig object MUST be map when key specified",
           ESMC_CONTEXT, rc);
         return hconfig;
       }else
-        (*hconfig.doc)[0] = HConfig::find((*doc)[0], key);
+        (*hconfig.doc)[docI] = HConfig::find((*doc)[docI], key);
     }else{
       // iterator
       if (type==YAML::NodeType::Map){
@@ -521,10 +532,10 @@ HConfig HConfig::createAtKey(
             ESMC_CONTEXT, rc);
           return hconfig;
         }else
-          (*hconfig.doc)[0] = HConfig::find(*iter, key);
+          (*hconfig.doc)[docI] = HConfig::find(*iter, key);
       }
     }
-    hconfig.type = (*hconfig.doc)[0].Type();
+    hconfig.type = (*hconfig.doc)[docI].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -555,6 +566,7 @@ HConfig HConfig::createAtMapKey(
 //
 // !ARGUMENTS:
     int *index,           // in  - if present, access by index, Fortran base 1
+    int *docIndex,        // in
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -571,6 +583,9 @@ HConfig HConfig::createAtMapKey(
 #ifdef ESMF_YAMLCPP
   hconfig.doc = NULL;
 
+  int docI = 0; // default
+  if (docIndex) docI = *docIndex - 1;
+
   try{
 
     // new hconfig with one document in the vector
@@ -585,9 +600,9 @@ HConfig HConfig::createAtMapKey(
             ESMC_CONTEXT, rc);
           return hconfig;
         }else
-          (*hconfig.doc)[0] = (iter->first)[*index-1];
+          (*hconfig.doc)[docI] = (iter->first)[*index-1];
       }else{
-        (*hconfig.doc)[0] = ((YAML::Node)(iter->first));
+        (*hconfig.doc)[docI] = ((YAML::Node)(iter->first));
       }
     }else{
       // error
@@ -595,7 +610,7 @@ HConfig HConfig::createAtMapKey(
         "HConfig object must be map iterator", ESMC_CONTEXT, rc);
       return hconfig;
     }
-    hconfig.type = (*hconfig.doc)[0].Type();
+    hconfig.type = (*hconfig.doc)[docI].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -626,6 +641,7 @@ HConfig HConfig::createAtMapKeyKey(
 //
 // !ARGUMENTS:
     HConfig *key,         // in  - access by key
+    int *docIndex,        // in
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -642,6 +658,9 @@ HConfig HConfig::createAtMapKeyKey(
 #ifdef ESMF_YAMLCPP
   hconfig.doc = NULL;
 
+  int docI = 0; // default
+  if (docIndex) docI = *docIndex - 1;
+
   try{
 
     // new hconfig with one document in the vector
@@ -655,14 +674,14 @@ HConfig HConfig::createAtMapKeyKey(
           ESMC_CONTEXT, rc);
         return hconfig;
       }else
-        (*hconfig.doc)[0] = HConfig::find(iter->first, key);
+        (*hconfig.doc)[docI] = HConfig::find(iter->first, key);
     }else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must be map iterator", ESMC_CONTEXT, rc);
       return hconfig;
     }
-    hconfig.type = (*hconfig.doc)[0].Type();
+    hconfig.type = (*hconfig.doc)[docI].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -693,6 +712,7 @@ HConfig HConfig::createAtMapVal(
 //
 // !ARGUMENTS:
     int *index,           // in  - if present, access by index, Fortran base 1
+    int *docIndex,        // in
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -709,6 +729,9 @@ HConfig HConfig::createAtMapVal(
 #ifdef ESMF_YAMLCPP
   hconfig.doc = NULL;
 
+  int docI = 0; // default
+  if (docIndex) docI = *docIndex - 1;
+
   try{
 
     // new hconfig with one document in the vector
@@ -723,9 +746,9 @@ HConfig HConfig::createAtMapVal(
             ESMC_CONTEXT, rc);
           return hconfig;
         }else
-          (*hconfig.doc)[0] = (iter->second)[*index-1];
+          (*hconfig.doc)[docI] = (iter->second)[*index-1];
       }else{
-        (*hconfig.doc)[0] = ((YAML::Node)(iter->second));
+        (*hconfig.doc)[docI] = ((YAML::Node)(iter->second));
       }
     }else{
       // error
@@ -733,7 +756,7 @@ HConfig HConfig::createAtMapVal(
         "HConfig object must be map iterator", ESMC_CONTEXT, rc);
       return hconfig;
     }
-    hconfig.type = (*hconfig.doc)[0].Type();
+    hconfig.type = (*hconfig.doc)[docI].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -764,6 +787,7 @@ HConfig HConfig::createAtMapValKey(
 //
 // !ARGUMENTS:
     HConfig *key,         // in  - access by key
+    int *docIndex,        // in
     int *rc) {            // out - return code
 //
 // !DESCRIPTION:
@@ -780,6 +804,9 @@ HConfig HConfig::createAtMapValKey(
 #ifdef ESMF_YAMLCPP
   hconfig.doc = NULL;
 
+  int docI = 0; // default
+  if (docIndex) docI = *docIndex - 1;
+
   try{
 
     // new hconfig with one document in the vector
@@ -793,14 +820,14 @@ HConfig HConfig::createAtMapValKey(
           ESMC_CONTEXT, rc);
         return hconfig;
       }else
-        (*hconfig.doc)[0] = HConfig::find(iter->second, key);
+        (*hconfig.doc)[docI] = HConfig::find(iter->second, key);
     }else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must be map iterator", ESMC_CONTEXT, rc);
       return hconfig;
     }
-    hconfig.type = (*hconfig.doc)[0].Type();
+    hconfig.type = (*hconfig.doc)[docI].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,

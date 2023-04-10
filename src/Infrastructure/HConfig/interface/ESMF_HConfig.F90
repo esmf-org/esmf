@@ -1048,7 +1048,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   function ESMF_HConfigCreateAt(hconfig, keywordEnforcer, index, key, &
-    keyString, rc)
+    keyString, doc, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_HConfig) :: ESMF_HConfigCreateAt
@@ -1059,6 +1059,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     type(ESMF_HConfig), intent(in),  optional :: key
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1079,6 +1080,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with
 !     {\tt index} and {\tt key}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1118,7 +1121,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_HConfigCreateAtKey(hconfig, ESMF_HConfigCreateAt, &
-        hkey, localrc)
+        hkey, doc, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (present(keyString)) then
@@ -1129,7 +1132,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_HConfigCreateAt(hconfig, ESMF_HConfigCreateAt, &
-        index, localrc)
+        index, doc, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1152,7 +1155,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   function ESMF_HConfigCreateAtMapKey(hconfig, keywordEnforcer, index, key, &
-    keyString, rc)
+    keyString, doc, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_HConfig) :: ESMF_HConfigCreateAtMapKey
@@ -1163,6 +1166,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     type(ESMF_HConfig), intent(in),  optional :: key
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1183,6 +1187,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with
 !     {\tt index} and {\tt key}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1222,7 +1228,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_HConfigCreateAtMapKeyKey(hconfig, ESMF_HConfigCreateAtMapKey, &
-        hkey, localrc)
+        hkey, doc, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (present(keyString)) then
@@ -1233,7 +1239,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_HConfigCreateAtMapKey(hconfig, ESMF_HConfigCreateAtMapKey, &
-        index, localrc)
+        index, doc, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1256,7 +1262,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   function ESMF_HConfigCreateAtMapVal(hconfig, keywordEnforcer, index, key, &
-    keyString, rc)
+    keyString, doc, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_HConfig) :: ESMF_HConfigCreateAtMapVal
@@ -1267,6 +1273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     type(ESMF_HConfig), intent(in),  optional :: key
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1287,6 +1294,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with
 !     {\tt index} and {\tt key}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1326,7 +1335,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_HConfigCreateAtMapValKey(hconfig, ESMF_HConfigCreateAtMapVal, &
-        hkey, localrc)
+        hkey, doc, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (present(keyString)) then
@@ -1336,7 +1345,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     else
       ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigCreateAtMapVal(hconfig, ESMF_HConfigCreateAtMapVal, index, localrc)
+      call c_ESMC_HConfigCreateAtMapVal(hconfig, ESMF_HConfigCreateAtMapVal, &
+        index, doc, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1360,7 +1370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddHConfig(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
+    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -1370,6 +1380,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),       intent(in),  optional :: addKeyString
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1400,6 +1411,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified.
 !     Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1427,9 +1440,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to add content
@@ -2003,7 +2016,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyHConfig(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
+    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2013,6 +2026,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),       intent(in),  optional :: addKeyString
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2043,6 +2057,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified.
 !     Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2070,9 +2086,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to add content
@@ -2646,7 +2662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValHConfig(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
+    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -2656,6 +2672,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),       intent(in),  optional :: addKeyString
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2686,6 +2703,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified.
 !     Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2713,9 +2732,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to add content
@@ -3287,7 +3306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigGetSize - Get size of HConfig node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetSize(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigGetSize(hconfig, keywordEnforcer, index, keyString, doc, rc)
 ! !RETURN VALUE:
     integer :: ESMF_HConfigGetSize
 !
@@ -3296,6 +3315,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -3309,6 +3329,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3328,9 +3350,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3364,7 +3386,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigGetSizeMapKey - Get size of HConfig node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetSizeMapKey(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigGetSizeMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     integer :: ESMF_HConfigGetSizeMapKey
 !
@@ -3373,6 +3396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -3386,6 +3410,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3405,9 +3431,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3443,7 +3469,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigGetSizeMapVal - Get size of HConfig node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetSizeMapVal(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigGetSizeMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     integer :: ESMF_HConfigGetSizeMapVal
 !
@@ -3452,6 +3479,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -3465,6 +3493,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3484,9 +3514,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3522,7 +3552,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigGetTag - Get tag of HConfig node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetTag(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigGetTag(hconfig, keywordEnforcer, index, keyString, doc, rc)
 ! !RETURN VALUE:
     character(len=:), allocatable :: ESMF_HConfigGetTag
 !
@@ -3531,6 +3561,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -3544,6 +3575,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3561,9 +3594,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3613,7 +3646,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigGetTagMapKey - Get tag of map key node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetTagMapKey(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigGetTagMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     character(len=:), allocatable :: ESMF_HConfigGetTagMapKey
 !
@@ -3622,6 +3656,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -3635,6 +3670,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3652,9 +3689,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3706,7 +3743,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigGetTagMapVal - Get tag of map key node
 
 ! !INTERFACE:
-  function ESMF_HConfigGetTagMapVal(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigGetTagMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     character(len=:), allocatable :: ESMF_HConfigGetTagMapVal
 !
@@ -3715,6 +3753,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -3728,6 +3767,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3745,9 +3786,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3799,7 +3840,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsNull - Check whether HConfig node is Null
 
 ! !INTERFACE:
-  function ESMF_HConfigIsNull(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsNull(hconfig, keywordEnforcer, index, keyString, doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsNull
 !
@@ -3808,6 +3849,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -3823,6 +3865,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3842,9 +3886,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3881,7 +3925,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsScalar - Check whether HConfig node is Scalar
 
 ! !INTERFACE:
-  function ESMF_HConfigIsScalar(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsScalar(hconfig, keywordEnforcer, index, keyString, doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsScalar
 !
@@ -3890,6 +3934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -3905,6 +3950,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3924,9 +3971,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3963,7 +4010,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsSequence - Check whether HConfig node is Sequence
 
 ! !INTERFACE:
-  function ESMF_HConfigIsSequence(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsSequence(hconfig, keywordEnforcer, index, keyString, doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsSequence
 !
@@ -3972,6 +4019,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -3987,6 +4035,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4006,9 +4056,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4045,7 +4095,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsMap - Check whether HConfig node is Map
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMap(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsMap(hconfig, keywordEnforcer, index, keyString, doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsMap
 !
@@ -4054,6 +4104,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4069,6 +4120,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4088,9 +4141,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4127,7 +4180,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsDefined - Check whether HConfig node is Defined
 
 ! !INTERFACE:
-  function ESMF_HConfigIsDefined(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsDefined(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsDefined
 !
@@ -4136,6 +4190,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4151,6 +4206,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4170,9 +4227,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4209,7 +4266,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsNullMapKey - Check whether HConfig node is Null
 
 ! !INTERFACE:
-  function ESMF_HConfigIsNullMapKey(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsNullMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsNullMapKey
 !
@@ -4218,6 +4276,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4233,6 +4292,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4252,9 +4313,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4291,7 +4352,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsScalarMapKey - Check whether HConfig node is Scalar
 
 ! !INTERFACE:
-  function ESMF_HConfigIsScalarMapKey(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsScalarMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsScalarMapKey
 !
@@ -4300,6 +4362,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4315,6 +4378,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4334,9 +4399,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4373,7 +4438,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsSequenceMapKey - Check whether HConfig node is Sequence
 
 ! !INTERFACE:
-  function ESMF_HConfigIsSequenceMapKey(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsSequenceMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsSequenceMapKey
 !
@@ -4382,6 +4448,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4397,6 +4464,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4416,9 +4485,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4455,7 +4524,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsMapMapKey - Check whether HConfig node is Map
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapMapKey(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsMapMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsMapMapKey
 !
@@ -4464,6 +4534,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4479,6 +4550,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4498,9 +4571,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4537,7 +4610,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsDefinedMapKey - Check whether HConfig node is Defined
 
 ! !INTERFACE:
-  function ESMF_HConfigIsDefinedMapKey(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsDefinedMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsDefinedMapKey
 !
@@ -4546,6 +4620,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4561,6 +4636,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4580,9 +4657,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4619,7 +4696,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsNullMapVal - Check whether HConfig node is Null
 
 ! !INTERFACE:
-  function ESMF_HConfigIsNullMapVal(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsNullMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsNullMapVal
 !
@@ -4628,6 +4706,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4643,6 +4722,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4662,9 +4743,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4701,7 +4782,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsScalarMapVal - Check whether HConfig node is Scalar
 
 ! !INTERFACE:
-  function ESMF_HConfigIsScalarMapVal(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsScalarMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsScalarMapVal
 !
@@ -4710,6 +4792,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4725,6 +4808,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4744,9 +4829,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4783,7 +4868,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsSequenceMapVal - Check whether HConfig node is Sequence
 
 ! !INTERFACE:
-  function ESMF_HConfigIsSequenceMapVal(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsSequenceMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsSequenceMapVal
 !
@@ -4792,6 +4878,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4807,6 +4894,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4826,9 +4915,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4865,7 +4954,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsMapMapVal - Check whether HConfig node is Map
 
 ! !INTERFACE:
-  function ESMF_HConfigIsMapMapVal(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsMapMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsMapMapVal
 !
@@ -4874,6 +4964,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4889,6 +4980,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4908,9 +5001,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4947,7 +5040,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigIsDefinedMapVal - Check whether HConfig node is Defined
 
 ! !INTERFACE:
-  function ESMF_HConfigIsDefinedMapVal(hconfig, keywordEnforcer, index, keyString, rc)
+  function ESMF_HConfigIsDefinedMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
 ! !RETURN VALUE:
     logical :: ESMF_HConfigIsDefinedMapVal
 !
@@ -4956,6 +5050,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -4971,6 +5066,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4990,9 +5087,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5585,7 +5682,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsString - Return value as string
 
 ! !INTERFACE:
-  function ESMF_HConfigAsString(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsString(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     character(len=:), allocatable :: ESMF_HConfigAsString
 !
@@ -5594,6 +5692,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -5610,6 +5709,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -5635,9 +5736,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5699,7 +5800,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsStringMapKey - Return map key as string
 
 ! !INTERFACE:
-  function ESMF_HConfigAsStringMapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsStringMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     character(len=:), allocatable :: ESMF_HConfigAsStringMapKey
 !
@@ -5708,6 +5810,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -5724,6 +5827,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -5749,9 +5854,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5813,7 +5918,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsStringMapVal - Return map value as string
 
 ! !INTERFACE:
-  function ESMF_HConfigAsStringMapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsStringMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     character(len=:), allocatable :: ESMF_HConfigAsStringMapVal
 !
@@ -5822,6 +5928,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -5838,6 +5945,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -5863,9 +5972,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5927,7 +6036,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsLogical - Return value as Logical
 
 ! !INTERFACE:
-  function ESMF_HConfigAsLogical(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsLogical(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     type(ESMF_Logical) :: ESMF_HConfigAsLogical
 !
@@ -5936,6 +6046,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -5952,6 +6063,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -5977,9 +6090,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the Logical
@@ -6024,7 +6137,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsLogicalMapKey - Return map key as Logical
 
 ! !INTERFACE:
-  function ESMF_HConfigAsLogicalMapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsLogicalMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     type(ESMF_Logical) :: ESMF_HConfigAsLogicalMapKey
 !
@@ -6033,6 +6147,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6049,6 +6164,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -6074,9 +6191,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the Logical
@@ -6121,7 +6238,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsLogicalMapVal - Return map value as Logical
 
 ! !INTERFACE:
-  function ESMF_HConfigAsLogicalMapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsLogicalMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     type(ESMF_Logical) :: ESMF_HConfigAsLogicalMapVal
 !
@@ -6130,6 +6248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6146,6 +6265,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -6171,9 +6292,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the Logical
@@ -6218,7 +6339,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsI4 - Return value as I4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsI4(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4
 !
@@ -6227,6 +6349,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6243,6 +6366,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -6267,9 +6392,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I4
@@ -6311,7 +6436,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsI4MapKey - Return map key as I4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI4MapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsI4MapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4MapKey
 !
@@ -6320,6 +6446,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6336,6 +6463,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -6360,9 +6489,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I4
@@ -6406,7 +6535,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsI4MapVal - Return map value as I4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI4MapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsI4MapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4MapVal
 !
@@ -6415,6 +6545,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6431,6 +6562,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -6455,9 +6588,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I4
@@ -6501,7 +6634,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsI8 - Return value as I8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI8(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsI8(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8
 !
@@ -6510,6 +6644,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6526,6 +6661,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -6550,9 +6687,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I8
@@ -6594,7 +6731,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsI8MapKey - Return map key as I8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI8MapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsI8MapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8MapKey
 !
@@ -6603,6 +6741,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6619,6 +6758,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -6643,9 +6784,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I8
@@ -6689,7 +6830,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsI8MapVal - Return map value as I8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsI8MapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsI8MapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8MapVal
 !
@@ -6698,6 +6840,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6714,6 +6857,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -6738,9 +6883,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the I8
@@ -6784,7 +6929,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsR4 - Return value as R4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsR4(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsR4(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     real(ESMF_KIND_R4) :: ESMF_HConfigAsR4
 !
@@ -6793,6 +6939,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6809,6 +6956,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -6833,9 +6982,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R4
@@ -6877,7 +7026,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsR4MapKey - Return map key as R4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsR4MapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsR4MapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     real(ESMF_KIND_R4) :: ESMF_HConfigAsR4MapKey
 !
@@ -6886,6 +7036,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6902,6 +7053,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -6926,9 +7079,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R4
@@ -6972,7 +7125,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsR4MapVal - Return map value as R4
 
 ! !INTERFACE:
-  function ESMF_HConfigAsR4MapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsR4MapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     real(ESMF_KIND_R4) :: ESMF_HConfigAsR4MapVal
 !
@@ -6981,6 +7135,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -6997,6 +7152,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -7021,9 +7178,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R4
@@ -7067,7 +7224,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsR8 - Return value as R8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsR8(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsR8(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     real(ESMF_KIND_R8) :: ESMF_HConfigAsR8
 !
@@ -7076,6 +7234,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -7092,6 +7251,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -7116,9 +7277,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R8
@@ -7160,7 +7321,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsR8MapKey - Return map key as R8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsR8MapKey(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsR8MapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     real(ESMF_KIND_R8) :: ESMF_HConfigAsR8MapKey
 !
@@ -7169,6 +7331,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -7185,6 +7348,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -7209,9 +7374,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R8
@@ -7255,7 +7420,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_HConfigAsR8MapVal - Return map value as R8
 
 ! !INTERFACE:
-  function ESMF_HConfigAsR8MapVal(hconfig, keywordEnforcer, index, keyString, asOkay, rc)
+  function ESMF_HConfigAsR8MapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, asOkay, rc)
 ! !RETURN VALUE:
     real(ESMF_KIND_R8) :: ESMF_HConfigAsR8MapVal
 !
@@ -7264,6 +7430,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     logical,            intent(out), optional :: asOkay
     integer,            intent(out), optional :: rc
 
@@ -7280,6 +7447,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[asOkay]}]
 !     Set to {\tt .true.} for successful convertion to the requested typekind.
 !     Set to {\tt .false.} otherwise. By default, i.e. without {\tt asOkay},
@@ -7304,9 +7473,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to get the R8
@@ -7351,7 +7520,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_HConfigSet()
-  subroutine ESMF_HConfigSetHConfig(hconfig, content, keywordEnforcer, index, keyString, rc)
+  subroutine ESMF_HConfigSetHConfig(hconfig, content, keywordEnforcer, index, keyString, &
+    doc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -7359,6 +7529,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -7376,6 +7547,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -7392,9 +7565,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAt(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to set content
@@ -7847,7 +8020,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_HConfigSetMapKey()
-  subroutine ESMF_HConfigSetMapKeyHConfig(hconfig, content, keywordEnforcer, index, keyString, rc)
+  subroutine ESMF_HConfigSetMapKeyHConfig(hconfig, content, keywordEnforcer, index, keyString, &
+    doc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -7855,6 +8029,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -7872,6 +8047,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -7888,9 +8065,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to set content
@@ -8343,7 +8520,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_HConfigSetMapVal()
-  subroutine ESMF_HConfigSetMapValHConfig(hconfig, content, keywordEnforcer, index, keyString, rc)
+  subroutine ESMF_HConfigSetMapValHConfig(hconfig, content, keywordEnforcer, index, keyString, &
+    doc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -8351,6 +8529,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -8368,6 +8547,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
 !     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
+!   \item[{[doc]}]
+!     The doc index. Defaults to the first document.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -8384,9 +8565,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
 
-    if (present(index).or.present(keyString)) then
+    if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, rc=localrc)
+        keyString=keyString, doc=doc, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Call into the C++ interface to set content

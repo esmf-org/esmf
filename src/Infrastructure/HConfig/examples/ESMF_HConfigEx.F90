@@ -1553,6 +1553,13 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
+! Most HConfig methods provide the optional {\tt doc} argument. If present,
+! the method applies to the specified document. The default for when the
+! {\tt doc} argument is not present, for most methods is to use the first
+! document in the object. The exception to this rule are the
+! {\tt ESMF\_HConfigSaveFile()} and {\tt ESMF\_HConfigLoadFile()} methods.
+! Here the default is to apply the operation to {\em all} documents.
+!
 ! When done, clean up {\tt hconfig} as usual.
 !EOE
 !BOC

@@ -73,12 +73,12 @@ namespace ESMCI {
       int loadFile(const std::string& filename, int *docIndex=NULL);
       int saveFile(const std::string& filename, int *docIndex=NULL);
 
-      HConfig createAt(int *index=NULL, int *rc=NULL);
-      HConfig createAtKey(HConfig *key, int *rc=NULL);
-      HConfig createAtMapKey(int *index=NULL, int *rc=NULL);
-      HConfig createAtMapKeyKey(HConfig *key, int *rc=NULL);
-      HConfig createAtMapVal(int *index=NULL, int *rc=NULL);
-      HConfig createAtMapValKey(HConfig *key, int *rc=NULL);
+      HConfig createAt(int *index=NULL, int *docIndex=NULL, int *rc=NULL);
+      HConfig createAtKey(HConfig *key, int *docIndex=NULL, int *rc=NULL);
+      HConfig createAtMapKey(int *index=NULL, int *docIndex=NULL, int *rc=NULL);
+      HConfig createAtMapKeyKey(HConfig *key, int *docIndex=NULL, int *rc=NULL);
+      HConfig createAtMapVal(int *index=NULL, int *docIndex=NULL, int *rc=NULL);
+      HConfig createAtMapValKey(HConfig *key, int *docIndex=NULL, int *rc=NULL);
 
       int add(HConfig *value);
       int add(HConfig *key, HConfig *value);

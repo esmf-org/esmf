@@ -121,7 +121,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigcreateatkey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
-    ESMCI::HConfig *key, int *rc){
+    ESMCI::HConfig *key, int *doc, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigcreateatkey()"
     // Initialize return code; assume routine not implemented
@@ -132,7 +132,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(at, rc)
     ESMCI_NULL_CHECK_PRC(key, rc)
     // call into C++
-    *at = ptr->createAtKey(key, &localrc);
+    *at = ptr->createAtKey(key, doc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -140,7 +140,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigcreateat)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
-    int *index, int *rc){
+    int *index, int *doc, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigcreateat()"
     // Initialize return code; assume routine not implemented
@@ -150,7 +150,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(at, rc)
     // call into C++
-    *at = ptr->createAt(index, &localrc);
+    *at = ptr->createAt(index, doc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -158,7 +158,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigcreateatmapkeykey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
-    ESMCI::HConfig *key, int *rc){
+    ESMCI::HConfig *key, int *doc, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigcreateatmapkeykey()"
     // Initialize return code; assume routine not implemented
@@ -169,7 +169,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(at, rc)
     ESMCI_NULL_CHECK_PRC(key, rc)
     // call into C++
-    *at = ptr->createAtMapKeyKey(key, &localrc);
+    *at = ptr->createAtMapKeyKey(key, doc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -177,7 +177,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigcreateatmapkey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
-    int *index, int *rc){
+    int *index, int *doc, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigcreateatmapkey()"
     // Initialize return code; assume routine not implemented
@@ -187,7 +187,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(at, rc)
     // call into C++
-    *at = ptr->createAtMapKey(index, &localrc);
+    *at = ptr->createAtMapKey(index, doc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -195,7 +195,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigcreateatmapvalkey)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
-    ESMCI::HConfig *key, int *rc){
+    ESMCI::HConfig *key, int *doc, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigcreateatmapvalkey()"
     // Initialize return code; assume routine not implemented
@@ -206,7 +206,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(at, rc)
     ESMCI_NULL_CHECK_PRC(key, rc)
     // call into C++
-    *at = ptr->createAtMapValKey(key, &localrc);
+    *at = ptr->createAtMapValKey(key, doc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -214,7 +214,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_hconfigcreateatmapval)(ESMCI::HConfig *ptr, ESMCI::HConfig *at,
-    int *index, int *rc){
+    int *index, int *doc, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_hconfigcreateatmapval()"
     // Initialize return code; assume routine not implemented
@@ -224,7 +224,7 @@ extern "C" {
     ESMCI_NULL_CHECK_PRC(ptr, rc)
     ESMCI_NULL_CHECK_PRC(at, rc)
     // call into C++
-    *at = ptr->createAtMapVal(index, &localrc);
+    *at = ptr->createAtMapVal(index, doc, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
