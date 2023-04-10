@@ -108,12 +108,12 @@ HConfig HConfig::create(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   HConfig hconfig;
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    // new object
-    hconfig.node = new YAML::Node;
+    // new hconfig with one document in the vector
+    hconfig.doc = new std::vector<YAML::Node>(1);
 
   }catch(int catchrc){
     // catch standard ESMF return code
@@ -165,9 +165,9 @@ int HConfig::destroy(
 
   // protect node from delete in case this is an iterator but user calls
   // the destroy call on it
-  if (hconfig->node){
-    // delete the YAML::Node
-    delete (hconfig->node);
+  if (hconfig->doc){
+    // delete the std::vector<YAML::Node>
+    delete (hconfig->doc);
   }
 
   // return successfully
@@ -202,8 +202,8 @@ int HConfig::load(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node)
-      *node = YAML::Load(content);
+    if (doc)
+      (*doc)[0] = YAML::Load(content);
     else{
       // iterator cannot be used here
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -250,8 +250,8 @@ int HConfig::loadFile(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node)
-      *node = YAML::LoadFile(filename);
+    if (doc)
+      (*doc)[0] = YAML::LoadFile(filename);
     else{
       // iterator cannot be used here
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -300,9 +300,9 @@ int HConfig::saveFile(
   try{
     if (VM::getCurrent()->getLocalPet() == 0){
       std::ofstream fout(filename);
-      if (node){
+      if (doc){
         // node
-        fout << *node;
+        fout << (*doc)[0];
       }else
         // iterator
         if (type==YAML::NodeType::Map){
@@ -355,26 +355,26 @@ HConfig HConfig::createAt(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    // new object
-    hconfig.node = new YAML::Node;
+    // new hconfig with one document in the vector
+    hconfig.doc = new std::vector<YAML::Node>(1);
 
-    if (node){
+    if (doc){
       // node
       if (index){
-        if (node->Type()!=YAML::NodeType::Sequence){
+        if ((*doc)[0].Type()!=YAML::NodeType::Sequence){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "HConfig object MUST be sequence when index specified",
             ESMC_CONTEXT, rc);
           return hconfig;
         }else{
-          *hconfig.node = (*node)[*index-1];
+          (*hconfig.doc)[0] = ((*doc)[0])[*index-1];
         }
       }else{
-        *hconfig.node = (*node);
+        (*hconfig.doc)[0] = ((*doc)[0]);
       }
     }else{
       // iterator
@@ -390,13 +390,13 @@ HConfig HConfig::createAt(
               ESMC_CONTEXT, rc);
             return hconfig;
           }else
-            *hconfig.node = (*iter)[*index-1];
+            (*hconfig.doc)[0] = (*iter)[*index-1];
         }else{
-          *hconfig.node = ((YAML::Node)(*iter));
+          (*hconfig.doc)[0] = ((YAML::Node)(*iter));
         }
       }
     }
-    hconfig.type = hconfig.node->Type();
+    hconfig.type = (*hconfig.doc)[0].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -415,13 +415,13 @@ HConfig HConfig::createAt(
 
 //-----------------------------------------------------------------------------
 template <typename T> inline YAML::Node HConfig::find(T self, HConfig *key){
-  if (key->node->IsScalar()){
+  if ((*key->doc)[0].IsScalar()){
     // handle scalar key as simple string direct indexing
-    return (self)[key->node->as<std::string>()];
+    return (self)[(*key->doc)[0].as<std::string>()];
   }else{
     // handle complex key by iteration and comparing serialized node
     std::stringstream ss_key;
-    ss_key << *(key->node);
+    ss_key << (*key->doc)[0];
     for (auto it=self.begin(); it!=self.end(); ++it){
       std::stringstream ss_self;
       ss_self << it->first;
@@ -462,22 +462,22 @@ HConfig HConfig::createAtKey(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    // new object
-    hconfig.node = new YAML::Node;
+    // new hconfig with one document in the vector
+    hconfig.doc = new std::vector<YAML::Node>(1);
 
-    if (node){
+    if (doc){
       // node
-      if (node->Type()!=YAML::NodeType::Map){
+      if ((*doc)[0].Type()!=YAML::NodeType::Map){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "HConfig object MUST be map when key specified",
           ESMC_CONTEXT, rc);
         return hconfig;
       }else
-        *hconfig.node = HConfig::find(*node, key);
+        (*hconfig.doc)[0] = HConfig::find((*doc)[0], key);
     }else{
       // iterator
       if (type==YAML::NodeType::Map){
@@ -491,10 +491,10 @@ HConfig HConfig::createAtKey(
             ESMC_CONTEXT, rc);
           return hconfig;
         }else
-          *hconfig.node = HConfig::find(*iter, key);
+          (*hconfig.doc)[0] = HConfig::find(*iter, key);
       }
     }
-    hconfig.type = hconfig.node->Type();
+    hconfig.type = (*hconfig.doc)[0].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -539,14 +539,14 @@ HConfig HConfig::createAtMapKey(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    // new object
-    hconfig.node = new YAML::Node;
+    // new hconfig with one document in the vector
+    hconfig.doc = new std::vector<YAML::Node>(1);
 
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       if (index){
         if (iter->first.Type()!=YAML::NodeType::Sequence){
@@ -555,9 +555,9 @@ HConfig HConfig::createAtMapKey(
             ESMC_CONTEXT, rc);
           return hconfig;
         }else
-          *hconfig.node = (iter->first)[*index-1];
+          (*hconfig.doc)[0] = (iter->first)[*index-1];
       }else{
-        *hconfig.node = ((YAML::Node)(iter->first));
+        (*hconfig.doc)[0] = ((YAML::Node)(iter->first));
       }
     }else{
       // error
@@ -565,7 +565,7 @@ HConfig HConfig::createAtMapKey(
         "HConfig object must be map iterator", ESMC_CONTEXT, rc);
       return hconfig;
     }
-    hconfig.type = hconfig.node->Type();
+    hconfig.type = (*hconfig.doc)[0].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -610,14 +610,14 @@ HConfig HConfig::createAtMapKeyKey(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    // new object
-    hconfig.node = new YAML::Node;
+    // new hconfig with one document in the vector
+    hconfig.doc = new std::vector<YAML::Node>(1);
 
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       if (iter->first.Type()!=YAML::NodeType::Map){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -625,14 +625,14 @@ HConfig HConfig::createAtMapKeyKey(
           ESMC_CONTEXT, rc);
         return hconfig;
       }else
-        *hconfig.node = HConfig::find(iter->first, key);
+        (*hconfig.doc)[0] = HConfig::find(iter->first, key);
     }else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must be map iterator", ESMC_CONTEXT, rc);
       return hconfig;
     }
-    hconfig.type = hconfig.node->Type();
+    hconfig.type = (*hconfig.doc)[0].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -677,14 +677,14 @@ HConfig HConfig::createAtMapVal(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    // new object
-    hconfig.node = new YAML::Node;
+    // new hconfig with one document in the vector
+    hconfig.doc = new std::vector<YAML::Node>(1);
 
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       if (index){
         if (iter->second.Type()!=YAML::NodeType::Sequence){
@@ -693,9 +693,9 @@ HConfig HConfig::createAtMapVal(
             ESMC_CONTEXT, rc);
           return hconfig;
         }else
-          *hconfig.node = (iter->second)[*index-1];
+          (*hconfig.doc)[0] = (iter->second)[*index-1];
       }else{
-        *hconfig.node = ((YAML::Node)(iter->second));
+        (*hconfig.doc)[0] = ((YAML::Node)(iter->second));
       }
     }else{
       // error
@@ -703,7 +703,7 @@ HConfig HConfig::createAtMapVal(
         "HConfig object must be map iterator", ESMC_CONTEXT, rc);
       return hconfig;
     }
-    hconfig.type = hconfig.node->Type();
+    hconfig.type = (*hconfig.doc)[0].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -748,14 +748,14 @@ HConfig HConfig::createAtMapValKey(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    // new object
-    hconfig.node = new YAML::Node;
+    // new hconfig with one document in the vector
+    hconfig.doc = new std::vector<YAML::Node>(1);
 
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       if (iter->second.Type()!=YAML::NodeType::Map){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -763,14 +763,14 @@ HConfig HConfig::createAtMapValKey(
           ESMC_CONTEXT, rc);
         return hconfig;
       }else
-        *hconfig.node = HConfig::find(iter->second, key);
+        (*hconfig.doc)[0] = HConfig::find(iter->second, key);
     }else{
       // error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must be map iterator", ESMC_CONTEXT, rc);
       return hconfig;
     }
-    hconfig.type = hconfig.node->Type();
+    hconfig.type = (*hconfig.doc)[0].Type();
 
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -813,20 +813,20 @@ int HConfig::add(
 #ifdef ESMF_YAMLCPP
   try{
     std::stringstream ss;
-    if (value->node)
-      ss << *(value->node);
+    if (value->doc)
+      ss << (*value->doc)[0];
     else
       ss << *(value->iter);
-    if (node){
+    if (doc){
       // node
-      if (node->Type()!=YAML::NodeType::Sequence
-        && node->Type()!=YAML::NodeType::Null){
+      if ((*doc)[0].Type()!=YAML::NodeType::Sequence
+        && (*doc)[0].Type()!=YAML::NodeType::Null){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "HConfig object MUST be sequence or NULL when adding item to the end",
           ESMC_CONTEXT, &rc);
         return rc;
       }else
-        node->push_back(YAML::Load(ss.str()));
+        (*doc)[0].push_back(YAML::Load(ss.str()));
     }else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -885,25 +885,25 @@ int HConfig::add(
 #ifdef ESMF_YAMLCPP
   try{
     std::stringstream ss;
-    if (value->node)
-      ss << *(value->node);
+    if (value->doc)
+      ss << (*value->doc)[0];
     else
       ss << *(value->iter);
     YAML::Node keyNode;
-    if (key->node)
-      keyNode = *(key->node);
+    if (key->doc)
+      keyNode = (*key->doc)[0];
     else
       keyNode = (YAML::Node)*(key->iter);
-    if (node){
+    if (doc){
       // node
-      if (node->Type()!=YAML::NodeType::Map
-        && node->Type()!=YAML::NodeType::Null){
+      if ((*doc)[0].Type()!=YAML::NodeType::Map
+        && (*doc)[0].Type()!=YAML::NodeType::Null){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "HConfig object MUST be map or NULL when adding item with key",
           ESMC_CONTEXT, &rc);
         return rc;
       }else
-        (*node)[keyNode] = YAML::Load(ss.str());
+        ((*doc)[0])[keyNode] = YAML::Load(ss.str());
     }else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -961,11 +961,11 @@ int HConfig::addMapKey(
 #ifdef ESMF_YAMLCPP
   try{
     std::stringstream ss;
-    if (value->node)
-      ss << *(value->node);
+    if (value->doc)
+      ss << (*value->doc)[0];
     else
       ss << *(value->iter);
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       if (iter->first.Type()!=YAML::NodeType::Sequence
         && iter->first.Type()!=YAML::NodeType::Null){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1022,16 +1022,16 @@ int HConfig::addMapKey(
 #ifdef ESMF_YAMLCPP
   try{
     std::stringstream ss;
-    if (value->node)
-      ss << *(value->node);
+    if (value->doc)
+      ss << (*value->doc)[0];
     else
       ss << *(value->iter);
     YAML::Node keyNode;
-    if (key->node)
-      keyNode = *(key->node);
+    if (key->doc)
+      keyNode = (*key->doc)[0];
     else
       keyNode = (YAML::Node)*(key->iter);
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       if (iter->first.Type()!=YAML::NodeType::Sequence
         && iter->first.Type()!=YAML::NodeType::Null){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1087,11 +1087,11 @@ int HConfig::addMapVal(
 #ifdef ESMF_YAMLCPP
   try{
     std::stringstream ss;
-    if (value->node)
-      ss << *(value->node);
+    if (value->doc)
+      ss << (*value->doc)[0];
     else
       ss << *(value->iter);
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       if (iter->second.Type()!=YAML::NodeType::Sequence
         && iter->second.Type()!=YAML::NodeType::Null){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1148,16 +1148,16 @@ int HConfig::addMapVal(
 #ifdef ESMF_YAMLCPP
   try{
     std::stringstream ss;
-    if (value->node)
-      ss << *(value->node);
+    if (value->doc)
+      ss << (*value->doc)[0];
     else
       ss << *(value->iter);
     YAML::Node keyNode;
-    if (key->node)
-      keyNode = *(key->node);
+    if (key->doc)
+      keyNode = (*key->doc)[0];
     else
       keyNode = (YAML::Node)*(key->iter);
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       if (iter->second.Type()!=YAML::NodeType::Sequence
         && iter->second.Type()!=YAML::NodeType::Null){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1215,9 +1215,9 @@ int HConfig::getSize(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node)
+    if (doc)
       // node
-      size = node->size();
+      size = (*doc)[0].size();
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -1269,7 +1269,7 @@ int HConfig::getSizeMapKey(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       size = iter->first.size();
     else{
@@ -1321,7 +1321,7 @@ int HConfig::getSizeMapVal(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       size = iter->second.size();
     else{
@@ -1444,9 +1444,9 @@ string HConfig::getTag(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node){
+    if (doc){
       // node
-      value = HConfig::tagRef(*node);
+      value = HConfig::tagRef((*doc)[0]);
     }else{
       // iterator
       if (type==YAML::NodeType::Map){
@@ -1500,7 +1500,7 @@ string HConfig::getTagMapKey(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       value = HConfig::tag(iter->first);
     }else{
@@ -1552,7 +1552,7 @@ string HConfig::getTagMapVal(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       value = HConfig::tag(iter->second);
     }else{
@@ -1601,9 +1601,9 @@ int HConfig::isNull(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node)
+    if (doc)
       // node
-      *flag = node->IsNull();
+      *flag = (*doc)[0].IsNull();
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -1652,9 +1652,9 @@ int HConfig::isScalar(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node)
+    if (doc)
       // node
-      *flag = node->IsScalar();
+      *flag = (*doc)[0].IsScalar();
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -1703,9 +1703,9 @@ int HConfig::isSequence(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node)
+    if (doc)
       // node
-      *flag = node->IsSequence();
+      *flag = (*doc)[0].IsSequence();
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -1754,9 +1754,9 @@ int HConfig::isMap(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node)
+    if (doc)
       // node
-      *flag = node->IsMap();
+      *flag = (*doc)[0].IsMap();
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -1805,9 +1805,9 @@ int HConfig::isDefined(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node)
+    if (doc)
       // node
-      *flag = node->IsDefined();
+      *flag = (*doc)[0].IsDefined();
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -1856,7 +1856,7 @@ int HConfig::isNullMapKey(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       *flag = iter->first.IsNull();
     else{
@@ -1905,7 +1905,7 @@ int HConfig::isScalarMapKey(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       *flag = iter->first.IsScalar();
     else{
@@ -1954,7 +1954,7 @@ int HConfig::isSequenceMapKey(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       *flag = iter->first.IsSequence();
     else{
@@ -2003,7 +2003,7 @@ int HConfig::isMapMapKey(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       *flag = iter->first.IsMap();
     else{
@@ -2052,7 +2052,7 @@ int HConfig::isDefinedMapKey(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       *flag = iter->first.IsDefined();
     else{
@@ -2101,7 +2101,7 @@ int HConfig::isNullMapVal(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       *flag = iter->second.IsNull();
     else{
@@ -2150,7 +2150,7 @@ int HConfig::isScalarMapVal(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       *flag = iter->second.IsScalar();
     else{
@@ -2199,7 +2199,7 @@ int HConfig::isSequenceMapVal(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       *flag = iter->second.IsSequence();
     else{
@@ -2248,7 +2248,7 @@ int HConfig::isMapMapVal(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       *flag = iter->second.IsMap();
     else{
@@ -2297,7 +2297,7 @@ int HConfig::isDefinedMapVal(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       // map iterator
       *flag = iter->second.IsDefined();
     else{
@@ -2346,7 +2346,7 @@ int HConfig::isIterator(
 
 #ifdef ESMF_YAMLCPP
   try{
-    *flag = (node==NULL);
+    *flag = (doc==NULL);
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -2387,7 +2387,7 @@ int HConfig::isSequenceIterator(
 
 #ifdef ESMF_YAMLCPP
   try{
-    *flag = ((node==NULL) & (type==YAML::NodeType::Sequence));
+    *flag = ((doc==NULL) & (type==YAML::NodeType::Sequence));
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -2428,7 +2428,7 @@ int HConfig::isMapIterator(
 
 #ifdef ESMF_YAMLCPP
   try{
-    *flag = ((node==NULL) & (type==YAML::NodeType::Map));
+    *flag = ((doc==NULL) & (type==YAML::NodeType::Map));
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "Caught exception accessing node information", ESMC_CONTEXT, &rc);
@@ -2471,14 +2471,14 @@ HConfig HConfig::iterBegin(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    if (node){
+    if (doc){
       // node
-      hconfig.type = node->Type();
-      hconfig.iter = node->begin();
+      hconfig.type = (*doc)[0].Type();
+      hconfig.iter = (*doc)[0].begin();
     }else{
       // iterator
       if (type==YAML::NodeType::Map){
@@ -2533,14 +2533,14 @@ HConfig HConfig::iterEnd(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    if (node){
+    if (doc){
       // node
-      hconfig.type = node->Type();
-      hconfig.iter = node->end();
+      hconfig.type = (*doc)[0].Type();
+      hconfig.iter = (*doc)[0].end();
     }else{
       // iterator
       if (type==YAML::NodeType::Map){
@@ -2595,11 +2595,11 @@ HConfig HConfig::iterBeginMapKey(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       hconfig.type = iter->first.Type();
       hconfig.iter = iter->first.begin();
@@ -2652,11 +2652,11 @@ HConfig HConfig::iterEndMapKey(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       hconfig.type = iter->first.Type();
       hconfig.iter = iter->first.end();
@@ -2709,11 +2709,11 @@ HConfig HConfig::iterBeginMapVal(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       hconfig.type = iter->second.Type();
       hconfig.iter = iter->second.begin();
@@ -2766,11 +2766,11 @@ HConfig HConfig::iterEndMapVal(
   HConfig hconfig;
 
 #ifdef ESMF_YAMLCPP
-  hconfig.node = NULL;
+  hconfig.doc = NULL;
 
   try{
 
-    if ((node==NULL) && (type==YAML::NodeType::Map)){
+    if ((doc==NULL) && (type==YAML::NodeType::Map)){
       // map iterator
       hconfig.type = iter->second.Type();
       hconfig.iter = iter->second.end();
@@ -2823,7 +2823,7 @@ int HConfig::iterNext(
 
   try{
     // make sure this is an iterator, or else error out
-    if (node){
+    if (doc){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "HConfig object must be iterator", ESMC_CONTEXT, &rc);
       return rc;
@@ -2873,8 +2873,8 @@ template<typename T> T HConfig::as(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node)
-      *asOkay = YAML::convert<T>::decode(*node, value);
+    if (doc)
+      *asOkay = YAML::convert<T>::decode((*doc)[0], value);
     else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -2927,7 +2927,7 @@ template<typename T> T HConfig::asMapKey(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       *asOkay = YAML::convert<T>::decode(iter->first, value);
     else{
       // error
@@ -2979,7 +2979,7 @@ template<typename T> T HConfig::asMapVal(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       *asOkay = YAML::convert<T>::decode(iter->second, value);
     else{
       // error
@@ -3028,13 +3028,13 @@ int HConfig::set(
 #ifdef ESMF_YAMLCPP
   try{
     std::stringstream ss;
-    if (value->node)
-      ss << *(value->node);
+    if (value->doc)
+      ss << (*value->doc)[0];
     else
       ss << *(value->iter);
-    if (node){
+    if (doc){
       // node
-      *node = YAML::Load(ss.str());
+      (*doc)[0] = YAML::Load(ss.str());
     }else
       // iterator
       if (type==YAML::NodeType::Map){
@@ -3084,11 +3084,11 @@ int HConfig::setMapKey(
 #ifdef ESMF_YAMLCPP
   try{
     std::stringstream ss;
-    if (value->node)
-      ss << *(value->node);
+    if (value->doc)
+      ss << (*value->doc)[0];
     else
       ss << *(value->iter);
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       iter->first = YAML::Load(ss.str());
     else{
       // error
@@ -3137,11 +3137,11 @@ int HConfig::setMapVal(
 #ifdef ESMF_YAMLCPP
   try{
     std::stringstream ss;
-    if (value->node)
-      ss << *(value->node);
+    if (value->doc)
+      ss << (*value->doc)[0];
     else
       ss << *(value->iter);
-    if ((node==NULL) && (type==YAML::NodeType::Map))
+    if ((doc==NULL) && (type==YAML::NodeType::Map))
       iter->second = YAML::Load(ss.str());
     else{
       // error
@@ -3189,15 +3189,15 @@ int HConfig::remove(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node){
+    if (doc){
       // node
-      if (node->Type()!=YAML::NodeType::Sequence){
+      if ((*doc)[0].Type()!=YAML::NodeType::Sequence){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "HConfig object MUST be sequence when index specified",
           ESMC_CONTEXT, &rc);
         return rc;
       }else
-        node->remove(index-1);
+        (*doc)[0].remove(index-1);
     }else{
       // iterator
       if (type==YAML::NodeType::Map){
@@ -3254,15 +3254,15 @@ int HConfig::remove(
 
 #ifdef ESMF_YAMLCPP
   try{
-    if (node){
+    if (doc){
       // node
-      if (node->Type()!=YAML::NodeType::Map){
+      if ((*doc)[0].Type()!=YAML::NodeType::Map){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "HConfig object MUST be map when keyString specified",
           ESMC_CONTEXT, &rc);
         return rc;
       }else
-        node->remove(keyString);
+        (*doc)[0].remove(keyString);
     }else{
       // iterator
       if (type==YAML::NodeType::Map){
@@ -3326,9 +3326,9 @@ int HConfig::toConfig(
 #ifdef ESMF_YAMLCPP
   try{
 
-    if (node->IsMap()){
+    if ((*doc)[0].IsMap()){
       // only support map on the doc level
-      for (auto it=node->begin(); it!=node->end(); ++it){
+      for (auto it=(*doc)[0].begin(); it!=(*doc)[0].end(); ++it){
         if (it->first.IsScalar()){
           // support scalar keys
           string label = it->first.as<string>() + ":";  // use colon separator

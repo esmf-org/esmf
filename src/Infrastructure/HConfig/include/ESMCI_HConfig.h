@@ -38,6 +38,7 @@ namespace ESMCI {
 
 #include "ESMCI_Config.h"
 #include <string>
+#include <vector>
 
 #ifdef ESMF_YAMLCPP
 #include "yaml-cpp/yaml.h"
@@ -53,8 +54,7 @@ namespace ESMCI {
 
     private:
 #ifdef ESMF_YAMLCPP
-      YAML::Node *node = NULL;    // the document node has a non-NULL value here
-                                  // a NULL indicates that this is an iterator
+      std::vector<YAML::Node> *doc = NULL;  // a NULL indicates this is iterator
       YAML::iterator iter;        // if iterator, then this member is iterator
       YAML::NodeType::value type; // what is being iterated over: map / sequence
 #endif
