@@ -99,6 +99,10 @@ namespace ESMCI {
   static bool profileOutputToBinary = false; // output to binary trace?
   static bool profileOutputSummary = false;   // output aggregate profile on root PET?
 
+  static bool profileLocalPetThread(){
+    return (profileLocalPet && VM::isThreadKnown());
+  }
+
   static uint16_t next_local_id() {
     static uint16_t next = 1;
     if (next > REGION_MAX_COUNT) {
@@ -479,7 +483,7 @@ namespace ESMCI {
     }
 
     //determine output method for profiling, if enabled
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       //always output binary if tracing is enabled
       if (traceLocalPet) profileOutputToBinary = true;
       char const *envProfileOutput = VM::getenv("ESMF_RUNTIME_PROFILE_OUTPUT");
@@ -522,13 +526,13 @@ namespace ESMCI {
     if (traceLocalPet) {
       ESMC_LogDefault.Write("ESMF Tracing Enabled", ESMC_LOGMSG_INFO);
     }
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       ESMC_LogDefault.Write("ESMF Profiling Enabled", ESMC_LOGMSG_INFO);
     }
 
     // initialize the clock
     struct esmftrc_platform_filesys_ctx *ctx;
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       ctx = FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, malloc(sizeof(*ctx)));
       if (!ctx) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE, "Cannot allocate context",
@@ -649,7 +653,7 @@ namespace ESMCI {
       globalvm->barrier();  //match barrier call above
     }
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       traceInitialized = true;
       // notify any function wrappers that trace is ready
       InitializeWrappers();
@@ -977,7 +981,7 @@ namespace ESMCI {
     char *serializedTree = NULL;
     size_t bufferSize = 0;
 
-    if (profileLocalPet && globalvm->getLocalPet() > 0) {
+    if (profileLocalPetThread() && globalvm->getLocalPet() > 0) {
       //std::cout << "serialize from pet: " << globalvm->getLocalPet() << "\n";
       try {
         serializedTree = rootRegionNode.serialize(&bufferSize);
@@ -1221,13 +1225,13 @@ namespace ESMCI {
   /////////////////// MPI /////////////////////
 
   void TraceMPIWaitStart() {
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       currentRegionNode->enteredMPI(TraceGetClock(traceCtx));
     }
   }
 
   void TraceMPIWaitEnd() {
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       currentRegionNode->exitedMPI(TraceGetClock(traceCtx));
     }
   }
@@ -1237,7 +1241,7 @@ namespace ESMCI {
    */
   void TraceTest_GetMPIWaitStats(int *count, long long *time) {
     if (!traceInitialized) return;
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       if (count != NULL)
         *count = currentRegionNode->getCountMPI();
       if (time != NULL)
@@ -1248,7 +1252,7 @@ namespace ESMCI {
   void TraceTest_CheckMPIRegion(string name, int *exists) {
     if (exists == NULL) return;
     *exists = 0;
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       if (currentRegionNode == NULL) return;
       uint16_t local_id = 0;
       //bool present = userRegionMap.get(name, local_id);
@@ -1282,7 +1286,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventPhaseEnter()"
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
 
       uint16_t local_id = 0;
       ESMFPhaseId phaseId(ESMFId(*ep_vmid, *ep_baseid), *ep_method, *ep_phase);
@@ -1351,7 +1355,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventCompPhaseEnter()"
   void TraceEventCompPhaseEnter(Comp *comp, enum method *method, int *phase, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       int localrc;
 
       int methodid = MethodToEnum(*method);
@@ -1387,7 +1391,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventCompPhaseExit()"
   void TraceEventCompPhaseExit(Comp *comp, enum method *method, int *phase, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       int localrc;
 
       if (*method == ESMCI::METHOD_SETSERVICES || (ESMCI::METHOD_INITIALIZE && *phase==0)) {
@@ -1498,7 +1502,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI:TraceEventPhaseExit()"
   void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
 
       TraceClockLatch(traceCtx);
 
@@ -1560,7 +1564,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventRegionEnter()"
   void TraceEventRegionEnter(std::string name, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
 
       uint16_t local_id = 0;
       bool present = userRegionMap.get(name, local_id);
@@ -1606,7 +1610,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceEventRegionExit()"
   void TraceEventRegionExit(std::string name, int *rc) {
 
-    if (traceLocalPet || profileLocalPet) {
+    if (traceLocalPet || profileLocalPetThread()) {
       TraceClockLatch(traceCtx);
       uint16_t local_id = 0;
       bool present = userRegionMap.get(name, local_id);
@@ -1705,7 +1709,7 @@ namespace ESMCI {
                                  strIPM.c_str(), strRPM.c_str(), strFPM.c_str());
     }
 
-    if (profileLocalPet) {
+    if (profileLocalPetThread()) {
       string compName(ep_name);
       ESMFId esmfId(*ep_vmid, *ep_baseid);
       UpdateComponentInfoMap(IPM, esmfId, 0, compName);
