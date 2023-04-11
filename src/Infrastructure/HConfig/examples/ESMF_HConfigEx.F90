@@ -867,8 +867,8 @@ program ESMF_HConfigEx
 !
 ! The HConfig class implements tags to identify a node's data type according to
 ! the YAML standard. The combination of a set of defined tags and a mechansim
-! to resolve non-specific tags is called a schema under YAML. Currently the
-! HConfig class implements the JSON schema. This setting can not be changed.
+! to resolve non-specific tags is called a schema under YAML. The HConfig class
+! implements the YAML Core schema, which is an extension of the JSON schema.
 !
 ! This example starts with an empty HConfig object.
 !EOE
@@ -891,7 +891,7 @@ program ESMF_HConfigEx
 !BOE
 ! \paragraph{Null}
 ! The {\tt hconfig} is an empty object, in other words it is associated with
-! NULL. The JSON schema tag for this situation is
+! NULL. The Core schema tag for this situation is
 ! {\tt{\bf tag:yaml.org,2002:null}}.
 !
 ! Next, file {\tt exampleWithTags.yaml} is loaded.
@@ -928,7 +928,7 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The resolved JSON schema tag is again {\tt{\bf tag:yaml.org,2002:null}}. There
+! The resolved Core schema tag is again {\tt{\bf tag:yaml.org,2002:null}}. There
 ! are four special values that resolve to this tag: {\tt null}, {\tt Null},
 ! {\tt NULL}, and {\tt $\sim$}. In addition to those special values, an {\em empty}
 ! value, as demonstrated by {\em key} "value\_eleven", also automatically
@@ -954,7 +954,7 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! results in the JSON schema tag of {\tt{\bf tag:yaml.org,2002:map}}.
+! results in the Core schema tag of {\tt{\bf tag:yaml.org,2002:map}}.
 !
 ! \paragraph{Sequence}
 ! The value associated with {\em map key} "value\_two" in the current
@@ -969,7 +969,7 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The resolved JSON schema tag for a sequence is {\tt{\bf tag:yaml.org,2002:seq}}.
+! The resolved Core schema tag for a sequence is {\tt{\bf tag:yaml.org,2002:seq}}.
 !
 ! \paragraph{String}
 ! All of the {\em keys} of the currently loaded {\tt hconfig} object are
@@ -993,7 +993,7 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Here the JSON schema tag resolves to {\tt{\bf tag:yaml.org,2002:str}}.
+! Here the Core schema tag resolves to {\tt{\bf tag:yaml.org,2002:str}}.
 !
 ! \paragraph{Integer}
 ! The value associated with {\em map key} "value\_three" in the current
@@ -1008,7 +1008,7 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The JSON schema tag resolves to {\tt{\bf tag:yaml.org,2002:int}}.
+! The Core schema tag resolves to {\tt{\bf tag:yaml.org,2002:int}}.
 !
 ! The value associated with {\em map key} "value\_nine" in the current
 ! {\tt hconfig} object is an integer number in hex. The tag for this node can be
@@ -1022,7 +1022,7 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The JSON schema tag resolves to {\tt{\bf tag:yaml.org,2002:int}}.
+! The Core schema tag resolves to {\tt{\bf tag:yaml.org,2002:int}}.
 !
 ! \paragraph{Floating Point}
 ! The value associated with {\em map key} "value\_five" in the current
@@ -1037,7 +1037,7 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The JSON schema tag resolves to {\tt{\bf tag:yaml.org,2002:float}}.
+! The Core schema tag resolves to {\tt{\bf tag:yaml.org,2002:float}}.
 !
 ! \paragraph{Boolean}
 ! The value associated with {\em map key} "value\_seven" in the current
@@ -1052,7 +1052,7 @@ program ESMF_HConfigEx
   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The JSON schema tag resolves to {\tt{\bf tag:yaml.org,2002:bool}}. The
+! The Core schema tag resolves to {\tt{\bf tag:yaml.org,2002:bool}}. The
 ! supported boolean values are {\tt true}, {\tt True}, {\tt TRUE},
 ! {\tt false}, {\tt False}, and {\tt FALSE}.
 !
@@ -1091,7 +1091,7 @@ program ESMF_HConfigEx
 !
 ! \paragraph{Explicit custom tags}
 ! The HConfig class supports application-specific local tags as per the YAML
-! standard. These are tags that are not known by the JSON schema. If such a
+! standard. These are tags that are not known by the Core schema. If such a
 ! tag is encountered on a node, it is preserved and no further automatic
 ! tag resolution is performed.
 !
