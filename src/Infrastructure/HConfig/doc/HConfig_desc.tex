@@ -10,5 +10,17 @@
 
 \label{sec:HConfig}
 
-The ESMF HConfig class implements an hierarchical configuration structure. It is
-compatible with YAML.
+The ESMF HConfig class implements a hierarchical configuration facility that is
+compatible with YAML Ain't Markup Languague (YAML\texttrademark). ESMF HConfig
+can be understood as a Fortran interface to YAML. However, no claim is made that
+{\em all} YAML language features are supported in their entirety.
+
+The purpose of the HConfig class under ESMF is to provide a migration path
+toward more standard configuration management for ESMF applications. To this end
+ESMF\_HConfig integrates with the traditional ESMF\_Config class. Through this
+integration the traditional Config class API offers basic access to YAML
+configuration files, in addition to providing backward compatible support of the
+traditional config file format. This is discussed in more detail in the Config
+class section. For more complete YAML support, applications are encouraged to
+migrate to the HConfig API discussed in this section.
+

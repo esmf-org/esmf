@@ -332,11 +332,6 @@ module ESMF_HConfigMod
 !   type(ESMF_HConfig), intent(in) :: hconfig1
 !   type(ESMF_HConfig), intent(in) :: hconfig2
 !
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \end{itemize}
-!
 ! !DESCRIPTION:
 !   Test whether hconfig1 and hconfig2 are valid aliases to the same ESMF
 !   HConfig object in memory. For a more general comparison of two 
@@ -375,11 +370,6 @@ module ESMF_HConfigMod
 ! !ARGUMENTS:
 !   type(ESMF_HConfig), intent(in) :: hconfig1
 !   type(ESMF_HConfig), intent(in) :: hconfig2
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether hconfig1 and hconfig2 are {\it not} valid aliases to the

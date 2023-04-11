@@ -85,15 +85,14 @@ program ESMF_HConfigEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! The syntax used for the {\tt content} argument is YAML. The above case
-! creates a {\em sequence} of six scalar members.
+! This sets {\tt hconfig} as a {\em sequence} of six scalar members.
 !EOE
 
 !-------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Iterator based HConfig sequence parsing}
 !
-! An easy way to parse the elements contained in {\tt hconfig} is to iterate
+! One way to parse the elements contained in {\tt hconfig} is to iterate
 ! through them. Two additional HConfig objects, acting as iterators, are needed.
 !EOE
 !BOC
@@ -139,6 +138,7 @@ program ESMF_HConfigEx
       ! such error condition, the optional, intent(out) argument "asOkay" can
       ! be provided. If asOkay == .true. is returned, the interpretation was
       ! successful. Otherwise asOkay == .false. is returned.
+
       ! logical :: asOkay
 
       ! integer(ESMF_KIND_I4) :: valueI4
