@@ -62,6 +62,7 @@ namespace ESMCI {
     public:
 
       static HConfig create(int *rc=NULL);
+      template <typename T> static HConfig create(T content, int *rc=NULL);
       static int destroy(HConfig *hconfig);
 
       template <typename T> inline static YAML::Node find(T self, HConfig *key);

@@ -64,6 +64,10 @@ namespace ESMCI {
 // source file.
 //
 //-----------------------------------------------------------------------------
+template HConfig HConfig::create(ESMC_I4, int*);
+template HConfig HConfig::create(ESMC_I8, int*);
+template HConfig HConfig::create(ESMC_R4, int*);
+template HConfig HConfig::create(ESMC_R8, int*);
 template std::string HConfig::as<std::string>(bool *asOkay, int *rc);
 template bool HConfig::as<bool>(bool *asOkay, int *rc);
 template ESMC_I4 HConfig::as<ESMC_I4>(bool *asOkay, int *rc);
@@ -114,6 +118,58 @@ HConfig HConfig::create(
 
     // new hconfig with one document in the vector
     hconfig.doc = new std::vector<YAML::Node>(1);
+
+  }catch(int catchrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return hconfig;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::HConfig.", ESMC_CONTEXT, rc);
+    return hconfig;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return hconfig;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::create()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::create - Create a new HConfig
+//
+// !INTERFACE:
+template <typename T>
+HConfig HConfig::create(
+//
+// !RETURN VALUE:
+//  pointer to newly allocated HConfig
+//
+// !ARGUMENTS:
+    T content,            // in
+    int *rc) {            // out - return code
+//
+// !DESCRIPTION:
+//  Set up HConfig internals.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  HConfig hconfig;
+  hconfig.doc = NULL;
+
+  try{
+
+    // new hconfig with one document in the vector
+    hconfig.doc = new std::vector<YAML::Node>(1);
+    (*hconfig.doc)[0] = content;
 
   }catch(int catchrc){
     // catch standard ESMF return code

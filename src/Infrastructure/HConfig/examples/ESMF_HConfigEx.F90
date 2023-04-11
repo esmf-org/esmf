@@ -1584,7 +1584,7 @@ program ESMF_HConfigEx
 
 !-------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Using the 1D Sequence short cuts}
+! \subsubsection{Using the 1D Sequence shortcut methods}
 !
 ! Still working on this...
 !EOE

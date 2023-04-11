@@ -673,17 +673,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc        ! local return code
-    character(len=16)     :: sContent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    write(sContent, "(i12)") content
+    ! invalidate return value
+    ESMF_HConfigCreateI4%shallowMemory = 0
 
-    ESMF_HConfigCreateI4 = ESMF_HConfigCreate(content=sContent, rc=localrc)
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_HConfigCreateI4(ESMF_HConfigCreateI4, content, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_HConfigCreateI4)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -724,17 +728,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc        ! local return code
-    character(len=16)     :: sContent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    write(sContent, "(i12)") content
+    ! invalidate return value
+    ESMF_HConfigCreateI8%shallowMemory = 0
 
-    ESMF_HConfigCreateI8 = ESMF_HConfigCreate(content=sContent, rc=localrc)
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_HConfigCreateI8(ESMF_HConfigCreateI8, content, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_HConfigCreateI8)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -775,17 +783,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc        ! local return code
-    character(len=24)     :: sContent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    write(sContent, "(g20.12)") content
+    ! invalidate return value
+    ESMF_HConfigCreateR4%shallowMemory = 0
 
-    ESMF_HConfigCreateR4 = ESMF_HConfigCreate(content=sContent, rc=localrc)
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_HConfigCreateR4(ESMF_HConfigCreateR4, content, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_HConfigCreateR4)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -826,17 +838,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc        ! local return code
-    character(len=24)     :: sContent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    write(sContent, "(g20.12)") content
+    ! invalidate return value
+    ESMF_HConfigCreateR8%shallowMemory = 0
 
-    ESMF_HConfigCreateR8 = ESMF_HConfigCreate(content=sContent, rc=localrc)
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_HConfigCreateR8(ESMF_HConfigCreateR8, content, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_HConfigCreateR8)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
