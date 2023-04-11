@@ -111,10 +111,10 @@ contains
   procedure, private :: updateGeneric, ESMF_InfoDescribeInitialize
   procedure, private, pass :: getInfoArray, getInfoArrayBundle, getInfoCplComp, &
    getInfoGridComp, getInfoSciComp, getInfoDistGrid, getInfoField, getInfoFieldBundle, &
-   getInfoGrid, getInfoState, getInfoLocStream, getInfoMesh
+   getInfoGrid, getInfoState, getInfoLocStream, getInfoMesh, getInfoGeom
   generic, public :: GetInfo => getInfoArray, getInfoArrayBundle, getInfoCplComp, getInfoGridComp, &
    getInfoSciComp, getInfoDistGrid, getInfoField, getInfoFieldBundle, getInfoGrid, &
-   getInfoState, getInfoLocStream, getInfoMesh
+   getInfoState, getInfoLocStream, getInfoMesh, getInfoGeom
   generic, public :: Initialize => ESMF_InfoDescribeInitialize
   generic, public :: Destroy => ESMF_InfoDescribeDestroy
   generic, public :: Print => ESMF_InfoDescribePrint
@@ -1284,5 +1284,85 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end function getInfoMesh
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "getInfoGeom()"
+function getInfoGeom(self, target, keywordEnforcer, rc) result(info)
+  class(ESMF_InfoDescribe), intent(in) :: self
+  type(ESMF_Geom), intent(in) :: target
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+  type(ESMF_Info) :: info
+  type(ESMF_InfoDescribe) :: eidesc
+  type(ESMF_GeomType_Flag) :: geomtype
+  type(ESMF_Grid) :: grid
+  type(ESMF_XGrid) :: xgrid
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_LocStream) :: locstream
+  integer :: localrc
+
+  localrc = ESMF_FAILURE
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+  
+  ESMF_INIT_CHECK_DEEP(ESMF_GeomGetInit, target, rc)
+
+  ! Get type of geometry
+  call ESMF_GeomGet(target, geomtype=geomtype, rc=localrc)
+  if (ESMF_LogFoundError(localrc, & 
+       ESMF_ERR_PASSTHRU, & 
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Get specific geometry and operate on that  
+  if (geomtype == ESMF_GEOMTYPE_GRID) then
+
+     ! Get Grid
+      call ESMF_GeomGet(target, grid=grid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Get info from Grid
+      info=self%getInfoGrid(grid)
+      
+   else if (geomtype == ESMF_GEOMTYPE_MESH) then
+
+     ! Get Mesh
+      call ESMF_GeomGet(target, mesh=mesh, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Get info from Mesh
+      info=self%getInfoMesh(mesh)
+
+   else if (geomtype == ESMF_GEOMTYPE_LOCSTREAM) then
+
+     ! Get LocStream
+      call ESMF_GeomGet(target, locstream=locstream, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Get info from LocStream
+      info=self%getInfoLocStream(locstream)
+
+   else if (geomtype == ESMF_GEOMTYPE_XGRID) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg=" currently you can't get an ESMF_Info object from an XGrid in an ESMF_Geom object.", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+   else
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg=" unsupported geometry type.", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+   endif
+  
+!  call ESMF_InfoGetFromPointer(target%this, info, rc=localrc)
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+!  info%is_view = .true.
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end function getInfoGeom
 
 end module ESMF_InfoDescribeMod

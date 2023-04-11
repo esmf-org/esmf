@@ -92,6 +92,7 @@ interface ESMF_InfoGetFromHost
   module procedure ESMF_InfoGetFromHostState
   module procedure ESMF_InfoGetFromHostLocStream
   module procedure ESMF_InfoGetFromHostMesh
+  module procedure ESMF_InfoGetFromHostGeom
 end interface
 
 contains !=====================================================================
@@ -583,5 +584,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if (present(rc)) rc = ESMF_SUCCESS
 end subroutine ESMF_InfoGetFromHostMesh
+
+
+! Note: Documentation stub located in ESMF_InfoMod
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InfoGetFromHostGeom()"
+subroutine ESMF_InfoGetFromHostGeom(host, info, keywordEnforcer, rc)
+  type(ESMF_Geom), intent(in) :: host
+  type(ESMF_Info), intent(out) :: info
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(inout), optional :: rc
+
+  integer :: localrc
+  type(ESMF_InfoDescribe) :: eidesc
+
+  if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  info = eidesc%GetInfo(host, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(rc)) rc = ESMF_SUCCESS
+end subroutine ESMF_InfoGetFromHostGeom
 
 end module ESMF_InfoSyncMod
