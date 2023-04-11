@@ -310,7 +310,7 @@ program ESMF_HConfigEx
 
 !-------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Destroy an HConfig object}
+! \subsubsection{Destroy a HConfig object}
 !
 ! When done with {\tt hconfig}, it should be destroyed in the usual manner.
 !EOE
@@ -321,7 +321,7 @@ program ESMF_HConfigEx
 
 !-------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Create an HConfig object directly loading from YAML string}
+! \subsubsection{Create a HConfig object directly loading from YAML string}
 !
 ! The {\tt ESMF\_HConfigCreate()} method supports loading contents from
 ! string using YAML syntax directly via the optional {\tt content} argument.
@@ -595,7 +595,7 @@ program ESMF_HConfigEx
 !BOE
 ! \subsubsection{Access HConfig from Config}
 !
-! The {\tt ESMF\_Config} class can be queried for an HConfig object. This allows
+! The {\tt ESMF\_Config} class can be queried for a HConfig object. This allows
 ! the use of the HConfig API to access information contained in a Config object.
 !EOE
   config = ESMF_ConfigCreate(rc=rc)
@@ -695,7 +695,7 @@ program ESMF_HConfigEx
 !BOE
 ! \subsubsection{Save HConfig to YAML file}
 !
-! An HConfig object can be saved to a YAML file by calling the
+! A HConfig object can be saved to a YAML file by calling the
 ! {\tt ESMF\_HConfigSaveFile()} method. To demonstrate this, a YAML file
 ! containing:
 ! \begin{verbatim}
@@ -739,7 +739,7 @@ program ESMF_HConfigEx
 !
 ! In the case of a {\em map} iterator, it is necessary to first create an
 ! appropriate root node utilizing the appropriate {\tt CreateAt} method. This
-! allows to either save the {\em map key} or {\em map value} node at the
+! allows saving either the {\em map key} or {\em map value} node at the
 ! current iterator. This is demonstrated below.
 !
 ! In the current example, where {\tt hconfig} is a map with two elements, a
@@ -751,7 +751,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Here {\tt hconfigIter} cannot be be saved to file directly. To write the
+! Here {\tt hconfigIter} cannot be saved to file directly. To write the
 ! {\em key} node, first create a HConfig object for it using method
 ! {\tt ESMF\_HConfigCreateAtMapKey()}.
 !EOE
@@ -775,7 +775,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Similarily, to write the {\em value} node to file, first create a HConfig
+! Similarly, to write the {\em value} node to file, first create a HConfig
 ! object for it using method {\tt ESMF\_HConfigCreateAtMapVal()}.
 !EOE
 !BOC
@@ -866,7 +866,7 @@ program ESMF_HConfigEx
 ! \subsubsection{Tags and Schemas}
 !
 ! The HConfig class implements tags to identify a node's data type according to
-! the YAML standard. The combination of a set of defined tags and a mechansim
+! the YAML standard. The combination of a set of defined tags and a mechanism
 ! to resolve non-specific tags is called a schema under YAML. The HConfig class
 ! implements the YAML Core schema, which is an extension of the JSON schema.
 !
@@ -1121,7 +1121,7 @@ program ESMF_HConfigEx
 !BOE
 ! \subsubsection{Adding, Setting, and Removing elements from HConfig object}
 !
-! After creating an HConfig object without specifying {\tt content} or
+! After creating a HConfig object without specifying {\tt content} or
 ! {\tt filename}, it is empty.
 !EOE
 !BOC
@@ -1191,7 +1191,7 @@ program ESMF_HConfigEx
 ! - {k1: 7, k2: 25}
 ! \end{verbatim}
 !
-! An HConfig structure can even be loaded from file and added to the end of 
+! A HConfig structure can even be loaded from file and added to the end of 
 ! {\tt hconfig}. This requires a temporary HConfig object.
 !EOE
 !BOC
@@ -1223,7 +1223,7 @@ program ESMF_HConfigEx
 !     plane: [TRUE, FALSE]
 ! \end{verbatim}
 !
-! Using the {\tt CreateAt()} method, it easy to gain access to any specific
+! Using the {\tt CreateAt()} method, it is easy to gain access to any specific
 ! element in {\tt hconfig}. Since {\tt hconfig} is a {\em sequence}, the proper
 ! access is by {\em index}.
 !EOE
@@ -1253,7 +1253,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The {\tt hconfigTemp} is reference to a {\em map}, and new elements can be
+! The {\tt hconfigTemp} is a reference to a {\em map}, and new elements can be
 ! added using the {\tt addKeyString} argument.
 !EOE
 !BOC
@@ -1306,7 +1306,7 @@ program ESMF_HConfigEx
   call ESMF_HConfigSaveFile(hconfig, filename="build_and_edit_07.yaml", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! The content of {\tt hconfig} has updated as below.
+! The content of {\tt hconfig} has been updated as below.
 ! \begin{verbatim}
 ! - first added item
 ! - 12.5700000000
@@ -1336,7 +1336,7 @@ program ESMF_HConfigEx
 ! - [a, b, c]
 ! \end{verbatim}
 !
-! Elements can be deleted from an HConfig object holding a sequence or map
+! Elements can be deleted from a HConfig object holding a sequence or map
 ! using the {\tt Remove()} method, specifying the {\em index} or
 ! {\em map key}, respectively. Here the 2nd element of the sequence held by
 ! {\tt hconfig} is removed.
@@ -1401,8 +1401,8 @@ program ESMF_HConfigEx
 ! ~
 ! \end{verbatim}
 !
-! At this point {\tt hconfig} is neither a {\em sequence} nor {\em map}. It is
-! NULL. Adding a map element, i.e. an element with {\em key}, turns
+! At this point {\tt hconfig} is neither a {\em sequence} nor a {\em map}. It is
+! NULL. Adding a map element, i.e. an element with a {\em key}, turns
 ! {\tt hconfig} into a map.
 !EOE
 !BOC
@@ -1570,7 +1570,7 @@ program ESMF_HConfigEx
 ! Most HConfig methods provide the optional {\tt doc} argument. If present,
 ! the method applies to the specified document. The default for when the
 ! {\tt doc} argument is not present, for most methods is to use the first
-! document in the object. The exception to this rule are the
+! document in the object. The exceptions to this rule are the
 ! {\tt ESMF\_HConfigSaveFile()} and {\tt ESMF\_HConfigLoadFile()} methods.
 ! Here the default is to apply the operation to {\em all} documents.
 !
@@ -1588,7 +1588,7 @@ program ESMF_HConfigEx
 !
 ! The HConfig class offers shortcut methods for the sake of convenience when
 ! working with sequences where all elements are of the same typekind. In these
-! cases a sequence can be represented as as one-dimensional Fortran array. The
+! cases a sequence can be represented as a one-dimensional Fortran array. The
 ! interfaces are overloaded for one-dimensional string, logical, I4, I8, R4,
 ! and R8 typekinds.
 !
@@ -1665,7 +1665,7 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Sequences can be added to {\tt hconfig} conventiently using the overloaded
+! Sequences can be added to {\tt hconfig} conveniently using the overloaded
 ! {\tt Add()} interfaces that accept one-dimensional Fortran arrays. Here a
 ! sequence of strings is added as the value of a map entry with key string "k1".
 !EOE
@@ -1700,7 +1700,7 @@ program ESMF_HConfigEx
 !
 ! The {\tt Set()} interfaces are also overloaded to accept one-dimensional
 ! Fortran arrays as input. This makes it easy to set any node to a sequence
-! that is available as Fortrn array. Here the value associated with key "k1"
+! that is available as Fortran array. Here the value associated with key "k1"
 ! is changed to a list of two logicals.
 !EOE
 !BOC

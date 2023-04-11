@@ -1,6 +1,6 @@
 % $Id$
 
-The following examples demonstrate how to a user typically interacts with the
+The following examples demonstrate how a user typically interacts with the
 HConfig API. HConfig objects can be created explicitly by the user, or they
 can be accessed from an existing Config object, e.g. queried from a Component.
 
@@ -11,15 +11,15 @@ a HConfig hierarchy:
 refers to a {\em document}.
 \item It can be any node within the hierarchy.
 \item It can be an iterator, {\em referencing} a specific node within the
-hierarchy. The iterator approach allows conventient sequential access to all
+hierarchy. The iterator approach allows convenient sequential access to all
 the child nodes of a particular location in the hierarchy. There are two flavors
 of iterators in HConfig: {\em sequence} and {\em map} iterators.
-\item It can be the a collection of hierarchies, i.e. a set of YAML {\em documents}.
+\item It can be a collection of hierarchies, i.e. a set of YAML {\em documents}.
 \end{enumerate}
 
 There are some redundancies built into the HConfig API, where different ways
-are available to achive the same goal. This is mostly done for convenience,
-allowing the user to pick the approach most suitable to their need.
+are available to achieve the same goal. This is mostly done for convenience,
+allowing the user to pick the approach most suitable to their needs.
 
 For instance, while it can be convenient to use iterators in some cases, in
 others, it might be easier to access each element directly by {\em index}
