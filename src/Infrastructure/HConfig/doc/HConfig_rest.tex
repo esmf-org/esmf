@@ -2,10 +2,12 @@
 
 %\subsubsection{Restrictions and Future Work}
 \begin{itemize}
-\item The JSON schema is implemented and used to resolve non-specific tags.
+\item The YAML Core schema, which is an extension of the JSON schema, is
+  implemented and used to resolve non-specific tags under HConfig.
   There is currently no mechanism implemented to switch to a different schema
   for tag resolution.
 \item Currently the only available removal method for HConfig {\em map}
   objects requires that {\em keys} be simple scalar strings.
-\item There is currently no method implemented to set or modify tags.
+\item There is currently no method implemented that allows setting of tags from
+  from the API.
 \end{itemize}
