@@ -1556,6 +1556,8 @@ program ESMF_HConfigEx
 !EOE
 !BOC
   call ESMF_HConfigSaveFile(hconfig, filename="multi_02.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Resulting in:
 ! \begin{verbatim}
@@ -1563,10 +1565,7 @@ program ESMF_HConfigEx
 ! - finally a
 ! - third document.
 ! \end{verbatim}
-!EOE
-!EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
+!
 ! Most HConfig methods provide the optional {\tt doc} argument. If present,
 ! the method applies to the specified document. The default for when the
 ! {\tt doc} argument is not present, for most methods is to use the first
@@ -1610,6 +1609,11 @@ print *, "valueLSeq: ", valueLSeq
 
 print *, "asOkay: ", asOkay
 print *, "valueSSeq: ", valueSSeq
+
+  hconfig = ESMF_HConfigCreate([99.3_ESMF_KIND_R8,3.99_ESMF_KIND_R8], rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_HConfigSaveFile(hconfig, filename="shortcut_00.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

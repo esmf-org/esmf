@@ -212,6 +212,10 @@ module ESMF_HConfigMod
     module procedure ESMF_HConfigCreateI8
     module procedure ESMF_HConfigCreateR4
     module procedure ESMF_HConfigCreateR8
+    module procedure ESMF_HConfigCreateI4Seq
+    module procedure ESMF_HConfigCreateI8Seq
+    module procedure ESMF_HConfigCreateR4Seq
+    module procedure ESMF_HConfigCreateR8Seq
   end interface
 
   interface ESMF_HConfigAdd
@@ -858,6 +862,262 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_HConfigCreateR8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigCreateI4Seq()"
+!BOP
+! !IROUTINE: ESMF_HConfigCreateI4Seq - Create HConfig seq object from I4
+
+! !INTERFACE:
+  ! Private name; call using ESMF_HConfigCreate()
+  function ESMF_HConfigCreateI4Seq(content, keywordEnforcer, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_HConfig) :: ESMF_HConfigCreateI4Seq
+!
+! !ARGUMENTS:
+    integer(ESMF_KIND_I4),  intent(in)            :: content(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create a new HConfig object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[content]
+!     Array of I4 content.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc        ! local return code
+    integer               :: count
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value
+    ESMF_HConfigCreateI4Seq%shallowMemory = 0
+
+    count = size(content)
+    if (count>0) then
+      ! call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_HConfigCreateI4Seq(ESMF_HConfigCreateI4Seq, content(1), &
+        count, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Set init code
+      ESMF_INIT_SET_CREATED(ESMF_HConfigCreateI4Seq)
+    else
+      ! empty hconfig
+      ESMF_HConfigCreateI4Seq = ESMF_HConfigCreate(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_HConfigCreateI4Seq
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigCreateI8Seq()"
+!BOP
+! !IROUTINE: ESMF_HConfigCreateI8Seq - Create HConfig seq object from I8
+
+! !INTERFACE:
+  ! Private name; call using ESMF_HConfigCreate()
+  function ESMF_HConfigCreateI8Seq(content, keywordEnforcer, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_HConfig) :: ESMF_HConfigCreateI8Seq
+!
+! !ARGUMENTS:
+    integer(ESMF_KIND_I8),  intent(in)            :: content(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create a new HConfig object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[content]
+!     Array of I8 content.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc        ! local return code
+    integer               :: count
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value
+    ESMF_HConfigCreateI8Seq%shallowMemory = 0
+
+    count = size(content)
+    if (count>0) then
+      ! call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_HConfigCreateI8Seq(ESMF_HConfigCreateI8Seq, content(1), &
+        count, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Set init code
+      ESMF_INIT_SET_CREATED(ESMF_HConfigCreateI8Seq)
+    else
+      ! empty hconfig
+      ESMF_HConfigCreateI8Seq = ESMF_HConfigCreate(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_HConfigCreateI8Seq
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigCreateR4Seq()"
+!BOP
+! !IROUTINE: ESMF_HConfigCreateR4Seq - Create HConfig seq object from R4
+
+! !INTERFACE:
+  ! Private name; call using ESMF_HConfigCreate()
+  function ESMF_HConfigCreateR4Seq(content, keywordEnforcer, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_HConfig) :: ESMF_HConfigCreateR4Seq
+!
+! !ARGUMENTS:
+    real(ESMF_KIND_R4),     intent(in)            :: content(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create a new HConfig object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[content]
+!     Array of R4 content.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc        ! local return code
+    integer               :: count
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value
+    ESMF_HConfigCreateR4Seq%shallowMemory = 0
+
+    count = size(content)
+    if (count>0) then
+      ! call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_HConfigCreateR4Seq(ESMF_HConfigCreateR4Seq, content(1), &
+        count, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Set init code
+      ESMF_INIT_SET_CREATED(ESMF_HConfigCreateR4Seq)
+    else
+      ! empty hconfig
+      ESMF_HConfigCreateR4Seq = ESMF_HConfigCreate(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_HConfigCreateR4Seq
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigCreateR8Seq()"
+!BOP
+! !IROUTINE: ESMF_HConfigCreateR8Seq - Create HConfig seq object from R8
+
+! !INTERFACE:
+  ! Private name; call using ESMF_HConfigCreate()
+  function ESMF_HConfigCreateR8Seq(content, keywordEnforcer, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_HConfig) :: ESMF_HConfigCreateR8Seq
+!
+! !ARGUMENTS:
+    real(ESMF_KIND_R8),     intent(in)            :: content(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create a new HConfig object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[content]
+!     Array of R8 content.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc        ! local return code
+    integer               :: count
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value
+    ESMF_HConfigCreateR8Seq%shallowMemory = 0
+
+    count = size(content)
+    if (count>0) then
+      ! call into the C++ interface, which will sort out optional arguments
+      call c_ESMC_HConfigCreateR8Seq(ESMF_HConfigCreateR8Seq, content(1), &
+        count, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Set init code
+      ESMF_INIT_SET_CREATED(ESMF_HConfigCreateR8Seq)
+    else
+      ! empty hconfig
+      ESMF_HConfigCreateR8Seq = ESMF_HConfigCreate(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_HConfigCreateR8Seq
 !------------------------------------------------------------------------------
 
 
