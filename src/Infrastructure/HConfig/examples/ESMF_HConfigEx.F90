@@ -33,6 +33,7 @@ program ESMF_HConfigEx
   character(len=:), allocatable   :: string, stringKey, tag
   character(len=:), allocatable   :: valueSSeq(:)
   integer(ESMF_KIND_I4)           :: valueI4
+  integer(ESMF_KIND_I4), allocatable :: valueI4Seq(:)
   integer(ESMF_KIND_I8)           :: valueI8
   real(ESMF_KIND_R4)              :: valueR4
   real(ESMF_KIND_R8)              :: valueR8
@@ -1583,36 +1584,149 @@ program ESMF_HConfigEx
 
 !-------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Using the 1D Sequence shortcut methods}
+! \subsubsection{Sequence shortcuts for: Create, As, Add, and Set}
 !
-! Still working on this...
+! The HConfig class offers shortcut methods for the sake of convenience when
+! working with sequences where all elements are of the same typekind. In these
+! cases a sequence can be represented as as one-dimensional Fortran array. The
+! interfaces are overloaded for one-dimensional string, logical, I4, I8, R4,
+! and R8 typekinds.
+!
+! Using a Fortran array constructor for the actual argument, a sequence of I4
+! data is created.
 !EOE
 !BOC
   ! type(ESMF_HConfig) :: hconfig
-  hconfig = ESMF_HConfigCreate(filename="example.yaml", rc=rc)
+  hconfig = ESMF_HConfigCreate([1,2,3], rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  hconfigTemp = ESMF_HConfigCreateAt(hconfig, keyString="simple_map", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  valueLSeq = ESMF_HConfigAsLogicalSeq(hconfigTemp, keyString="plane", &
-    asOkay=asOkay, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-print *, "asOkay: ", asOkay
-print *, "valueLSeq: ", valueLSeq
-
-  valueSSeq = ESMF_HConfigAsStringSeq(hconfigTemp, stringLen=20, &
-    keyString="[bike, {p1: 10, p2: 20}]", asOkay=asOkay, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-print *, "asOkay: ", asOkay
-print *, "valueSSeq: ", valueSSeq
-
-  hconfig = ESMF_HConfigCreate([99.3_ESMF_KIND_R8,3.99_ESMF_KIND_R8], rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_HConfigSaveFile(hconfig, filename="shortcut_00.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The content of {\tt hconfig} can be accessed in the usual manner, via
+! iterators or indexed access. Alternatively, the sequence of I4 elements
+! can be retrieved in a single call using a one-dimensional allocatable
+! Fortran array of the appropriate typekind.
+!EOE
+!BOC
+  ! integer(ESMF_KIND_I4), allocatable :: valueI4Seq(:)
+  valueI4Seq = ESMF_HConfigAsI4Seq(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("valueI4Seq: ", 3i8)') valueI4Seq
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! The optional, intent(out) argument {\tt asOkay} is available as in the scalar
+! access methods. If specified, errors triggered by unsupported typekind
+! conversion exceptions are suppressed, and instead {\tt asOkay == .false.} is
+! returned by the call.
+!
+! Here an attempt is made to access the content of {\tt hconfig} as a sequence
+! of logicals. This is not supported, and will be flagged in the return value
+! of {\tt asOkay}.
+!EOE
+!BOC
+  ! logical, allocatable :: valueLSeq(:)
+  valueLSeq = ESMF_HConfigAsLogicalSeq(hconfig, asOkay=asOkay, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("asOkay for Logical: ", l2)') asOkay
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Finally the content of {\tt hconfig} is accessed as a sequence of strings.
+! This is always supported since every typekind can be represented in string
+! form.
+!EOE
+!BOC
+  ! character(len=:), allocatable :: valueSSeq(:)
+  valueSSeq = ESMF_HConfigAsStringSeq(hconfig, stringLen=10, asOkay=asOkay, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("asOkay for String: ", l2)') asOkay
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("valueSSeq: ", 3A10)') valueSSeq
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Next {\tt hconfig} is cleaned up before re-creating it as an empty HConfig
+! object.
+!EOE
+!BOC
+  ! Clean up hconfig.
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Sequences can be added to {\tt hconfig} conventiently using the overloaded
+! {\tt Add()} interfaces that accept one-dimensional Fortran arrays. Here a
+! sequence of strings is added as the value of a map entry with key string "k1".
+!EOE
+!BOC
+  call ESMF_HConfigAdd(hconfig, ["aaa","bbb","ccc"], addKeyString="k1", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_HConfigSaveFile(hconfig, filename="shortcut_01.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Next a sequence of R4 values is added to the map held by {\tt hconfig},
+! under key string "k2".
+!EOE
+!BOC
+  call ESMF_HConfigAdd(hconfig, [1.0,1.25,1.5], addKeyString="k2", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_HConfigSaveFile(hconfig, filename="shortcut_02.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! At this point {\tt hconfig} contains the following information:
+! \begin{verbatim}
+! k1:
+!   - aaa
+!   - bbb
+!   - ccc
+! k2:
+!   - 1
+!   - 1.25
+!   - 1.5
+! \end{verbatim}
+!
+! The {\tt Set()} interfaces are also overloaded to accept one-dimensional
+! Fortran arrays as input. This makes it easy to set any node to a sequence
+! that is available as Fortrn array. Here the value associated with key "k1"
+! is changed to a list of two logicals.
+!EOE
+!BOC
+  call ESMF_HConfigSet(hconfig, [.true.,.false.], keyString="k1", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_HConfigSaveFile(hconfig, filename="shortcut_03.yaml", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! This changes the content of {\tt hconfig} as expected.
+! \begin{verbatim}
+! k1:
+!   - True
+!   - False
+! k2:
+!   - 1
+!   - 1.25
+!   - 1.5
+! \end{verbatim}
+!
+! Finally clean up {\tt hconfig} as usual.
+!EOE
+!BOC
+  ! Destroy hconfig when done with it.
+  call ESMF_HConfigDestroy(hconfig, rc=rc)
+!EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------------
