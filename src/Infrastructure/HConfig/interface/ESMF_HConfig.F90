@@ -99,6 +99,8 @@ module ESMF_HConfigMod
   public ESMF_HConfigAddMapKey
   public ESMF_HConfigAddMapVal
 
+  public ESMF_HConfigGetDocCount
+
   public ESMF_HConfigGetSize
   public ESMF_HConfigGetSizeMapKey
   public ESMF_HConfigGetSizeMapVal
@@ -3296,6 +3298,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigGetDocCount()"
+!BOP
+! !IROUTINE: ESMF_HConfigGetDocCount - Get number of docs in HConfig
+
+! !INTERFACE:
+  function ESMF_HConfigGetDocCount(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    integer :: ESMF_HConfigGetDocCount
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return the number of documents held by {\tt hconfig}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig]
+!     {\tt ESMF\_HConfig} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigGetDocCount = 0   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigGetDocCount(hconfig, ESMF_HConfigGetDocCount, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
 !------------------------------------------------------------------------------
 
 
@@ -9016,7 +9070,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigRemove()"
 !BOP
-! !IROUTINE: ESMF_HConfigRemve - Remove element from HConfig object
+! !IROUTINE: ESMF_HConfigRemove - Remove element from HConfig object
 
 ! !INTERFACE:
   subroutine ESMF_HConfigRemove(hconfig, keywordEnforcer, index, keyString, rc)

@@ -1246,6 +1246,58 @@ int HConfig::addMapVal(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::HConfig::getDocCount()"
+//BOP
+// !IROUTINE:  ESMCI::HConfig::getDocCount - Get number of documents held
+//
+// !INTERFACE:
+int HConfig::getDocCount(
+//
+// !RETURN VALUE:
+//  int
+//
+// !ARGUMENTS:
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//  Return the size of the node.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  int count = 0;
+
+#ifdef ESMF_YAMLCPP
+  try{
+    if (doc){
+      // node
+      count = doc->size();
+    }else{
+      // iterator cannot be used here
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "HConfig object must NOT be iterator", ESMC_CONTEXT, rc);
+      return count;
+    }
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception accessing node information", ESMC_CONTEXT, rc);
+    return count;
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+#endif
+
+  return count;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::HConfig::getSize()"
 //BOP
 // !IROUTINE:  ESMCI::HConfig::getSize - Get size of the node

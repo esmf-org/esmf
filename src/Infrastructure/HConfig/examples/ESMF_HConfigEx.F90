@@ -23,7 +23,7 @@ program ESMF_HConfigEx
   implicit none
 
   ! local variables
-  integer                         :: rc, size, i
+  integer                         :: rc, size, i, docCount
   type(ESMF_HConfig)              :: hconfig, hconfigTemp, hconfigTemp2
   type(ESMF_HConfig)              :: hconfigIter, hconfigIterEnd
   type(ESMF_Config)               :: config
@@ -1489,6 +1489,17 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
+! The number of documents held by {\tt hconfig} can be queried.
+!EOE
+!BOC
+  ! integer :: docCount
+  docCount = ESMF_HConfigGetDocCount(hconfig, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  write (msgString, '("docCount: ", i8)') docCount
+  call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
 ! When saving {\tt hconfig}, a multi-document YAML file will be written.
 !EOE
 !BOC
@@ -1515,6 +1526,7 @@ program ESMF_HConfigEx
 ! - third document.
 ! ...
 ! \end{verbatim}
+!
 ! The optional {\tt doc} argument can be specified when saving the
 ! multi-document {\tt hconfig} to file. Only the specified document, by index,
 ! is written to file.
