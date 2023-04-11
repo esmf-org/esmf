@@ -29,7 +29,9 @@ program ESMF_HConfigEx
   type(ESMF_Config)               :: config
   logical                         :: asOkay, valueL, isDefined
   logical                         :: isNull, isScalar, isSequence, isMap
+  logical, allocatable            :: valueLSeq(:)
   character(len=:), allocatable   :: string, stringKey, tag
+  character(len=:), allocatable   :: valueSSeq(:)
   integer(ESMF_KIND_I4)           :: valueI4
   integer(ESMF_KIND_I8)           :: valueI8
   real(ESMF_KIND_R4)              :: valueR4
@@ -1579,6 +1581,35 @@ program ESMF_HConfigEx
   call ESMF_HConfigDestroy(hconfig, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!-------------------------------------------------------------------------------
+!BOE
+! \subsubsection{Using the 1D Sequence short cuts}
+!
+! Still working on this...
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfig
+  hconfig = ESMF_HConfigCreate(filename="example.yaml", rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  hconfigTemp = ESMF_HConfigCreateAt(hconfig, keyString="simple_map", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  valueLSeq = ESMF_HConfigAsLogicalSeq(hconfigTemp, keyString="plane", &
+    asOkay=asOkay, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+print *, "asOkay: ", asOkay
+print *, "valueLSeq: ", valueLSeq
+
+  valueSSeq = ESMF_HConfigAsStringSeq(hconfigTemp, stringLen=20, &
+    keyString="[bike, {p1: 10, p2: 20}]", asOkay=asOkay, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+print *, "asOkay: ", asOkay
+print *, "valueSSeq: ", valueSSeq
 
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
