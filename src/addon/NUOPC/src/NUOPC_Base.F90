@@ -2035,7 +2035,7 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(20)
+    character(ESMF_MAXSTR)            :: attrList(24)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -2047,35 +2047,36 @@ module NUOPC_Base
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! Set up a customized list of Attributes to be added to the Fields
-    attrList(1) = "Connected"  ! values: "true" or "false"
-    attrList(2) = "ProducerConnection"! values: "open", "targeted", "connected"
-    attrList(3) = "ConsumerConnection"! values: "open", "targeted", "connected"
-    attrList(4) = "Updated" ! values: "true" or "false"
-    attrList(5) = "ProducerTransferOffer"   ! values: "cannot provide",
+    attrList(1) = "StandardName"
+    attrList(2) = "Units"
+    attrList(3) = "LongName"
+    attrList(4) = "ShortName"
+    attrList(5) = "Connected"  ! values: "true" or "false"
+    attrList(6) = "ProducerConnection"! values: "open", "targeted", "connected"
+    attrList(7) = "ConsumerConnection"! values: "open", "targeted", "connected"
+    attrList(8) = "Updated" ! values: "true" or "false"
+    attrList(9) = "ProducerTransferOffer"   ! values: "cannot provide",
                                     !   "can provide", "will provide"
-    attrList(6) = "ProducerTransferAction"  ! values: "provide", "accept"
-    attrList(7) = "ConsumerTransferOffer"   ! values: "cannot provide",
+    attrList(10)= "ProducerTransferAction"  ! values: "provide", "accept"
+    attrList(11)= "ConsumerTransferOffer"   ! values: "cannot provide",
                                     !   "can provide", "will provide"
-    attrList(8) = "ConsumerTransferAction"  ! values: "provide", "accept"
-    attrList(9) = "SharePolicyField"       ! values: "share", "not share"
-    attrList(10)= "ShareStatusField"       ! values: "shared", "not shared"
-    attrList(11)= "SharePolicyGeomObject"  ! values: "share", "not share"
-    attrList(12)= "ShareStatusGeomObject"  ! values: "shared", "not shared"
-    attrList(13)= "UngriddedLBound"
-    attrList(14)= "UngriddedUBound"
-    attrList(15)= "GridToFieldMap"
-    attrList(16)= "ArbDimCount"
-    attrList(17)= "MinIndex"
-    attrList(18)= "MaxIndex"
-    attrList(19)= "TypeKind"
-    attrList(20)= "GeomLoc"   ! either staggerloc or meshloc
+    attrList(12)= "ConsumerTransferAction"  ! values: "provide", "accept"
+    attrList(13)= "SharePolicyField"       ! values: "share", "not share"
+    attrList(14)= "ShareStatusField"       ! values: "shared", "not shared"
+    attrList(15)= "SharePolicyGeomObject"  ! values: "share", "not share"
+    attrList(16)= "ShareStatusGeomObject"  ! values: "shared", "not shared"
+    attrList(17)= "UngriddedLBound"
+    attrList(18)= "UngriddedUBound"
+    attrList(19)= "GridToFieldMap"
+    attrList(20)= "ArbDimCount"
+    attrList(21)= "MinIndex"
+    attrList(22)= "MaxIndex"
+    attrList(23)= "TypeKind"
+    attrList(24)= "GeomLoc"   ! either staggerloc or meshloc
     
     ! add Attribute packages
-    call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     call ESMF_AttributeAdd(field, convention="NUOPC", purpose="Instance",   &
-      attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=localrc)
+      attrList=attrList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       

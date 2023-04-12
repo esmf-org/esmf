@@ -130,6 +130,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void getArgs(int *argc, char ***argv, int *rc);  // command line args
     static VM *getGlobal(int *rc=NULL);       // global VM
     static VM *getCurrent(int *rc=NULL);      // current VM
+    static bool isThreadKnown(int *rc=NULL);  // is thread known under any VM
     static VMId *getCurrentID(int *rc=NULL);  // VMId of current VM
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
     static void logGarbageInfo(std::string prefix, bool current=false,
