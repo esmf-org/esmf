@@ -25,7 +25,7 @@ program ESMF_HConfigEx
   ! local variables
   integer                         :: rc, size, i, docCount
   type(ESMF_HConfig)              :: hconfig, hconfigTemp, hconfigTemp2
-  type(ESMF_HConfig)              :: hconfigIter, hconfigIterEnd
+  type(ESMF_HConfig)              :: hconfigIter, hconfigIterBegin, hconfigIterEnd
   type(ESMF_Config)               :: config
   logical                         :: asOkay, valueL, isDefined
   logical                         :: isNull, isScalar, isSequence, isMap
@@ -92,12 +92,30 @@ program ESMF_HConfigEx
 !BOE
 ! \subsubsection{Iterator based HConfig sequence parsing}
 !
-! One way to parse the elements contained in {\tt hconfig} is to iterate
-! through them. Two additional HConfig objects, acting as iterators, are needed.
+! One way to parse the elements contained in {\tt hconfig} is to use the
+! iterator pattern known from laguages such as C++ or Python. HConfig
+! iterators are implemented as regular {\tt type(ESMF\_HConfig)} objects that
+! are initialized using one of the {\tt HConfigIter*()} methods. An iterator
+! can then be used to traverse the elements in a {\em sequence} or {\em map}
+! by calling the {\tt ESMF\_HConfigIterNext()} method, taking one step forward
+! each time the method is called.
+!
+! Being a HConfig object, an iterator can be passed into any of the usual
+! HConfig methods. The operation is applied to the element that the iterator is
+! currently referencing. 
+!
+! Notice that iterators are merely references, not associated with their own
+! deep allocation. This is reflected in the fact that iterators are
+! {\em not} created by an assignment that has a {\tt Create()} call on the right
+! hand side. As such, HConfig iterators need {\em not} be destroyed
+! explicitly when done.
+!
+! Two special HConfig iterators are defined, referencing the beginning and
+! the end of a HConfig sequence or map object.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigIter, hconfigIterEnd
-  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+  ! type(ESMF_HConfig) :: hconfigIterBegin, hconfigIterEnd
+  hconfigIterBegin = ESMF_HConfigIterBegin(hconfig, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -105,17 +123,71 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Both {\tt hconfigIter} and {\tt hconfigIterEnd} are merely references, not
-! associated with their own deep allocation. In other words, neither was
-! created by an assignment that had a {\tt Create()} call on the righ hand side.
-! As such, neither {\tt hconfigIter} nor {\tt hconfigIterEnd} need to be
-! explicitly destroyed when done.
-!
-! Iterating over {\tt hconfig} is straight forward:
+! In analogy to the C++ iterator pattern, {\tt hconfigIterBegin} points to the
+! first element in {\tt hconfig}, while {\tt hconfigIterEnd} points one step
+! beyond the last element. Using these elements together, an iterator loop
+! can be written in the following intuitive way, using {\tt hconfigIter} as the
+! loop variable.
 !EOE
 !BOC
+  ! type(ESMF_HConfig) :: hconfigIter
+  hconfigIter = hconfigIterBegin
   do while (hconfigIter /= hconfigIterEnd)
 
+    ! Code here that uses hconfigIter
+    ! to access the currently referenced
+    ! element in hconfig.  .......
+
+    call ESMF_HConfigIterNext(hconfigIter, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  enddo
+!EOC
+!BOE
+! One {\em major} concern with the above iterator loop implementation is when
+! Fortran {\tt cycle} statements are introduced. In orde to make the above loop
+! {\tt cycle}--safe, each such {\tt cycle} statement needs to be matched with
+! its own call to {\tt ESMF\_HConfigIterNext()}. This needs to be done to
+! prevent endless-loop conditions, where the exit condition of the
+! {\tt do while} is never reached.
+!
+! The {\tt cycle}--safe alternative implementation of the iterator loop
+! leverages the {\tt ESMF\_HConfigIterLoop()} function instead of 
+! {\tt ESMF\_HConfigIterNext()}. This approach is more akin to the
+! C++
+! \begin{verbatim}
+!   for (element : container){
+!     ...
+!   }
+! \end{verbatim}
+! or the Python
+! \begin{verbatim}
+!   for element in container:
+!     ...
+! \end{verbatim}
+! approach. It is the preferable way to write HConfig iterator loops due to its
+! simplicity and inherent {\tt cycle}--safety.
+!
+! The {\tt ESMF\_HConfigIterLoop()} function takes three required arguments.
+! The first is the loop iterator, followed by the begin and end iterators. The
+! loop iterator must enter equal to the begin iterator at the start of the loop.
+! Each time the {\tt ESMF\_HConfigIterLoop()} function is called, the loop
+! iterator is stepped forward as appropriate, and the exit condition of having
+! reached the end iterator is checked. Having both the stepping and exit logic
+! in one place provided by the HConfig API simplifies the usage. In addition,
+! the approach is {\tt cycle}--safe: no matter where a {\tt cycle} statement is
+! inserted in the loop body, it always brings the execution back to the top of
+! the while loop, which in turn calls the {\tt ESMF\_HConfigIterLoop()}
+! function.
+!EOE
+!BOC
+  ! type(ESMF_HConfig) :: hconfigIter
+  hconfigIter = hconfigIterBegin
+  do while (ESMF_HConfigIterLoop(hconfigIter, hconfigIterBegin, hconfigIterEnd, rc=rc))
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
     ! Check whether the current element is a scalar.
     ! logical :: isScalar
     isScalar = ESMF_HConfigIsScalar(hconfigIter, rc=rc)
@@ -185,11 +257,6 @@ program ESMF_HConfigEx
       ! Possible recursive iteration over the current hconfigIter element.
     endif
 
-    ! Next iteration step.
-    call ESMF_HConfigIterNext(hconfigIter, rc=rc)
-!EOC
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
   enddo
 !EOC
 
@@ -341,12 +408,12 @@ program ESMF_HConfigEx
 ! \subsubsection{Iterator based HConfig map parsing}
 !
 ! The elements of the {\em map} contained in {\tt hconfig} can be iterated over
-! similar to the the {\em sequence} case demonstrated earlier. Again two
-! iterator variables are employed.
+! analogous to the {\em sequence} case demonstrated earlier. Again the begin
+! and end iterator variables are defined.
 !EOE
 !BOC
-  ! type(ESMF_HConfig) :: hconfigIter, hconfigIterEnd
-  hconfigIter = ESMF_HConfigIterBegin(hconfig, rc=rc)
+  ! type(ESMF_HConfig) :: hconfigIterBegin, hconfigIterEnd
+  hconfigIterBegin = ESMF_HConfigIterBegin(hconfig, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -354,16 +421,20 @@ program ESMF_HConfigEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Then iterate over {\tt hconfig} using the iterator variables as before.
-! Notice, however, in the code below, compared to the {\em sequence} case, all 
-! of the {\tt As} access methods now are either of the form {\tt As*MapKey} or
-! {\tt As*MapVal} to selectively access the {\em map key} or {\em map value},
-! respectively.
+! Then iterate over the elements in {\tt hconfig} using an iterator loop
+! variable as before.
+!
+! The difference of the code below, compared to the {\em sequence} case, is
+! that all the {\tt As} access methods here are either of the form
+! {\tt As*MapKey} or {\tt As*MapVal}. This is necessary to selectively access
+! the {\em map key} or {\em map value}, respectively.
 !EOE
 !BOC
-
-  do while (hconfigIter /= hconfigIterEnd)
-
+  hconfigIter = hconfigIterBegin
+  do while (ESMF_HConfigIterLoop(hconfigIter, hconfigIterBegin, hconfigIterEnd, rc=rc))
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
     ! Check whether the current element is a scalar both for the map key
     ! and the map value.
     ! logical :: isScalar
@@ -455,11 +526,6 @@ program ESMF_HConfigEx
       ! Deal with case where either key or value are not scalars themselves.
     endif
 
-    ! Next iteration step.
-    call ESMF_HConfigIterNext(hconfigIter, rc=rc)
-!EOC
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
   enddo
 !EOC
 

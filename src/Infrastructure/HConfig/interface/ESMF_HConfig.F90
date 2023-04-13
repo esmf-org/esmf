@@ -67,6 +67,7 @@ module ESMF_HConfigMod
 #else
     integer(ESMF_KIND_I4), dimension(20) :: shallowMemory
 #endif
+    logical ::  loopFirst = .true.
     ESMF_INIT_DECLARE
   end type
 
@@ -138,6 +139,7 @@ module ESMF_HConfigMod
   public ESMF_HConfigIterBeginMapVal
   public ESMF_HConfigIterEndMapVal
   public ESMF_HConfigIterNext
+  public ESMF_HConfigIterLoop
 
   public ESMF_HConfigAsString
   public ESMF_HConfigAsStringMapKey
@@ -7709,7 +7711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Step iterator {\tt hconfig} one step forward.
+!   Step the iterator {\tt hconfig} one step forward.
 !
 ! The arguments are:
 !   \begin{description}
@@ -7739,6 +7741,88 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterLoop()"
+!BOP
+! !IROUTINE: ESMF_HConfigIterLoop - Step iterator forward
+
+! !INTERFACE:
+  function ESMF_HConfigIterLoop(hconfig, hconfigBegin, hconfigEnd, keywordEnforcer, rc)
+! !RETURN VALUE:
+    logical :: ESMF_HConfigIterLoop
+!
+! !ARGUMENTS:
+    type(ESMF_HConfig), intent(inout)         :: hconfig
+    type(ESMF_HConfig), intent(in)            :: hconfigBegin
+    type(ESMF_HConfig), intent(in)            :: hconfigEnd
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Step the iterator {\tt hconfig} forward. starting at {\tt hconfigBegin}
+!   until {\tt hconfigEnd} is reached. Returns {\tt .true.} as long as
+!   {\tt hconfig} has not reached {\tt hconfigEnd}. Once this condition has
+!   been reached, returns {\tt .false.}.
+!
+!   The intended usage of {\tt ESMF\_HConfigIterLoop()} is as the conditional
+!   in a {\tt do while} loop, iterating over the elements of a HConfig object.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig]
+!     The {\tt ESMF\_HConfig} iterator object. Must enter equal to
+!     {\tt hconfigBegin} on the first loop step.
+!   \item[hconfigBegin]
+!     The {\tt ESMF\_HConfig} iterator to begin at.
+!   \item[hconfigEnd]
+!     The {\tt ESMF\_HConfig} iterator that marks the end of the loop.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! default to returning .false.
+    ESMF_HConfigIterLoop = .false.
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfigBegin, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfigEnd, rc)
+
+    ! detect hconfigEnd condition early
+    if (hconfig == hconfigEnd) return
+
+    ! take the conditional next step
+    if (hconfig /= hconfigBegin .or. .not.hconfig%loopFirst) then
+      ! reset for next time this iterator is used from the beginning of loop
+      if (hconfig == hconfigBegin) hconfig%loopFirst = .true.
+      ! next
+      call ESMF_HConfigIterNext(hconfig, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! prepare for next loop call on this iterator
+      hconfig%loopFirst = .false.
+    endif
+
+    ! Set the return value
+    ESMF_HConfigIterLoop = (hconfig /= hconfigEnd)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
 !------------------------------------------------------------------------------
 
 
