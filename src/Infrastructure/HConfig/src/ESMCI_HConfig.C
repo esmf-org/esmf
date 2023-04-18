@@ -1599,6 +1599,10 @@ inline string HConfig::tagRef(YAML::Node &self){
         break;
     }
     value = self.Tag();  // determine final outcome
+  }else if (value == "!"){
+    // yaml-cpp seems to do this for a quoted string
+    self.SetTag("tag:yaml.org,2002:str");
+    value = self.Tag();  // determine final outcome
   }
   return value;
 }
@@ -1632,6 +1636,10 @@ inline string HConfig::tag(YAML::Node self){
       default:
         break;
     }
+    value = self.Tag();  // determine final outcome
+  }else if (value == "!"){
+    // yaml-cpp seems to do this for a quoted string
+    self.SetTag("tag:yaml.org,2002:str");
     value = self.Tag();  // determine final outcome
   }
   return value;
