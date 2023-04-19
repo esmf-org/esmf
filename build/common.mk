@@ -792,11 +792,10 @@ endif
 
 # - F90COMPILER
 ifneq ($(origin ESMF_F90COMPILER), environment)
-ifeq ($(origin ESMF_F90), environment)
-ESMF_F90COMPILER = $(ESMF_F90)
-else
 ESMF_F90COMPILER = $(ESMF_F90COMPILERDEFAULT)
 ESMF_F90COMPILERDEFAULT = $(ESMF_F90DEFAULT)
+ifeq ($(origin ESMF_F90), environment)
+ESMF_F90COMPILERDEFAULT = $(ESMF_F90)
 endif
 endif
 ifneq ($(origin ESMF_F90IMOD), environment)
@@ -846,11 +845,10 @@ ESMF_F90COMPILECPPFLAGS   += $(ESMF_FPPFLAGS)
 
 # - CXXCOMPILER
 ifneq ($(origin ESMF_CXXCOMPILER), environment)
-ifeq ($(origin ESMF_CXX), environment)
-ESMF_CXXCOMPILER = $(ESMF_CXX)
-else
 ESMF_CXXCOMPILER = $(ESMF_CXXCOMPILERDEFAULT)
 ESMF_CXXCOMPILERDEFAULT = $(ESMF_CXXDEFAULT)
+ifeq ($(origin ESMF_CXX), environment)
+ESMF_CXXCOMPILERDEFAULT = $(ESMF_CXX)
 endif
 endif
 ifneq ($(origin ESMF_CXXOPTFLAG), environment)
@@ -891,11 +889,10 @@ ESMF_CXXCOMPILECPPFLAGS   += $(ESMF_CPPFLAGS) -D__SDIR__='"$(LOCDIR)"'
 
 # - CCOMPILER
 ifneq ($(origin ESMF_CCOMPILER), environment)
-ifeq ($(origin ESMF_C), environment)
-ESMF_CCOMPILER = $(ESMF_C)
-else
 ESMF_CCOMPILER = $(ESMF_CCOMPILERDEFAULT)
 ESMF_CCOMPILERDEFAULT = $(ESMF_CDEFAULT)
+ifeq ($(origin ESMF_C), environment)
+ESMF_CCOMPILERDEFAULT = $(ESMF_C)
 endif
 endif
 ifneq ($(origin ESMF_COPTFLAG), environment)
@@ -936,11 +933,10 @@ ESMF_CCOMPILECPPFLAGS   += $(ESMF_CPPFLAGS) -D__SDIR__='"$(LOCDIR)"'
 
 # - F90LINKER
 ifneq ($(origin ESMF_F90LINKER), environment)
-ifeq ($(origin ESMF_F90), environment)
-ESMF_F90LINKER = $(ESMF_F90)
-else
 ESMF_F90LINKER = $(ESMF_F90LINKERDEFAULT)
 ESMF_F90LINKERDEFAULT = $(ESMF_F90DEFAULT)
+ifeq ($(origin ESMF_F90), environment)
+ESMF_F90LINKERDEFAULT = $(ESMF_F90)
 endif
 endif
 # - make sure environment variable gets prepended _once_
@@ -990,11 +986,10 @@ ESMF_F90ESMFLINKLIBS += -lesmf $(ESMF_F90LINKLIBS)
 
 # - CXXLINKER
 ifneq ($(origin ESMF_CXXLINKER), environment)
-ifeq ($(origin ESMF_CXX), environment)
-ESMF_CXXLINKER = $(ESMF_CXX)
-else
 ESMF_CXXLINKER = $(ESMF_CXXLINKERDEFAULT)
 ESMF_CXXLINKERDEFAULT = $(ESMF_CXXDEFAULT)
+ifeq ($(origin ESMF_CXX), environment)
+ESMF_CXXLINKERDEFAULT = $(ESMF_CXX)
 endif
 endif
 # - make sure environment variable gets prepended _once_
@@ -1044,11 +1039,10 @@ ESMF_CXXESMFLINKLIBS += -lesmf $(ESMF_CXXLINKLIBS)
 
 # - CLINKER
 ifneq ($(origin ESMF_CLINKER), environment)
-ifeq ($(origin ESMF_C), environment)
-ESMF_CLINKER = $(ESMF_C)
-else
 ESMF_CLINKER = $(ESMF_CLINKERDEFAULT)
 ESMF_CLINKERDEFAULT = $(ESMF_CDEFAULT)
+ifeq ($(origin ESMF_C), environment)
+ESMF_CLINKERDEFAULT = $(ESMF_C)
 endif
 endif
 # - make sure environment variable gets prepended _once_
