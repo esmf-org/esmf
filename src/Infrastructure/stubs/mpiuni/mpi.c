@@ -6,7 +6,7 @@
 */
 #include <stddef.h>
 
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
 #include <sys/time.h>
 #else
 #include <windows.h>
@@ -179,7 +179,7 @@ int Petsc_MPI_Finalize(void)
   return 0;
 }
 
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
 // POSIX version
 double ESMC_MPI_Wtime(void)
 {

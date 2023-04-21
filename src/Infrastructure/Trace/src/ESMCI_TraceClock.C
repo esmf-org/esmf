@@ -15,7 +15,7 @@
 #include <string>
 #include <time.h>
 
-#ifndef ESMF_OS_MinGW
+#ifndef ESMF_NO_SIGNALS
 #include <unistd.h>
 #else
 #include <Winsock.h>
@@ -41,7 +41,7 @@ namespace ESMCI {
   static int traceClock = 0;
   static int64_t traceClockOffset = 0;
 
-#ifdef ESMF_OS_MinGW
+#ifdef ESMF_NO_SIGNALS
   struct timespec { long tv_sec; long tv_nsec; };
   static int unix_time(struct timespec *spec) {
     __int64 wintime; GetSystemTimeAsFileTime((FILETIME*)&wintime);
@@ -80,7 +80,7 @@ namespace ESMCI {
     (void) clock_get_time(rt_clock_serv, &mts);
     ts.tv_sec = mts.tv_sec;
     ts.tv_nsec = mts.tv_nsec;
-#elif ESMF_OS_MinGW
+#elif ESMF_NO_SIGNALS
     clock_gettime(0, &ts);
 #else
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -103,7 +103,7 @@ namespace ESMCI {
     (void) clock_get_time(rt_clock_serv, &mts);
     ts.tv_sec = mts.tv_sec;
     ts.tv_nsec = mts.tv_nsec;
-#elif ESMF_OS_MinGW
+#elif ESMF_NO_SIGNALS
     clock_gettime(0, &ts);
 #else
     clock_gettime(CLOCK_MONOTONIC, &ts);

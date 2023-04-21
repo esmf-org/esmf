@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifndef ESMF_OS_MinGW
+#ifndef ESMF_NO_SIGNALS
 #include <unistd.h>
 #else
 #include <Winsock.h>
@@ -48,7 +48,7 @@
 #include "ESMCI_Comp.h"
 #include <esmftrc.h>
 
-#ifndef ESMF_OS_MinGW
+#ifndef ESMF_NO_SIGNALS
 #define TRACE_DIR_PERMISSIONS (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
 #else
 #define TRACE_DIR_PERMISSIONS (S_IRWXU)

@@ -41,7 +41,7 @@
 #define _XOPEN_SOURCE_EXTENDED
 #endif
 
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
 #include <unistd.h>
 #include <sys/time.h>
 #else
@@ -103,7 +103,7 @@ using namespace std;
 #endif
 #endif
 
-#if defined (ESMF_OS_MinGW)
+#if defined (ESMF_NO_SIGNALS)
 // Windows equivalent to POSIX getpid(2)
 #if !defined (__GNUC__)
 typedef DWORD pid_t;
@@ -1147,7 +1147,7 @@ static void enter_callback(SpawnArg *sarg, void *mutex){
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_DEBUG);
     }
 #endif
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
     kill(sarg->contributors[i].pid, VM_SIG1);
 #else
     // TODO: Windows equivalent, perhaps using TerminateProcess
@@ -3626,7 +3626,7 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
           // use nanosleep to pause between tests to lower impact on CPU load
 #ifdef ESMF_NO_NANOSLEEP
 #else
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
           struct timespec dt = {0, nanopause};
 #endif
 #endif
@@ -3643,7 +3643,7 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
             if (completeFlag) break;
 #ifdef ESMF_NO_NANOSLEEP
 #else
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
             nanosleep(&dt, NULL);
 #else
             Sleep (1); // 1 millisec delay
@@ -7734,7 +7734,7 @@ namespace ESMCI{
 
 #ifndef ESMF_NO_SOCKETS
 
-#ifdef ESMF_OS_MinGW
+#ifdef ESMF_NO_SIGNALS
 
 #include <Windows.h>
 #include <Winsock.h>
@@ -7815,7 +7815,7 @@ namespace ESMCI {
       return SOCKERR_UNSPEC;  // bail out
     }
     // make socket non-blocking
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
     int sockFlags = fcntl(sock, F_GETFL);
     fcntl(sock, F_SETFL, sockFlags | O_NONBLOCK);   // Add non-blocking flag
 #else
@@ -7836,7 +7836,7 @@ namespace ESMCI {
     fprintf(stderr, "socketServerInit waited: %g\n", t1-t0);
     
     // close the original socket
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
     if (close(sock) < 0){
 #else
     if (closesocket(sock) < 0) {
@@ -7901,7 +7901,7 @@ namespace ESMCI {
     }
     
     // make socket non-blocking
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
     int sockFlags = fcntl(sock, F_GETFL, 0);
     fcntl(sock, F_SETFL, sockFlags | O_NONBLOCK); // Set non-blocking flag
 #else
@@ -7990,7 +7990,7 @@ namespace ESMCI {
       VMK::wtime(&t1);
     }
     // reset socket to be blocking
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
     sockFlags = fcntl(sock, F_GETFL, 0);
     fcntl(sock, F_SETFL, sockFlags & (~O_NONBLOCK));
 #else
@@ -8002,7 +8002,7 @@ namespace ESMCI {
 
     if (!connected){
       fprintf(stderr, "socketClientInit: TIMEOUT!\n");
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
       close(sock);
 #else
       closesocket (sock);
@@ -8087,7 +8087,7 @@ namespace ESMCI {
     
 
     // close the socket
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
     if (close(sock) < 0){
 #else
     if (closesocket (sock) < 0) {
