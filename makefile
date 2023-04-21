@@ -320,8 +320,12 @@ endif
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * Other relevant environment variables *"
-	-@echo "PATH:    $(PATH)"
+	-@echo "PATH:     $(PATH)"
 	-@echo "LD_LIBRARY_PATH: $(LD_LIBRARY_PATH)"
+	-@echo "LDFLAGS:  $(LDFLAGS)"
+	-@echo "CXXFLAGS: $(CXXFLAGS)"
+	-@echo "FCFLAGS:  $(FCFLAGS)"
+	-@echo "CFLAGS:   $(CFLAGS)"
 	-@echo " "
 
 #
