@@ -19,6 +19,8 @@
  * \author Jason Kraftcheck
  */
 
+#define _POSIX_C_SOURCE 200809
+
 #include "WriteSTL.hpp"
 #include "moab/CN.hpp"
 #include "moab/Interface.hpp"
@@ -27,7 +29,14 @@
 #include "moab/FileOptions.hpp"
 #include "SysUtil.hpp"
 
+#ifdef __STRICT_ANSI__
+#undef __STRICT_ANSI__
 #include <cstdio>
+#define __STRICT_ANSI__
+#else
+#include <cstdio>
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <cerrno>
@@ -48,6 +57,7 @@ typedef unsigned __int32 uint32_t;
 #define _S_IREAD  ( S_IRUSR | S_IRGRP | S_IROTH )
 #define _S_IWRITE ( S_IWUSR | S_IWGRP | S_IWOTH )
 #endif
+
 
 const int DEFAULT_PRECISION = 6;
 
