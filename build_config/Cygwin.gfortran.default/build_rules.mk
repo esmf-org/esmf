@@ -253,6 +253,3 @@ ESMF_PTHREADS := OFF
 # Windows does not have support for sockets
 #
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SOCKETS
-
-
-ESMF_CXXCOMPILECPPFLAGS += -std=gnu++11
