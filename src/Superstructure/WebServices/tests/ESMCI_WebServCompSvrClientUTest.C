@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
 #include <time.h>
 #include <unistd.h>
 #else
@@ -38,7 +38,7 @@ static char*   monthStr[] =
 };
 
 
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "getDateAndTime"
@@ -116,7 +116,7 @@ int main(int    argc,
    printf("\n");
    printf("ESMF_WebServCompSvrClientUTest\n");
    printf("-----------------------------------------------------\n");
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
    printf("  date:  %s\n", getDateAndTime());
 #endif
    printf("  host:  %s\n", host);

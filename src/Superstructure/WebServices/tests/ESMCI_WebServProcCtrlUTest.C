@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-#if !defined (ESMF_OS_MinGW)
+#if !defined (ESMF_NO_SIGNALS)
 #include <unistd.h>
 #else
 #include <Winsock.h>
