@@ -242,7 +242,7 @@ ESMF_CRPATHPREFIX           = -Wl,-rpath,
 # Determine where gfortran's libraries are located
 #
 ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
-ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
+ifeq ($(ESMF_LIBGFORTRAN),libgfortran.dylib)
 ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
 endif
 ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
@@ -250,6 +250,18 @@ ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))
 # With clang, we use a C++ linker for Fortran programs, so use the same link paths as for CXX:
 ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 ESMF_F90LINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))
+
+############################################################
+# Link against the c++ library
+#
+# Although we use the C++ linker for Fortran programs under ESMF, users might not, so still
+# add on the C++ specific information
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libc++.dylib)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) -print-file-name=libc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKLIBS  += -lm -lc++
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
