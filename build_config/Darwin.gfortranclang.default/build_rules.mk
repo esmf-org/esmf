@@ -7,7 +7,7 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = gfortran
-ESMF_F90LINKERDEFAULT   = clang++
+ESMF_F90LINKERDEFAULT   = $(ESMF_CXXLINKER)
 ESMF_CXXDEFAULT         = clang++
 ESMF_CDEFAULT           = clang
 ESMF_CLINKERDEFAULT     = clang++
@@ -35,7 +35,6 @@ ifeq ($(ESMF_COMM),mpich1)
 ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH1
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH1
 ESMF_F90DEFAULT         = mpif90
-ESMF_F90LINKERDEFAULT   = mpiCC
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_CDEFAULT           = mpicc
 ESMF_CLINKERDEFAULT     = mpiCC
@@ -46,7 +45,6 @@ else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
-ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_CLINKERDEFAULT     = mpicxx
@@ -58,7 +56,6 @@ else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich3 and up --------------------------------------------
 ESMF_F90DEFAULT         = mpif90
-ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_CLINKERDEFAULT     = mpicxx
@@ -70,7 +67,6 @@ else
 ifeq ($(ESMF_COMM),mvapich2)
 # Mvapich2 -------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
-ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CDEFAULT           = mpicc
 ESMF_CLINKERDEFAULT     = mpicxx
@@ -81,7 +77,6 @@ ifeq ($(ESMF_COMM),lam)
 # LAM (assumed to be built with gfortran) ------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
-ESMF_F90LINKERDEFAULT   = mpic++
 ESMF_CXXDEFAULT         = mpic++
 ESMF_CDEFAULT           = mpicc
 ESMF_CLINKERDEFAULT     = mpic++
@@ -97,7 +92,6 @@ ESMF_F90DEFAULT         = mpifort
 else
 ESMF_F90DEFAULT         = mpif90
 endif
-ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90_forcxx $(ESMF_F90DEFAULT))
 ESMF_CXXDEFAULT         = mpicxx
