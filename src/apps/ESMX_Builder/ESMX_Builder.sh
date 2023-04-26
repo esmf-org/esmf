@@ -3,10 +3,10 @@
 # usage instructions
 usage () {
   printf "\n"
-  printf "Usage: $0 [OPTIONS]... ESMX_BUILD_FILE\n"
+  printf "Usage: $0 [OPTIONS]... BUILD_FILE\n"
   printf "\n"
   printf "ARGUMENTS\n"
-  printf "  ESMX_BUILD_FILE\n"
+  printf "  BUILD_FILE\n"
   printf "      ESMX build configuration file\n"
   printf "      (default: esmxBuild.yaml)\n"
   printf "\n"
@@ -31,9 +31,9 @@ usage () {
   printf "      set --build-type=debug\n"
   printf "  --build-args=BUILD_ARGS\n"
   printf "      cmake arguments (e.g. -DARG=VAL)\n"
-  printf "  --disable-esmx-comps=DISABLE_ESMX_COMPS\n"
-  printf "      disable built in ESMX components\n"
-  printf "  --build-jobs=JOBS\n"
+  printf "  --disable-comps=DISABLE_COMPS\n"
+  printf "      disable components\n"
+  printf "  --build-jobs=BUILD_JOBS\n"
   printf "      number of jobs used for building esmx and components\n"
   printf "  --load-module=MODULEFILE\n"
   printf "      load modulefile before building\n"
@@ -57,15 +57,15 @@ usage_error () {
 settings () {
   printf "Settings:\n"
   printf "\n"
-  printf "  ESMX_BUILD_FILE=${ESMX_BUILD_FILE}\n"
+  printf "  BUILD_FILE=${BUILD_FILE}\n"
   printf "  ESMF_ESMXDIR=${ESMF_ESMXDIR}\n"
   printf "  ESMFMKFILE=${ESMFMKFILE}\n"
   printf "  BUILD_DIR=${BUILD_DIR}\n"
   printf "  INSTALL_PREFIX=${INSTALL_PREFIX}\n"
   printf "  BUILD_TYPE=${BUILD_TYPE}\n"
   printf "  BUILD_ARGS=${BUILD_ARGS}\n"
-  printf "  DISABLE_ESMX_COMPS=${DISABLE_ESMX_COMPS}\n"
-  printf "  JOBS=${JOBS}\n"
+  printf "  DISABLE_COMPS=${DISABLE_COMPS}\n"
+  printf "  BUILD_JOBS=${BUILD_JOBS}\n"
   printf "  MODULEFILE=${MODULEFILE}\n"
   printf "  BASHENV=${BASHENV}\n"
   printf "  TEST=${TEST}\n"
@@ -77,12 +77,12 @@ settings () {
 # default settings
 CWD="${PWD}"
 ESMFMKFILE="${ESMFMKFILE:-esmf.mk}"
-ESMX_BUILD_FILE="esmxBuild.yaml"
+BUILD_FILE="esmxBuild.yaml"
 ESMF_ESMXDIR=""
 BUILD_TYPE="release"
 BUILD_ARGS=""
-DISABLE_ESMX_COMPS=""
-JOBS=""
+DISABLE_COMPS=""
+BUILD_JOBS=""
 BUILD_DIR="${CWD}/build"
 INSTALL_PREFIX="${CWD}/install"
 MODULEFILE=""
@@ -123,14 +123,14 @@ while [[ $# -gt 0 ]]; do
     --build-args=?*) BUILD_ARGS=${1#*=} ;;
     --build-args)  usage_error "$1" "requires an argument" ;;
     --build-args=) usage_error "$1" "requires an argument" ;;
-    --build-jobs=?*) JOBS=${1#*=} ;;
+    --build-jobs=?*) BUILD_JOBS=${1#*=} ;;
     --build-jobs)  usage_error "$1" "requires an argument" ;;
     --build-jobs=) usage_error "$1" "requires an argument" ;;
-    --disable-esmx-comps=?*) DISABLE_ESMX_COMPS=${1#*=} 
-      DISABLE_ESMX_COMPS=${DISABLE_ESMX_COMPS/' '/','} 
-      DISABLE_ESMX_COMPS=${DISABLE_ESMX_COMPS/';'/','} ;;
-    --disable-esmx-comps)  usage_error  "$1" "requires an argument" ;;
-    --disable-esmx-comps=) usage_error "$1" "requires an argument" ;;
+    --disable-comps=?*) DISABLE_COMPS=${1#*=} 
+      DISABLE_COMPS=${DISABLE_COMPS/' '/','} 
+      DISABLE_COMPS=${DISABLE_COMPS/';'/','} ;;
+    --disable-comps)  usage_error  "$1" "requires an argument" ;;
+    --disable-comps=) usage_error "$1" "requires an argument" ;;
     --load-module=?*) MODULEFILE=${1#*=} ;;
     --load-module)  usage_error "$1" "requires an argument" ;;
     --load-module=) usage_error "$1" "requires an argument" ;;
@@ -171,9 +171,9 @@ fi
 
 # read ESMX build file from positional arguments
 if [[ $# -ge 1 ]]; then
-  ESMX_BUILD_FILE="${1}"
+  BUILD_FILE="${1}"
 else
-  ESMX_BUILD_FILE="esmxBuild.yaml"
+  BUILD_FILE="esmxBuild.yaml"
 fi
 
 # set ESMF_ESMXDIR using ESMFMKFILE
@@ -197,9 +197,9 @@ if [ ! -d "${ESMF_ESMXDIR}" ]; then
   usage; exit 1
 fi
 
-# check ESMX_BUILD_FILE
-if [ ! -f "${ESMX_BUILD_FILE}" ]; then
-  echo "ERROR: ESMX_BUILD_FILE is missing: ${ESMX_BUILD_FILE}"
+# check BUILD_FILE
+if [ ! -f "${BUILD_FILE}" ]; then
+  echo "ERROR: BUILD_FILE is missing: ${BUILD_FILE}"
   usage; exit 1
 fi
 
@@ -210,29 +210,29 @@ fi
 
 # cmake settings
 CMAKE_SETTINGS=("")
-if [ ! -z "${ESMX_BUILD_FILE}" ]; then
-  CMAKE_SETTINGS+=("-DESMX_BUILD_FILE=${ESMX_BUILD_FILE}")
-fi
-if [ ! -z "${DISABLE_ESMX_COMPS}" ]; then
-  CMAKE_SETTINGS+=("-DDISABLE_ESMX_COMPS=${DISABLE_ESMX_COMPS}")
+if [ ! -z "${BUILD_TYPE}" ]; then
+  CMAKE_SETTINGS+=("-DCMAKE_BUILD_TYPE=${BUILD_TYPE}")
 fi
 if [ ! -z "${INSTALL_PREFIX}" ]; then
   CMAKE_SETTINGS+=("-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}")
 fi
-if [ ! -z "${BUILD_TYPE}" ]; then
-  CMAKE_SETTINGS+=("-DCMAKE_BUILD_TYPE=${BUILD_TYPE}")
+if [ ! -z "${BUILD_FILE}" ]; then
+  CMAKE_SETTINGS+=("-DESMX_BUILD_FILE=${BUILD_FILE}")
+fi
+if [ ! -z "${DISABLE_COMPS}" ]; then
+  CMAKE_SETTINGS+=("-DESMX_DISABLE_COMPS=${DISABLE_COMPS}")
 fi
 if [ "${TEST}" = true ]; then
-  CMAKE_SETTINGS+=("-DTEST=1")
+  CMAKE_SETTINGS+=("-DESMX_TEST=ON")
 fi
 if [ "${VERBOSE}" = true ]; then
-  CMAKE_SETTINGS+=("-DVERBOSE=1")
+  CMAKE_SETTINGS+=("-DESMX_BUILD_VERBOSE=ON")
 fi
-if [ ! -z "${JOBS}" ]; then
-  CMAKE_SETTINGS+=("-DJOBS=${JOBS}")
+if [ ! -z "${BUILD_JOBS}" ]; then
+  CMAKE_SETTINGS+=("-DESMX_BUILD_JOBS=${BUILD_JOBS}")
 fi
 if [ ! -z "${BUILD_ARGS}" ]; then
-  CMAKE_SETTINGS+=("${BUILD_ARGS}")
+  CMAKE_SETTINGS+=("-DESMX_BUILD_ARGS=${BUILD_ARGS}")
 fi
 
 # make settings
@@ -240,8 +240,8 @@ BUILD_SETTINGS=("")
 if [ "${VERBOSE}" = true ]; then
   BUILD_SETTINGS+=("-v")
 fi
-if [ ! -z "${JOBS}" ]; then
-  BUILD_SETTINGS+=("-j ${JOBS}")
+if [ ! -z "${BUILD_JOBS}" ]; then
+  BUILD_SETTINGS+=("-j ${BUILD_JOBS}")
 fi
 
 # test settings
