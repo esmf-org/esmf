@@ -74,12 +74,12 @@
 \input{../Infrastructure/Geom/doc/Geom_usage}
 #endif
 
-%\subsection{Class API: General Geom Methods}
-%#ifdef STANDALONE
-%\input{ESMF_Geom_fapi}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/ESMF_Geom_fapi}
-%#endif
+\subsection{Class API: Geom Methods}
+#ifdef STANDALONE
+\input{ESMF_Geom_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Grid/doc/ESMF_Geom_fapi}
+#endif
 
 #ifdef STANDALONE
 \end{document}
