@@ -421,7 +421,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomCreate"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GeomCreate - Create a Geom from a Grid
 
 ! !INTERFACE:
@@ -452,7 +452,7 @@ end interface
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
     type(ESMF_GeomClass),pointer :: gbcp
     type(ESMF_StaggerLoc)  :: localStaggerLoc
     integer :: localrc ! local error status
@@ -500,7 +500,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomCreate"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GeomCreate - Create a Geom from a Mesh
 
 ! !INTERFACE:
@@ -527,7 +527,7 @@ end interface
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
     type(ESMF_GeomClass),pointer :: gbcp
     integer                          :: localrc ! local error status
     type(ESMF_MeshLoc)               :: localMeshLoc
@@ -580,7 +580,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomCreate"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GeomCreate - Create a Geom from a LocStream
 
 ! !INTERFACE:
@@ -606,7 +606,7 @@ end interface
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
     type(ESMF_GeomClass),pointer :: gbcp
     integer :: localrc ! local error status
 
@@ -646,7 +646,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomCreate"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GeomCreate - Create a Geom from an XGrid
 
 ! !INTERFACE:
@@ -678,7 +678,7 @@ end interface
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
     type(ESMF_GeomClass),pointer :: gbcp
     integer :: localrc ! local error status
     integer :: localGridIndex
@@ -734,7 +734,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomDestroy"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GeomDestroy - Release resources associated with a Geom
 
 ! !INTERFACE:
@@ -755,7 +755,7 @@ end interface
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 
     ! Initialize return code; assume failure until success is certain
     integer                 :: localrc ! local error status
