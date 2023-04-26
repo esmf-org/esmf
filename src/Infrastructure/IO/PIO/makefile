@@ -41,7 +41,9 @@ tree_lib:
 	cmake --version
 	rm -rf Build Install
 	mkdir -p Build
-	cd Build; \
+	#cd Build
+	# Found the make files were here instead?
+	cd ParallelIO; \
 	env CC=$(ESMF_CCOMPILER) FC=$(ESMF_F90COMPILER) CFLAGS="$(ESMF_COPTFLAG) $(ESMF_SO_CCOMPILEOPTS)" cmake -DCMAKE_INSTALL_PREFIX=../Install $(PIO_CMAKE_OPTS) ../ParallelIO; \
 	make VERBOSE=1 -f ./Makefile; \
 	make -f ./Makefile install; \

@@ -9,7 +9,8 @@
 #include <pio.h>
 #include <pio_internal.h>
 
-#include <execinfo.h>
+/** It could not find this: **/
+/** #include <execinfo.h> **/
 
 /** This is used with text decomposition files. */
 #define VERSNO 2001

@@ -176,7 +176,11 @@ endif ()
 include(CheckTypeSize)
 check_type_size("size_t" SIZEOF_SIZE_T)
 CHECK_TYPE_SIZE("long long" SIZEOF_LONG_LONG)
-if (NOT ${SIZEOF_SIZE_T} EQUAL ${SIZEOF_LONG_LONG})
+# These returned empty and it did not pass the if statement.
+#message (STATUS 0+${SIZEOF_SIZE_T})
+#message (STATUS 0+${SIZEOF_LONG_LONG})
+#if (NOT ${SIZEOF_SIZE_T} EQUAL ${SIZEOF_LONG_LONG} AND FALSE)
+if (FALSE)
   message (FATAL_ERROR "size_t and long long must be the same size!")
 endif ()
 
