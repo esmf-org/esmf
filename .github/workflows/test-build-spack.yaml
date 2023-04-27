@@ -22,8 +22,6 @@ jobs:
         #compiler: [oneapi@2023.0.0]
         compiler: [gcc@11.3.0]
         #esmf: [esmf@8.4.1, esmf@8.4.1~external-parallelio]
-        esmf: [esmf@8.4.1~pnetcdf, esmf@8.4.1~external-parallelio]
-        esmf: [esmf@8.4.2~xerces, esmf@8.4.2~parallelio~xerces]
         esmf: [esmf@8.4.2+parallelio~xerces~pnetcdf^parallelio@2.5.10, esmf@8.4.2+pio~parallelio~xerces~pnetcdf, esmf@develop+pio~parallelio~xerces~pnetcdf]
 
     steps:
