@@ -72,17 +72,16 @@ echo "::endgroup::"
 
 # process output
 echo "::group::Process Output of NUOPC Application Prototypes"
-result=`sed -n '/== TEST SUMMARY START ==/, /== TEST SUMMARY STOP ==/p' testProtos.log`
-result_fail=`echo $result | grep "FAIL"`
-result_pass=`echo $result | grep "PASS"`
+sed -n '/== TEST SUMMARY START ==/, /== TEST SUMMARY STOP ==/p' testProtos.log >& testProtos_summary.log
+result_fail=`cat testProtos_summary.log | grep "FAIL"`
 echo "-------------"
 echo "FAILED TESTS:"
 echo "-------------"
-echo "$result_fail"
+cat testProtos_summary.log | grep "FAIL"
 echo "-------------"
 echo "PASSED TESTS:"
 echo "-------------"
-echo "$result_pass"
+cat testProtos_summary.log | grep "PASS"
 if [[ ! -z "$result_fail" ]]; then
   echo "Some of NUOPC app prototypes are failed! Exiting ..."
   exit 1
