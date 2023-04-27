@@ -42,11 +42,12 @@ module esmx_data
 
   type xdata_state
     ! component information
-    character(32) :: cname      = "XDATA"
-    integer       :: verbosity  =  0
-    integer       :: diagnostic =  0
-    integer       :: myid       = -1
-    integer       :: outid      =  0
+    character(32) :: cname       = "XDATA"
+    integer       :: verbosity   =  0
+    integer       :: diagnostic  =  0
+    logical       :: write_final = .true.
+    integer       :: myid        = -1
+    integer       :: outid       =  0
     type(ESMF_VM) :: vm
     ! grid information
     integer                  :: nx = 64
@@ -545,6 +546,11 @@ module esmx_data
     type(xstate_wrap)          :: is
     type(xdata_state), pointer :: xstate
     type(xdata_field), pointer :: xfield
+    type(ESMF_State)           :: importState
+    type(ESMF_State)           :: exportState
+    integer                    :: fc
+    type(ESMF_Field), pointer  :: fl(:)
+    type(ESMF_FieldBundle)     :: fb
 
     rc = ESMF_SUCCESS
 
@@ -566,6 +572,56 @@ module esmx_data
       verbosity=xstate%verbosity, diagnostic=xstate%diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
+
+    ! write final import and export states
+    if (xstate%write_final) then
+      call NUOPC_ModelGet(xdata, importState=importState, &
+        exportState=exportState, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      call NUOPC_GetStateMemberCount(importState, fieldCount=fc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (fc .gt. 0) then
+        nullify(fl)
+        call NUOPC_GetStateMemberLists(importState, fieldList=fl, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        fb = ESMF_FieldBundleCreate(fieldList=fl, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        call ESMF_FieldBundleWrite(fb, &
+          fileName=trim(xstate%cname)//"_final_import.nc", &
+          overwrite=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        call ESMF_FieldBundleDestroy(fb, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        deallocate(fl)
+      endif
+      call NUOPC_GetStateMemberCount(exportState, fieldCount=fc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      if (fc .gt. 0) then
+        nullify(fl)
+        call NUOPC_GetStateMemberLists(exportState, fieldList=fl, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        fb = ESMF_FieldBundleCreate(fieldList=fl, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        call ESMF_FieldBundleWrite(fb, &
+          fileName=trim(xstate%cname)//"_final_export.nc", &
+          overwrite=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        call ESMF_FieldBundleDestroy(fb, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=__FILE__)) return
+        deallocate(fl)
+      endif
+    endif
 
     ! destroy import fields
     do while (associated(xstate%imp_flds_head))
@@ -629,6 +685,16 @@ module esmx_data
         line=__LINE__, file=__FILE__, rcToReturn=rc)
       return
     endif
+
+    ! diagnostics
+    call ESMF_AttributeGet(xdata, name="write_final", value=attval, &
+      defaultValue="true", convention="NUOPC", purpose="Instance", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    attval = ESMF_UtilStringLowerCase(attval, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    xstate%write_final = (attval .eq. "true")
 
     ! dimensions
     call ESMF_AttributeGet(xdata, name="nx", value=attval, &
@@ -1212,5 +1278,7 @@ module esmx_data
       xfield%okay = .false.
     endif
   endsubroutine x_comp_check_field
+
+  !-----------------------------------------------------------------------------
 
 endmodule esmx_data
