@@ -22,7 +22,7 @@ jobs:
         #compiler: [oneapi@2023.0.0]
         compiler: [gcc@11.3.0]
         #esmf: [esmf@8.4.1, esmf@8.4.1~external-parallelio]
-        esmf: [esmf@8.4.1, esmf@8.4.1~parallelio~xerces]
+        esmf: [esmf@8.4.1~xerces, esmf@8.4.1~parallelio~xerces]
 
     steps:
     # check out base repo
