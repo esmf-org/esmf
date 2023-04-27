@@ -1,5 +1,6 @@
 [![ESMF Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmf-docs.yml)
 [![ESMPy Doc Build](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml/badge.svg)](https://github.com/esmf-org/esmf/actions/workflows/build-esmpy-docs.yml)
+[![Build ESMF Using Spack](https://github.com/uturuncoglu/esmf/actions/workflows/test-build-spack.yaml/badge.svg)](https://github.com/uturuncoglu/esmf/actions/workflows/test-build-spack.yaml)
 
 # Earth System Modeling Framework (ESMF)
 

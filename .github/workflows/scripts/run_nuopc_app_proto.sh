@@ -74,14 +74,19 @@ echo "::endgroup::"
 echo "::group::Process Output of NUOPC Application Prototypes"
 lineFrom=`cat -n testProtos.log | grep "== TEST SUMMARY START ==" | awk '{print $1}'`
 lineTo=`cat -n testProtos.log | grep "== TEST SUMMARY STOP ==" | awk '{print $1}'`
-result=`sed -n '${lineFrom},${lineTo}p' testProtos.log | grep "FAIL"`
-if [[ ! -z "$result" ]]; then
-  echo "Failed NUOPC app prototypes ..."
-  echo $result
+echo "Show summary of logs between line ${lineFrom} to ${lineTo}"
+result_fail=`sed -n '${lineFrom},${lineTo}p' testProtos.log | grep "FAIL"`
+result_pass=`sed -n '${lineFrom},${lineTo}p' testProtos.log | grep "PASS"`
+echo "-------------"
+echo "FAILED TESTS:"
+echo "-------------"
+echo "$result_fail"
+echo "-------------"
+echo "PASSED TESTS:"
+echo "-------------"
+echo "$result_pass"
+if [[ ! -z "$result_fail" ]]; then
+  echo "Some NUOPC app prototypes are failed!"
   exit 1
-else
-  echo "All NUOPC app prototypes are PASSED"
-  result=`sed -n '${lineFrom},${lineTo}p' testProtos.log | grep "PASS"`
-  echo $result
 fi
 echo "::endgroup::"
