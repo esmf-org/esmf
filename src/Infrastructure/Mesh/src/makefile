@@ -9,6 +9,7 @@ ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 SOURCEC	  = \
             ESMCI_ClumpPnts.C \
             ESMCI_MathUtil.C \
+            ESMCI_DInfo.C \
             ESMCI_Mesh_Glue.C \
             ESMCI_FileIO_Util.C \
             ESMCI_ESMFMesh_Util.C \

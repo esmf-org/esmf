@@ -867,13 +867,16 @@ class MCT {
         int has_status_array = 0;
         ESMCI::Array *dummy_status_array = NULL;
         int check_flag = 0;
+        int vectorRegrid=0;
 
+        
         // calculate weights between mesh and pointlist
         MeshCap::regrid_create(&mesh, &array, &pl, 
                                &target, &array, &target_pl, 
                                &regrid_method, 
                                &map_type, 
-                               &norm_type, 
+                               &norm_type,
+                               &vectorRegrid, 
                                &pole_type, &regrid_pole_npnts, 
                                &extrap_method, &extrap_num_src_pts,
                                &extrap_dist_exponent, &extrap_num_levels,
