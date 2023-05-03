@@ -31,6 +31,11 @@ echo "Spack Install Directory: $spack_install_dir";
 # go to directory
 cd $run_dir
 
+# output esmf.mk file for debugging
+echo "::group::Content of esmf.mk"
+cat $spack_install_dir/view/lib/esmf.mk
+echo "::endgroup::"
+
 # debug
 echo "::group::Prepare Environment and Debug Output for NUOPC Application Prototypes"
 export ESMFMKFILE=$spack_install_dir/view/lib/esmf.mk
