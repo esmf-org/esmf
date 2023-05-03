@@ -71,11 +71,32 @@ module ESMF_HConfigMod
     ESMF_INIT_DECLARE
   end type
 
+  ! Fortran type to hold pointer to C++ object
+  type ESMF_HConfigIter
+#ifndef ESMF_NO_SEQUENCE
+  sequence
+#endif
+  private
+    ! 20 x 4-byte to safely store a few items on the C++ side. This size has
+    ! been emperically determined, and might need to increase if the C++ side
+    ! changes!
+    ! Keeping this memory as shallow on the stack eliminates the need for
+    ! complicated garbage collection around heap memory.
+#ifndef ESMF_NO_INITIALIZERS
+    integer(ESMF_KIND_I4), dimension(20) :: shallowMemory = 0
+#else
+    integer(ESMF_KIND_I4), dimension(20) :: shallowMemory
+#endif
+    logical ::  loopFirst = .true.
+    ESMF_INIT_DECLARE
+  end type
+
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_HConfig
+  public ESMF_HConfigIter
 
 !------------------------------------------------------------------------------
 !
@@ -174,16 +195,15 @@ module ESMF_HConfigMod
   public ESMF_HConfigIsSequenceMapKey
   public ESMF_HConfigIsSequenceMapVal
 
-  public ESMF_HConfigIsIterator
-  public ESMF_HConfigIsMapIterator
-  public ESMF_HConfigIsSequenceIterator
-
+  public ESMF_HConfigIterAsHConfig
   public ESMF_HConfigIterBegin
   public ESMF_HConfigIterBeginMapKey
   public ESMF_HConfigIterBeginMapVal
   public ESMF_HConfigIterEnd
   public ESMF_HConfigIterEndMapKey
   public ESMF_HConfigIterEndMapVal
+  public ESMF_HConfigIterIsMap
+  public ESMF_HConfigIterIsSequence
   public ESMF_HConfigIterLoop
   public ESMF_HConfigIterNext
 
@@ -207,22 +227,6 @@ module ESMF_HConfigMod
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-
-  interface ESMF_HConfigCreate
-    module procedure ESMF_HConfigCreateDefault
-    module procedure ESMF_HConfigCreateHConfig
-    module procedure ESMF_HConfigCreateI4
-    module procedure ESMF_HConfigCreateI4Seq
-    module procedure ESMF_HConfigCreateI8
-    module procedure ESMF_HConfigCreateI8Seq
-    module procedure ESMF_HConfigCreateLogical
-    module procedure ESMF_HConfigCreateLogicalSeq
-    module procedure ESMF_HConfigCreateR4
-    module procedure ESMF_HConfigCreateR4Seq
-    module procedure ESMF_HConfigCreateR8
-    module procedure ESMF_HConfigCreateR8Seq
-    module procedure ESMF_HConfigCreateStringSeq
-  end interface
 
   interface ESMF_HConfigAdd
     module procedure ESMF_HConfigAddHConfig
@@ -270,6 +274,22 @@ module ESMF_HConfigMod
     module procedure ESMF_HConfigAddMapValR8Seq
     module procedure ESMF_HConfigAddMapValString
     module procedure ESMF_HConfigAddMapValStringSeq
+  end interface
+
+  interface ESMF_HConfigCreate
+    module procedure ESMF_HConfigCreateDefault
+    module procedure ESMF_HConfigCreateHConfig
+    module procedure ESMF_HConfigCreateI4
+    module procedure ESMF_HConfigCreateI4Seq
+    module procedure ESMF_HConfigCreateI8
+    module procedure ESMF_HConfigCreateI8Seq
+    module procedure ESMF_HConfigCreateLogical
+    module procedure ESMF_HConfigCreateLogicalSeq
+    module procedure ESMF_HConfigCreateR4
+    module procedure ESMF_HConfigCreateR4Seq
+    module procedure ESMF_HConfigCreateR8
+    module procedure ESMF_HConfigCreateR8Seq
+    module procedure ESMF_HConfigCreateStringSeq
   end interface
 
   interface ESMF_HConfigSet
@@ -355,6 +375,7 @@ module ESMF_HConfigMod
 !
 !EOP
     module procedure ESMF_HConfigEQ
+    module procedure ESMF_HConfigIterEQ
 
   end interface
 !------------------------------------------------------------------------------
@@ -394,6 +415,7 @@ module ESMF_HConfigMod
 !
 !EOP
     module procedure ESMF_HConfigNE
+    module procedure ESMF_HConfigIterNE
 
   end interface
 !------------------------------------------------------------------------------
@@ -425,8 +447,8 @@ contains
     type(ESMF_HConfig), intent(in) :: HConfig2
 
 ! !DESCRIPTION:
-!   Test if both {\tt HConfig1} and {\tt HConfig2} alias the same ESMF HConfig 
-!   object.
+!   Test if both {\tt HConfig1} and {\tt HConfig2} alias the same
+!   ESMF HConfig object.
 !
 !EOPI
 !-------------------------------------------------------------------------------
@@ -458,6 +480,54 @@ contains
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterEQ()"
+!BOPI
+! !IROUTINE:  ESMF_HConfigIterEQ - Compare two HConfigIters for equality
+!
+! !INTERFACE:
+  function ESMF_HConfigIterEQ(HConfig1, HConfig2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_HConfigIterEQ
+
+! !ARGUMENTS:
+    type(ESMF_HConfigIter), intent(in) :: HConfig1
+    type(ESMF_HConfigIter), intent(in) :: HConfig2
+
+! !DESCRIPTION:
+!   Test if both {\tt HConfig1} and {\tt HConfig2} alias the same
+!   ESMF HConfigIter object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE init1, init2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! check inputs
+    init1 = ESMF_HConfigIterGetInit(HConfig1)
+    init2 = ESMF_HConfigIterGetInit(HConfig2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (init1 .eq. ESMF_INIT_CREATED .and. &
+      init2 .eq. ESMF_INIT_CREATED) then
+      ESMF_HConfigIterEQ = all(HConfig1%shallowMemory .eq. HConfig2%shallowMemory)
+    else
+      ESMF_HConfigIterEQ = .false.
+    endif
+
+  end function ESMF_HConfigIterEQ
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigNE()"
 !BOPI
 ! !IROUTINE:  ESMF_HConfigNE - Compare two HConfigs for non-equality
@@ -482,6 +552,35 @@ contains
     ESMF_HConfigNE = .not.ESMF_HConfigEQ(HConfig1, HConfig2)
 
   end function ESMF_HConfigNE
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterNE()"
+!BOPI
+! !IROUTINE:  ESMF_HConfigIterNE - Compare two HConfigIters for non-equality
+!
+! !INTERFACE:
+  function ESMF_HConfigIterNE(HConfig1, HConfig2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_HConfigIterNE
+
+! !ARGUMENTS:
+    type(ESMF_HConfigIter), intent(in) :: HConfig1
+    type(ESMF_HConfigIter), intent(in) :: HConfig2
+
+! !DESCRIPTION:
+!   Test if both {\tt HConfig1} and {\tt HConfig2} alias the same
+!   ESMF HConfigIter object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_HConfigIterNE = .not.ESMF_HConfigIterEQ(HConfig1, HConfig2)
+
+  end function ESMF_HConfigIterNE
 !-------------------------------------------------------------------------------
 
 
@@ -595,7 +694,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4MapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -611,7 +710,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -640,7 +739,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -694,7 +793,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4) :: ESMF_HConfigAsI4MapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -710,7 +809,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -739,7 +838,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -908,7 +1007,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), allocatable :: ESMF_HConfigAsI4SeqMapKey(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -954,7 +1053,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -1023,7 +1122,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), allocatable :: ESMF_HConfigAsI4SeqMapVal(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -1039,7 +1138,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -1069,7 +1168,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -1235,7 +1334,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8MapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -1251,7 +1350,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -1280,7 +1379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -1334,7 +1433,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I8) :: ESMF_HConfigAsI8MapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -1350,7 +1449,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -1379,7 +1478,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -1548,7 +1647,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I8), allocatable :: ESMF_HConfigAsI8SeqMapKey(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -1564,7 +1663,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -1594,7 +1693,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -1663,7 +1762,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I8), allocatable :: ESMF_HConfigAsI8SeqMapVal(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -1679,7 +1778,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -1709,7 +1808,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -1879,7 +1978,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigAsLogicalMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -1895,7 +1994,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -1925,7 +2024,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -1980,7 +2079,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigAsLogicalMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -1996,7 +2095,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -2026,7 +2125,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -2196,7 +2295,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical, allocatable :: ESMF_HConfigAsLogicalSeqMapKey(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -2212,7 +2311,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -2242,7 +2341,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -2311,7 +2410,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical, allocatable :: ESMF_HConfigAsLogicalSeqMapVal(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -2327,7 +2426,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -2357,7 +2456,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -2523,7 +2622,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4) :: ESMF_HConfigAsR4MapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -2539,7 +2638,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -2568,7 +2667,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -2622,7 +2721,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4) :: ESMF_HConfigAsR4MapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -2667,7 +2766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -2836,7 +2935,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), allocatable :: ESMF_HConfigAsR4SeqMapKey(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -2852,7 +2951,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -2882,7 +2981,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -2951,7 +3050,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), allocatable :: ESMF_HConfigAsR4SeqMapVal(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -2967,7 +3066,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -2997,7 +3096,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -3163,7 +3262,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8) :: ESMF_HConfigAsR8MapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -3179,7 +3278,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -3208,7 +3307,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -3262,7 +3361,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8) :: ESMF_HConfigAsR8MapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -3278,7 +3377,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -3307,7 +3406,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -3476,7 +3575,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), allocatable :: ESMF_HConfigAsR8SeqMapKey(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -3492,7 +3591,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -3522,7 +3621,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -3591,7 +3690,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), allocatable :: ESMF_HConfigAsR8SeqMapVal(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -3607,7 +3706,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -3637,7 +3736,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -3824,7 +3923,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=:), allocatable :: ESMF_HConfigAsStringMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -3840,7 +3939,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -3870,7 +3969,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -3942,7 +4041,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=:), allocatable :: ESMF_HConfigAsStringMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -3958,7 +4057,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -3988,7 +4087,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -4179,7 +4278,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=:), allocatable :: ESMF_HConfigAsStringSeqMapKey(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     integer,            intent(in)            :: stringLen
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -4196,7 +4295,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[stringLen]
 !     Number of characters in each of the output strings. Longer actual strings
 !     are tuncated, while shorter actual strings are padded with white space.
@@ -4229,7 +4328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapKey(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -4298,7 +4397,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=:), allocatable :: ESMF_HConfigAsStringSeqMapVal(:)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     integer,            intent(in)            :: stringLen
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -4315,7 +4414,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[stringLen]
 !     Number of characters in each of the output strings. Longer actual strings
 !     are tuncated, while shorter actual strings are padded with white space.
@@ -4348,7 +4447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     isScalar = ESMF_HConfigIsScalarMapVal(hconfig, index=index, &
       keyString=keyString, doc=doc, rc=localrc)
@@ -5584,7 +5683,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     type(ESMF_HConfig), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -5607,7 +5706,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -5638,7 +5737,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(addKey).or.present(addKeyString)) then
       if (present(addKeyString)) then
@@ -5708,7 +5807,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -5730,7 +5829,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -5759,7 +5858,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5795,7 +5894,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -5817,7 +5916,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -5846,7 +5945,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5882,7 +5981,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -5904,7 +6003,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -5933,7 +6032,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5969,7 +6068,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -5991,7 +6090,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -6020,7 +6119,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6056,7 +6155,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -6078,7 +6177,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -6107,7 +6206,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6143,7 +6242,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -6165,7 +6264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -6194,7 +6293,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6230,7 +6329,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -6252,7 +6351,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -6281,7 +6380,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6317,7 +6416,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -6368,7 +6467,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6404,7 +6503,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -6426,7 +6525,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -6455,7 +6554,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6491,7 +6590,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -6513,7 +6612,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -6542,7 +6641,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6578,7 +6677,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -6600,7 +6699,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -6629,7 +6728,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6665,7 +6764,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -6687,7 +6786,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -6716,7 +6815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6752,7 +6851,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     type(ESMF_HConfig), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -6775,7 +6874,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -6806,7 +6905,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(addKey).or.present(addKeyString)) then
       if (present(addKeyString)) then
@@ -6876,7 +6975,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -6898,7 +6997,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -6927,7 +7026,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6963,7 +7062,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -6985,7 +7084,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7014,7 +7113,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7050,7 +7149,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -7072,7 +7171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7101,7 +7200,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7137,7 +7236,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -7159,7 +7258,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7188,7 +7287,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7224,7 +7323,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -7246,7 +7345,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7275,7 +7374,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7311,7 +7410,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -7333,7 +7432,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7362,7 +7461,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7398,7 +7497,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -7420,7 +7519,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7449,7 +7548,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7485,7 +7584,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -7507,7 +7606,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7536,7 +7635,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7572,7 +7671,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -7594,7 +7693,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7623,7 +7722,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7659,7 +7758,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -7681,7 +7780,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7710,7 +7809,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7746,7 +7845,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -7768,7 +7867,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7797,7 +7896,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7833,7 +7932,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     addKey, addKeyString, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
@@ -7855,7 +7954,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -7884,7 +7983,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -8816,7 +8915,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig) :: ESMF_HConfigCreateAtMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     type(ESMF_HConfig), intent(in),  optional :: key
@@ -8832,7 +8931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with
 !     {\tt key} and {\tt keyString}.
@@ -8861,7 +8960,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigCreateAtMapKey%shallowMemory = 0
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     ! Check mutual exclusions
     if ((present(index) .and. (present(key) .or. present(keyString))) &
@@ -8923,7 +9022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig) :: ESMF_HConfigCreateAtMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     type(ESMF_HConfig), intent(in),  optional :: key
@@ -8939,7 +9038,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with
 !     {\tt key} and {\tt keyString}.
@@ -8968,7 +9067,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigCreateAtMapVal%shallowMemory = 0
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     ! Check mutual exclusions
     if ((present(index) .and. (present(key) .or. present(keyString))) &
@@ -9220,7 +9319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: ESMF_HConfigGetSizeMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -9233,7 +9332,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -9257,7 +9356,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigGetSizeMapKey = 0   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -9303,7 +9402,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: ESMF_HConfigGetSizeMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -9316,7 +9415,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -9340,7 +9439,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigGetSizeMapVal = 0   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -9480,7 +9579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=:), allocatable :: ESMF_HConfigGetTagMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -9493,7 +9592,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -9515,7 +9614,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -9577,7 +9676,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=:), allocatable :: ESMF_HConfigGetTagMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -9590,7 +9689,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -9612,7 +9711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -9760,7 +9859,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIsDefinedMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -9775,7 +9874,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -9799,7 +9898,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIsDefinedMapKey = .false.   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -9846,7 +9945,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIsDefinedMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -9861,7 +9960,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -9885,7 +9984,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIsDefinedMapVal = .false.   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -10017,7 +10116,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIsNullMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -10032,7 +10131,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -10056,7 +10155,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIsNullMapKey = .false.   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -10103,7 +10202,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIsNullMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -10118,7 +10217,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -10142,7 +10241,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIsNullMapVal = .false.   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -10274,7 +10373,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIsMapMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -10289,7 +10388,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -10313,7 +10412,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIsMapMapKey = .false.   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -10360,7 +10459,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIsMapMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -10375,7 +10474,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -10399,7 +10498,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIsMapMapVal = .false.   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -10531,7 +10630,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIsScalarMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -10546,7 +10645,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -10570,7 +10669,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIsScalarMapKey = .false.   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -10617,7 +10716,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIsScalarMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -10632,7 +10731,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -10656,7 +10755,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIsScalarMapVal = .false.   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -10788,7 +10887,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIsSequenceMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -10803,7 +10902,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -10827,7 +10926,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIsSequenceMapKey = .false.   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -10874,7 +10973,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIsSequenceMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
@@ -10889,7 +10988,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -10913,7 +11012,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIsSequenceMapVal = .false.   ! initialize
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -10949,29 +11048,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsIterator()"
+#define ESMF_METHOD "ESMF_HConfigIterAsHConfig()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsIterator - Check whether HConfig node is Iterator
+! !IROUTINE: ESMF_HConfigIterAsHConfig - Interpret an iterator as hconfig
 
 ! !INTERFACE:
-  function ESMF_HConfigIsIterator(hconfig, keywordEnforcer, rc)
+  function ESMF_HConfigIterAsHConfig(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsIterator
+    type(ESMF_HConfig) :: ESMF_HConfigIterAsHConfig
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
+!   Return an {\tt ESMF\_HConfig} object
 !
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -10979,134 +11076,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsIterator = .false.   ! initialize
-
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigIsIterator(hconfig, flag, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    ESMF_HConfigIsIterator = flag
+    ! Copy the shallow memory
+    ESMF_HConfigIterAsHConfig%shallowMemory = hconfig%shallowMemory
+    ESMF_HConfigIterAsHConfig%loopFirst = hconfig%loopFirst
 
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapIterator()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsMapIterator - Check whether HConfig node is Map Iterator
-
-! !INTERFACE:
-  function ESMF_HConfigIsMapIterator(hconfig, keywordEnforcer, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapIterator
-!
-! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ESMF_HConfigIsMapIterator = .false.   ! initialize
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigIsMapIterator(hconfig, flag, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    ESMF_HConfigIsMapIterator = flag
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsSequenceIterator()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsSequenceIterator - Check whether HConfig node is Sequence Iterator
-
-! !INTERFACE:
-  function ESMF_HConfigIsSequenceIterator(hconfig, keywordEnforcer, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsSequenceIterator
-!
-! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ESMF_HConfigIsSequenceIterator = .false.   ! initialize
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_HConfigIsSeqIterator(hconfig, flag, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    ESMF_HConfigIsSequenceIterator = flag
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_HConfigIterAsHConfig)
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -11124,7 +11107,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_HConfigIterBegin(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigIterBegin
+    type(ESMF_HConfigIter) :: ESMF_HConfigIterBegin
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -11180,10 +11163,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_HConfigIterBeginMapKey(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigIterBeginMapKey
+    type(ESMF_HConfigIter) :: ESMF_HConfigIterBeginMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
@@ -11193,7 +11176,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -11210,7 +11193,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIterBeginMapKey%shallowMemory = 0
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_HConfigIterBeginMapKey(hconfig, ESMF_HConfigIterBeginMapKey, &
@@ -11237,10 +11220,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_HConfigIterBeginMapVal(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigIterBeginMapVal
+    type(ESMF_HConfigIter) :: ESMF_HConfigIterBeginMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
@@ -11250,7 +11233,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -11267,7 +11250,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIterBeginMapVal%shallowMemory = 0
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_HConfigIterBeginMapVal(hconfig, ESMF_HConfigIterBeginMapVal, &
@@ -11294,7 +11277,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_HConfigIterEnd(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigIterEnd
+    type(ESMF_HConfigIter) :: ESMF_HConfigIterEnd
 !
 ! !ARGUMENTS:
     type(ESMF_HConfig), intent(in)            :: hconfig
@@ -11350,10 +11333,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_HConfigIterEndMapKey(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigIterEndMapKey
+    type(ESMF_HConfigIter) :: ESMF_HConfigIterEndMapKey
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
@@ -11363,7 +11346,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -11380,7 +11363,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIterEndMapKey%shallowMemory = 0
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_HConfigIterEndMapKey(hconfig, ESMF_HConfigIterEndMapKey, &
@@ -11407,10 +11390,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_HConfigIterEndMapVal(hconfig, keywordEnforcer, rc)
 ! !RETURN VALUE:
-    type(ESMF_HConfig) :: ESMF_HConfigIterEndMapVal
+    type(ESMF_HConfigIter) :: ESMF_HConfigIterEndMapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
@@ -11420,7 +11403,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -11437,7 +11420,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIterEndMapVal%shallowMemory = 0
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_HConfigIterEndMapVal(hconfig, ESMF_HConfigIterEndMapVal, &
@@ -11447,6 +11430,118 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_HConfigIterEndMapVal)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterIsMap()"
+!BOP
+! !IROUTINE: ESMF_HConfigIterIsMap - Check whether HConfig iterator is Map
+
+! !INTERFACE:
+  function ESMF_HConfigIterIsMap(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    logical :: ESMF_HConfigIterIsMap
+!
+! !ARGUMENTS:
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
+!   returned, the return value of the function will also be {\tt .false.}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig]
+!     {\tt ESMF\_HConfigIter} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigIterIsMap = .false.   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigIsMapIterator(hconfig, flag, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ESMF_HConfigIterIsMap = flag
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterIsSequence()"
+!BOP
+! !IROUTINE: ESMF_HConfigIterIsSequence - Check whether HConfig iterator is Sequence
+
+! !INTERFACE:
+  function ESMF_HConfigIterIsSequence(hconfig, keywordEnforcer, rc)
+! !RETURN VALUE:
+    logical :: ESMF_HConfigIterIsSequence
+!
+! !ARGUMENTS:
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
+!   returned, the return value of the function will also be {\tt .false.}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[hconfig]
+!     {\tt ESMF\_HConfigIter} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer               :: localrc                ! local return code
+    type(ESMF_Logical)    :: flag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigIterIsSequence = .false.   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_HConfigIsSeqIterator(hconfig, flag, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ESMF_HConfigIterIsSequence = flag
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -11467,9 +11562,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: ESMF_HConfigIterLoop
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(inout)         :: hconfig
-    type(ESMF_HConfig), intent(in)            :: hconfigBegin
-    type(ESMF_HConfig), intent(in)            :: hconfigEnd
+    type(ESMF_HConfigIter), intent(inout)     :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfigBegin
+    type(ESMF_HConfigIter), intent(in)        :: hconfigEnd
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
@@ -11485,12 +11580,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     The {\tt ESMF\_HConfig} iterator object. Must enter equal to
+!     The {\tt ESMF\_HConfigIter} object. Must enter equal to
 !     {\tt hconfigBegin} on the first loop step.
 !   \item[hconfigBegin]
-!     The {\tt ESMF\_HConfig} iterator to begin at.
+!     The {\tt ESMF\_HConfigIter} to begin at.
 !   \item[hconfigEnd]
-!     The {\tt ESMF\_HConfig} iterator that marks the end of the loop.
+!     The {\tt ESMF\_HConfigIter} that marks the end of the loop.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -11507,9 +11602,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_HConfigIterLoop = .false.
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfigBegin, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfigEnd, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfigBegin, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfigEnd, rc)
 
     ! detect hconfigEnd condition early
     if (hconfig == hconfigEnd) return
@@ -11547,7 +11642,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigIterNext(hconfig, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(inout)         :: hconfig
+    type(ESMF_HConfigIter), intent(inout)         :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 
@@ -11557,7 +11652,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object must be iterator.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -11571,7 +11666,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_HConfigIterNext(hconfig, localrc)
@@ -12758,7 +12853,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     type(ESMF_HConfig), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -12774,7 +12869,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -12797,7 +12892,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
@@ -12837,7 +12932,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyI4(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12852,7 +12947,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -12873,7 +12968,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -12907,7 +13002,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyI4Seq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12922,7 +13017,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -12943,7 +13038,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -12977,7 +13072,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyI8(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -12992,7 +13087,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13013,7 +13108,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13047,7 +13142,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyI8Seq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13062,7 +13157,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13083,7 +13178,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13117,7 +13212,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyLogical(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13132,7 +13227,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13153,7 +13248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13187,7 +13282,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyLogicalSeq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13202,7 +13297,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13223,7 +13318,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13257,7 +13352,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyR4(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13293,7 +13388,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13327,7 +13422,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyR4Seq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13342,7 +13437,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13363,7 +13458,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13397,7 +13492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyR8(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13412,7 +13507,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13433,7 +13528,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13467,7 +13562,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyR8Seq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13482,7 +13577,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13503,7 +13598,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13537,7 +13632,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyString(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13552,7 +13647,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13573,7 +13668,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13607,7 +13702,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapKeyStringSeq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13622,7 +13717,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13643,7 +13738,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13678,7 +13773,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     type(ESMF_HConfig), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -13694,7 +13789,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13717,7 +13812,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     if (present(index).or.present(keyString).or.present(doc)) then
       hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
@@ -13757,7 +13852,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValI4(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13772,7 +13867,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13793,7 +13888,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13827,7 +13922,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValI4Seq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13842,7 +13937,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13863,7 +13958,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13897,7 +13992,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValI8(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13912,7 +14007,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -13933,7 +14028,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13967,7 +14062,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValI8Seq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13982,7 +14077,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -14003,7 +14098,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -14037,7 +14132,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValLogical(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -14052,7 +14147,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -14073,7 +14168,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -14107,7 +14202,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValLogicalSeq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -14122,7 +14217,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -14143,7 +14238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -14177,7 +14272,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValR4(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -14192,7 +14287,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -14213,7 +14308,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -14247,7 +14342,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValR4Seq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -14262,7 +14357,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -14283,7 +14378,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -14317,7 +14412,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValR8(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -14332,7 +14427,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -14353,7 +14448,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -14387,7 +14482,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValR8Seq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -14402,7 +14497,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -14423,7 +14518,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -14457,7 +14552,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValString(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -14472,7 +14567,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -14493,7 +14588,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -14527,7 +14622,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValStringSeq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -14542,7 +14637,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be set.
 !   \item[{[index]}]
@@ -14563,7 +14658,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigGetInit, hconfig, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
 
     hcontent = ESMF_HConfigCreate(content=content, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -14619,6 +14714,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
   end function ESMF_HConfigGetInit
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterGetInit"
+!BOPI
+! !IROUTINE: ESMF_HConfigIterGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_HConfigIterGetInit(hconfig)
+!
+! !RETURN VALUE:
+    ESMF_INIT_TYPE :: ESMF_HConfigIterGetInit
+!
+! !ARGUMENTS:
+    type(ESMF_HConfigIter), intent(in), optional :: hconfig
+!
+! !DESCRIPTION:
+!   Access deep object init code.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item [hconfig]
+!     HConfig object.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    if (present(hconfig)) then
+      ESMF_HConfigIterGetInit = ESMF_INIT_GET(hconfig)
+    else
+      ESMF_HConfigIterGetInit = ESMF_INIT_CREATED
+    endif
+
+  end function ESMF_HConfigIterGetInit
 !------------------------------------------------------------------------------
 
 end module ESMF_HConfigMod
