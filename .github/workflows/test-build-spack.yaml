@@ -20,8 +20,8 @@ jobs:
         # gnu  : 11.3.0
         #compiler: [oneapi@2023.0.0]
         compiler: [gcc@11.3.0]
-        esmf: [esmf@8.4.2, esmf@8.4.2~external-parallelio]
-        #esmf: [esmf@8.4.2+parallelio~xerces~pnetcdf^parallelio@2.5.10, esmf@8.4.2~xerces~pnetcdf]
+        #esmf: [esmf@8.4.2, esmf@8.4.2~external-parallelio]
+        esmf: [esmf@8.4.2+parallelio~xerces~pnetcdf^parallelio@2.5.10, esmf@8.4.2~xerces~pnetcdf]
 
     steps:
     # check out base repo
