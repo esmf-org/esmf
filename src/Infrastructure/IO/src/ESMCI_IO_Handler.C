@@ -539,7 +539,7 @@ const std::string IO_Handler::getFilename(
   }
 
   if (ntiles > 1) {
-    const char tilePlaceholder = '#';  // the character that will get replaced by the tile number
+    const char tilePlaceholder = '*';  // the character that will get replaced by the tile number
     int numOccurrences = std::count(filename.begin(), filename.end(), tilePlaceholder);
     if (numOccurrences != 1) {
       std::stringstream errmsg;

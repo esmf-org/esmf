@@ -96,9 +96,9 @@ program ESMF_IO_MultitileUTest
 
   logical :: allEqual
 
-  character(len=*), parameter :: fileNameFields = "ESMF_IO_MultitileUTestFields#.nc"
-  character(len=*), parameter :: fileNameArrays = "ESMF_IO_MultitileUTestArrays#.nc"
-  character(len=*), parameter :: fileNameFail = "ESMF_IO_MultitileUTestFail#.nc"
+  character(len=*), parameter :: fileNameFields = "ESMF_IO_MultitileUTestFields*.nc"
+  character(len=*), parameter :: fileNameArrays = "ESMF_IO_MultitileUTestArrays*.nc"
+  character(len=*), parameter :: fileNameFail = "ESMF_IO_MultitileUTestFail*.nc"
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
