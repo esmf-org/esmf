@@ -215,6 +215,8 @@
 
       integer :: localrc
       integer, allocatable :: indicesLocal(:)
+      type(ESMF_DistGrid)    :: dgridTemp
+      type(ESMF_Pointer)     :: this
 
       ! initialize return code; assume routine not implemented
       rc = ESMF_RC_NOT_IMPL
@@ -224,14 +226,32 @@
       if (count > 0) then
         indicesLocal(1:count) = indices(1:count)
       endif
- 
-      dgrid = ESMF_DistGridCreate(indicesLocal, rc=localrc)
+
+      ! create the DistGrid, but store in a temporary ESMF_DistGrid object
+      ! because the ESMF_DistGridCreate() method sets the init macro member
+      ! which is not present coming in from the C++ side!
+      dgridTemp = ESMF_DistGridCreate(indicesLocal, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) then
-          deallocate(indicesLocal)
-          return
+        ESMF_CONTEXT, rcToReturn=rc)) then
+        deallocate(indicesLocal)  ! prevent memory leak when bailing
+        return
       endif
 
+      ! transfer only this pointer from temporary to actual DistGrid object
+      call ESMF_DistGridGetThis(dgridTemp, this, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) then
+        deallocate(indicesLocal)  ! prevent memory leak when bailing
+        return
+      endif
+      call ESMF_DistGridSetThis(dgrid, this, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) then
+        deallocate(indicesLocal)  ! prevent memory leak when bailing
+        return
+      endif
+
+      ! clean up
       deallocate(indicesLocal)
 
       ! Return success
