@@ -438,12 +438,11 @@ end interface
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Geom} object from an {\tt ESMF\_Grid} object.
-! This will be overloaded for each type of object a Geom can represent.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[grid]
-!      {\tt ESMF\_Grid} object to create the Grid Base from.
+!      {\tt ESMF\_Grid} object from which to create the Geom.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values see section \ref{const:staggerloc}.
@@ -517,12 +516,17 @@ end interface
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Geom} object from an {\tt ESMF\_Mesh} object.
-! This will be overloaded for each type of object a Geom can represent.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[mesh]
-!      {\tt ESMF\_Mesh} object to create the Mesh Base from.
+!      {\tt ESMF\_Mesh} object from which to create the Geom.
+! \item [{[meshloc]}]
+!       \begin{sloppypar}
+!       The part of the Mesh on which to build the Field. For valid
+!       predefined values see Section~\ref{const:meshloc}.
+!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       \end{sloppypar}
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -596,12 +600,11 @@ end interface
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Geom} object from an {\tt ESMF\_LocStream} object.
-! This will be overloaded for each type of object a Geom can represent.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[locstream]
-!      {\tt ESMF\_LocStream} object to create the Geom from.
+!      {\tt ESMF\_LocStream} object from which to create the Geom.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -657,23 +660,26 @@ end interface
       type(ESMF_Geom) :: ESMF_GeomCreateXGrid
 !
 ! !ARGUMENTS:
-       type(ESMF_XGrid),     intent(in)            :: xgrid
-       type(ESMF_XGridSide_Flag), intent(in), optional  :: XGridSide
-       integer,              intent(in), optional  :: gridIndex
-       integer,              intent(out),optional  :: rc
+       type(ESMF_XGrid),     intent(in)                :: xgrid
+       type(ESMF_XGridSide_Flag), intent(in), optional :: xgridSide
+       integer,              intent(in), optional      :: gridIndex
+       integer,              intent(out),optional      :: rc
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Geom} object from an {\tt ESMF\_XGrid} object.
-! This will be overloaded for each type of object a Geom can represent.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[xgrid]
-!      {\tt ESMF\_XGrid} object to create the Geom from.
-! \item[{[XGridSide]}]
-!      Which side to create the Field on.
-! \item[{[gridIndex]}]
-!      Index to specify which distgrid when on side A or side B
+!      {\tt ESMF\_XGrid} object from which to create the Geom.
+! \item[{[xgridSide]}]
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A,
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not specified, then
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED.
+! \item [{[gridindex]}]
+!       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then
+!       this index tells which Grid or Mesh on that side is being
+!       referred to. If not provided, defaults to 1.      
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -746,14 +752,15 @@ end interface
 !
 ! !DESCRIPTION:
 !   Destroys an {\tt ESMF\_Geom} object. This call does not destroy wrapped
-!   Grid, LocStream, or other Grid objects.
+!   Grid, LocStream, or other objects.
 !
 !     The arguments are:
-!     \begin{description}
-!     \item[geom]
-!          {\tt ESMF\_Geom} to be destroyed.
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+! \begin{description}
+! \item[geom]
+!   {\tt ESMF\_Geom} to be destroyed.
+! \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
 !EOP
 
@@ -783,7 +790,7 @@ end interface
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomGet"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_GeomGet - Get information about a Grid
 
 ! !INTERFACE:
@@ -814,49 +821,51 @@ end interface
 
 !
 ! !DESCRIPTION:
-!    Gets various types of information about a grid.
+!    Get various types of information about a Geom.
 !
 !The arguments are:
 !\begin{description}
 !\item[{geom}]
 !   Geom to get the information from.
 !\item[{[dimCount]}]
-!   DimCount of the Geom object (e.g. the number of dimensions in the Array
-!   it will be mapped to (e.g. Mesh=1)).
+!   The full number of dimensions of the Distgrid object underneath the Geom object.
 ! \item[{[rank]}]
-!   The count of the memory dimensions in this geom. Typically it's the same as dimCount.
-!   However, in some cases (e.g. arbitrarily distributed grids) it can be different. 
+!   The count of the memory dimensions in this Geom object.
+!   Typically it's the same as dimCount.
+!   However, in some cases (e.g. arbitrarily distributed grids) it can be different.
 !\item[{[localDECount]}]
-!   The number of DEs in this grid on this PET.
+!   The number of DEs in this Geom object on this PET.
 !\item[{[distgrid]}]
-!   The structure describing the distribution of the grid.
+!   The structure describing the distribution of the Geom object.
 !\item[{[distgridToGridMap]}]
 !   List that has as many elements as the distgrid dimCount. This array describes
-!   mapping between the grids dimensions and the distgrid.
+!   mapping between the Geom object's dimensions and its Distgrid.
 ! \item[{[indexflag]}]
 !    Flag that indicates how the DE-local indices are to be defined.
-! \item[{[geomtype]}]
-!    Flag that indicates what type of object this geom holds.
-!    Can be {\tt ESMF_GEOMTYPE_GRID}, {\tt ESMF_GEOMTYPE_MESH},...
+! \item [{[geomtype]}]
+!    The type of geometry on which the Field is built. See
+!    section~\ref{const:geomtype} for the range of values.
 ! \item[{[grid]}]
-!    The Grid object that this geom object holds.
+!    If the Geom object holds a Grid, then this will pass out that Grid object.
 ! \item[{[staggerloc]}]
-!    The Grid stagger location.
+!    If the Geom object holds a Grid, then this will pass out the staggerloc.
 ! \item[{[mesh]}]
-!    The Mesh object that this geom object holds.
+!    If the Geom object holds a Mesh, then this will pass out that Mesh object.
 ! \item[{[meshloc]}]
-!    The part of the mesh that the field is on
+!    If the Geom object holds a Mesh, then this will pass out the meshloc.
 ! \item[{[locstream]}]
-!    The LocStream object that this geom object holds.
- ! \item[{[XGridSide]}]
-!      The xgrid side that the Fiels was created on.
- ! \item[{[gridIndex]}]
-!      The Xgrid index to specify which distgrid the Field was created on when on side A or side B.
+!    If the Geom object holds a LocStream, then this will pass out that LocStream object.
+! \item[{[xgrid]}]
+!    If the Geom object holds an XGrid, then this will pass out that XGrid object.
+! \item[{[xgridSide]}]
+!    If the Geom object holds an XGrid, then this will pass out the XGrid side.
+! \item[{[gridIndex]}]
+!    If the Geom object holds an XGrid, then this will pass out the gridIndex. 
 !\item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
 !
-!EOPI
+!EOP
     type(ESMF_GeomClass),pointer :: gbcp
     type(ESMF_XGridGeomBase)         :: xgrid_geom
     type(ESMF_Distgrid)              :: localDistgrid
