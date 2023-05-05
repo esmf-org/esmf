@@ -119,7 +119,7 @@ if [[ "$comp" == *"oneapi"* ]]; then
   #echo "    - spec: ${mpi}%${comp}" >> ~/.spack/packages.yaml
   #echo "      prefix: /opt/intel/oneapi/mpi/$mpi_version" >> ~/.spack/packages.yaml
   #echo "    buildable: false" >> ~/.spack/packages.yaml
-  echo "packages:" > ~/.spack/packages.yaml
+  echo "packages:" >> ~/.spack/packages.yaml
   echo "  intel-oneapi-mpi:" >> ~/.spack/packages.yaml
   echo "    externals:" >> ~/.spack/packages.yaml
   echo "    - spec: intel-${mpi}" >> ~/.spack/packages.yaml
