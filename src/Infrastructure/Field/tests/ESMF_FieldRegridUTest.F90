@@ -14,6 +14,8 @@
 
 !------------------------------------------------------------------------------
 
+#define FILENAME "ESMF_FieldRegridUTest.F90"
+
 #include "ESMF.h"
 
 #if defined (ESMF_LAPACK)
@@ -21593,8 +21595,6 @@ write(*,*) "LOCALRC=",localrc
  end subroutine test_regridMeshToMeshMask
 
 
-#define FILE "ESMF_FieldRegridUTest.F90"
-
   subroutine test_regridSrcHoles(rc)
     integer, intent(out)  :: rc
 
@@ -21620,11 +21620,11 @@ write(*,*) "LOCALRC=",localrc
 
     call ESMF_VMGetCurrent(vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     ! --- set up the source side ---
 
@@ -21661,24 +21661,24 @@ write(*,*) "LOCALRC=",localrc
     srcDistGrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/iMax,jMax/),&
       deBlockList=deBlockList, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     ! Create the srcGrid.
     srcGrid = ESMF_GridCreate(srcDistGrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     ! Add coordinates to the srcGrid.
     call ESMF_GridAddCoord(srcGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     ! Access the longitude coordinate pointer in srcGrid and fill.
     call ESMF_GridGetCoord(srcGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
       coordDim=1, farrayPtr=fptr, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
     do j=lbound(fptr,2), ubound(fptr,2)
     do i=lbound(fptr,1), ubound(fptr,1)
       fptr(i,j) = (lonMaxS-lonMinS)/real(iMax) * (i-1) + lonMinS
@@ -21689,7 +21689,7 @@ write(*,*) "LOCALRC=",localrc
     call ESMF_GridGetCoord(srcGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
       coordDim=2, farrayPtr=fptr, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
     do j=lbound(fptr,2), ubound(fptr,2)
     do i=lbound(fptr,1), ubound(fptr,1)
       fptr(i,j) = (latMaxS-latMinS)/real(jMax) * (j-1) + latMinS
@@ -21700,7 +21700,7 @@ write(*,*) "LOCALRC=",localrc
     srcField =  ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     ! --- set up the destination side ---
 
@@ -21708,24 +21708,24 @@ write(*,*) "LOCALRC=",localrc
     dstDistGrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/iMax,jMax/),&
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     ! Create the dstGrid.
     dstGrid = ESMF_GridCreate(dstDistGrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     ! Add coordinates to the dstGrid.
     call ESMF_GridAddCoord(dstGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     ! Access the longitude coordinate pointer in dstGrid and fill.
     call ESMF_GridGetCoord(dstGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
       coordDim=1, farrayPtr=fptr, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
     do j=lbound(fptr,2), ubound(fptr,2)
     do i=lbound(fptr,1), ubound(fptr,1)
       fptr(i,j) = (lonMaxD-lonMinD)/real(iMax) * (i-1) + lonMinD
@@ -21736,7 +21736,7 @@ write(*,*) "LOCALRC=",localrc
     call ESMF_GridGetCoord(dstGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
       coordDim=2, farrayPtr=fptr, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
     do j=lbound(fptr,2), ubound(fptr,2)
     do i=lbound(fptr,1), ubound(fptr,1)
       fptr(i,j) = (latMaxD-latMinD)/real(jMax) * (j-1) + latMinD
@@ -21747,7 +21747,7 @@ write(*,*) "LOCALRC=",localrc
     dstField =  ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     ! --- Regridding ---
 
@@ -21755,7 +21755,7 @@ write(*,*) "LOCALRC=",localrc
     call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
       routehandle=rh, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILE)) return ! bail out
+      line=__LINE__, file=FILENAME)) return ! bail out
 
     !TODO: execute the Regrid and validate the result.
     !TODO: right now it doesn't even make it that far for srcDistGrid w/ holes
