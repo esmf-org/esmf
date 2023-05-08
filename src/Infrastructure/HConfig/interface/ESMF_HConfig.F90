@@ -230,18 +230,31 @@ module ESMF_HConfigMod
 
   interface ESMF_HConfigAdd
     module procedure ESMF_HConfigAddHConfig
+    module procedure ESMF_HConfigIterAddHConfig
     module procedure ESMF_HConfigAddI4
+    module procedure ESMF_HConfigIterAddI4
     module procedure ESMF_HConfigAddI4Seq
+    module procedure ESMF_HConfigIterAddI4Seq
     module procedure ESMF_HConfigAddI8
+    module procedure ESMF_HConfigIterAddI8
     module procedure ESMF_HConfigAddI8Seq
+    module procedure ESMF_HConfigIterAddI8Seq
     module procedure ESMF_HConfigAddLogical
+    module procedure ESMF_HConfigIterAddLogical
     module procedure ESMF_HConfigAddLogicalSeq
+    module procedure ESMF_HConfigIterAddLogicalSeq
     module procedure ESMF_HConfigAddR4
+    module procedure ESMF_HConfigIterAddR4
     module procedure ESMF_HConfigAddR4Seq
+    module procedure ESMF_HConfigIterAddR4Seq
     module procedure ESMF_HConfigAddR8
+    module procedure ESMF_HConfigIterAddR8
     module procedure ESMF_HConfigAddR8Seq
+    module procedure ESMF_HConfigIterAddR8Seq
     module procedure ESMF_HConfigAddString
+    module procedure ESMF_HConfigIterAddString
     module procedure ESMF_HConfigAddStringSeq
+    module procedure ESMF_HConfigIterAddStringSeq
   end interface
 
   interface ESMF_HConfigAddMapKey
@@ -645,41 +658,48 @@ contains
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAddHConfig()"
 !BOP
-! !IROUTINE: ESMF_HConfigAddHConfig - Add hconfig to HConfig object
+! !IROUTINE: ESMF_HConfigAdd - Add content to HConfig object
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
-  subroutine ESMF_HConfigAddHConfig(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, doc, rc)
+!  subroutine ESMF_HConfigAdd(hconfig, content, keywordEnforcer, &
+!    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-    type(ESMF_HConfig), intent(in)            :: content
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_HConfig), intent(in),  optional :: addKey
-    character(*),       intent(in),  optional :: addKeyString
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfig[Iter}), intent(in)      :: hconfig
+!    <Type>,             intent(in)            :: content[(:)]
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_HConfig), intent(in),  optional :: addKey
+!    character(*),       intent(in),  optional :: addKeyString
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Add the content of a HConfig object to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
+!   Add the content of type <Type> to {\tt hconfig}. Most <Type> options support
+!   the sequence array variant {\tt (:)} in addition to the scalar variant.
 !
 !   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
 !   specified, then add a new map element with the respective {\em key}.
 !   Otherwise add a new list element at the end of the list. Error checking
 !   is implemented to ensure respective conditions are met.
 !
+!   The supported <Type> options are:
+!   \begin{itemize}
+!   \item HConfig (scalar only variant!)
+!   \item I4
+!   \item I8
+!   \item Logical
+!   \item R4
+!   \item R8
+!   \item String
+!   \end{itemize}
+!
 !   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[content]
 !     The content to be added.
 !   \item[{[addKey]}]
@@ -702,6 +722,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAddHConfig()"
+
+  subroutine ESMF_HConfigAddHConfig(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+    type(ESMF_HConfig), intent(in)            :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp, hKey
 
@@ -770,16 +809,52 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAddI4()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddI4 - Add I4 to HConfig object
+#define ESMF_METHOD "ESMF_HConfigIterAddHConfig()"
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
+  subroutine ESMF_HConfigIterAddHConfig(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfig), intent(in)            :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAddI4()"
+
   subroutine ESMF_HConfigAddI4(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig),     intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -787,42 +862,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),           intent(in),  optional :: addKeyString
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
+    integer,                intent(in),  optional :: doc
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -839,12 +881,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddI4()"
+
+  subroutine ESMF_HConfigIterAddI4(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    integer(ESMF_KIND_I4),  intent(in)        :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -858,15 +941,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddI4Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddI4Seq - Add I4 Seq to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddI4Seq(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig),     intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -874,42 +952,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),           intent(in),  optional :: addKeyString
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
+    integer,                intent(in),  optional :: doc
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -926,12 +971,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddI4Seq()"
+
+  subroutine ESMF_HConfigIterAddI4Seq(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    integer(ESMF_KIND_I4),  intent(in)        :: content(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -945,15 +1031,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddI8()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddI8 - Add I8 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddI8(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig),     intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -961,42 +1042,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),           intent(in),  optional :: addKeyString
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
+    integer,                intent(in),  optional :: doc
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -1013,12 +1061,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddI8()"
+
+  subroutine ESMF_HConfigIterAddI8(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    integer(ESMF_KIND_I8),  intent(in)        :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1032,15 +1121,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddI8Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddI8Seq - Add I8 Seq to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddI8Seq(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig),     intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1048,42 +1132,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),           intent(in),  optional :: addKeyString
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
+    integer,                intent(in),  optional :: doc
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -1100,12 +1151,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddI8Seq()"
+
+  subroutine ESMF_HConfigIterAddI8Seq(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    integer(ESMF_KIND_I8),  intent(in)        :: content(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1119,15 +1211,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddLogical()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddLogical - Add logical to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddLogical(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig), intent(in)            :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1135,42 +1222,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),       intent(in),  optional :: addKeyString
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add a logical to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -1187,12 +1241,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddLogical()"
+
+  subroutine ESMF_HConfigIterAddLogical(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    logical,            intent(in)            :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1206,15 +1301,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddLogicalSeq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddLogicalSeq - Add Logical Seq to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddLogicalSeq(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig),     intent(in)            :: hconfig
     logical,                intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1222,42 +1312,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),           intent(in),  optional :: addKeyString
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
+    integer,                intent(in),  optional :: doc
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an Logical to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -1274,12 +1331,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddLogicalSeq()"
+
+  subroutine ESMF_HConfigIterAddLogicalSeq(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    logical,                intent(in)        :: content(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1293,15 +1391,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddR4()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddR4 - Add R4 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddR4(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig), intent(in)            :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1309,42 +1402,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),       intent(in),  optional :: addKeyString
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -1361,12 +1421,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddR4()"
+
+  subroutine ESMF_HConfigIterAddR4(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    real(ESMF_KIND_R4), intent(in)            :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1380,15 +1481,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddR4Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddR4Seq - Add R4 Seq to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddR4Seq(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig), intent(in)            :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1396,42 +1492,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),       intent(in),  optional :: addKeyString
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -1448,12 +1511,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddR4Seq()"
+
+  subroutine ESMF_HConfigIterAddR4Seq(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    real(ESMF_KIND_R4), intent(in)            :: content(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1467,15 +1571,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddR8()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddR8 - Add R8 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddR8(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig), intent(in)            :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1483,42 +1582,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),       intent(in),  optional :: addKeyString
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -1535,12 +1601,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddR8()"
+
+  subroutine ESMF_HConfigIterAddR8(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    real(ESMF_KIND_R8), intent(in)            :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1554,15 +1661,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddR8Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddR8Seq - Add R8 Seq to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddR8Seq(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig), intent(in)            :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1570,42 +1672,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),       intent(in),  optional :: addKeyString
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -1622,12 +1691,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddR8Seq()"
+
+  subroutine ESMF_HConfigIterAddR8Seq(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    real(ESMF_KIND_R8), intent(in)            :: content(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1641,15 +1751,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddString()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddString - Add string to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddString(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig), intent(in)            :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1657,42 +1762,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),       intent(in),  optional :: addKeyString
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add a string to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -1709,12 +1781,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! clean up
     call ESMF_HConfigDestroy(hcontent, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIterAddString()"
+
+  subroutine ESMF_HConfigIterAddString(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    character(*),       intent(in)            :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1728,15 +1841,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddStringSeq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddStringSeq - Add String Seq to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAdd()
   subroutine ESMF_HConfigAddStringSeq(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+    addKey, addKeyString, index, keyString, doc, rc)
+
     type(ESMF_HConfig),     intent(in)            :: hconfig
     character(len=*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1744,42 +1852,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),           intent(in),  optional :: addKeyString
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
+    integer,                intent(in),  optional :: doc
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an String to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} must {\em not} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -1796,7 +1871,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_HConfigAdd(hconfig, hcontent, &
       addKey=addKey, addKeyString=addKeyString, &
-      index=index, keyString=keyString, rc=localrc)
+      index=index, keyString=keyString, doc=doc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1814,18 +1889,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAddMapKeyHConfig()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyHConfig - Add hconfig to HConfig object
+#define ESMF_METHOD "ESMF_HConfigIterAddStringSeq()"
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
-  subroutine ESMF_HConfigAddMapKeyHConfig(hconfig, content, keywordEnforcer, &
+  subroutine ESMF_HConfigIterAddStringSeq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, doc, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
-    type(ESMF_HConfig), intent(in)            :: content
+    character(len=*),       intent(in)        :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig), intent(in),  optional :: addKey
     character(*),       intent(in),  optional :: addKeyString
@@ -1833,16 +1903,70 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),       intent(in),  optional :: keyString
     integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_HConfigAdd(hconfigTemp, content=content, addKey=addKey, &
+      addKeyString=addKeyString, index=index, keyString=keyString, doc=doc, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_HConfigAddMapKey - Add content to HConfig MapKey object
+
+! !INTERFACE:
+!  subroutine ESMF_HConfigAdd(hconfig, content, keywordEnforcer, &
+!    addKey, addKeyString, index, keyString, doc, rc)
+!
+! !ARGUMENTS:
+!    type(ESMF_HConfigIter), intent(in)        :: hconfig
+!    <Type>,             intent(in)            :: content[(:)]
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_HConfig), intent(in),  optional :: addKey
+!    character(*),       intent(in),  optional :: addKeyString
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Add the content of a HConfig object to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
+!   Add the content of type <Type> to the map key of {\tt hconfig}.
+!   Most <Type> options support the sequence array variant {\tt (:)} in
+!   addition to the scalar variant.
 !
 !   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
 !   specified, then add a new map element with the respective {\em key}.
 !   Otherwise add a new list element at the end of the list. Error checking
 !   is implemented to ensure respective conditions are met.
+!
+!   The supported <Type> options are:
+!   \begin{itemize}
+!   \item HConfig (scalar only variant!)
+!   \item I4
+!   \item I8
+!   \item Logical
+!   \item R4
+!   \item R8
+!   \item String
+!   \end{itemize}
 !
 !   The arguments are:
 !   \begin{description}
@@ -1870,6 +1994,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAddMapKeyHConfig()"
+
+  subroutine ESMF_HConfigAddMapKeyHConfig(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfig), intent(in)            :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp, hKey
 
@@ -1939,15 +2082,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyI4()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyI4 - Add I4 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyI4(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -1956,41 +2094,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2026,16 +2130,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyI4Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyI4Seq - Add Seq of I4 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyI4Seq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter),     intent(in)            :: hconfig
+
+    type(ESMF_HConfigIter), intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -2043,41 +2142,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2113,15 +2178,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyI8()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyI8 - Add I8 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyI8(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2130,41 +2190,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2200,16 +2226,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyI8Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyI8Seq - Add Seq of I8 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyI8Seq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter),     intent(in)            :: hconfig
+
+    type(ESMF_HConfigIter), intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -2217,41 +2238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2287,15 +2274,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyLogical()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyLogical - Add logical to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyLogical(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2304,41 +2286,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add a logical to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2374,15 +2322,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyLogicalSeq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyLogicalSeq - Add Seq of logical to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyLogicalSeq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2391,41 +2334,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add a logical to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2461,15 +2370,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyR4()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyR4 - Add R4 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyR4(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2478,41 +2382,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2548,15 +2418,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyR4Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyR4Seq - Add Seq of R4 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyR4Seq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2565,41 +2430,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2635,15 +2466,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyR8()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyR8 - Add R8 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyR8(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2652,41 +2478,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2722,15 +2514,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyR8Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyR8Seq - Add Seq of R8 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyR8Seq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2739,41 +2526,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2809,15 +2562,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyString()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyString - Add string to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyString(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2826,41 +2574,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add a string to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2896,15 +2610,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapKeyStringSeq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapKeyStringSeq - Add Seq of string to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapKey()
   subroutine ESMF_HConfigAddMapKeyStringSeq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -2913,41 +2622,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add a string to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -2981,36 +2656,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigAddMapValHConfig()"
 !BOP
-! !IROUTINE: ESMF_HConfigAddMapValHConfig - Add hconfig to HConfig object
+! !IROUTINE: ESMF_HConfigAddMapVal - Add content to HConfig MapVal object
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
-  subroutine ESMF_HConfigAddMapValHConfig(hconfig, content, keywordEnforcer, &
-    addKey, addKeyString, index, keyString, doc, rc)
+!  subroutine ESMF_HConfigAdd(hconfig, content, keywordEnforcer, &
+!    addKey, addKeyString, index, keyString, doc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-    type(ESMF_HConfig), intent(in)            :: content
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_HConfig), intent(in),  optional :: addKey
-    character(*),       intent(in),  optional :: addKeyString
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfigIter), intent(in)        :: hconfig
+!    <Type>,             intent(in)            :: content[(:)]
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_HConfig), intent(in),  optional :: addKey
+!    character(*),       intent(in),  optional :: addKeyString
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Add the content of a HConfig object to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
+!   Add the content of type <Type> to the map value of {\tt hconfig}.
+!   Most <Type> options support the sequence array variant {\tt (:)} in
+!   addition to the scalar variant.
 !
 !   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
 !   specified, then add a new map element with the respective {\em key}.
 !   Otherwise add a new list element at the end of the list. Error checking
 !   is implemented to ensure respective conditions are met.
+!
+!   The supported <Type> options are:
+!   \begin{itemize}
+!   \item HConfig (scalar only variant!)
+!   \item I4
+!   \item I8
+!   \item Logical
+!   \item R4
+!   \item R8
+!   \item String
+!   \end{itemize}
 !
 !   The arguments are:
 !   \begin{description}
@@ -3038,6 +2721,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigAddMapValHConfig()"
+
+  subroutine ESMF_HConfigAddMapValHConfig(hconfig, content, keywordEnforcer, &
+    addKey, addKeyString, index, keyString, doc, rc)
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+    type(ESMF_HConfig), intent(in)            :: content
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HConfig), intent(in),  optional :: addKey
+    character(*),       intent(in),  optional :: addKeyString
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp, hKey
 
@@ -3107,15 +2809,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValI4()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValI4 - Add I4 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValI4(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3124,41 +2821,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -3194,16 +2857,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValI4Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValI4Seq - Add Seq of I4 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValI4Seq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter),     intent(in)            :: hconfig
+
+    type(ESMF_HConfigIter), intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -3211,41 +2869,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -3281,15 +2905,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValI8()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValI8 - Add I8 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValI8(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter),     intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3298,41 +2917,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -3368,16 +2953,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValI8Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValI8Seq - Add Seq of I8 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValI8Seq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter),     intent(in)            :: hconfig
+
+    type(ESMF_HConfigIter), intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HConfig),     intent(in),  optional :: addKey
@@ -3385,41 +2965,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
     character(*),           intent(in),  optional :: keyString
     integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an I8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -3455,15 +3001,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValLogical()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValLogical - Add logical to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValLogical(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3472,41 +3013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add a logical to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -3542,15 +3049,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValLogicalSeq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValLogicalSeq - Add Seq of logical to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValLogicalSeq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     logical,            intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3559,41 +3061,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add a logical to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -3629,15 +3097,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValR4()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValR4 - Add R4 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValR4(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3646,41 +3109,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -3716,15 +3145,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValR4Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValR4Seq - Add Seq of R4 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValR4Seq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R4), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3733,41 +3157,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R4 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -3803,15 +3193,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValR8()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValR8 - Add R8 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValR8(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3820,41 +3205,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -3890,15 +3241,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValR8Seq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValR8Seq - Add Seq of R8 to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValR8Seq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     real(ESMF_KIND_R8), intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3907,41 +3253,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add an R8 to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -3977,15 +3289,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValString()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValString - Add string to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValString(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3994,41 +3301,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add a string to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -4064,15 +3337,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigAddMapValStringSeq()"
-!BOP
-! !IROUTINE: ESMF_HConfigAddMapValStringSeq - Add Seq of string to HConfig object
 
-! !INTERFACE:
-  ! Private name; call using ESMF_HConfigAddMapVal()
   subroutine ESMF_HConfigAddMapValStringSeq(hconfig, content, keywordEnforcer, &
     addKey, addKeyString, index, keyString, rc)
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
     character(*),       intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -4081,41 +3349,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
     character(*),       intent(in),  optional :: keyString
     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!   Add a string to the current iteration, or
-!   as specified by {\tt index} or {\tt keyString} (mutually exclusive!).
-!   The {\tt hconfig} {\em must} be a map iterator.
-!
-!   If either {\tt addKey} or {\tt addKeyString} (mutually exclusive!) is
-!   specified, then add a new map element with the respective {\em key}.
-!   Otherwise add a new list element at the end of the list. Error checking
-!   is implemented to ensure respective conditions are met.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[content]
-!     The content to be added.
-!   \item[{[addKey]}]
-!     The key under which to add the new map item.
-!     Mutural exclusive with {\tt addKeyString}.
-!   \item[{[addKeyString]}]
-!     The key string under which to add the new map item.
-!     Mutural exclusive with {\tt addKey}.
-!   \item[{[index]}]
-!     Attempt to access by index if specified.
-!     Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified.
-!     Mutural exclusive with {\tt index}.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hcontent
 
@@ -4290,6 +3524,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
 
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4389,6 +3627,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4494,6 +3736,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
 
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4594,6 +3840,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
 
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4693,6 +3943,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4814,6 +4068,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5961,6 +5219,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
 
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6078,6 +5340,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6197,6 +5463,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
 
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6315,6 +5585,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
 
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6432,6 +5706,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6552,6 +5830,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer               :: localrc                ! local return code
     type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -13600,7 +12882,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValI4Seq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfigIter),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)            :: hconfig
     integer(ESMF_KIND_I4),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
@@ -13740,7 +13022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_HConfigSetMapValI8Seq(hconfig, content, keywordEnforcer, index, keyString, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfigIter),     intent(in)            :: hconfig
+    type(ESMF_HConfigIter), intent(in)            :: hconfig
     integer(ESMF_KIND_I8),  intent(in)            :: content(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: index
