@@ -615,7 +615,7 @@ program ESMF_HConfigUTest
             if (flag) then
               string = ESMF_HConfigAsString(hconfigIter2, rc=rc)
               if (rc /= ESMF_SUCCESS) return
-              tag = ESMF_HConfigGetTag(ESMF_HConfigIterAsHConfig(hconfigIter2), rc=rc)
+              tag = ESMF_HConfigGetTag(hconfigIter2, rc=rc)
               if (rc /= ESMF_SUCCESS) return
               write(msgString, *) "String: ", string, "  [", tag, "]"
               call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
@@ -633,7 +633,7 @@ program ESMF_HConfigUTest
                 if (flag) then
                   string = ESMF_HConfigAsString(hconfigIter3, rc=rc)
                   if (rc /= ESMF_SUCCESS) return
-                  tag = ESMF_HConfigGetTag(ESMF_HConfigIterAsHConfig(hconfigIter3), rc=rc)
+                  tag = ESMF_HConfigGetTag(hconfigIter3, rc=rc)
                   if (rc /= ESMF_SUCCESS) return
                   write(msgString, *) "String: ", string, "  [", tag, "]"
                   call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
