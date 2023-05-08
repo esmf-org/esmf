@@ -190,7 +190,7 @@ program ESMF_HConfigEx
 !BOC
     ! Check whether the current element is a scalar.
     ! logical :: isScalar
-    isScalar = ESMF_HConfigIsScalar(ESMF_HConfigIterAsHConfig(hconfigIter), rc=rc)
+    isScalar = ESMF_HConfigIsScalar(hconfigIter, rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC

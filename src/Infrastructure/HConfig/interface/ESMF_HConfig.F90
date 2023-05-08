@@ -380,6 +380,31 @@ module ESMF_HConfigMod
     module procedure ESMF_HConfigIterGetTag
   end interface
 
+  interface ESMF_HConfigIsDefined
+    module procedure ESMF_HConfigIsDefined
+    module procedure ESMF_HConfigItrIsDefined
+  end interface
+
+  interface ESMF_HConfigIsNull
+    module procedure ESMF_HConfigIsNull
+    module procedure ESMF_HConfigItrIsNull
+  end interface
+
+  interface ESMF_HConfigIsMap
+    module procedure ESMF_HConfigIsMap
+    module procedure ESMF_HConfigItrIsMap
+  end interface
+
+  interface ESMF_HConfigIsScalar
+    module procedure ESMF_HConfigIsScalar
+    module procedure ESMF_HConfigItrIsScalar
+  end interface
+
+  interface ESMF_HConfigIsSequence
+    module procedure ESMF_HConfigIsSequence
+    module procedure ESMF_HConfigItrIsSequence
+  end interface
+
   interface ESMF_HConfigSet
     module procedure ESMF_HConfigSetHConfig
     module procedure ESMF_HConfigSetI4
@@ -8751,34 +8776,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsDefined()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsDefined - Check whether HConfig node is Defined
+! !IROUTINE: ESMF_HConfigIs<NodeType> - Check for HConfig node type
 
 ! !INTERFACE:
-  function ESMF_HConfigIsDefined(hconfig, keywordEnforcer, index, keyString, &
-    doc, rc)
+!  function ESMF_HConfigIs<NodeType>(hconfig, keywordEnforcer, index, keyString, &
+!    doc, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsDefined
+!    logical :: ESMF_HConfigIs<NodeType>
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfig), intent(in)            :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfig[Iter]), intent(in)      :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Defined. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
+!   Return {\tt .true.} if the {\tt hconfig} node is of node type
+!   <NodeType>. Otherwise return {\tt .false.}. If an error occurs, i.e.
+!   {\tt rc /= ESMF\_SUCCESS} is returned, the return value of the function
+!   will be {\tt .false.}.
 !
-! The arguments are:
+!   The supported <NodeType> options are:
+!   \begin{itemize}
+!   \item Defined
+!   \item Null
+!   \item Map
+!   \item Scalar
+!   \item Sequence
+!   \end{itemize}
+!
+!   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
+!     {\tt ESMF\_HConfig} or {\tt ESMF\_HConfigIter} object.
 !   \item[{[index]}]
 !     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
 !   \item[{[keyString]}]
@@ -8791,6 +8824,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsDefined()"
+
+  function ESMF_HConfigIsDefined(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsDefined
+
+    type(ESMF_HConfig), intent(in)            :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp
@@ -8838,17 +8889,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsDefinedMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsDefinedMapKey - Check whether HConfig node is Defined
+#define ESMF_METHOD "ESMF_HConfigItrIsDefined()"
 
-! !INTERFACE:
-  function ESMF_HConfigIsDefinedMapKey(hconfig, keywordEnforcer, index, keyString, &
+  function ESMF_HConfigItrIsDefined(hconfig, keywordEnforcer, index, keyString, &
     doc, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsDefinedMapKey
-!
-! !ARGUMENTS:
+
+    logical :: ESMF_HConfigItrIsDefined
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -8856,150 +8903,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsDefinedMapKey = .false.   ! initialize
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsDefined(hconfigTemp, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsDefinedMapKey(hconfig, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsDefinedMapKey = flag
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsDefinedMapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsDefinedMapVal - Check whether HConfig node is Defined
-
-! !INTERFACE:
-  function ESMF_HConfigIsDefinedMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsDefinedMapVal
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
-    type(ESMF_HConfig)    :: hconfigTemp
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ESMF_HConfigIsDefinedMapVal = .false.   ! initialize
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsDefined(hconfigTemp, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsDefinedMapVal(hconfig, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsDefinedMapVal = flag
+    ESMF_HConfigItrIsDefined = ESMF_HConfigIsDefined(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -9011,15 +8929,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIsNull()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsNull - Check whether HConfig node is Null
 
-! !INTERFACE:
   function ESMF_HConfigIsNull(hconfig, keywordEnforcer, index, keyString, doc, rc)
-! !RETURN VALUE:
+
     logical :: ESMF_HConfigIsNull
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -9027,27 +8941,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp
@@ -9095,17 +8988,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsNullMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsNullMapKey - Check whether HConfig node is Null
+#define ESMF_METHOD "ESMF_HConfigItrIsNull()"
 
-! !INTERFACE:
-  function ESMF_HConfigIsNullMapKey(hconfig, keywordEnforcer, index, keyString, &
-    doc, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsNullMapKey
-!
-! !ARGUMENTS:
+  function ESMF_HConfigItrIsNull(hconfig, keywordEnforcer, index, keyString, doc, rc)
+
+    logical :: ESMF_HConfigItrIsNull
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -9113,150 +9001,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsNullMapKey = .false.   ! initialize
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsNull(hconfigTemp, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsNullMapKey(hconfig, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsNullMapKey = flag
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsNullMapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsNullMapVal - Check whether HConfig node is Null
-
-! !INTERFACE:
-  function ESMF_HConfigIsNullMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsNullMapVal
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
-    type(ESMF_HConfig)    :: hconfigTemp
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ESMF_HConfigIsNullMapVal = .false.   ! initialize
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsNull(hconfigTemp, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsNullMapVal(hconfig, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsNullMapVal = flag
+    ESMF_HConfigItrIsNull = ESMF_HConfigIsNull(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -9268,15 +9027,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIsMap()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsMap - Check whether HConfig node is Map
 
-! !INTERFACE:
   function ESMF_HConfigIsMap(hconfig, keywordEnforcer, index, keyString, doc, rc)
-! !RETURN VALUE:
+
     logical :: ESMF_HConfigIsMap
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -9284,27 +9039,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Map. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp
@@ -9352,17 +9086,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsMapMapKey - Check whether HConfig node is Map
+#define ESMF_METHOD "ESMF_HConfigItrIsMap()"
 
-! !INTERFACE:
-  function ESMF_HConfigIsMapMapKey(hconfig, keywordEnforcer, index, keyString, &
-    doc, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapMapKey
-!
-! !ARGUMENTS:
+  function ESMF_HConfigItrIsMap(hconfig, keywordEnforcer, index, keyString, doc, rc)
+
+    logical :: ESMF_HConfigItrIsMap
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -9370,150 +9099,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsMapMapKey = .false.   ! initialize
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMap(hconfigTemp, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapMapKey(hconfig, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapMapKey = flag
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsMapMapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsMapMapVal - Check whether HConfig node is Map
-
-! !INTERFACE:
-  function ESMF_HConfigIsMapMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsMapMapVal
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
-    type(ESMF_HConfig)    :: hconfigTemp
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ESMF_HConfigIsMapMapVal = .false.   ! initialize
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMap(hconfigTemp, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsMapMapVal(hconfig, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsMapMapVal = flag
+    ESMF_HConfigItrIsMap = ESMF_HConfigIsMap(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -9525,15 +9125,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIsScalar()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsScalar - Check whether HConfig node is Scalar
 
-! !INTERFACE:
   function ESMF_HConfigIsScalar(hconfig, keywordEnforcer, index, keyString, doc, rc)
-! !RETURN VALUE:
+
     logical :: ESMF_HConfigIsScalar
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -9541,27 +9137,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Scalar. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp
@@ -9609,17 +9184,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsScalarMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsScalarMapKey - Check whether HConfig node is Scalar
+#define ESMF_METHOD "ESMF_HConfigItrIsScalar()"
 
-! !INTERFACE:
-  function ESMF_HConfigIsScalarMapKey(hconfig, keywordEnforcer, index, keyString, &
-    doc, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsScalarMapKey
-!
-! !ARGUMENTS:
+  function ESMF_HConfigItrIsScalar(hconfig, keywordEnforcer, index, keyString, doc, rc)
+
+    logical :: ESMF_HConfigItrIsScalar
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -9627,150 +9197,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_HConfigIsScalarMapKey = .false.   ! initialize
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsScalar(hconfigTemp, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsScalarMapKey(hconfig, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsScalarMapKey = flag
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsScalarMapVal()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsScalarMapVal - Check whether HConfig node is Scalar
-
-! !INTERFACE:
-  function ESMF_HConfigIsScalarMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsScalarMapVal
-!
-! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfigIter} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer               :: localrc                ! local return code
-    type(ESMF_Logical)    :: flag
-    type(ESMF_HConfig)    :: hconfigTemp
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ESMF_HConfigIsScalarMapVal = .false.   ! initialize
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
-
-    if (present(index).or.present(keyString).or.present(doc)) then
-      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
-        keyString=keyString, doc=doc, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsScalar(hconfigTemp, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! clean up
-      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_HConfigIsScalarMapVal(hconfig, flag, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! convert ESMF_Logical -> logical
-    ESMF_HConfigIsScalarMapVal = flag
+    ESMF_HConfigItrIsScalar = ESMF_HConfigIsScalar(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -9782,15 +9223,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_HConfigIsSequence()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsSequence - Check whether HConfig node is Sequence
 
-! !INTERFACE:
   function ESMF_HConfigIsSequence(hconfig, keywordEnforcer, index, keyString, doc, rc)
-! !RETURN VALUE:
+
     logical :: ESMF_HConfigIsSequence
-!
-! !ARGUMENTS:
+
     type(ESMF_HConfig), intent(in)            :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -9798,27 +9235,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Sequence. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item[hconfig]
-!     {\tt ESMF\_HConfig} object.
-!   \item[{[index]}]
-!     Attempt to access by index if specified. Mutural exclusive with {\tt keyString}.
-!   \item[{[keyString]}]
-!     Attempt to access by key string if specified. Mutural exclusive with {\tt index}.
-!   \item[{[doc]}]
-!     The doc index. Defaults to the first document.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
     integer               :: localrc                ! local return code
     type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp
@@ -9866,17 +9282,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsSequenceMapKey()"
-!BOP
-! !IROUTINE: ESMF_HConfigIsSequenceMapKey - Check whether HConfig node is Sequence
+#define ESMF_METHOD "ESMF_HConfigItrIsSequence()"
 
-! !INTERFACE:
-  function ESMF_HConfigIsSequenceMapKey(hconfig, keywordEnforcer, index, keyString, &
-    doc, rc)
-! !RETURN VALUE:
-    logical :: ESMF_HConfigIsSequenceMapKey
-!
-! !ARGUMENTS:
+  function ESMF_HConfigItrIsSequence(hconfig, keywordEnforcer, index, keyString, doc, rc)
+
+    logical :: ESMF_HConfigItrIsSequence
+
     type(ESMF_HConfigIter), intent(in)        :: hconfig
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: index
@@ -9884,12 +9295,63 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: doc
     integer,            intent(out), optional :: rc
 
-! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
+    integer               :: localrc                ! local return code
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    hconfigTemp = ESMF_HConfigIterAsHConfig(hconfig, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_HConfigItrIsSequence = ESMF_HConfigIsSequence(hconfigTemp, &
+      index=index, keyString=keyString, doc=doc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_HConfigIs<NodeType>MapKey - Check for HConfig MapKey node type
+
+! !INTERFACE:
+!  function ESMF_HConfigIs<NodeType>MapKey(hconfig, keywordEnforcer, index, keyString, &
+!    doc, rc)
+! !RETURN VALUE:
+!    logical :: ESMF_HConfigIs<NodeType>MapKey
 !
-! The arguments are:
+! !ARGUMENTS:
+!    type(ESMF_HConfigIter), intent(in)       :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    integer,            intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt hconfig} MapKey node is of node type
+!   <NodeType>. Otherwise return {\tt .false.}. If an error occurs, i.e.
+!   {\tt rc /= ESMF\_SUCCESS} is returned, the return value of the function
+!   will be {\tt .false.}.
+!
+!   The supported <NodeType> options are:
+!   \begin{itemize}
+!   \item Defined
+!   \item Null
+!   \item Map
+!   \item Scalar
+!   \item Sequence
+!   \end{itemize}
+!
+!   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
@@ -9905,6 +9367,269 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsDefinedMapKey()"
+
+  function ESMF_HConfigIsDefinedMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsDefinedMapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_Logical)    :: flag
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigIsDefinedMapKey = .false.   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsDefined(hconfigTemp, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsDefinedMapKey(hconfig, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigIsDefinedMapKey = flag
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsNullMapKey()"
+
+  function ESMF_HConfigIsNullMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsNullMapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_Logical)    :: flag
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigIsNullMapKey = .false.   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsNull(hconfigTemp, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsNullMapKey(hconfig, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigIsNullMapKey = flag
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsMapMapKey()"
+
+  function ESMF_HConfigIsMapMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsMapMapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_Logical)    :: flag
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigIsMapMapKey = .false.   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsMap(hconfigTemp, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsMapMapKey(hconfig, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigIsMapMapKey = flag
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsScalarMapKey()"
+
+  function ESMF_HConfigIsScalarMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsScalarMapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_Logical)    :: flag
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigIsScalarMapKey = .false.   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapKey(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsScalar(hconfigTemp, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsScalarMapKey(hconfig, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigIsScalarMapKey = flag
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsSequenceMapKey()"
+
+  function ESMF_HConfigIsSequenceMapKey(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsSequenceMapKey
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp
@@ -9951,31 +9676,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_HConfigIsSequenceMapVal()"
 !BOP
-! !IROUTINE: ESMF_HConfigIsSequenceMapVal - Check whether HConfig node is Sequence
+! !IROUTINE: ESMF_HConfigIs<NodeType>MapVal - Check for HConfig MapVal node type
 
 ! !INTERFACE:
-  function ESMF_HConfigIsSequenceMapVal(hconfig, keywordEnforcer, index, keyString, &
-    doc, rc)
+!  function ESMF_HConfigIs<NodeType>MapVal(hconfig, keywordEnforcer, index, keyString, &
+!    doc, rc)
 ! !RETURN VALUE:
-    logical :: ESMF_HConfigIsSequenceMapVal
+!    logical :: ESMF_HConfigIs<NodeType>MapVal
 !
 ! !ARGUMENTS:
-    type(ESMF_HConfigIter), intent(in)        :: hconfig
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional :: index
-    character(*),       intent(in),  optional :: keyString
-    integer,            intent(in),  optional :: doc
-    integer,            intent(out), optional :: rc
+!    type(ESMF_HConfigIter), intent(in)       :: hconfig
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,            intent(in),  optional :: index
+!    character(*),       intent(in),  optional :: keyString
+!    integer,            intent(in),  optional :: doc
+!    integer,            intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt hconfig} node is Null. Otherwise return
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
-!   returned, the return value of the function will also be {\tt .false.}.
+!   Return {\tt .true.} if the {\tt hconfig} MapVal node is of node type
+!   <NodeType>. Otherwise return {\tt .false.}. If an error occurs, i.e.
+!   {\tt rc /= ESMF\_SUCCESS} is returned, the return value of the function
+!   will be {\tt .false.}.
 !
-! The arguments are:
+!   The supported <NodeType> options are:
+!   \begin{itemize}
+!   \item Defined
+!   \item Null
+!   \item Map
+!   \item Scalar
+!   \item Sequence
+!   \end{itemize}
+!
+!   The arguments are:
 !   \begin{description}
 !   \item[hconfig]
 !     {\tt ESMF\_HConfigIter} object.
@@ -9991,6 +9724,268 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsDefinedMapVal()"
+
+  function ESMF_HConfigIsDefinedMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsDefinedMapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_Logical)    :: flag
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigIsDefinedMapVal = .false.   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsDefined(hconfigTemp, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsDefinedMapVal(hconfig, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigIsDefinedMapVal = flag
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsNullMapVal()"
+
+  function ESMF_HConfigIsNullMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsNullMapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_Logical)    :: flag
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigIsNullMapVal = .false.   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsNull(hconfigTemp, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsNullMapVal(hconfig, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigIsNullMapVal = flag
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsMapMapVal()"
+
+  function ESMF_HConfigIsMapMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsMapMapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_Logical)    :: flag
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigIsMapMapVal = .false.   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsMap(hconfigTemp, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsMapMapVal(hconfig, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigIsMapMapVal = flag
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsScalarMapVal()"
+
+  function ESMF_HConfigIsScalarMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsScalarMapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
+    integer               :: localrc                ! local return code
+    type(ESMF_Logical)    :: flag
+    type(ESMF_HConfig)    :: hconfigTemp
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_HConfigIsScalarMapVal = .false.   ! initialize
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_HConfigIterGetInit, hconfig, rc)
+
+    if (present(index).or.present(keyString).or.present(doc)) then
+      hconfigTemp = ESMF_HConfigCreateAtMapVal(hconfig, index=index, &
+        keyString=keyString, doc=doc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsScalar(hconfigTemp, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! clean up
+      call ESMF_HConfigDestroy(hconfigTemp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_HConfigIsScalarMapVal(hconfig, flag, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! convert ESMF_Logical -> logical
+    ESMF_HConfigIsScalarMapVal = flag
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_HConfigIsSequenceMapVal()"
+
+  function ESMF_HConfigIsSequenceMapVal(hconfig, keywordEnforcer, index, keyString, &
+    doc, rc)
+
+    logical :: ESMF_HConfigIsSequenceMapVal
+
+    type(ESMF_HConfigIter), intent(in)        :: hconfig
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),  optional :: index
+    character(*),       intent(in),  optional :: keyString
+    integer,            intent(in),  optional :: doc
+    integer,            intent(out), optional :: rc
+
     integer               :: localrc                ! local return code
     type(ESMF_Logical)    :: flag
     type(ESMF_HConfig)    :: hconfigTemp

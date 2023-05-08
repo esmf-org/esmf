@@ -525,7 +525,7 @@ program ESMF_HConfigUTest
         call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO, rc=rc)
         if (rc /= ESMF_SUCCESS) return
 
-        flag = ESMF_HConfigIsScalar(ESMF_HConfigIterAsHConfig(hconfigIter), rc=rc)
+        flag = ESMF_HConfigIsScalar(hconfigIter, rc=rc)
         if (rc /= ESMF_SUCCESS) return
         if (flag) then
           ! as string
@@ -610,7 +610,7 @@ program ESMF_HConfigUTest
           if (rc /= ESMF_SUCCESS) return
 
           do while(hconfigIter2 /= hconfigIter2End)
-            flag = ESMF_HConfigIsScalar(ESMF_HConfigIterAsHConfig(hconfigIter2), rc=rc)
+            flag = ESMF_HConfigIsScalar(hconfigIter2, rc=rc)
             if (rc /= ESMF_SUCCESS) return
             if (flag) then
               string = ESMF_HConfigAsString(hconfigIter2, rc=rc)
@@ -628,7 +628,7 @@ program ESMF_HConfigUTest
               if (rc /= ESMF_SUCCESS) return
 
               do while(hconfigIter3 /= hconfigIter3End)
-                flag = ESMF_HConfigIsScalar(ESMF_HConfigIterAsHConfig(hconfigIter3), rc=rc)
+                flag = ESMF_HConfigIsScalar(hconfigIter3, rc=rc)
                 if (rc /= ESMF_SUCCESS) return
                 if (flag) then
                   string = ESMF_HConfigAsString(hconfigIter3, rc=rc)
